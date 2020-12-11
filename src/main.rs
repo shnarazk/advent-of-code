@@ -15,18 +15,16 @@ fn main() {
         .read_to_string(&mut buffer)
         .expect("something wrong");
 
-    let mut dic: HashMap<&str, &str> = HashMap::new();
-    let mut nvalids = 0;
+    // let mut dic: HashMap<&str, &str> = HashMap::new();
+    // let mut nvalids = 0;
 
-    for c in buffer.split("\n") {
-        for kv in c.split_ascii_whitespace() {
-            let k_v = kv.split(':').collect::<Vec<_>>();
-            dic.insert(k_v[0], k_v[1]);
-        }
-        nvalids += check_keys(&dic);
-        dbg!((&dic, nvalids));
+    for c in buffer.split('\n') {
+        // for kv in c.split_ascii_whitespace() {
+        //     let k_v = kv.split(':').collect::<Vec<_>>();
+        //     dic.insert(k_v[0], k_v[1]);
+        // }
     }
-    dbg!(nvalids);
+    // dbg!(nvalids);
 }
 
 fn check_keys(_dic: &HashMap<&str, &str>) -> usize {
