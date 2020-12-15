@@ -1,6 +1,14 @@
 #![allow(dead_code)]
+#![allow(unused_imports)]
 #![allow(unused_variables)]
-use std::io::{stdin, Read};
+use {
+    lazy_static::lazy_static,
+    regex::Regex,
+    std::{
+        collections::HashMap,
+        io::{stdin, Read},
+    },
+};
 
 fn main() {
     let mut buf = String::new();
