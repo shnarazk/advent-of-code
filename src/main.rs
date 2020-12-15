@@ -23,3 +23,11 @@ fn valid(key: &str, _val: &str) -> bool {
     // if let Some(m) = RE.captures(key) {}
     false
 }
+
+mod test {
+    use super::*;
+    #[test]
+    fn test1() {
+        assert_eq!(0, 0);
+    }
+}
