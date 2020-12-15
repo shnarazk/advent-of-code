@@ -5,32 +5,14 @@ use std::{
     io::{stdin, Read},
 };
 
-fn at(p: (usize, usize)) -> usize {
-    p.1
-}
-
-fn count(p: (usize, usize)) -> usize {
-    p.0
-}
-
-fn diff(p: (usize, usize)) -> usize {
-    if p.0 < p.1 {
-        p.1 - p.0
-    } else {
-        p.0 - p.1
-    }
-}
-
 fn main() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
 
     let mut dic: HashMap<usize, usize> = HashMap::new();
-    // let mut nvalids = 0;
-    let mut vec: Vec<usize> = Vec::new();
     let mut last = 0;
-
     let mut clock = 0;
+
     let mut iter = buf.split(',');
     let mut ch = iter.next();
     loop {
