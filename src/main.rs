@@ -13,25 +13,25 @@ use {
 fn main() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
-    read(buf)
+    read(&buf);
 }
 
 fn read(str: &str) -> usize {
-    let mut dic;
-    for c in buf.split('\n') {
+    // let mut dic;
+    for c in str.split('\n') {
         // c.split_ascii_whitespace()
         if let Some(d) = parse(c) {
             // let k_v = kv.split(':').collect::<Vec<_>>();
             // dic.insert(d);
         }
     }
-    eval(dic)
+    eval()
 }
 
 fn parse(str: &str) -> Option<bool> {
     // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)$").expect("error"); }
     // if let Some(m) = RE.captures(key) {}
-    false
+    Some(false)
 }
 
 fn eval() -> usize {
