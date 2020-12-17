@@ -13,29 +13,37 @@ use {
 fn main() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
-
-    // let mut dic: HashMap<&str, &str> = HashMap::new();
-    // let mut nvalids = 0;
-
-    for c in buf.split('\n') {
-        // for kv in c.split_ascii_whitespace() {
-        //     let k_v = kv.split(':').collect::<Vec<_>>();
-        //     dic.insert(k_v[0], k_v[1]);
-        // }
-    }
-    // dbg!(nvalids);
+    read(buf)
 }
 
-fn valid(key: &str, _val: &str) -> bool {
-    // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)(cm|in)$").expect("wrong regex"); }
+fn read(str: &str) -> usize {
+    let mut dic;
+    for c in buf.split('\n') {
+        // c.split_ascii_whitespace()
+        if let Some(d) = parse(c) {
+            // let k_v = kv.split(':').collect::<Vec<_>>();
+            // dic.insert(d);
+        }
+    }
+    eval(dic)
+}
+
+fn parse(str: &str) -> Option<bool> {
+    // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)$").expect("error"); }
     // if let Some(m) = RE.captures(key) {}
     false
 }
 
+fn eval() -> usize {
+    0
+}
+
 mod test {
     use super::*;
+    const TEST1: &str = "\
+";
     #[test]
     fn test1() {
-        assert_eq!(0, 0);
+        assert_eq!(read(TEST1), 1);
     }
 }
