@@ -18,9 +18,9 @@ fn main() {
 
 fn read(str: &str) -> usize {
     // let mut dic;
-    for c in str.split('\n') {
+    for l in str.split('\n') {
         // c.split_ascii_whitespace()
-        if let Some(d) = parse(c) {
+        if let Some(d) = parse(l) {
             // let k_v = kv.split(':').collect::<Vec<_>>();
             // dic.insert(d);
         }
