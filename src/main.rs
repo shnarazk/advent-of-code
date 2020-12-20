@@ -19,7 +19,7 @@ fn main() {
 fn read(str: &str) -> usize {
     // let mut dic;
     for l in str.split('\n') {
-        // c.split_ascii_whitespace()
+        // l.split_ascii_whitespace()
         if let Some(d) = parse(l) {
             // let k_v = kv.split(':').collect::<Vec<_>>();
             // dic.insert(d);
