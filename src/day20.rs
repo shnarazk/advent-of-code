@@ -16,6 +16,7 @@ pub struct Tile {
     pub id: usize,
     pub sign: [usize; 4],
     pub len: usize,
+    pub image: Vec<String>,
 }
 
 pub enum Dir {
@@ -69,13 +70,13 @@ pub fn flip_bits(width: usize, mut n: usize) -> usize {
 impl Tile {
     /// ```
     /// use adventofcode::main::*;
-    /// let tile = Tile { id: 0, sign: [1, 1, 1, 1], len: 3 };
+    /// let tile = Tile { id: 0, sign: [1, 1, 1, 1], len: 3, image: Vec::new() };
     /// assert_eq!(tile.transpose(0, 0), [1, 1, 1, 1]);
     /// assert_eq!(tile.transpose(1, 0), [4, 1, 4, 1]);
     /// assert_eq!(tile.transpose(2, 0), [4, 4, 4, 4]);
     /// assert_eq!(tile.transpose(3, 0), [1, 4, 1, 4]);
     /// assert_eq!(tile.transpose(0, 1), [4, 1, 4, 1]);
-    /// let t = Tile {id: 2473, sign: [542, 116, 234, 966], len: 10 };
+    /// let t = Tile {id: 2473, sign: [542, 116, 234, 966], len: 10, image: Vec::new() };
     /// assert_eq!(t.transpose(0, 0), [542, 116, 234, 966]);
     /// assert_eq!(format!("{:#b}", flip_bits(10, 542)), format!("{:#b}", 481));
     /// assert_eq!(t.transpose(1, 0), [399, 542, 184, 234]);
@@ -98,21 +99,17 @@ impl Tile {
         result[3] = rot(self.sign[(7 - n) % 4], 2 == n || 3 == n);
         // horizontal flip
         if flip % 2 == 1 {
-            let tmp = result[1];
-            result[1] = result[3];
-            result[3] = tmp;
+            result.swap(1, 3);
             result[0] = flip_bits(self.len, result[0]);
             result[2] = flip_bits(self.len, result[2]);
         }
         // vertial flip
         if flip / 2 == 1 {
-            let tmp = result[0];
-            result[0] = result[2];
-            result[2] = tmp;
+            result.swap(0, 2);
             result[1] = flip_bits(self.len, result[1]);
             result[3] = flip_bits(self.len, result[3]);
         }
-        return result;
+        result
     }
     pub fn valid(
         &self,
@@ -184,7 +181,7 @@ impl Tile {
     }
     /// ```
     /// use adventofcode::main::*;
-    /// assert_eq!(Tile::from(0, &vec!["...", "...", "..."]), Tile { id: 0, sign: [0, 0, 0,0 ], len: 3 });
+    /// assert_eq!(Tile::from(0, &vec!["...", "...", "..."]), Tile { id: 0, sign: [0, 0, 0,0 ], len: 3, image: vec!["...".to_string(), "...".to_string(), "...".to_string()] });
     /// ```
     pub fn from(id: usize, block: &[&str]) -> Self {
         let top = decode(&block[0].chars().collect::<Vec<char>>());
@@ -206,8 +203,145 @@ impl Tile {
             id,
             sign: [top, right, bottom, left],
             len: block.len(),
+            image: block.iter().map(|s| s.to_string()).collect::<Vec<String>>(),
         }
     }
+    //
+    // part 2
+    //
+    pub fn new_empty_image(&self, with_border: bool) -> Vec<String> {
+        let mut v: Vec<String> = Vec::new();
+        if with_border {
+            for _ in self.image.iter() {
+                v.push(String::new())
+            }
+        } else {
+            for _ in self.image.iter().take(self.len - 1).skip(1) {
+                v.push(String::new())
+            }
+        }
+        v
+    }
+    pub fn paste_image(&self, with_border: bool, rotate: usize, flip: usize, vec: &mut [String]) {
+        let mut chars: Vec<char> = Vec::new();
+        if with_border {
+            assert_eq!(vec.len(), 10);
+            for line in self.image.iter() {
+                for c in line.chars() {
+                    chars.push(c);
+                }
+            }
+            assert_eq!(chars.len(), self.len * self.len);
+        } else {
+            assert_eq!(vec.len(), 8);
+            for line in self.image.iter().take(self.len - 1).skip(1) {
+                for c in line.chars().take(self.len - 1).skip(1) {
+                    chars.push(c);
+                }
+            }
+            assert_eq!(chars.len(), (self.len - 2) * (self.len - 2));
+        }
+        let at = |i0: usize, j0: usize| {
+            let len = if with_border {
+                self.len - 1
+            } else {
+                self.len - 3
+            };
+            let mut i = i0;
+            let mut j = j0;
+            match flip {
+                1 => {
+                    j = len - j;
+                }
+                _ => (),
+            }
+            match rotate {
+                1 => {
+                    let ix = i;
+                    i = len - j;
+                    j = ix;
+                }
+                2 => {
+                    i = len - i;
+                    j = len - j;
+                }
+                3 => {
+                    let ix = i; 
+                    i = j;
+                    j = len - ix;
+                }
+                _ => (),
+            }
+            if with_border {
+                chars[i * self.len + j]
+            } else {
+                chars[i * (self.len - 2) + j]
+            }
+        };
+        for (i, line) in vec.iter_mut().enumerate() {
+            if with_border {
+                for j in 0..self.len {
+                    line.push(at(i, j));
+                }
+            } else {
+                for j in 0..self.len - 2 {
+                    line.push(at(i, j));
+                }
+            }
+        }
+        //for (i, s) in self.image.iter().take(self.len - 1).skip(1).enumerate() {
+        //    vec[i].push_str(&s[1..self.len - 1]);
+        //}
+    }
+}
+
+pub fn transose_image(image: &[String], rotate: usize, flip: usize) -> Vec<String> {
+    let mut chars: Vec<char> = Vec::new();
+    for line in image.iter() {
+        for c in line.chars() {
+            chars.push(c);
+        }
+    }
+    let len = image.len();
+    assert_eq!(chars.len(), len * len);
+    let at = |i0: usize, j0: usize| {
+        let len1 = len - 1;
+        let mut i = i0;
+        let mut j = j0;
+        match flip {
+            1 => {
+                j = len1 - j;
+            }
+            _ => (),
+        }
+        match rotate {
+            1 => {
+                let ix = i;
+                i = len1 - j;
+                j = ix;
+            }
+            2 => {
+                i = len1 - i;
+                j = len1 - j;
+            }
+            3 => {
+                let ix = i; 
+                i = j;
+                j = len1 - ix;
+            }
+            _ => (),
+        }
+        chars[i * len + j]
+    };
+    let mut vec: Vec<String> = Vec::new();
+    for i in 0..len {
+        let mut line: String = String::new();
+        for j in 0..len {
+            line.push(at(i, j));
+        }
+        vec.push(line);
+    }
+    vec
 }
 
 /// ```
@@ -225,14 +359,36 @@ fn main() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     // check_ans(&buf);
-    if let Some(p) = read(&buf) {
-        assert_eq!(p.len(), 144);
-        for (t, _, _) in p.iter() {
-            print!("{:?}, ", t.id);
-        }
-        println!();
-        println!("{}", p[0].0.id * p[11].0.id * p[132].0.id * p[143].0.id)
+    read(&buf);
+}
+
+fn count_sharps(vec: &[String]) -> usize {
+    vec.iter()
+        .map(|line| line.chars().filter(|c| *c == '#').count())
+        .sum()
+}
+
+fn check_sea_monstar(image: &[String]) -> usize {
+    lazy_static! {
+        static ref MONSTER_HEAD: Regex = Regex::new(r"^..................#.").expect("error");
+        static ref MONSTER_BODY: Regex = Regex::new(r"^#....##....##....###").expect("error");
+        static ref MONSTER_DOWN: Regex = Regex::new(r"^.#..#..#..#..#..#...").expect("error");
     }
+    let mut count = 0;
+    let len = image.len();
+    for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
+        for j in 0..line.len() {
+            if let Some(m) = MONSTER_BODY.captures(&line[j..]) {
+                if MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
+                    && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
+                {
+                    count += 1;
+                    dbg!((i, j));
+                }
+            }
+        }
+    }
+    count
 }
 
 fn check_ans(str: &str) {
@@ -245,7 +401,7 @@ fn check_ans(str: &str) {
     }
 }
 
-fn read(str: &str) -> Option<Vec<(Tile, usize, usize)>> {
+fn read(str: &str) {
     let mut tile: Vec<Tile> = Vec::new();
     for b in str.split("\n\n") {
         // c.split_ascii_whitespace()
@@ -254,7 +410,60 @@ fn read(str: &str) -> Option<Vec<(Tile, usize, usize)>> {
             tile.push(t);
         }
     }
-    eval(&tile)
+    if let Some(mut p) = eval(&tile) {
+        // assert_eq!(p.len(), 144);
+        for (t, _, _) in p.iter() {
+            print!("{:?}, ", t.id);
+        }
+        println!();
+        let l = (tile.len() as f64).sqrt() as usize;
+        println!("{}", p[0].0.id * p[l - 1].0.id * p[tile.len() - l].0.id * p[tile.len() - 1].0.id);
+
+        // part 2
+        for (t, r, f) in &p {
+            print!("({}, {}, {}) ", t.id, r, f);
+        }
+        println!();
+        let line: Vec<Vec<String>> = Vec::new();
+        for i in 0..l {
+            for j in 0..l {
+                let (t, r, f) = &p[i * l + j];
+                print!("({}, {}, {}) ", t.id, r, f);
+            }
+            println!();
+        }
+        let mut image: Vec<String> = Vec::new();
+        let with_border = false;
+        for i in 0..l {
+            let mut pasted: Vec<String> = p[0].0.new_empty_image(with_border);
+            for j in 0..l {
+                let (t, r, f) = p.remove(0);
+                t.paste_image(with_border, r, f, &mut pasted);
+            }
+            for l in &pasted {
+                image.push(l.to_string());
+            }
+        }
+        for l in &image {
+            println!("{}", l);
+        }
+        let mut total = 0;
+        for rotate in 0..4 {
+            for flip in 0..2 {
+                let i = transose_image(&image, rotate, flip);
+                let n = check_sea_monstar(&i);
+                total += n;
+                if 0 < n {
+                    dbg!((rotate, flip, n));
+                    dbg!(count_sharps(&i) - n * 15);
+                }
+            }
+        }
+        dbg!(count_sharps(&image) - total * 15);
+        panic!("works now");
+    } else {
+        panic!("failed");
+    }
 }
 
 fn parse(b: &str) -> Option<Tile> {
@@ -299,10 +508,10 @@ fn search(
                     u.push((tile.clone(), rotate, flip));
                     let mut r = remain.clone();
                     r.retain(|t| t != tile);
-                    for _ in 0..u.len() - 1 {
+                    /* for _ in 0..u.len() - 1 {
                         print!(" ");
                     }
-                    println!("assume {}", tile.id);
+                    println!("assume {}", tile.id); */
                     if let Some(ans) = search(align, u, r) {
                         return Some(ans);
                     }
@@ -601,13 +810,42 @@ Tile 3079:
         assert_eq!(usize::from_str_radix("0100111110", 2), Ok(318));
         // return;
         // assert_eq!(decode(&"#.##...##.".chars().collect::<Vec<char>>()),564);
-        if let Some(result) = read(TEST1) {
+        read(TEST1);
+        /*
+        if let Some(mut result) =  {
             assert_eq!(
                 result[0].0.id * result[2].0.id * result[6].0.id * result[8].0.id,
                 20899048083289
             );
+            for (t, r, f) in &result {
+                print!("({}, {}, {}) ", t.id, r, f);
+            }
+            println!();
+            let line: Vec<Vec<String>> = Vec::new();
+            for i in 0..3 {
+                for j in 0..3 {
+                    let (t, r, f) = &result[i * 3 + j];
+                    print!("({}, {}, {}) ", t.id, r, f);
+                }
+                println!();
+            }
+            let mut image: Vec<String> = Vec::new();
+            let with_border = false;
+            for i in 0..3 {
+                let mut pasted: Vec<String> = result[0].0.new_empty_image(with_border);
+                for j in 0..3 {
+                    let (t, r, f) = result.remove(0);
+                    t.paste_image(with_border, r, f, &mut pasted);
+                }
+                for l in &pasted {
+                    println!("{}", l);
+                    image.push(l.to_string());
+                }
+            }
+            panic!("works now");
         } else {
             panic!("failed");
         }
+         */
     }
 }
