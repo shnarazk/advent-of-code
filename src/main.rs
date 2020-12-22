@@ -16,9 +16,9 @@ fn main() {
     read(&buf);
 }
 
-fn read(str: &str) -> usize {
+fn read(buf: &str) -> usize {
     // let mut dic;
-    for l in str.split('\n') {
+    for l in buf.split('\n') {
         // l.split_ascii_whitespace()
         if let Some(d) = parse(l) {
             // let k_v = kv.split(':').collect::<Vec<_>>();
@@ -28,9 +28,9 @@ fn read(str: &str) -> usize {
     eval()
 }
 
-fn parse(str: &str) -> Option<bool> {
+fn parse(line: &str) -> Option<bool> {
     // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)$").expect("error"); }
-    // if let Some(m) = RE.captures(key) {}
+    // if let Some(m) = RE.captures(line) {}
     Some(false)
 }
 
