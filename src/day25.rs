@@ -17,7 +17,7 @@ fn determine_loop_size(public_key: usize) -> usize {
     0
 }
 
-pub fn main() {
+pub fn day25() {
     /*
     let card_pubkey = 5764801;
     let door_pubkey = 17807724;

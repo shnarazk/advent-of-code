@@ -1,6 +1,6 @@
 use std::io::{self, Read};
 
-fn main() {
+pub fn day01() {
     let mut buffer = String::new();
     let mut v: Vec<usize> = Vec::new();
     io::stdin().read_to_string(&mut buffer).expect("something wrong");
