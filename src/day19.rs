@@ -40,7 +40,7 @@ fn read(str: &str) -> usize {
             break;
         }
 
-        let cs = l.chars().collect::<Vec<char>>(); 
+        let cs = l.chars().collect::<Vec<char>>();
         if check_trace(&rule, &mut vec![0], &cs, 0) {
             success += 1;
         }
@@ -49,8 +49,12 @@ fn read(str: &str) -> usize {
     success
 }
 
-fn check_trace(rule: &HashMap<usize, Rule>, stack: &mut Vec<usize>,
-               target: &[char], from: usize) -> bool {
+fn check_trace(
+    rule: &HashMap<usize, Rule>,
+    stack: &mut Vec<usize>,
+    target: &[char],
+    from: usize,
+) -> bool {
     if let Some(index) = stack.pop() {
         if !stack.is_empty() && target.len() <= from {
             return false;
@@ -58,19 +62,27 @@ fn check_trace(rule: &HashMap<usize, Rule>, stack: &mut Vec<usize>,
         if let Some(r) = rule.get(&index) {
             match r {
                 Rule::Match(c) => {
-                    println!("try match: {} against {}", index, target[from..].iter().collect::<String>());
+                    println!(
+                        "try match: {} against {}",
+                        index,
+                        target[from..].iter().collect::<String>()
+                    );
                     if target[from] != *c {
                         return false;
                     }
                     println!("recurse {}", target.len() == from + 1);
-                    return check_trace(rule, stack, target, from + 1)
+                    return check_trace(rule, stack, target, from + 1);
                 }
                 Rule::Seq(vec) => {
-                    println!("try seq: {} against {}", index, target[from..].iter().collect::<String>());
+                    println!(
+                        "try seq: {} against {}",
+                        index,
+                        target[from..].iter().collect::<String>()
+                    );
                     for i in vec.iter().rev() {
                         stack.push(*i);
                     }
-                    return check_trace(rule, stack, target, from)
+                    return check_trace(rule, stack, target, from);
                 }
                 Rule::Or(vec1, vec2) => {
                     let mut stack2 = stack.clone();
@@ -89,7 +101,12 @@ fn check_trace(rule: &HashMap<usize, Rule>, stack: &mut Vec<usize>,
                 }
             }
         } else {
-            panic!("here stack.{}, from.{}, len.{}", stack.len(), from, target.len());
+            panic!(
+                "here stack.{}, from.{}, len.{}",
+                stack.len(),
+                from,
+                target.len()
+            );
             // return target.len() == from;
         }
     }
@@ -113,16 +130,14 @@ fn parse(str: &str) -> Option<(usize, Rule)> {
         let i = m[1].parse::<usize>().expect("wrong");
         let c = m[2].parse::<char>().expect("wrong");
         return Some((i, Rule::Match(c)));
-    }
-    else if let Some(m) = R1.captures(str) {
+    } else if let Some(m) = R1.captures(str) {
         let i = m[1].parse::<usize>().expect("wrong");
         let mut vec: Vec<usize> = Vec::new();
         for n in m[2].split_ascii_whitespace() {
             vec.push(n.parse::<usize>().expect("strange"));
         }
         return Some((i, Rule::Seq(vec)));
-    }
-    else if let Some(m) = R2.captures(str) {
+    } else if let Some(m) = R2.captures(str) {
         let i = m[1].parse::<usize>().expect("wrong");
         let mut vec1: Vec<usize> = Vec::new();
         for n in m[2].split_ascii_whitespace() {

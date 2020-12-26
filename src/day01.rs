@@ -1,11 +1,5 @@
-use std::io::{self, Read};
-
-pub fn day01() {
-    let mut buffer = String::new();
+pub fn day01(_part: usize, buffer: String) {
     let mut v: Vec<usize> = Vec::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
     for s in buffer.lines() {
         v.push(s.parse::<usize>().expect("bad int"));
     }

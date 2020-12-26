@@ -75,14 +75,16 @@ impl GameCache {
         }
         // a same length pair can check after rotations.
         if player1.len() == player2.len() {
-            for i in 1..player1.len() {
-            }
+            for i in 1..player1.len() {}
         }
         None
     }
-fn insert(&mut self, player1: &Player, player2: &Player, val: bool) -> bool {
+    fn insert(&mut self, player1: &Player, player2: &Player, val: bool) -> bool {
         if player1.len() + player2.len() < self.limit {
-            *self.cache.entry((player1.clone(), player2.clone())).or_insert(false) = val;
+            *self
+                .cache
+                .entry((player1.clone(), player2.clone()))
+                .or_insert(false) = val;
             // if self.cache.len() % 10000 == 0 {
             //     println!("{}", self.cache.len());
             // }
@@ -114,7 +116,13 @@ fn read(buf: &str) -> usize {
     while winner(stopper, &p1, &p2).is_none() {
         // stopper = run1(&mut p1, &mut p2);
         stopper = run2(&mut p1, &mut p2, &mut cache, &mut game_cache);
-        println!(" 1 -> {:?}\n 2 -> {:?}\n {} cached, stopper: {:?}", &p1, &p2, cache.set.len(), stopper);
+        println!(
+            " 1 -> {:?}\n 2 -> {:?}\n {} cached, stopper: {:?}",
+            &p1,
+            &p2,
+            cache.set.len(),
+            stopper
+        );
     }
     let mut score = 0;
     if let Some(p) = winner(stopper, &p1, &p2) {
@@ -139,14 +147,14 @@ fn run1(player1: &mut Player, player2: &mut Player) -> Option<usize> {
                 println!("Player2 won with {} against {}", h2, h1);
                 println!("Player1: {:?}", player1);
                 println!("Player2: {:?}", player2);
-                // dbg!(&player2);
+            // dbg!(&player2);
             } else if h2 < h1 {
                 player1.push_back(h1);
                 player1.push_back(h2);
                 println!("Player1 won with {} against {}", h1, h2);
                 println!("Player1: {:?}", player1);
                 println!("Player2: {:?}", player2);
-                // dbg!(&player1);
+            // dbg!(&player1);
             } else {
                 panic!("equals!");
             }
@@ -160,11 +168,16 @@ fn run1(player1: &mut Player, player2: &mut Player) -> Option<usize> {
     }
 }
 
-fn run2(player1: &mut Player, player2: &mut Player, cache: &mut Cache, game_cache: &mut GameCache) -> Option<usize> {
+fn run2(
+    player1: &mut Player,
+    player2: &mut Player,
+    cache: &mut Cache,
+    game_cache: &mut GameCache,
+) -> Option<usize> {
     if player1.is_empty() {
         return Some(2);
     }
-    if  player2.is_empty() {
+    if player2.is_empty() {
         return Some(1);
     }
     if let Some(x) = cache.saw(player1, player2) {
@@ -194,8 +207,8 @@ fn run2(player1: &mut Player, player2: &mut Player, cache: &mut Cache, game_cach
                             Some(n) => {
                                 game_cache.insert(&p1, &p2, n == 1);
                                 n == 1
-                            },
-                            None => panic!("eeae")
+                            }
+                            None => panic!("eeae"),
                         }
                     }
                 } else {
@@ -216,7 +229,7 @@ fn run2(player1: &mut Player, player2: &mut Player, cache: &mut Cache, game_cach
 
 fn winner(exception: Option<usize>, p1: &Player, p2: &Player) -> Option<usize> {
     if exception.is_some() {
-        return exception
+        return exception;
     }
     if p2.is_empty() {
         return Some(1);

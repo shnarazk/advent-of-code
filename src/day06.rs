@@ -1,20 +1,14 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        collections::{HashMap, HashSet},
-        io::{self, Read},
-    },
-};
+use std::collections::{HashMap, HashSet};
 
-pub fn day06() {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
+pub fn day06(part: usize, buffer: String) {
+    if part == 1 {
+        part1(buffer);
+    } else {
+        part2(buffer);
+    }
+}
 
+pub fn part2(buffer: String) {
     let mut nvalids = 0;
 
     for g in buffer.split("\n\n") {
@@ -31,19 +25,14 @@ pub fn day06() {
                 }
             }
         }
-        let x = dic.iter().filter(|(k, m)| **m == n).count();
+        let x = dic.iter().filter(|(_, m)| **m == n).count();
         dbg!((x, n, &dic));
         nvalids += x
     }
     dbg!(nvalids);
 }
 
-fn part1() {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
-
+fn part1(buffer: String) {
     let mut nvalids = 0;
 
     for g in buffer.split("\n\n") {
@@ -60,4 +49,3 @@ fn part1() {
     }
     dbg!(nvalids);
 }
-

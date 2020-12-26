@@ -1,13 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-use std::io::{self, Read};
-
-pub fn day10() {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
-
+pub fn day10(_part: usize, buffer: String) {
     let mut vec: Vec<usize> = Vec::new();
     vec.push(0);
 

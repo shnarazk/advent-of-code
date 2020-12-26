@@ -1,15 +1,6 @@
-use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{self, Read},
-    },
-};
+use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
-pub fn day04() {
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer).expect("something wrong");
+pub fn day04(_part: usize, buffer: String) {
     let mut nvalids = 0;
     for c in buffer.split("\n\n") {
         let mut dic: HashMap<&str, &str> = HashMap::new();
@@ -41,8 +32,10 @@ fn check_keys(dic: &HashMap<&str, &str>) -> usize {
 fn valid(key: &str, val: &str) -> bool {
     lazy_static! {
         static ref HIGHT: Regex = Regex::new(r"^(\d+)(cm|in)$").expect("wrong regex");
-        static ref HAIR: Regex = Regex::new(r"^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$").expect("wrong regex");
-        static ref EYE: Regex = Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").expect("wrong regex");
+        static ref HAIR: Regex = Regex::new(r"^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$")
+            .expect("wrong regex");
+        static ref EYE: Regex =
+            Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").expect("wrong regex");
         static ref PID: Regex = Regex::new(r"^\d{9}$").expect("wrong regex");
     }
     match key {

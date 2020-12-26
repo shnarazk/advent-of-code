@@ -3,14 +3,7 @@
 #![allow(unused_variables)]
 use {
     lazy_static::lazy_static,
-    nom::{
-        *,
-        branch::alt,
-        character::complete::*,
-        combinator::*,
-        IResult,
-        multi::many1,
-    },
+    nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult, *},
     regex::Regex,
     std::{
         collections::HashMap,
@@ -36,7 +29,9 @@ enum Expr {
 impl Expr {
     fn clone_expr(&self) -> Expr {
         match self {
-            Expr::BIOP(op, l, r) => Expr::BIOP(*op, Box::new(l.clone_expr()), Box::new(r.clone_expr())),
+            Expr::BIOP(op, l, r) => {
+                Expr::BIOP(*op, Box::new(l.clone_expr()), Box::new(r.clone_expr()))
+            }
             Expr::TERM(b) => Expr::TERM(Box::new(b.clone_expr())),
             Expr::NUM(n) => Expr::NUM(*n),
         }
@@ -44,14 +39,9 @@ impl Expr {
 }
 
 fn a_number(input: &str) -> IResult<&str, Expr> {
-  map_res(
-      recognize(
-          many1(
-              one_of("0123456789")
-          )
-      ),
-      |out: &str| out.parse::<i64>().map(|a| Expr::NUM(a)))
-        (input)
+    map_res(recognize(many1(one_of("0123456789"))), |out: &str| {
+        out.parse::<i64>().map(|a| Expr::NUM(a))
+    })(input)
 }
 
 fn an_operator(input: &str) -> IResult<&str, Op> {
@@ -60,7 +50,7 @@ fn an_operator(input: &str) -> IResult<&str, Op> {
         '*' => Ok(Op::MUL),
         '-' => Ok(Op::SUB),
         '/' => Ok(Op::DIV),
-        _ => Err("")
+        _ => Err(""),
     })(input)
 }
 
@@ -74,7 +64,7 @@ fn a_bitree(input: &str) -> IResult<&str, Expr> {
 }
 
 fn an_operand(input: &str) -> IResult<&str, Expr> {
-    alt((a_term, a_number)) (input)
+    alt((a_term, a_number))(input)
 }
 
 fn a_term(input: &str) -> IResult<&str, Expr> {
@@ -87,7 +77,10 @@ fn a_term(input: &str) -> IResult<&str, Expr> {
 fn an_expr(input: &str) -> IResult<&str, Expr> {
     let (remain, opr1) = alt((a_term, a_number))(input.trim_start())?;
     if let Ok((remain, (op, opr2))) = a_modifier(remain.trim_start()) {
-        Ok((remain.trim_start(), Expr::BIOP(op, Box::new(opr1), Box::new(opr2))))
+        Ok((
+            remain.trim_start(),
+            Expr::BIOP(op, Box::new(opr1), Box::new(opr2)),
+        ))
     } else {
         Ok((remain, opr1))
     }
@@ -108,14 +101,13 @@ fn subexpr(input: &str) -> IResult<&str, Expr> {
     Ok((remain, Expr::TERM(Box::new(term))))
 }
 
-
 fn an_factor_operator(input: &str) -> IResult<&str, Op> {
     map_res(one_of("+*-/"), |c: char| match c {
-//        '*' => Ok(Op::MUL),
-//        '/' => Ok(Op::DIV),
+        //        '*' => Ok(Op::MUL),
+        //        '/' => Ok(Op::DIV),
         '+' => Ok(Op::ADD),
         '-' => Ok(Op::SUB),
-        _ => Err("")
+        _ => Err(""),
     })(input)
 }
 
@@ -123,9 +115,9 @@ fn an_term_operator(input: &str) -> IResult<&str, Op> {
     map_res(one_of("+*-/"), |c: char| match c {
         '*' => Ok(Op::MUL),
         '/' => Ok(Op::DIV),
-//        '+' => Ok(Op::ADD),
-//        '-' => Ok(Op::SUB),
-        _ => Err("")
+        //        '+' => Ok(Op::ADD),
+        //        '-' => Ok(Op::SUB),
+        _ => Err(""),
     })(input)
 }
 
@@ -135,7 +127,7 @@ fn factors(input: &str) -> IResult<&str, Expr> {
         let (remain, r) = factors(remain.trim_start())?;
         Ok((remain, Expr::BIOP(op, Box::new(l), Box::new(r))))
     } else {
-        Ok((remain,l))
+        Ok((remain, l))
     }
 }
 
@@ -145,7 +137,7 @@ fn terms(input: &str) -> IResult<&str, Expr> {
         let (remain, r) = terms(remain.trim_start())?;
         Ok((remain, Expr::BIOP(op, Box::new(l), Box::new(r))))
     } else {
-        Ok((remain,l))
+        Ok((remain, l))
     }
 }
 
@@ -189,12 +181,7 @@ fn read(str: &str) -> i64 {
 
 fn traverse(op: Op, acum: i64, e: &Expr) -> i64 {
     match e {
-        Expr::BIOP(next_op, l, r) => {
-            traverse(*next_op,
-                     traverse(op, acum, &*l),
-                     &*r,
-            )
-        }
+        Expr::BIOP(next_op, l, r) => traverse(*next_op, traverse(op, acum, &*l), &*r),
         Expr::TERM(t) => {
             let n = traverse(Op::ADD, 0, &t);
             match op {
@@ -204,13 +191,11 @@ fn traverse(op: Op, acum: i64, e: &Expr) -> i64 {
                 Op::SUB => acum - n,
             }
         }
-        Expr::NUM(n) => {
-            match op {
-                Op::ADD => acum + n,
-                Op::DIV => acum / n,
-                Op::MUL => acum * n,
-                Op::SUB => acum - n,
-            }
+        Expr::NUM(n) => match op {
+            Op::ADD => acum + n,
+            Op::DIV => acum / n,
+            Op::MUL => acum * n,
+            Op::SUB => acum - n,
         },
     }
 }

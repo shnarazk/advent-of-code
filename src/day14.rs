@@ -31,7 +31,7 @@ impl OP {
                 let mut addr = base;
                 for loc in ms.iter() {
                     addr &= !(1 << loc);
-                    addr |= i % 2 << loc;
+                    addr |= (i % 2) << loc;
                     i /= 2;
                 }
                 vec.push(addr);
@@ -56,7 +56,7 @@ pub fn day14() {
             // dbg!(&op);
             match op {
                 OP::Mask(_, _, _) => {
-                mask = op;                    
+                    mask = op;
                 }
                 OP::Set(a, v) => {
                     // let entry = dic.entry(a).or_insert(0);
@@ -81,8 +81,12 @@ fn parse(str: &str) -> Option<OP> {
         static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
     }
     if let Some(m) = MASK.captures(str) {
-        let zeros = m[1].chars().fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
-        let ones = m[1].chars().fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
+        let zeros = m[1]
+            .chars()
+            .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
+        let ones = m[1]
+            .chars()
+            .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
         let wilds = m[1]
             .chars()
             .enumerate()
@@ -90,7 +94,9 @@ fn parse(str: &str) -> Option<OP> {
                 if letter == 'X' {
                     v.push(35 - i);
                     v
-                } else { v }
+                } else {
+                    v
+                }
             });
         return Some(OP::Mask(zeros, ones, wilds));
     }

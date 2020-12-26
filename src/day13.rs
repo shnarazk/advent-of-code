@@ -17,7 +17,7 @@ pub fn day13() {
             vec.push((n, i));
             let before = time % n;
             // if before == 0 {
-             //    panic!("found: {}", 0);
+            //    panic!("found: {}", 0);
             // }
             let w = n - before;
             if w < wait {
@@ -33,7 +33,7 @@ pub fn day13() {
             tuple.0 - tuple.1
         } else {
             println!("逆転{}, {}", tuple.0, tuple.1);
-            (tuple.0 * tuple.1 - tuple.1) % tuple.0 
+            (tuple.0 * tuple.1 - tuple.1) % tuple.0
         };
         println!("周期{}で{}余る", tuple.0, offset);
         x = chinese(x, (tuple.0, offset));
@@ -67,7 +67,7 @@ fn chinese((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize)
 
 /// Return `X` such that:
 /// (X * a) `mod` m = ((X * b) `mod` m) + 1
-/// 
+///
 fn solve1(a: usize, m: usize) -> usize {
     for i in 0.. {
         if (i * a) % m == 1 {

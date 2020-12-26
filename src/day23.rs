@@ -10,21 +10,42 @@ use {
     },
 };
 
-/*
+pub fn day23(part: usize, flag: String) {
+    assert!(flag.starts_with('-'));
+    let sample = vec![3, 8, 9, 1, 2, 5, 4, 6, 7];
+    let test = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
+    if part == 1 {
+        if flag == "-test" {
+            dbg!(part1(9, 100, &sample));
+            assert_eq!(part1(9, 100, &sample), "67384529");
+
+        } else {
+            dbg!(part1(9, 100, &test));
+        }
+    } else {
+        if flag == "-test" {
+            dbg!(part2(1_000_000, 10_000_000, &sample));
+            assert_eq!(part2(1_000_000, 10_000_000, &sample), 149245887792);
+        } else {
+            dbg!(part2(1_000_000, 10_000_000, &test));
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
-struct Config {
+struct Config1 {
     cups: VecDeque<usize>,
     highest: usize,
     lowest: usize,
 }
 
-impl Config {
-    fn from(v: Vec<usize>) -> Config {
+impl Config1 {
+    fn from(v: Vec<usize>) -> Config1 {
         let mut cups = VecDeque::new();
         for n in v.iter() {
             cups.push_back(*n);
         }
-        Config {
+        Config1 {
             cups,
             highest: *v.iter().max().unwrap(),
             lowest: *v.iter().min().unwrap(),
@@ -76,7 +97,7 @@ impl Config {
     }
     /*
     fn round1(&mut self) {
-        let Config {
+        let Config1 {
             ref mut cups,
             ref mut workplace,
             highest,
@@ -141,7 +162,6 @@ impl Config {
         0
     }
 }
- */
 
 struct Config {
     next_cup: Vec<usize>,
@@ -232,62 +252,33 @@ fn part2(ncup: usize, nround: usize, vec: &[usize]) -> usize {
     conf.answer2()
 }
 
-pub fn day23() {
-    let sample = vec![3, 8, 9, 1, 2, 5, 4, 6, 7];
-    let test = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
-    // assert_eq!(part1(9, 100, &sample), "67384529");
-    dbg!(part1(9, 100, &test));
-    assert_eq!(part2(1_000_000, 10_000_000, &sample), 149245887792);
-    dbg!(part2(1_000_000, 10_000_000, &test));
-}
-
-fn read(buf: &str) -> usize {
-    // let mut dic;
-    for l in buf.split('\n') {
-        // l.split_ascii_whitespace()
-        if let Some(d) = parse(l) {
-            // let k_v = kv.split(':').collect::<Vec<_>>();
-            // dic.insert(d);
-        }
-    }
-    eval()
-}
-
-fn parse(line: &str) -> Option<bool> {
-    // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)$").expect("error"); }
-    // if let Some(m) = RE.captures(line) {}
-    Some(false)
-}
-
-fn eval() -> usize {
-    0
-}
-
 mod test {
     use super::*;
     #[test]
     fn test0() {
-        let mut conf = Config::from(vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Config1::new(9, vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut current = 3;
         dbg!(&conf);
         for _ in 0..10 {
-            conf.round();
+            current = conf.round();
             dbg!(&conf);
         }
         assert_eq!(conf.answer(), "92658374");
     }
     #[test]
     fn test1() {
-        let mut conf = Config::from(vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Config1::from(vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut current = 3;
         dbg!(&conf);
         for _ in 0..100 {
-            conf.round();
+            current = conf.round();
             dbg!(&conf);
         }
         assert_eq!(conf.answer(), "67384529");
     }
     #[test]
     fn test2() {
-        let mut conf = Config::from(vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
+        let mut conf = Config1::from(vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
         dbg!(&conf);
         for _ in 0..100 {
             conf.round();

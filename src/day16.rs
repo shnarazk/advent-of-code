@@ -66,7 +66,10 @@ fn solve(body: &str) {
         let mut ok = true;
         for (i, e) in v.iter().enumerate() {
             if let Some(n) = invalid(&field_cands[i], *e) {
-                println!("{}th element {} is out of range {:?}", i, e, &field_cands[i]);
+                println!(
+                    "{}th element {} is out of range {:?}",
+                    i, e, &field_cands[i]
+                );
                 count += n;
                 ok = false;
             }
@@ -86,8 +89,12 @@ fn solve(body: &str) {
                 valids.push((range.0.clone(), ticket[i]));
             }
         }
-        println!("{}-th field ({}) has {} cands: {:?}", i, ticket[i], valids.len(),
-                 valids.iter().map(|r| &r.0).collect::<Vec<_>>(),
+        println!(
+            "{}-th field ({}) has {} cands: {:?}",
+            i,
+            ticket[i],
+            valids.len(),
+            valids.iter().map(|r| &r.0).collect::<Vec<_>>(),
         );
         result.push(valids);
     }
@@ -95,7 +102,6 @@ fn solve(body: &str) {
     // simplify
     let mut trimmed: Vec<(String, usize)> = Vec::new();
     loop {
-        let mut modified = false;
         let mut index: Option<usize> = None;
         for (i, cands) in result.iter().enumerate() {
             if cands.len() == 1 {
@@ -103,18 +109,15 @@ fn solve(body: &str) {
                 break;
             }
         }
-        if let Some(n) =index {
+        if let Some(n) = index {
             let name: String = result[n][0].0.clone();
             trimmed.push(result[n][0].clone());
             println!("asserted {}", name);
             for (j, v) in result.iter_mut().enumerate() {
                 let old_len = v.len();
                 v.retain(|range| range.0 != name);
-                if v.len() != old_len {
-                    modified = true;
-                }
             }
-        } else if !modified {
+        } else {
             break;
         }
     }
@@ -134,7 +137,10 @@ fn valid((_, a, b, c, d): &Range, val: usize) -> bool {
 }
 
 fn invalid(dic: &[&Range], x: usize) -> Option<usize> {
-    if dic.iter().any(|(_, a, b, c, d)| (*a <= x && x <= *b) || (*c <= x && x <= *d)) {
+    if dic
+        .iter()
+        .any(|(_, a, b, c, d)| (*a <= x && x <= *b) || (*c <= x && x <= *d))
+    {
         None
     } else {
         Some(x)
@@ -143,7 +149,8 @@ fn invalid(dic: &[&Range], x: usize) -> Option<usize> {
 
 fn parse_range(str: &str) -> Option<Range> {
     lazy_static! {
-        static ref LINE: Regex = Regex::new(r"^([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)$").expect("wrong");
+        static ref LINE: Regex =
+            Regex::new(r"^([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)$").expect("wrong");
     }
     if let Some(m) = LINE.captures(str) {
         if let Ok(a) = m[2].parse::<usize>() {

@@ -266,7 +266,7 @@ impl Tile {
                     j = len - j;
                 }
                 3 => {
-                    let ix = i; 
+                    let ix = i;
                     i = j;
                     j = len - ix;
                 }
@@ -325,7 +325,7 @@ pub fn transose_image(image: &[String], rotate: usize, flip: usize) -> Vec<Strin
                 j = len1 - j;
             }
             3 => {
-                let ix = i; 
+                let ix = i;
                 i = j;
                 j = len1 - ix;
             }
@@ -417,7 +417,10 @@ fn read(str: &str) {
         }
         println!();
         let l = (tile.len() as f64).sqrt() as usize;
-        println!("{}", p[0].0.id * p[l - 1].0.id * p[tile.len() - l].0.id * p[tile.len() - 1].0.id);
+        println!(
+            "{}",
+            p[0].0.id * p[l - 1].0.id * p[tile.len() - l].0.id * p[tile.len() - 1].0.id
+        );
 
         // part 2
         for (t, r, f) in &p {

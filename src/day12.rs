@@ -3,9 +3,7 @@
 use {
     lazy_static::lazy_static,
     regex::Regex,
-    std::{
-        io::{self, Read},
-    },
+    std::io::{self, Read},
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -73,7 +71,6 @@ impl Instruction {
     }
 }
 
-
 #[derive(Debug, PartialEq)]
 struct World {
     dir: Dir,
@@ -92,7 +89,7 @@ impl Default for World {
             waypoint_we: 10,
             dist_sn: 0,
             dist_we: 0,
-            ip: 0
+            ip: 0,
         }
     }
 }
@@ -105,23 +102,23 @@ impl World {
         if self.dist_we < 0 {
             print!("ship: west {} ", self.dist_we.abs());
         } else {
-            print!("ship: east {} ",self.dist_we);
+            print!("ship: east {} ", self.dist_we);
         }
         if self.dist_sn < 0 {
             print!("south {} ", self.dist_sn.abs());
         } else {
-            print!("north {} ",self.dist_sn);
+            print!("north {} ", self.dist_sn);
         }
         print!("facing {:?}, \t", self.dir);
         if self.waypoint_we < 0 {
             print!("waypoint west {} ", self.waypoint_we.abs());
         } else {
-            print!("waypoint east {} ",self.waypoint_we);
+            print!("waypoint east {} ", self.waypoint_we);
         }
         if self.waypoint_sn < 0 {
             println!("south {} ", self.waypoint_sn.abs());
         } else {
-            println!("north {} ",self.waypoint_sn);
+            println!("north {} ", self.waypoint_sn);
         }
     }
     fn run(codes: &[Instruction]) -> Option<World> {
@@ -134,7 +131,7 @@ impl World {
             cpu.execute(codes);
             cpu.print();
         }
-   }
+    }
     fn decode(&mut self, inst: &Instruction) {
         match inst {
             Instruction::N(n) => {
@@ -156,14 +153,14 @@ impl World {
                     0 => (),
                     1 => {
                         self.waypoint_sn = we;
-                        self.waypoint_we = - sn;
+                        self.waypoint_we = -sn;
                     }
                     2 => {
-                        self.waypoint_sn = - sn;
-                        self.waypoint_we = - we;
+                        self.waypoint_sn = -sn;
+                        self.waypoint_we = -we;
                     }
                     3 => {
-                        self.waypoint_sn = - we;
+                        self.waypoint_sn = -we;
                         self.waypoint_we = sn;
                     }
                     _ => panic!("can't handle"),
@@ -175,16 +172,16 @@ impl World {
                 match (n % 360) / 90 {
                     0 => (),
                     1 => {
-                        self.waypoint_sn = - we;
+                        self.waypoint_sn = -we;
                         self.waypoint_we = sn;
                     }
                     2 => {
-                        self.waypoint_sn = - sn;
-                        self.waypoint_we = - we;
+                        self.waypoint_sn = -sn;
+                        self.waypoint_we = -we;
                     }
                     3 => {
                         self.waypoint_sn = we;
-                        self.waypoint_we = - sn;
+                        self.waypoint_we = -sn;
                     }
                     _ => panic!("can't handle"),
                 }

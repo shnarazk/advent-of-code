@@ -17,7 +17,7 @@ pub enum Dir {
     SW,
     W,
     NW,
-    NE
+    NE,
 }
 
 pub type Location = (isize, isize);
@@ -30,12 +30,24 @@ pub type Location = (isize, isize);
 /// assert_eq!(location(&dirs_from("nwesw")), (0, 0));
 /// ```
 pub fn location(dirs: &[Dir]) -> Location {
-    let up = dirs.iter().filter(|d| [Dir::NW, Dir::NE].contains(d)).count() as isize;
-    let down = dirs.iter().filter(|d| [Dir::SW, Dir::SE].contains(d)).count() as isize;
+    let up = dirs
+        .iter()
+        .filter(|d| [Dir::NW, Dir::NE].contains(d))
+        .count() as isize;
+    let down = dirs
+        .iter()
+        .filter(|d| [Dir::SW, Dir::SE].contains(d))
+        .count() as isize;
     let right2 = dirs.iter().filter(|d| [Dir::E].contains(d)).count() as isize;
-    let right = dirs.iter().filter(|d| [Dir::SE, Dir::NE].contains(d)).count() as isize;
+    let right = dirs
+        .iter()
+        .filter(|d| [Dir::SE, Dir::NE].contains(d))
+        .count() as isize;
     let left2 = dirs.iter().filter(|d| [Dir::W].contains(d)).count() as isize;
-    let left = dirs.iter().filter(|d| [Dir::SW, Dir::NW].contains(d)).count() as isize;
+    let left = dirs
+        .iter()
+        .filter(|d| [Dir::SW, Dir::NW].contains(d))
+        .count() as isize;
     (up - down, (right2 - left2) * 2 + (right - left))
 }
 
@@ -49,13 +61,14 @@ fn push_dirs(vec: &mut Vec<Dir>, s: &str) {
     if s.is_empty() {
         return;
     }
-    for (prefix, symbol) in &[("e", Dir::E),
-                              ("se", Dir::SE),
-                              ("sw", Dir::SW),
-                              ("w", Dir::W),
-                              ("nw", Dir::NW),
-                              ("ne", Dir::NE)]
-    {
+    for (prefix, symbol) in &[
+        ("e", Dir::E),
+        ("se", Dir::SE),
+        ("sw", Dir::SW),
+        ("w", Dir::W),
+        ("nw", Dir::NW),
+        ("ne", Dir::NE),
+    ] {
         if let Some(remain) = s.strip_prefix(prefix) {
             vec.push(*symbol);
             return push_dirs(vec, remain);
@@ -71,10 +84,10 @@ fn push_dirs(vec: &mut Vec<Dir>, s: &str) {
 /// ```
 pub fn neighbors((i, j): &Location) -> [Location; 6] {
     [
-        (*i,     *j + 2),
+        (*i, *j + 2),
         (*i - 1, *j + 1),
         (*i - 1, *j - 1),
-        (*i,     *j - 2),
+        (*i, *j - 2),
         (*i + 1, *j - 1),
         (*i + 1, *j + 1),
     ]
@@ -86,7 +99,9 @@ struct World {
 
 impl World {
     fn new() -> World {
-        World { cell: HashMap::new() }
+        World {
+            cell: HashMap::new(),
+        }
     }
     fn flip(&mut self, loc: Location) {
         let entry = self.cell.entry(loc).or_insert(false);
@@ -116,13 +131,19 @@ impl World {
     fn next_day(&self) -> World {
         let mut next: World = World::new();
         for (k, v) in self.cell.iter() {
-            if *v { println!("{:?}", k); }
-            if self.next_state(k) { println!("\t\t=> {:?}", k); }
+            if *v {
+                println!("{:?}", k);
+            }
+            if self.next_state(k) {
+                println!("\t\t=> {:?}", k);
+            }
             next.cell.insert(*k, self.next_state(k));
             for l in neighbors(k).iter() {
                 if next.cell.get(l).is_none() {
                     next.cell.insert(*l, self.next_state(l));
-                    if self.next_state(l) { println!("\t\t=> {:?}", l); }
+                    if self.next_state(l) {
+                        println!("\t\t=> {:?}", l);
+                    }
                 }
             }
         }
@@ -170,7 +191,6 @@ fn read2(buf: &str, n: usize) -> usize {
     }
     w.count()
 }
-
 
 mod test {
     use super::*;

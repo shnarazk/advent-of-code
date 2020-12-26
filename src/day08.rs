@@ -1,12 +1,27 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        io::{self, Read},
-    },
-};
+use {lazy_static::lazy_static, regex::Regex};
+
+pub fn day08(_part: usize, buffer: String) {
+    let mut codes: Vec<(Instruction, bool)> = Vec::new();
+
+    for line in buffer.split('\n') {
+        if line.is_empty() {
+            break;
+        }
+        if let Some(c) = parse(line) {
+            codes.push((c, false));
+        } else {
+            panic!("wrong code");
+        }
+    }
+    for i in 0..codes.len() {
+        if let Some(mut variant) = flip(&codes, i) {
+            if let Some(result) = CPU::run(&mut variant) {
+                dbg!(result);
+                return;
+            }
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 enum Instruction {
@@ -43,7 +58,7 @@ impl Default for CPU {
     fn default() -> Self {
         CPU {
             accumulator: 0,
-            ip: 0
+            ip: 0,
         }
     }
 }
@@ -63,7 +78,7 @@ impl CPU {
             }
             cpu.execute(codes);
         }
-   }
+    }
     fn decode(&mut self, inst: &Instruction) {
         match inst {
             Instruction::Acc(n) => {
@@ -77,7 +92,7 @@ impl CPU {
                     self.ip = new_ip as usize;
                 }
             }
-            Instruction::Nop(n) => (),
+            Instruction::Nop(_) => (),
         }
     }
     fn execute(&mut self, codes: &[(Instruction, bool)]) {
@@ -97,34 +112,6 @@ impl CPU {
         let first = codes[self.ip].1;
         codes[self.ip].1 = true;
         first
-    }
-}
-
-pub fn day08() {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
-
-    let mut codes: Vec<(Instruction, bool)> = Vec::new();
-
-    for line in buffer.split('\n') {
-        if line.is_empty() {
-            break;
-        }
-        if let Some(c) = parse(line) {
-            codes.push((c, false));
-        } else {
-            panic!("wrong code");
-        }
-    }
-    for i in 0..codes.len() {
-        if let Some(mut variant) = flip(&codes, i) {
-            if let Some(result) = CPU::run(&mut variant) {
-                dbg!(result);
-                return;
-            }
-        }
     }
 }
 

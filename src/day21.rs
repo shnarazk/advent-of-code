@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+use splr::*;
+use std::{convert::TryFrom, env::args};
 use {
     lazy_static::lazy_static,
     regex::Regex,
@@ -9,24 +11,22 @@ use {
         io::{stdin, Read},
     },
 };
-use splr::*;
-use std::{convert::TryFrom, env::args};
 
 /// ## 変数
 /// ingredient x allergen
-/// 
+///
 /// ## ルール
 /// 1. [ONLY-ONE-AllERGEN] ある ingredient がある allergen を持つなら他の indredient はその allergen を持てない
 /// 1. [EXCULSIZE-ALLERGEN] ある ingredient がある allergen を持つなら他の allergen を持てない
 /// 1. [AT-LEAST-1] ルールに則して、どれかはそのallergen を持たなければならない
 /// 1. [XOR] ある ingredient がある allergen を持つなら他の ingredient はその allergen を持てない
 /// 1. allergenに対して候補がある
-/// 
+///
 /// * {mxmxvkd.dairy, kfcds.dairy, sqjhc.dairy, nhms.dairy}
 /// * {mxmxvkd.dairy, kfcds.fish, sqjhc.fish, nhms.fish}
 /// * {trh.dairy, fvjkl.dairy, sbzzf.dairy, mxmxvkd.dairy}
 /// * ...
-/// 
+///
 /// ## 目的
 /// どの属性でもtrueにしたらUNSATになるようなindredientを探せ
 pub fn day21() {
@@ -52,8 +52,16 @@ fn parse(str: &str) -> Option<(Vec<String>, Vec<String>)> {
     }
 
     if let Some(m) = RE.captures(str) {
-        let ingredients = m[1].trim().split(' ').map(|s| s.to_string()).collect::<Vec<String>>();
-        let allergens = m[2].trim().split(", ").map(|s| s.to_string()).collect::<Vec<String>>();
+        let ingredients = m[1]
+            .trim()
+            .split(' ')
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+        let allergens = m[2]
+            .trim()
+            .split(", ")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         // dbg!((&ingredients, &allergens));
         return Some((ingredients, allergens));
     }
@@ -92,8 +100,8 @@ fn eval(rules: &[(Vec<String>, Vec<String>)]) {
         0
     };
     // clause builder
-    let imply = |v1: i32, v2: i32| { vec![-v1, v2] };
-    let xor = |v1: i32, v2: i32| { vec![-v1, -v2] };
+    let imply = |v1: i32, v2: i32| vec![-v1, v2];
+    let xor = |v1: i32, v2: i32| vec![-v1, -v2];
     // build cnf
     let mut cnf: Vec<Vec<i32>> = Vec::new();
 
@@ -133,45 +141,45 @@ fn eval(rules: &[(Vec<String>, Vec<String>)]) {
     }
 
     // run Splr
-    
+
     // part 1.
-/*
-    let mut count: usize = 0;
-    for ing in ingredients.iter() {
-        let mut satisfiable = false;
-        for al in allergens.iter() {
-            let mut asserted = cnf.clone();
-            asserted.push(vec![var_of(ing, al)]);
-            if let Certificate::SAT(ans) = Certificate::try_from(asserted).expect("panic!") {
-                satisfiable = true;
-                break;
-                /*
-                // println!("Assigning {} to {} has an answer {:?}", al, ing, ans);
-                'next: for lit in ans.iter() {
-                    if *lit < 0 {
-                        continue;
-                    }
-                    for i in ingredients.iter() {
-                        for a in allergens.iter() {
-                            if var_of(i, a) == *lit {
-                                println!(" - Under assigning {} to {}, {} has {}.", ing, al, i, a);
-                                continue 'next;
+    /*
+        let mut count: usize = 0;
+        for ing in ingredients.iter() {
+            let mut satisfiable = false;
+            for al in allergens.iter() {
+                let mut asserted = cnf.clone();
+                asserted.push(vec![var_of(ing, al)]);
+                if let Certificate::SAT(ans) = Certificate::try_from(asserted).expect("panic!") {
+                    satisfiable = true;
+                    break;
+                    /*
+                    // println!("Assigning {} to {} has an answer {:?}", al, ing, ans);
+                    'next: for lit in ans.iter() {
+                        if *lit < 0 {
+                            continue;
+                        }
+                        for i in ingredients.iter() {
+                            for a in allergens.iter() {
+                                if var_of(i, a) == *lit {
+                                    println!(" - Under assigning {} to {}, {} has {}.", ing, al, i, a);
+                                    continue 'next;
+                                }
                             }
                         }
                     }
+                     */
+                } else {
+                    // println!("Assigning {} to {} emits a conflict", al, ing);
                 }
-                 */
-            } else {
-                // println!("Assigning {} to {} emits a conflict", al, ing);
+            }
+            if !satisfiable {
+                println!("{} is safe", ing);
+                count += rules.iter().map(|(v, _)| v.iter().filter(|i| *i == ing).count()).sum::<usize>();
             }
         }
-        if !satisfiable {
-            println!("{} is safe", ing);
-            count += rules.iter().map(|(v, _)| v.iter().filter(|i| *i == ing).count()).sum::<usize>();
-        }
-    }
-    // dbg!(count);
-*/
+        // dbg!(count);
+    */
     // part 2.
     let mut assign: HashSet<(&str, &str)> = HashSet::new();
     if let Certificate::SAT(ans) = Certificate::try_from(cnf).expect("panic!") {

@@ -10,7 +10,7 @@ pub fn day15() {
     stdin().read_to_string(&mut buf).expect("wrong");
 
     let mut dic: HashMap<usize, usize> = HashMap::new();
-    let mut last = 0;
+    let mut last;
     let mut clock = 0;
 
     let mut iter = buf.split(',');
@@ -23,7 +23,7 @@ pub fn day15() {
                 if ch.is_some() {
                     let entry = dic.entry(n).or_insert(0);
                     *entry = clock;
-                    // println!("Turn {}: call.{}, a starting number", clock, n);
+                // println!("Turn {}: call.{}, a starting number", clock, n);
                 } else {
                     // println!("Turn {}: call.{}, a starting number", clock, n);
                     last = n;
