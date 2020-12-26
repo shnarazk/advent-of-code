@@ -163,6 +163,7 @@ impl Config1 {
     }
 }
 
+#[derive(Debug, PartialEq)]
 struct Config {
     next_cup: Vec<usize>,
     highest: usize,
@@ -256,34 +257,35 @@ mod test {
     use super::*;
     #[test]
     fn test0() {
-        let mut conf = Config1::new(9, vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Config::new(9, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
         let mut current = 3;
         dbg!(&conf);
         for _ in 0..10 {
-            current = conf.round();
+            current = conf.round(current);
             dbg!(&conf);
         }
-        assert_eq!(conf.answer(), "92658374");
+        assert_eq!(conf.answer1(), "92658374");
     }
     #[test]
     fn test1() {
-        let mut conf = Config1::from(vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Config::new(9, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
         let mut current = 3;
         dbg!(&conf);
         for _ in 0..100 {
-            current = conf.round();
+            current = conf.round(current);
             dbg!(&conf);
         }
-        assert_eq!(conf.answer(), "67384529");
+        assert_eq!(conf.answer1(), "67384529");
     }
     #[test]
     fn test2() {
-        let mut conf = Config1::from(vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
+        let mut conf = Config::new(9, &vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
+        let mut current = 3;
         dbg!(&conf);
         for _ in 0..100 {
-            conf.round();
+            current = conf.round(current);
             dbg!(&conf);
         }
-        assert_eq!(conf.answer(), "24798635");
+        assert_eq!(conf.answer1(), "24798635");
     }
 }
