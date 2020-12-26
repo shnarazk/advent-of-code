@@ -15,30 +15,34 @@ pub fn main() {
         println!("$0 23 2 -\t22日目のパート2を（'-'フラグ付き、入力データなしで）実行");
         panic!();
     }
-    let (day, part, test) = {
-        let mut a = args();
-        let d = a
-            .nth(1)
-            .unwrap_or("1".to_string())
-            .parse::<usize>()
-            .unwrap_or(1);
-        let p = a
-            .next()
-            .unwrap_or("1".to_string())
-            .parse::<usize>()
-            .unwrap_or(1);
-        (d, p, a.next())
-    };
+    let mut a = args();
+    let day = a
+        .nth(1)
+        .unwrap_or("1".to_string())
+        .parse::<usize>()
+        .unwrap_or(1);
+    let part = a
+        .next()
+        .unwrap_or("1".to_string())
+        .parse::<usize>()
+        .unwrap_or(1);
+    let test = a.next();
     let (input, input_data) = if let Some(ext) = test {
         if ext.starts_with('-') {
             (ext.to_string(), ext.to_string())
         } else {
             let f = format!("input-day{:>02}-{}.txt", day, ext);
-            (f.to_string(), read_input(&f).expect(&format!("Can't read {}", f)))
+            (
+                f.to_string(),
+                read_input(&f).expect(&format!("Can't read {}", f)),
+            )
         }
     } else {
         let f = format!("input-day{:>02}.txt", day);
-        (f.to_string(), read_input(&f).expect(&format!("Can't read {}", f)))
+        (
+            f.to_string(),
+            read_input(&f).expect(&format!("Can't read {}", f)),
+        )
     };
     println!(
         "# Advent of Code 2020: day {}, part {} on {}",
@@ -68,9 +72,9 @@ pub fn main() {
         21 => day21(),
         22 => day22(),
         23 => day23(part, input_data),
-        24 => day24(),
-        25 => day25(),
-        _ => (),
+        24 => day24(part, input_data),
+        25 => day25(part, input_data),
+        _ => template(part, input_data),
     };
 }
 

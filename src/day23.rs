@@ -18,7 +18,6 @@ pub fn day23(part: usize, flag: String) {
         if flag == "-test" {
             dbg!(part1(9, 100, &sample));
             assert_eq!(part1(9, 100, &sample), "67384529");
-
         } else {
             dbg!(part1(9, 100, &test));
         }
@@ -69,9 +68,9 @@ impl Config1 {
         pick_ups.push(self.cups.pop_front().unwrap());
 
         let mut destination = if current_cup == self.lowest {
-                self.highest
+            self.highest
         } else {
-                current_cup - 1
+            current_cup - 1
         };
         while pick_ups.contains(&destination) {
             if destination == self.lowest {
@@ -156,7 +155,7 @@ impl Config1 {
     fn answer2(&self) -> usize {
         for i in 1..self.cups.len() {
             if self.cups[i] == 1 {
-                return self.cups[i + 1] * self.cups[i + 2]
+                return self.cups[i + 1] * self.cups[i + 2];
             }
         }
         0

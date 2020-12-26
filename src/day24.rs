@@ -10,6 +10,14 @@ use {
     },
 };
 
+pub fn day24(part: usize, buffer: String) {
+    if part == 1 {
+        dbg!(read(&buffer));
+    } else {
+        dbg!(read2(&buffer, 100));
+    }
+}
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Dir {
     E,
@@ -151,15 +159,6 @@ impl World {
         next.cell.retain(|_, v| *v);
         next
     }
-}
-
-pub fn day24() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
-    // part 1
-    // dbg!(read(&buf));
-    // part 2
-    dbg!(read2(&buf, 100));
 }
 
 fn read(buf: &str) -> usize {
