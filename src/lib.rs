@@ -1,3 +1,4 @@
+pub mod template;
 pub mod day01;
 pub mod day02;
 pub mod day03;
@@ -30,4 +31,25 @@ pub use {
     day13::day13, day14::day14, day15::day15, day16::day16, day17::day17, day18::day18,
     day19::day19, day20::day20, day21::day21, day22::day22, day23::day23, day24::day24,
     day25::day25,
+    template::day00,
 };
+
+pub trait ProblemSolver {
+    type TargetObject;
+    type Output;
+    fn add(&mut self, object: Self::TargetObject);
+    fn default() -> Self;
+    fn parse(s: String) -> Self;
+    fn part1(&mut self) -> Self::Output {
+        todo!()
+    }
+    fn part2(&mut self) -> Self::Output {
+        todo!()
+    }
+}
+
+pub trait ProblemObject {
+    fn parse(s: &str) -> Option<Box<Self>> {
+        todo!()
+    }
+}
