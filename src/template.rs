@@ -1,11 +1,12 @@
+use crate::ProblemDescription;
 use crate::{ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
-pub fn template(part: usize, buffer: String) {
+pub fn template(part: usize, _buffer: String) {
     if part == 1 {
-        dbg!(World::parse(&buffer).part1());
+        dbg!(World::parse(ProblemDescription::None).part1());
     } else {
-        dbg!(World::parse(&buffer).part2());
+        dbg!(World::parse(ProblemDescription::None).part2());
     }
 }
 
@@ -13,7 +14,7 @@ pub fn template(part: usize, buffer: String) {
 struct Object {}
 
 impl ProblemObject for Object {
-    fn parse(_s: &str) -> Option<Box<Self>> {
+    fn parse(_s: &str) -> Option<Self> {
         todo!()
     }
 }
@@ -21,29 +22,19 @@ impl ProblemObject for Object {
 #[derive(Debug, PartialEq)]
 struct World {}
 
-impl ProblemSolver for World {
-    type TargetObject = Object;
-    type Output1 = usize;
-    type Output2 = String;
-    fn add(&mut self, _object: Self::TargetObject) {
+impl ProblemSolver<Object, usize, String> for World {
+    const DAY: usize = 0;
+    const DELIMITER: &'static str = "\n";
+    fn add(&mut self, _object: Object) {
         todo!()
     }
     fn default() -> Self {
         World {}
     }
-    fn parse(buffer: &str) -> World {
-        let mut w = Self::default();
-        for l in buffer.split('\n') {
-            if let Some(d) = Self::TargetObject::parse(l) {
-                w.add(*d);
-            }
-        }
-        w
-    }
-    fn part1(&mut self) -> Self::Output1 {
+    fn part1(&mut self) -> usize {
         0
     }
-    fn part2(&mut self) -> Self::Output2 {
+    fn part2(&mut self) -> String {
         "done".to_string()
     }
 }

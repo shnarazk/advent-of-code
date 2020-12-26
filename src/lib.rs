@@ -1,3 +1,4 @@
+use std::{fmt::Debug, fs::File, io::prelude::*};
 pub mod day01;
 pub mod day02;
 pub mod day03;
@@ -33,27 +34,77 @@ pub use {
     day25::day25, template::template,
 };
 
+#[derive(Debug)]
 pub enum ProblemDescription {
-    FileName(String),
-    Testcase(usize),
-    String(String),
+    FileTag(String),
+    TestData(String),
+    None,
 }
 
-pub trait ProblemSolver {
-    type TargetObject;
-    type Output1;
-    type Output2;
-    fn add(&mut self, object: Self::TargetObject);
+pub trait ProblemSolver<TargetObject: ProblemObject + Debug, Output1: Sized, Output2: Sized>:
+    Debug + Sized
+{
+    const DAY: usize;
+    const DELIMITER: &'static str;
+    fn add(&mut self, object: TargetObject);
     fn default() -> Self;
-    fn parse(s: &str) -> Self;
-    fn part1(&mut self) -> Self::Output1 {
+    fn input_filename(desc: ProblemDescription) -> Option<String> {
+        match desc {
+            ProblemDescription::FileTag(tag) => {
+                Some(format!("input-day{:>02}-{}.txt", Self::DAY, tag))
+            }
+            ProblemDescription::None => Some(format!("input-day{:>02}.txt", Self::DAY)),
+            _ => None,
+        }
+    }
+    fn load(desc: ProblemDescription) -> Option<String> {
+        match desc {
+            ProblemDescription::FileTag(_) => Self::load_file(desc),
+            ProblemDescription::TestData(_) => Self::load_data(desc),
+            ProblemDescription::None => Self::load_file(desc),
+        }
+    }
+    fn load_file(desc: ProblemDescription) -> Option<String> {
+        if let Some(fname) = Self::input_filename(desc) {
+            match File::open(format!("data/{}", fname)) {
+                Ok(mut file) => {
+                    let mut contents = String::new();
+                    if let Err(e) = file.read_to_string(&mut contents) {
+                        panic!("Can't read {}: {:?}", fname, e);
+                    }
+                    return Some(contents);
+                }
+                Err(e) => panic!("Can't read {}: {:?}", fname, e),
+            }
+        }
+        None
+    }
+    fn load_data(desc: ProblemDescription) -> Option<String> {
+        if let ProblemDescription::TestData(s) = desc {
+            Some(s)
+        } else {
+            None
+        }
+    }
+    fn parse(desc: ProblemDescription) -> Self {
+        let mut instance = Self::default();
+        if let Some(buffer) = Self::load(desc) {
+            for block in buffer.split(Self::DELIMITER) {
+                if let Some(element) = TargetObject::parse(block) {
+                    instance.add(element);
+                }
+            }
+        }
+        instance
+    }
+    fn part1(&mut self) -> Output1 {
         todo!()
     }
-    fn part2(&mut self) -> Self::Output2 {
+    fn part2(&mut self) -> Output2 {
         todo!()
     }
 }
 
-pub trait ProblemObject {
-    fn parse(s: &str) -> Option<Box<Self>>;
+pub trait ProblemObject: Debug + Sized {
+    fn parse(s: &str) -> Option<Self>;
 }
