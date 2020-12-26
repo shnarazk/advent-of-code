@@ -50,4 +50,3 @@ fn determine_loop_size(public_key: usize) -> usize {
     }
     0
 }
-
