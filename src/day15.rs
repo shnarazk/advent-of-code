@@ -5,7 +5,7 @@ use std::{
     io::{stdin, Read},
 };
 
-fn main() {
+pub fn day15() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
 

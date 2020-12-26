@@ -3,7 +3,9 @@ use std::io::{self, Read};
 pub fn day01() {
     let mut buffer = String::new();
     let mut v: Vec<usize> = Vec::new();
-    io::stdin().read_to_string(&mut buffer).expect("something wrong");
+    io::stdin()
+        .read_to_string(&mut buffer)
+        .expect("something wrong");
     for s in buffer.lines() {
         v.push(s.parse::<usize>().expect("bad int"));
     }
@@ -23,5 +25,4 @@ pub fn day01() {
             }
         }
     }
-    
 }

@@ -132,7 +132,7 @@ impl World {
     }
 }
 
-fn main() {
+pub fn day24() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     // part 1

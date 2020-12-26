@@ -153,7 +153,7 @@ fn an_expr2(input: &str) -> IResult<&str, Expr> {
     terms(input.trim_start())
 }
 
-fn main() {
+pub fn day18() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     dbg!(read(&buf));

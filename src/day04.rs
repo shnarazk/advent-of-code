@@ -7,7 +7,7 @@ use {
     },
 };
 
-fn main() {
+pub fn day04() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).expect("something wrong");
     let mut nvalids = 0;

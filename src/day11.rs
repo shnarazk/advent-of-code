@@ -128,7 +128,7 @@ impl World {
     }
 }
 
-fn main() {
+pub fn day11() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).expect("wrong");
 

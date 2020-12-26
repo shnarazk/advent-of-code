@@ -29,7 +29,7 @@ fn collects(links: &HashSet<(String, String, usize)>, origin: &str) -> usize {
 }
 
 
-fn main() {
+pub fn day07() {
     let mut buffer = String::new();
     io::stdin()
         .read_to_string(&mut buffer)

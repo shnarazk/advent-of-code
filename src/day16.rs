@@ -10,7 +10,7 @@ use {
     },
 };
 
-fn main() {
+pub fn day16() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     solve(&buf);

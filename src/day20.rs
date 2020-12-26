@@ -355,7 +355,7 @@ pub fn decode(line: &[char]) -> usize {
         .fold(0, |acum, c| acum * 2 + ((*c == '#') as usize))
 }
 
-fn main() {
+pub fn day20() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     // check_ans(&buf);

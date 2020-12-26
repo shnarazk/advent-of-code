@@ -4,7 +4,7 @@ use {
     std::io::{self, Read},
 };
 
-fn main() {
+pub fn day02() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).expect("something wrong");
     println!("{}", buffer.lines().map(|s| check_line2(s)).sum::<usize>());

@@ -92,7 +92,7 @@ impl World {
                 }
                 println!();
             }
-            println!("");
+            println!();
         }
     }
     fn actives(&mut self) -> usize {
@@ -196,7 +196,7 @@ impl World4 {
                     }
                     println!();
                 }
-                println!("");
+                println!();
             }
         }
     }
@@ -217,7 +217,7 @@ impl World4 {
     }
 }
 
-fn main() {
+pub fn day17() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     let mut w0 = read4(&buf);

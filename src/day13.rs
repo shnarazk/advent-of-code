@@ -2,7 +2,7 @@
 #![allow(unused_variables)]
 use std::io::{stdin, Read};
 
-fn main() {
+pub fn day13() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
 

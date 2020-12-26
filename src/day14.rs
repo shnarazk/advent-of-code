@@ -43,8 +43,7 @@ impl OP {
     }
 }
 
-
-fn main() {
+pub fn day14() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
 

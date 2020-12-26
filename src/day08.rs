@@ -100,7 +100,7 @@ impl CPU {
     }
 }
 
-fn main() {
+pub fn day08() {
     let mut buffer = String::new();
     io::stdin()
         .read_to_string(&mut buffer)

@@ -29,7 +29,7 @@ use std::{convert::TryFrom, env::args};
 /// 
 /// ## 目的
 /// どの属性でもtrueにしたらUNSATになるようなindredientを探せ
-fn main() {
+pub fn day21() {
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).expect("wrong");
     read(&buf);

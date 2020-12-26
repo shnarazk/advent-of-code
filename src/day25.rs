@@ -11,7 +11,7 @@ fn determine_loop_size(public_key: usize) -> usize {
     for i in 1.. {
         value = (value * 7) % 20201227;
         if value == public_key {
-            return i
+            return i;
         }
     }
     0

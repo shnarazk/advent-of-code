@@ -1,15 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{self, Read},
-    },
-};
+use std::io::{self, Read};
 
-fn main() {
+pub fn day05() {
     let mut buffer = String::new();
     io::stdin()
         .read_to_string(&mut buffer)

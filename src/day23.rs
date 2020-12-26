@@ -232,7 +232,7 @@ fn part2(ncup: usize, nround: usize, vec: &[usize]) -> usize {
     conf.answer2()
 }
 
-fn main() {
+pub fn day23() {
     let sample = vec![3, 8, 9, 1, 2, 5, 4, 6, 7];
     let test = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
     // assert_eq!(part1(9, 100, &sample), "67384529");
