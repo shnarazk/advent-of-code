@@ -12,7 +12,6 @@ pub fn day23(part: usize, desc: ProblemDescription) {
     dbg!(Config::new(ncups, &cups).set_round(nround).run(part));
 }
 
-
 #[derive(Debug, PartialEq)]
 struct Config {
     next_cup: Vec<usize>,
@@ -31,23 +30,19 @@ impl ProblemSolver<(), String, usize> for Config {
             round_end: 0,
             highest: 1,
         }
-    } 
+    }
     fn part1(&mut self) -> String {
         if 20 < self.next_cup.len() {
             return String::new();
         }
-        let mut current = self.start_from;
-        for _ in 0..self.round_end {
-            current = self.round(current);
-        }
-        self.answer1()
+        self.turn_rounds().answer1()
     }
     fn part2(&mut self) -> usize {
         let mut current = self.start_from;
         for _ in 0..self.round_end {
             current = self.round(current);
         }
-        self.answer2()
+        self.turn_rounds().answer2()
     }
 }
 
@@ -107,6 +102,13 @@ impl Config {
         self.next_cup[pick3] = tmp2;
         self.next_cup[current]
     }
+    fn turn_rounds(&mut self) -> &mut Self {
+        let mut current = self.start_from;
+        for _ in 0..self.round_end {
+            current = self.round(current);
+        }
+        self
+    }
     fn answer1(&self) -> String {
         let mut i = 1;
         let mut s: String = String::new();
@@ -122,7 +124,6 @@ impl Config {
         x * y
     }
 }
-
 
 mod test {
     use super::*;

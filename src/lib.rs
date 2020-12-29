@@ -58,7 +58,9 @@ pub trait ProblemSolver<
     const DAY: usize;
     const DELIMITER: &'static str;
     fn default() -> Self;
-    fn insert(&mut self, _object: TargetObject) { todo!() }
+    fn insert(&mut self, _object: TargetObject) {
+        todo!()
+    }
     fn input_filename(desc: ProblemDescription) -> Option<String> {
         match desc {
             ProblemDescription::FileTag(tag) => {
@@ -118,7 +120,7 @@ pub trait ProblemSolver<
                 println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
                 let ans2 = self.part2();
                 SolverResult::Answers(ans1, ans2)
-            },
+            }
             1 => {
                 println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
                 SolverResult::Part1(self.part1())
@@ -143,5 +145,7 @@ pub trait ProblemObject: Debug + Sized {
 }
 
 impl ProblemObject for () {
-    fn parse(_: &str) -> Option<Self> { None }
+    fn parse(_: &str) -> Option<Self> {
+        None
+    }
 }
