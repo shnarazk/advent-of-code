@@ -24,7 +24,7 @@ struct World {}
 impl ProblemSolver<Object, usize, String> for World {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
-    fn add(&mut self, _object: Object) {
+    fn insert(&mut self, _object: Object) {
         todo!()
     }
     fn default() -> Self {

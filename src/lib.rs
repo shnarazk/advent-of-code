@@ -57,8 +57,8 @@ pub trait ProblemSolver<
 {
     const DAY: usize;
     const DELIMITER: &'static str;
-    fn add(&mut self, object: TargetObject);
     fn default() -> Self;
+    fn insert(&mut self, _object: TargetObject) { todo!() }
     fn input_filename(desc: ProblemDescription) -> Option<String> {
         match desc {
             ProblemDescription::FileTag(tag) => {
@@ -104,7 +104,7 @@ pub trait ProblemSolver<
         if let Some(buffer) = Self::load(desc) {
             for block in buffer.split(Self::DELIMITER) {
                 if let Some(element) = TargetObject::parse(block) {
-                    instance.add(element);
+                    instance.insert(element);
                 }
             }
         }

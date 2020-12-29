@@ -109,7 +109,7 @@ struct World {
 impl ProblemSolver<Location, usize, usize> for World {
     const DAY: usize = 24;
     const DELIMITER: &'static str = "\n";
-    fn add(&mut self, loc: Location) {
+    fn insert(&mut self, loc: Location) {
         self.flip(loc);
     }
     fn default() -> Self {
