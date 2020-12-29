@@ -34,15 +34,26 @@ pub use {
     day25::day25, template::template,
 };
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ProblemDescription {
     FileTag(String),
     TestData(String),
     None,
 }
 
-pub trait ProblemSolver<TargetObject: ProblemObject + Debug, Output1: Sized, Output2: Sized>:
-    Debug + Sized
+#[derive(Debug, PartialEq)]
+pub enum SolverResult<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + PartialEq> {
+    Answers(Output1, Output2),
+    Part1(Output1),
+    Part2(Output2),
+    None,
+}
+
+pub trait ProblemSolver<
+    TargetObject: ProblemObject + Debug,
+    Output1: Sized + Debug + PartialEq,
+    Output2: Sized + Debug + PartialEq,
+>: Debug + Sized
 {
     const DAY: usize;
     const DELIMITER: &'static str;
@@ -66,12 +77,14 @@ pub trait ProblemSolver<TargetObject: ProblemObject + Debug, Output1: Sized, Out
     }
     fn load_file(desc: ProblemDescription) -> Option<String> {
         if let Some(fname) = Self::input_filename(desc) {
-            match File::open(format!("data/{}", fname)) {
+            let file_name = format!("data/{}", fname);
+            match File::open(&file_name) {
                 Ok(mut file) => {
                     let mut contents = String::new();
                     if let Err(e) = file.read_to_string(&mut contents) {
                         panic!("Can't read {}: {:?}", fname, e);
                     }
+                    println!("# loaded {}", &file_name);
                     return Some(contents);
                 }
                 Err(e) => panic!("Can't read {}: {:?}", fname, e),
@@ -96,6 +109,26 @@ pub trait ProblemSolver<TargetObject: ProblemObject + Debug, Output1: Sized, Out
             }
         }
         instance
+    }
+    fn run(&mut self, part: usize) -> SolverResult<Output1, Output2> {
+        match part {
+            0 => {
+                println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
+                let ans1 = self.part1();
+                println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
+                let ans2 = self.part2();
+                SolverResult::Answers(ans1, ans2)
+            },
+            1 => {
+                println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
+                SolverResult::Part1(self.part1())
+            }
+            2 => {
+                println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
+                SolverResult::Part2(self.part2())
+            }
+            _ => SolverResult::None,
+        }
     }
     fn part1(&mut self) -> Output1 {
         todo!()

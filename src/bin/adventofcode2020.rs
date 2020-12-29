@@ -2,7 +2,7 @@ use {
     adventofcode2020::{
         day01, day02, day03, day04, day05, day06, day07, day08, day09, day10, day11, day12, day13,
         day14, day15, day16, day17, day18, day19, day20, day21, day22, day23, day24, day25,
-        template,
+        template, ProblemDescription,
     },
     std::{env::args, fs::File, io::prelude::*},
 };
@@ -23,11 +23,13 @@ pub fn main() {
         .unwrap_or(1);
     let part = a
         .next()
-        .unwrap_or("1".to_string())
+        .unwrap_or("0".to_string())
         .parse::<usize>()
-        .unwrap_or(1);
+        .unwrap_or(0);
     let test = a.next();
-    let (input, input_data) = if let Some(ext) = test {
+    let desc: ProblemDescription;
+    let (input, input_data) = if let Some(ref ext) = test {
+        desc = ProblemDescription::FileTag(ext.to_string());
         if ext.starts_with('-') {
             (ext.to_string(), ext.to_string())
         } else {
@@ -38,6 +40,7 @@ pub fn main() {
             )
         }
     } else {
+        desc = ProblemDescription::None;
         let f = format!("input-day{:>02}.txt", day);
         (
             f.to_string(),
@@ -72,7 +75,7 @@ pub fn main() {
         21 => day21(),
         22 => day22(),
         23 => day23(part, input_data),
-        24 => day24(part, input_data),
+        24 => day24(part, desc),
         25 => day25(part, input_data),
         _ => template(part, input_data),
     };

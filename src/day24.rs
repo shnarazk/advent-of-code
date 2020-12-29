@@ -1,21 +1,11 @@
 #![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{stdin, Read},
-    },
+    crate::{ProblemDescription, ProblemObject, ProblemSolver},
+    std::collections::HashMap,
 };
 
-pub fn day24(part: usize, buffer: String) {
-    if part == 1 {
-        dbg!(read(&buffer));
-    } else {
-        dbg!(read2(&buffer, 100));
-    }
+pub fn day24(part: usize, desc: ProblemDescription) {
+    dbg!(World::parse(desc).run(part));
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -29,6 +19,16 @@ pub enum Dir {
 }
 
 pub type Location = (isize, isize);
+
+impl ProblemObject for Location {
+    fn parse(s: &str) -> Option<Self> {
+        if s.is_empty() {
+            None
+        } else {
+            Some(location(&dirs_from(s)))
+        }
+    }
+}
 
 /// ```
 /// use adventofcode::main::*;
@@ -101,16 +101,38 @@ pub fn neighbors((i, j): &Location) -> [Location; 6] {
     ]
 }
 
+#[derive(Clone, Debug, PartialEq)]
 struct World {
     cell: HashMap<Location, bool>,
 }
 
-impl World {
-    fn new() -> World {
+impl ProblemSolver<Location, usize, usize> for World {
+    const DAY: usize = 24;
+    const DELIMITER: &'static str = "\n";
+    fn add(&mut self, loc: Location) {
+        self.flip(loc);
+    }
+    fn default() -> Self {
         World {
             cell: HashMap::new(),
         }
     }
+    fn part1(&mut self) -> usize {
+        self.count()
+    }
+    fn part2(&mut self) -> usize {
+        let n = 100;
+        let mut w = self.clone();
+        w.cell.retain(|_, v| *v);
+        for _ in 1..=n {
+            w = w.next_day();
+            // println!("Day {}: {}", i, w.count());
+        }
+        w.count()
+    }
+}
+
+impl World {
     fn flip(&mut self, loc: Location) {
         let entry = self.cell.entry(loc).or_insert(false);
         *entry = !*entry;
@@ -137,21 +159,22 @@ impl World {
         }
     }
     fn next_day(&self) -> World {
-        let mut next: World = World::new();
-        for (k, v) in self.cell.iter() {
+        let mut next: World = World::default();
+        for (k, _v) in self.cell.iter() {
+            /*
             if *v {
                 println!("{:?}", k);
             }
             if self.next_state(k) {
                 println!("\t\t=> {:?}", k);
-            }
+            } */
             next.cell.insert(*k, self.next_state(k));
             for l in neighbors(k).iter() {
                 if next.cell.get(l).is_none() {
                     next.cell.insert(*l, self.next_state(l));
-                    if self.next_state(l) {
+                    /* if self.next_state(l) {
                         println!("\t\t=> {:?}", l);
-                    }
+                    } */
                 }
             }
         }
@@ -159,36 +182,6 @@ impl World {
         next.cell.retain(|_, v| *v);
         next
     }
-}
-
-fn read(buf: &str) -> usize {
-    let mut dic: World = World::new();
-    for l in buf.split('\n') {
-        if l.is_empty() {
-            break;
-        }
-        let dirs = dirs_from(l);
-        dic.flip(location(&dirs));
-    }
-    // dbg!(dic.iter().filter(|(k, c)| 1 < **c).collect::<Vec<_>>());
-    dic.count()
-}
-
-fn read2(buf: &str, n: usize) -> usize {
-    let mut w: World = World::new();
-    for l in buf.split('\n') {
-        if l.is_empty() {
-            break;
-        }
-        let dirs = dirs_from(l);
-        w.flip(location(&dirs));
-    }
-    w.cell.retain(|_, v| *v);
-    for i in 1..=n {
-        w = w.next_day();
-        println!("Day {}: {}", i, w.count());
-    }
-    w.count()
 }
 
 mod test {
@@ -216,10 +209,16 @@ neswnwewnwnwseenwseesewsenwsweewe
 wseweeenwnesenwwwswnew";
     #[test]
     fn test1() {
-        assert_eq!(read(TEST1), 10);
+        assert_eq!(
+            World::parse(ProblemDescription::TestData(TEST1.to_string())).run(1),
+            SolverResult::Part1(10)
+        );
     }
     #[test]
     fn test2() {
-        assert_eq!(read2(TEST1, 1), 15);
+        assert_eq!(
+            World::parse(ProblemDescription::TestData(TEST1.to_string())).run(2),
+            SolverResult::Part2(2208)
+        );
     }
 }

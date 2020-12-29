@@ -1,5 +1,4 @@
-use crate::ProblemDescription;
-use crate::{ProblemObject, ProblemSolver};
+use crate::{ProblemDescription, ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
 pub fn template(part: usize, _buffer: String) {
@@ -45,11 +44,17 @@ mod test {
     #[test]
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
-        assert_eq!(World::parse(TEST1).part1(), 0);
+        assert_eq!(
+            World::parse(ProblemDescription::TestData(TEST1.to_string())).part1(),
+            0
+        );
     }
     #[test]
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
-        assert_eq!(World::parse(TEST2).part2(), "done".to_string());
+        assert_eq!(
+            World::parse(ProblemDescription::TestData(TEST2.to_string())).part2(),
+            "done".to_string()
+        );
     }
 }
