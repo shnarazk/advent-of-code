@@ -14,7 +14,7 @@ struct Object {}
 
 impl ProblemObject for Object {
     fn parse(_s: &str) -> Option<Self> {
-        todo!()
+        None
     }
 }
 
@@ -25,7 +25,6 @@ impl ProblemSolver<Object, usize, String> for World {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, _object: Object) {
-        todo!()
     }
     fn default() -> Self {
         World {}
@@ -38,6 +37,7 @@ impl ProblemSolver<Object, usize, String> for World {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 

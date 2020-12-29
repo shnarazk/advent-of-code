@@ -89,6 +89,7 @@ fn gcd(a: usize, b: usize) -> usize {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
     #[test]

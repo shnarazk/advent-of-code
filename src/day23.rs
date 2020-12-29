@@ -125,6 +125,7 @@ impl Config {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
     #[test]

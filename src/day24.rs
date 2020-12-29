@@ -184,8 +184,10 @@ impl World {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
+    use crate::SolverResult;
     const TEST1: &str = "\
 sesenwnenenewseeswwswswwnenewsewsw
 neeenesenwnwwswnenewnwwsewnenwseswesw
