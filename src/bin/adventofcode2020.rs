@@ -27,9 +27,14 @@ pub fn main() {
         .parse::<usize>()
         .unwrap_or(0);
     let test = a.next();
-    let desc: ProblemDescription;
-    let (input, input_data) = if let Some(ref ext) = test {
-        desc = ProblemDescription::FileTag(ext.to_string());
+    let desc: ProblemDescription = if let Some(ref ext) = test {
+        ProblemDescription::FileTag(ext.to_string())
+    } else {
+        ProblemDescription::None
+    };
+    let (input, input_data) = if [23, 24].contains(&day) {
+        ("".to_string(), "".to_string())
+    } else if let Some(ref ext) = test {
         if ext.starts_with('-') {
             (ext.to_string(), ext.to_string())
         } else {
@@ -40,7 +45,6 @@ pub fn main() {
             )
         }
     } else {
-        desc = ProblemDescription::None;
         let f = format!("input-day{:>02}.txt", day);
         (
             f.to_string(),
@@ -74,7 +78,7 @@ pub fn main() {
         20 => day20(),
         21 => day21(),
         22 => day22(),
-        23 => day23(part, input_data),
+        23 => day23(part, desc),
         24 => day24(part, desc),
         25 => day25(part, input_data),
         _ => template(part, input_data),
