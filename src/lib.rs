@@ -141,3 +141,7 @@ pub trait ProblemSolver<
 pub trait ProblemObject: Debug + Sized {
     fn parse(s: &str) -> Option<Self>;
 }
+
+impl ProblemObject for () {
+    fn parse(_: &str) -> Option<Self> { None }
+}
