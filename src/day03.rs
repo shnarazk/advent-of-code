@@ -1,37 +1,72 @@
-pub fn day03(_part: usize, buffer: String) {
-    let geo: Vec<Vec<char>> = buffer
-        .lines()
-        .map(|l| l.chars().collect::<Vec<char>>())
-        .collect::<Vec<_>>();
-    println!("{}", count_for_slope(&geo, 1, 1));
-    println!("{}", count_for_slope(&geo, 1, 3));
-    println!("{}", count_for_slope(&geo, 1, 5));
-    println!("{}", count_for_slope(&geo, 1, 7));
-    println!("{}", count_for_slope(&geo, 2, 1));
-    println!(
-        "{}",
-        count_for_slope(&geo, 1, 1)
-            * count_for_slope(&geo, 1, 3)
-            * count_for_slope(&geo, 1, 5)
-            * count_for_slope(&geo, 1, 7)
-            * count_for_slope(&geo, 2, 1)
-    )
+use crate::{Description, ProblemObject, ProblemSolver};
+
+pub fn day03(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
 
-fn count_for_slope(geo: &[Vec<char>], row: usize, col: usize) -> usize {
-    let mut r = row;
-    let mut c = col;
-    let mut occ = 0;
-    while r < geo.len() {
-        occ += access(&geo, r, c);
-        r += row;
-        c += col;
+#[derive(Debug, PartialEq)]
+struct Chars {
+    char: Vec<char>
+}
+
+impl ProblemObject for Chars {
+    fn parse(s: &str) -> Option<Self> {
+        if s.is_empty() {
+            None
+        } else {
+            Some(Chars { char: s.chars().collect::<Vec<char>>() })
+        }
     }
-    occ
 }
 
-fn access(geo: &[Vec<char>], row: usize, col: usize) -> usize {
-    let line = &geo[row];
-    let c = col % line.len();
-    (line[c] == '#') as usize
+#[derive(Debug, PartialEq)]
+struct Setting {
+    line: Vec<Chars>,
+}
+
+impl ProblemSolver<Chars, usize, usize> for Setting {
+    const DAY: usize = 3;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        Setting {
+            line: Vec::new()
+        }
+    }
+    fn insert(&mut self, object: Chars) {
+        self.line.push(object);
+    }
+    fn part1(&mut self) -> usize {
+       self.count_for_slope(1, 3)
+    }
+    fn part2(&mut self) -> usize {
+        // println!("{}", self.count_for_slope(1, 1));
+        // println!("{}", self.count_for_slope(1, 3));
+        // println!("{}", self.count_for_slope(1, 5));
+        // println!("{}", self.count_for_slope(1, 7));
+        // println!("{}", self.count_for_slope(2, 1));
+        self.count_for_slope(1, 1)
+            * self.count_for_slope(1, 3)
+            * self.count_for_slope(1, 5)
+            * self.count_for_slope(1, 7)
+            * self.count_for_slope(2, 1)
+    }
+}
+
+impl Setting {
+    fn count_for_slope(&self, row: usize, col: usize) -> usize {
+        let mut r = row;
+        let mut c = col;
+        let mut occ = 0;
+        while r < self.line.len() {
+            occ += self.access(r, c);
+            r += row;
+            c += col;
+        }
+        occ
+    }
+    fn access(&self, row: usize, col: usize) -> usize {
+        let line = &self.line[row].char;
+        let c = col % line.len();
+        (line[c] == '#') as usize
+    }
 }
