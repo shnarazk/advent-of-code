@@ -4,7 +4,7 @@ use {
         day14, day15, day16, day17, day18, day19, day20, day21, day22, day23, day24, day25,
         template, Description,
     },
-    std::{env::args, fs::File, io::prelude::*},
+    std::env::args,
 };
 
 pub fn main() {
@@ -32,19 +32,6 @@ pub fn main() {
     } else {
         Description::None
     };
-    let input_data = if [1, 2, 3, 4, 5, 6, 7, 8, 10, 16, 18, 21, 22, 23, 24, 25].contains(&day) {
-        "".to_string()
-    } else if let Some(ref ext) = test {
-        if ext.starts_with('-') {
-            ext.to_string()
-        } else {
-            let f = format!("input-day{:>02}-{}.txt", day, ext);
-            read_input(&f).unwrap_or_else(|| panic!("Can't read {}", f))
-        }
-    } else {
-        let f = format!("input-day{:>02}.txt", day);
-        read_input(&f).unwrap_or_else(&|| panic!("Can't read {}", f))
-    };
     match day {
         1 => day01(part, desc),
         2 => day02(part, desc),
@@ -54,7 +41,7 @@ pub fn main() {
         6 => day06(part, desc),
         7 => day07(part, desc),
         8 => day08(part, desc),
-        9 => day09(part, input_data),
+        9 => day09(part, desc),
         10 => day10(part, desc),
         11 => day11(),
         12 => day12(),
@@ -73,17 +60,4 @@ pub fn main() {
         25 => day25(part, desc),
         _ => template(part, desc),
     };
-}
-
-fn read_input(fname: &str) -> Option<String> {
-    match File::open(format!("data/{}", fname)) {
-        Ok(mut file) => {
-            let mut contents = String::new();
-            if let Err(e) = file.read_to_string(&mut contents) {
-                panic!("Can't read {}: {:?}", fname, e);
-            }
-            Some(contents)
-        }
-        Err(e) => panic!("Can't read {}: {:?}", fname, e),
-    }
 }
