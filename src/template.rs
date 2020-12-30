@@ -3,7 +3,7 @@ use crate::{Description, ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
 pub fn template(part: usize, desc: Description) {
-    dbg!(World::parse(desc).run(part));
+    dbg!(Setting::parse(desc).run(part));
 }
 
 #[derive(Debug, PartialEq)]
@@ -16,15 +16,15 @@ impl ProblemObject for Object {
 }
 
 #[derive(Debug, PartialEq)]
-struct World {}
+struct Setting {}
 
-impl ProblemSolver<Object, usize, String> for World {
+impl ProblemSolver<Object, usize, String> for Setting {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _object: Object) {}
     fn default() -> Self {
-        World {}
+        Setting {}
     }
+    fn insert(&mut self, _object: Object) {}
     fn part1(&mut self) -> usize {
         0
     }
@@ -41,7 +41,7 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            World::parse(Description::TestData(TEST1.to_string())).part1(),
+            Setting::parse(Description::TestData(TEST1.to_string())).part1(),
             0
         );
     }
@@ -49,7 +49,7 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            World::parse(Description::TestData(TEST2.to_string())).part2(),
+            Setting::parse(Description::TestData(TEST2.to_string())).part2(),
             "done".to_string()
         );
     }

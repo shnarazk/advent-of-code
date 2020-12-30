@@ -59,7 +59,7 @@ pub trait ProblemSolver<
     const DELIMITER: &'static str;
     fn default() -> Self;
     fn insert(&mut self, _object: TargetObject) {
-        todo!()
+        todo!("insert is not implemented")
     }
     fn input_filename(desc: Description) -> Option<String> {
         match desc {
