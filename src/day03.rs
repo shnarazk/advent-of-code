@@ -6,7 +6,7 @@ pub fn day03(part: usize, desc: Description) {
 
 #[derive(Debug, PartialEq)]
 struct Chars {
-    char: Vec<char>
+    char: Vec<char>,
 }
 
 impl ProblemObject for Chars {
@@ -14,7 +14,9 @@ impl ProblemObject for Chars {
         if s.is_empty() {
             None
         } else {
-            Some(Chars { char: s.chars().collect::<Vec<char>>() })
+            Some(Chars {
+                char: s.chars().collect::<Vec<char>>(),
+            })
         }
     }
 }
@@ -28,15 +30,13 @@ impl ProblemSolver<Chars, usize, usize> for Setting {
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting {
-            line: Vec::new()
-        }
+        Setting { line: Vec::new() }
     }
     fn insert(&mut self, object: Chars) {
         self.line.push(object);
     }
     fn part1(&mut self) -> usize {
-       self.count_for_slope(1, 3)
+        self.count_for_slope(1, 3)
     }
     fn part2(&mut self) -> usize {
         // println!("{}", self.count_for_slope(1, 1));
