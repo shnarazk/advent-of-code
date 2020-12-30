@@ -32,7 +32,7 @@ pub fn main() {
     } else {
         Description::None
     };
-    let input_data = if [16, 18, 21, 22, 23, 24, 25].contains(&day) {
+    let input_data = if [1, 16, 18, 21, 22, 23, 24, 25].contains(&day) {
         "".to_string()
     } else if let Some(ref ext) = test {
         if ext.starts_with('-') {
@@ -46,7 +46,7 @@ pub fn main() {
         read_input(&f).expect(&format!("Can't read {}", f))
     };
     match day {
-        1 => day01(part, input_data),
+        1 => day01(part, desc),
         2 => day02(part, input_data),
         3 => day03(part, input_data),
         4 => day04(part, input_data),
