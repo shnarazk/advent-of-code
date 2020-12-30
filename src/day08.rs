@@ -1,26 +1,11 @@
-use {lazy_static::lazy_static, regex::Regex};
+use {
+    crate::{Description, ProblemObject, ProblemSolver},
+    lazy_static::lazy_static,
+    regex::Regex,
+};
 
-pub fn day08(_part: usize, buffer: String) {
-    let mut codes: Vec<(Instruction, bool)> = Vec::new();
-
-    for line in buffer.split('\n') {
-        if line.is_empty() {
-            break;
-        }
-        if let Some(c) = parse(line) {
-            codes.push((c, false));
-        } else {
-            panic!("wrong code");
-        }
-    }
-    for i in 0..codes.len() {
-        if let Some(mut variant) = flip(&codes, i) {
-            if let Some(result) = CPU::run(&mut variant) {
-                dbg!(result);
-                return;
-            }
-        }
-    }
+pub fn day08(part: usize, desc: Description) {
+    dbg!(Machine::parse(desc).run(part));
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -28,6 +13,28 @@ enum Instruction {
     Acc(isize),
     Jmp(isize),
     Nop(isize),
+}
+
+impl ProblemObject for Instruction {
+    fn parse(line: &str) -> Option<Instruction> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
+        }
+        if let Some(m) = RE.captures(line) {
+            let mnemonic = &m[1];
+            let val = match (&m[2], &m[3]) {
+                ("+", n) => n.parse::<isize>().ok(),
+                ("-", n) => n.parse::<isize>().map(|n| -n).ok(),
+                _ => None,
+            };
+            if let Some(n) = val {
+                return Instruction::from(mnemonic, n);
+            } else {
+                panic!("mnemonic.{}, sign.{}, val.{}", mnemonic, &m[2], &m[3]);
+            }
+        }
+        None
+    }
 }
 
 impl Instruction {
@@ -49,26 +56,70 @@ impl Instruction {
 }
 
 #[derive(Debug, PartialEq)]
+struct Machine {
+    code: Vec<(Instruction, bool)>,
+}
+
+impl ProblemSolver<Instruction, isize, isize> for Machine {
+    const DAY: usize = 8;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        Machine { code: Vec::new() }
+    }
+    fn insert(&mut self, ins: Instruction) {
+        self.code.push((ins, false));
+    }
+    fn part1(&mut self) -> isize {
+        if let Some(result) = CPU::run1(&mut self.code) {
+            return result.accumulator;
+        }
+        0
+    }
+    fn part2(&mut self) -> isize {
+        for i in 0..self.code.len() {
+            if let Some(mut variant) = flip(&self.code, i) {
+                if let Some(result) = CPU::run2(&mut variant) {
+                    dbg!(&result);
+                    return result.accumulator;
+                }
+            }
+        }
+        0
+    }
+}
+
+const ABORT: usize = 10_000_000_000_000;
+
+#[derive(Debug, PartialEq)]
 struct CPU {
     accumulator: isize,
     ip: usize,
 }
 
-impl Default for CPU {
+impl CPU {
     fn default() -> Self {
         CPU {
             accumulator: 0,
             ip: 0,
         }
     }
-}
-
-const ABORT: usize = 10_000_000_000_000;
-
-impl CPU {
-    fn run(codes: &mut [(Instruction, bool)]) -> Option<CPU> {
+    fn run1(codes: &mut [(Instruction, bool)]) -> Option<CPU> {
         let mut cpu = CPU::default();
-        cpu.ip = 0;
+        loop {
+            if cpu.stopped(codes) {
+                return Some(cpu);
+            }
+            if cpu.should_be_stopped(codes) {
+                return Some(cpu);
+            }
+            cpu.execute(codes);
+            if cpu.ip == ABORT {
+                return None;
+            }
+        }
+    }
+    fn run2(codes: &mut [(Instruction, bool)]) -> Option<CPU> {
+        let mut cpu = CPU::default();
         loop {
             if cpu.stopped(codes) {
                 return Some(cpu);
@@ -77,6 +128,9 @@ impl CPU {
                 return None;
             }
             cpu.execute(codes);
+            if cpu.ip == ABORT {
+                return None;
+            }
         }
     }
     fn decode(&mut self, inst: &Instruction) {
@@ -106,33 +160,10 @@ impl CPU {
         codes.len() == self.ip
     }
     fn should_be_stopped(&mut self, codes: &mut [(Instruction, bool)]) -> bool {
-        if self.ip == ABORT {
-            return true;
-        }
         let first = codes[self.ip].1;
         codes[self.ip].1 = true;
         first
     }
-}
-
-fn parse(line: &str) -> Option<Instruction> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
-    }
-    if let Some(m) = RE.captures(line) {
-        let mnemonic = &m[1];
-        let val = match (&m[2], &m[3]) {
-            ("+", n) => n.parse::<isize>().ok(),
-            ("-", n) => n.parse::<isize>().map(|n| -n).ok(),
-            _ => None,
-        };
-        if let Some(n) = val {
-            return Instruction::from(mnemonic, n);
-        } else {
-            panic!("mnemonic.{}, sign.{}, val.{}", mnemonic, &m[2], &m[3]);
-        }
-    }
-    None
 }
 
 fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bool)>> {
@@ -140,7 +171,6 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
     for (n, inst) in codes.iter().enumerate() {
         if n == at {
             if let Some(flipped) = inst.0.flip() {
-                dbg!((n, &flipped));
                 newcodes.push((flipped, false));
             } else {
                 return None;
@@ -150,4 +180,27 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
         }
     }
     Some(newcodes)
+}
+
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            Machine::parse(Description::FileTag("test".to_string())).run(1),
+            Answer::Part1(5)
+        );
+    }
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            Machine::parse(Description::FileTag("test".to_string())).run(2),
+            Answer::Part2(8)
+        );
+    }
 }
