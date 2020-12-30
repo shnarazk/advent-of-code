@@ -7,7 +7,7 @@ pub fn day05(part: usize, desc: Description) {
 #[derive(Debug, PartialEq)]
 struct Setting {
     seats: [bool; 128 * 8 + 1],
-    max_sid: usize
+    max_sid: usize,
 }
 
 impl ProblemSolver<usize, usize, usize> for Setting {
@@ -55,10 +55,8 @@ impl ProblemSolver<usize, usize, usize> for Setting {
     }
     fn part2(&mut self) -> usize {
         for (i, e) in self.seats.iter().enumerate() {
-            if !*e && 7 < i && i < 126 * 8 {
-                if self.seats[i - 1] && self.seats[i + 1] {
-                    return i;
-                }
+            if !*e && 7 < i && i < 126 * 8 && self.seats[i - 1] && self.seats[i + 1] {
+                return i;
             }
         }
         0
