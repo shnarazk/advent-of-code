@@ -305,11 +305,8 @@ pub fn transose_image(image: &[String], rotate: usize, flip: usize) -> Vec<Strin
         let len1 = len - 1;
         let mut i = i0;
         let mut j = j0;
-        match flip {
-            1 => {
-                j = len1 - j;
-            }
-            _ => (),
+        if flip == 1 {
+            j = len1 - j;
         }
         match rotate {
             1 => {
