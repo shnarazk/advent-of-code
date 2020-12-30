@@ -36,11 +36,8 @@ impl ProblemSolver<usize, usize, usize> for Setting {
     fn part2(&mut self) -> usize {
         self.vec.sort_unstable();
         let mx = *self.vec.last().unwrap();
-        let mut count: Vec<usize> = Vec::new();
-        count.push(1);
-        for _ in 0..mx {
-            count.push(0);
-        }
+        let mut count: Vec<usize> = vec![0; mx + 1];
+        count[0] = 1;
         for n in &self.vec[1..] {
             count[*n] += count[*n - 1];
             if 2 <= *n {
