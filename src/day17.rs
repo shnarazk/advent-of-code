@@ -1,43 +1,64 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{stdin, Read},
-    },
+    crate::{Description, ProblemSolver},
+    std::{cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
 };
 
+pub fn day17(part: usize, desc: Description) {
+    if part == 1 {
+        dbg!(World::<LOC>::parse(desc).run(part));
+    } else {
+        dbg!(World::<LOC4>::parse(desc).run(part));
+    }
+}
+
 const RANGE: isize = 17;
+
 type LOC = (isize, isize, isize);
+type LOC4 = (isize, isize, isize, isize);
 
 #[derive(Debug, PartialEq)]
-struct World {
-    loc: HashMap<LOC, bool>,
+struct World<DIM: Eq + Hash + PartialEq> {
+    loc: HashMap<DIM, bool>,
     generation: usize,
 }
 
-impl Default for World {
-    fn default() -> Self {
-        World {
+trait CellParser {
+    type Element;
+    fn default_() -> Self;
+    fn parse_(self, block: &str) -> Self;
+    fn neighbors(&mut self, l: Self::Element) -> (usize, usize);
+    fn next(&mut self) -> Self;
+    fn actives(&self) -> usize;
+}
+
+impl CellParser for World<LOC> {
+    type Element = LOC;
+    fn default_() -> Self {
+        Self {
             loc: HashMap::new(),
             generation: 0,
         }
     }
-}
-
-impl World {
-    fn get_entry(&mut self, l: LOC) -> &mut bool {
-        self.loc.entry(l).or_insert(false)
-    }
-    fn from(vec: &[LOC]) -> World {
-        let mut w = World::default();
-        for l in vec {
-            *w.get_entry(*l) = true;
+    fn parse_(mut self, block: &str) -> Self {
+        let mut vec: Vec<LOC> = Vec::new();
+        let z = 0;
+        let offset = (block.split('\n').count() as isize - 1) / 2;
+        let mut i = -offset;
+        let mut j = -offset;
+        for l in block.split('\n') {
+            for c in l.chars() {
+                if c == '#' {
+                    vec.push((z, i, j));
+                }
+                j += 1;
+            }
+            j = -offset;
+            i += 1;
         }
-        w
+        for l in vec {
+            *self.loc.entry(l).or_insert(false) = true;
+        }
+        self
     }
     fn neighbors(&mut self, l: LOC) -> (usize, usize) {
         let mut actives = 0;
@@ -58,13 +79,13 @@ impl World {
         }
         (inactives, actives)
     }
-    fn next(&mut self) -> World {
-        let mut next = World::default();
+    fn next(&mut self) -> Self {
+        let mut next = Self::default_();
         for z in -RANGE..=RANGE {
             for i in -RANGE..=RANGE {
                 for j in -RANGE..=RANGE {
                     let l = (z, i, j);
-                    let (ni, na) = self.neighbors(l);
+                    let na = self.neighbors(l).1;
                     let new_entry = next.get_entry(l);
                     if *self.get_entry(l) {
                         *new_entry = na == 2 || na == 3;
@@ -77,30 +98,12 @@ impl World {
         next.generation = self.generation + 1;
         next
     }
-    fn print(&mut self) {
-        const R: isize = 5;
-        // for z in -R..=R {
-        for z in -1..=1 {
-            for i in -R..=R {
-                for j in -R..=R {
-                    if *self.get_entry((z, i, j)) {
-                        print!("#");
-                    // print!("{:?}, ", (z, i, j));
-                    } else {
-                        print!(".");
-                    }
-                }
-                println!();
-            }
-            println!();
-        }
-    }
-    fn actives(&mut self) -> usize {
+    fn actives(&self) -> usize {
         let mut count = 0;
         for z in -RANGE..=RANGE {
             for i in -RANGE..=RANGE {
                 for j in -RANGE..=RANGE {
-                    if *self.get_entry((z, i, j)) {
+                    if let Some(true) = self.loc.get(&(z, i, j)) {
                         count += 1;
                     }
                 }
@@ -110,33 +113,35 @@ impl World {
     }
 }
 
-type LOC4 = (isize, isize, isize, isize);
-
-#[derive(Debug, PartialEq)]
-struct World4 {
-    loc: HashMap<LOC4, bool>,
-    generation: usize,
-}
-
-impl Default for World4 {
-    fn default() -> Self {
-        World4 {
+impl CellParser for World<LOC4> {
+    type Element = LOC4;
+    fn default_() -> Self {
+        Self {
             loc: HashMap::new(),
             generation: 0,
         }
     }
-}
-
-impl World4 {
-    fn get_entry(&mut self, l: LOC4) -> &mut bool {
-        self.loc.entry(l).or_insert(false)
-    }
-    fn from(vec: &[LOC4]) -> World4 {
-        let mut w = World4::default();
-        for l in vec {
-            *w.get_entry(*l) = true;
+    fn parse_(mut self, block: &str) -> Self {
+        let mut vec: Vec<LOC4> = Vec::new();
+        let t = 0;
+        let z = 0;
+        let offset = (block.split('\n').count() as isize - 1) / 2;
+        let mut i = -offset;
+        let mut j = -offset;
+        for l in block.split('\n') {
+            for c in l.chars() {
+                if c == '#' {
+                    vec.push((t, z, i, j));
+                }
+                j += 1;
+            }
+            j = -offset;
+            i += 1;
         }
-        w
+        for l in vec {
+            *self.loc.entry(l).or_insert(false) = true;
+        }
+        self
     }
     fn neighbors(&mut self, l: LOC4) -> (usize, usize) {
         let mut actives = 0;
@@ -159,14 +164,14 @@ impl World4 {
         }
         (inactives, actives)
     }
-    fn next(&mut self) -> World4 {
-        let mut next = World4::default();
+    fn next(&mut self) -> Self {
+        let mut next = Self::default_();
         for t in -RANGE..=RANGE {
             for z in -RANGE..=RANGE {
                 for i in -RANGE..=RANGE {
                     for j in -RANGE..=RANGE {
                         let l = (t, z, i, j);
-                        let (ni, na) = self.neighbors(l);
+                        let na = self.neighbors(l).1;
                         let new_entry = next.get_entry(l);
                         if *self.get_entry(l) {
                             *new_entry = na == 2 || na == 3;
@@ -180,33 +185,13 @@ impl World4 {
         next.generation = self.generation + 1;
         next
     }
-    fn print(&mut self) {
-        const R: isize = 5;
-        // for z in -R..=R {
-        for t in -1..=1 {
-            for z in -1..=1 {
-                for i in -R..=R {
-                    for j in -R..=R {
-                        if *self.get_entry((t, z, i, j)) {
-                            print!("#");
-                        // print!("{:?}, ", (z, i, j));
-                        } else {
-                            print!(".");
-                        }
-                    }
-                    println!();
-                }
-                println!();
-            }
-        }
-    }
-    fn actives(&mut self) -> usize {
+    fn actives(&self) -> usize {
         let mut count = 0;
         for t in -RANGE..=RANGE {
             for z in -RANGE..=RANGE {
                 for i in -RANGE..=RANGE {
                     for j in -RANGE..=RANGE {
-                        if *self.get_entry((t, z, i, j)) {
+                        if let Some(true) = self.loc.get(&(t, z, i, j)) {
                             count += 1;
                         }
                     }
@@ -217,79 +202,80 @@ impl World4 {
     }
 }
 
-pub fn day17() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
-    let mut w0 = read4(&buf);
-    w0.print();
-    let mut w6 = w0.next().next().next().next().next().next();
-    dbg!(w6.actives());
-}
-
-fn read4(str: &str) -> World4 {
-    let mut vec: Vec<LOC4> = Vec::new();
-    let t = 0;
-    let z = 0;
-    let offset = (str.split('\n').count() as isize - 1) / 2;
-    let mut i = -offset;
-    let mut j = -offset;
-    for l in str.split('\n') {
-        for c in l.chars() {
-            if c == '#' {
-                vec.push((t, z, i, j));
-            }
-            j += 1;
-        }
-        j = -offset;
-        i += 1;
+impl<DIM: Debug + Eq + Hash + PartialEq> ProblemSolver<(), usize, usize> for World<DIM>
+where
+    World<DIM>: CellParser,
+{
+    const DAY: usize = 17;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        Self::default_()
     }
-    World4::from(&vec)
-}
-
-fn read(str: &str) -> World {
-    let mut vec: Vec<LOC> = Vec::new();
-    let z = 0;
-    let offset = (str.split('\n').count() as isize - 1) / 2;
-    let mut i = -offset;
-    let mut j = -offset;
-    for l in str.split('\n') {
-        for c in l.chars() {
-            if c == '#' {
-                vec.push((z, i, j));
-            }
-            j += 1;
-        }
-        j = -offset;
-        i += 1;
+    fn parse(desc: Description) -> Self {
+        Self::default().parse_(&Self::load(desc).unwrap())
     }
-    World::from(&vec)
+    fn part1(&mut self) -> usize {
+        self.next().next().next().next().next().next().actives()
+    }
+    fn part2(&mut self) -> usize {
+        self.next().next().next().next().next().next().actives()
+    }
 }
 
-fn parse(str: &str) -> Option<bool> {
-    // lazy_static! { static ref RE: Regex = Regex::new(r"^(\d+)$").expect("error"); }
-    // if let Some(m) = RE.captures(key) {}
-    Some(false)
+impl<DIM: Eq + Hash + PartialEq> World<DIM>
+where
+    World<DIM>: CellParser,
+{
+    fn get_entry(&mut self, l: DIM) -> &mut bool {
+        self.loc.entry(l).or_insert(false)
+    }
+    /*
+    fn print(&mut self) {
+        const R: isize = 5;
+        // for z in -R..=R {
+        for z in -1..=1 {
+            for i in -R..=R {
+                for j in -R..=R {
+                    if *self.get_entry((z, i, j)) {
+                        print!("#");
+                    // print!("{:?}, ", (z, i, j));
+                    } else {
+                        print!(".");
+                    }
+                }
+                println!();
+            }
+            println!();
+        }
+    }
+     */
 }
 
-fn eval() -> usize {
-    0
-}
-
+#[cfg(test)]
 mod test {
-    use super::*;
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
     const TEST1: &str = "\
 .#.
 ..#
 ###";
+
     #[test]
-    fn test1() {
-        dbg!(TEST1);
-        let mut w0 = read(TEST1);
-        dbg!(w0.neighbors((-1, -1, -1)));
-        let mut w1 = w0.next();
-        dbg!(w1.get_entry((-1, -1, -1)));
-        let mut w6 = w0.next().next().next().next().next().next();
-        assert_eq!(w6.generation, 6);
-        assert_eq!(w6.actives(), 112);
+    fn test_part1() {
+        assert_eq!(
+            World::<LOC>::parse(Description::TestData(TEST1.to_string())).run(1),
+            Answer::Part1(112)
+        );
+    }
+
+    // #[test] too long
+    fn test_part2() {
+        assert_eq!(
+            World::<LOC4>::parse(Description::TestData(TEST1.to_string())).run(2),
+            Answer::Part2(848)
+        );
     }
 }
