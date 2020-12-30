@@ -26,7 +26,7 @@ impl ProblemSolver<(), usize, usize> for Setting {
     fn default() -> Self {
         Setting {
             dic: Vec::new(),
-            samples:Vec::new(),
+            samples: Vec::new(),
             ticket: Vec::new(),
             field_cands: Vec::new(),
             good_samples: Vec::new(),
@@ -99,7 +99,11 @@ impl ProblemSolver<(), usize, usize> for Setting {
         for (i, ranges) in self.field_cands.iter().enumerate() {
             let mut valids: Vec<(String, usize)> = Vec::new();
             for range in ranges {
-                if self.good_samples.iter().all(|sample| valid(range, sample[i])) {
+                if self
+                    .good_samples
+                    .iter()
+                    .all(|sample| valid(range, sample[i]))
+                {
                     valids.push((range.0.clone(), self.ticket[i]));
                 }
             }
@@ -143,7 +147,6 @@ impl ProblemSolver<(), usize, usize> for Setting {
         count
     }
 }
-
 
 fn valid((_, a, b, c, d): &Range, val: usize) -> bool {
     (*a <= val && val <= *b) || (*c <= val && val <= *d)
@@ -197,7 +200,7 @@ mod test {
     };
     #[test]
     fn test1() {
-    const TEST: &str = "\
+        const TEST: &str = "\
 class: 1-3 or 5-7
 row: 6-11 or 33-44
 seat: 13-40 or 45-50
@@ -218,7 +221,7 @@ nearby tickets:
 
     #[test]
     fn test2() {
-    const TEST: &str = "\
+        const TEST: &str = "\
 class: 0-1 or 4-19
 row: 0-5 or 8-19
 seat: 0-13 or 16-19

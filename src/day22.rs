@@ -2,7 +2,10 @@ use {
     crate::{Description, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
-    std::{collections::{HashSet, VecDeque}, cmp::Ordering},
+    std::{
+        cmp::Ordering,
+        collections::{HashSet, VecDeque},
+    },
 };
 
 pub fn day22(part: usize, desc: Description) {

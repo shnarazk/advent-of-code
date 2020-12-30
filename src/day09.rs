@@ -34,11 +34,9 @@ pub fn day09(part: usize, buffer: String) {
             // exhaustive check
             let mut found = false;
             for k in &set {
-                if 2 * *k < *n {
-                    if set.contains(&(*n - *k)) {
-                        found = true;
-                        break;
-                    }
+                if 2 * *k < *n && set.contains(&(*n - *k)) {
+                    found = true;
+                    break;
                 }
             }
             if found {
