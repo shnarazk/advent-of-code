@@ -31,11 +31,11 @@ impl ProblemObject for Location {
 }
 
 /// ```
-/// use adventofcode::main::*;
+/// use adventofcode2020::{ProblemObject, day24::*};
 /// assert_eq!(location(&[Dir::E, Dir::SE, Dir::W]), (-1, 1));
 /// assert_eq!(location(&[Dir::NW, Dir::W, Dir::SW, Dir::E, Dir::E]), (0, 0));
-/// assert_eq!(location(&dirs_from("nwwswee")), (0, 0));
-/// assert_eq!(location(&dirs_from("nwesw")), (0, 0));
+/// assert_eq!(Location::parse("nwwswee"), Some((0, 0)));
+/// assert_eq!(Location::parse("nwesw"), Some((0, 0)));
 /// ```
 pub fn location(dirs: &[Dir]) -> Location {
     let up = dirs
@@ -86,7 +86,7 @@ fn push_dirs(vec: &mut Vec<Dir>, s: &str) {
 }
 
 /// ```
-/// use adventofcode::main::*;
+/// use adventofcode2020::day24::*;
 /// assert_eq!(neighbors(&(0,0)), [(0,2),(-1,1),(-1,-1),(0,-2),(1,-1),(1,1)]);
 /// assert_eq!(neighbors(&(1,1)), [(1,3),(0,2),(0,0),(1,-1),(2,0),(2,2)]);
 /// ```

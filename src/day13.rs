@@ -48,12 +48,13 @@ pub fn day13() {
 /// * x `mod` bq = bm
 ///
 /// ```
+/// use crate::adventofcode2020::day13::*;
 /// let a = chinese((3, 2), (5, 3));
 /// assert_eq!(a.1, 8);
-/// let b = chinese(a, (2, 7);
+/// let b = chinese(a, (2, 7));
 /// assert_eq!(b.1, 23);
 /// ```
-fn chinese((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize) {
+pub fn chinese((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize) {
     let n = solve1(aq, bq);
     let nar = (n * ar) % bq;
     let nbr = (n * br) % bq;
