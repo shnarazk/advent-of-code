@@ -85,7 +85,7 @@ impl World {
             (-1, -1),
         ];
         dirs.iter()
-            .filter(|(oi, oj)| self.find_around_through('#', &vec!['L'], i, j, *oi, *oj))
+            .filter(|(oi, oj)| self.find_around_through('#', &['L'], i, j, *oi, *oj))
             .count()
     }
 

@@ -4,7 +4,7 @@ use std::collections::HashSet;
 pub fn day09(part: usize, buffer: String) {
     let mut vec: Vec<usize> = Vec::new();
 
-    for c in buffer.split("\n") {
+    for c in buffer.split('\n') {
         if c.is_empty() {
             break;
         }

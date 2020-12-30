@@ -249,11 +249,8 @@ impl Tile {
             };
             let mut i = i0;
             let mut j = j0;
-            match flip {
-                1 => {
-                    j = len - j;
-                }
-                _ => (),
+            if flip == 1 {
+                j = len - j;
             }
             match rotate {
                 1 => {
@@ -401,7 +398,7 @@ fn check_ans(str: &str) {
     }
 }
 
-fn read(str: &str) {
+fn read(str: &str) -> usize {
     let mut tile: Vec<Tile> = Vec::new();
     for b in str.split("\n\n") {
         // c.split_ascii_whitespace()
@@ -463,7 +460,7 @@ fn read(str: &str) {
             }
         }
         dbg!(count_sharps(&image) - total * 15);
-        panic!("works now");
+        count_sharps(&image) - total * 15
     } else {
         panic!("failed");
     }

@@ -119,7 +119,7 @@ impl Expr {
 
 fn a_number(input: &str) -> IResult<&str, Expr> {
     map_res(recognize(many1(one_of("0123456789"))), |out: &str| {
-        out.parse::<isize>().map(|a| Expr::NUM(a))
+        out.parse::<isize>().map(Expr::NUM)
     })(input)
 }
 

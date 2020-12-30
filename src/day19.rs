@@ -35,7 +35,7 @@ fn read(str: &str) -> usize {
     rule.insert(11, Rule::Or(vec![42, 31], vec![42, 11, 31]));
 
     let mut success = 0;
-    while let Some(l) = iter.next() {
+    for l in iter {
         if l.is_empty() {
             break;
         }
@@ -110,7 +110,7 @@ fn check_trace(
             // return target.len() == from;
         }
     }
-    return target.len() == from;
+    target.len() == from
 }
 
 #[derive(Debug, PartialEq)]

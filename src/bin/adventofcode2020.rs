@@ -18,12 +18,12 @@ pub fn main() {
     let mut a = args();
     let day = a
         .nth(1)
-        .unwrap_or("1".to_string())
+        .unwrap_or_else(|| "1".to_string())
         .parse::<usize>()
         .unwrap_or(1);
     let part = a
         .next()
-        .unwrap_or("0".to_string())
+        .unwrap_or_else(|| "0".to_string())
         .parse::<usize>()
         .unwrap_or(0);
     let test = a.next();
@@ -39,11 +39,11 @@ pub fn main() {
             ext.to_string()
         } else {
             let f = format!("input-day{:>02}-{}.txt", day, ext);
-            read_input(&f).expect(&format!("Can't read {}", f))
+            read_input(&f).unwrap_or_else(|| panic!("Can't read {}", f))
         }
     } else {
         let f = format!("input-day{:>02}.txt", day);
-        read_input(&f).expect(&format!("Can't read {}", f))
+        read_input(&f).unwrap_or_else(&|| panic!("Can't read {}", f))
     };
     match day {
         1 => day01(part, desc),
@@ -82,7 +82,7 @@ fn read_input(fname: &str) -> Option<String> {
             if let Err(e) = file.read_to_string(&mut contents) {
                 panic!("Can't read {}: {:?}", fname, e);
             }
-            return Some(contents);
+            Some(contents)
         }
         Err(e) => panic!("Can't read {}: {:?}", fname, e),
     }
