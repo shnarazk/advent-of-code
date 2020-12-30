@@ -2,7 +2,7 @@ use {
     crate::{Description, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
-    std::collections::{HashSet, VecDeque},
+    std::{collections::{HashSet, VecDeque}, cmp::Ordering},
 };
 
 pub fn day22(part: usize, desc: Description) {
@@ -150,16 +150,18 @@ impl World {
     fn round_part1(&mut self) -> Option<usize> {
         if let Some(h1) = self.player1.pop_front() {
             if let Some(h2) = self.player2.pop_front() {
-                if h1 < h2 {
-                    self.player2.push_back(h2);
-                    self.player2.push_back(h1);
-                // println!("Player2 won with {} against {}", h2, h1);
-                } else if h2 < h1 {
-                    self.player1.push_back(h1);
-                    self.player1.push_back(h2);
-                // println!("Player1 won with {} against {}", h1, h2);
-                } else {
-                    panic!("equals!");
+                match h1.cmp(&h2) {
+                    Ordering::Less => {
+                        self.player2.push_back(h2);
+                        self.player2.push_back(h1);
+                        // println!("Player2 won with {} against {}", h2, h1);
+                    }
+                    Ordering::Equal => panic!("equals!"),
+                    Ordering::Greater => {
+                        self.player1.push_back(h1);
+                        self.player1.push_back(h2);
+                        // println!("Player1 won with {} against {}", h1, h2);
+                    }
                 }
                 // println!("Player1: {:?}", self.player1);
                 // println!("Player2: {:?}", self.player2);
