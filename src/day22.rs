@@ -191,7 +191,11 @@ impl World {
                         child.player2 = self.player2.clone();
                         child.player1.truncate(p1_head);
                         child.player2.truncate(p2_head);
-                        println!("{:>width$}", ">", width = child.player1.len() + child.player2.len());
+                        println!(
+                            "{:>width$}",
+                            ">",
+                            width = child.player1.len() + child.player2.len()
+                        );
                         let mut stopper = None;
                         while child.check_winner(stopper).is_none() {
                             stopper = child.round_part2();
@@ -216,7 +220,10 @@ impl World {
 
 #[cfg(test)]
 mod test {
-    use {crate::{Description, ProblemSolver, Answer}, super::*};
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
     #[test]
     fn test0() {
         const TEST: &str = "\
@@ -227,8 +234,10 @@ Player 1:
 Player 2:
 7
 10";
-        assert_eq!(World::parse(Description::TestData(TEST.to_string())).run(1),
-                   Answer::Part1(58));
+        assert_eq!(
+            World::parse(Description::TestData(TEST.to_string())).run(1),
+            Answer::Part1(58)
+        );
     }
     #[test]
     fn test_loop() {
@@ -241,8 +250,10 @@ Player 2:
 2
 29
 14";
-        assert_eq!(World::parse(Description::TestData(TEST.to_string())).run(2),
-                   Answer::Part2(43 * 2 + 19 * 1));
+        assert_eq!(
+            World::parse(Description::TestData(TEST.to_string())).run(2),
+            Answer::Part2(43 * 2 + 19 * 1)
+        );
     }
     #[test]
     fn test1() {
@@ -260,8 +271,10 @@ Player 2:
 4
 7
 10";
-        assert_eq!(World::parse(Description::TestData(TEST.to_string())).run(2),
-                   Answer::Part2(291));
+        assert_eq!(
+            World::parse(Description::TestData(TEST.to_string())).run(2),
+            Answer::Part2(291)
+        );
     }
     #[test]
     fn test2() {
@@ -274,7 +287,9 @@ Player 1:
 
 Player 2:
 1";
-        assert_eq!(World::parse(Description::TestData(TEST.to_string())).run(1),
-                   Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1 * 1));
+        assert_eq!(
+            World::parse(Description::TestData(TEST.to_string())).run(1),
+            Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1 * 1)
+        );
     }
 }
