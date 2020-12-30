@@ -1,15 +1,11 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    lazy_static::lazy_static,
-    nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult, *},
-    regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{stdin, Read},
-    },
+    crate::{Description, ProblemObject, ProblemSolver},
+    nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},
 };
+
+pub fn day18(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Op {
@@ -19,28 +15,121 @@ enum Op {
     SUB,
 }
 
+impl ProblemObject for String {
+    fn parse(line: &str) -> Option<Self> {
+        if line.is_empty() {
+            None
+        } else {
+            Some(line.to_string())
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 enum Expr {
     BIOP(Op, Box<Expr>, Box<Expr>),
     TERM(Box<Expr>),
-    NUM(i64),
+    NUM(isize),
+}
+
+#[derive(Debug, PartialEq)]
+struct Setting {
+    expr: Vec<String>,
+}
+
+impl ProblemSolver<String, isize, isize> for Setting {
+    const DAY: usize = 18;
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, expr: String) {
+        self.expr.push(expr);
+    }
+    fn default() -> Self {
+        Setting { expr: Vec::new() }
+    }
+    fn part1(&mut self) -> isize {
+        let mut result = 0;
+        for l in self.expr.iter() {
+            if let Some(e) = Expr::parse1(l) {
+                let x = e.traverse(Op::ADD, 0);
+                // dbg!((l, x));
+                result += x;
+            } else {
+                panic!("{}", l);
+            }
+        }
+        result
+    }
+    fn part2(&mut self) -> isize {
+        let mut result = 0;
+        for l in self.expr.iter() {
+            if let Some(e) = Expr::parse2(l) {
+                let x = e.eval();
+                // dbg!((l, x));
+                result += x;
+            } else {
+                panic!("{}", l);
+            }
+        }
+        result
+    }
 }
 
 impl Expr {
-    fn clone_expr(&self) -> Expr {
-        match self {
-            Expr::BIOP(op, l, r) => {
-                Expr::BIOP(*op, Box::new(l.clone_expr()), Box::new(r.clone_expr()))
+    fn parse1(input: &str) -> Option<Expr> {
+        if let Ok((remain, opr1)) = alt((a_term, a_number))(input.trim_start()) {
+            if let Ok((_, (op, opr2))) = a_modifier(remain.trim_start()) {
+                Some(Expr::BIOP(op, Box::new(opr1), Box::new(opr2)))
+            } else {
+                Some(opr1)
             }
-            Expr::TERM(b) => Expr::TERM(Box::new(b.clone_expr())),
-            Expr::NUM(n) => Expr::NUM(*n),
+        } else {
+            None
+        }
+    }
+    fn parse2(input: &str) -> Option<Expr> {
+        if let Ok((_, e)) = terms(input.trim_start()) {
+            Some(e)
+        } else {
+            None
+        }
+    }
+    // for part 1
+    fn traverse(&self, op: Op, acum: isize) -> isize {
+        match self {
+            Expr::BIOP(next_op, l, r) => r.traverse(*next_op, l.traverse(op, acum)),
+            Expr::TERM(t) => {
+                let n = t.traverse(Op::ADD, 0);
+                match op {
+                    Op::ADD => acum + n,
+                    Op::DIV => acum / n,
+                    Op::MUL => acum * n,
+                    Op::SUB => acum - n,
+                }
+            }
+            Expr::NUM(n) => match op {
+                Op::ADD => acum + n,
+                Op::DIV => acum / n,
+                Op::MUL => acum * n,
+                Op::SUB => acum - n,
+            },
+        }
+    }
+    // for part 2
+    fn eval(&self) -> isize {
+        match self {
+            Expr::BIOP(Op::ADD, o1, o2) => o1.eval() + o2.eval(),
+            Expr::BIOP(Op::DIV, o1, o2) => o1.eval() / o2.eval(),
+            Expr::BIOP(Op::MUL, o1, o2) => o1.eval() * o2.eval(),
+            Expr::BIOP(Op::SUB, o1, o2) => o1.eval() - o2.eval(),
+            Expr::TERM(e0) => e0.eval(),
+            Expr::NUM(n) => *n,
         }
     }
 }
 
 fn a_number(input: &str) -> IResult<&str, Expr> {
     map_res(recognize(many1(one_of("0123456789"))), |out: &str| {
-        out.parse::<i64>().map(|a| Expr::NUM(a))
+        out.parse::<isize>().map(|a| Expr::NUM(a))
     })(input)
 }
 
@@ -52,19 +141,6 @@ fn an_operator(input: &str) -> IResult<&str, Op> {
         '/' => Ok(Op::DIV),
         _ => Err(""),
     })(input)
-}
-
-fn a_bitree(input: &str) -> IResult<&str, Expr> {
-    let (remain, opr1) = an_operand(input)?;
-    let (remain, _) = many1(char(' '))(remain)?;
-    let (remain, op) = an_operator(remain)?;
-    let (remain, _) = many1(char(' '))(remain)?;
-    let (remain, opr2) = an_operand(remain)?;
-    Ok((remain, Expr::BIOP(op, Box::new(opr1), Box::new(opr2))))
-}
-
-fn an_operand(input: &str) -> IResult<&str, Expr> {
-    alt((a_term, a_number))(input)
 }
 
 fn a_term(input: &str) -> IResult<&str, Expr> {
@@ -145,89 +221,50 @@ fn an_expr2(input: &str) -> IResult<&str, Expr> {
     terms(input.trim_start())
 }
 
-pub fn day18() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
-    dbg!(read(&buf));
-}
-
-fn read(str: &str) -> i64 {
-    let mut result = 0;
-    for l in str.split('\n') {
-        if l.is_empty() {
-            break;
-        }
-        // part 1
-        /*
-        if let Ok(e) = an_expr(l) {
-            // dbg!(&e.1);
-            let x = traverse(Op::ADD, 0, &e.1);
-            dbg!(x);
-            result += x;
-        } else {
-            panic!("{}", l);
-        }
-         */
-        if let Ok(e) = an_expr2(l) {
-            let x = eval(&e.1);
-            dbg!((l, x));
-            result += x;
-        } else {
-            panic!("{}", l);
-        }
-    }
-    result
-}
-
-fn traverse(op: Op, acum: i64, e: &Expr) -> i64 {
-    match e {
-        Expr::BIOP(next_op, l, r) => traverse(*next_op, traverse(op, acum, &*l), &*r),
-        Expr::TERM(t) => {
-            let n = traverse(Op::ADD, 0, &t);
-            match op {
-                Op::ADD => acum + n,
-                Op::DIV => acum / n,
-                Op::MUL => acum * n,
-                Op::SUB => acum - n,
-            }
-        }
-        Expr::NUM(n) => match op {
-            Op::ADD => acum + n,
-            Op::DIV => acum / n,
-            Op::MUL => acum * n,
-            Op::SUB => acum - n,
-        },
-    }
-}
-
-fn eval(e: &Expr) -> i64 {
-    match e {
-        Expr::BIOP(Op::ADD, o1, o2) => eval(o1) + eval(o2),
-        Expr::BIOP(Op::DIV, o1, o2) => eval(o1) / eval(o2),
-        Expr::BIOP(Op::MUL, o1, o2) => eval(o1) * eval(o2),
-        Expr::BIOP(Op::SUB, o1, o2) => eval(o1) - eval(o2),
-        Expr::TERM(e0) => eval(e0),
-        Expr::NUM(n) => *n,
-    }
-}
-
+#[cfg(test)]
 mod test {
-    use super::*;
-    const TEST1: &str = "\
-1 + 2 * 3 + 4 * 5 + 6
-1 + (2 * 3) + (4 * (5 + 6))
-2 * 3 + (4 * 5)
-8 * 3 + 9 + 3 * 4 * 3
-(8 * 3 + 9 + 3 * 4 * 3)
-5 + (8 * 3 + 9 + 3 * 4 * 3)
-5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))           
-((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2";
-    const TEST0: &str = "\
-(8 * 3 + 9 + 3 * 4)
-";
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
     #[test]
     fn test1() {
-        dbg!(read(TEST1));
-        assert_eq!(0, 1);
+        assert_eq!(
+            Setting::parse(Description::TestData("1 + 2 * 3 + 4 * 5 + 6".to_string())).run(1),
+            Answer::Part1(71)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData(
+                "1 + (2 * 3) + (4 * (5 + 6))".to_string()
+            ))
+            .run(1),
+            Answer::Part1(51)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("2 * 3 + (4 * 5)".to_string())).run(1),
+            Answer::Part1(26)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData(
+                "5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string()
+            ))
+            .run(1),
+            Answer::Part1(437)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData(
+                "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string()
+            ))
+            .run(1),
+            Answer::Part1(12240)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData(
+                "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string()
+            ))
+            .run(1),
+            Answer::Part1(13632)
+        );
     }
 }
