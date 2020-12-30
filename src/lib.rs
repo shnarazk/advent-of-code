@@ -147,3 +147,13 @@ impl ProblemObject for () {
         None
     }
 }
+
+impl ProblemObject for String {
+    fn parse(line: &str) -> Option<Self> {
+        if line.is_empty() {
+            None
+        } else {
+            Some(line.to_string())
+        }
+    }
+}

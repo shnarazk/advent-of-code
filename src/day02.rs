@@ -1,10 +1,33 @@
-use {lazy_static::lazy_static, regex::Regex};
+use {
+    crate::{Description, ProblemSolver},
+    lazy_static::lazy_static,
+    regex::Regex,
+};
 
-pub fn day02(part: usize, buffer: String) {
-    if part == 1 {
-        println!("{}", buffer.lines().map(|s| check_line1(s)).sum::<usize>());
+pub fn day02(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
+
+#[derive(Debug, PartialEq)]
+struct Setting {
+    line: Vec<String>,
+}
+
+impl ProblemSolver<String, usize, usize> for Setting {
+    const DAY: usize = 2;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        Setting { line: Vec::new() }
     }
-    println!("{}", buffer.lines().map(|s| check_line2(s)).sum::<usize>());
+    fn insert(&mut self, s: String) {
+        self.line.push(s);
+    }
+    fn part1(&mut self) -> usize {
+        self.line.iter().map(|s| check_line1(s)).sum::<usize>()
+    }
+    fn part2(&mut self) -> usize {
+        self.line.iter().map(|s| check_line2(s)).sum::<usize>()
+    }
 }
 
 fn check_line1(str: &str) -> usize {
@@ -60,5 +83,34 @@ fn check_line2(str: &str) -> usize {
         (p1 ^ p2) as usize
     } else {
         0
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
+    const TEST: &str = "\
+1-3 a: abcde
+1-3 b: cdefg
+2-9 c: ccccccccc";
+
+    #[test]
+    fn test1() {
+        assert_eq!(
+            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Answer::Part1(2)
+        );
+    }
+
+    #[test]
+    fn test2() {
+        assert_eq!(
+            Setting::parse(Description::TestData(TEST.to_string())).run(2),
+            Answer::Part2(1)
+        );
     }
 }
