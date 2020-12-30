@@ -35,14 +35,14 @@ pub use {
 };
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum ProblemDescription {
+pub enum Description {
     FileTag(String),
     TestData(String),
     None,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum SolverResult<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + PartialEq> {
+pub enum Answer<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + PartialEq> {
     Answers(Output1, Output2),
     Part1(Output1),
     Part2(Output2),
@@ -61,23 +61,23 @@ pub trait ProblemSolver<
     fn insert(&mut self, _object: TargetObject) {
         todo!()
     }
-    fn input_filename(desc: ProblemDescription) -> Option<String> {
+    fn input_filename(desc: Description) -> Option<String> {
         match desc {
-            ProblemDescription::FileTag(tag) => {
+            Description::FileTag(tag) => {
                 Some(format!("input-day{:>02}-{}.txt", Self::DAY, tag))
             }
-            ProblemDescription::None => Some(format!("input-day{:>02}.txt", Self::DAY)),
+            Description::None => Some(format!("input-day{:>02}.txt", Self::DAY)),
             _ => None,
         }
     }
-    fn load(desc: ProblemDescription) -> Option<String> {
+    fn load(desc: Description) -> Option<String> {
         match desc {
-            ProblemDescription::FileTag(_) => Self::load_file(desc),
-            ProblemDescription::TestData(_) => Self::load_data(desc),
-            ProblemDescription::None => Self::load_file(desc),
+            Description::FileTag(_) => Self::load_file(desc),
+            Description::TestData(_) => Self::load_data(desc),
+            Description::None => Self::load_file(desc),
         }
     }
-    fn load_file(desc: ProblemDescription) -> Option<String> {
+    fn load_file(desc: Description) -> Option<String> {
         if let Some(fname) = Self::input_filename(desc) {
             let file_name = format!("data/{}", fname);
             match File::open(&file_name) {
@@ -94,14 +94,14 @@ pub trait ProblemSolver<
         }
         None
     }
-    fn load_data(desc: ProblemDescription) -> Option<String> {
-        if let ProblemDescription::TestData(s) = desc {
+    fn load_data(desc: Description) -> Option<String> {
+        if let Description::TestData(s) = desc {
             Some(s)
         } else {
             None
         }
     }
-    fn parse(desc: ProblemDescription) -> Self {
+    fn parse(desc: Description) -> Self {
         let mut instance = Self::default();
         if let Some(buffer) = Self::load(desc) {
             for block in buffer.split(Self::DELIMITER) {
@@ -112,24 +112,24 @@ pub trait ProblemSolver<
         }
         instance
     }
-    fn run(&mut self, part: usize) -> SolverResult<Output1, Output2> {
+    fn run(&mut self, part: usize) -> Answer<Output1, Output2> {
         match part {
             0 => {
                 println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
                 let ans1 = self.part1();
                 println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
                 let ans2 = self.part2();
-                SolverResult::Answers(ans1, ans2)
+                Answer::Answers(ans1, ans2)
             }
             1 => {
                 println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
-                SolverResult::Part1(self.part1())
+                Answer::Part1(self.part1())
             }
             2 => {
                 println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
-                SolverResult::Part2(self.part2())
+                Answer::Part2(self.part2())
             }
-            _ => SolverResult::None,
+            _ => Answer::None,
         }
     }
     fn part1(&mut self) -> Output1 {

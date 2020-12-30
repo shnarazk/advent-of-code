@@ -1,12 +1,9 @@
-use crate::{ProblemDescription, ProblemObject, ProblemSolver};
+#![allow(unused_imports)]
+use crate::{Description, ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
-pub fn template(part: usize, _buffer: String) {
-    if part == 1 {
-        dbg!(World::parse(ProblemDescription::None).part1());
-    } else {
-        dbg!(World::parse(ProblemDescription::None).part2());
-    }
+pub fn template(part: usize, desc: Description) {
+    dbg!(World::parse(desc).run(part));
 }
 
 #[derive(Debug, PartialEq)]
@@ -24,8 +21,7 @@ struct World {}
 impl ProblemSolver<Object, usize, String> for World {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _object: Object) {
-    }
+    fn insert(&mut self, _object: Object) {}
     fn default() -> Self {
         World {}
     }
@@ -45,7 +41,7 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            World::parse(ProblemDescription::TestData(TEST1.to_string())).part1(),
+            World::parse(Description::TestData(TEST1.to_string())).part1(),
             0
         );
     }
@@ -53,7 +49,7 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            World::parse(ProblemDescription::TestData(TEST2.to_string())).part2(),
+            World::parse(Description::TestData(TEST2.to_string())).part2(),
             "done".to_string()
         );
     }

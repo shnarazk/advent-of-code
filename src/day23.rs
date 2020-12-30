@@ -1,10 +1,10 @@
 // #![allow(dead_code)]
-use crate::{ProblemDescription, ProblemSolver};
+use crate::{Description, ProblemSolver};
 
-pub fn day23(part: usize, desc: ProblemDescription) {
+pub fn day23(part: usize, desc: Description) {
     let ncups = if part == 1 { 9 } else { 1_000_000 };
     let nround = if part == 1 { 100 } else { 10_000_000 };
-    let cups = if desc == ProblemDescription::None {
+    let cups = if desc == Description::None {
         vec![3, 6, 2, 9, 8, 1, 7, 5, 4]
     } else {
         vec![3, 8, 9, 1, 2, 5, 4, 6, 7]

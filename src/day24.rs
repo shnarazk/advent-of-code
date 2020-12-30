@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 use {
-    crate::{ProblemDescription, ProblemObject, ProblemSolver},
+    crate::{Description, ProblemObject, ProblemSolver},
     std::collections::HashMap,
 };
 
-pub fn day24(part: usize, desc: ProblemDescription) {
+pub fn day24(part: usize, desc: Description) {
     dbg!(World::parse(desc).run(part));
 }
 
@@ -187,7 +187,7 @@ impl World {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::SolverResult;
+    use crate::Answer;
     const TEST1: &str = "\
 sesenwnenenewseeswwswswwnenewsewsw
 neeenesenwnwwswnenewnwwsewnenwseswesw
@@ -212,15 +212,15 @@ wseweeenwnesenwwwswnew";
     #[test]
     fn test1() {
         assert_eq!(
-            World::parse(ProblemDescription::TestData(TEST1.to_string())).run(1),
-            SolverResult::Part1(10)
+            World::parse(Description::TestData(TEST1.to_string())).run(1),
+            Answer::Part1(10)
         );
     }
     #[test]
     fn test2() {
         assert_eq!(
-            World::parse(ProblemDescription::TestData(TEST1.to_string())).run(2),
-            SolverResult::Part2(2208)
+            World::parse(Description::TestData(TEST1.to_string())).run(2),
+            Answer::Part2(2208)
         );
     }
 }

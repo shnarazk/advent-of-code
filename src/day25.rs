@@ -1,5 +1,7 @@
-pub fn day25(_: usize, tag: String) {
-    if tag == "-test" {
+use crate::Description;
+
+pub fn day25(_: usize, tag: Description) {
+    if tag != Description::None {
         let card_pubkey = 5764801;
         let door_pubkey = 17807724;
         assert_eq!(transform(8, 7), card_pubkey);
