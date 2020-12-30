@@ -3,7 +3,7 @@ use {lazy_static::lazy_static, regex::Regex, std::collections::HashSet};
 pub fn day07(_part: usize, buffer: String) {
     let mut links: HashSet<(String, String, usize)> = HashSet::new();
 
-    for c in buffer.split("\n") {
+    for c in buffer.split('\n') {
         parse(&mut links, c);
     }
     let mut outers: HashSet<String> = HashSet::new();

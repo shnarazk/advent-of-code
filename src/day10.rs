@@ -2,7 +2,7 @@ pub fn day10(_part: usize, buffer: String) {
     let mut vec: Vec<usize> = Vec::new();
     vec.push(0);
 
-    for c in buffer.split("\n") {
+    for c in buffer.split('\n') {
         if c.is_empty() {
             break;
         }

@@ -15,7 +15,7 @@ pub fn part2(buffer: String) {
         let mut dic: HashMap<char, usize> = HashMap::new();
         let mut n = 0;
         for p in g.split('\n') {
-            if 0 < p.len() {
+            if p.is_empty() {
                 n += 1;
             }
             for a in p.chars() {
