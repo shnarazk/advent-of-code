@@ -32,7 +32,7 @@ pub fn main() {
     } else {
         Description::None
     };
-    let input_data = if [23, 24, 25].contains(&day) {
+    let input_data = if [21, 22, 23, 24, 25].contains(&day) {
         "".to_string()
     } else if let Some(ref ext) = test {
         if ext.starts_with('-') {
@@ -66,7 +66,7 @@ pub fn main() {
         18 => day18(),
         19 => day19(),
         20 => day20(),
-        21 => day21(),
+        21 => day21(part, desc),
         22 => day22(part, desc),
         23 => day23(part, desc),
         24 => day24(part, desc),

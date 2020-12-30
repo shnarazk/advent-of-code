@@ -1,14 +1,11 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use splr::*;
-use std::{convert::TryFrom, env::args};
 use {
+    crate::{Description, ProblemObject, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
+    splr::*,
     std::{
         collections::{HashMap, HashSet},
-        io::{stdin, Read},
+        convert::TryFrom,
     },
 };
 
@@ -29,198 +26,227 @@ use {
 ///
 /// ## 目的
 /// どの属性でもtrueにしたらUNSATになるようなindredientを探せ
-pub fn day21() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
-    read(&buf);
+pub fn day21(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
 
-fn read(str: &str) -> usize {
-    let mut rules: Vec<(Vec<String>, Vec<String>)> = Vec::new();
-    for l in str.split('\n') {
-        if let Some(rule) = parse(l) {
-            rules.push(rule);
-        }
-    }
-    eval(&rules);
-    0
+#[derive(Clone, Debug, PartialEq)]
+struct Rule {
+    ingredients: Vec<String>,
+    allergens: Vec<String>,
 }
 
-fn parse(str: &str) -> Option<(Vec<String>, Vec<String>)> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$").expect("error");
+impl ProblemObject for Rule {
+    fn parse(line: &str) -> Option<Self> {
+        lazy_static! {
+            static ref RE: Regex =
+                Regex::new(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$").expect("error");
+        }
+        if let Some(m) = RE.captures(line) {
+            let ingredients = m[1]
+                .trim()
+                .split(' ')
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
+            let allergens = m[2]
+                .trim()
+                .split(", ")
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
+            // dbg!((&ingredients, &allergens));
+            return Some(Rule {
+                ingredients,
+                allergens,
+            });
+        }
+        None
     }
-
-    if let Some(m) = RE.captures(str) {
-        let ingredients = m[1]
-            .trim()
-            .split(' ')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
-        let allergens = m[2]
-            .trim()
-            .split(", ")
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
-        // dbg!((&ingredients, &allergens));
-        return Some((ingredients, allergens));
-    }
-    None
 }
 
-fn eval(rules: &[(Vec<String>, Vec<String>)]) {
-    let mut ingredients: HashSet<String> = HashSet::new();
-    let mut allergens: HashSet<String> = HashSet::new();
-    for (is, al) in rules.iter() {
-        for i in is {
-            ingredients.insert(i.to_string());
-        }
-        for a in al {
-            allergens.insert(a.to_string());
-        }
-    }
-    let mut n_ingredients: HashMap<String, usize> = HashMap::new();
-    let mut n_allergens: HashMap<String, usize> = HashMap::new();
-    for (n, i) in ingredients.iter().enumerate() {
-        *n_ingredients.entry(i.to_string()).or_insert(0) = n;
-    }
-    for (n, a) in allergens.iter().enumerate() {
-        *n_allergens.entry(a.to_string()).or_insert(0) = n;
-    }
-    let num_ings = n_ingredients.len();
-    let num_alls = n_allergens.len();
-    // dbg!(&n_ingredients);
-    // dbg!(&n_allergens);
-    let var_of = |ing: &str, all: &str| {
-        if let Some(ni) = n_ingredients.get(ing) {
-            if let Some(na) = n_allergens.get(all) {
-                return (ni * num_alls + na + 1) as i32;
+#[derive(Clone, Debug, PartialEq)]
+struct Setting {
+    ingredients: HashMap<String, usize>,
+    allergens: HashMap<String, usize>,
+    rules: Vec<Rule>,
+}
+
+impl ProblemSolver<Rule, usize, String> for Setting {
+    const DAY: usize = 21;
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, rule: Rule) {
+        let mut num_ingredient = self.ingredients.len();
+        for ing in rule.ingredients.iter() {
+            if self.ingredients.get(ing).is_none() {
+                self.ingredients.insert(ing.to_string(), num_ingredient);
+                num_ingredient += 1;
             }
         }
-        0
-    };
-    // clause builder
-    let imply = |v1: i32, v2: i32| vec![-v1, v2];
-    let xor = |v1: i32, v2: i32| vec![-v1, -v2];
-    // build cnf
-    let mut cnf: Vec<Vec<i32>> = Vec::new();
-
-    //
-    //## ONLY-ONE-ALLERGEN
-    //
-    for i0 in ingredients.iter() {
-        for ale in allergens.iter() {
-            for i1 in ingredients.iter() {
-                if i0 != i1 {
-                    cnf.push(xor(var_of(i0, ale), var_of(i1, ale)));
-                }
+        let mut num_allergen = self.allergens.len();
+        for ale in rule.allergens.iter() {
+            if self.allergens.get(ale).is_none() {
+                self.allergens.insert(ale.to_string(), num_allergen);
+                num_allergen += 1;
             }
         }
+        self.rules.push(rule);
     }
-
-    //
-    //## EXCLUSIZE-ALLERGEN
-    //
-    for ing in ingredients.iter() {
-        for a0 in allergens.iter() {
-            for a1 in allergens.iter() {
-                if a0 != a1 {
-                    cnf.push(xor(var_of(ing, a0), var_of(ing, a1)));
-                }
-            }
+    fn default() -> Self {
+        Setting {
+            ingredients: HashMap::new(),
+            allergens: HashMap::new(),
+            rules: Vec::new(),
         }
     }
-
-    //
-    //## AT-LEAST-1
-    //
-    for (ings, alles) in rules.iter() {
-        for al in alles.iter() {
-            cnf.push(ings.iter().map(|ing| var_of(ing, al)).collect::<Vec<i32>>());
-        }
-    }
-
-    // run Splr
-
-    // part 1.
-    /*
+    fn part1(&mut self) -> usize {
+        let cnf = self.make_cnf();
         let mut count: usize = 0;
-        for ing in ingredients.iter() {
+        for ing in self.ingredients.keys() {
             let mut satisfiable = false;
-            for al in allergens.iter() {
+            for al in self.allergens.keys() {
                 let mut asserted = cnf.clone();
-                asserted.push(vec![var_of(ing, al)]);
-                if let Certificate::SAT(ans) = Certificate::try_from(asserted).expect("panic!") {
+                asserted.push(vec![self.var_of(ing, al)]);
+                if let Certificate::SAT(_) = Certificate::try_from(asserted).expect("panic!") {
                     satisfiable = true;
                     break;
-                    /*
-                    // println!("Assigning {} to {} has an answer {:?}", al, ing, ans);
-                    'next: for lit in ans.iter() {
-                        if *lit < 0 {
-                            continue;
-                        }
-                        for i in ingredients.iter() {
-                            for a in allergens.iter() {
-                                if var_of(i, a) == *lit {
-                                    println!(" - Under assigning {} to {}, {} has {}.", ing, al, i, a);
-                                    continue 'next;
-                                }
+                /*
+                // println!("Assigning {} to {} has an answer {:?}", al, ing, ans);
+                'next: for lit in ans.iter() {
+                    if *lit < 0 {
+                        continue;
+                    }
+                    for i in ingredients.iter() {
+                        for a in allergens.iter() {
+                            if var_of(i, a) == *lit {
+                                println!(" - Under assigning {} to {}, {} has {}.", ing, al, i, a);
+                                continue 'next;
                             }
                         }
                     }
-                     */
+                }
+                 */
                 } else {
                     // println!("Assigning {} to {} emits a conflict", al, ing);
                 }
             }
             if !satisfiable {
                 println!("{} is safe", ing);
-                count += rules.iter().map(|(v, _)| v.iter().filter(|i| *i == ing).count()).sum::<usize>();
+                count += self
+                    .rules
+                    .iter()
+                    .map(|r| r.ingredients.iter().filter(|i| *i == ing).count())
+                    .sum::<usize>();
             }
         }
-        // dbg!(count);
-    */
-    // part 2.
-    let mut assign: HashSet<(&str, &str)> = HashSet::new();
-    if let Certificate::SAT(ans) = Certificate::try_from(cnf).expect("panic!") {
-        for lit in ans.iter() {
-            if *lit < 0 {
-                continue;
+        count
+    }
+    fn part2(&mut self) -> String {
+        let cnf = self.make_cnf();
+        let mut assign: HashSet<(&str, &str)> = HashSet::new();
+        if let Certificate::SAT(ans) = Certificate::try_from(cnf).expect("panic!") {
+            for lit in ans.iter() {
+                if *lit < 0 {
+                    continue;
+                }
+                for i in self.ingredients.keys() {
+                    for a in self.allergens.keys() {
+                        if self.var_of(i, a) == *lit {
+                            // println!(" - {} has {}.", i, a);
+                            assign.insert((a, i));
+                        }
+                    }
+                }
             }
-            for i in ingredients.iter() {
-                for a in allergens.iter() {
-                    if var_of(i, a) == *lit {
-                        // println!(" - {} has {}.", i, a);
-                        assign.insert((a, i));
+        } else {
+            println!("UNSAT");
+        }
+        let mut vec: Vec<&(&str, &str)> = assign.iter().collect::<Vec<&(&str, &str)>>();
+        vec.sort_unstable();
+
+        let mut result = String::from(vec[0].1);
+        for w in &vec[1..] {
+            result.push(',');
+            result.push_str(w.1);
+        }
+        result
+    }
+}
+
+impl Setting {
+    fn var_of(&self, ing: &str, all: &str) -> i32 {
+        if let Some(ni) = self.ingredients.get(ing) {
+            if let Some(na) = self.allergens.get(all) {
+                let num_alls = self.allergens.len();
+                return (ni * num_alls + na + 1) as i32;
+            }
+        }
+        0
+    }
+    fn make_cnf(&self) -> Vec<Vec<i32>> {
+        // clause builder
+        let _imply = |v1: i32, v2: i32| vec![-v1, v2];
+        let xor = |v1: i32, v2: i32| vec![-v1, -v2];
+        // build cnf
+        let mut cnf: Vec<Vec<i32>> = Vec::new();
+
+        //
+        //## ONLY-ONE-ALLERGEN
+        //
+        for i0 in self.ingredients.keys() {
+            for ale in self.allergens.keys() {
+                for i1 in self.ingredients.keys() {
+                    if i0 != i1 {
+                        cnf.push(xor(self.var_of(i0, ale), self.var_of(i1, ale)));
                     }
                 }
             }
         }
-    } else {
-        println!("UNSAT");
-    }
-    let mut vec: Vec<&(&str, &str)> = assign.iter().collect::<Vec<&(&str, &str)>>();
-    vec.sort_unstable();
-    // dbg!(vec.iter().map(|t| t.1).collect::<Vec<_>>());
 
-    for (i, w) in vec.iter().map(|t| t.1).enumerate() {
-        print!("{}", w);
-        if i < vec.len() - 1 {
-            print!(",");
+        //
+        //## EXCLUSIZE-ALLERGEN
+        //
+        for ing in self.ingredients.keys() {
+            for a0 in self.allergens.keys() {
+                for a1 in self.allergens.keys() {
+                    if a0 != a1 {
+                        cnf.push(xor(self.var_of(ing, a0), self.var_of(ing, a1)));
+                    }
+                }
+            }
         }
+
+        //
+        //## AT-LEAST-1
+        //
+        for r in self.rules.iter() {
+            for al in r.allergens.iter() {
+                cnf.push(
+                    r.ingredients
+                        .iter()
+                        .map(|ing| self.var_of(ing, al))
+                        .collect::<Vec<i32>>(),
+                );
+            }
+        }
+        cnf
     }
-    println!();
 }
 
+#[cfg(test)]
 mod test {
-    use super::*;
-    const TEST1: &str = "\
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+    const TEST: &str = "\
 mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
 trh fvjkl sbzzf mxmxvkd (contains dairy)
 sqjhc fvjkl (contains soy)
 sqjhc mxmxvkd sbzzf (contains fish)";
     #[test]
     fn test1() {
-        assert_eq!(read(TEST1), 1);
+        assert_eq!(
+            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Answer::Part1(5)
+        );
     }
 }
