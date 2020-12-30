@@ -1,10 +1,12 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
 use {
+    crate::{Description, ProblemObject, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
-    std::io::{self, Read},
 };
+
+pub fn day12(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
 
 #[derive(Clone, Debug, PartialEq)]
 enum Dir {
@@ -44,6 +46,12 @@ enum Instruction {
     F(usize),
 }
 
+impl ProblemObject for Instruction {
+    fn parse(s: &str) -> Option<Self> {
+        Instruction::from(s)
+    }
+}
+
 impl Instruction {
     fn from(str: &str) -> Option<Self> {
         lazy_static! {
@@ -72,32 +80,52 @@ impl Instruction {
 }
 
 #[derive(Debug, PartialEq)]
-struct World {
+struct Setting {
+    codes: Vec<Instruction>,
     dir: Dir,
     waypoint_sn: isize,
     waypoint_we: isize,
     dist_sn: isize,
     dist_we: isize,
     ip: usize,
+    mode: usize,
 }
 
-impl Default for World {
+impl ProblemSolver<Instruction, usize, usize> for Setting {
+    const DAY: usize = 12;
+    const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        World {
+        Setting {
+            codes: Vec::new(),
             dir: Dir::E,
             waypoint_sn: 1,
             waypoint_we: 10,
             dist_sn: 0,
             dist_we: 0,
             ip: 0,
+            mode: 0,
         }
+    }
+    fn insert(&mut self, inst: Instruction) {
+        self.codes.push(inst);
+    }
+    fn part1(&mut self) -> usize {
+        self.mode = 1;
+        self.run_program();
+        self.distance()
+    }
+    fn part2(&mut self) -> usize {
+        self.mode = 2;
+        self.run_program();
+        self.distance()
     }
 }
 
-impl World {
+impl Setting {
     fn distance(&self) -> usize {
         (self.dist_sn.abs() as usize) + (self.dist_we.abs() as usize)
     }
+    #[allow(dead_code)]
     fn print(&self) {
         if self.dist_we < 0 {
             print!("ship: west {} ", self.dist_we.abs());
@@ -121,18 +149,53 @@ impl World {
             println!("north {} ", self.waypoint_sn);
         }
     }
-    fn run(codes: &[Instruction]) -> Option<World> {
-        let mut cpu = World::default();
-        cpu.ip = 0;
+    fn run_program(&mut self) {
+        self.ip = 0;
         loop {
-            if cpu.stopped(codes) {
-                return Some(cpu);
+            if self.stopped() {
+                return;
             }
-            cpu.execute(codes);
-            cpu.print();
+            self.execute();
+            // self.print();
         }
     }
-    fn decode(&mut self, inst: &Instruction) {
+    fn decode1(&mut self, inst: &Instruction) {
+        match inst {
+            Instruction::N(n) => {
+                self.dist_sn += *n as isize;
+            }
+            Instruction::S(n) => {
+                self.dist_sn -= *n as isize;
+            }
+            Instruction::E(n) => {
+                self.dist_we += *n as isize;
+            }
+            Instruction::W(n) => {
+                self.dist_we -= *n as isize;
+            }
+            Instruction::L(n) => match (n % 360) / 90 {
+                0 => (),
+                1 => self.dir = self.dir.left(),
+                2 => self.dir = self.dir.left().left(),
+                3 => self.dir = self.dir.right(),
+                _ => panic!("can't handle"),
+            },
+            Instruction::R(n) => match (n % 360) / 90 {
+                0 => (),
+                1 => self.dir = self.dir.right(),
+                2 => self.dir = self.dir.right().right(),
+                3 => self.dir = self.dir.left(),
+                _ => panic!("can't handle"),
+            },
+            Instruction::F(n) => match self.dir {
+                Dir::N => self.dist_sn += *n as isize,
+                Dir::E => self.dist_we += *n as isize,
+                Dir::S => self.dist_sn -= *n as isize,
+                Dir::W => self.dist_we -= *n as isize,
+            },
+        }
+    }
+    fn decode2(&mut self, inst: &Instruction) {
         match inst {
             Instruction::N(n) => {
                 self.waypoint_sn += *n as isize;
@@ -192,138 +255,41 @@ impl World {
             }
         }
     }
-    fn execute(&mut self, codes: &[Instruction]) {
-        let code = &codes[self.ip];
-        print!("{:?}\t", code);
-        self.decode(code);
+    fn execute(&mut self) {
+        let code = &self.codes[self.ip].clone();
+        // print!("{:?}\t", code);
+        if self.mode == 1 {
+            self.decode1(code);
+        } else {
+            self.decode2(code);
+        }
         self.ip += 1;
     }
-    fn stopped(&self, codes: &[Instruction]) -> bool {
-        codes.len() == self.ip
+    fn stopped(&self) -> bool {
+        self.codes.len() == self.ip
     }
 }
 
-pub fn day12() {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("something wrong");
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
 
-    let mut codes: Vec<Instruction> = Vec::new();
-
-    for line in buffer.split('\n') {
-        if line.is_empty() {
-            break;
-        }
-        if let Some(c) = Instruction::from(line) {
-            codes.push(c);
-        } else {
-            panic!("wrong code");
-        }
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            Setting::parse(Description::FileTag("test".to_string())).run(1),
+            Answer::Part1(25)
+        );
     }
-    if let Some(w) = World::run(&codes) {
-        dbg!(&w);
-        dbg!(w.distance());
+    #[test]
+    fn test_part2() {
+        const TEST2: &str = "0\n1\n2";
+        assert_eq!(
+            Setting::parse(Description::FileTag("test".to_string())).run(2),
+            Answer::Part2(286)
+        );
     }
 }
-
-/*
-#[derive(Debug, PartialEq)]
-struct World {
-    dir: Dir,
-    dist_sn: isize,
-    dist_we: isize,
-    ip: usize,
-}
-
-impl Default for World {
-    fn default() -> Self {
-        World {
-            dir: Dir::E,
-            dist_sn: 0,
-            dist_we: 0,
-            ip: 0
-        }
-    }
-}
-
-impl World {
-    fn distance(&self) -> usize {
-        (self.dist_sn.abs() as usize) + (self.dist_we.abs() as usize)
-    }
-    fn print(&self) {
-        if self.dist_we < 0 {
-            print!("west {} ", self.dist_we.abs());
-        } else {
-            print!("east {} ",self.dist_we);
-        }
-        if self.dist_sn < 0 {
-            print!("south {} ", self.dist_sn.abs());
-        } else {
-            print!("north {} ",self.dist_sn);
-        }
-        println!("facing {:?}", self.dir);
-    }
-    fn run(codes: &[Instruction]) -> Option<World> {
-        let mut cpu = World::default();
-        cpu.ip = 0;
-        loop {
-            if cpu.stopped(codes) {
-                return Some(cpu);
-            }
-            cpu.execute(codes);
-            cpu.print();
-        }
-   }
-    fn decode(&mut self, inst: &Instruction) {
-        match inst {
-            Instruction::N(n) => {
-                self.dist_sn += *n as isize;
-            }
-            Instruction::S(n) => {
-                self.dist_sn -= *n as isize;
-            }
-            Instruction::E(n) => {
-                self.dist_we += *n as isize;
-            }
-            Instruction::W(n) => {
-                self.dist_we -= *n as isize;
-            }
-            Instruction::L(n) => {
-                match (n % 360) / 90 {
-                    0 => (),
-                    1 => self.dir = self.dir.left(),
-                    2 => self.dir = self.dir.left().left(),
-                    3 => self.dir = self.dir.right(),
-                    _ => panic!("can't handle"),
-                }
-            }
-            Instruction::R(n) => {
-                match (n % 360) / 90 {
-                    0 => (),
-                    1 => self.dir = self.dir.right(),
-                    2 => self.dir = self.dir.right().right(),
-                    3 => self.dir = self.dir.left(),
-                    _ => panic!("can't handle"),
-                }
-            }
-            Instruction::F(n) => {
-                match self.dir {
-                    Dir::N => self.dist_sn += *n as isize,
-                    Dir::E => self.dist_we += *n as isize,
-                    Dir::S => self.dist_sn -= *n as isize,
-                    Dir::W => self.dist_we -= *n as isize,
-                }
-            }
-        }
-    }
-    fn execute(&mut self, codes: &[Instruction]) {
-        let code = &codes[self.ip];
-        self.decode(code);
-        self.ip += 1;
-    }
-    fn stopped(&self, codes: &[Instruction]) -> bool {
-        codes.len() == self.ip
-    }
-}
-*/
