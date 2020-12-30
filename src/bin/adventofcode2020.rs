@@ -26,8 +26,7 @@ pub fn main() {
         .unwrap_or_else(|| "0".to_string())
         .parse::<usize>()
         .unwrap_or(0);
-    let test = a.next();
-    let desc: Description = if let Some(ref ext) = test {
+    let desc: Description = if let Some(ext) = a.next() {
         Description::FileTag(ext.to_string())
     } else {
         Description::None
