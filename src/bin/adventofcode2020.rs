@@ -46,7 +46,7 @@ pub fn main() {
         12 => day12(),
         13 => day13(),
         14 => day14(),
-        15 => day15(),
+        15 => day15(part, desc),
         16 => day16(part, desc),
         17 => day17(),
         18 => day18(part, desc),

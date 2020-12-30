@@ -1,59 +1,117 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-use std::{
-    collections::HashMap,
-    io::{stdin, Read},
+#![allow(unused_imports)]
+use {
+    crate::{Description, ProblemObject, ProblemSolver},
+    std::collections::HashMap,
 };
 
-pub fn day15() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
+pub fn day15(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
 
-    let mut dic: HashMap<usize, usize> = HashMap::new();
-    let mut last;
-    let mut clock = 0;
+#[derive(Debug, PartialEq)]
+struct Object {}
 
-    let mut iter = buf.split(',');
-    let mut ch = iter.next();
-    loop {
-        if let Some(c) = ch {
-            if let Ok(n) = c.trim().parse::<usize>() {
-                ch = iter.next();
-                clock += 1;
-                if ch.is_some() {
-                    let entry = dic.entry(n).or_insert(0);
-                    *entry = clock;
-                // println!("Turn {}: call.{}, a starting number", clock, n);
-                } else {
-                    // println!("Turn {}: call.{}, a starting number", clock, n);
-                    last = n;
-                    break;
-                }
-            }
+impl ProblemObject for Object {
+    fn parse(_s: &str) -> Option<Self> {
+        None
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct Setting {
+    dic: HashMap<usize, usize>,
+    last: usize,
+    clock: usize,
+}
+
+impl ProblemSolver<String, usize, usize> for Setting {
+    const DAY: usize = 15;
+    const DELIMITER: &'static str = ",";
+    fn default() -> Self {
+        Setting {
+            dic: HashMap::new(),
+            last: 0,
+            clock: 0,
         }
     }
-    clock += 1;
-    loop {
-        let last_entry = dic.entry(last).or_insert(0);
-        if *last_entry == 0 {
-            *last_entry = clock - 1;
-            // println!("Turn {}: call.0, {} is a first spoken, set {}", clock, last, clock - 1);
-            last = 0;
-        } else {
-            // println!("Turn {}: call.{}, {} is spoken at.{} set {}", clock, clock - 1 - *last_entry, last, *last_entry, clock - 1);
-            last = clock - 1 - *last_entry;
-            *last_entry = clock - 1;
+    fn insert(&mut self, cs: String) {
+        if let Ok(n) = cs.trim().parse::<usize>() {
+            self.clock += 1;
+            *self.dic.entry(n).or_insert(0) = self.clock;
+            self.last = n;
         }
-        clock += 1;
+    }
+    fn part1(&mut self) -> usize {
+        self.run_to(2020)
+    }
+    fn part2(&mut self) -> usize {
+        self.run_to(30000000)
+    }
+}
 
-        // part 1
-        // if 2020 < clock {
-        //     panic!("done as {}", last);
-        // }
-
-        //part 2
-        if 30000000 < clock {
-            panic!("done as {}", last);
+impl Setting {
+    fn run_to(&mut self, limit: usize) -> usize {
+        self.clock += 1;
+        loop {
+            let last_entry = self.dic.entry(self.last).or_insert(0);
+            if *last_entry == 0 {
+                *last_entry = self.clock - 1;
+                self.last = 0;
+            } else {
+                self.last = self.clock - 1 - *last_entry;
+                *last_entry = self.clock - 1;
+            }
+            if limit == self.clock {
+                return self.last;
+            }
+            self.clock += 1;
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            Setting::parse(Description::TestData("1,3,2".to_string())).run(1),
+            Answer::Part1(1)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("2,1,3".to_string())).run(1),
+            Answer::Part1(10)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("1,2,3".to_string())).run(1),
+            Answer::Part1(27)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("2,3,1".to_string())).run(1),
+            Answer::Part1(78)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("3,2,1".to_string())).run(1),
+            Answer::Part1(438)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("3,1,2".to_string())).run(1),
+            Answer::Part1(1836)
+        );
+    }
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            Setting::parse(Description::TestData("0,3,6".to_string())).run(2),
+            Answer::Part2(175594)
+        );
+        assert_eq!(
+            Setting::parse(Description::TestData("1,3,2".to_string())).run(2),
+            Answer::Part2(2578)
+        );
     }
 }
