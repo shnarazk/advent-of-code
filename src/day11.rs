@@ -1,21 +1,67 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-use std::io::{self, Read};
+use crate::{Description, ProblemObject, ProblemSolver};
+
+pub fn day11(part: usize, desc: Description) {
+    dbg!(World::parse(desc).run(part));
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct Chars {
+    char: Vec<char>,
+}
+
+impl ProblemObject for Chars {
+    fn parse(s: &str) -> Option<Self> {
+        if s.is_empty() {
+            None
+        } else {
+            Some(Chars {
+                char: s.chars().collect::<Vec<char>>(),
+            })
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 struct World {
-    data: Vec<Vec<char>>,
+    data: Vec<Chars>,
     size: usize,
 }
 
-impl World {
-    fn from(data: Vec<Vec<char>>) -> Self {
-        // assert_eq!(data.len(), data[0].len());
-        let size = data.len();
-        World { data, size }
+impl ProblemSolver<Chars, usize, usize> for World {
+    const DAY: usize = 11;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        World {
+            data: Vec::new(),
+            size: 0,
+        }
     }
+    fn insert(&mut self, cs: Chars) {
+        self.data.push(cs);
+    }
+    fn part1(&mut self) -> usize {
+        loop {
+            let next = self.next1();
+            if self.data == next {
+                return self.num_occupied();
+            }
+            self.data = next;
+        }
+    }
+    fn part2(&mut self) -> usize {
+        loop {
+            let next = self.next2();
+            if self.data == next {
+                return self.num_occupied();
+            }
+            self.data = next;
+        }
+    }
+}
+
+impl World {
     fn at(&self, i: usize, j: usize) -> char {
-        self.data[i][j]
+        self.data[i].char[j]
     }
     fn neighbors(&self, i: usize, j: usize) -> Vec<char> {
         let mut vec: Vec<char> = Vec::new();
@@ -24,13 +70,13 @@ impl World {
                 continue;
             }
             for oj in &[-1, 0, 1] {
-                if (0 == j && *oj == -1) || (j == self.data[0].len() - 1 && *oj == 1) {
+                if (0 == j && *oj == -1) || (j == self.data[0].char.len() - 1 && *oj == 1) {
                     continue;
                 }
                 if *oi == 0 && *oj == 0 {
                     continue;
                 }
-                vec.push(self.data[(i as isize + oi) as usize][((j as isize) + oj) as usize]);
+                vec.push(self.data[(i as isize + oi) as usize].char[((j as isize) + oj) as usize]);
             }
         }
         vec
@@ -38,7 +84,11 @@ impl World {
     fn with_offset(&self, i: usize, j: usize, oi: isize, oj: isize) -> Option<char> {
         let ii: isize = i as isize + oi;
         let jj: isize = j as isize + oj;
-        if ii < 0 || self.data.len() as isize <= ii || jj < 0 || self.data[0].len() as isize <= jj {
+        if ii < 0
+            || self.data.len() as isize <= ii
+            || jj < 0
+            || self.data[0].char.len() as isize <= jj
+        {
             return None;
         }
         Some(self.at(ii as usize, jj as usize))
@@ -46,7 +96,7 @@ impl World {
     fn num_occupied(&self) -> usize {
         self.data
             .iter()
-            .map(|v| v.iter().filter(|c| **c == '#').count())
+            .map(|cs| cs.char.iter().filter(|c| **c == '#').count())
             .sum()
     }
     fn num_occupied_around(&self, i: usize, j: usize) -> usize {
@@ -89,69 +139,55 @@ impl World {
             .count()
     }
 
-    fn next(&mut self) -> Self {
-        let mut v: Vec<Vec<char>> = self.data.clone();
+    fn next1(&mut self) -> Vec<Chars> {
+        let mut v: Vec<Chars> = self.data.clone();
         for i in 0..self.data.len() {
-            for j in 0..self.data[0].len() {
+            for j in 0..self.data[0].char.len() {
                 let no = self.num_occupied_around(i, j);
                 match self.at(i, j) {
-                    'L' if no == 0 => v[i][j] = '#',
-                    '#' if 4 <= no => v[i][j] = 'L',
+                    'L' if no == 0 => v[i].char[j] = '#',
+                    '#' if 4 <= no => v[i].char[j] = 'L',
                     _ => (),
                 }
             }
         }
-        World::from(v)
+        v
     }
-    fn next2(&mut self) -> Self {
-        let mut v: Vec<Vec<char>> = self.data.clone();
+    fn next2(&mut self) -> Vec<Chars> {
+        let mut v: Vec<Chars> = self.data.clone();
         for i in 0..self.data.len() {
-            for j in 0..self.data[0].len() {
+            for j in 0..self.data[0].char.len() {
                 let no = self.num_occupied_around_through(i, j);
                 match self.at(i, j) {
-                    'L' if no == 0 => v[i][j] = '#',
-                    '#' if 5 <= no => v[i][j] = 'L',
+                    'L' if no == 0 => v[i].char[j] = '#',
+                    '#' if 5 <= no => v[i].char[j] = 'L',
                     _ => (),
                 }
             }
         }
-        World::from(v)
-    }
-
-    fn print(&self) {
-        for v in &self.data {
-            for c in v {
-                print!("{}", c);
-            }
-            println!();
-        }
+        v
     }
 }
 
-pub fn day11() {
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer).expect("wrong");
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
 
-    let mut place: Vec<Vec<char>> = Vec::new();
-    for l in buffer.split('\n') {
-        if l.is_empty() {
-            break;
-        }
-        let mut vec: Vec<char> = Vec::new();
-        for c in l.chars() {
-            vec.push(c);
-        }
-        place.push(vec);
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            World::parse(Description::FileTag("test1".to_string())).run(1),
+            Answer::Part1(37)
+        );
     }
-    let mut world: World = World::from(place);
-    let mut n = 0;
-    loop {
-        n += 1;
-        // let next = world.next();
-        let next = world.next2();
-        if world == next {
-            panic!("stabilized at {} with {}", n, next.num_occupied());
-        }
-        world = next;
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            World::parse(Description::FileTag("test1".to_string())).run(2),
+            Answer::Part2(26)
+        );
     }
 }
