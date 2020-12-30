@@ -1,51 +1,95 @@
-use std::collections::{HashMap, HashSet};
+use {
+    crate::{Description, ProblemSolver},
+    std::collections::HashMap,
+};
 
-pub fn day06(part: usize, buffer: String) {
-    if part == 1 {
-        part1(buffer);
-    } else {
-        part2(buffer);
-    }
+pub fn day06(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
 
-pub fn part2(buffer: String) {
-    let mut nvalids = 0;
+#[derive(Debug, PartialEq)]
+struct Setting {
+    dic: Vec<(usize, HashMap<char, usize>)>,
+}
 
-    for g in buffer.split("\n\n") {
+impl ProblemSolver<String, usize, usize> for Setting {
+    const DAY: usize = 6;
+    const DELIMITER: &'static str = "\n\n";
+    fn default() -> Self {
+        Setting { dic: Vec::new() }
+    }
+    fn insert(&mut self, line: String) {
         let mut dic: HashMap<char, usize> = HashMap::new();
-        let mut n = 0;
-        for p in g.split('\n') {
-            if p.is_empty() {
-                n += 1;
-            }
-            for a in p.chars() {
-                if 'a' <= a && a <= 'z' {
-                    let k = dic.entry(a).or_insert(0);
-                    *k += 1;
-                }
+        let n = line.lines().count();
+        for ch in line.chars() {
+            if 'a' <= ch && ch <= 'z' {
+                *dic.entry(ch).or_insert(0) += 1;
             }
         }
-        let x = dic.iter().filter(|(_, m)| **m == n).count();
-        dbg!((x, n, &dic));
-        nvalids += x
+        self.dic.push((n, dic));
     }
-    dbg!(nvalids);
+    fn part1(&mut self) -> usize {
+        self.dic.iter().map(|(_, h)| h.len()).sum()
+    }
+    fn part2(&mut self) -> usize {
+        self.dic
+            .iter()
+            .map(|(n, h)| h.values().filter(|m| n == *m).count())
+            .sum()
+    }
 }
 
-fn part1(buffer: String) {
-    let mut nvalids = 0;
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
 
-    for g in buffer.split("\n\n") {
-        let mut dic: HashSet<char> = HashSet::new();
-        for p in g.split('\n') {
-            for a in p.chars() {
-                if 'a' <= a && a <= 'z' {
-                    dic.insert(a);
-                }
-            }
-        }
-        nvalids += dic.len();
-        dbg!(&dic);
+    #[test]
+    fn test_part1() {
+        const TEST1: &str = "\
+abc
+
+a
+b
+c
+
+ab
+ac
+
+a
+a
+a
+a
+
+b";
+        assert_eq!(
+            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
+            Answer::Part1(11)
+        );
     }
-    dbg!(nvalids);
+    #[test]
+    fn test_part2() {
+        const TEST2: &str = "\
+abc
+
+a
+b
+c
+
+ab
+ac
+
+a
+a
+a
+a
+
+b";
+        assert_eq!(
+            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
+            Answer::Part2(6)
+        );
+    }
 }
