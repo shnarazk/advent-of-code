@@ -141,12 +141,13 @@ impl World {
 
     fn next1(&mut self) -> Vec<Chars> {
         let mut v: Vec<Chars> = self.data.clone();
-        for i in 0..self.data.len() {
-            for j in 0..self.data[0].char.len() {
+        let len = self.data[0].char.len();
+        for (i, vi) in v.iter_mut().enumerate() {
+            for j in 0..len {
                 let no = self.num_occupied_around(i, j);
                 match self.at(i, j) {
-                    'L' if no == 0 => v[i].char[j] = '#',
-                    '#' if 4 <= no => v[i].char[j] = 'L',
+                    'L' if no == 0 => vi.char[j] = '#',
+                    '#' if 4 <= no => vi.char[j] = 'L',
                     _ => (),
                 }
             }
