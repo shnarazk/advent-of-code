@@ -131,10 +131,10 @@ pub trait ProblemSolver<
         }
     }
     fn part1(&mut self) -> Output1 {
-        todo!()
+        todo!("part1 is not yet implemented.")
     }
     fn part2(&mut self) -> Output2 {
-        todo!()
+        todo!("part2 is not yet implemented.")
     }
 }
 
