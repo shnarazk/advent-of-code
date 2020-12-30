@@ -1,5 +1,5 @@
 use {
-    crate::{Description, ProblemObject, ProblemSolver},
+    crate::{Description, ProblemSolver},
     nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},
 };
 
@@ -13,16 +13,6 @@ enum Op {
     DIV,
     MUL,
     SUB,
-}
-
-impl ProblemObject for String {
-    fn parse(line: &str) -> Option<Self> {
-        if line.is_empty() {
-            None
-        } else {
-            Some(line.to_string())
-        }
-    }
 }
 
 #[derive(Debug, PartialEq)]
