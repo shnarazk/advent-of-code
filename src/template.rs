@@ -18,7 +18,7 @@ impl ProblemObject for Object {
 #[derive(Debug, PartialEq)]
 struct Setting {}
 
-impl ProblemSolver<Object, usize, String> for Setting {
+impl ProblemSolver<Object, usize, usize> for Setting {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
@@ -28,8 +28,8 @@ impl ProblemSolver<Object, usize, String> for Setting {
     fn part1(&mut self) -> usize {
         0
     }
-    fn part2(&mut self) -> String {
-        "done".to_string()
+    fn part2(&mut self) -> usize {
+        0
     }
 }
 
@@ -53,7 +53,7 @@ mod test {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
             Setting::parse(Description::TestData(TEST2.to_string())).run(2),
-            Answer::Part2("done".to_string())
+            Answer::Part2(0)
         );
     }
 }
