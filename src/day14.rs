@@ -1,18 +1,53 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
 use {
+    crate::{Description, ProblemObject, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
-    std::{
-        collections::HashMap,
-        io::{stdin, Read},
-    },
+    std::collections::HashMap,
 };
 
-#[derive(Debug, PartialEq)]
+pub fn day14(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
+
+#[derive(Clone, Debug, PartialEq)]
 enum OP {
     Mask(usize, usize, Vec<usize>),
     Set(usize, usize),
+}
+
+impl ProblemObject for OP {
+    fn parse(str: &str) -> Option<Self> {
+        lazy_static! {
+            static ref MASK: Regex = Regex::new(r"^mask = ((X|0|1)+)").expect("wrong");
+            static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
+        }
+        if let Some(m) = MASK.captures(str) {
+            let zeros = m[1]
+                .chars()
+                .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
+            let ones = m[1]
+                .chars()
+                .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
+            let wilds = m[1]
+                .chars()
+                .enumerate()
+                .fold(Vec::new(), |mut v, (i, letter)| {
+                    if letter == 'X' {
+                        v.push(35 - i);
+                        v
+                    } else {
+                        v
+                    }
+                });
+            return Some(OP::Mask(zeros, ones, wilds));
+        }
+        if let Some(m) = SET.captures(str) {
+            let address = m[1].parse::<usize>().unwrap();
+            let val = m[2].parse::<usize>().unwrap();
+            return Some(OP::Set(address, val));
+        }
+        None
+    }
 }
 
 impl OP {
@@ -43,67 +78,75 @@ impl OP {
     }
 }
 
-pub fn day14() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
+#[derive(Debug, PartialEq)]
+struct Setting {
+    mask: OP,
+    code: Vec<OP>,
+}
 
-    let mut dic: HashMap<usize, usize> = HashMap::new();
-    // let mut nvalids = 0;
-
-    let mut mask = OP::Mask(0, 0, Vec::new());
-    for c in buf.split('\n') {
-        if let Some(op) = parse(c) {
-            // dbg!(&op);
+impl ProblemSolver<OP, usize, usize> for Setting {
+    const DAY: usize = 14;
+    const DELIMITER: &'static str = "\n";
+    fn default() -> Self {
+        Setting {
+            mask: OP::Mask(0, 0, vec![]),
+            code: Vec::new(),
+        }
+    }
+    fn insert(&mut self, op: OP) {
+        self.code.push(op);
+    }
+    fn part1(&mut self) -> usize {
+        let mut mem: HashMap<usize, usize> = HashMap::new();
+        for op in self.code.iter() {
             match op {
                 OP::Mask(_, _, _) => {
-                    mask = op;
+                    self.mask = op.clone();
                 }
                 OP::Set(a, v) => {
-                    // let entry = dic.entry(a).or_insert(0);
-                    // *entry = mask.apply1_to(v);
-                    // dbg!((v, &mask, *entry));
-                    for addr in mask.apply2_to(a).iter() {
-                        let entry = dic.entry(*addr).or_insert(0);
-                        *entry = v;
-                        // dbg!((addr, v));
+                    *mem.entry(*a).or_insert(0) = self.mask.apply1_to(*v);
+                }
+            }
+        }
+        mem.values().sum::<usize>()
+    }
+    fn part2(&mut self) -> usize {
+        let mut mem: HashMap<usize, usize> = HashMap::new();
+        for op in self.code.iter() {
+            match op {
+                OP::Mask(_, _, _) => {
+                    self.mask = op.clone();
+                }
+                OP::Set(a, v) => {
+                    for addr in self.mask.apply2_to(*a).iter() {
+                        *mem.entry(*addr).or_insert(0) = *v;
                     }
                 }
             }
         }
+        mem.values().sum::<usize>()
     }
-    dbg!(&dic);
-    dbg!(dic.values().sum::<usize>());
 }
 
-fn parse(str: &str) -> Option<OP> {
-    lazy_static! {
-        static ref MASK: Regex = Regex::new(r"^mask = ((X|0|1)+)").expect("wrong");
-        static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Answer::Part1(165)
+        );
     }
-    if let Some(m) = MASK.captures(str) {
-        let zeros = m[1]
-            .chars()
-            .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
-        let ones = m[1]
-            .chars()
-            .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
-        let wilds = m[1]
-            .chars()
-            .enumerate()
-            .fold(Vec::new(), |mut v, (i, letter)| {
-                if letter == 'X' {
-                    v.push(35 - i);
-                    v
-                } else {
-                    v
-                }
-            });
-        return Some(OP::Mask(zeros, ones, wilds));
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            Setting::parse(Description::FileTag("test2".to_string())).run(2),
+            Answer::Part2(208)
+        );
     }
-    if let Some(m) = SET.captures(str) {
-        let address = m[1].parse::<usize>().unwrap();
-        let val = m[2].parse::<usize>().unwrap();
-        return Some(OP::Set(address, val));
-    }
-    None
 }
