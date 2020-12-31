@@ -286,7 +286,6 @@ mod test {
     }
     #[test]
     fn test_part2() {
-        const TEST2: &str = "0\n1\n2";
         assert_eq!(
             Setting::parse(Description::FileTag("test".to_string())).run(2),
             Answer::Part2(286)
