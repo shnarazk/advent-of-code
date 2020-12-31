@@ -271,6 +271,7 @@ mod test {
         );
     }
 
+    #[allow(dead_code)]
     // #[test] too long
     fn test_part2() {
         assert_eq!(
