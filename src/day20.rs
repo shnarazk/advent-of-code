@@ -1,15 +1,102 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
+    crate::{Description, ProblemObject, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
-    std::{
-        collections::{HashMap, HashSet},
-        io::{stdin, Read},
-        ops::Index,
-    },
+    std::ops::Index,
 };
+
+pub fn day20(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
+}
+
+#[derive(Debug, PartialEq)]
+struct Object {}
+
+impl ProblemObject for Tile {
+    fn parse(b: &str) -> Option<Tile> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^Tile (\d+):$").expect("error");
+        }
+        let mut lines = b.split('\n').collect::<Vec<_>>();
+        if let Some(m) = RE.captures(lines[0]) {
+            let id = m[1].parse::<usize>().expect("wrong");
+            if let Some(l) = lines.last() {
+                if l.is_empty() {
+                    lines.pop();
+                }
+            }
+            return Some(Tile::from(id, &lines[1..]));
+        }
+        None
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct Setting {
+    tile: Vec<Tile>,
+}
+
+impl ProblemSolver<Tile, usize, usize> for Setting {
+    const DAY: usize = 20;
+    const DELIMITER: &'static str = "\n\n";
+    fn default() -> Self {
+        Setting { tile: Vec::new() }
+    }
+    fn insert(&mut self, t: Tile) {
+        self.tile.push(t);
+    }
+    fn part1(&mut self) -> usize {
+        let p = eval(&self.tile).expect("impossible");
+        for (t, _, _) in p.iter() {
+            print!("{:?}, ", t.id);
+        }
+        println!();
+        let len = self.tile.len();
+        let l = (len as f64).sqrt() as usize;
+        p[0].0.id * p[l - 1].0.id * p[len - l].0.id * p[len - 1].0.id
+    }
+    fn part2(&mut self) -> usize {
+        let mut p = eval(&self.tile).expect("impossible");
+        let len = self.tile.len();
+        let l = (len as f64).sqrt() as usize;
+        // part 2
+        for (t, r, f) in &p {
+            print!("({}, {}, {}) ", t.id, r, f);
+        }
+        println!();
+        for i in 0..l {
+            for j in 0..l {
+                let (t, r, f) = &p[i * l + j];
+                print!("({}, {}, {}) ", t.id, r, f);
+            }
+            println!();
+        }
+        let mut image: Vec<String> = Vec::new();
+        let with_border = false;
+        for _ in 0..l {
+            let mut pasted: Vec<String> = p[0].0.new_empty_image(with_border);
+            for _ in 0..l {
+                let (t, r, f) = p.remove(0);
+                t.paste_image(with_border, r, f, &mut pasted);
+            }
+            for l in &pasted {
+                image.push(l.to_string());
+            }
+        }
+        for l in &image {
+            println!("{}", l);
+        }
+        let mut total = 0;
+        for rotate in 0..4 {
+            for flip in 0..2 {
+                let i = transose_image(&image, rotate, flip);
+                let n = check_sea_monstar(&i);
+                total += n;
+            }
+        }
+        count_sharps(&image) - total * 15
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Tile {
@@ -118,35 +205,10 @@ impl Tile {
         flip: usize,
         placed: &[(Tile, usize, usize)],
     ) -> bool {
-        let mut ok = true;
-        for (i, (t, _, _)) in placed.iter().enumerate() {
-            if t.id != vec![1951, 2311, 3079, 2729, 1427, 2473, 2971, 1489, 1171][i] {
-                ok = false;
-                break;
-            }
-        }
         let loc = placed.len();
-        if loc < 4 {
-            ok = false;
-        }
         // check upper tile which number is id - align
         if align <= loc {
             let (upper, r, f) = &placed[loc - align];
-            if ok && self.id == 2473 && upper.id == 3079 {
-                println!(
-                    "{:?}, try ({}, {}, {}): {} with upper ({}, {}, {}): {}",
-                    // placed.len(),
-                    placed.iter().map(|(t, _, _)| t.id).collect::<Vec<usize>>(),
-                    self.id,
-                    rotate,
-                    flip,
-                    self.transpose(rotate, flip)[Dir::TOP.as_index()],
-                    upper.id,
-                    r,
-                    f,
-                    upper.transpose(*r, *f)[Dir::TOP.opposite()],
-                );
-            }
             if self.transpose(rotate, flip)[Dir::TOP.as_index()]
                 != upper.transpose(*r, *f)[Dir::TOP.opposite()]
             {
@@ -155,22 +217,6 @@ impl Tile {
         }
         if 0 < loc % align {
             let (left, r, f) = &placed[loc - 1];
-            if ok
-            /* && self.id == 1427 && left.id == 2729 */
-            {
-                println!(
-                    "{:?}, try ({}, {}, {}): {} with left ({}, {}, {}): {}",
-                    placed.iter().map(|(t, _, _)| t.id).collect::<Vec<usize>>(),
-                    self.id,
-                    rotate,
-                    flip,
-                    self.transpose(rotate, flip)[Dir::LEFT.as_index()],
-                    left.id,
-                    r,
-                    f,
-                    left.transpose(*r, *f)[Dir::LEFT.opposite()],
-                );
-            }
             if self.transpose(rotate, flip)[Dir::LEFT.as_index()]
                 != left.transpose(*r, *f)[Dir::LEFT.opposite()]
             {
@@ -349,13 +395,6 @@ pub fn decode(line: &[char]) -> usize {
         .fold(0, |acum, c| acum * 2 + ((*c == '#') as usize))
 }
 
-pub fn day20() {
-    let mut buf = String::new();
-    stdin().read_to_string(&mut buf).expect("wrong");
-    // check_ans(&buf);
-    read(&buf);
-}
-
 fn count_sharps(vec: &[String]) -> usize {
     vec.iter()
         .map(|line| line.chars().filter(|c| *c == '#').count())
@@ -372,12 +411,11 @@ fn check_sea_monstar(image: &[String]) -> usize {
     let len = image.len();
     for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
         for j in 0..line.len() {
-            if let Some(m) = MONSTER_BODY.captures(&line[j..]) {
+            if MONSTER_BODY.captures(&line[j..]).is_some() {
                 if MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
                     && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
                 {
                     count += 1;
-                    dbg!((i, j));
                 }
             }
         }
@@ -385,107 +423,11 @@ fn check_sea_monstar(image: &[String]) -> usize {
     count
 }
 
-fn check_ans(str: &str) {
-    for n in str.split(' ') {
-        if let Ok(v) = n.parse::<isize>() {
-            if 0 < v {
-                dbg!(v);
-            }
-        }
-    }
-}
-
-fn read(str: &str) -> usize {
-    let mut tile: Vec<Tile> = Vec::new();
-    for b in str.split("\n\n") {
-        // c.split_ascii_whitespace()
-        if let Some(t) = parse(b) {
-            // dbg!(&t);
-            tile.push(t);
-        }
-    }
-    if let Some(mut p) = eval(&tile) {
-        // assert_eq!(p.len(), 144);
-        for (t, _, _) in p.iter() {
-            print!("{:?}, ", t.id);
-        }
-        println!();
-        let l = (tile.len() as f64).sqrt() as usize;
-        println!(
-            "{}",
-            p[0].0.id * p[l - 1].0.id * p[tile.len() - l].0.id * p[tile.len() - 1].0.id
-        );
-
-        // part 2
-        for (t, r, f) in &p {
-            print!("({}, {}, {}) ", t.id, r, f);
-        }
-        println!();
-        let line: Vec<Vec<String>> = Vec::new();
-        for i in 0..l {
-            for j in 0..l {
-                let (t, r, f) = &p[i * l + j];
-                print!("({}, {}, {}) ", t.id, r, f);
-            }
-            println!();
-        }
-        let mut image: Vec<String> = Vec::new();
-        let with_border = false;
-        for i in 0..l {
-            let mut pasted: Vec<String> = p[0].0.new_empty_image(with_border);
-            for j in 0..l {
-                let (t, r, f) = p.remove(0);
-                t.paste_image(with_border, r, f, &mut pasted);
-            }
-            for l in &pasted {
-                image.push(l.to_string());
-            }
-        }
-        for l in &image {
-            println!("{}", l);
-        }
-        let mut total = 0;
-        for rotate in 0..4 {
-            for flip in 0..2 {
-                let i = transose_image(&image, rotate, flip);
-                let n = check_sea_monstar(&i);
-                total += n;
-                if 0 < n {
-                    dbg!((rotate, flip, n));
-                    dbg!(count_sharps(&i) - n * 15);
-                }
-            }
-        }
-        dbg!(count_sharps(&image) - total * 15);
-        count_sharps(&image) - total * 15
-    } else {
-        panic!("failed");
-    }
-}
-
-fn parse(b: &str) -> Option<Tile> {
-    let mut lines = b.split('\n').collect::<Vec<_>>();
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^Tile (\d+):$").expect("error");
-    }
-    if let Some(m) = RE.captures(lines[0]) {
-        let id = m[1].parse::<usize>().expect("wrong");
-        if let Some(l) = lines.last() {
-            if l.is_empty() {
-                lines.pop();
-            }
-        }
-        return Some(Tile::from(id, &lines[1..]));
-    }
-    None
-}
-
 fn eval(tile: &[Tile]) -> Option<Vec<(Tile, usize, usize)>> {
     let len = (tile.len() as f64).sqrt() as usize;
     let used: Vec<(Tile, usize, usize)> = Vec::new();
     let remain = tile.to_vec();
     println!("#tiles: {}", tile.len());
-    // make_cnf(&tile);
     search(len, used, remain)
 }
 
@@ -519,282 +461,15 @@ fn search(
     None
 }
 
-fn imply(a: usize, b: usize) -> Vec<isize> {
-    vec![-(a as isize), b as isize]
-}
-
-fn xor(a: usize, b: usize) -> Vec<isize> {
-    vec![-(a as isize), -(b as isize)]
-}
-
-const VARS_IN_CELL: usize = 144 * 8;
-
-fn base(i: usize, j: usize) -> usize {
-    (i * 12 + j) * VARS_IN_CELL
-}
-
-fn state_index(n: usize, rotate: usize, flip: usize) -> usize {
-    n * 8 + rotate * 2 + flip
-}
-
-fn state_var(i: usize, j: usize, n: usize, rotate: usize, flip: usize) -> usize {
-    base(i, j) + state_index(n, rotate, flip) + 1
-}
-
-fn dump_clause(force: bool, clause: &[isize]) {
-    if !force {
-        return;
-    }
-    for (i, l) in clause.iter().enumerate() {
-        print!("{} ", l);
-    }
-    println!("0");
-}
-
-fn make_cnf(tile: &[Tile]) {
-    let dump = true;
-    let mut dic: HashMap<usize, [usize; 4]> = HashMap::new();
-    for (n, t) in tile.iter().enumerate() {
-        for rotate in 0..4 {
-            for flip in 0..2 {
-                *dic.entry(state_index(n, rotate, flip)).or_insert([0; 4]) =
-                    t.transpose(rotate, flip);
-            }
-        }
-    }
-    // for (i, n) in dic.iter() {
-    //     println!("val: {}, occur: {:?}", i, n);
-    // }
-    const NVAR: usize = 165316;
-    const NRULE: usize = 557976408;
-    println!("p cnf {} {}", NVAR, NRULE);
-    let mut nrule = 0;
-    let mut nvar = 0;
-    // at least law
-    for i in 0..12 {
-        for j in 0..12 {
-            let mut vec: Vec<isize> = Vec::new();
-            for n in 0..144 {
-                for r in 0..4 {
-                    for f in 0..2 {
-                        vec.push(state_var(i, j, n, r, f) as isize);
-                    }
-                }
-            }
-            // dump_clause(vec);
-            nrule += 1;
-        }
-    }
-
-    // at most law
-    for i in 0..12 {
-        for j in 0..12 {
-            for n0 in 0..144 {
-                for r0 in 0..4 {
-                    for f0 in 0..2 {
-                        for n1 in 0..144 {
-                            for r1 in 0..4 {
-                                for f1 in 0..2 {
-                                    let v0 = state_var(i, j, n0, r0, f0);
-                                    let v1 = state_var(i, j, n1, r1, f1);
-                                    nvar = nvar.max(v0).max(v1);
-                                    if v0 != v1 {
-                                        dump_clause(dump, &xor(v0, v1));
-                                        nrule += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // excusive law
-    for n in 0..144 {
-        for i0 in 0..12 {
-            for j0 in 0..12 {
-                for r0 in 0..4 {
-                    for f0 in 0..2 {
-                        for i1 in 0..12 {
-                            for j1 in 0..12 {
-                                for r1 in 0..4 {
-                                    for f1 in 0..2 {
-                                        let v0 = state_var(i0, j0, n, r0, f0);
-                                        let v1 = state_var(i1, j1, n, r1, f1);
-                                        nvar = nvar.max(v0).max(v1);
-                                        dump_clause(dump, &xor(v0, v1));
-                                        nrule += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // right law
-    for i in 0..12 {
-        for j in 0..11 {
-            for n in 0..144 {
-                for r in 0..4 {
-                    for f in 0..2 {
-                        let e = tile[n].transpose(r, f)[Dir::RIGHT.as_index()];
-                        let v0 = state_var(i, j, n, r, f);
-                        for (i1, e1) in dic.iter() {
-                            if e != e1[Dir::LEFT.as_index()] {
-                                let v1 = base(i, j + 1) + i1 + 1;
-                                nvar = nvar.max(v0).max(v1);
-                                dump_clause(dump, &xor(v0, v1));
-                                nrule += 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // down law
-    for i in 0..11 {
-        for j in 0..12 {
-            for n in 0..144 {
-                for r in 0..4 {
-                    for f in 0..2 {
-                        let e = tile[n].transpose(r, f)[Dir::BOTTOM.as_index()];
-                        let v0 = state_var(i, j, n, f, r);
-                        for (i1, e1) in dic.iter() {
-                            if e != e1[Dir::TOP.as_index()] {
-                                let v1 = base(i + 1, j) + i1 + 1;
-                                nvar = nvar.max(v0).max(v1);
-                                dump_clause(dump, &xor(v0, v1));
-                                nrule += 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    assert_eq!(NVAR, nvar);
-    assert_eq!(NRULE, nrule);
-    if !dump {
-        dbg!(nvar, nrule);
-    }
-}
-
+#[cfg(test)]
 mod test {
-    use super::*;
-    const TEST1: &str = "\
-Tile 2311:
-..##.#..#.
-##..#.....
-#...##..#.
-####.#...#
-##.##.###.
-##...#.###
-.#.#.#..##
-..#....#..
-###...#.#.
-..###..###
+    use {
+        super::*,
+        crate::{Answer, Description},
+    };
 
-Tile 1951:
-#.##...##.
-#.####...#
-.....#..##
-#...######
-.##.#....#
-.###.#####
-###.##.##.
-.###....#.
-..#.#..#.#
-#...##.#..
-
-Tile 1171:
-####...##.
-#..##.#..#
-##.#..#.#.
-.###.####.
-..###.####
-.##....##.
-.#...####.
-#.##.####.
-####..#...
-.....##...
-
-Tile 1427:
-###.##.#..
-.#..#.##..
-.#.##.#..#
-#.#.#.##.#
-....#...##
-...##..##.
-...#.#####
-.#.####.#.
-..#..###.#
-..##.#..#.
-
-Tile 1489:
-##.#.#....
-..##...#..
-.##..##...
-..#...#...
-#####...#.
-#..#.#.#.#
-...#.#.#..
-##.#...##.
-..##.##.##
-###.##.#..
-
-Tile 2473:
-#....####.
-#..#.##...
-#.##..#...
-######.#.#
-.#...#.#.#
-.#########
-.###.#..#.
-########.#
-##...##.#.
-..###.#.#.
-
-Tile 2971:
-..#.#....#
-#...###...
-#.#.###...
-##.##..#..
-.#####..##
-.#..####.#
-#..#.#..#.
-..####.###
-..#.#.###.
-...#.#.#.#
-
-Tile 2729:
-...#.#.#.#
-####.#....
-..#.#.....
-....#..#.#
-.##..##.#.
-.#.####...
-####.#.#..
-##.####...
-##..#.##..
-#.##...##.
-
-Tile 3079:
-#.#.#####.
-.#..######
-..#.......
-######....
-####.#..#.
-.#...#.##.
-#.#####.##
-..#.###...
-..#.......
-..#.###...";
     #[test]
-    fn test1() {
+    fn test_basic_computations() {
         assert_eq!(usize::from_str_radix("0010111000", 2), Ok(184));
         assert_eq!(usize::from_str_radix("0101011100", 2), Ok(348));
         assert_eq!(
@@ -805,44 +480,21 @@ Tile 3079:
         assert_eq!(usize::from_str_radix("0111110010", 2), Ok(498));
         assert_eq!(decode(&"0#####00#0".chars().collect::<Vec<char>>()), 498);
         assert_eq!(usize::from_str_radix("0100111110", 2), Ok(318));
-        // return;
-        // assert_eq!(decode(&"#.##...##.".chars().collect::<Vec<char>>()),564);
-        read(TEST1);
-        /*
-        if let Some(mut result) =  {
-            assert_eq!(
-                result[0].0.id * result[2].0.id * result[6].0.id * result[8].0.id,
-                20899048083289
-            );
-            for (t, r, f) in &result {
-                print!("({}, {}, {}) ", t.id, r, f);
-            }
-            println!();
-            let line: Vec<Vec<String>> = Vec::new();
-            for i in 0..3 {
-                for j in 0..3 {
-                    let (t, r, f) = &result[i * 3 + j];
-                    print!("({}, {}, {}) ", t.id, r, f);
-                }
-                println!();
-            }
-            let mut image: Vec<String> = Vec::new();
-            let with_border = false;
-            for i in 0..3 {
-                let mut pasted: Vec<String> = result[0].0.new_empty_image(with_border);
-                for j in 0..3 {
-                    let (t, r, f) = result.remove(0);
-                    t.paste_image(with_border, r, f, &mut pasted);
-                }
-                for l in &pasted {
-                    println!("{}", l);
-                    image.push(l.to_string());
-                }
-            }
-            panic!("works now");
-        } else {
-            panic!("failed");
-        }
-         */
+    }
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(
+            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Answer::Part1(20899048083289)
+        );
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            Setting::parse(Description::FileTag("test1".to_string())).run(2),
+            Answer::Part2(273)
+        );
     }
 }
