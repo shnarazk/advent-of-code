@@ -90,6 +90,7 @@ impl ProblemSolver<Instruction, isize, isize> for Machine {
 
 const ABORT: usize = 10_000_000_000_000;
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq)]
 struct CPU {
     accumulator: isize,

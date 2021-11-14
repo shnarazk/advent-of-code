@@ -50,7 +50,7 @@ impl ProblemSolver<usize, usize, usize> for Setting {
                 if !set.insert(*n) {
                     panic!("this requires HashMap");
                 }
-                assert!(set.contains(&n));
+                assert!(set.contains(n));
             } else {
                 return *n;
             }

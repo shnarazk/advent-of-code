@@ -47,8 +47,8 @@ impl ProblemSolver<Tile, usize, usize> for Setting {
     }
     fn part1(&mut self) -> usize {
         let p = eval(&self.tile).expect("impossible");
-        for (t, _, _) in p.iter() {
-            print!("{:?}, ", t.id);
+        for (ti, _, _) in p.iter() {
+            print!("{:?}, ", ti.id);
         }
         println!();
         let len = self.tile.len();
@@ -66,8 +66,8 @@ impl ProblemSolver<Tile, usize, usize> for Setting {
         println!();
         for i in 0..l {
             for j in 0..l {
-                let (t, r, f) = &p[i * l + j];
-                print!("({}, {}, {}) ", t.id, r, f);
+                let (ti, r, f) = &p[i * l + j];
+                print!("({}, {}, {}) ", ti.id, r, f);
             }
             println!();
         }
@@ -76,8 +76,8 @@ impl ProblemSolver<Tile, usize, usize> for Setting {
         for _ in 0..l {
             let mut pasted: Vec<String> = p[0].0.new_empty_image(with_border);
             for _ in 0..l {
-                let (t, r, f) = p.remove(0);
-                t.paste_image(with_border, r, f, &mut pasted);
+                let (ti, r, f) = p.remove(0);
+                ti.paste_image(with_border, r, f, &mut pasted);
             }
             for l in &pasted {
                 image.push(l.to_string());
@@ -411,12 +411,11 @@ fn check_sea_monstar(image: &[String]) -> usize {
     let len = image.len();
     for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
         for j in 0..line.len() {
-            if MONSTER_BODY.captures(&line[j..]).is_some() {
-                if MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
-                    && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
-                {
+            if MONSTER_BODY.captures(&line[j..]).is_some() 
+                && MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
+                && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
+            {
                     count += 1;
-                }
             }
         }
     }

@@ -13,7 +13,10 @@ pub fn day17(part: usize, desc: Description) {
 
 const RANGE: isize = 17;
 
+#[allow(clippy::upper_case_acronyms)]
 type LOC = (isize, isize, isize);
+
+#[allow(clippy::upper_case_acronyms)]
 type LOC4 = (isize, isize, isize, isize);
 
 #[derive(Debug, PartialEq)]

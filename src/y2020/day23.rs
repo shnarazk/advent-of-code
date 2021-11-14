@@ -57,13 +57,12 @@ impl Config {
         }
         // dbg!(&next_cup[1..]);
 
+        let last_of_init = init.last().unwrap();
         if init.len() < len {
-            let last_of_init = init.last().unwrap();
             next_cup[*last_of_init] = init.len() + 1;
             let last = next_cup.len() - 1;
             next_cup[last] = init[0];
         } else {
-            let last_of_init = init.last().unwrap();
             next_cup[*last_of_init] = init[0];
         }
         // dbg!(&next_cup[1..]);

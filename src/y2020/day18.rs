@@ -7,6 +7,7 @@ pub fn day18(part: usize, desc: Description) {
     dbg!(Setting::parse(desc).run(part));
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Op {
     ADD,
@@ -15,6 +16,7 @@ enum Op {
     SUB,
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq)]
 enum Expr {
     BIOP(Op, Box<Expr>, Box<Expr>),

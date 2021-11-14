@@ -80,28 +80,28 @@ fn valid(key: &str, val: &str) -> bool {
     match key {
         "byr" => {
             if let Ok(y) = val.parse::<usize>() {
-                return 1920 <= y && y <= 2002;
+                return (1920..=2002).contains(&y);
             }
         }
         "iyr" => {
             if let Ok(y) = val.parse::<usize>() {
-                return 2010 <= y && y <= 2020;
+                return (2010..=2020).contains(&y);
             }
         }
         "eyr" => {
             if let Ok(y) = val.parse::<usize>() {
-                return 2020 <= y && y <= 2030;
+                return (2020..=2030).contains(&y);
             }
         }
         "hgt" => {
             if let Some(m) = HIGHT.captures(val) {
                 if m[2] == *"cm" {
                     if let Ok(v) = m[1].parse::<usize>() {
-                        return 150 <= v && v <= 193;
+                        return (150..=193).contains(&v);
                     }
                 } else if m[2] == *"in" {
                     if let Ok(v) = m[1].parse::<usize>() {
-                        return 59 <= v && v <= 76;
+                        return (59..=76).contains(&v);
                     }
                 }
             }

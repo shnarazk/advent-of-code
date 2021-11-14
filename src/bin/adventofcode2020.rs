@@ -1,8 +1,11 @@
 use {
-    adventofcode2020::{
-        day01, day02, day03, day04, day05, day06, day07, day08, day09, day10, day11, day12, day13,
-        day14, day15, day16, day17, day18, day19, day20, day21, day22, day23, day24, day25,
-        template, Description,
+    adventofcode::{Description,
+                   y2020::{
+                       day01, day02, day03, day04, day05, day06, day07, day08, day09, day10, day11,
+                       day12, day13, day14, day15, day16, day17, day18, day19, day20, day21, day22,
+                       day23, day24, day25,
+                       template, 
+                   },
     },
     std::env::args,
 };
@@ -27,20 +30,20 @@ pub fn main() {
         .parse::<usize>()
         .unwrap_or(0);
     let desc: Description = if let Some(ext) = a.next() {
-        Description::FileTag(ext.to_string())
+        Description::FileTag(ext)
     } else {
         Description::None
     };
     match day {
-        01 => day01(part, desc),
-        02 => day02(part, desc),
-        03 => day03(part, desc),
-        04 => day04(part, desc),
-        05 => day05(part, desc),
-        06 => day06(part, desc),
-        07 => day07(part, desc),
-        08 => day08(part, desc),
-        09 => day09(part, desc),
+        1 => day01(part, desc),
+        2 => day02(part, desc),
+        3 => day03(part, desc),
+        4 => day04(part, desc),
+        5 => day05(part, desc),
+        6 => day06(part, desc),
+        7 => day07(part, desc),
+        8 => day08(part, desc),
+        9 => day09(part, desc),
         10 => day10(part, desc),
         11 => day11(part, desc),
         12 => day12(part, desc),

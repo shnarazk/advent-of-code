@@ -34,10 +34,8 @@ impl ProblemObject for OP {
                 .fold(Vec::new(), |mut v, (i, letter)| {
                     if letter == 'X' {
                         v.push(35 - i);
-                        v
-                    } else {
-                        v
                     }
+                    v
                 });
             return Some(OP::Mask(zeros, ones, wilds));
         }

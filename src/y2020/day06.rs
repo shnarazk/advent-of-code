@@ -22,7 +22,7 @@ impl ProblemSolver<String, usize, usize> for Setting {
         let mut dic: HashMap<char, usize> = HashMap::new();
         let n = line.lines().count();
         for ch in line.chars() {
-            if 'a' <= ch && ch <= 'z' {
+            if ('a'..='z').contains(&ch) {
                 *dic.entry(ch).or_insert(0) += 1;
             }
         }
