@@ -27,6 +27,7 @@ pub trait ProblemSolver<
     Output2: Sized + Debug + PartialEq,
 >: Debug + Sized
 {
+    const YEAR: usize;
     const DAY: usize;
     const DELIMITER: &'static str;
     fn default() -> Self;
@@ -35,8 +36,8 @@ pub trait ProblemSolver<
     }
     fn input_filename(desc: Description) -> Option<String> {
         match desc {
-            Description::FileTag(tag) => Some(format!("input-day{:>02}-{}.txt", Self::DAY, tag)),
-            Description::None => Some(format!("input-day{:>02}.txt", Self::DAY)),
+            Description::FileTag(tag) => Some(format!("{}/input-day{:>02}-{}.txt", Self::YEAR, Self::DAY, tag)),
+            Description::None => Some(format!("{}/input-day{:>02}.txt", Self::YEAR, Self::DAY)),
             _ => None,
         }
     }

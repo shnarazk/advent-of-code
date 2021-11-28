@@ -209,6 +209,7 @@ impl<DIM: Debug + Eq + Hash + PartialEq> ProblemSolver<(), usize, usize> for Wor
 where
     World<DIM>: CellParser,
 {
+    const YEAR: usize = 2020;
     const DAY: usize = 17;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {

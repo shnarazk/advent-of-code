@@ -107,6 +107,7 @@ struct World {
 }
 
 impl ProblemSolver<Location, usize, usize> for World {
+    const YEAR: usize = 2020;
     const DAY: usize = 24;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, loc: Location) {

@@ -61,6 +61,7 @@ struct Machine {
 }
 
 impl ProblemSolver<Instruction, isize, isize> for Machine {
+    const YEAR: usize = 2020;
     const DAY: usize = 8;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {

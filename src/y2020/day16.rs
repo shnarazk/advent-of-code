@@ -20,6 +20,7 @@ struct Setting {
 }
 
 impl ProblemSolver<(), usize, usize> for Setting {
+    const YEAR: usize = 2020;
     const DAY: usize = 16;
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, _object: ()) {}

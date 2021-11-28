@@ -27,6 +27,7 @@ struct Setting {
 }
 
 impl ProblemSolver<Chars, usize, usize> for Setting {
+    const YEAR: usize = 2020;
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
