@@ -90,18 +90,18 @@ pub trait ProblemSolver<
     fn run(&mut self, part: usize) -> Answer<Output1, Output2> {
         match part {
             0 => {
-                println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
+                println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
                 let ans1 = self.part1();
-                println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
+                println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
                 let ans2 = self.part2();
                 Answer::Answers(ans1, ans2)
             }
             1 => {
-                println!("# Advent of Code 2020: day {}, part 1", Self::DAY);
+                println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
                 Answer::Part1(self.part1())
             }
             2 => {
-                println!("# Advent of Code 2020: day {}, part 2", Self::DAY);
+                println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
                 Answer::Part2(self.part2())
             }
             _ => Answer::None,

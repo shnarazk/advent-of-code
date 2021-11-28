@@ -6,10 +6,12 @@ use {
 pub fn main() {
     if args().count() == 1 {
         println!("USAGE:");
-        println!(" $0 12 1 test1\t12日目のパート1をdata/input-day12-test1.txtを元に実行");
-        println!(" $0 12 2\t\t12日目のパート2をdata/input-day12.txtを元に実行");
-        println!(" $0 23 1 -test\t23日目のパート1を（'-test'フラグ付き、入力データなしで）実行");
-        println!(" $0 23 2 -\t22日目のパート2を（'-'フラグ付き、入力データなしで）実行");
+        println!(" $0 DD P test1\tDD日目のパートPをdata/2021/input-dayDD-testP.txtを元に実行");
+        println!(" $0 DD P\tDD日目のパートPをdata/2021/input-dayDD.txtを元に実行");
+        println!(" $0 DD P -test\tDD日目のパートPを（'-test'フラグ付き、入力データなしで）実行");
+        println!(" $0 DD P -\tDD日目のパートPを（'-'フラグ付き、入力データなしで）実行");
+        println!("option '-test' \t??");
+        println!("option '-' \t??");
         panic!();
     }
     let mut a = args();
