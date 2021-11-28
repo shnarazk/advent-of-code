@@ -1,10 +1,9 @@
 use std::{fmt::Debug, fs::File, io::prelude::*};
-pub mod y2020;
 pub mod template;
+pub mod y2020;
+pub mod y2021;
 
-pub use {
-   y2020::*, template::template,
-};
+pub use {y2020::*, y2021::*};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Description {
@@ -36,7 +35,12 @@ pub trait ProblemSolver<
     }
     fn input_filename(desc: Description) -> Option<String> {
         match desc {
-            Description::FileTag(tag) => Some(format!("{}/input-day{:>02}-{}.txt", Self::YEAR, Self::DAY, tag)),
+            Description::FileTag(tag) => Some(format!(
+                "{}/input-day{:>02}-{}.txt",
+                Self::YEAR,
+                Self::DAY,
+                tag
+            )),
             Description::None => Some(format!("{}/input-day{:>02}.txt", Self::YEAR, Self::DAY)),
             _ => None,
         }

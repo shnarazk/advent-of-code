@@ -412,11 +412,11 @@ fn check_sea_monstar(image: &[String]) -> usize {
     let len = image.len();
     for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
         for j in 0..line.len() {
-            if MONSTER_BODY.captures(&line[j..]).is_some() 
+            if MONSTER_BODY.captures(&line[j..]).is_some()
                 && MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
                 && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
             {
-                    count += 1;
+                count += 1;
             }
         }
     }
