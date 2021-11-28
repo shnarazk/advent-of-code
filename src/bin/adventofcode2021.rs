@@ -9,6 +9,7 @@ pub fn main() {
         println!(" $0 DD\t\tDD日目のパート{{1, 2}}をdata/2021/input-dayDD.txtを入力として実行");
         println!(" $0 DD P\tDD日目のパートPをdata/2021/input-dayDD.txtを入力として実行");
         println!(" $0 DD P TTT\tDD日目のパートPをdata/2021/input-dayDD-TTT.txtを入力として実行");
+        println!(" $0 DD P -\tDD日目のパートPを入力なしで実行");
         panic!();
     }
     let mut a = args();
@@ -22,10 +23,10 @@ pub fn main() {
         .unwrap_or_else(|| "0".to_string())
         .parse::<usize>()
         .unwrap_or(0);
-    let desc: Description = if let Some(ext) = a.next() {
-        Description::FileTag(ext)
-    } else {
-        Description::None
+    let desc: Description = match a.next() {
+        Some(ext) if ext == "-" => Description::TestData("".to_string()),
+        Some(ext) => Description::FileTag(ext),
+        None => Description::None,
     };
     match day {
         0_ => day00::go(part, desc),

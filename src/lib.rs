@@ -70,10 +70,10 @@ pub trait ProblemSolver<
         None
     }
     fn load_data(desc: Description) -> Option<String> {
-        if let Description::TestData(s) = desc {
-            Some(s)
-        } else {
-            None
+        match desc {
+            Description::TestData(s) if s.is_empty() => None,
+            Description::TestData(s) => Some(s),
+            _ => None,
         }
     }
     fn parse(desc: Description) -> Self {
