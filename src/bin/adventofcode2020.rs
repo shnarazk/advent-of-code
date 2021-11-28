@@ -1,5 +1,5 @@
 use {
-    adventofcode::{y2020::*, Description},
+    adventofcode::{template::template, y2020::*, Description},
     std::env::args,
 };
 

@@ -1,17 +1,14 @@
 use {
-    adventofcode::{y2021::*, Description},
+    adventofcode::{template::template, y2021::*, Description},
     std::env::args,
 };
 
 pub fn main() {
     if args().count() == 1 {
         println!("USAGE:");
-        println!(" $0 DD P test1\tDD日目のパートPをdata/2021/input-dayDD-testP.txtを元に実行");
-        println!(" $0 DD P\tDD日目のパートPをdata/2021/input-dayDD.txtを元に実行");
-        println!(" $0 DD P -test\tDD日目のパートPを（'-test'フラグ付き、入力データなしで）実行");
-        println!(" $0 DD P -\tDD日目のパートPを（'-'フラグ付き、入力データなしで）実行");
-        println!("option '-test' \t??");
-        println!("option '-' \t??");
+        println!(" $0 DD\t\tDD日目のパート{{1, 2}}をdata/2021/input-dayDD.txtを入力として実行");
+        println!(" $0 DD P\tDD日目のパートPをdata/2021/input-dayDD.txtを入力として実行");
+        println!(" $0 DD P TTT\tDD日目のパートPをdata/2021/input-dayDD-TTT.txtを入力として実行");
         panic!();
     }
     let mut a = args();
@@ -31,15 +28,16 @@ pub fn main() {
         Description::None
     };
     match day {
-        // _1 => day01(part, desc),
-        // _2 => day02(part, desc),
-        // _3 => day03(part, desc),
-        // _4 => day04(part, desc),
-        // _5 => day05(part, desc),
-        // _6 => day06(part, desc),
-        // _7 => day07(part, desc),
-        // _8 => day08(part, desc),
-        // _9 => day09(part, desc),
+        0_ => day00::go(part, desc),
+        // 1_ => day01(part, desc),
+        // 2_ => day02(part, desc),
+        // 3_ => day03(part, desc),
+        // 4_ => day04(part, desc),
+        // 5_ => day05(part, desc),
+        // 6_ => day06(part, desc),
+        // 7_ => day07(part, desc),
+        // 8_ => day08(part, desc),
+        // 9_ => day09(part, desc),
         // 10 => day10(part, desc),
         // 11 => day11(part, desc),
         // 12 => day12(part, desc),

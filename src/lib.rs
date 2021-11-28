@@ -113,6 +113,9 @@ pub trait ProblemSolver<
     fn part2(&mut self) -> Output2 {
         todo!("part2 is not yet implemented.")
     }
+    fn go(part: usize, desc: Description) {
+        dbg!(Self::parse(desc).run(part));
+    }
 }
 
 pub trait ProblemObject: Debug + Sized {
