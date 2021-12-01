@@ -7,18 +7,7 @@ pub fn go(part: usize, desc: Description) {
     dbg!(Setting::parse(desc).run(part));
 }
 
-// #[derive(Debug, PartialEq)]
 type Object = usize;
-
-// impl ProblemObject for Object {
-//     fn parse(s: &str) -> Option<Self> {
-//         if let Ok(x) = s.parse::<usize>() {
-//             Some(x)
-//         } else {
-//             None
-//         }
-//     }
-// }
 
 #[derive(Debug, PartialEq)]
 struct Setting {
