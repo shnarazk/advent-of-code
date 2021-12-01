@@ -38,50 +38,42 @@ pub trait ProblemSolver<
         todo!("insert is not implemented")
     }
     /// UNDER THE HOOD
-    fn input_filename(desc: Description) -> Option<String> {
-        match desc {
-            Description::FileTag(tag) => Some(format!(
-                "{}/input-day{:>02}-{}.txt",
-                Self::YEAR,
-                Self::DAY,
-                tag
-            )),
-            Description::None => Some(format!("{}/input-day{:>02}.txt", Self::YEAR, Self::DAY)),
-            _ => None,
-        }
-    }
-    /// UNDER THE HOOD
     fn load(desc: Description) -> Option<String> {
-        match desc {
-            Description::FileTag(_) => Self::load_file(desc),
-            Description::TestData(_) => Self::load_data(desc),
-            Description::None => Self::load_file(desc),
-        }
-    }
-    /// UNDER THE HOOD
-    fn load_file(desc: Description) -> Option<String> {
-        if let Some(fname) = Self::input_filename(desc) {
-            let file_name = format!("data/{}", fname);
-            match File::open(&file_name) {
-                Ok(mut file) => {
-                    let mut contents = String::new();
-                    if let Err(e) = file.read_to_string(&mut contents) {
-                        panic!("Can't read {}: {:?}", fname, e);
-                    }
-                    println!("# loaded {}", &file_name);
-                    return Some(contents);
-                }
-                Err(e) => panic!("Can't read {}: {:?}", fname, e),
+        fn input_filename(desc: Description, year: usize, day: usize) -> Option<String> {
+            match desc {
+                Description::FileTag(tag) => Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag)),
+                Description::None => Some(format!("{}/input-day{:>02}.txt", year, day)),
+                _ => None,
             }
         }
-        None
-    }
-    /// UNDER THE HOOD
-    fn load_data(desc: Description) -> Option<String> {
+        fn load_file(input: Option<String>) -> Option<String> {
+            if let Some(fname) = input {
+                let file_name = format!("data/{}", fname);
+                match File::open(&file_name) {
+                    Ok(mut file) => {
+                        let mut contents = String::new();
+                        if let Err(e) = file.read_to_string(&mut contents) {
+                            panic!("Can't read {}: {:?}", fname, e);
+                        }
+                        println!("# loaded {}", &file_name);
+                        return Some(contents);
+                    }
+                    Err(e) => panic!("Can't read {}: {:?}", fname, e),
+                }
+            }
+            None
+        }
+        fn load_data(desc: Description) -> Option<String> {
+            match desc {
+                Description::TestData(s) if s.is_empty() => None,
+                Description::TestData(s) => Some(s),
+                _ => None,
+            }
+        }
         match desc {
-            Description::TestData(s) if s.is_empty() => None,
-            Description::TestData(s) => Some(s),
-            _ => None,
+            Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)),
+            Description::TestData(_) => load_data(desc),
+            Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)),
         }
     }
     /// UNDER THE HOOD.
