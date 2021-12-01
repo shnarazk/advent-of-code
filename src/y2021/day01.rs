@@ -11,7 +11,7 @@ type Object = usize;
 
 #[derive(Debug, PartialEq)]
 struct Setting {
-    line: Vec<usize>
+    line: Vec<usize>,
 }
 
 impl ProblemSolver<Object, usize, usize> for Setting {
@@ -19,9 +19,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     const DAY: usize = 1;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting {
-         line: Vec::new()
-        }
+        Setting { line: Vec::new() }
     }
     fn insert(&mut self, object: Object) {
         self.line.push(object);
