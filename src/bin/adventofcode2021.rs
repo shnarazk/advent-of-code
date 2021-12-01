@@ -1,5 +1,5 @@
 use {
-    adventofcode::{template::template, y2021::*, Description},
+    adventofcode::{template, y2021::*, Description},
     std::env::args,
 };
 
@@ -29,8 +29,8 @@ pub fn main() {
         None => Description::None,
     };
     match day {
-        0_ => day00::go(part, desc),
-        // 1_ => day01(part, desc),
+        0 => day00::go(part, desc),
+        1 => day01::go(part, desc),
         // 2_ => day02(part, desc),
         // 3_ => day03(part, desc),
         // 4_ => day04(part, desc),
@@ -55,6 +55,6 @@ pub fn main() {
         // 23 => day23(part, desc),
         // 24 => day24(part, desc),
         // 25 => day25(part, desc),
-        _ => template(part, desc),
+        _ => template::go(part, desc),
     };
 }

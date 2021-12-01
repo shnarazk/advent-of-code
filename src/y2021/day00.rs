@@ -1,8 +1,5 @@
 #![allow(unused_imports)]
-#![allow(dead_code)]
 use crate::{Description, ProblemObject, ProblemSolver};
-// use lazy_static::lazy_static;
-// use regex::Regex;
 // use std::collections::HashMap;
 
 pub fn go(part: usize, desc: Description) {
@@ -28,6 +25,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     fn default() -> Self {
         Setting {}
     }
+    // fn input_filename(_desc: Description) -> Option<String> { None }
     fn insert(&mut self, _object: Object) {}
     fn part1(&mut self) -> usize {
         0

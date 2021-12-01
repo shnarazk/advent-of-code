@@ -1,5 +1,5 @@
 use {
-    adventofcode::{template::template, y2020::*, Description},
+    adventofcode::{template, y2020::*, Description},
     std::env::args,
 };
 
@@ -53,6 +53,6 @@ pub fn main() {
         23 => day23(part, desc),
         24 => day24(part, desc),
         25 => day25(part, desc),
-        _ => template(part, desc),
+        _ => template::go(part, desc),
     };
 }
