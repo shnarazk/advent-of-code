@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 use crate::{Description, ParseError, ProblemObject, ProblemSolver};
-// use lazy_static::lazy_static;
-// use regex::Regex;
+use lazy_static::lazy_static;
+use regex::Regex;
 // use std::collections::HashMap;
 
 pub fn go(part: usize, desc: Description) {
@@ -13,7 +13,12 @@ pub fn go(part: usize, desc: Description) {
 struct Object {}
 
 impl ProblemObject for Object {
-    fn parse(_s: &str) -> Result<Self, ParseError> {
+    fn parse(s: &str) -> Result<Self, ParseError> {
+        lazy_static! {
+            static ref PARSER: Regex =
+                Regex::new(r"^").expect("wrong");
+        }
+        let _segment = PARSER.captures(s).ok_or(ParseError)?;
         Err(ParseError)
     }
 }
