@@ -69,28 +69,3 @@ fn check_line1(str: &str) -> usize {
         0
     }
 }
-
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
-            Answer::Part1(0)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        const TEST2: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
-            Answer::Part2(0)
-        );
-    }
-}
