@@ -3,10 +3,6 @@
 use crate::{Description, ProblemObject, ProblemSolver};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
 type Object = usize;
 
 #[derive(Debug, PartialEq)]
@@ -53,19 +49,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     }
 }
 
-fn check_line1(str: &str) -> usize {
-    lazy_static! {
-        static ref PARSER: Regex =
-            Regex::new(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$").expect("wrong regex");
-    }
-    if let Some(m) = PARSER.captures(str) {
-        let mi = m[1].parse::<usize>().unwrap();
-        let ma = m[2].parse::<usize>().unwrap();
-        let target: char = m[3].chars().next().unwrap();
-        println!("min:{}, max:{}, letter:{}, body: {}", mi, ma, target, &m[4]);
-        let occ = m[4].chars().filter(|c| *c == target).count();
-        (mi <= occ && occ <= ma) as usize
-    } else {
-        0
-    }
+pub fn go(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
+

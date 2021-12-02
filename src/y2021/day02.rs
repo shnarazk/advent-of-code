@@ -5,10 +5,6 @@ use lazy_static::lazy_static;
 use regex::Regex;
 // use std::collections::HashMap;
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
 #[derive(Debug, PartialEq)]
 enum Object {
     Forward(usize),
@@ -85,4 +81,8 @@ impl ProblemSolver<Object, usize, usize> for Setting {
         }
         horizontal * depth
     }
+}
+
+pub fn go(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }

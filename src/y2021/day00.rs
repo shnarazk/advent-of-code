@@ -2,10 +2,6 @@
 use crate::{Description, ParseError, ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
 #[derive(Debug, PartialEq)]
 struct Object {}
 
@@ -33,6 +29,10 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     fn part2(&mut self) -> usize {
         0
     }
+}
+
+pub fn go(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
 
 #[cfg(test)]
