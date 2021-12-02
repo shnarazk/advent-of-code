@@ -11,9 +11,9 @@ pub fn go(part: usize, desc: Description) {
 
 #[derive(Debug, PartialEq)]
 enum Object {
-    Forward(isize),
-    Down(isize),
-    Up(isize),
+    Forward(usize),
+    Down(usize),
+    Up(usize),
 }
 
 impl ProblemObject for Object {
@@ -23,7 +23,7 @@ impl ProblemObject for Object {
                 Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
-        let num = segment[2].parse::<isize>().map_err(|_| ParseError)?;
+        let num = segment[2].parse::<usize>().map_err(|_| ParseError)?;
         match &segment[1] {
             "forward" => Ok(Object::Forward(num)),
             "down" => Ok(Object::Down(num)),
@@ -49,11 +49,31 @@ impl ProblemSolver<Object, usize, usize> for Setting {
         self.line.push(object)
     }
     fn part1(&mut self) -> usize {
-        dbg!(&self.line);
-        0
+        let mut horizontal: usize = 0;
+        let mut depth: usize = 0;
+        for l in self.line.iter() {
+            match *l {
+                Object::Forward(n) => { horizontal += n; },
+                Object::Down(n) => { depth += n; },
+                Object::Up(n) => { depth -= n; },
+            }
+        }
+        dbg!(horizontal, depth);
+        horizontal * depth
     }
     fn part2(&mut self) -> usize {
-        0
+        let mut horizontal: usize = 0;
+        let mut depth: usize = 0;
+        let mut aim: usize = 0; 
+        for l in self.line.iter() {
+            match *l {
+                Object::Forward(n) => { horizontal += n; depth += aim * n; },
+                Object::Down(n) => { aim += n; },
+                Object::Up(n) => { aim -= n; },
+            }
+        }
+        dbg!(horizontal, depth);
+        horizontal * depth
     }
 }
 
