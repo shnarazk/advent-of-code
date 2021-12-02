@@ -58,7 +58,6 @@ impl ProblemSolver<Object, usize, usize> for Setting {
                 Object::Up(n) => { depth -= n; },
             }
         }
-        dbg!(horizontal, depth);
         horizontal * depth
     }
     fn part2(&mut self) -> usize {
@@ -72,7 +71,6 @@ impl ProblemSolver<Object, usize, usize> for Setting {
                 Object::Up(n) => { aim -= n; },
             }
         }
-        dbg!(horizontal, depth);
         horizontal * depth
     }
 }
