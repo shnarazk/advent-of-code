@@ -22,6 +22,25 @@ pub enum Answer<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + Par
     None,
 }
 
+#[derive(Debug)]
+pub struct ParseError;
+
+impl std::convert::From<std::num::ParseIntError> for ParseError {
+    fn from(_: std::num::ParseIntError) -> Self {
+        todo!()
+    }
+}
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "End of Stream")
+    }
+}
+
+impl std::error::Error for ParseError {}
+
+pub type Maybe<T> = Result<T, ParseError>;
+
 /// The standard interface for a problem description with solving methods
 pub trait ProblemSolver<
     TargetObject: ProblemObject + Debug,
@@ -39,44 +58,40 @@ pub trait ProblemSolver<
         todo!("insert is not implemented")
     }
     /// UNDER THE HOOD
-    fn load(desc: Description) -> Option<String> {
-        fn input_filename(desc: Description, year: usize, day: usize) -> Option<String> {
+    fn load(desc: Description) -> Maybe<String> {
+        fn input_filename(desc: Description, year: usize, day: usize) -> Maybe<String> {
             match desc {
                 Description::FileTag(tag) => {
-                    Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag))
+                    Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
                 }
-                Description::None => Some(format!("{}/input-day{:>02}.txt", year, day)),
-                _ => None,
+                Description::None => Ok(format!("data/{}/input-day{:>02}.txt", year, day)),
+                _ => Err(ParseError),
             }
         }
-        fn load_file(input: Option<String>) -> Option<String> {
-            if let Some(fname) = input {
-                let file_name = format!("data/{}", fname);
-                match File::open(&file_name) {
-                    Ok(mut file) => {
-                        let mut contents = String::new();
-                        if let Err(e) = file.read_to_string(&mut contents) {
-                            panic!("Can't read {}: {:?}", fname, e);
-                        }
-                        println!("# loaded {}", &file_name);
-                        return Some(contents);
+        fn load_file(file_name: String) -> Maybe<String> {
+            match File::open(&file_name) {
+                Ok(mut file) => {
+                    let mut contents = String::new();
+                    if let Err(e) = file.read_to_string(&mut contents) {
+                        panic!("Can't read {}: {:?}", file_name, e);
                     }
-                    Err(e) => panic!("Can't read {}: {:?}", fname, e),
+                    println!("# loaded {}", &file_name);
+                    Ok(contents)
                 }
+                Err(e) => panic!("Can't read {}: {:?}", file_name, e),
             }
-            None
         }
-        fn load_data(desc: Description) -> Option<String> {
+        fn load_data(desc: Description) -> Maybe<String> {
             match desc {
-                Description::TestData(s) if s.is_empty() => None,
-                Description::TestData(s) => Some(s),
-                _ => None,
+                Description::TestData(s) if s.is_empty() => Err(ParseError),
+                Description::TestData(s) => Ok(s),
+                _ => Err(ParseError),
             }
         }
         match desc {
-            Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)),
+            Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
             Description::TestData(_) => load_data(desc),
-            Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)),
+            Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
         }
     }
     /// UNDER THE HOOD.
@@ -84,10 +99,12 @@ pub trait ProblemSolver<
     /// then return `Self`.
     fn parse(desc: Description) -> Self {
         let mut instance = Self::default();
-        if let Some(buffer) = Self::load(desc) {
+        if let Ok(buffer) = Self::load(desc) {
             for block in buffer.split(Self::DELIMITER) {
                 if let Ok(element) = TargetObject::parse(block) {
                     instance.insert(element);
+                } else {
+                    dbg!(block);
                 }
             }
         }
@@ -128,53 +145,32 @@ pub trait ProblemSolver<
     }
 }
 
-#[derive(Debug)]
-pub struct ParseError;
-
-impl std::convert::From<std::num::ParseIntError> for ParseError {
-    fn from(_: std::num::ParseIntError) -> Self {
-        todo!()
-    }
-}
-
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "End of Stream")
-    }
-}
-
-impl std::error::Error for ParseError {}
-
 /// The standard interface for a data unit which corresponds to a 'block' in an input stream
 pub trait ProblemObject: Debug + Sized {
     /// **TO BE IMPLEMENTED**: Parse a block then return `Option<ProblemObject>`
-    fn parse(s: &str) -> Result<Self, ParseError>;
+    fn parse(s: &str) -> Maybe<Self>;
 }
 
 impl ProblemObject for () {
-    fn parse(_: &str) -> Result<Self, ParseError> {
+    fn parse(_: &str) -> Maybe<Self> {
         Err(ParseError)
     }
 }
 
 impl ProblemObject for usize {
-    fn parse(s: &str) -> Result<Self, ParseError> {
+    fn parse(s: &str) -> Maybe<Self> {
         s.parse::<usize>().map_err(|_| ParseError)
     }
 }
 
 impl ProblemObject for isize {
-    fn parse(s: &str) -> Result<Self, ParseError> {
+    fn parse(s: &str) -> Maybe<Self> {
         s.parse::<isize>().map_err(|_| ParseError)
     }
 }
 
 impl ProblemObject for String {
-    fn parse(line: &str) -> Result<Self, ParseError> {
-        if line.is_empty() {
-            Err(ParseError)
-        } else {
-            Ok(line.to_string())
-        }
+    fn parse(line: &str) -> Maybe<Self> {
+        line.is_empty().then(|| line.to_string()).ok_or(ParseError)
     }
 }
