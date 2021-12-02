@@ -42,7 +42,9 @@ pub trait ProblemSolver<
     fn load(desc: Description) -> Option<String> {
         fn input_filename(desc: Description, year: usize, day: usize) -> Option<String> {
             match desc {
-                Description::FileTag(tag) => Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag)),
+                Description::FileTag(tag) => {
+                    Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag))
+                }
                 Description::None => Some(format!("{}/input-day{:>02}.txt", year, day)),
                 _ => None,
             }
@@ -130,7 +132,9 @@ pub trait ProblemSolver<
 pub struct ParseError;
 
 impl std::convert::From<std::num::ParseIntError> for ParseError {
-    fn from(_: std::num::ParseIntError) -> Self { todo!() }
+    fn from(_: std::num::ParseIntError) -> Self {
+        todo!()
+    }
 }
 
 impl std::fmt::Display for ParseError {
@@ -139,7 +143,7 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-impl std::error::Error for ParseError { }
+impl std::error::Error for ParseError {}
 
 /// The standard interface for a data unit which corresponds to a 'block' in an input stream
 pub trait ProblemObject: Debug + Sized {

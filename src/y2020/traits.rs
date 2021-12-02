@@ -37,7 +37,9 @@ pub trait ProblemSolver<
     fn load(desc: Description) -> Option<String> {
         fn input_filename(desc: Description, year: usize, day: usize) -> Option<String> {
             match desc {
-                Description::FileTag(tag) => Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag)),
+                Description::FileTag(tag) => {
+                    Some(format!("{}/input-day{:>02}-{}.txt", year, day, tag))
+                }
                 Description::None => Some(format!("{}/input-day{:>02}.txt", year, day)),
                 _ => None,
             }

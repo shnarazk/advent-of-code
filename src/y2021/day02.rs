@@ -19,8 +19,7 @@ enum Object {
 impl ProblemObject for Object {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
-            static ref PARSER: Regex =
-                Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
         let num = segment[2].parse::<usize>()?;
@@ -53,9 +52,15 @@ impl ProblemSolver<Object, usize, usize> for Setting {
         let mut depth: usize = 0;
         for l in self.line.iter() {
             match *l {
-                Object::Forward(n) => { horizontal += n; },
-                Object::Down(n) => { depth += n; },
-                Object::Up(n) => { depth -= n; },
+                Object::Forward(n) => {
+                    horizontal += n;
+                }
+                Object::Down(n) => {
+                    depth += n;
+                }
+                Object::Up(n) => {
+                    depth -= n;
+                }
             }
         }
         horizontal * depth
@@ -63,12 +68,19 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     fn part2(&mut self) -> usize {
         let mut horizontal: usize = 0;
         let mut depth: usize = 0;
-        let mut aim: usize = 0; 
+        let mut aim: usize = 0;
         for l in self.line.iter() {
             match *l {
-                Object::Forward(n) => { horizontal += n; depth += aim * n; },
-                Object::Down(n) => { aim += n; },
-                Object::Up(n) => { aim -= n; },
+                Object::Forward(n) => {
+                    horizontal += n;
+                    depth += aim * n;
+                }
+                Object::Down(n) => {
+                    aim += n;
+                }
+                Object::Up(n) => {
+                    aim -= n;
+                }
             }
         }
         horizontal * depth

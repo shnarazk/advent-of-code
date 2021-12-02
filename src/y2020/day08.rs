@@ -1,8 +1,5 @@
 use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
-use {
-    lazy_static::lazy_static,
-    regex::Regex,
-};
+use {lazy_static::lazy_static, regex::Regex};
 
 pub fn day08(part: usize, desc: Description) {
     dbg!(Machine::parse(desc).run(part));
