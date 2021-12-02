@@ -1,5 +1,5 @@
 #![allow(unused_imports)]
-use crate::{Description, ProblemObject, ProblemSolver};
+use crate::{Description, ParseError, ProblemObject, ProblemSolver};
 // use std::collections::HashMap;
 
 pub fn go(part: usize, desc: Description) {
@@ -10,8 +10,8 @@ pub fn go(part: usize, desc: Description) {
 struct Object {}
 
 impl ProblemObject for Object {
-    fn parse(_s: &str) -> Option<Self> {
-        None
+    fn parse(_s: &str) -> Result<Self, ParseError> {
+        Err(ParseError)
     }
 }
 

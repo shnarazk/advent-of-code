@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
-use crate::{Description, ProblemObject, ProblemSolver};
-// use lazy_static::lazy_static;
-// use regex::Regex;
+use crate::{Description, ParseError, ProblemObject, ProblemSolver};
+use lazy_static::lazy_static;
+use regex::Regex;
 // use std::collections::HashMap;
 
 pub fn go(part: usize, desc: Description) {
@@ -10,26 +10,46 @@ pub fn go(part: usize, desc: Description) {
 }
 
 #[derive(Debug, PartialEq)]
-struct Object {}
+enum Object {
+    Forward(isize),
+    Down(isize),
+    Up(isize),
+}
 
 impl ProblemObject for Object {
-    fn parse(_s: &str) -> Option<Self> {
-        None
+    fn parse(s: &str) -> Result<Self, ParseError> {
+        lazy_static! {
+            static ref PARSER: Regex =
+                Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
+        }
+        let segment = PARSER.captures(s).ok_or(ParseError)?;
+        let num = segment[2].parse::<isize>().map_err(|_| ParseError)?;
+        match &segment[1] {
+            "forward" => Ok(Object::Forward(num)),
+            "down" => Ok(Object::Down(num)),
+            "up" => Ok(Object::Up(num)),
+            _ => Err(ParseError),
+        }
     }
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {}
+struct Setting {
+    line: Vec<Object>,
+}
 
 impl ProblemSolver<Object, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 2;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting {}
+        Setting { line: Vec::new() }
     }
-    fn insert(&mut self, _object: Object) {}
+    fn insert(&mut self, object: Object) {
+        self.line.push(object)
+    }
     fn part1(&mut self) -> usize {
+        dbg!(&self.line);
         0
     }
     fn part2(&mut self) -> usize {

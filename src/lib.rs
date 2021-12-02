@@ -1,9 +1,9 @@
 use std::{fmt::Debug, fs::File, io::prelude::*};
 pub mod template;
-pub mod y2020;
+// pub mod y2020;
 pub mod y2021;
 
-pub use {y2020::*, y2021::*};
+pub use y2021::*;
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Clone, Debug, PartialEq)]
@@ -84,7 +84,7 @@ pub trait ProblemSolver<
         let mut instance = Self::default();
         if let Some(buffer) = Self::load(desc) {
             for block in buffer.split(Self::DELIMITER) {
-                if let Some(element) = TargetObject::parse(block) {
+                if let Ok(element) = TargetObject::parse(block) {
                     instance.insert(element);
                 }
             }
@@ -126,24 +126,47 @@ pub trait ProblemSolver<
     }
 }
 
+#[derive(Debug)]
+pub struct ParseError;
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "End of Stream")
+    }
+}
+
+impl std::error::Error for ParseError { }
+
 /// The standard interface for a data unit which corresponds to a 'block' in an input stream
 pub trait ProblemObject: Debug + Sized {
     /// **TO BE IMPLEMENTED**: Parse a block then return `Option<ProblemObject>`
-    fn parse(s: &str) -> Option<Self>;
+    fn parse(s: &str) -> Result<Self, ParseError>;
 }
 
 impl ProblemObject for () {
-    fn parse(_: &str) -> Option<Self> {
-        None
+    fn parse(_: &str) -> Result<Self, ParseError> {
+        Err(ParseError)
+    }
+}
+
+impl ProblemObject for usize {
+    fn parse(s: &str) -> Result<Self, ParseError> {
+        s.parse::<usize>().map_err(|_| ParseError)
+    }
+}
+
+impl ProblemObject for isize {
+    fn parse(s: &str) -> Result<Self, ParseError> {
+        s.parse::<isize>().map_err(|_| ParseError)
     }
 }
 
 impl ProblemObject for String {
-    fn parse(line: &str) -> Option<Self> {
+    fn parse(line: &str) -> Result<Self, ParseError> {
         if line.is_empty() {
-            None
+            Err(ParseError)
         } else {
-            Some(line.to_string())
+            Ok(line.to_string())
         }
     }
 }
