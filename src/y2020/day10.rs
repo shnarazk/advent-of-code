@@ -1,4 +1,4 @@
-use crate::{Description, ProblemSolver};
+use crate::y2020::traits::{Description, ProblemSolver};
 
 pub fn day10(part: usize, desc: Description) {
     dbg!(Setting::parse(desc).run(part));

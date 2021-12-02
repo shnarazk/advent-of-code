@@ -1,5 +1,5 @@
 use {
-    crate::{Description, ProblemObject, ProblemSolver},
+    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
     lazy_static::lazy_static,
     regex::Regex,
 };

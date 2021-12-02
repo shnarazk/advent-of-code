@@ -1,5 +1,5 @@
 use {
-    crate::{Description, ProblemSolver},
+    crate::y2020::traits::{Description, ProblemSolver},
     std::{cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
 };
 

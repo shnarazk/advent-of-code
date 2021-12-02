@@ -1,5 +1,5 @@
 use {
-    crate::{Description, ProblemSolver},
+    crate::y2020::traits::{Description, ProblemSolver},
     nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},
 };
 

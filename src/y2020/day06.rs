@@ -1,7 +1,5 @@
-use {
-    crate::{Description, ProblemSolver},
-    std::collections::HashMap,
-};
+use crate::y2020::traits::{Description, ProblemSolver};
+use std::collections::HashMap;
 
 pub fn day06(part: usize, desc: Description) {
     dbg!(Setting::parse(desc).run(part));

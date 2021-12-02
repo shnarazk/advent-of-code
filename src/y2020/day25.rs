@@ -1,4 +1,4 @@
-use crate::Description;
+use crate::y2020::traits::{Description};
 
 pub fn day25(_: usize, tag: Description) {
     if tag != Description::None {

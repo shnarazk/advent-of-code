@@ -1,5 +1,5 @@
 // #![allow(dead_code)]
-use crate::{Description, ProblemSolver};
+use crate::y2020::traits::{Description, ProblemSolver};
 
 pub fn day23(part: usize, desc: Description) {
     let ncups = if part == 1 { 9 } else { 1_000_000 };

@@ -1,4 +1,4 @@
-use crate::{Description, ProblemObject, ProblemSolver};
+use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
 pub fn day04(part: usize, desc: Description) {

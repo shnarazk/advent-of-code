@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use {
-    crate::{Description, ProblemObject, ProblemSolver},
+    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
     std::collections::HashMap,
 };
 
