@@ -23,7 +23,7 @@ impl ProblemObject for Object {
                 Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
-        let num = segment[2].parse::<usize>().map_err(|_| ParseError)?;
+        let num = segment[2].parse::<usize>()?;
         match &segment[1] {
             "forward" => Ok(Object::Forward(num)),
             "down" => Ok(Object::Down(num)),

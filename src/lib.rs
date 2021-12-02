@@ -129,6 +129,10 @@ pub trait ProblemSolver<
 #[derive(Debug)]
 pub struct ParseError;
 
+impl std::convert::From<std::num::ParseIntError> for ParseError {
+    fn from(_: std::num::ParseIntError) -> Self { todo!() }
+}
+
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "End of Stream")
