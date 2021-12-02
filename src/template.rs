@@ -13,10 +13,10 @@ pub fn go(part: usize, desc: Description) {
 struct Object {}
 
 impl ProblemObject for Object {
+    /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
-            static ref PARSER: Regex =
-                Regex::new(r"^").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^").expect("wrong");
         }
         let _segment = PARSER.captures(s).ok_or(ParseError)?;
         Err(ParseError)
@@ -33,10 +33,13 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     fn default() -> Self {
         Setting {}
     }
+    /// add a data block
     fn insert(&mut self, _object: Object) {}
+    /// solver for part1
     fn part1(&mut self) -> usize {
         0
     }
+    /// solver for part2
     fn part2(&mut self) -> usize {
         0
     }
