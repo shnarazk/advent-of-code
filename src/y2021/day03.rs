@@ -17,11 +17,6 @@ impl FromDataFile for DataSegment {
     }
 }
 
-#[derive(Debug, PartialEq)]
-struct Setting {
-    line: Vec<DataSegment>,
-}
-
 fn dominant(vec: Vec<bool>) -> Option<bool> {
     let num_pos = vec.iter().filter(|b| **b).count();
     let num_neg = vec.iter().filter(|b| !**b).count();
@@ -66,7 +61,12 @@ fn find_co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     find_co2_s_rate(nv, i + 1)
 }
 
-impl Setting {
+#[derive(Debug, PartialEq)]
+struct Puzzle {
+    line: Vec<DataSegment>,
+}
+
+impl Puzzle {
     fn gamma_and_epsilon(&self) -> (usize, usize) {
         let len = self.line[0].len();
         let vec = (0..len)
@@ -78,7 +78,7 @@ impl Setting {
     }
 }
 
-impl AdventOfCode<DataSegment, usize, usize> for Setting {
+impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
     const YEAR: usize = 2021;
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
@@ -102,5 +102,5 @@ impl AdventOfCode<DataSegment, usize, usize> for Setting {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+    dbg!(Puzzle::parse(desc).run(part));
 }

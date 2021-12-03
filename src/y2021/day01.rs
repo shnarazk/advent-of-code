@@ -3,21 +3,19 @@
 use crate::{AdventOfCode, Description, FromDataFile};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
-type Object = usize;
-
 #[derive(Debug, PartialEq)]
-struct Setting {
+struct Puzzle {
     line: Vec<usize>,
 }
 
-impl AdventOfCode<Object, usize, usize> for Setting {
+impl AdventOfCode<usize, usize, usize> for Puzzle {
     const YEAR: usize = 2021;
     const DAY: usize = 1;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting { line: Vec::new() }
+        Puzzle { line: Vec::new() }
     }
-    fn insert(&mut self, object: Object) {
+    fn insert(&mut self, object: usize) {
         self.line.push(object);
     }
     fn part1(&mut self) -> usize {
@@ -50,5 +48,5 @@ impl AdventOfCode<Object, usize, usize> for Setting {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+    dbg!(Puzzle::parse(desc).run(part));
 }
