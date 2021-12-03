@@ -30,7 +30,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting {}
+        Self {}
     }
     fn insert(&mut self, _object: Object) {}
     fn part1(&mut self) -> usize {

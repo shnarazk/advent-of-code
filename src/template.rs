@@ -27,7 +27,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Setting {}
+        Self {}
     }
     /// add a data block
     fn insert(&mut self, _object: Object) {}
