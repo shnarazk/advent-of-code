@@ -1,9 +1,10 @@
-#![allow(unused_imports)]
 #![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
-// use std::collections::HashMap;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {}
@@ -14,7 +15,7 @@ impl FromDataFile for DataSegment {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^").expect("wrong");
         }
-        let _segment = PARSER.captures(s).ok_or(ParseError)?;
+        let segment = PARSER.captures(s).ok_or(ParseError)?;
         Err(ParseError)
     }
 }
@@ -30,7 +31,7 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
         Self {}
     }
     /// add a data block
-    fn insert(&mut self, _object: DataSegment) {}
+    fn insert(&mut self, object: DataSegment) {}
     /// solver for part1
     fn part1(&mut self) -> usize {
         0

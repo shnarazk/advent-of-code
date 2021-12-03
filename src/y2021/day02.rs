@@ -1,5 +1,6 @@
-#![allow(unused_imports)]
 #![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
