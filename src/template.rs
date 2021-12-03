@@ -6,9 +6,9 @@ use regex::Regex;
 // use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-struct Object {}
+struct DataSegment {}
 
-impl ProblemObject for Object {
+impl ProblemObject for DataSegment {
     /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
@@ -20,9 +20,9 @@ impl ProblemObject for Object {
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {}
+struct Puzzle {}
 
-impl ProblemSolver<Object, usize, usize> for Setting {
+impl ProblemSolver<DataSegment, usize, usize> for Puzzle {
     const YEAR: usize = 2021;
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
@@ -30,7 +30,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
         Self {}
     }
     /// add a data block
-    fn insert(&mut self, _object: Object) {}
+    fn insert(&mut self, _object: DataSegment) {}
     /// solver for part1
     fn part1(&mut self) -> usize {
         0
@@ -42,7 +42,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+    dbg!(Puzzle::parse(desc).run(part));
 }
 
 #[cfg(test)]
@@ -56,7 +56,7 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
+            Puzzle::parse(Description::TestData(TEST1.to_string())).run(1),
             Answer::Part1(0)
         );
     }
@@ -64,7 +64,7 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
+            Puzzle::parse(Description::TestData(TEST2.to_string())).run(2),
             Answer::Part2(0)
         );
     }
