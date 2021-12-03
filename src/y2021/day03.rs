@@ -4,10 +4,6 @@ use crate::{Description, ParseError, ProblemObject, ProblemSolver};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
 // #[derive(Debug, PartialEq)]
 type DataSegment = Vec<bool>;
 
@@ -95,4 +91,8 @@ impl ProblemSolver<DataSegment, usize, usize> for Setting {
         dbg!(o, c);
         o * c
     }
+}
+
+pub fn go(part: usize, desc: Description) {
+    dbg!(Setting::parse(desc).run(part));
 }
