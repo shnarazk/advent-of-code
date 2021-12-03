@@ -3,65 +3,96 @@
 use crate::{Description, ParseError, ProblemObject, ProblemSolver};
 use lazy_static::lazy_static;
 use regex::Regex;
-// use std::collections::HashMap;
 
 pub fn go(part: usize, desc: Description) {
     dbg!(Setting::parse(desc).run(part));
 }
 
-#[derive(Debug, PartialEq)]
-struct Object {}
+// #[derive(Debug, PartialEq)]
+type DataSegment = Vec<bool>;
 
-impl ProblemObject for Object {
+impl ProblemObject for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
         }
-        let _segment = PARSER.captures(s).ok_or(ParseError)?;
-        Err(ParseError)
+        let segment = PARSER.captures(s).ok_or(ParseError)?;
+        Ok(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>())
     }
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {}
+struct Setting {
+    line: Vec<DataSegment>,
+}
 
-impl ProblemSolver<Object, usize, usize> for Setting {
+fn dominant(vec: Vec<bool>) -> Option<bool> {
+    let num_pos = vec.iter().filter(|b| **b).count();
+    let num_neg = vec.iter().filter(|b| !**b).count();
+    if num_neg == num_pos {
+        None
+    } else {
+        Some(num_neg < num_pos)
+    }
+}
+
+fn to_number(vec: &[bool]) -> usize {
+    vec.iter().fold(0, |s, b| s * 2 + (*b as usize))
+}
+
+fn dominant_at(vec: &[Vec<bool>], i: usize, default: bool) -> bool {
+    dominant(vec.iter().map(|v| v[i]).collect::<Vec<bool>>()).unwrap_or(default)
+}
+
+fn find_oxygen_g_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
+    if vec.len() == 1 {
+        return to_number(&vec[0]);
+    }
+    let collecting = dominant_at(&vec, i, true);
+    let nv: Vec<Vec<bool>> = vec.iter().filter(|v| v[i] == collecting).cloned().collect::<Vec<_>>();
+    find_oxygen_g_rate(nv, i + 1)
+}
+
+fn find_co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
+    if vec.len() == 1 {
+        return to_number(&vec[0]);
+    }
+    let collecting = !dominant_at(&vec, i, true);
+    let nv: Vec<Vec<bool>> = vec.iter().filter(|v| v[i] == collecting).cloned().collect::<Vec<_>>();
+    find_co2_s_rate(nv, i + 1)
+}
+
+impl Setting {
+    fn gamma_and_epsilon(&self) -> (usize, usize) {
+        let len = self.line[0].len();
+        let vec = (0..len)
+            .map(|i| self.line.iter().map(|v| v[i]).collect::<Vec<bool>>())
+            .map(|v| dominant(v).unwrap())
+            .collect::<Vec<_>>();
+        let cev = vec.iter().map(|b| !*b).collect::<Vec<_>>();
+        (to_number(&vec), to_number(&cev))
+    }
+}
+
+impl ProblemSolver<DataSegment, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Self {}
+        Self { line: Vec::new() }
     }
-    fn insert(&mut self, _object: Object) {}
+    fn insert(&mut self, object: DataSegment) {
+        self.line.push(object)
+    }
     fn part1(&mut self) -> usize {
-        0
+        let (g, e) = self.gamma_and_epsilon();
+        dbg!(g, e);
+        g * e
     }
     fn part2(&mut self) -> usize {
-        0
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
-            Answer::Part1(0)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        const TEST2: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
-            Answer::Part2(0)
-        );
+        let o = find_oxygen_g_rate(self.line.clone(), 0);
+        let c = find_co2_s_rate(self.line.clone(), 0);
+        dbg!(o, c);
+        o * c
     }
 }
