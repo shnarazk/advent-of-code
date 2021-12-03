@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
-use crate::{Description, ParseError, ProblemObject, ProblemSolver};
+use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 // use std::collections::HashMap;
@@ -8,7 +8,7 @@ use regex::Regex;
 #[derive(Debug, PartialEq)]
 struct DataSegment {}
 
-impl ProblemObject for DataSegment {
+impl FromDataFile for DataSegment {
     /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
@@ -22,7 +22,7 @@ impl ProblemObject for DataSegment {
 #[derive(Debug, PartialEq)]
 struct Puzzle {}
 
-impl ProblemSolver<DataSegment, usize, usize> for Puzzle {
+impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
     const YEAR: usize = 2021;
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";

@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
-use crate::{Description, ParseError, ProblemObject, ProblemSolver};
+use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 // use std::collections::HashMap;
@@ -12,7 +12,7 @@ enum Object {
     Up(usize),
 }
 
-impl ProblemObject for Object {
+impl FromDataFile for Object {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
@@ -33,7 +33,7 @@ struct Setting {
     line: Vec<Object>,
 }
 
-impl ProblemSolver<Object, usize, usize> for Setting {
+impl AdventOfCode<Object, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 2;
     const DELIMITER: &'static str = "\n";

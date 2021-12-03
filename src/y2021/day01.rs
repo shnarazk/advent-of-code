@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
-use crate::{Description, ProblemObject, ProblemSolver};
+use crate::{AdventOfCode, Description, FromDataFile};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
 type Object = usize;
@@ -10,7 +10,7 @@ struct Setting {
     line: Vec<usize>,
 }
 
-impl ProblemSolver<Object, usize, usize> for Setting {
+impl AdventOfCode<Object, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 1;
     const DELIMITER: &'static str = "\n";

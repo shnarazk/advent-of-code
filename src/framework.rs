@@ -39,9 +39,53 @@ impl std::error::Error for ParseError {}
 /// An alias for `Result<T, ParseError>`
 pub type Maybe<T> = Result<T, ParseError>;
 
+/// The standard interface for a data unit which corresponds to a 'block' in an input stream
+pub trait FromDataFile: Debug + Sized {
+    /// # TO BE IMPLEMENTED
+    /// Parse a block then return `Result<ProblemObject, ParseError>`
+    /// ## A typical implementation example
+    /// ```
+    /// fn parse(s: &str) -> Result<Self, ParseError> {
+    ///     let parser: Regex = Regex::new(r"^(down|up) ([0-9]+)$").expect("wrong");
+    ///     let segment = parser.captures(s).ok_or(ParseError)?;
+    ///     let num: usize = segment[2].parse::<usize>()?;
+    ///     match &segment[1] {
+    ///         "down" => Ok(Object::Down(num)),
+    ///         "up" => Ok(Object::Up(num)),
+    ///         _ => Err(ParseError),
+    ///     }
+    /// }
+    /// ```
+    fn parse(s: &str) -> Maybe<Self>;
+}
+
+impl FromDataFile for () {
+    fn parse(_: &str) -> Maybe<Self> {
+        Err(ParseError)
+    }
+}
+
+impl FromDataFile for usize {
+    fn parse(s: &str) -> Maybe<Self> {
+        s.parse::<usize>().map_err(|_| ParseError)
+    }
+}
+
+impl FromDataFile for isize {
+    fn parse(s: &str) -> Maybe<Self> {
+        s.parse::<isize>().map_err(|_| ParseError)
+    }
+}
+
+impl FromDataFile for String {
+    fn parse(line: &str) -> Maybe<Self> {
+        line.is_empty().then(|| line.to_string()).ok_or(ParseError)
+    }
+}
+
 /// The standard interface for a problem description with solving methods
-pub trait ProblemSolver<
-    TargetObject: ProblemObject + Debug,
+pub trait AdventOfCode<
+    Segment: FromDataFile + Debug,
     Output1: Sized + Debug + PartialEq,
     Output2: Sized + Debug + PartialEq,
 >: Debug + Sized
@@ -75,7 +119,7 @@ pub trait ProblemSolver<
     ///     self.num_data += 1;
     /// }
     /// ```
-    fn insert(&mut self, _object: TargetObject) {
+    fn insert(&mut self, _object: Segment) {
         todo!("insert is not implemented")
     }
     /// # UNDER THE HOOD
@@ -122,7 +166,7 @@ pub trait ProblemSolver<
         let mut instance = Self::default();
         if let Ok(buffer) = Self::load(desc) {
             for block in buffer.split(Self::DELIMITER) {
-                if let Ok(element) = TargetObject::parse(block) {
+                if let Ok(element) = Segment::parse(block) {
                     instance.insert(element);
                 } else {
                     dbg!(block);
@@ -173,49 +217,5 @@ pub trait ProblemSolver<
             }
             _ => Answer::None,
         }
-    }
-}
-
-/// The standard interface for a data unit which corresponds to a 'block' in an input stream
-pub trait ProblemObject: Debug + Sized {
-    /// # TO BE IMPLEMENTED
-    /// Parse a block then return `Result<ProblemObject, ParseError>`
-    /// ## A typical implementation example
-    /// ```
-    /// fn parse(s: &str) -> Result<Self, ParseError> {
-    ///     let parser: Regex = Regex::new(r"^(down|up) ([0-9]+)$").expect("wrong");
-    ///     let segment = parser.captures(s).ok_or(ParseError)?;
-    ///     let num: usize = segment[2].parse::<usize>()?;
-    ///     match &segment[1] {
-    ///         "down" => Ok(Object::Down(num)),
-    ///         "up" => Ok(Object::Up(num)),
-    ///         _ => Err(ParseError),
-    ///     }
-    /// }
-    /// ```
-    fn parse(s: &str) -> Maybe<Self>;
-}
-
-impl ProblemObject for () {
-    fn parse(_: &str) -> Maybe<Self> {
-        Err(ParseError)
-    }
-}
-
-impl ProblemObject for usize {
-    fn parse(s: &str) -> Maybe<Self> {
-        s.parse::<usize>().map_err(|_| ParseError)
-    }
-}
-
-impl ProblemObject for isize {
-    fn parse(s: &str) -> Maybe<Self> {
-        s.parse::<isize>().map_err(|_| ParseError)
-    }
-}
-
-impl ProblemObject for String {
-    fn parse(line: &str) -> Maybe<Self> {
-        line.is_empty().then(|| line.to_string()).ok_or(ParseError)
     }
 }

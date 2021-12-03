@@ -1,11 +1,11 @@
 #![allow(unused_imports)]
-use crate::{Description, ParseError, ProblemObject, ProblemSolver};
+use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 // use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct Object {}
 
-impl ProblemObject for Object {
+impl FromDataFile for Object {
     fn parse(_s: &str) -> Result<Self, ParseError> {
         Err(ParseError)
     }
@@ -14,7 +14,7 @@ impl ProblemObject for Object {
 #[derive(Debug, PartialEq)]
 struct Setting {}
 
-impl ProblemSolver<Object, usize, usize> for Setting {
+impl AdventOfCode<Object, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";

@@ -1,13 +1,13 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
-use crate::{Description, ParseError, ProblemObject, ProblemSolver};
+use crate::{AdventOfCode, Description, FromDataFile, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
 // #[derive(Debug, PartialEq)]
 type DataSegment = Vec<bool>;
 
-impl ProblemObject for DataSegment {
+impl FromDataFile for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
@@ -45,7 +45,11 @@ fn find_oxygen_g_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
         return to_number(&vec[0]);
     }
     let collecting = dominant_at(&vec, i, true);
-    let nv: Vec<Vec<bool>> = vec.iter().filter(|v| v[i] == collecting).cloned().collect::<Vec<_>>();
+    let nv: Vec<Vec<bool>> = vec
+        .iter()
+        .filter(|v| v[i] == collecting)
+        .cloned()
+        .collect::<Vec<_>>();
     find_oxygen_g_rate(nv, i + 1)
 }
 
@@ -54,7 +58,11 @@ fn find_co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
         return to_number(&vec[0]);
     }
     let collecting = !dominant_at(&vec, i, true);
-    let nv: Vec<Vec<bool>> = vec.iter().filter(|v| v[i] == collecting).cloned().collect::<Vec<_>>();
+    let nv: Vec<Vec<bool>> = vec
+        .iter()
+        .filter(|v| v[i] == collecting)
+        .cloned()
+        .collect::<Vec<_>>();
     find_co2_s_rate(nv, i + 1)
 }
 
@@ -70,7 +78,7 @@ impl Setting {
     }
 }
 
-impl ProblemSolver<DataSegment, usize, usize> for Setting {
+impl AdventOfCode<DataSegment, usize, usize> for Setting {
     const YEAR: usize = 2021;
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
