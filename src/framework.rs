@@ -24,7 +24,7 @@ pub struct ParseError;
 
 impl std::convert::From<std::num::ParseIntError> for ParseError {
     fn from(_: std::num::ParseIntError) -> Self {
-        todo!()
+        ParseError
     }
 }
 
@@ -61,7 +61,7 @@ pub trait FromDataFile: Debug + Sized {
 
 impl FromDataFile for () {
     fn parse(_: &str) -> Maybe<Self> {
-        Err(ParseError)
+        Ok(())
     }
 }
 
