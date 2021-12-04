@@ -36,7 +36,7 @@ fn dominant_at(vec: &[Vec<bool>], i: usize, default: bool) -> bool {
     dominant(vec.iter().map(|v| v[i]).collect::<Vec<bool>>()).unwrap_or(default)
 }
 
-fn find_oxygen_g_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
+fn oxygen_g_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     if vec.len() == 1 {
         return to_number(&vec[0]);
     }
@@ -46,10 +46,10 @@ fn find_oxygen_g_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
         .filter(|v| v[i] == collecting)
         .cloned()
         .collect::<Vec<_>>();
-    find_oxygen_g_rate(nv, i + 1)
+    oxygen_g_rate(nv, i + 1)
 }
 
-fn find_co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
+fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     if vec.len() == 1 {
         return to_number(&vec[0]);
     }
@@ -59,7 +59,7 @@ fn find_co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
         .filter(|v| v[i] == collecting)
         .cloned()
         .collect::<Vec<_>>();
-    find_co2_s_rate(nv, i + 1)
+    co2_s_rate(nv, i + 1)
 }
 
 #[derive(Debug, PartialEq)]
@@ -71,8 +71,7 @@ impl Puzzle {
     fn gamma_and_epsilon(&self) -> (usize, usize) {
         let len = self.line[0].len();
         let vec = (0..len)
-            .map(|i| self.line.iter().map(|v| v[i]).collect::<Vec<bool>>())
-            .map(|v| dominant(v).unwrap())
+            .map(|i| dominant_at(&self.line, i, true))
             .collect::<Vec<_>>();
         let cev = vec.iter().map(|b| !*b).collect::<Vec<_>>();
         (to_number(&vec), to_number(&cev))
@@ -95,8 +94,8 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
         g * e
     }
     fn part2(&mut self) -> usize {
-        let o = find_oxygen_g_rate(self.line.clone(), 0);
-        let c = find_co2_s_rate(self.line.clone(), 0);
+        let o = oxygen_g_rate(self.line.clone(), 0);
+        let c = co2_s_rate(self.line.clone(), 0);
         dbg!(o, c);
         o * c
     }
