@@ -13,10 +13,10 @@ use {
 /// ingredient x allergen
 ///
 /// ## ルール
-/// 1. [ONLY-ONE-AllERGEN] ある ingredient がある allergen を持つなら他の indredient はその allergen を持てない
-/// 1. [EXCULSIZE-ALLERGEN] ある ingredient がある allergen を持つなら他の allergen を持てない
-/// 1. [AT-LEAST-1] ルールに則して、どれかはそのallergen を持たなければならない
-/// 1. [XOR] ある ingredient がある allergen を持つなら他の ingredient はその allergen を持てない
+/// 1. \[ONLY-ONE-AllERGEN\] ある ingredient がある allergen を持つなら他の indredient はその allergen を持てない
+/// 1. \[EXCULSIZE-ALLERGEN\] ある ingredient がある allergen を持つなら他の allergen を持てない
+/// 1. \[AT-LEAST-1\] ルールに則して、どれかはそのallergen を持たなければならない
+/// 1. \[XOR\] ある ingredient がある allergen を持つなら他の ingredient はその allergen を持てない
 /// 1. allergenに対して候補がある
 ///
 /// * {mxmxvkd.dairy, kfcds.dairy, sqjhc.dairy, nhms.dairy}

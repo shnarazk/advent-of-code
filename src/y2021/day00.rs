@@ -14,7 +14,10 @@ impl FromDataFile for Object {
 #[derive(Debug, PartialEq)]
 struct Setting {}
 
-impl AdventOfCode<Object, usize, usize> for Setting {
+impl AdventOfCode for Setting {
+    type Segment = Object;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 0;
     const DELIMITER: &'static str = "\n";
@@ -46,7 +49,9 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).expect("-").run(1),
+            Setting::parse(Description::TestData(TEST1.to_string()))
+                .expect("-")
+                .run(1),
             Answer::Part1(0)
         );
     }
@@ -54,7 +59,9 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).expect("-").run(2),
+            Setting::parse(Description::TestData(TEST2.to_string()))
+                .expect("-")
+                .run(2),
             Answer::Part2(0)
         );
     }

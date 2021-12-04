@@ -22,14 +22,17 @@ impl FromDataFile for DataSegment {
 #[derive(Debug, PartialEq)]
 struct Puzzle {}
 
-impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
+impl AdventOfCode for Puzzle {
+    type Segment = DataSegment;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 6;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self {}
     }
-    fn insert(&mut self, object: DataSegment) {}
+    fn insert(&mut self, object: Self::Segment) {}
     fn part1(&mut self) -> usize {
         0
     }
@@ -53,7 +56,9 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST1.to_string())).expect("-").run(1),
+            Puzzle::parse(Description::TestData(TEST1.to_string()))
+                .expect("-")
+                .run(1),
             Answer::Part1(0)
         );
     }
@@ -61,7 +66,9 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST2.to_string())).expect("-").run(2),
+            Puzzle::parse(Description::TestData(TEST2.to_string()))
+                .expect("-")
+                .run(2),
             Answer::Part2(0)
         );
     }

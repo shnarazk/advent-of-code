@@ -78,14 +78,17 @@ impl Puzzle {
     }
 }
 
-impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
+impl AdventOfCode for Puzzle {
+    type Segment = DataSegment;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 3;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self { line: Vec::new() }
     }
-    fn insert(&mut self, object: DataSegment) {
+    fn insert(&mut self, object: Self::Segment) {
         self.line.push(object)
     }
     fn part1(&mut self) -> usize {

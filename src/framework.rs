@@ -84,12 +84,10 @@ impl FromDataFile for String {
 }
 
 /// The standard interface for a problem description with solving methods
-pub trait AdventOfCode<
-    Segment: FromDataFile + Debug,
-    Output1: Sized + Debug + PartialEq,
-    Output2: Sized + Debug + PartialEq,
->: Debug + Sized
-{
+pub trait AdventOfCode: Debug + Sized {
+    type Segment: FromDataFile + Debug;
+    type Output1: Sized + Debug + PartialEq;
+    type Output2: Sized + Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
     /// delimeter between data blocks
@@ -119,7 +117,7 @@ pub trait AdventOfCode<
     ///     self.num_data += 1;
     /// }
     /// ```
-    fn insert(&mut self, _object: Segment) {
+    fn insert(&mut self, _object: Self::Segment) {
         todo!("insert is not implemented")
     }
     /// # UNDER THE HOOD
@@ -165,7 +163,7 @@ pub trait AdventOfCode<
     fn parse(desc: Description) -> Maybe<Self> {
         let mut instance = Self::default();
         for block in Self::load(desc)?.split(Self::DELIMITER) {
-            instance.insert(Segment::parse(block)?);
+            instance.insert(Self::Segment::parse(block)?);
         }
         Ok(instance)
     }
@@ -173,11 +171,11 @@ pub trait AdventOfCode<
     /// the solver for part1
     /// ## A typical implementation example
     /// ```
-    /// fn part1(&mut self) -> Output1 {
+    /// fn part1(&mut self) -> Self::Output1 {
     ///     self.data.iter().filter(|x| !x.is_empty()).count()
     /// }
     /// ```
-    fn part1(&mut self) -> Output1 {
+    fn part1(&mut self) -> Self::Output1 {
         todo!("part1 is not yet implemented.")
     }
     /// # TO BE IMPLEMENTED
@@ -188,11 +186,11 @@ pub trait AdventOfCode<
     ///     self.data.iter().filter(|x| !x.is_empty()).map(|x| x * x).sum()
     /// }
     /// ```
-    fn part2(&mut self) -> Output2 {
+    fn part2(&mut self) -> Self::Output2 {
         todo!("part2 is not yet implemented.")
     }
     /// # UNDER THE HOOD
-    fn run(&mut self, part: usize) -> Answer<Output1, Output2> {
+    fn run(&mut self, part: usize) -> Answer<Self::Output1, Self::Output2> {
         match part {
             0 => {
                 println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);

@@ -34,7 +34,10 @@ struct Setting {
     line: Vec<Object>,
 }
 
-impl AdventOfCode<Object, usize, usize> for Setting {
+impl AdventOfCode for Setting {
+    type Segment = Object;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 2;
     const DELIMITER: &'static str = "\n";

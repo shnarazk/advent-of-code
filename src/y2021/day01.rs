@@ -9,7 +9,10 @@ struct Puzzle {
     line: Vec<usize>,
 }
 
-impl AdventOfCode<usize, usize, usize> for Puzzle {
+impl AdventOfCode for Puzzle {
+    type Segment = usize;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 1;
     const DELIMITER: &'static str = "\n";

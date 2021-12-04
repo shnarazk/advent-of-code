@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, ParseError, Maybe};
+use crate::{AdventOfCode, Description, FromDataFile, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -15,7 +15,11 @@ impl FromDataFile for DataSegment {
             if l.is_empty() {
                 break;
             }
-            let line = l.split(' ').filter(|s| !s.is_empty()).map(|n| n.parse::<usize>().expect("-")).collect::<Vec<_>>();
+            let line = l
+                .split(' ')
+                .filter(|s| !s.is_empty())
+                .map(|n| n.parse::<usize>().expect("-"))
+                .collect::<Vec<_>>();
             if !line.is_empty() {
                 vec.push(line);
             }
@@ -40,11 +44,21 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
             return None;
         }
     }
-    let point = board.iter().map(|v| v.iter().map(|n| if order[*n] <= need { 0 } else { *n } ).sum::<usize>() ).sum();
+    let point = board
+        .iter()
+        .map(|v| {
+            v.iter()
+                .map(|n| if order[*n] <= need { 0 } else { *n })
+                .sum::<usize>()
+        })
+        .sum();
     Some((need, point))
 }
 
-impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
+impl AdventOfCode for Puzzle {
+    type Segment = DataSegment;
+    type Output1 = usize;
+    type Output2 = usize;
     const YEAR: usize = 2021;
     const DAY: usize = 4;
     const DELIMITER: &'static str = "\n\n";
@@ -55,20 +69,20 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
             order: Vec::new(),
         }
     }
-    fn insert(&mut self, object: DataSegment) {
+    fn insert(&mut self, object: Self::Segment) {
         self.board.push(object);
     }
     fn parse(desc: Description) -> Maybe<Self> {
         let mut instance = Self::default();
         let input = Self::load(desc)?;
-        let mut iter = input.split(Self::DELIMITER); 
+        let mut iter = input.split(Self::DELIMITER);
         for num in iter.next().ok_or(ParseError)?.split(',') {
             instance.hands.push(num.parse::<usize>()?);
         }
         for block in iter {
-            instance.insert(DataSegment::parse(block)?);
+            instance.insert(Self::Segment::parse(block)?);
         }
-        instance.order = instance.hands.clone(); 
+        instance.order = instance.hands.clone();
         for (i, h) in instance.hands.iter().enumerate() {
             instance.order[*h] = i;
         }
@@ -79,17 +93,24 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
     fn part1(&mut self) -> usize {
         let nrow = self.board[0].len();
         let ncol = self.board[0][0].len();
-        let x: Vec<(usize, usize)> = self.board.iter()
-            .flat_map(|b|
-                      (0..nrow)
-                      .flat_map(|i|
-                                [
-                                    grade(&b[i], &self.order, b),
-                                    grade(&b.iter().map(|l| l[i]).collect::<Vec<usize>>(), &self.order, b),
-                                ]
-                      )
-                      .flatten()
-                      .collect::<Vec<_>>())
+        let x: Vec<(usize, usize)> = self
+            .board
+            .iter()
+            .flat_map(|b| {
+                (0..nrow)
+                    .flat_map(|i| {
+                        [
+                            grade(&b[i], &self.order, b),
+                            grade(
+                                &b.iter().map(|l| l[i]).collect::<Vec<usize>>(),
+                                &self.order,
+                                b,
+                            ),
+                        ]
+                    })
+                    .flatten()
+                    .collect::<Vec<_>>()
+            })
             .collect();
         let result = x.iter().min_by_key(|(h, v)| h).expect("??");
         dbg!(self.hands[result.0], result.1);
@@ -98,16 +119,25 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
     fn part2(&mut self) -> usize {
         let nrow = self.board[0].len();
         let ncol = self.board[0][0].len();
-        let x: Vec<(usize, usize)> = self.board.iter()
-            .map(|b|
-                 (0..nrow).flat_map(|i|
-                               [
-                                   grade(&b[i], &self.order, b),
-                                   grade(&b.iter().map(|l| l[i]).collect::<Vec<usize>>(), &self.order, b),
-                               ]
-                 )
-                 .flatten()
-                 .min_by_key(|(h, v)| *h).expect("??"))
+        let x: Vec<(usize, usize)> = self
+            .board
+            .iter()
+            .map(|b| {
+                (0..nrow)
+                    .flat_map(|i| {
+                        [
+                            grade(&b[i], &self.order, b),
+                            grade(
+                                &b.iter().map(|l| l[i]).collect::<Vec<usize>>(),
+                                &self.order,
+                                b,
+                            ),
+                        ]
+                    })
+                    .flatten()
+                    .min_by_key(|(h, v)| *h)
+                    .expect("??")
+            })
             .collect();
         dbg!(&x);
         let result = x.iter().max_by_key(|(h, v)| h).expect("??");
