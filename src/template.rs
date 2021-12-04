@@ -13,7 +13,7 @@ impl FromDataFile for DataSegment {
     /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
         Err(ParseError)
