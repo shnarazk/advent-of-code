@@ -85,5 +85,5 @@ impl AdventOfCode<Object, usize, usize> for Setting {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+    dbg!(Setting::parse(desc).expect("-").run(part));
 }

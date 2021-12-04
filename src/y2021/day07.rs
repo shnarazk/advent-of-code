@@ -39,7 +39,7 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::parse(desc).run(part));
+    dbg!(Puzzle::parse(desc).expect("-").run(part));
 }
 
 #[cfg(test)]
@@ -53,7 +53,7 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST1.to_string())).run(1),
+            Puzzle::parse(Description::TestData(TEST1.to_string())).expect("-").run(1),
             Answer::Part1(0)
         );
     }
@@ -61,7 +61,7 @@ mod test {
     fn test_part2() {
         const TEST2: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST2.to_string())).run(2),
+            Puzzle::parse(Description::TestData(TEST2.to_string())).expect("-").run(2),
             Answer::Part2(0)
         );
     }

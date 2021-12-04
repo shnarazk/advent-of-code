@@ -102,5 +102,5 @@ impl AdventOfCode<DataSegment, usize, usize> for Puzzle {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::parse(desc).run(part));
+    dbg!(Puzzle::parse(desc).expect("-").run(part));
 }
