@@ -102,10 +102,6 @@ pub trait AdventOfCode: Debug + Sized {
     /// }
     /// ```
     fn default() -> Self;
-    /// read the input, run solver(s), return the results
-    fn go(part: usize, desc: Description) {
-        dbg!(Self::parse(desc).expect("failed to parse").run(part));
-    }
     /// An optional function to handle header section from the contents an input file.
     /// It must return the remanis as `Ok(Some(remains as String))`.
     /// ## A typical implementation example
@@ -140,8 +136,8 @@ pub trait AdventOfCode: Debug + Sized {
     /// ```
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
-    fn load(desc: Description) -> Maybe<String> {
-        fn input_filename(desc: Description, year: usize, day: usize) -> Maybe<String> {
+    fn load(desc: &Description) -> Maybe<String> {
+        fn input_filename(desc: &Description, year: usize, day: usize) -> Maybe<String> {
             match desc {
                 Description::FileTag(tag) => {
                     Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
@@ -163,10 +159,10 @@ pub trait AdventOfCode: Debug + Sized {
                 Err(e) => panic!("Can't read {}: {:?}", file_name, e),
             }
         }
-        fn load_data(desc: Description) -> Maybe<String> {
+        fn load_data(desc: &Description) -> Maybe<String> {
             match desc {
                 Description::TestData(s) if s.is_empty() => Err(ParseError),
-                Description::TestData(s) => Ok(s),
+                Description::TestData(s) => Ok(s.to_string()),
                 _ => Err(ParseError),
             }
         }
@@ -179,16 +175,20 @@ pub trait AdventOfCode: Debug + Sized {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(desc: Description) -> Maybe<Self> {
+    fn parse(desc: &Description) -> Maybe<Self> {
         let mut instance = Self::default();
         let contents = Self::load(desc)?;
         if let Some(remains) = instance.header(&contents)? {
             for block in remains.split(Self::DELIMITER) {
-                instance.insert(Self::Segment::parse(block)?);
+                if !block.is_empty() {
+                    instance.insert(Self::Segment::parse(block)?);
+                }
             }
         } else {
             for block in contents.split(Self::DELIMITER) {
-                instance.insert(Self::Segment::parse(block)?);
+                if !block.is_empty() {
+                    instance.insert(Self::Segment::parse(block)?);
+                }
             }
         }
         instance.after_insert();
@@ -211,22 +211,23 @@ pub trait AdventOfCode: Debug + Sized {
     /// ```
     fn part2(&mut self) -> Self::Output2;
     /// # UNDER THE HOOD
-    fn run(&mut self, part: usize) -> Answer<Self::Output1, Self::Output2> {
+    /// read the input, run solver(s), return the results
+    fn solve(desc: &Description, part: usize) -> Answer<Self::Output1, Self::Output2> {
         match part {
             0 => {
                 println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
-                let ans1 = self.part1();
+                let ans1 = Self::parse(desc).expect("failed to parse").part1();
                 println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
-                let ans2 = self.part2();
+                let ans2 = Self::parse(desc).expect("failed to parse").part2();
                 Answer::Answers(ans1, ans2)
             }
             1 => {
                 println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
-                Answer::Part1(self.part1())
+                Answer::Part1(Self::parse(desc).expect("failed to parse").part1())
             }
             2 => {
                 println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
-                Answer::Part2(self.part2())
+                Answer::Part2(Self::parse(desc).expect("failed to parse").part2())
             }
             _ => Answer::None,
         }

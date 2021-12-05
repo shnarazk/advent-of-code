@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, TryParse, Maybe, ParseError};
+use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -58,15 +58,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-impl TryFrom<Description> for Puzzle {
-    type Error = ParseError;
-    fn try_from(desc: Description) -> Result<Self, ParseError> {
-        Puzzle::parse(desc)
-    }
-}
-
 pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::try_from(desc).expect("failed to parse").run(part));
+    dbg!(Puzzle::solve(&desc, part));
 }
 
 #[cfg(test)]
@@ -80,7 +73,7 @@ mod test {
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST1.to_string()))
+            Puzzle::parse(&Description::TestData(TEST1.to_string()))
                 .expect("-")
                 .run(1),
             Answer::Part1(0)

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, TryParse, Maybe, ParseError};
+use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -14,9 +14,13 @@ struct DataSegment {
 
 impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
-        let mut i = DataSegment { beg: (0,0), end: (0, 0) };
+        let mut i = DataSegment {
+            beg: (0, 0),
+            end: (0, 0),
+        };
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$").expect("wrong");
+            static ref PARSER: Regex =
+                Regex::new(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
         i.beg.0 = segment[1].parse::<usize>()?;
@@ -63,8 +67,18 @@ impl AdventOfCode for Puzzle {
         self.line.push(object);
     }
     fn after_insert(&mut self) {
-        self.max_x = self.line.iter().map(|ds| ds.beg.0.max(ds.end.0)).max().unwrap_or(0);
-        self.max_y = self.line.iter().map(|ds| ds.beg.1.max(ds.end.1)).max().unwrap_or(0);
+        self.max_x = self
+            .line
+            .iter()
+            .map(|ds| ds.beg.0.max(ds.end.0))
+            .max()
+            .unwrap_or(0);
+        self.max_y = self
+            .line
+            .iter()
+            .map(|ds| ds.beg.1.max(ds.end.1))
+            .max()
+            .unwrap_or(0);
         for _ in 0..=self.max_y {
             let mut v = Vec::new();
             v.resize(self.max_x + 1, 0);
@@ -90,7 +104,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         // println!("{:?}", &self.count);
-        self.count.iter().map(|v| v.iter().filter(|x| 1 < **x).count()).sum()
+        self.count
+            .iter()
+            .map(|v| v.iter().filter(|x| 1 < **x).count())
+            .sum()
     }
     fn part2(&mut self) -> usize {
         for ds in self.line.iter() {
@@ -106,9 +123,11 @@ impl AdventOfCode for Puzzle {
                 for i in beg..=end {
                     self.count[ds.beg.1][i] += 1;
                 }
-            } else if (ds.beg.0 as isize - ds.end.0 as isize).abs() == (ds.beg.0 as isize - ds.end.0 as isize).abs()  {
-                let mut x:isize = ds.beg.0 as isize;
-                let mut y:isize = ds.beg.1 as isize;
+            } else if (ds.beg.0 as isize - ds.end.0 as isize).abs()
+                == (ds.beg.0 as isize - ds.end.0 as isize).abs()
+            {
+                let mut x: isize = ds.beg.0 as isize;
+                let mut y: isize = ds.beg.1 as isize;
                 let diff_x: isize = (ds.end.0 as isize - ds.beg.0 as isize).signum();
                 let diff_y: isize = (ds.end.1 as isize - ds.beg.1 as isize).signum();
                 for i in 0..=(ds.end.0 as isize - ds.beg.0 as isize).abs() {
@@ -119,7 +138,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         // println!("{:?}", &self.count);
-        self.count.iter().map(|v| v.iter().filter(|x| 1 < **x).count()).sum()
+        self.count
+            .iter()
+            .map(|v| v.iter().filter(|x| 1 < **x).count())
+            .sum()
     }
 }
 

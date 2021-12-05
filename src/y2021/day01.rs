@@ -52,5 +52,5 @@ impl AdventOfCode for Puzzle {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::parse(desc).expect("-").run(part));
+    dbg!(Puzzle::solve(&desc, part));
 }

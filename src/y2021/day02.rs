@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, TryParse, ParseError};
+use crate::{AdventOfCode, Description, ParseError, TryParse};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -87,5 +87,5 @@ impl AdventOfCode for Puzzle {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::parse(desc).expect("-").run(part));
+    dbg!(Puzzle::solve(&desc, part));
 }
