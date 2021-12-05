@@ -54,15 +54,6 @@ impl AdventOfCode for Puzzle {
             count: Vec::new(),
         }
     }
-    // fn header(&mut self, input: &str) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-
     fn insert(&mut self, object: Self::Segment) {
         self.line.push(object);
     }
