@@ -29,7 +29,7 @@ impl TryParse for DataSegment {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 struct Puzzle {
     hands: Vec<usize>,
     board: Vec<DataSegment>,

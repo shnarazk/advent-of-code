@@ -28,7 +28,7 @@ impl TryParse for Direction {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 struct Puzzle {
     line: Vec<Direction>,
 }

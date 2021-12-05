@@ -4,7 +4,7 @@
 use crate::{AdventOfCode, Description, TryParse};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 struct Puzzle {
     line: Vec<usize>,
 }

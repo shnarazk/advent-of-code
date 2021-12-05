@@ -61,7 +61,7 @@ fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     co2_s_rate(nv, i + 1)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 struct Puzzle {
     line: Vec<DataSegment>,
 }
