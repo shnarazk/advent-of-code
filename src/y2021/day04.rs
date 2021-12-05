@@ -4,6 +4,7 @@
 use crate::{AdventOfCode, Description, FromDataFile, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 type DataSegment = Vec<Vec<usize>>;
@@ -33,6 +34,16 @@ struct Puzzle {
     hands: Vec<usize>,
     board: Vec<DataSegment>,
     order: Vec<usize>,
+    num_col: usize,
+    num_row: usize,
+}
+
+fn col_at(vec: &[Vec<usize>], at: usize) -> Cow<Vec<usize>> {
+    Cow::Owned(vec.iter().map(|l| l[at]).collect::<Vec<usize>>())
+}
+
+fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<Vec<usize>> {
+    Cow::Borrowed(&vec[at])
 }
 
 fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize, usize)> {
@@ -67,45 +78,39 @@ impl AdventOfCode for Puzzle {
             hands: Vec::new(),
             board: Vec::new(),
             order: Vec::new(),
+            num_col: 5,
+            num_row: 5,
         }
     }
     fn insert(&mut self, object: Self::Segment) {
         self.board.push(object);
     }
-    fn parse(desc: Description) -> Maybe<Self> {
-        let mut instance = Self::default();
-        let input = Self::load(desc)?;
-        let mut iter = input.split(Self::DELIMITER);
-        for num in iter.next().ok_or(ParseError)?.split(',') {
-            instance.hands.push(num.parse::<usize>()?);
+    fn header(&mut self, input: &str) -> Maybe<Option<String>> {
+        let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
+        let segment = parser.captures(input).ok_or(ParseError)?;
+        for num in segment[1].split(',') {
+            self.hands.push(num.parse::<usize>()?);
         }
-        for block in iter {
-            instance.insert(Self::Segment::parse(block)?);
-        }
-        instance.order = instance.hands.clone();
-        for (i, h) in instance.hands.iter().enumerate() {
-            instance.order[*h] = i;
-        }
-        // dbg!(&instance);
-        Ok(instance)
+        Ok(Some(segment[2].to_string()))
     }
-
+    fn after_insert(&mut self) {
+        self.num_col = self.board[0][0].len();
+        self.num_row = self.board[0].len();
+        self.order = self.hands.clone();
+        for (i, h) in self.hands.iter().enumerate() {
+            self.order[*h] = i;
+        }
+    }
     fn part1(&mut self) -> usize {
-        let nrow = self.board[0].len();
-        let ncol = self.board[0][0].len();
         let x: Vec<(usize, usize)> = self
             .board
             .iter()
             .flat_map(|b| {
-                (0..nrow)
+                (0..self.num_row)
                     .flat_map(|i| {
                         [
-                            grade(&b[i], &self.order, b),
-                            grade(
-                                &b.iter().map(|l| l[i]).collect::<Vec<usize>>(),
-                                &self.order,
-                                b,
-                            ),
+                            grade(&row_at(b, i), &self.order, b),
+                            grade(&col_at(b, i), &self.order, b),
                         ]
                     })
                     .flatten()
@@ -117,21 +122,15 @@ impl AdventOfCode for Puzzle {
         self.hands[result.0] * result.1
     }
     fn part2(&mut self) -> usize {
-        let nrow = self.board[0].len();
-        let ncol = self.board[0][0].len();
         let x: Vec<(usize, usize)> = self
             .board
             .iter()
             .map(|b| {
-                (0..nrow)
+                (0..self.num_row)
                     .flat_map(|i| {
                         [
-                            grade(&b[i], &self.order, b),
-                            grade(
-                                &b.iter().map(|l| l[i]).collect::<Vec<usize>>(),
-                                &self.order,
-                                b,
-                            ),
+                            grade(&row_at(b, i), &self.order, b),
+                            grade(&col_at(b, i), &self.order, b),
                         ]
                     })
                     .flatten()
@@ -139,7 +138,6 @@ impl AdventOfCode for Puzzle {
                     .expect("??")
             })
             .collect();
-        dbg!(&x);
         let result = x.iter().max_by_key(|(h, v)| h).expect("??");
         dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
