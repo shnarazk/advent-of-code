@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, ParseError};
+use crate::{AdventOfCode, Description, FromDataFile, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -33,8 +33,21 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self {}
     }
+    // handle header
+    // fn header(&mut self, input: &str) -> Maybe<Option<String>> {
+    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
+    //     let segment = parser.captures(input).ok_or(ParseError)?;
+    //     for num in segment[1].split(',') {
+    //         let _value = num.parse::<usize>()?;
+    //     }
+    //     Ok(Some(segment[2].to_string()))
+    // }
     /// add a data block
-    fn insert(&mut self, object: Self::Segment) {}
+    fn insert(&mut self, object: Self::Segment) {
+        // self = object;
+    }
+    // finalize
+    // fn after_insert(&mut self) {}
     /// solver for part1
     fn part1(&mut self) -> usize {
         0
