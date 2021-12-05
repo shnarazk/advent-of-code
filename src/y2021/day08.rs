@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, ParseError};
+use crate::{AdventOfCode, Description, TryParse, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 // use std::collections::HashMap;
@@ -9,7 +9,7 @@ use regex::Regex;
 #[derive(Debug, PartialEq)]
 struct DataSegment {}
 
-impl FromDataFile for DataSegment {
+impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^").expect("wrong");
@@ -60,16 +60,6 @@ mod test {
                 .expect("-")
                 .run(1),
             Answer::Part1(0)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        const TEST2: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::parse(Description::TestData(TEST2.to_string()))
-                .expect("-")
-                .run(2),
-            Answer::Part2(0)
         );
     }
 }

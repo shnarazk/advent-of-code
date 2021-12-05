@@ -1,14 +1,13 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, ParseError};
+use crate::{AdventOfCode, Description, TryParse, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-// #[derive(Debug, PartialEq)]
 type DataSegment = Vec<bool>;
 
-impl FromDataFile for DataSegment {
+impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");

@@ -29,7 +29,6 @@ pub fn main() {
         None => Description::None,
     };
     match day {
-        0 => day00::go(part, desc),
         1 => day01::go(part, desc),
         2 => day02::go(part, desc),
         3 => day03::go(part, desc),

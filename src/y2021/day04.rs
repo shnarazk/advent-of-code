@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, Maybe, ParseError};
+use crate::{AdventOfCode, Description, TryParse, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::borrow::Cow;
@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 type DataSegment = Vec<Vec<usize>>;
 
-impl FromDataFile for DataSegment {
+impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
         let mut vec = Vec::new();
         for l in s.split('\n') {

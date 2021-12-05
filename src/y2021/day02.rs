@@ -1,19 +1,18 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, ParseError};
+use crate::{AdventOfCode, Description, TryParse, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
-// use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-enum Object {
+enum Direction {
     Forward(usize),
     Down(usize),
     Up(usize),
 }
 
-impl FromDataFile for Object {
+impl TryParse for Direction {
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
@@ -21,21 +20,21 @@ impl FromDataFile for Object {
         let segment = PARSER.captures(s).ok_or(ParseError)?;
         let num = segment[2].parse::<usize>()?;
         match &segment[1] {
-            "forward" => Ok(Object::Forward(num)),
-            "down" => Ok(Object::Down(num)),
-            "up" => Ok(Object::Up(num)),
+            "forward" => Ok(Direction::Forward(num)),
+            "down" => Ok(Direction::Down(num)),
+            "up" => Ok(Direction::Up(num)),
             _ => Err(ParseError),
         }
     }
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {
-    line: Vec<Object>,
+struct Puzzle {
+    line: Vec<Direction>,
 }
 
-impl AdventOfCode for Setting {
-    type Segment = Object;
+impl AdventOfCode for Puzzle {
+    type Segment = Direction;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -44,7 +43,7 @@ impl AdventOfCode for Setting {
     fn default() -> Self {
         Self { line: Vec::new() }
     }
-    fn insert(&mut self, object: Object) {
+    fn insert(&mut self, object: Direction) {
         self.line.push(object)
     }
     fn part1(&mut self) -> usize {
@@ -52,13 +51,13 @@ impl AdventOfCode for Setting {
         let mut depth: usize = 0;
         for l in self.line.iter() {
             match *l {
-                Object::Forward(n) => {
+                Direction::Forward(n) => {
                     horizontal += n;
                 }
-                Object::Down(n) => {
+                Direction::Down(n) => {
                     depth += n;
                 }
-                Object::Up(n) => {
+                Direction::Up(n) => {
                     depth -= n;
                 }
             }
@@ -71,14 +70,14 @@ impl AdventOfCode for Setting {
         let mut aim: usize = 0;
         for l in self.line.iter() {
             match *l {
-                Object::Forward(n) => {
+                Direction::Forward(n) => {
                     horizontal += n;
                     depth += aim * n;
                 }
-                Object::Down(n) => {
+                Direction::Down(n) => {
                     aim += n;
                 }
-                Object::Up(n) => {
+                Direction::Up(n) => {
                     aim -= n;
                 }
             }
@@ -88,5 +87,5 @@ impl AdventOfCode for Setting {
 }
 
 pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).expect("-").run(part));
+    dbg!(Puzzle::parse(desc).expect("-").run(part));
 }

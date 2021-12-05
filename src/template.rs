@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, FromDataFile, Maybe, ParseError};
+use crate::{AdventOfCode, Description, TryParse, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[derive(Debug, PartialEq)]
 struct DataSegment {}
 
-impl FromDataFile for DataSegment {
+impl TryParse for DataSegment {
     /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
