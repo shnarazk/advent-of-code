@@ -102,7 +102,7 @@ impl AdventOfCode for Puzzle {
             // dbg!(acum.iter().sum::<usize>() + pre1 + pre2);
         }
         acum.iter().sum::<usize>() + pre1 + pre2
-    } 
+    }
 }
 
 pub fn go(part: usize, desc: Description) {
