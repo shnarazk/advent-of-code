@@ -93,22 +93,3 @@ impl AdventOfCode for Puzzle {
 pub fn go(part: usize, desc: Description) {
     dbg!(Puzzle::solve(&desc, part));
 }
-
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::parse(&Description::TestData(TEST1.to_string()))
-                .expect("-")
-                .run(1),
-            Answer::Part1(0)
-        );
-    }
-}
