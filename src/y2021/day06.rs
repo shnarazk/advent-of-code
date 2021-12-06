@@ -1,8 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
-use lazy_static::lazy_static;
+use crate::{AdventOfCode, Description, ParseError, TryParse};
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -11,20 +7,22 @@ struct DataSegment {
 
 impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
-        let mut vec = Vec::new();
-        for i in s.split(',') {
-            vec.push(
-                i.strip_suffix('\n')
-                    .unwrap_or(i)
-                    .parse::<usize>()
-                    .map_err(|_| ParseError)?,
-            );
-        }
-        Ok(DataSegment { vec })
+        Ok(DataSegment {
+            vec: s
+                .trim()
+                .split(',')
+                .map(|i| i.parse::<usize>().unwrap())
+                .collect(),
+        })
     }
 }
 
-fn rotating_go_forward(acum: &mut [usize; 7], index: usize, birth1: &mut usize, birth2: &mut usize) {
+fn rotating_go_forward(
+    acum: &mut [usize; 7],
+    index: usize,
+    birth1: &mut usize,
+    birth2: &mut usize,
+) {
     let matured = *birth2;
     *birth2 = *birth1;
     *birth1 = acum[index];
@@ -76,7 +74,6 @@ impl AdventOfCode for Puzzle {
         for i in self.vec.iter() {
             acum[*i] += 1;
         }
-        dbg!(&acum);
         let mut birth1 = 0;
         let mut birth2 = 0;
         for i in 0..256 {
