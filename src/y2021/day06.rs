@@ -3,8 +3,6 @@
 #![allow(unused_variables)]
 use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
 use lazy_static::lazy_static;
-use regex::Regex;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -12,7 +10,6 @@ struct DataSegment {
 }
 
 impl TryParse for DataSegment {
-    /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         let mut vec = Vec::new();
         for i in s.split(',') {
@@ -27,10 +24,10 @@ impl TryParse for DataSegment {
     }
 }
 
-fn rotating_go_forward(acum: &mut [usize; 7], index: usize, pre1: &mut usize, pre2: &mut usize) {
-    let matured = *pre2;
-    *pre2 = *pre1;
-    *pre1 = acum[index];
+fn rotating_go_forward(acum: &mut [usize; 7], index: usize, birth1: &mut usize, birth2: &mut usize) {
+    let matured = *birth2;
+    *birth2 = *birth1;
+    *birth1 = acum[index];
     acum[index] += matured;
 }
 
@@ -80,13 +77,13 @@ impl AdventOfCode for Puzzle {
             acum[*i] += 1;
         }
         dbg!(&acum);
-        let mut pre1 = 0;
-        let mut pre2 = 0;
+        let mut birth1 = 0;
+        let mut birth2 = 0;
         for i in 0..256 {
-            rotating_go_forward(&mut acum, i % 7, &mut pre1, &mut pre2);
+            rotating_go_forward(&mut acum, i % 7, &mut birth1, &mut birth2);
             // dbg!(acum.iter().sum::<usize>() + pre1 + pre2);
         }
-        acum.iter().sum::<usize>() + pre1 + pre2
+        acum.iter().sum::<usize>() + birth1 + birth2
     }
 }
 
