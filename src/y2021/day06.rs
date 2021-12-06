@@ -64,22 +64,9 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { vec: Vec::new() }
     }
-    // handle header
-    // fn header(&mut self, input: &str) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-    /// add a data block
     fn insert(&mut self, object: Self::Segment) {
         self.vec = object.vec;
     }
-    // finalize
-    // fn after_insert(&mut self) {}
-    /// solver for part1
     fn part1(&mut self) -> usize {
         let mut vec = self.vec.clone();
         for _ in 0..80 {
@@ -87,7 +74,6 @@ impl AdventOfCode for Puzzle {
         }
         vec.len()
     }
-    /// solver for part2
     fn part2(&mut self) -> usize {
         let mut acum = [0; 7];
         for i in self.vec.iter() {
