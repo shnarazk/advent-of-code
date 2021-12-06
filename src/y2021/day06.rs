@@ -14,17 +14,16 @@ struct DataSegment {
 impl TryParse for DataSegment {
     /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
-        Ok(DataSegment {
-            vec: s
-                .split(',')
-                .map(|i| {
-                    i.strip_suffix('\n')
-                        .unwrap_or(i)
-                        .parse::<usize>()
-                        .expect("bad num")
-                })
-                .collect::<Vec<usize>>(),
-        })
+        let mut vec = Vec::new();
+        for i in s.split(',') {
+            vec.push(
+                i.strip_suffix('\n')
+                    .unwrap_or(i)
+                    .parse::<usize>()
+                    .map_err(|_| ParseError)?,
+            );
+        }
+        Ok(DataSegment { vec })
     }
 }
 
