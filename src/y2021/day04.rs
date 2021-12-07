@@ -7,7 +7,8 @@ use regex::Regex;
 use std::borrow::Cow;
 use std::collections::HashMap;
 
-type DataSegment = Vec<Vec<usize>>;
+#[derive(Debug, PartialEq)]
+struct DataSegment (Vec<Vec<usize>>);
 
 impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
@@ -25,14 +26,14 @@ impl TryParse for DataSegment {
                 vec.push(line);
             }
         }
-        Ok(vec)
+        Ok(DataSegment(vec))
     }
 }
 
 #[derive(Debug)]
 struct Puzzle {
     hands: Vec<usize>,
-    board: Vec<DataSegment>,
+    board: Vec<Vec<Vec<usize>>>,
     order: Vec<usize>,
     num_col: usize,
     num_row: usize,
@@ -83,7 +84,7 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn insert(&mut self, object: Self::Segment) {
-        self.board.push(object);
+        self.board.push(object.0);
     }
     fn header(&mut self, input: &str) -> Maybe<Option<String>> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");

@@ -5,7 +5,8 @@ use crate::{AdventOfCode, Description, ParseError, TryParse};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-type DataSegment = Vec<bool>;
+#[derive(Debug, PartialEq)]
+struct DataSegment (Vec<bool>);
 
 impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
@@ -13,7 +14,7 @@ impl TryParse for DataSegment {
             static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
         }
         let segment = PARSER.captures(s).ok_or(ParseError)?;
-        Ok(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>())
+        Ok(DataSegment(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>()))
     }
 }
 
@@ -63,7 +64,7 @@ fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
 
 #[derive(Debug)]
 struct Puzzle {
-    line: Vec<DataSegment>,
+    line: Vec<Vec<bool>>,
 }
 
 impl Puzzle {
@@ -88,7 +89,7 @@ impl AdventOfCode for Puzzle {
         Self { line: Vec::new() }
     }
     fn insert(&mut self, object: Self::Segment) {
-        self.line.push(object)
+        self.line.push(object.0)
     }
     fn part1(&mut self) -> usize {
         let (g, e) = self.gamma_and_epsilon();
