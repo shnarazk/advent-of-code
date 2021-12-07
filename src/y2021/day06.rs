@@ -1,19 +1,16 @@
 use crate::{AdventOfCode, Description, ParseError, TryParse};
 
 #[derive(Debug, PartialEq)]
-struct DataSegment {
-    vec: Vec<usize>,
-}
+struct DataSegment(Vec<usize>);
 
 impl TryParse for DataSegment {
     fn parse(s: &str) -> Result<Self, ParseError> {
-        Ok(DataSegment {
-            vec: s
-                .trim()
+        Ok(DataSegment(
+            s.trim()
                 .split(',')
                 .map(|i| i.parse::<usize>().unwrap())
                 .collect(),
-        })
+        ))
     }
 }
 
@@ -60,7 +57,7 @@ impl AdventOfCode for Puzzle {
         Self { vec: Vec::new() }
     }
     fn insert(&mut self, object: Self::Segment) {
-        self.vec = object.vec;
+        self.vec = object.0;
     }
     fn part1(&mut self) -> usize {
         let mut vec = self.vec.clone();
