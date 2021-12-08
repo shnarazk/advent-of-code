@@ -1,10 +1,6 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
+use crate::{AdventOfCode, Description, ParseError, TryParse};
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -13,7 +9,6 @@ struct DataSegment {
 }
 
 impl TryParse for DataSegment {
-    /// make a `Object` from a string block
     fn parse(s: &str) -> Result<Self, ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([ a-g]+)\|([ a-g]+)$").expect("wrong");
@@ -59,8 +54,8 @@ fn s2i (ch: char) -> usize {
 fn deduce (pattern: &[Vec<char>], table: &[usize; 7]) -> [usize; 7] {
     // from used mnemonic to true mnemonic
     let mut real_mnemonic: [Option<usize>; 7] = [None; 7];
-    // unique (4 => 'e'), (6 => 'b'), (9 => 'f')
-    // dbg!(&table);
+
+    // fix unique occurs (4 => 'e'), (6 => 'b'), (9 => 'f')
     for (i,n) in table.iter().enumerate() {
         match n {
             4 => real_mnemonic[i] = Some(4), // 4 == 'e'
@@ -72,7 +67,6 @@ fn deduce (pattern: &[Vec<char>], table: &[usize; 7]) -> [usize; 7] {
     'stage2: for p in pattern.iter() {
         if p.len() == 2 {
             // deduce from digit which len == 2: 'f' => 'c'
-            // real_mnemonic[s2i(p[(real_mnemonic[s2i(p[0])].is_none()) as usize])] = Some(2);
             for c in p.iter() {
                 if real_mnemonic[s2i(*c)].is_none() {
                     real_mnemonic[s2i(*c)] = Some(2); // 2 == 'c'
@@ -154,9 +148,6 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
     }
     fn part1(&mut self) -> usize {
-        // dbg!(self.line.iter().map(|v| v.target.iter().filter(|p| p.len() == 2).count()).collect::<Vec<_>>());
-        // dbg!(self.line.iter().map(|v| v.target.iter().filter(|p| p.len() == 4).count()).collect::<Vec<_>>());
-        // dbg!(self.line.iter().map(|v| v.target.iter().filter(|p| p.len() == 7).count()).collect::<Vec<_>>());
         self.line.iter().map(|v| v.target.iter().filter(|p| [2, 3, 4, 7].contains(&p.len())).count()).sum()
     }
     fn part2(&mut self) -> usize {
@@ -167,7 +158,6 @@ impl AdventOfCode for Puzzle {
                 table[i] = v.pattern.iter().filter(|set| set.contains(&ch)).count();
             }
             let decode = deduce(&v.pattern, &table);
-            // dbg!(&v.pattern, table);
             let mut value: usize = 0;
             for ss in v.target.iter() {
                 value *= 10;
