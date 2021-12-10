@@ -1,8 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use crate::{AdventOfCode, Description, Maybe};
-use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
 #[derive(Debug)]
 struct Puzzle {
