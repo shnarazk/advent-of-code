@@ -1,34 +1,11 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
+use crate::{AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
     beg: (usize, usize),
     end: (usize, usize),
-}
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        let mut i = DataSegment {
-            beg: (0, 0),
-            end: (0, 0),
-        };
-        lazy_static! {
-            static ref PARSER: Regex =
-                Regex::new(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(s).ok_or(ParseError)?;
-        i.beg.0 = segment[1].parse::<usize>()?;
-        i.beg.1 = segment[2].parse::<usize>()?;
-        i.end.0 = segment[3].parse::<usize>()?;
-        i.end.1 = segment[4].parse::<usize>()?;
-        Ok(i)
-    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -40,7 +17,6 @@ struct Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -54,8 +30,22 @@ impl AdventOfCode for Puzzle {
             count: Vec::new(),
         }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.line.push(object);
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        let mut i = DataSegment {
+            beg: (0, 0),
+            end: (0, 0),
+        };
+        lazy_static! {
+            static ref PARSER: Regex =
+                Regex::new(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$").expect("wrong");
+        }
+        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        i.beg.0 = segment[1].parse::<usize>()?;
+        i.beg.1 = segment[2].parse::<usize>()?;
+        i.end.0 = segment[3].parse::<usize>()?;
+        i.end.1 = segment[4].parse::<usize>()?;
+        self.line.push(i);
+        Ok(())
     }
     fn after_insert(&mut self) {
         self.max_x = self
@@ -121,7 +111,7 @@ impl AdventOfCode for Puzzle {
                 let mut y: isize = ds.beg.1 as isize;
                 let diff_x: isize = (ds.end.0 as isize - ds.beg.0 as isize).signum();
                 let diff_y: isize = (ds.end.1 as isize - ds.beg.1 as isize).signum();
-                for i in 0..=(ds.end.0 as isize - ds.beg.0 as isize).abs() {
+                for _ in 0..=(ds.end.0 as isize - ds.beg.0 as isize).abs() {
                     self.count[y as usize][x as usize] += 1;
                     x += diff_x;
                     y += diff_y;

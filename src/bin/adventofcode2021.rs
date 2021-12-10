@@ -38,7 +38,7 @@ pub fn main() {
         7 => day07::go(part, desc),
         8 => day08::go(part, desc),
         9 => day09::go(part, desc),
-        // 10 => day10::go(part, desc),
+        10 => day10::go(part, desc),
         // 11 => day11::go(part, desc),
         // 12 => day12::go(part, desc),
         // 13 => day13::go(part, desc),

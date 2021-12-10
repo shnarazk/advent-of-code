@@ -1,30 +1,15 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
+use crate::{AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-struct DataSegment {}
-
-impl TryParse for DataSegment {
-    /// make a `Object` from a string block
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(s).ok_or(ParseError)?;
-        Err(ParseError)
-    }
-}
-
-#[derive(Debug, PartialEq)]
 struct Puzzle {}
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -34,7 +19,7 @@ impl AdventOfCode for Puzzle {
         Self {}
     }
     // handle header
-    // fn header(&mut self, input: &str) -> Maybe<Option<String>> {
+    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
     //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
     //     let segment = parser.captures(input).ok_or(ParseError)?;
     //     for num in segment[1].split(',') {
@@ -43,8 +28,13 @@ impl AdventOfCode for Puzzle {
     //     Ok(Some(segment[2].to_string()))
     // }
     /// add a data block
-    fn insert(&mut self, object: Self::Segment) {
-        // self = object;
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        lazy_static! {
+            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
+        }
+        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        // self.line.push(object);
+        Ok(())
     }
     // finalize
     // fn after_insert(&mut self) {}

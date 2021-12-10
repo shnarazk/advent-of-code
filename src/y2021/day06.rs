@@ -1,18 +1,4 @@
-use crate::{AdventOfCode, Description, ParseError, TryParse};
-
-#[derive(Debug, PartialEq)]
-struct DataSegment(Vec<usize>);
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        Ok(DataSegment(
-            s.trim()
-                .split(',')
-                .map(|i| i.parse::<usize>().unwrap())
-                .collect(),
-        ))
-    }
-}
+use crate::{AdventOfCode, Description, Maybe};
 
 fn rotating_go_forward(
     acum: &mut [usize; 7],
@@ -47,7 +33,6 @@ struct Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -56,8 +41,13 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { vec: Vec::new() }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.vec = object.0;
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        self.vec = block
+            .trim()
+            .split(',')
+            .map(|i| i.parse::<usize>().unwrap())
+            .collect();
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut vec = self.vec.clone();

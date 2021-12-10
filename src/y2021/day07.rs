@@ -1,24 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
-use lazy_static::lazy_static;
-use regex::Regex;
-use std::collections::HashMap;
-
-#[derive(Debug, PartialEq)]
-struct DataSegment(Vec<usize>);
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        Ok(DataSegment(
-            s.trim()
-                .split(',')
-                .map(|i| i.parse::<usize>().unwrap())
-                .collect(),
-        ))
-    }
-}
+use crate::{AdventOfCode, Description, Maybe};
 
 #[derive(Debug, PartialEq)]
 struct Puzzle {
@@ -26,7 +6,6 @@ struct Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -35,8 +14,13 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { config: Vec::new() }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.config = object.0;
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        self.config = block
+            .trim()
+            .split(',')
+            .map(|i| i.parse::<usize>().unwrap())
+            .collect();
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let vec = &self.config;

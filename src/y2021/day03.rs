@@ -1,22 +1,6 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, ParseError, TryParse};
+use crate::{AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
-
-#[derive(Debug, PartialEq)]
-struct DataSegment (Vec<bool>);
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(s).ok_or(ParseError)?;
-        Ok(DataSegment(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>()))
-    }
-}
 
 fn dominant(vec: Vec<bool>) -> Option<bool> {
     let num_pos = vec.iter().filter(|b| **b).count();
@@ -79,7 +63,6 @@ impl Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -88,8 +71,14 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { line: Vec::new() }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.line.push(object.0)
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        lazy_static! {
+            static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
+        }
+        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        self.line
+            .push(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>());
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let (g, e) = self.gamma_and_epsilon();

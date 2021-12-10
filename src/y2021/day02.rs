@@ -1,7 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, ParseError, TryParse};
+use crate::{AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -12,29 +9,12 @@ enum Direction {
     Up(usize),
 }
 
-impl TryParse for Direction {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
-        }
-        let segment = PARSER.captures(s).ok_or(ParseError)?;
-        let num = segment[2].parse::<usize>()?;
-        match &segment[1] {
-            "forward" => Ok(Direction::Forward(num)),
-            "down" => Ok(Direction::Down(num)),
-            "up" => Ok(Direction::Up(num)),
-            _ => Err(ParseError),
-        }
-    }
-}
-
 #[derive(Debug)]
 struct Puzzle {
     line: Vec<Direction>,
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = Direction;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -43,8 +23,20 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { line: Vec::new() }
     }
-    fn insert(&mut self, object: Direction) {
-        self.line.push(object)
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        lazy_static! {
+            static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
+        }
+        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let num = segment[2].parse::<usize>()?;
+        let object = match &segment[1] {
+            "forward" => Direction::Forward(num),
+            "down" => Direction::Down(num),
+            "up" => Direction::Up(num),
+            _ => return Err(ParseError),
+        };
+        self.line.push(object);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut horizontal: usize = 0;

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, TryParse};
+use crate::{AdventOfCode, Description, Maybe};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
 #[derive(Debug)]
@@ -10,7 +10,6 @@ struct Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = usize;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -19,8 +18,9 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Puzzle { line: Vec::new() }
     }
-    fn insert(&mut self, object: usize) {
-        self.line.push(object);
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        self.line.push(block.parse::<usize>()?);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut last = self.line[0];

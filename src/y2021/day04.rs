@@ -1,34 +1,6 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError, TryParse};
-use lazy_static::lazy_static;
+use crate::{AdventOfCode, Description, Maybe, ParseError};
 use regex::Regex;
 use std::borrow::Cow;
-use std::collections::HashMap;
-
-#[derive(Debug, PartialEq)]
-struct DataSegment (Vec<Vec<usize>>);
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        let mut vec = Vec::new();
-        for l in s.split('\n') {
-            if l.is_empty() {
-                break;
-            }
-            let line = l
-                .split(' ')
-                .filter(|s| !s.is_empty())
-                .map(|n| n.parse::<usize>().expect("-"))
-                .collect::<Vec<_>>();
-            if !line.is_empty() {
-                vec.push(line);
-            }
-        }
-        Ok(DataSegment(vec))
-    }
-}
 
 #[derive(Debug)]
 struct Puzzle {
@@ -68,7 +40,6 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -83,16 +54,31 @@ impl AdventOfCode for Puzzle {
             num_row: 5,
         }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.board.push(object.0);
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        let mut vec = Vec::new();
+        for l in block.split('\n') {
+            if l.is_empty() {
+                break;
+            }
+            let line = l
+                .split(' ')
+                .filter(|s| !s.is_empty())
+                .map(|n| n.parse::<usize>().expect("-"))
+                .collect::<Vec<_>>();
+            if !line.is_empty() {
+                vec.push(line);
+            }
+        }
+        self.board.push(vec);
+        Ok(())
     }
-    fn header(&mut self, input: &str) -> Maybe<Option<String>> {
+    fn header(&mut self, input: String) -> Maybe<String> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-        let segment = parser.captures(input).ok_or(ParseError)?;
+        let segment = parser.captures(&input).ok_or(ParseError)?;
         for num in segment[1].split(',') {
             self.hands.push(num.parse::<usize>()?);
         }
-        Ok(Some(segment[2].to_string()))
+        Ok(segment[2].to_string())
     }
     fn after_insert(&mut self) {
         self.num_col = self.board[0][0].len();
@@ -118,7 +104,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect();
-        let result = x.iter().min_by_key(|(h, v)| h).expect("??");
+        let result = x.iter().min_by_key(|(h, _)| h).expect("??");
         dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
     }
@@ -135,11 +121,11 @@ impl AdventOfCode for Puzzle {
                         ]
                     })
                     .flatten()
-                    .min_by_key(|(h, v)| *h)
+                    .min_by_key(|(h, _)| *h)
                     .expect("??")
             })
             .collect();
-        let result = x.iter().max_by_key(|(h, v)| h).expect("??");
+        let result = x.iter().max_by_key(|(h, _)| h).expect("??");
         dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
     }

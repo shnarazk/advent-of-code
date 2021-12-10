@@ -1,23 +1,9 @@
-use crate::{AdventOfCode, Description, ParseError, TryParse};
-
-#[derive(Debug, PartialEq)]
-struct DataSegment(Vec<usize>);
-
-impl TryParse for DataSegment {
-    fn parse(s: &str) -> Result<Self, ParseError> {
-        Ok(DataSegment(
-            s.trim()
-                .chars()
-                .map(|c| c.to_digit(10).unwrap() as usize)
-                .collect::<Vec<usize>>(),
-        ))
-    }
-}
+use crate::{AdventOfCode, Description, Maybe};
 
 fn basin_size(grid: &[Vec<usize>], h: usize, w: usize, j: usize, i: usize) -> usize {
-    let mut to_check: Vec<(usize, usize)> = vec![(j,i)];
+    let mut to_check: Vec<(usize, usize)> = vec![(j, i)];
     let mut checked: Vec<(usize, usize)> = Vec::new();
-    while let Some(pos@(j, i)) = to_check.pop() {
+    while let Some(pos @ (j, i)) = to_check.pop() {
         let here = grid[j][i];
         if here == 9 {
             continue;
@@ -57,7 +43,6 @@ struct Puzzle {
 }
 
 impl AdventOfCode for Puzzle {
-    type Segment = DataSegment;
     type Output1 = usize;
     type Output2 = usize;
     const YEAR: usize = 2021;
@@ -66,8 +51,15 @@ impl AdventOfCode for Puzzle {
     fn default() -> Self {
         Self { line: Vec::new() }
     }
-    fn insert(&mut self, object: Self::Segment) {
-        self.line.push(object.0);
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        self.line.push(
+            block
+                .trim()
+                .chars()
+                .map(|c| c.to_digit(10).unwrap() as usize)
+                .collect::<Vec<usize>>(),
+        );
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         // dbg!(&self.line);
