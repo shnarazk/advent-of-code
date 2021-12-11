@@ -51,7 +51,7 @@ pub trait AdventOfCode: Debug + Default + Sized {
     /// An optional function to handle header section from the contents an input file.
     /// It must return the remanis as `Ok(Some(remains as String))`.
     /// ## A typical implementation example
-    /// ```
+    /// ```ignore
     /// fn header(&mut self, input: String) -> Maybe<String> {
     ///     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
     ///     let segment = parser.captures(input).ok_or(ParseError)?;
@@ -66,7 +66,7 @@ pub trait AdventOfCode: Debug + Default + Sized {
     }
     /// called by getting a new data block
     /// ## A typical implementation example
-    /// ```
+    /// ```ignore
     /// fn insert(&mut self, block: &str) -> Maybe<()> {
     ///     let parser: Regex = Regex::new(r"^(down|up) ([0-9]+)$").expect("wrong");
     ///     let segment = parser.captures(s).ok_or(ParseError)?;
@@ -84,7 +84,7 @@ pub trait AdventOfCode: Debug + Default + Sized {
     fn insert(&mut self, s: &str) -> Maybe<()>;
     /// An optional function to wrap up initialization.
     /// ## A typical implementation example
-    /// ```
+    /// ```ignore
     /// fn after_insert(&mut self) {
     ///     self.num_data = self.data.len();
     /// }
@@ -145,7 +145,7 @@ pub trait AdventOfCode: Debug + Default + Sized {
     }
     /// the solver for part1
     /// ## A typical implementation example
-    /// ```
+    /// ```ignore
     /// fn part1(&mut self) -> Self::Output1 {
     ///     self.data.iter().filter(|x| !x.is_empty()).count()
     /// }
@@ -153,7 +153,7 @@ pub trait AdventOfCode: Debug + Default + Sized {
     fn part1(&mut self) -> Self::Output1;
     /// the solver for part1
     /// ## A typical implementation example
-    /// ```
+    /// ```ignore
     /// fn part2(&mut self) -> Output2 {
     ///     self.data.iter().filter(|x| !x.is_empty()).map(|x| x * x).sum()
     /// }
