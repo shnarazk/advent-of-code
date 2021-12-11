@@ -6,11 +6,11 @@ use {
         framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
         line_parser,
     },
+    lazy_static::lazy_static,
+    regex::Regex,
     std::borrow::Borrow,
+    std::collections::HashMap,
 };
-use lazy_static::lazy_static;
-use regex::Regex;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub struct Puzzle {

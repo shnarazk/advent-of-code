@@ -102,7 +102,7 @@ pub trait AdventOfCode: Debug + Sized {
     /// ```
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
-    fn load(desc: impl Borrow<Description>) -> Maybe<String> {
+    fn load(description: impl Borrow<Description>) -> Maybe<String> {
         fn input_filename(desc: &Description, year: usize, day: usize) -> Maybe<String> {
             match desc {
                 Description::FileTag(tag) => {
@@ -132,7 +132,8 @@ pub trait AdventOfCode: Debug + Sized {
                 _ => Err(ParseError),
             }
         }
-        match desc.borrow() {
+        let desc = description.borrow();
+        match desc {
             Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
             Description::TestData(_) => load_data(desc),
             Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
