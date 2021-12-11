@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(block.trim().to_string());
         Ok(())
     }
-    fn part1(&mut self) -> usize {
+    fn part1(&mut self) -> Self::Output1 {
         fn syntax_error(l: &str) -> usize {
             let mut stack: Vec<char> = Vec::new();
             for c in l.chars() {
@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line);
         self.line.iter().map(|l| syntax_error(l)).sum()
     }
-    fn part2(&mut self) -> usize {
+    fn part2(&mut self) -> Self::Output2 {
         fn syntax_error(l: &str) -> usize {
             let mut stack: Vec<char> = Vec::new();
             for c in l.chars() {

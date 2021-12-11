@@ -44,11 +44,11 @@ impl AdventOfCode for Puzzle {
     // finalize
     // fn after_insert(&mut self) {}
     /// solver for part1
-    fn part1(&mut self) -> usize {
+    fn part1(&mut self) -> Self::Output1 {
         0
     }
     /// solver for part2
-    fn part2(&mut self) -> usize {
+    fn part2(&mut self) -> Self::Output2 {
         0
     }
 }
