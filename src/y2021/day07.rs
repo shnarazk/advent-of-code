@@ -1,15 +1,12 @@
-use crate::{AdventOfCode, Description, Maybe};
+use crate::{aoc_at, AdventOfCode, Description, Maybe};
 
 #[derive(Debug, PartialEq)]
 struct Puzzle {
     config: Vec<usize>,
 }
 
+#[aoc_at(2021, 7)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 7;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self { config: Vec::new() }

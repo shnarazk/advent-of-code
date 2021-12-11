@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{AdventOfCode, Description, Maybe, ParseError};
+use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
@@ -9,11 +9,8 @@ use std::collections::HashMap;
 #[derive(Debug, PartialEq)]
 struct Puzzle {}
 
+#[aoc_at(2021, 15)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 15;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self {}

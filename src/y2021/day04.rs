@@ -1,4 +1,4 @@
-use crate::{AdventOfCode, Description, Maybe, ParseError};
+use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -39,11 +39,8 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
     Some((need, point))
 }
 
+#[aoc_at(2021, 4)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 4;
     const DELIMITER: &'static str = "\n\n";
     fn default() -> Self {
         Self {

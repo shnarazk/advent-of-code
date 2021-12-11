@@ -1,4 +1,4 @@
-use crate::{AdventOfCode, Description, Maybe};
+use crate::{aoc_at, AdventOfCode, Description, Maybe};
 
 fn rotating_go_forward(
     acum: &mut [usize; 7],
@@ -32,11 +32,8 @@ struct Puzzle {
     vec: Vec<usize>,
 }
 
+#[aoc_at(2021, 6)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 6;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self { vec: Vec::new() }

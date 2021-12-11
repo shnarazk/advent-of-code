@@ -1,4 +1,4 @@
-use crate::{AdventOfCode, Description, Maybe};
+use crate::{aoc_at, AdventOfCode, Description, Maybe};
 
 fn basin_size(grid: &[Vec<usize>], h: usize, w: usize, j: usize, i: usize) -> usize {
     let mut to_check: Vec<(usize, usize)> = vec![(j, i)];
@@ -42,11 +42,8 @@ struct Puzzle {
     line: Vec<Vec<usize>>,
 }
 
+#[aoc_at(2021, 9)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 9;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self { line: Vec::new() }

@@ -1,4 +1,4 @@
-use crate::{AdventOfCode, Description, Maybe, ParseError};
+use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -16,11 +16,8 @@ struct Puzzle {
     count: Vec<Vec<usize>>,
 }
 
+#[aoc_at(2021, 5)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 5;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self {
