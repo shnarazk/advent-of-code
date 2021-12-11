@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
+use crate::framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;

@@ -1,4 +1,4 @@
-use crate::{AdventOfCode, Description, Maybe};
+use crate::framework::{AdventOfCode, Description, Maybe};
 
 #[derive(Debug, PartialEq)]
 struct Puzzle {

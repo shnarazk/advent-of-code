@@ -1,6 +1,4 @@
-use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
-use lazy_static::lazy_static;
-use regex::Regex;
+use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe}, line_parser};
 
 fn dominant(vec: Vec<bool>) -> Option<bool> {
     let num_pos = vec.iter().filter(|b| **b).count();
@@ -69,12 +67,7 @@ impl AdventOfCode for Puzzle {
         Self { line: Vec::new() }
     }
     fn insert(&mut self, block: &str) -> Maybe<()> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([01]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        self.line
-            .push(segment[1].chars().map(|s| s == '1').collect::<Vec<bool>>());
+        self.line.push(line_parser::to_binaries(block)?);
         Ok(())
     }
     fn part1(&mut self) -> usize {

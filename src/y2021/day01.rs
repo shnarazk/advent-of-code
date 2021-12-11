@@ -1,4 +1,4 @@
-use crate::{aoc_at, AdventOfCode, Description, Maybe};
+use crate::framework::{aoc_at, AdventOfCode, Description, Maybe};
 
 #[derive(Debug)]
 struct Puzzle {

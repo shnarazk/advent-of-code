@@ -1,5 +1,6 @@
 /// data handling frmework
 use std::{fmt::Debug, fs::File, io::prelude::*};
+pub use aoc_macro::aoc_at;
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Clone, Debug, PartialEq)]

@@ -1,4 +1,4 @@
-use crate::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
+use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError}, line_parser};
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -51,24 +51,6 @@ impl AdventOfCode for Puzzle {
             num_row: 5,
         }
     }
-    fn insert(&mut self, block: &str) -> Maybe<()> {
-        let mut vec = Vec::new();
-        for l in block.split('\n') {
-            if l.is_empty() {
-                break;
-            }
-            let line = l
-                .split(' ')
-                .filter(|s| !s.is_empty())
-                .map(|n| n.parse::<usize>().expect("-"))
-                .collect::<Vec<_>>();
-            if !line.is_empty() {
-                vec.push(line);
-            }
-        }
-        self.board.push(vec);
-        Ok(())
-    }
     fn header(&mut self, input: String) -> Maybe<String> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
         let segment = parser.captures(&input).ok_or(ParseError)?;
@@ -76,6 +58,17 @@ impl AdventOfCode for Puzzle {
             self.hands.push(num.parse::<usize>()?);
         }
         Ok(segment[2].to_string())
+    }
+    fn insert(&mut self, block: &str) -> Maybe<()> {
+        let mut vec = Vec::new();
+        for l in block.split('\n') {
+            if l.is_empty() {
+                break;
+            }
+            vec.push(line_parser::to_usizes(l, ' ')?);
+        }
+        self.board.push(vec);
+        Ok(())
     }
     fn after_insert(&mut self) {
         self.num_col = self.board[0][0].len();

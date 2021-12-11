@@ -1,4 +1,4 @@
-use crate::{aoc_at, AdventOfCode, Description, Maybe};
+use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe}, line_parser};
 
 #[derive(Debug, PartialEq)]
 struct Puzzle {
@@ -12,11 +12,7 @@ impl AdventOfCode for Puzzle {
         Self { config: Vec::new() }
     }
     fn insert(&mut self, block: &str) -> Maybe<()> {
-        self.config = block
-            .trim()
-            .split(',')
-            .map(|i| i.parse::<usize>().unwrap())
-            .collect();
+        self.config = line_parser::to_usizes(block, ',')?;
         Ok(())
     }
     fn part1(&mut self) -> usize {

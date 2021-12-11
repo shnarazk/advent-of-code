@@ -1,4 +1,4 @@
-use crate::{aoc_at, AdventOfCode, Description, Maybe};
+use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe}, line_parser};
 
 fn rotating_go_forward(
     acum: &mut [usize; 7],
@@ -39,11 +39,7 @@ impl AdventOfCode for Puzzle {
         Self { vec: Vec::new() }
     }
     fn insert(&mut self, block: &str) -> Maybe<()> {
-        self.vec = block
-            .trim()
-            .split(',')
-            .map(|i| i.parse::<usize>().unwrap())
-            .collect();
+        self.vec = line_parser::to_usizes(block, ',')?;
         Ok(())
     }
     fn part1(&mut self) -> usize {
