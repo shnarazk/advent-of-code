@@ -41,7 +41,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     #[test]

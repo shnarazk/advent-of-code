@@ -125,7 +125,7 @@ fn valid(key: &str, val: &str) -> bool {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
     #[test]
     fn test_part1() {

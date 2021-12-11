@@ -228,7 +228,7 @@ impl World {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
     #[test]
     fn test0() {

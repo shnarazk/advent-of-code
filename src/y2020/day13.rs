@@ -82,7 +82,7 @@ impl ProblemSolver<Object, usize, usize> for Setting {
 /// * x `mod` bq = bm
 ///
 /// ```
-/// use crate::adventofcode2020::day13::*;
+/// use crate::adventofcode::y2020::day13::*;
 /// let a = chinese((3, 2), (5, 3));
 /// assert_eq!(a.1, 8);
 /// let b = chinese(a, (2, 7));
@@ -116,7 +116,7 @@ fn solve1(a: usize, m: usize) -> usize {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     #[test]

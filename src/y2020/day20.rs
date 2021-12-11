@@ -157,7 +157,7 @@ pub fn flip_bits(width: usize, mut n: usize) -> usize {
 
 impl Tile {
     /// ```
-    /// use adventofcode2020::day20::*;
+    /// use adventofcode::y2020::day20::*;
     /// let tile = Tile { id: 0, sign: [1, 1, 1, 1], len: 3, image: Vec::new() };
     /// assert_eq!(tile.transpose(0, 0), [1, 1, 1, 1]);
     /// assert_eq!(tile.transpose(1, 0), [4, 1, 4, 1]);
@@ -227,7 +227,7 @@ impl Tile {
         true
     }
     /// ```
-    /// use adventofcode2020::day20::*;
+    /// use adventofcode::y2020::day20::*;
     /// assert_eq!(Tile::from(0, &vec!["...", "...", "..."]), Tile { id: 0, sign: [0, 0, 0,0 ], len: 3, image: vec!["...".to_string(), "...".to_string(), "...".to_string()] });
     /// ```
     pub fn from(id: usize, block: &[&str]) -> Self {
@@ -386,7 +386,7 @@ pub fn transose_image(image: &[String], rotate: usize, flip: usize) -> Vec<Strin
 }
 
 /// ```
-/// use adventofcode2020::day20::*;
+/// use adventofcode::y2020::day20::*;
 /// assert_eq!(decode(&"....".chars().collect::<Vec<char>>()), 0);
 /// assert_eq!(decode(&"...#".chars().collect::<Vec<char>>()), 1);
 /// assert_eq!(decode(&"..##".chars().collect::<Vec<char>>()), 3);
@@ -465,7 +465,7 @@ fn search(
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     #[test]

@@ -91,7 +91,7 @@ fn collects(links: &HashSet<Link>, origin: &str) -> usize {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     #[test]

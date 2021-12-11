@@ -185,7 +185,7 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     #[test]

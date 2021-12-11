@@ -31,7 +31,7 @@ impl ProblemObject for Location {
 }
 
 /// ```
-/// use adventofcode2020::{ProblemObject, day24::*};
+/// use adventofcode::y2020::{traits::ProblemObject, day24::*};
 /// assert_eq!(location(&[Dir::E, Dir::SE, Dir::W]), (-1, 1));
 /// assert_eq!(location(&[Dir::NW, Dir::W, Dir::SW, Dir::E, Dir::E]), (0, 0));
 /// assert_eq!(Location::parse("nwwswee"), Some((0, 0)));
@@ -86,7 +86,7 @@ fn push_dirs(vec: &mut Vec<Dir>, s: &str) {
 }
 
 /// ```
-/// use adventofcode2020::day24::*;
+/// use adventofcode::y2020::day24::*;
 /// assert_eq!(neighbors(&(0,0)), [(0,2),(-1,1),(-1,-1),(0,-2),(1,-1),(1,1)]);
 /// assert_eq!(neighbors(&(1,1)), [(1,3),(0,2),(0,0),(1,-1),(2,0),(2,2)]);
 /// ```
@@ -188,7 +188,7 @@ impl World {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Answer;
+    use crate::y2020::traits::*;
     const TEST1: &str = "\
 sesenwnenenewseeswwswswwnenewsewsw
 neeenesenwnwwswnenewnwwsewnenwseswesw

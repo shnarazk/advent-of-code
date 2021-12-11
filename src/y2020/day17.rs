@@ -259,7 +259,7 @@ where
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     const TEST1: &str = "\

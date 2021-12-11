@@ -91,7 +91,7 @@ fn check_line2(str: &str) -> usize {
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::y2020::traits::{Answer, Description},
     };
 
     const TEST: &str = "\
