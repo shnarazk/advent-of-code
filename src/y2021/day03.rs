@@ -1,4 +1,7 @@
-use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe}, line_parser};
+use crate::{
+    framework::{aoc_at, AdventOfCode, Description, Maybe},
+    line_parser,
+};
 
 fn dominant(vec: Vec<bool>) -> Option<bool> {
     let num_pos = vec.iter().filter(|b| **b).count();

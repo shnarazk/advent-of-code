@@ -1,19 +1,24 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
+use crate::{
+    framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+    line_parser,
+};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {}
+struct Puzzle {
+    line: Vec<()>,
+}
 
 #[aoc_at(2021, 14)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
-        Self {}
+        Self { line: Vec::new() }
     }
     // handle header
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {

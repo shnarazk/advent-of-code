@@ -1,4 +1,7 @@
-use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe}, line_parser};
+use crate::{
+    framework::{aoc_at, AdventOfCode, Description, Maybe},
+    line_parser,
+};
 
 fn rotating_go_forward(
     acum: &mut [usize; 7],

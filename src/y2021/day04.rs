@@ -1,4 +1,7 @@
-use crate::{framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError}, line_parser};
+use crate::{
+    framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+    line_parser,
+};
 use regex::Regex;
 use std::borrow::Cow;
 

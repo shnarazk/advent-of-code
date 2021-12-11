@@ -26,7 +26,7 @@ pub fn to_binaries(line: &str) -> Maybe<Vec<bool>> {
     }
     let segment = PARSER.captures(line.trim()).ok_or(ParseError)?;
     Ok(segment[0].chars().map(|s| s == '1').collect::<Vec<bool>>())
-} 
+}
 
 /// parse a line like 'ewnswss' after trimming it
 pub fn to_chars(line: &str) -> Maybe<Vec<char>> {
