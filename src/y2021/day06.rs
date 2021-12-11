@@ -30,7 +30,7 @@ fn go_forward(vec: &mut Vec<usize>) {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
     vec: Vec<usize>,
 }
@@ -38,9 +38,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 6)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { vec: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         self.vec = line_parser::to_usizes(block, ',')?;
         Ok(())

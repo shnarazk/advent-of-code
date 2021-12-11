@@ -12,7 +12,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
     line: Vec<()>,
 }
@@ -20,9 +20,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 0)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { line: Vec::new() }
-    }
     // handle header
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {
     //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");

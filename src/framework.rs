@@ -41,24 +41,13 @@ impl std::error::Error for ParseError {}
 pub type Maybe<T> = Result<T, ParseError>;
 
 /// The standard interface for a problem description with solving methods
-pub trait AdventOfCode: Debug + Sized {
+pub trait AdventOfCode: Debug + Default + Sized {
     type Output1: Sized + Debug + PartialEq;
     type Output2: Sized + Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
     /// delimeter between data blocks
     const DELIMITER: &'static str;
-    /// return an initialized setting
-    /// ## A typical implementation example
-    /// ```
-    /// fn default() -> Self {
-    ///     Self {
-    ///         data: Vec::new(),
-    ///         num_data: 0
-    ///     }
-    /// }
-    /// ```
-    fn default() -> Self;
     /// An optional function to handle header section from the contents an input file.
     /// It must return the remanis as `Ok(Some(remains as String))`.
     /// ## A typical implementation example

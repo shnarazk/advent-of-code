@@ -8,7 +8,7 @@ struct DataSegment {
     target: Vec<Vec<char>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
     line: Vec<DataSegment>,
 }
@@ -140,9 +140,6 @@ fn segments_to_num(vec: &[usize]) -> usize {
 #[aoc_at(2021, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { line: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([ a-g]+)\|([ a-g]+)$").expect("wrong");

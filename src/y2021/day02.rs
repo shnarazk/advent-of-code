@@ -9,7 +9,7 @@ enum Direction {
     Up(usize),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<Direction>,
 }
@@ -17,9 +17,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 2)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { line: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");

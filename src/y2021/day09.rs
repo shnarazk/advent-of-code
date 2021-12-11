@@ -37,7 +37,7 @@ fn basin_size(grid: &[Vec<usize>], h: usize, w: usize, j: usize, i: usize) -> us
     checked.len()
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }
@@ -45,9 +45,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { line: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         self.line.push(
             block

@@ -47,7 +47,7 @@ fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     co2_s_rate(nv, i + 1)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
 }
@@ -66,9 +66,6 @@ impl Puzzle {
 #[aoc_at(2021, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { line: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         self.line.push(line_parser::to_binaries(block)?);
         Ok(())

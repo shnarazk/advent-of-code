@@ -3,7 +3,7 @@ use crate::{
     line_parser,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
     config: Vec<usize>,
 }
@@ -11,9 +11,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 7)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self { config: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         self.config = line_parser::to_usizes(block, ',')?;
         Ok(())

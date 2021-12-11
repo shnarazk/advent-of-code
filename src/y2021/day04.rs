@@ -5,7 +5,7 @@ use crate::{
 use regex::Regex;
 use std::borrow::Cow;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     hands: Vec<usize>,
     board: Vec<Vec<Vec<usize>>>,
@@ -45,15 +45,6 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
 #[aoc_at(2021, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        Self {
-            hands: Vec::new(),
-            board: Vec::new(),
-            order: Vec::new(),
-            num_col: 5,
-            num_row: 5,
-        }
-    }
     fn header(&mut self, input: String) -> Maybe<String> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
         let segment = parser.captures(&input).ok_or(ParseError)?;

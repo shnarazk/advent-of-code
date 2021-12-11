@@ -1,6 +1,6 @@
 use crate::framework::{aoc_at, AdventOfCode, Maybe};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<usize>,
 }
@@ -8,9 +8,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Puzzle { line: Vec::new() }
-    }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         self.line.push(block.parse::<usize>()?);
         Ok(())
