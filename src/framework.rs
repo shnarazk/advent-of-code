@@ -1,6 +1,6 @@
 /// data handling frmework
 pub use aoc_macro::aoc_at;
-use std::{fmt::Debug, fs::File, io::prelude::*};
+use std::{borrow::Borrow, fmt::Debug, fs::File, io::prelude::*};
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Clone, Debug, PartialEq)]
@@ -102,7 +102,7 @@ pub trait AdventOfCode: Debug + Sized {
     /// ```
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
-    fn load(desc: &Description) -> Maybe<String> {
+    fn load(desc: impl Borrow<Description>) -> Maybe<String> {
         fn input_filename(desc: &Description, year: usize, day: usize) -> Maybe<String> {
             match desc {
                 Description::FileTag(tag) => {
@@ -132,7 +132,7 @@ pub trait AdventOfCode: Debug + Sized {
                 _ => Err(ParseError),
             }
         }
-        match desc {
+        match desc.borrow() {
             Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
             Description::TestData(_) => load_data(desc),
             Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
@@ -141,9 +141,9 @@ pub trait AdventOfCode: Debug + Sized {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(desc: &Description) -> Maybe<Self> {
+    fn parse(desc: impl Borrow<Description>) -> Maybe<Self> {
         let mut instance = Self::default();
-        let contents = Self::load(desc)?;
+        let contents = Self::load(desc.borrow())?;
         let remains = instance.header(contents)?;
         for block in remains.split(Self::DELIMITER) {
             if !block.is_empty() {
@@ -171,7 +171,11 @@ pub trait AdventOfCode: Debug + Sized {
     fn part2(&mut self) -> Self::Output2;
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
-    fn solve(desc: &Description, part: usize) -> Answer<Self::Output1, Self::Output2> {
+    fn solve(
+        description: impl Borrow<Description>,
+        part: usize,
+    ) -> Answer<Self::Output1, Self::Output2> {
+        let desc = description.borrow();
         match part {
             0 => {
                 println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);

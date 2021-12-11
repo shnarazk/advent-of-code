@@ -1,7 +1,7 @@
-use crate::framework::{aoc_at, AdventOfCode, Description, Maybe};
+use crate::framework::{aoc_at, AdventOfCode, Maybe};
 
 #[derive(Debug)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<usize>,
 }
 
@@ -42,8 +42,4 @@ impl AdventOfCode for Puzzle {
         }
         count
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

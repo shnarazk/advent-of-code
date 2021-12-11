@@ -1,4 +1,4 @@
-use crate::framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
+use crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -9,7 +9,7 @@ struct DataSegment {
 }
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<DataSegment>,
 }
 
@@ -189,8 +189,4 @@ impl AdventOfCode for Puzzle {
         }
         total
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

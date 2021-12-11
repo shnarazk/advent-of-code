@@ -1,15 +1,12 @@
-use crate::framework::{AdventOfCode, Description, Maybe};
+use crate::framework::{aoc_at, AdventOfCode, Maybe};
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<String>,
 }
 
+#[aoc_at(2021, 10)]
 impl AdventOfCode for Puzzle {
-    type Output1 = usize;
-    type Output2 = usize;
-    const YEAR: usize = 2021;
-    const DAY: usize = 10;
     const DELIMITER: &'static str = "\n";
     fn default() -> Self {
         Self { line: Vec::new() }
@@ -128,8 +125,4 @@ impl AdventOfCode for Puzzle {
         dbg!(&v);
         v[v.len() / 2]
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

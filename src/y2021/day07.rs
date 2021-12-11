@@ -1,10 +1,10 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe},
+    framework::{aoc_at, AdventOfCode, Maybe},
     line_parser,
 };
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     config: Vec<usize>,
 }
 
@@ -55,28 +55,5 @@ impl AdventOfCode for Puzzle {
             );
         }
         fmin
-    }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
-}
-
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::parse(&Description::TestData(TEST1.to_string()))
-                .expect("-")
-                .run(1),
-            Answer::Part1(0)
-        );
     }
 }

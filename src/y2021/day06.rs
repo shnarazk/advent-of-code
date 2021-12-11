@@ -1,5 +1,5 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe},
+    framework::{aoc_at, AdventOfCode, Maybe},
     line_parser,
 };
 
@@ -31,7 +31,7 @@ fn go_forward(vec: &mut Vec<usize>) {
 }
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     vec: Vec<usize>,
 }
 
@@ -65,8 +65,4 @@ impl AdventOfCode for Puzzle {
         }
         acum.iter().sum::<usize>() + birth1 + birth2
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

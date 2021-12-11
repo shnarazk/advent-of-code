@@ -1,16 +1,19 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+        line_parser,
+    },
+    std::borrow::Borrow,
 };
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<()>,
 }
 
@@ -50,24 +53,18 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
-}
-
 #[cfg(test)]
 mod test {
     use {
         super::*,
-        crate::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST1.to_string()))
-                .expect("-")
-                .run(1),
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
             Answer::Part1(0)
         );
     }

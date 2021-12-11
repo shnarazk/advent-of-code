@@ -1,4 +1,4 @@
-use crate::framework::{aoc_at, AdventOfCode, Description, Maybe};
+use crate::framework::{aoc_at, AdventOfCode, Maybe};
 
 fn basin_size(grid: &[Vec<usize>], h: usize, w: usize, j: usize, i: usize) -> usize {
     let mut to_check: Vec<(usize, usize)> = vec![(j, i)];
@@ -38,7 +38,7 @@ fn basin_size(grid: &[Vec<usize>], h: usize, w: usize, j: usize, i: usize) -> us
 }
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }
 
@@ -122,8 +122,4 @@ impl AdventOfCode for Puzzle {
         sizes.reverse();
         sizes[0] * sizes[1] * sizes[2]
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

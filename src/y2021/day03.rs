@@ -1,5 +1,5 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe},
+    framework::{aoc_at, AdventOfCode, Maybe},
     line_parser,
 };
 
@@ -48,7 +48,7 @@ fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
 }
 
 #[derive(Debug)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<Vec<bool>>,
 }
 
@@ -84,8 +84,4 @@ impl AdventOfCode for Puzzle {
         dbg!(o, c);
         o * c
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

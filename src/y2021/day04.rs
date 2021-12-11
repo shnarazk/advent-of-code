@@ -1,12 +1,12 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+    framework::{aoc_at, AdventOfCode, Maybe, ParseError},
     line_parser,
 };
 use regex::Regex;
 use std::borrow::Cow;
 
 #[derive(Debug)]
-struct Puzzle {
+pub struct Puzzle {
     hands: Vec<usize>,
     board: Vec<Vec<Vec<usize>>>,
     order: Vec<usize>,
@@ -122,8 +122,4 @@ impl AdventOfCode for Puzzle {
         dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

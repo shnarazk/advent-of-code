@@ -2,7 +2,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 use crate::{
-    framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+    framework::{aoc_at, AdventOfCode, Maybe, ParseError},
     line_parser,
 };
 use lazy_static::lazy_static;
@@ -10,7 +10,7 @@ use regex::Regex;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<()>,
 }
 
@@ -48,8 +48,4 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> usize {
         0
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }

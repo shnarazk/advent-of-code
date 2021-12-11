@@ -1,4 +1,4 @@
-use crate::framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError};
+use crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -10,7 +10,7 @@ enum Direction {
 }
 
 #[derive(Debug)]
-struct Puzzle {
+pub struct Puzzle {
     line: Vec<Direction>,
 }
 
@@ -73,8 +73,4 @@ impl AdventOfCode for Puzzle {
         }
         horizontal * depth
     }
-}
-
-pub fn go(part: usize, desc: Description) {
-    dbg!(Puzzle::solve(&desc, part));
 }
