@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,3 +11,4 @@ lazy_static = "^1.4"
 nom = "^6.2"
 regex = "^1.3"
 splr = "^0.14"
+aoc_macro = { version = "0.1", path = "aoc_macro" }
