@@ -88,16 +88,8 @@ impl Puzzle {
             }
         }
         for (j, i) in flash.iter() {
-            for jj in [
-                Some(*j),
-                j.checked_sub(1),
-                (j + 1 < self.height).then(|| j + 1),
-            ] {
-                for ii in [
-                    Some(*i),
-                    i.checked_sub(1),
-                    (i + 1 < self.width).then(|| i + 1),
-                ] {
+            for jj in neighbors(*j, self.height) {
+                for ii in neighbors(*i, self.width) {
                     if let (Some(y), Some(x)) = (jj, ii) {
                         if *j != y || *i != x {
                             if self.line[y][x] == 9 {
