@@ -4,11 +4,11 @@
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+        geometric::neighbors,
         line_parser,
     },
     lazy_static::lazy_static,
     regex::Regex,
-    std::borrow::Borrow,
     std::collections::HashMap,
 };
 
