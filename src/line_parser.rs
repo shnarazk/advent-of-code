@@ -19,6 +19,32 @@ pub fn to_usizes(line: &str, delimiter: char) -> Maybe<Vec<usize>> {
     }
 }
 
+/// parse a line like '01234' after trimming it
+pub fn to_digits(line: &str) -> Maybe<Vec<usize>> {
+    let result = line
+        .trim()
+        .chars()
+        .map(|n| match n {
+            '0' => 0,
+            '1' => 1,
+            '2' => 2,
+            '3' => 3,
+            '4' => 4,
+            '5' => 5,
+            '6' => 6,
+            '7' => 7,
+            '8' => 8,
+            '9' => 9,
+            _ => panic!(),
+        })
+        .collect::<Vec<usize>>();
+    if result.is_empty() {
+        Err(ParseError)
+    } else {
+        Ok(result)
+    }
+}
+
 /// parse a line like '010101010' after trimming it
 pub fn to_binaries(line: &str) -> Maybe<Vec<bool>> {
     lazy_static! {
