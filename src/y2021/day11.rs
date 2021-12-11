@@ -1,7 +1,6 @@
 use crate::{
     framework::{aoc_at, AdventOfCode, Maybe},
-    geometric::neighbors,
-    line_parser,
+    geometric, line_parser,
 };
 
 #[derive(Debug, Default, PartialEq)]
@@ -37,17 +36,11 @@ impl Puzzle {
             }
         }
         for (j, i) in flash.iter() {
-            for jj in neighbors(*j, self.height) {
-                for ii in neighbors(*i, self.width) {
-                    if let (Some(y), Some(x)) = (jj, ii) {
-                        if *j != y || *i != x {
-                            if self.line[y][x] == 9 {
-                                secondary.push((y, x))
-                            }
-                            self.line[y][x] += 1;
-                        }
-                    }
+            for (jj, ii) in geometric::neighbors8(*j, *i, self.height, self.width) {
+                if self.line[jj][ii] == 9 {
+                    secondary.push((jj, ii))
                 }
+                self.line[jj][ii] += 1;
             }
         }
         total += flash.len();
@@ -81,17 +74,11 @@ impl Puzzle {
             }
         }
         for (j, i) in flash.iter() {
-            for jj in neighbors(*j, self.height) {
-                for ii in neighbors(*i, self.width) {
-                    if let (Some(y), Some(x)) = (jj, ii) {
-                        if *j != y || *i != x {
-                            if self.line[y][x] == 9 {
-                                secondary.push((y, x))
-                            }
-                            self.line[y][x] += 1;
-                        }
-                    }
+            for (jj, ii) in geometric::neighbors8(*j, *i, self.height, self.width) {
+                if self.line[jj][ii] == 9 {
+                    secondary.push((jj, ii))
                 }
+                self.line[jj][ii] += 1;
             }
         }
         if secondary.is_empty() {

@@ -1,6 +1,6 @@
 use crate::{
     framework::{aoc_at, AdventOfCode, Maybe},
-    geometric::neighbors,
+    geometric,
 };
 
 #[derive(Debug, Default, PartialEq)]
@@ -18,18 +18,12 @@ impl Puzzle {
                 continue;
             }
             checked.push(pos);
-            for jj in neighbors(j, h + 1) {
-                for ii in neighbors(i, w + 1) {
-                    if let (Some(y), Some(x)) = (jj, ii) {
-                        if (y == j || x == i)
-                            && !(y == j && x == i)
-                            && here < self.line[y][x]
-                            && !to_check.contains(&(y, x))
-                            && !checked.contains(&(y, x))
-                        {
-                            to_check.push((y, x));
-                        }
-                    }
+            for (jj, ii) in geometric::neighbors4(j, i, h + 1, w + 1) {
+                if here < self.line[jj][ii]
+                    && !to_check.contains(&(jj, ii))
+                    && !checked.contains(&(jj, ii))
+                {
+                    to_check.push((jj, ii));
                 }
             }
         }
@@ -58,16 +52,9 @@ impl AdventOfCode for Puzzle {
         for j in 0..height {
             'next: for i in 0..width {
                 let here = self.line[j][i];
-                for jj in neighbors(j, height) {
-                    for ii in neighbors(i, width) {
-                        if let (Some(jj), Some(ii)) = (jj, ii) {
-                            if (jj == j || ii == i)
-                                && !(jj == j && ii == i)
-                                && self.line[jj][ii] <= here
-                            {
-                                continue 'next;
-                            }
-                        }
+                for (jj, ii) in geometric::neighbors4(j, i, height, width) {
+                    if self.line[jj][ii] <= here {
+                        continue 'next;
                     }
                 }
                 risks += self.line[j][i] + 1;
@@ -82,24 +69,11 @@ impl AdventOfCode for Puzzle {
         for j in 0..height {
             for i in 0..width {
                 let here = self.line[j][i];
-                if (if j != 0 {
-                    here < self.line[j - 1][i]
-                } else {
-                    true
-                } && if j + 1 != height {
-                    here < self.line[j + 1][i]
-                } else {
-                    true
-                } && if i != 0 {
-                    here < self.line[j][i - 1]
-                } else {
-                    true
-                } && if i + 1 != width {
-                    here < self.line[j][i + 1]
-                } else {
-                    true
-                }) {
-                    dbg!(self.basin_size(height - 1, width - 1, j, i));
+                if geometric::neighbors4(j, i, height, width)
+                    .iter()
+                    .all(|(y, x)| here < self.line[*y][*x])
+                {
+                    // dbg!(self.basin_size(height - 1, width - 1, j, i));
                     sizes.push(self.basin_size(height - 1, width - 1, j, i));
                 }
             }
