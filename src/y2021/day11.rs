@@ -1,5 +1,6 @@
 use crate::{
     framework::{aoc_at, AdventOfCode, Maybe},
+    geometric::neighbors,
     line_parser,
 };
 
@@ -9,14 +10,6 @@ pub struct Puzzle {
     height: usize,
     width: usize,
     step: usize,
-}
-
-fn neighbors(here: usize, to: usize) -> [Option<usize>; 3] {
-    [
-        Some(here),
-        here.checked_sub(1),
-        (here + 1 < to).then(|| here + 1),
-    ]
 }
 
 impl Puzzle {

@@ -1,4 +1,5 @@
 pub mod framework;
+pub mod geometric;
 pub mod line_parser;
 pub mod template;
 pub mod y2020;
