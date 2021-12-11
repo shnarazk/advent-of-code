@@ -19,6 +19,12 @@ impl Parse for Args {
     }
 }
 
+/// Set year, day, and output types as `usize` on `AdventOfCode` implementaion
+// ### Example
+/// ```
+/// #[aoc_at(2021, 25)]
+/// impl AdventOfCode for Puzzle { ... }
+/// ```
 #[proc_macro_attribute]
 pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let vars = parse_macro_input!(attrs as Args);
