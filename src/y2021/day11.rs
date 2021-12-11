@@ -32,36 +32,22 @@ fn progress(
                 *p += 1;
             }
         }
-    } else {
-        for (j, i) in flash.iter() {
-            for dj in [-1isize, 0, 1] {
-                if *j == 0 && dj == -1 {
-                    continue;
-                }
-                if *j + 1 == h && dj == 1 {
-                    continue;
-                }
-                for di in [-1, 0, 1] {
-                    if *i == 0 && di == -1 {
-                        continue;
+    }
+    for (j, i) in flash.iter() {
+        for jj in [Some(*j), j.checked_sub(1), (j + 1 < h).then(|| j + 1)] {
+            for ii in [Some(*i), i.checked_sub(1), (i + 1 < w).then(|| i + 1)] {
+                if let (Some(y), Some(x)) = (jj, ii) {
+                    if *j != y || *i != x {
+                        if vec[y][x] == 9 {
+                            secondary.push((y, x))
+                        }
+                        vec[y][x] += 1;
                     }
-                    if *i + 1 == w && di == 1 {
-                        continue;
-                    }
-                    if dj == 0 && di == 0 {
-                        continue;
-                    }
-                    let jj = (*j as isize + dj) as usize;
-                    let ii = (*i as isize + di) as usize;
-                    if vec[jj][ii] == 9 {
-                        secondary.push((jj, ii))
-                    }
-                    vec[jj][ii] += 1;
                 }
             }
         }
-        total += flash.len();
     }
+    total += flash.len();
     if secondary.is_empty() {
         for v in vec.iter_mut() {
             for i in v.iter_mut() {
@@ -92,31 +78,17 @@ fn progress_check(vec: &mut [Vec<usize>], flash: Vec<(usize, usize)>, mut step: 
                 *p += 1;
             }
         }
-    } else {
-        for (j, i) in flash.iter() {
-            for dj in [-1isize, 0, 1] {
-                if *j == 0 && dj == -1 {
-                    continue;
-                }
-                if *j + 1 == h && dj == 1 {
-                    continue;
-                }
-                for di in [-1, 0, 1] {
-                    if *i == 0 && di == -1 {
-                        continue;
+    }
+    for (j, i) in flash.iter() {
+        for jj in [Some(*j), j.checked_sub(1), (j + 1 < h).then(|| j + 1)] {
+            for ii in [Some(*i), i.checked_sub(1), (i + 1 < w).then(|| i + 1)] {
+                if let (Some(y), Some(x)) = (jj, ii) {
+                    if *j != y || *i != x {
+                        if vec[y][x] == 9 {
+                            secondary.push((y, x))
+                        }
+                        vec[y][x] += 1;
                     }
-                    if *i + 1 == w && di == 1 {
-                        continue;
-                    }
-                    if dj == 0 && di == 0 {
-                        continue;
-                    }
-                    let jj = (*j as isize + dj) as usize;
-                    let ii = (*i as isize + di) as usize;
-                    if vec[jj][ii] == 9 {
-                        secondary.push((jj, ii))
-                    }
-                    vec[jj][ii] += 1;
                 }
             }
         }
