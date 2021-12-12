@@ -29,8 +29,8 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn count_to(&self, path: Vec<Node>) -> usize {
-        let here: &Node = &*path.last().unwrap();
+    fn count_to(&self, path: Vec<&Node>) -> usize {
+        let here: &Node = *path.last().unwrap();
         if *here == Node::Start {
             let mut p = path.clone();
             p.reverse();
@@ -39,17 +39,17 @@ impl Puzzle {
         }
         let mut count = 0;
         for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
-            if !to.is_big() && path.contains(to) {
+            if !to.is_big() && path.contains(&to) {
                 continue;
             }
             let mut cand = path.clone();
-            cand.push(to.clone());
+            cand.push(to);
             count += self.count_to(cand);
         }
         count
     }
-    fn count_to2(&self, path: Vec<Node>, favorite: Option<Node>) -> usize {
-        let here: &Node = &*path.last().unwrap();
+    fn count_to2(&self, path: Vec<&Node>, favorite: Option<&Node>) -> usize {
+        let here: &Node = *path.last().unwrap();
         if *here == Node::Start {
             if let Some(f) = favorite {
                 if path.iter().filter(|n| **n == f).count() == 2 {
@@ -65,20 +65,20 @@ impl Puzzle {
         for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
             match to {
                 Node::End => continue,
-                Node::Small(_) if favorite == Some(to.clone()) => {
-                    if path.iter().filter(|n| *n == to).count() == 2 {
+                Node::Small(_) if favorite == Some(to) => {
+                    if path.iter().filter(|n| *n == &to).count() == 2 {
                         continue;
                     }
                 }
-                Node::Small(_) if path.contains(to) => continue,
+                Node::Small(_) if path.contains(&to) => continue,
                 _ => (),
             }
             let mut cand = path.clone();
-            cand.push(to.clone());
+            cand.push(to);
             if favorite.is_none() && to.is_small() {
-                count += self.count_to2(cand.clone(), Some(to.clone()));
+                count += self.count_to2(cand.clone(), Some(to));
             }
-            count += self.count_to2(cand, favorite.clone());
+            count += self.count_to2(cand, favorite);
         }
         count
     }
@@ -118,9 +118,9 @@ impl AdventOfCode for Puzzle {
         dbg!(self.path.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.count_to(vec![Node::End])
+        self.count_to(vec![&Node::End])
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.count_to(vec![Node::End]) + self.count_to2(vec![Node::End], None)
+        self.count_to(vec![&Node::End]) + self.count_to2(vec![&Node::End], None)
     }
 }
