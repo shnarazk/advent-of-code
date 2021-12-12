@@ -14,8 +14,11 @@ enum Node {
 }
 
 impl Node {
+    fn is_big(&self) -> bool {
+        matches!(self, Node::Big(_))
+    }
     fn is_small(&self) -> bool {
-        !matches!(self, Node::Big(_))
+        matches!(self, Node::Small(_))
     }
 }
 
@@ -36,7 +39,7 @@ impl Puzzle {
         }
         let mut count = 0;
         for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
-            if to.is_small() && path.contains(to) {
+            if !to.is_big() && path.contains(to) {
                 continue;
             }
             let mut cand = path.clone();
@@ -72,7 +75,7 @@ impl Puzzle {
             }
             let mut cand = path.clone();
             cand.push(to.clone());
-            if favorite.is_none() && matches!(to, Node::Small(_)) {
+            if favorite.is_none() && to.is_small() {
                 count += self.count_to2(cand.clone(), Some(to.clone()));
             }
             count += self.count_to2(cand, favorite.clone());
