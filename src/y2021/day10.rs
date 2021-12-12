@@ -1,6 +1,6 @@
 use crate::framework::{aoc, AdventOfCode, Maybe};
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<String>,
 }

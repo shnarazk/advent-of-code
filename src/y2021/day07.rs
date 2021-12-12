@@ -3,7 +3,7 @@ use crate::{
     line_parser,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     config: Vec<usize>,
 }

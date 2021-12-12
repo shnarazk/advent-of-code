@@ -8,7 +8,7 @@ struct DataSegment {
     end: (usize, usize),
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<DataSegment>,
     max_x: usize,

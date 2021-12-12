@@ -41,9 +41,9 @@ impl std::error::Error for ParseError {}
 pub type Maybe<T> = Result<T, ParseError>;
 
 /// The standard interface for a problem description with solving methods
-pub trait AdventOfCode: Debug + Default + Sized {
-    type Output1: Sized + Debug + PartialEq;
-    type Output2: Sized + Debug + PartialEq;
+pub trait AdventOfCode: Debug + Default {
+    type Output1: Debug + PartialEq;
+    type Output2: Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
     /// delimeter between data blocks

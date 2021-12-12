@@ -10,7 +10,7 @@ struct DataSegment {
     target: Vec<Vec<char>>,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<DataSegment>,
 }

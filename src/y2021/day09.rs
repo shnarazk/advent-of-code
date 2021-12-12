@@ -3,7 +3,7 @@ use crate::{
     geometric,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }
