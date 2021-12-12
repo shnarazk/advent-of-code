@@ -1,5 +1,5 @@
 use {
-    crate::framework::{aoc, AdventOfCode, Maybe, ParseError},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
 };
@@ -19,7 +19,7 @@ pub struct Puzzle {
 #[aoc(2021, 2)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^(forward|down|up) ([0-9]+)").expect("wrong");
         }

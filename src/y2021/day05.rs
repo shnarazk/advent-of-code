@@ -1,4 +1,4 @@
-use crate::framework::{aoc, AdventOfCode, Maybe, ParseError};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -19,7 +19,7 @@ pub struct Puzzle {
 #[aoc(2021, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let mut i = DataSegment {
             beg: (0, 0),
             end: (0, 0),

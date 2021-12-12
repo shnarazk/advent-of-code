@@ -37,9 +37,6 @@ impl std::fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
-/// An alias for `Result<T, ParseError>`
-pub type Maybe<T> = Result<T, ParseError>;
-
 /// The standard interface for a problem description with solving methods
 pub trait AdventOfCode: Debug + Default {
     type Output1: Debug + PartialEq;
@@ -52,7 +49,7 @@ pub trait AdventOfCode: Debug + Default {
     /// It must return the remanis as `Ok(Some(remains as String))`.
     /// ## A typical implementation example
     /// ```ignore
-    /// fn header(&mut self, input: String) -> Maybe<String> {
+    /// fn header(&mut self, input: String) -> Result<String, ParseError> {
     ///     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
     ///     let segment = parser.captures(input).ok_or(ParseError)?;
     ///     for num in segment[1].split(',') {
@@ -61,13 +58,13 @@ pub trait AdventOfCode: Debug + Default {
     ///     Ok(Some(segment[2].to_string()))
     /// }
     /// ```
-    fn header(&mut self, input: String) -> Maybe<String> {
+    fn header(&mut self, input: String) -> Result<String, ParseError> {
         Ok(input)
     }
     /// called by getting a new data block
     /// ## A typical implementation example
     /// ```ignore
-    /// fn insert(&mut self, block: &str) -> Maybe<()> {
+    /// fn insert(&mut self, block: &str) -> Result<(), ParseError> {
     ///     let parser: Regex = Regex::new(r"^(down|up) ([0-9]+)$").expect("wrong");
     ///     let segment = parser.captures(s).ok_or(ParseError)?;
     ///     let num: usize = segment[2].parse::<usize>()?;
@@ -81,7 +78,7 @@ pub trait AdventOfCode: Debug + Default {
     ///     Ok(())
     /// }
     /// ```
-    fn insert(&mut self, s: &str) -> Maybe<()>;
+    fn insert(&mut self, s: &str) -> Result<(), ParseError>;
     /// An optional function to wrap up initialization.
     /// ## A typical implementation example
     /// ```ignore
@@ -91,8 +88,8 @@ pub trait AdventOfCode: Debug + Default {
     /// ```
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
-    fn load(description: impl Borrow<Description>) -> Maybe<String> {
-        fn input_filename(desc: &Description, year: usize, day: usize) -> Maybe<String> {
+    fn load(description: impl Borrow<Description>) -> Result<String, ParseError> {
+        fn input_filename(desc: &Description, year: usize, day: usize) -> Result<String, ParseError> {
             match desc {
                 Description::FileTag(tag) => {
                     Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
@@ -101,7 +98,7 @@ pub trait AdventOfCode: Debug + Default {
                 _ => Err(ParseError),
             }
         }
-        fn load_file(file_name: String) -> Maybe<String> {
+        fn load_file(file_name: String) -> Result<String, ParseError> {
             match File::open(&file_name) {
                 Ok(mut file) => {
                     let mut contents = String::new();
@@ -114,7 +111,7 @@ pub trait AdventOfCode: Debug + Default {
                 Err(e) => panic!("Can't read {}: {:?}", file_name, e),
             }
         }
-        fn load_data(desc: &Description) -> Maybe<String> {
+        fn load_data(desc: &Description) -> Result<String, ParseError> {
             match desc {
                 Description::TestData(s) if s.is_empty() => Err(ParseError),
                 Description::TestData(s) => Ok(s.to_string()),
@@ -131,7 +128,7 @@ pub trait AdventOfCode: Debug + Default {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(desc: impl Borrow<Description>) -> Maybe<Self> {
+    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(desc.borrow())?;
         let remains = instance.header(contents)?;

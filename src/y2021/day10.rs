@@ -1,4 +1,4 @@
-use crate::framework::{aoc, AdventOfCode, Maybe};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
@@ -8,7 +8,7 @@ pub struct Puzzle {
 #[aoc(2021, 10)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(block.trim().to_string());
         Ok(())
     }

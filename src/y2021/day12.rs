@@ -1,5 +1,5 @@
 use {
-    crate::framework::{aoc, AdventOfCode, Maybe, ParseError},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashSet,
@@ -87,7 +87,7 @@ impl Puzzle {
 #[aoc(2021, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref PARSER: Regex =
                 Regex::new(r"^(start|end|[a-z]+|[A-Z]+)-(start|end|[a-z]+|[A-Z]+)$")

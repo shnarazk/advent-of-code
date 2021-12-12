@@ -1,5 +1,5 @@
 use crate::{
-    framework::{aoc, AdventOfCode, Maybe},
+    framework::{aoc, AdventOfCode, ParseError},
     geometric,
 };
 
@@ -34,7 +34,7 @@ impl Puzzle {
 #[aoc(2021, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(
             block
                 .trim()

@@ -1,6 +1,6 @@
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Maybe, ParseError},
+        framework::{aoc, AdventOfCode, ParseError},
         line_parser,
     },
     regex::Regex,
@@ -47,7 +47,7 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
 #[aoc(2021, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn header(&mut self, input: String) -> Maybe<String> {
+    fn header(&mut self, input: String) -> Result<String, ParseError> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
         let segment = parser.captures(&input).ok_or(ParseError)?;
         for num in segment[1].split(',') {
@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(segment[2].to_string())
     }
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let mut vec = Vec::new();
         for l in block.split('\n') {
             if l.is_empty() {

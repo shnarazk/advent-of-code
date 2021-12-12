@@ -3,7 +3,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Description, Maybe, ParseError},
+        framework::{aoc, AdventOfCode, Description, ParseError},
         geometric::neighbors,
         line_parser,
     },
@@ -28,7 +28,7 @@ impl AdventOfCode for Puzzle {
     //     }
     //     Ok(Some(segment[2].to_string()))
     // }
-    fn insert(&mut self, block: &str) -> Maybe<()> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
         }
