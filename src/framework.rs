@@ -1,4 +1,4 @@
-/// data handling frmework
+//! data handling frmework
 pub use aoc_macro::{aoc, aoc_at};
 use std::{borrow::Borrow, fmt::Debug, fs::File, io::prelude::*};
 

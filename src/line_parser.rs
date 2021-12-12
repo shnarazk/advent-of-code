@@ -1,3 +1,4 @@
+//! misc implementations of string-to-object parsers
 use {
     crate::framework::ParseError,
     lazy_static::lazy_static,

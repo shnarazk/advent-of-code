@@ -1,3 +1,5 @@
+//! misc functions about 2D/3D computation
+
 /// returns `[self - 1, self, self + 1]`
 pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     [
