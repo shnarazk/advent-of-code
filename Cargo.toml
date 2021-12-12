@@ -19,5 +19,10 @@ aoc_macro = { version = "0.1", path = "aoc_macro" }
 
 [features]
 default = ["y2021"]
-y2020 = []
 y2021 = []
+y2020 = []
+y2019 = []
+y2018 = []
+y2017 = []
+y2016 = []
+y2015 = []
