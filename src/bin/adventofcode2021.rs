@@ -1,5 +1,5 @@
 use {
-    adventofcode::{framework::AdventOfCode, template, y2021::*, Description},
+    adventofcode::{framework::AdventOfCode, y2021::*, Description},
     std::env::args,
 };
 

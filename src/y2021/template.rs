@@ -20,7 +20,6 @@ pub struct Puzzle {
 #[aoc_at(2021, 0)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // handle header
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {
     //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
     //     let segment = parser.captures(input).ok_or(ParseError)?;
@@ -29,7 +28,6 @@ impl AdventOfCode for Puzzle {
     //     }
     //     Ok(Some(segment[2].to_string()))
     // }
-    /// add a data block
     fn insert(&mut self, block: &str) -> Maybe<()> {
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
@@ -38,18 +36,18 @@ impl AdventOfCode for Puzzle {
         // self.line.push(object);
         Ok(())
     }
-    // finalize
-    // fn after_insert(&mut self) {}
-    /// solver for part1
+    fn after_insert(&mut self) {
+        dbg!(&self.line);
+    }
     fn part1(&mut self) -> Self::Output1 {
         0
     }
-    /// solver for part2
     fn part2(&mut self) -> Self::Output2 {
         0
     }
 }
 
+#[cfg(feature = "y2021")]
 #[cfg(test)]
 mod test {
     use {
