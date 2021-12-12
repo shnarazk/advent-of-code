@@ -1,12 +1,5 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
+    crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashSet,
@@ -75,7 +68,7 @@ impl Puzzle {
                     }
                 }
                 Node::Small(_) if path.contains(to) => continue,
-                _ => ()
+                _ => (),
             }
             let mut cand = path.clone();
             cand.push(to.clone());
@@ -93,7 +86,9 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^(start|end|[a-z]+|[A-Z]+)-(start|end|[a-z]+|[A-Z]+)$").expect("wrong");
+            static ref PARSER: Regex =
+                Regex::new(r"^(start|end|[a-z]+|[A-Z]+)-(start|end|[a-z]+|[A-Z]+)$")
+                    .expect("wrong");
         }
         // dbg!(&block);
         let segment = PARSER.captures(block).ok_or(ParseError)?;
