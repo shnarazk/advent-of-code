@@ -128,6 +128,7 @@ impl ProblemSolver<OP, usize, usize> for Setting {
 }
 
 #[cfg(test)]
+#[cfg(feature = "y2020")]
 mod test {
     use {
         super::*,

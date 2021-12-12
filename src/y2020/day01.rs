@@ -49,6 +49,7 @@ impl ProblemSolver<usize, usize, usize> for Setting {
     }
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {
@@ -72,7 +73,7 @@ mod test {
         );
     }
 
-    #[test]
+    #[cfg_attr(feature = "y2020", test)]
     fn test2() {
         assert_eq!(
             Setting::parse(Description::TestData(TEST.to_string())).run(2),

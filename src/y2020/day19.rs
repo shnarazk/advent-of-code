@@ -188,6 +188,7 @@ enum Rule {
     Seq(Vec<usize>),
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

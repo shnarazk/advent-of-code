@@ -461,6 +461,7 @@ fn search(
     None
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

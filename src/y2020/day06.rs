@@ -38,6 +38,7 @@ impl ProblemSolver<String, usize, usize> for Setting {
     }
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

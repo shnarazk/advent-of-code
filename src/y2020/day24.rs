@@ -185,6 +185,7 @@ impl World {
     }
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use super::*;
@@ -210,6 +211,7 @@ nenewswnwewswnenesenwnesewesw
 eneswnwswnwsenenwnwnwwseeswneewsenese
 neswnwewnwnwseenwseesewsenwsweewe
 wseweeenwnesenwwwswnew";
+
     #[test]
     fn test1() {
         assert_eq!(

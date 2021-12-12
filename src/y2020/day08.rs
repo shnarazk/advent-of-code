@@ -181,6 +181,7 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
     Some(newcodes)
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

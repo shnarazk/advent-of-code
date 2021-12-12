@@ -112,6 +112,7 @@ fn solve1(a: usize, m: usize) -> usize {
     panic!("can't");
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

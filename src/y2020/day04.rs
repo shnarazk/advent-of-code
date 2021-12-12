@@ -121,6 +121,7 @@ fn valid(key: &str, val: &str) -> bool {
     false
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

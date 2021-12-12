@@ -214,6 +214,7 @@ fn an_expr2(input: &str) -> IResult<&str, Expr> {
     terms(input.trim_start())
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

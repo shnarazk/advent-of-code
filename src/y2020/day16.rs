@@ -193,12 +193,14 @@ fn parse_sample(str: &str) -> Vec<usize> {
     vec
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {
         super::*,
         crate::y2020::traits::{Answer, Description},
     };
+
     #[test]
     fn test1() {
         const TEST: &str = "\

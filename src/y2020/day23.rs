@@ -125,9 +125,11 @@ impl Config {
     }
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use super::*;
+
     #[test]
     fn test0() {
         let mut conf = Config::new(9, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);

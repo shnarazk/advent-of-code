@@ -255,6 +255,7 @@ where
      */
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

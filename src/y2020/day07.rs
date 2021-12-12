@@ -87,6 +87,7 @@ fn collects(links: &HashSet<Link>, origin: &str) -> usize {
     count + 1
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {

@@ -87,6 +87,7 @@ fn check_line2(str: &str) -> usize {
     }
 }
 
+#[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {
