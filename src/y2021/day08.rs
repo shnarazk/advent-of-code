@@ -1,6 +1,8 @@
-use crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError};
-use lazy_static::lazy_static;
-use regex::Regex;
+use {
+    crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError},
+    lazy_static::lazy_static,
+    regex::Regex,
+};
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {

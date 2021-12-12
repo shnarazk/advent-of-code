@@ -1,9 +1,11 @@
-use crate::{
-    framework::{aoc_at, AdventOfCode, Maybe, ParseError},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc_at, AdventOfCode, Maybe, ParseError},
+        line_parser,
+    },
+    regex::Regex,
+    std::borrow::Cow,
 };
-use regex::Regex;
-use std::borrow::Cow;
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
