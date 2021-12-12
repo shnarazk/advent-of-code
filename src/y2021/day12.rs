@@ -9,58 +9,120 @@ use {
     },
     lazy_static::lazy_static,
     regex::Regex,
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+enum Node {
+    Start,
+    End,
+    Big(String),
+    Small(String),
+}
+
+impl Node {
+    fn is_small(&self) -> bool {
+        !matches!(self, Node::Big(_))
+    }
+}
+
+#[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(Node, Node)>,
+    path: HashSet<(Node, Node)>,
+}
+
+impl Puzzle {
+    fn count_to(&self, path: Vec<Node>) -> usize {
+        let here: &Node = &*path.last().unwrap();
+        if *here == Node::Start {
+            let mut p = path.clone();
+            p.reverse();
+            // println!("{:?}", p);
+            return 1;
+        }
+        let mut count = 0;
+        for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
+            if to.is_small() && path.contains(to) {
+                continue;
+            }
+            let mut cand = path.clone();
+            cand.push(to.clone());
+            count += self.count_to(cand);
+        }
+        count
+    }
+    fn count_to2(&self, path: Vec<Node>, favorite: Option<Node>) -> usize {
+        let here: &Node = &*path.last().unwrap();
+        if *here == Node::Start {
+            if let Some(f) = favorite {
+                if path.iter().filter(|n| **n == f).count() == 2 {
+                    // let mut p = path.clone();
+                    // p.reverse();
+                    // println!("{:?} -- {:?}", p, f);
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        let mut count = 0;
+        for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
+            match to {
+                Node::End => continue,
+                Node::Small(_) if favorite == Some(to.clone()) => {
+                    if path.iter().filter(|n| *n == to).count() == 2 {
+                        continue;
+                    }
+                }
+                Node::Small(_) if path.contains(to) => continue,
+                _ => ()
+            }
+            let mut cand = path.clone();
+            cand.push(to.clone());
+            if favorite.is_none() && matches!(to, Node::Small(_)) {
+                count += self.count_to2(cand.clone(), Some(to.clone()));
+            }
+            count += self.count_to2(cand, favorite.clone());
+        }
+        count
+    }
 }
 
 #[aoc_at(2021, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Maybe<()> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^(start|end|[a-z]+|[A-Z]+)-(start|end|[a-z]+|[A-Z]+)$").expect("wrong");
         }
+        // dbg!(&block);
         let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
+        let b: Node = match &segment[1] {
+            "start" => Node::Start,
+            "end" => Node::End,
+            s if s.chars().all(|c| c.is_ascii_lowercase()) => Node::Small(s.to_string()),
+            b => Node::Big(b.to_string()),
+        };
+        let e: Node = match &segment[2] {
+            "start" => Node::Start,
+            "end" => Node::End,
+            s if s.chars().all(|c| c.is_ascii_lowercase()) => Node::Small(s.to_string()),
+            b => Node::Big(b.to_string()),
+        };
+        self.line.push((b, e));
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (from, to) in self.line.iter() {
+            self.path.insert((from.clone(), to.clone()));
+            self.path.insert((to.clone(), from.clone()));
+        }
+        dbg!(self.path.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.count_to(vec![Node::End])
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
-    }
-}
-
-#[cfg(feature = "y2021")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
+        self.count_to(vec![Node::End]) + self.count_to2(vec![Node::End], None)
     }
 }
