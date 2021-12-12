@@ -1,13 +1,16 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{
-    framework::{aoc_at, AdventOfCode, Maybe, ParseError},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+        geometric::neighbors,
+        line_parser,
+    },
+    lazy_static::lazy_static,
+    regex::Regex,
+    std::collections::HashMap,
 };
-use lazy_static::lazy_static;
-use regex::Regex;
-use std::collections::HashMap;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
@@ -33,11 +36,31 @@ impl AdventOfCode for Puzzle {
         // self.line.push(object);
         Ok(())
     }
-    // fn after_insert(&mut self) {}
+    fn after_insert(&mut self) {
+        dbg!(&self.line);
+    }
     fn part1(&mut self) -> Self::Output1 {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+#[cfg(feature = "y2021")]
+#[cfg(test)]
+mod test {
+    use {
+        super::*,
+        crate::framework::{Answer, Description},
+    };
+
+    #[test]
+    fn test_part1() {
+        const TEST1: &str = "0\n1\n2";
+        assert_eq!(
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
+            Answer::Part1(0)
+        );
     }
 }
