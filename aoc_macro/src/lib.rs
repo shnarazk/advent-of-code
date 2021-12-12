@@ -22,11 +22,11 @@ impl Parse for Args {
 /// Set year, day, and output types as `usize` on `AdventOfCode` implementaion
 // ### Example
 /// ```
-/// #[aoc_at(2021, 25)]
+/// #[aoc(2021, 25)]
 /// impl AdventOfCode for Puzzle { ... }
 /// ```
 #[proc_macro_attribute]
-pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
+pub fn aoc(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let vars = parse_macro_input!(attrs as Args);
     let year = &vars.items[0];
     let day = &vars.items[1];
@@ -47,5 +47,28 @@ pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
     implementation
         .items
         .push(syn::parse::<ImplItem>(output_type2).expect(""));
+    TokenStream::from(implementation.to_token_stream())
+}
+
+/// Set year, day on `AdventOfCode` implementaion
+// ### Example
+/// ```
+/// #[aoc_at(2021, 25)]
+/// impl AdventOfCode for Puzzle { ... }
+/// ```
+#[proc_macro_attribute]
+pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
+    let vars = parse_macro_input!(attrs as Args);
+    let year = &vars.items[0];
+    let day = &vars.items[1];
+    let assign_year = TokenStream::from(quote! { const YEAR: usize =#year; });
+    let assign_day = TokenStream::from(quote! { const DAY: usize =#day; });
+    let mut implementation: ItemImpl = syn::parse(input).expect("only be applied to impl");
+    implementation
+        .items
+        .push(syn::parse::<ImplItem>(assign_year).expect(""));
+    implementation
+        .items
+        .push(syn::parse::<ImplItem>(assign_day).expect(""));
     TokenStream::from(implementation.to_token_stream())
 }

@@ -1,5 +1,5 @@
 use {
-    crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError},
+    crate::framework::{aoc, AdventOfCode, Maybe, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashSet,
@@ -84,7 +84,7 @@ impl Puzzle {
     }
 }
 
-#[aoc_at(2021, 12)]
+#[aoc(2021, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {

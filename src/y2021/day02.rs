@@ -1,5 +1,5 @@
 use {
-    crate::framework::{aoc_at, AdventOfCode, Maybe, ParseError},
+    crate::framework::{aoc, AdventOfCode, Maybe, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
 };
@@ -16,7 +16,7 @@ pub struct Puzzle {
     line: Vec<Direction>,
 }
 
-#[aoc_at(2021, 2)]
+#[aoc(2021, 2)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {

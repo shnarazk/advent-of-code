@@ -1,5 +1,5 @@
 /// data handling frmework
-pub use aoc_macro::aoc_at;
+pub use aoc_macro::{aoc, aoc_at};
 use std::{borrow::Borrow, fmt::Debug, fs::File, io::prelude::*};
 
 /// IT MUST BE UNDER THE HOOD

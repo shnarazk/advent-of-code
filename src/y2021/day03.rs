@@ -1,5 +1,5 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Maybe},
+    framework::{aoc, AdventOfCode, Maybe},
     line_parser,
 };
 
@@ -63,7 +63,7 @@ impl Puzzle {
     }
 }
 
-#[aoc_at(2021, 3)]
+#[aoc(2021, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {

@@ -3,7 +3,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, Description, Maybe, ParseError},
+        framework::{aoc, AdventOfCode, Description, Maybe, ParseError},
         geometric::neighbors,
         line_parser,
     },
@@ -17,7 +17,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc_at(2021, 17)]
+#[aoc(2021, 17)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {

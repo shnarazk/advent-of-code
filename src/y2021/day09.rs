@@ -1,5 +1,5 @@
 use crate::{
-    framework::{aoc_at, AdventOfCode, Maybe},
+    framework::{aoc, AdventOfCode, Maybe},
     geometric,
 };
 
@@ -31,7 +31,7 @@ impl Puzzle {
     }
 }
 
-#[aoc_at(2021, 9)]
+#[aoc(2021, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {

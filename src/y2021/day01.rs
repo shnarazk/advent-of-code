@@ -1,11 +1,11 @@
-use crate::framework::{aoc_at, AdventOfCode, Maybe};
+use crate::framework::{aoc, AdventOfCode, Maybe};
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<usize>,
 }
 
-#[aoc_at(2021, 1)]
+#[aoc(2021, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Maybe<()> {

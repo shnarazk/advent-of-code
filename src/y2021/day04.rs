@@ -1,6 +1,6 @@
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, Maybe, ParseError},
+        framework::{aoc, AdventOfCode, Maybe, ParseError},
         line_parser,
     },
     regex::Regex,
@@ -44,7 +44,7 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
     Some((need, point))
 }
 
-#[aoc_at(2021, 4)]
+#[aoc(2021, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn header(&mut self, input: String) -> Maybe<String> {
