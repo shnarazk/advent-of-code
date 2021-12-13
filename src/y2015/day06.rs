@@ -1,4 +1,3 @@
-//! template for [framework](`framework`)
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -18,7 +17,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2015, 0)]
+#[aoc(2015, 6)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
