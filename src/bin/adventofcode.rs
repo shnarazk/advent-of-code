@@ -230,7 +230,7 @@ pub fn main() {
         2015 => {
             match day {
                 1 => dbg!(y2015::day01::Puzzle::solve(desc, part)),
-                // 2 => dbg!(y2015::day02::Puzzle::solve(desc, part)),
+                2 => dbg!(y2015::day02::Puzzle::solve(desc, part)),
                 // 3 => dbg!(y2015::day03::Puzzle::solve(desc, part)),
                 // 4 => dbg!(y2015::day04::Puzzle::solve(desc, part)),
                 // 5 => dbg!(y2015::day05::Puzzle::solve(desc, part)),
