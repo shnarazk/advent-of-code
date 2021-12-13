@@ -20,7 +20,7 @@ pub enum Answer<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + Par
 }
 
 /// A custom error type for errors during reading data file
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ParseError;
 
 impl std::convert::From<std::num::ParseIntError> for ParseError {
