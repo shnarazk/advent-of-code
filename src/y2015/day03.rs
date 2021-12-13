@@ -1,49 +1,67 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         line_parser,
     },
-    lazy_static::lazy_static,
-    regex::Regex,
     std::collections::HashMap,
 };
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<char>,
+    hash: HashMap<(isize, isize), usize>,
 }
 
 #[aoc(2015, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
+        self.line = line_parser::to_chars(block)?;
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.hash.insert((0, 0), 1);
+        let mut pos: (isize, isize) = (0, 0);
+        for c in self.line.iter() {
+            match *c {
+                '^' => pos.0 -= 1,
+                'v' => pos.0 += 1,
+                '<' => pos.1 -= 1,
+                '>' => pos.1 += 1,
+                _ => panic!(),
+            }
+            *self.hash.entry(pos).or_insert(0) += 1;
+        }
+        self.hash.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.hash.insert((0, 0), 1);
+        let mut pos: (isize, isize) = (0, 0);
+        for (_, c) in self.line.iter().enumerate().filter(|(i, _)| i % 2 == 0) {
+            match *c {
+                '^' => pos.0 -= 1,
+                'v' => pos.0 += 1,
+                '<' => pos.1 -= 1,
+                '>' => pos.1 += 1,
+                _ => panic!(),
+            }
+            *self.hash.entry(pos).or_insert(0) += 1;
+        }
+        let mut pos: (isize, isize) = (0, 0);
+        for (_, c) in self.line.iter().enumerate().filter(|(i, _)| i % 2 == 1) {
+            match *c {
+                '^' => pos.0 -= 1,
+                'v' => pos.0 += 1,
+                '<' => pos.1 -= 1,
+                '>' => pos.1 += 1,
+                _ => panic!(),
+            }
+            *self.hash.entry(pos).or_insert(0) += 1;
+        }
+        self.hash.len()
     }
 }
 
@@ -57,10 +75,17 @@ mod test {
 
     #[test]
     fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
+            Puzzle::solve(Description::TestData(">".to_string()), 1),
+            Answer::Part1(2)
+        );
+        assert_eq!(
+            Puzzle::solve(Description::TestData("^>v<".to_string()), 1),
+            Answer::Part1(4)
+        );
+        assert_eq!(
+            Puzzle::solve(Description::TestData("^v^v^v^v^v".to_string()), 1),
+            Answer::Part1(2)
         );
     }
 }
