@@ -89,7 +89,11 @@ pub trait AdventOfCode: Debug + Default {
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
     fn load(description: impl Borrow<Description>) -> Result<String, ParseError> {
-        fn input_filename(desc: &Description, year: usize, day: usize) -> Result<String, ParseError> {
+        fn input_filename(
+            desc: &Description,
+            year: usize,
+            day: usize,
+        ) -> Result<String, ParseError> {
             match desc {
                 Description::FileTag(tag) => {
                     Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))

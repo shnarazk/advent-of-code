@@ -1,9 +1,5 @@
 //! misc implementations of string-to-object parsers
-use {
-    crate::framework::ParseError,
-    lazy_static::lazy_static,
-    regex::Regex,
-};
+use {crate::framework::ParseError, lazy_static::lazy_static, regex::Regex};
 
 /// parse a line like '0,1,2,3,4' (delimiter == ',') after trimming it
 pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> {
