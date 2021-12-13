@@ -103,21 +103,3 @@ impl AdventOfCode for Puzzle {
         lights.iter().map(|v| v.iter().sum::<usize>()).sum()
     }
 }
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
-    }
-}
