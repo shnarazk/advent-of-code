@@ -34,7 +34,7 @@ impl AdventOfCode for Puzzle {
             static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
         }
         let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
+        // self.line.push(block);
         Ok(())
     }
     fn after_insert(&mut self) {
