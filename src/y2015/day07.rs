@@ -1,20 +1,69 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashMap,
 };
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum Id {
+    Const(usize),
+    Wire(String),
+}
+
+impl TryFrom<&str> for Id {
+    type Error = ParseError;
+    fn try_from(s: &str) -> Result<Self, ParseError> {
+        if s.chars().next().unwrap().is_ascii_digit() {
+            Ok(Id::Const(s.parse::<usize>()?))
+        } else {
+            Ok(Id::Wire(s.to_string()))
+        }
+    }
+}
+
+impl Id {
+    fn determined(&self, hash: &HashMap<String, usize>) -> bool {
+        match self {
+            Id::Const(_) => true,
+            Id::Wire(s) if hash.contains_key(s) => true,
+            _ => false,
+        }
+    }
+    fn get(&self, hash: &HashMap<String, usize>) -> usize {
+        match self {
+            Id::Const(n) => *n,
+            Id::Wire(s) => *hash.get(s).unwrap(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+enum Code {
+    Input(Id, Id),
+    And(Id, Id, Id),
+    Or(Id, Id, Id),
+    LShift(Id, usize, Id),
+    RShift(Id, usize, Id),
+    Not(Id, Id),
+}
+
+impl Code {
+    fn determined(&self, hash: &HashMap<String, usize>) -> bool {
+        match self {
+            Code::Input(op1, _) => op1.determined(hash),
+            Code::And(op1, op2, _) => op1.determined(hash) && op2.determined(hash),
+            Code::Or(op1, op2, _) => op1.determined(hash) && op2.determined(hash),
+            Code::LShift(op1, _, _) => op1.determined(hash),
+            Code::RShift(op1, _, _) => op1.determined(hash),
+            Code::Not(op1, _) => op1.determined(hash),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Code>,
 }
 
 #[aoc(2015, 7)]
@@ -30,37 +79,104 @@ impl AdventOfCode for Puzzle {
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
+            static ref PARSER1: Regex =
+                Regex::new(r"^([0-9]+|[a-z]+) -> ([a-z]+)$").expect("wrong");
+            static ref PARSER2: Regex =
+                Regex::new(r"^([0-9]+|[a-z]+) (AND|OR) ([0-9]+|[a-z]+) -> ([a-z]+)$")
+                    .expect("wrong");
+            static ref PARSER3: Regex =
+                Regex::new(r"^([0-9]+|[a-z]+) (LSHIFT|RSHIFT) ([0-9]+) -> ([a-z]+)$")
+                    .expect("wrong");
+            static ref PARSER4: Regex = Regex::new(r"^NOT ([a-z]+) -> ([a-z]+)$").expect("wrong");
         }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
-        Ok(())
+        if let Ok(segment) = PARSER1.captures(block).ok_or(ParseError) {
+            let op1: Id = Id::try_from(&segment[1])?;
+            let op2: Id = Id::try_from(&segment[2])?;
+            self.line.push(Code::Input(op1, op2));
+            return Ok(());
+        }
+        if let Ok(segment) = PARSER2.captures(block).ok_or(ParseError) {
+            let op1: Id = Id::try_from(&segment[1])?;
+            let op2: Id = Id::try_from(&segment[3])?;
+            let op3: Id = Id::try_from(&segment[4])?;
+            self.line.push(match &segment[2] {
+                "AND" => Code::And(op1, op2, op3),
+                "OR" => Code::Or(op1, op2, op3),
+                _ => unreachable!(),
+            });
+            return Ok(());
+        }
+        if let Ok(segment) = PARSER3.captures(block).ok_or(ParseError) {
+            let op1: Id = Id::try_from(&segment[1])?;
+            let op2: Id = Id::try_from(&segment[4])?;
+            self.line.push(match &segment[2] {
+                "LSHIFT" => Code::LShift(op1, segment[3].parse::<usize>()?, op2),
+                "RSHIFT" => Code::RShift(op1, segment[3].parse::<usize>()?, op2),
+                _ => unreachable!(),
+            });
+            return Ok(());
+        }
+        if let Ok(segment) = PARSER4.captures(block).ok_or(ParseError) {
+            let op1: Id = Id::try_from(&segment[1])?;
+            let op2: Id = Id::try_from(&segment[2])?;
+            self.line.push(Code::Not(op1, op2));
+            return Ok(());
+        }
+        dbg!(block);
+        Err(ParseError)
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut value: HashMap<String, usize> = HashMap::new();
+        // let mut count = 0;
+        while let Some(code) = self.line.pop() {
+            // count += 1;
+            // assert!(count < 20);
+            if code.determined(&value) {
+                // println!("{:?} => {:?}", code, code.determined(&value));
+                assert!(match code {
+                    Code::Input(op1, Id::Wire(s)) => value.insert(s, op1.get(&value)),
+                    Code::And(op1, op2, Id::Wire(s)) =>
+                        value.insert(s, op1.get(&value) & op2.get(&value)),
+                    Code::Or(op1, op2, Id::Wire(s)) =>
+                        value.insert(s, op1.get(&value) | op2.get(&value)),
+                    Code::LShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) << n),
+                    Code::RShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) >> n),
+                    Code::Not(op1, Id::Wire(s)) => value.insert(s, !op1.get(&value)),
+                    _ => None,
+                }
+                .is_none());
+            } else {
+                self.line.insert(0, code);
+            }
+        }
+        *value.get("a").expect("no a")
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut line = self.line.clone();
+        let b_value = self.part1();
+        line.retain(|c| !matches!(&*c, Code::Input(Id::Const(_), Id::Wire(b)) if b == "b"));
+        line.push(Code::Input(Id::Const(b_value), Id::Wire("b".to_string())));
+        dbg!(line.len());
+        self.line = line;
+        self.part1()
     }
 }
 
 #[cfg(feature = "y2015")]
 #[cfg(test)]
 mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
+    use super::*;
 
     #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
+    fn test_ids() {
+        assert!(Id::try_from("0").is_ok());
+        assert_eq!(Id::try_from("0"), Ok(Id::Const(0)));
+        assert!(Id::try_from("a").is_ok());
+        assert_eq!(Id::try_from("a"), Ok(Id::Wire("a".to_string())));
+        assert!(Id::try_from("0").unwrap().determined(&HashMap::new()));
+        assert!(!Id::try_from("a").unwrap().determined(&HashMap::new()));
     }
 }
