@@ -12,6 +12,7 @@ required-features = ["y2020"]
 
 [dependencies]
 lazy_static = "^1.4"
+md-5 = "0.10.0"
 nom = "^6.2"
 regex = "^1.3"
 splr = "^0.14"

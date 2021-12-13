@@ -1,66 +1,64 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    md5::{Digest, Md5},
 };
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: String,
 }
 
 #[aoc(2015, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
+        self.line = block.to_string();
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        // self.line = "abcdef".to_string();
+        // self.line = "pqrstuv".to_string();
+        for i in 0.. {
+            let target: String = format!("{}{}", self.line, i);
+            let mut hasher = Md5::new();
+            hasher.update(&target);
+            let d = hasher
+                .finalize()
+                .iter()
+                .map(|n| format!("{:0>2x}", n))
+                .collect::<Vec<String>>()
+                .join("");
+            if d.starts_with("00000") {
+                dbg!(i, d);
+                return 0;
+            }
+        }
+        // for n in &hasher.finalize()[..] {
+        //     print!("{:0>2X}", n);
+        // }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        for i in 0.. {
+            let target: String = format!("{}{}", self.line, i);
+            let mut hasher = Md5::new();
+            hasher.update(&target);
+            if hasher.finalize().iter().take(3).all(|n| *n == 0) {
+                let mut hasher = Md5::new();
+                hasher.update(&target);
+                let d = hasher
+                    .finalize()
+                    .iter()
+                    .map(|n| format!("{:0>2x}", n))
+                    .collect::<Vec<String>>()
+                    .join("");
+                dbg!(i, d);
+                return 0;
+            }
+        }
         0
-    }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
     }
 }
