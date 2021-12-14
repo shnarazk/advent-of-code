@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2021/day/12>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,

@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/7>
 use {
     crate::y2020::traits::{Description, ProblemSolver},
     lazy_static::lazy_static,

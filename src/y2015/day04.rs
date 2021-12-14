@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2015/day/4>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     md5::{Digest, Md5},

@@ -1,4 +1,4 @@
-//! template for [framework](crate::framework)
+//! <https://adventofcode.com/2021/day/>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]

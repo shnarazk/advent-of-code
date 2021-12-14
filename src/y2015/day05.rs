@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2015/day/5>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
 fn is_nice(s: &str) -> bool {

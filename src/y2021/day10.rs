@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2021/day/10>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default)]

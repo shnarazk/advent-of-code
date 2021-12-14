@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/6>
 use crate::y2020::traits::{Description, ProblemSolver};
 use std::collections::HashMap;
 

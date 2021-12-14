@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/18>
 use {
     crate::y2020::traits::{Description, ProblemSolver},
     nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},

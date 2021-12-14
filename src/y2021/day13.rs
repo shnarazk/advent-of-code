@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2021/day/13>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     regex::Regex,

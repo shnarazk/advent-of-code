@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2021/day/7>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
     line_parser,

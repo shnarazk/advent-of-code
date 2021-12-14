@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/10>
 use crate::y2020::traits::{Description, ProblemSolver};
 
 pub fn day10(part: usize, desc: Description) {

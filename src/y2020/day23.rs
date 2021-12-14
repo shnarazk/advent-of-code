@@ -1,4 +1,4 @@
-// #![allow(dead_code)]
+//! <https://adventofcode.com/2020/day/23>
 use crate::y2020::traits::{Description, ProblemSolver};
 
 pub fn day23(part: usize, desc: Description) {

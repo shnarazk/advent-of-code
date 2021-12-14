@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2021/day/5>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 use lazy_static::lazy_static;
 use regex::Regex;

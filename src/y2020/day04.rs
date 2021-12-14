@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/4>
 use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
 use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 

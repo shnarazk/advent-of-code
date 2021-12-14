@@ -1,3 +1,4 @@
+//! <https://adventofcode.com/2020/day/25>
 use crate::y2020::traits::Description;
 
 pub fn day25(_: usize, tag: Description) {

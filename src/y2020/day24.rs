@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+//! <https://adventofcode.com/2020/day/24>
 use {
     crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
     std::collections::HashMap,
