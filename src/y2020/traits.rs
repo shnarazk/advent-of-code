@@ -1,21 +1,5 @@
 use std::{fmt::Debug, fs::File, io::prelude::*};
-
-/// IT MUST BE UNDER THE HOOD
-#[derive(Clone, Debug, PartialEq)]
-pub enum Description {
-    FileTag(String),
-    TestData(String),
-    None,
-}
-
-/// IT MUST BE UNDER THE HOOD
-#[derive(Debug, PartialEq)]
-pub enum Answer<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + PartialEq> {
-    Answers(Output1, Output2),
-    Part1(Output1),
-    Part2(Output2),
-    None,
-}
+pub use crate::framework::{Answer, Description};
 
 /// The standard interface for a problem description with solving methods
 pub trait ProblemSolver<

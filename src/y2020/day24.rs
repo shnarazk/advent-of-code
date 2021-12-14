@@ -138,9 +138,9 @@ impl World {
         let entry = self.cell.entry(loc).or_insert(false);
         *entry = !*entry;
     }
-    fn set(&mut self, loc: Location, val: bool) {
-        self.cell.insert(loc, val);
-    }
+    // fn set(&mut self, loc: Location, val: bool) {
+    //     self.cell.insert(loc, val);
+    // }
     fn get(&self, loc: &Location) -> bool {
         if let Some(b) = self.cell.get(loc) {
             *b
