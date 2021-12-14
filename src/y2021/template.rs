@@ -4,7 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Description, ParseError},
+        framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser,
     },
@@ -13,7 +13,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<()>,
 }
@@ -58,9 +58,8 @@ mod test {
 
     #[test]
     fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
+            Puzzle::solve(Description::TestData("".to_string()), 1),
             Answer::Part1(0)
         );
     }

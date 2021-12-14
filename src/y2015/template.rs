@@ -13,7 +13,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<()>,
 }
@@ -34,7 +34,7 @@ impl AdventOfCode for Puzzle {
             static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
         }
         let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(block);
+        // self.line.push(segment[1].parse::<_>());
         Ok(())
     }
     fn after_insert(&mut self) {
@@ -58,9 +58,8 @@ mod test {
 
     #[test]
     fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
         assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
+            Puzzle::solve(Description::TestData("".to_string()), 1),
             Answer::Part1(0)
         );
     }

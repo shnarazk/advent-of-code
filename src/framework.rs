@@ -1,22 +1,43 @@
 //! data handling frmework
 pub use aoc_macro::{aoc, aoc_at};
-use std::{borrow::Borrow, fmt::Debug, fs::File, io::prelude::*};
+use std::{borrow::Borrow, fmt, fs::File, io::prelude::*};
 
 /// IT MUST BE UNDER THE HOOD
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, fmt::Debug, PartialEq)]
 pub enum Description {
     FileTag(String),
     TestData(String),
     None,
 }
 
+impl fmt::Display for Description {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 /// IT MUST BE UNDER THE HOOD
 #[derive(Debug, PartialEq)]
-pub enum Answer<Output1: Sized + Debug + PartialEq, Output2: Sized + Debug + PartialEq> {
+pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::Debug + PartialEq> {
     Answers(Output1, Output2),
     Part1(Output1),
     Part2(Output2),
     None,
+}
+
+impl<O1, O2> fmt::Display for Answer<O1, O2>
+where
+    O1: fmt::Debug + Eq,
+    O2: fmt::Debug + Eq
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Answer::Answers(o1, o2) => write!(f, "Answers: {:?}, {:?}", o1, o2),
+            Answer::Part1(o) => write!(f, "Part1: {:?}", o),
+            Answer::Part2(o) => write!(f, "Part2: {:?}", o),
+            Answer::None => write!(f, "No answer"),
+        }
+    }
 }
 
 /// A custom error type for errors during reading data file
@@ -38,9 +59,9 @@ impl std::fmt::Display for ParseError {
 impl std::error::Error for ParseError {}
 
 /// The standard interface for a problem description with solving methods
-pub trait AdventOfCode: Debug + Default {
-    type Output1: Debug + PartialEq;
-    type Output2: Debug + PartialEq;
+pub trait AdventOfCode: fmt::Debug + Default {
+    type Output1: fmt::Debug + PartialEq;
+    type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
     /// delimeter between data blocks
