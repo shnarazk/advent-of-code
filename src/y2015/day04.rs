@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
                 .join("");
             if d.starts_with("00000") {
                 dbg!(i, d);
-                return 0;
+                return i;
             }
         }
         // for n in &hasher.finalize()[..] {
@@ -56,7 +56,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<String>>()
                     .join("");
                 dbg!(i, d);
-                return 0;
+                return i;
             }
         }
         0

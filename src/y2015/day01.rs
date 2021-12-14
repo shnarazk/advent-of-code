@@ -1,11 +1,11 @@
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{aoc_at, AdventOfCode, ParseError},
     line_parser,
 };
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
-    line: Vec<Vec<char>>,
+    line: Vec<char>,
 }
 
 fn floor(vec: &[char]) -> isize {
@@ -26,26 +26,22 @@ fn to_basement(vec: &[char], level: isize) -> isize {
     }
 }
 
-#[aoc(2015, 1)]
+#[aoc_at(2015, 1)]
 impl AdventOfCode for Puzzle {
+    type Output1 = isize;
+    type Output2 = isize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(line_parser::to_chars(block)?);
+        self.line = line_parser::to_chars(block)?;
         Ok(())
     }
     fn after_insert(&mut self) {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        for l in self.line.iter() {
-            dbg!(floor(l));
-        }
-        0
+        floor(&self.line)
     }
     fn part2(&mut self) -> Self::Output2 {
-        for l in self.line.iter() {
-            dbg!(to_basement(l, 0));
-        }
-        0
+        to_basement(&self.line, 0)
     }
 }
