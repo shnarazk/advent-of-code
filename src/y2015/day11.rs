@@ -1,66 +1,84 @@
 //! <https://adventofcode.com/2015/day/>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
+
+fn valid(vec: &[char]) -> bool {
+    vec.windows(3)
+        .any(|c3| c3[0] as u8 + 1 == c3[1] as u8 && c3[0] as u8 + 2 == c3[2] as u8)
+        && vec.iter().all(|c| !['i', 'o', 'l'].contains(c))
+        && vec
+            .windows(2)
+            .enumerate()
+            .any(|(i, c2)| c2[0] == c2[1] && vec[i + 2..].windows(2).any(|d2| d2[0] == d2[1]))
+}
+
+fn increment(vec: &mut [char]) {
+    let mut target = vec.len() - 1;
+    let mut add = |n: usize| -> bool {
+        if vec[n] == 'z' {
+            vec[n] = 'a';
+            true
+        } else {
+            vec[n] = (vec[n] as u8 + 1) as char;
+            false
+        }
+    };
+    while add(target) {
+        assert!(0 < target);
+        target -= 1;
+    }
+}
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<char>>,
 }
 
-#[aoc(2015, 0)]
+#[aoc_at(2015, 11)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+        self.line.push(block.chars().collect::<Vec<char>>());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut result: String = "".to_string();
+        for l in self.line.iter() {
+            let mut p = l.clone();
+            increment(&mut p);
+            while !valid(&p) {
+                increment(&mut p);
+            }
+            result = p
+                .iter()
+                .map(|c| format!("{}", c))
+                .collect::<Vec<String>>()
+                .join("");
+            println!(
+                "{} => {}",
+                l.iter()
+                    .map(|c| format!("{}", c))
+                    .collect::<Vec<String>>()
+                    .join(""),
+                result,
+            );
+        }
+        result
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
-    }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData("".to_string()), 1),
-            Answer::Part1(0)
-        );
+        let mut next_one = self.part1().chars().collect::<Vec<char>>();
+        increment(&mut next_one);
+        while !valid(&next_one) {
+            increment(&mut next_one);
+        }
+        return next_one
+            .iter()
+            .map(|c| format!("{}", c))
+            .collect::<Vec<String>>()
+            .join("");
     }
 }
