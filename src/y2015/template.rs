@@ -1,4 +1,4 @@
-//! template for [framework](`framework`)
+//! template for [framework](crate::framework)
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
