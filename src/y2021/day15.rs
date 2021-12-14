@@ -4,7 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Description, ParseError},
+        framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser,
     },
