@@ -1,67 +1,66 @@
 //! <https://adventofcode.com/2015/day/8>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
+
+fn count(vec: &[char]) -> usize {
+    if let Some(ch) = vec.get(0) {
+        match ch {
+            '\\' if vec.get(1) == Some(&'\\') => 1 + count(&vec[2..]),
+            '\\' if vec.get(1) == Some(&'"') => 1 + count(&vec[2..]),
+            '\\' if vec.get(1) == Some(&'x') => 1 + count(&vec[4..]),
+            _ => 1 + count(&vec[1..]),
+        }
+    } else {
+        0
+    }
+}
+
+fn encode(vec: &[char]) -> usize {
+    if let Some(ch) = vec.get(0) {
+        match ch {
+            '"' => 2 + encode(&vec[1..]),
+            '\\' => 2 + encode(&vec[1..]),
+            _ => 1 + encode(&vec[1..]),
+        }
+    } else {
+        0
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<char>>,
 }
 
 #[aoc(2015, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment);
+        self.line.push(block.chars().collect::<Vec<char>>());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        // for l in self.line.iter() {
+        //     println!("{} = {}",
+        //              &l.iter().map(|c| format!("{}", c)).collect::<Vec<String>>().join(""),
+        //              count(&l[1..l.len() - 1]),
+        //     );
+        // }
+        let effective: usize = self.line.iter().map(|v| count(&v[1..v.len() - 1])).sum();
+        dbg!(effective);
+        self.line.iter().map(|v| v.len()).sum::<usize>() - effective
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
-    }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
+        // for l in self.line.iter() {
+        //     println!("{} = {}",
+        //              &l.iter().map(|c| format!("{}", c)).collect::<Vec<String>>().join(""),
+        //              encode(l) + 2,
+        //     );
+        // }
+        let effective: usize = self.line.iter().map(|v| 2 + encode(v)).sum();
+        dbg!(effective);
+        effective - self.line.iter().map(|v| v.len()).sum::<usize>()
     }
 }

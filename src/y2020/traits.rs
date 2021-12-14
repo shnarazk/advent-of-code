@@ -1,5 +1,5 @@
-use std::{fmt::Debug, fs::File, io::prelude::*};
 pub use crate::framework::{Answer, Description};
+use std::{fmt::Debug, fs::File, io::prelude::*};
 
 /// The standard interface for a problem description with solving methods
 pub trait ProblemSolver<
