@@ -1,10 +1,9 @@
 [package]
 name = "adventofcode"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-default-run = "adventofcode2021"
+default-run = "adventofcode"
 
 [dependencies]
 lazy_static = "^1.4"

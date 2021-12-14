@@ -16,6 +16,19 @@ impl fmt::Display for Description {
     }
 }
 
+impl Description {
+    /// return file name
+    fn name(&self, year: usize, day: usize) -> Result<String, ParseError> {
+        match self {
+            Description::FileTag(tag) => {
+                Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
+            }
+            Description::None => Ok(format!("data/{}/input-day{:>02}.txt", year, day)),
+            _ => Err(ParseError),
+        }
+    }
+}
+
 /// IT MUST BE UNDER THE HOOD
 #[derive(Debug, PartialEq)]
 pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::Debug + PartialEq> {
@@ -28,7 +41,7 @@ pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::D
 impl<O1, O2> fmt::Display for Answer<O1, O2>
 where
     O1: fmt::Debug + Eq,
-    O2: fmt::Debug + Eq
+    O2: fmt::Debug + Eq,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -110,19 +123,6 @@ pub trait AdventOfCode: fmt::Debug + Default {
     fn after_insert(&mut self) {}
     /// # UNDER THE HOOD
     fn load(description: impl Borrow<Description>) -> Result<String, ParseError> {
-        fn input_filename(
-            desc: &Description,
-            year: usize,
-            day: usize,
-        ) -> Result<String, ParseError> {
-            match desc {
-                Description::FileTag(tag) => {
-                    Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
-                }
-                Description::None => Ok(format!("data/{}/input-day{:>02}.txt", year, day)),
-                _ => Err(ParseError),
-            }
-        }
         fn load_file(file_name: String) -> Result<String, ParseError> {
             match File::open(&file_name) {
                 Ok(mut file) => {
@@ -130,7 +130,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     if let Err(e) = file.read_to_string(&mut contents) {
                         panic!("Can't read {}: {:?}", file_name, e);
                     }
-                    println!("# loaded {}", &file_name);
+                    // println!("# loaded {}", &file_name);
                     Ok(contents)
                 }
                 Err(e) => panic!("Can't read {}: {:?}", file_name, e),
@@ -145,9 +145,9 @@ pub trait AdventOfCode: fmt::Debug + Default {
         }
         let desc = description.borrow();
         match desc {
-            Description::FileTag(_) => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
+            Description::FileTag(_) => load_file(desc.name(Self::YEAR, Self::DAY)?),
             Description::TestData(_) => load_data(desc),
-            Description::None => load_file(input_filename(desc, Self::YEAR, Self::DAY)?),
+            Description::None => load_file(desc.name(Self::YEAR, Self::DAY)?),
         }
     }
     /// # UNDER THE HOOD.
@@ -188,20 +188,35 @@ pub trait AdventOfCode: fmt::Debug + Default {
         part: usize,
     ) -> Answer<Self::Output1, Self::Output2> {
         let desc = description.borrow();
+        let input = desc.name(Self::YEAR, Self::DAY).expect("no input");
         match part {
             0 => {
-                println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
+                println!(
+                    "# Advent of Code {}: day {} from {}",
+                    Self::YEAR,
+                    Self::DAY,
+                    input
+                );
                 let ans1 = Self::parse(desc).expect("failed to parse").part1();
-                println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
                 let ans2 = Self::parse(desc).expect("failed to parse").part2();
                 Answer::Answers(ans1, ans2)
             }
             1 => {
-                println!("# Advent of Code {}: day {}, part 1", Self::YEAR, Self::DAY);
+                println!(
+                    "# Advent of Code {}: day {}, part 1 from {}",
+                    Self::YEAR,
+                    Self::DAY,
+                    input
+                );
                 Answer::Part1(Self::parse(desc).expect("failed to parse").part1())
             }
             2 => {
-                println!("# Advent of Code {}: day {}, part 2", Self::YEAR, Self::DAY);
+                println!(
+                    "# Advent of Code {}: day {}, part 2 from {}",
+                    Self::YEAR,
+                    Self::DAY,
+                    input
+                );
                 Answer::Part2(Self::parse(desc).expect("failed to parse").part2())
             }
             _ => Answer::None,
