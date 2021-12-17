@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2015/day/>
+//! <https://adventofcode.com/2015/day/15>
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},

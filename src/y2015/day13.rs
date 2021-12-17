@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2015/day/>
+//! <https://adventofcode.com/2015/day/13>
 use {
     crate::framework::{aoc_at, AdventOfCode, ParseError},
     itertools::Itertools,
