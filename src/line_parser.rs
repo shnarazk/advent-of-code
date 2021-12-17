@@ -16,6 +16,15 @@ pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> 
     }
 }
 
+/// parse a line like '-312'
+pub fn to_isize(line: &str) -> Result<isize, ParseError> {
+    if line.starts_with('-') {
+        Ok(-line.trim_matches('-').parse::<isize>()?)
+    } else {
+        Ok(line.parse::<isize>()?)
+    }
+}
+
 /// parse a line like '01234' after trimming it
 pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
     let result = line
