@@ -48,12 +48,12 @@ pub fn main() {
         17 => println!("{:?}", day17::Puzzle::solve(desc, part)),
         18 => println!("{:?}", day18::Puzzle::solve(desc, part)),
         19 => println!("{:?}", day19::Puzzle::solve(desc, part)),
-        // 20 => println!("{:?}", day20::Puzzle::solve(desc, part)),
-        // 21 => println!("{:?}", day21::Puzzle::solve(desc, part)),
-        // 22 => println!("{:?}", day22::Puzzle::solve(desc, part)),
-        // 23 => println!("{:?}", day23::Puzzle::solve(desc, part)),
-        // 24 => println!("{:?}", day24::Puzzle::solve(desc, part)),
-        // 25 => println!("{:?}", day25::Puzzle::solve(desc, part)),
+        20 => println!("{:?}", day20::Puzzle::solve(desc, part)),
+        21 => println!("{:?}", day21::Puzzle::solve(desc, part)),
+        22 => println!("{:?}", day22::Puzzle::solve(desc, part)),
+        23 => println!("{:?}", day23::Puzzle::solve(desc, part)),
+        24 => println!("{:?}", day24::Puzzle::solve(desc, part)),
+        25 => println!("{:?}", day25::Puzzle::solve(desc, part)),
         _ => println!("{:?}", template::Puzzle::solve(desc, part)),
     };
 }
