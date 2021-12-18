@@ -1,66 +1,77 @@
 //! <https://adventofcode.com/2015/day/17>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<usize>,
 }
 
 #[aoc(2015, 17)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+        self.line.push(block.parse::<usize>()?);
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.patterns_for(150)
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.minimize(150)
     }
 }
 
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData("".to_string()), 1),
-            Answer::Part1(0)
-        );
+impl Puzzle {
+    fn patterns_for(&self, target: usize) -> usize {
+        let mut memo: Vec<usize> = Vec::new();
+        memo.resize(target + 1, 0);
+        memo[0] = 1;
+        for l in self.line.iter() {
+            for i in (0..=target).rev() {
+                let new_volume = i + l;
+                if new_volume <= target {
+                    memo[new_volume] += memo[i];
+                }
+            }
+        }
+        // let mut containers = self.line.clone();
+        // containers.sort_unstable();
+        // println!("{:?}", &containers);
+        // println!("{:?}", &memo[..10]);
+        memo[target]
+    }
+    fn minimize(&self, target: usize) -> usize {
+        type Solution = Vec<usize>;
+        let mut memo: Vec<Vec<Solution>> = Vec::new();
+        memo.resize(target + 1, Vec::new());
+        memo[0].push(Vec::new());
+        for l in self.line.iter() {
+            for i in (0..=target).rev() {
+                let new_volume = i + l;
+                if new_volume <= target {
+                    let mut copy: Vec<Solution> = memo[i]
+                        .iter()
+                        .cloned()
+                        .map(|mut solution| {
+                            solution.push(*l);
+                            solution
+                        })
+                        .collect::<Vec<_>>();
+                    memo[new_volume].append(&mut copy);
+                }
+            }
+        }
+        let min = memo[target]
+            .iter()
+            .map(|solution| solution.len())
+            .min()
+            .unwrap();
+        memo[target]
+            .iter()
+            .filter(|solution| solution.len() == min)
+            .count()
     }
 }
