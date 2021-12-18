@@ -58,9 +58,9 @@ mod test {
 
     #[test]
     fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData("".to_string()), 1),
-            Answer::Part1(0)
-        );
+        // assert_eq!(
+        //     Puzzle::solve(Description::TestData("".to_string()), 1),
+        //     Answer::Part1(0)
+        // );
     }
 }

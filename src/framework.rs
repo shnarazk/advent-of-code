@@ -24,7 +24,7 @@ impl Description {
                 Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
             }
             Description::None => Ok(format!("data/{}/input-day{:>02}.txt", year, day)),
-            _ => Err(ParseError),
+            Description::TestData(_) => Ok("A test input".to_string()),
         }
     }
 }
