@@ -300,10 +300,7 @@ impl AdventOfCode for Puzzle {
 #[cfg(feature = "y2021")]
 #[cfg(test)]
 mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
+    use super::*;
 
     #[test]
     fn test_part1() {
