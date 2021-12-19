@@ -91,7 +91,7 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     let day_to: usize = vars.items.get(2).map_or(25, to_usize);
     let match_body: String = format!(
         "match day {{ {} _=> panic!(\"an invalid day\"), }}\n",
-        (day_from..day_to)
+        (day_from..=day_to)
             .map(|d| format!(
                 "{} => {{ println!(\"{{}}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",
                 d, year, d,
