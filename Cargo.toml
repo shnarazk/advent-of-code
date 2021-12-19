@@ -18,7 +18,7 @@ md-5 = { version = "0.10.0", optional = true }
 serde_json = { version = "1.0", optional = true }
 
 [features]
-default = ["y2021", "y2015"]
+default = ["y2021", "y2020", "y2015"]
 y2021 = []
 y2020 = ["nom", "splr"]
 y2019 = []

@@ -1,28 +1,21 @@
 //! <https://adventofcode.com/2020/day/2>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
 };
 
-pub fn day02(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     line: Vec<String>,
 }
 
-impl ProblemSolver<String, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 2;
+#[aoc(2020, 2)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting { line: Vec::new() }
-    }
-    fn insert(&mut self, s: String) {
-        self.line.push(s);
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.line.push(block.to_string());
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.line.iter().map(|s| check_line1(s)).sum::<usize>()
@@ -93,7 +86,7 @@ fn check_line2(str: &str) -> usize {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     const TEST: &str = "\
@@ -104,7 +97,7 @@ mod test {
     #[test]
     fn test1() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(2)
         );
     }
@@ -112,7 +105,7 @@ mod test {
     #[test]
     fn test2() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(1)
         );
     }
