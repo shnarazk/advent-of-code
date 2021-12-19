@@ -87,10 +87,10 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     }
     let vars = parse_macro_input!(attrs as Args);
     let year: usize = to_usize(&vars.items[0]);
-    let day_from: usize = to_usize(&vars.items[1]);
-    let day_to: usize = to_usize(&vars.items[2]);
+    let day_from: usize = vars.items.get(1).map_or(1, to_usize);
+    let day_to: usize = vars.items.get(2).map_or(25, to_usize);
     let match_body: String = format!(
-        "match day {{ {} _=> panic!(), }}\n",
+        "match day {{ {} _=> panic!(\"an invalid day\"), }}\n",
         (day_from..day_to)
             .map(|d| format!(
                 "{} => {{ println!(\"{{}}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",

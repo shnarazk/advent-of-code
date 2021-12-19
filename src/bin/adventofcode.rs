@@ -53,7 +53,7 @@ pub fn main() {
     };
     match year {
         #[cfg(feature = "y2021")]
-        2021 => aoc_arms!(2021, 1, 25),
+        2021 => aoc_arms!(2021),
         #[cfg(feature = "y2020")]
         2020 => match day {
             1 => println!("{:?}", y2020::day01(part, desc)),
@@ -84,15 +84,15 @@ pub fn main() {
             _ => panic!(),
         },
         #[cfg(feature = "y2019")]
-        2019 => aoc_arms!(2019, 1, 25),
+        2019 => aoc_arms!(2019),
         #[cfg(feature = "y2018")]
-        2018 => aoc_arms!(2018, 1, 25),
+        2018 => aoc_arms!(2018),
         #[cfg(feature = "y2017")]
-        2017 => aoc_arms(2017, 1, 25),
+        2017 => aoc_arms!(2017),
         #[cfg(feature = "y2016")]
-        2016 => aoc_arms!(2015, 1, 25),
+        2016 => aoc_arms!(2015),
         #[cfg(feature = "y2015")]
-        2015 => aoc_arms!(2015, 1, 25),
+        2015 => aoc_arms!(2015),
         _ => println!("{:?}", y2021::template::Puzzle::solve(desc, part)),
     };
 }
