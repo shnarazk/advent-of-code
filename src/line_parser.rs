@@ -2,7 +2,7 @@
 
 use {crate::framework::ParseError, lazy_static::lazy_static, regex::Regex};
 
-/// parse a line like '0,1,2,3,4' (delimiter == ',') after trimming it
+/// parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
 /// assert_eq!(line_parser::to_usizes("0,1,8,9", ','), Ok(vec![0, 1, 8, 9]));
@@ -38,11 +38,21 @@ pub fn to_isize(line: &str) -> Result<isize, ParseError> {
     }
 }
 
+/// parse a line like '0,-1,2,-3,40' (delimiter == ',') after trimming it
+/// ```
+/// use adventofcode::{framework::ParseError, line_parser};
+/// assert_eq!(line_parser::to_isizes("0,-1,8,-9", ','), Ok(vec![0, -1, 8, -9]));
+/// assert_eq!(line_parser::to_isizes("-100 200", ' '), Ok(vec![-100, 200]));
+/// assert_eq!(line_parser::to_isizes("", ','), Err(ParseError));
+/// ```
 pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> {
     let result = line
         .trim()
         .split(delimiter)
-        .map(|num| to_isize(num).unwrap())
+        .filter(|s| !s.is_empty())
+        .map(|num| {
+            to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
+        })
         .collect::<Vec<_>>();
     if result.is_empty() {
         Err(ParseError)
