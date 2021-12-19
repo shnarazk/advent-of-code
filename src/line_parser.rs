@@ -1,4 +1,5 @@
 //! misc implementations of string-to-object parsers
+
 use {crate::framework::ParseError, lazy_static::lazy_static, regex::Regex};
 
 /// parse a line like '0,1,2,3,4' (delimiter == ',') after trimming it
@@ -34,6 +35,19 @@ pub fn to_isize(line: &str) -> Result<isize, ParseError> {
         Ok(-line.trim_matches('-').parse::<isize>()?)
     } else {
         Ok(line.parse::<isize>()?)
+    }
+}
+
+pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> {
+    let result = line
+        .trim()
+        .split(delimiter)
+        .map(|num| to_isize(num).unwrap())
+        .collect::<Vec<_>>();
+    if result.is_empty() {
+        Err(ParseError)
+    } else {
+        Ok(result)
     }
 }
 
