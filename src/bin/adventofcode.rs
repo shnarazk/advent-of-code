@@ -22,11 +22,11 @@ use {
 pub fn main() {
     if args().count() == 1 {
         println!("USAGE:");
-        println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/2021/input-dayDD.txtを入力として実行");
+        println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/YYYY/input-dayDD.txtを入力として実行");
         println!(
-            " $0 YYYY DD P\t\tYYYY年DD日目のパートPをdata/2021/input-dayDD.txtを入力として実行"
+            " $0 YYYY DD P\t\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD.txtを入力として実行"
         );
-        println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/2021/input-dayDD-TTT.txtを入力として実行");
+        println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD-TTT.txtを入力として実行");
         println!(" $0 YYYY DD P -\t\tYYYY年DD日目のパートPを入力なしで実行");
         panic!();
     }
