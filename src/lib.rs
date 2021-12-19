@@ -16,4 +16,5 @@ pub mod y2021;
 #[cfg(feature = "y2015")]
 pub mod y2015;
 
+pub use aoc_macro::aoc_arms;
 pub use framework::Description;

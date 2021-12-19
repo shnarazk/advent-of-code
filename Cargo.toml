@@ -1,12 +1,12 @@
 [package]
 name = "adventofcode"
-version = "0.8.1"
+version = "0.8.2"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
 
 [dependencies]
-aoc_macro = { version = "0.1", path = "aoc_macro" }
+aoc_macro = { version = "0.2", path = "aoc_macro" }
 lazy_static = "^1.4"
 regex = "^1.3"
 # 2020

@@ -1,6 +1,7 @@
 use {
     proc_macro::TokenStream,
     quote::{quote, ToTokens},
+    std::str::FromStr,
     syn::{parse::*, parse_macro_input, ImplItem, ItemImpl},
 };
 
@@ -71,4 +72,32 @@ pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
         .items
         .push(syn::parse::<ImplItem>(assign_day).expect(""));
     TokenStream::from(implementation.to_token_stream())
+}
+
+// #[aco_arms(2021, 1, 25)]
+#[proc_macro]
+pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
+    fn to_usize(token: &syn::ExprLit) -> usize {
+        if let syn::Lit::Int(ref lit_int) = token.lit {
+            if let Ok(n) = lit_int.base10_parse::<usize>() {
+                return n;
+            }
+        }
+        panic!();
+    }
+    let vars = parse_macro_input!(attrs as Args);
+    let year: usize = to_usize(&vars.items[0]);
+    let day_from: usize = to_usize(&vars.items[1]);
+    let day_to: usize = to_usize(&vars.items[2]);
+    let match_body: String = format!(
+        "match day {{ {} _=> panic!(), }}\n",
+        (day_from..day_to)
+            .map(|d| format!(
+                "{} => {{ println!(\"{{}}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",
+                d, year, d,
+            ))
+            .collect::<Vec<String>>()
+            .join("\n"),
+    );
+    TokenStream::from_str(&match_body).unwrap()
 }
