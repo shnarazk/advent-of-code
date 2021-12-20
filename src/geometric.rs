@@ -54,3 +54,23 @@ pub fn neighbors8(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize
         .filter(|(jj, ii)| !(*jj == j && *ii == i))
         .collect::<Vec<_>>()
 }
+
+/// returns all 9 neighbors
+/// ```
+/// use adventofcode::geometric;
+/// assert_eq!(geometric::neighbors9(1, 1, 3, 3).len(), 9);
+/// assert_eq!(geometric::neighbors9(1, 1, 3, 3), vec![(0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0), (2,1), (2,2)]);
+/// ```
+pub fn neighbors9(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
+    neighbors(j, height)
+        .iter()
+        .filter(|s| s.is_some())
+        .flat_map(|jj| {
+            neighbors(i, width)
+                .iter()
+                .filter(|t| t.is_some())
+                .map(|ii| (jj.unwrap(), ii.unwrap()))
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>()
+}
