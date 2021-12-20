@@ -126,20 +126,3 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
 }
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
-}
