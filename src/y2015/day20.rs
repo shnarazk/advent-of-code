@@ -18,7 +18,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2015, 19)]
+#[aoc(2015, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
