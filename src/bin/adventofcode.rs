@@ -1,14 +1,6 @@
 //! advent of code runner
 #[cfg(feature = "y2015")]
 use adventofcode::y2015;
-#[cfg(feature = "y2016")]
-use adventofcode::y2016;
-#[cfg(feature = "y2017")]
-use adventofcode::y2017;
-#[cfg(feature = "y2018")]
-use adventofcode::y2018;
-#[cfg(feature = "y2019")]
-use adventofcode::y2019;
 #[cfg(feature = "y2020")]
 use adventofcode::y2020;
 #[cfg(feature = "y2021")]
