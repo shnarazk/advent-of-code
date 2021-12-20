@@ -118,7 +118,7 @@ fn valid(key: &str, val: &str) -> bool {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
     #[test]
     fn test_part1() {
@@ -137,7 +137,7 @@ hgt:179cm
 hcl:#cfa07d eyr:2025 pid:166559648
 iyr:2011 ecl:brn hgt:59in";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(2)
         );
     }
@@ -158,7 +158,7 @@ hgt:59cm ecl:zzz
 eyr:2038 hcl:74454a iyr:2023
 pid:3556412378 byr:2007";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(0)
         );
     }
@@ -178,7 +178,7 @@ eyr:2022
 
 iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719";
         assert_eq!(
-            Puzzle::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(4)
         );
     }
