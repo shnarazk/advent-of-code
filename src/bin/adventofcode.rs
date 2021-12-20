@@ -55,7 +55,7 @@ pub fn main() {
         #[cfg(feature = "y2021")]
         2021 => aoc_arms!(2021),
         #[cfg(feature = "y2020")]
-        2020 => aoc_arms!(2020, 1, 2),
+        2020 => aoc_arms!(2020, 1, 3),
         #[cfg(feature = "y2019")]
         2019 => aoc_arms!(2019),
         #[cfg(feature = "y2018")]

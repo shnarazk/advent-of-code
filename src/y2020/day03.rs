@@ -1,41 +1,27 @@
 //! <https://adventofcode.com/2020/day/3>
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
+};
 
-pub fn day03(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 struct Chars {
     char: Vec<char>,
 }
 
-impl ProblemObject for Chars {
-    fn parse(s: &str) -> Option<Self> {
-        if s.is_empty() {
-            None
-        } else {
-            Some(Chars {
-                char: s.chars().collect::<Vec<char>>(),
-            })
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     line: Vec<Chars>,
 }
 
-impl ProblemSolver<Chars, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 3;
+#[aoc(2020, 3)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting { line: Vec::new() }
-    }
-    fn insert(&mut self, object: Chars) {
-        self.line.push(object);
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.line.push(Chars {
+            char: line_parser::to_chars(block)?,
+        });
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.count_for_slope(1, 3)
@@ -54,7 +40,7 @@ impl ProblemSolver<Chars, usize, usize> for Setting {
     }
 }
 
-impl Setting {
+impl Puzzle {
     fn count_for_slope(&self, row: usize, col: usize) -> usize {
         let mut r = row;
         let mut c = col;
