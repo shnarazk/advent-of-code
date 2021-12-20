@@ -1,56 +1,47 @@
 //! <https://adventofcode.com/2020/day/5>
-use crate::y2020::traits::{Description, ProblemSolver};
-
-pub fn day05(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
+};
 
 #[derive(Debug, PartialEq)]
-struct Setting {
+pub struct Puzzle {
     seats: [bool; 128 * 8 + 1],
     max_sid: usize,
 }
 
-impl ProblemSolver<usize, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 5;
-    const DELIMITER: &'static str = "\n";
+impl Default for Puzzle {
     fn default() -> Self {
-        Setting {
+        Puzzle {
             seats: [false; 128 * 8 + 1],
             max_sid: 0,
         }
     }
-    fn insert(&mut self, n: usize) {
-        self.seats[n] = true;
-        if self.max_sid < n {
-            self.max_sid = n;
-        }
-    }
-    fn parse(desc: Description) -> Self {
-        let mut s = Setting::default();
+}
 
-        if let Some(buffer) = Self::load(desc) {
-            for code in buffer.split(Self::DELIMITER) {
-                if code.is_empty() {
-                    break;
-                }
-                let (row_code, col_code) = code.split_at(7);
-                let row = row_code
-                    .chars()
-                    .map(|c| (c == 'B') as usize)
-                    .collect::<Vec<_>>();
-                let col = col_code
-                    .chars()
-                    .map(|c| (c == 'R') as usize)
-                    .collect::<Vec<_>>();
-                let r = row.iter().fold(0, |t, n| t * 2 + n);
-                let c = col.iter().fold(0, |t, n| t * 2 + n);
-                let sid = r * 8 + c;
-                s.insert(sid);
-            }
+#[aoc(2020, 5)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        if block.is_empty() {
+            return Ok(());
         }
-        s
+        let chs = line_parser::to_chars(block)?;
+        let row = chs[..7]
+            .iter()
+            .map(|c| (*c == 'B') as usize)
+            .fold(0, |t, n| t * 2 + n);
+        let col = chs[7..]
+            .iter()
+            .map(|c| (*c == 'R') as usize)
+            .fold(0, |t, n| t * 2 + n);
+        let sid = row * 8 + col;
+
+        self.seats[sid] = true;
+        if self.max_sid < sid {
+            self.max_sid = sid;
+        }
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.max_sid
