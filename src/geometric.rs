@@ -60,6 +60,7 @@ pub fn neighbors8(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize
 /// use adventofcode::geometric;
 /// assert_eq!(geometric::neighbors9(1, 1, 3, 3).len(), 9);
 /// assert_eq!(geometric::neighbors9(1, 1, 3, 3), vec![(0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0), (2,1), (2,2)]);
+/// assert_eq!(geometric::neighbors9(0, 0, 3, 3), vec![(0,0), (0,1), (1,0), (1,1)]);
 /// ```
 pub fn neighbors9(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
     neighbors(j, height)
