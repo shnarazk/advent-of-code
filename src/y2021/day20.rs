@@ -1,67 +1,225 @@
 //! <https://adventofcode.com/2021/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    geometric, line_parser,
 };
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    enhancer: Vec<char>,
+    image: Vec<Vec<char>>,
 }
 
-#[aoc(2021, 19)]
+#[aoc(2021, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
+    const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
+        let first_block = self.enhancer.is_empty();
+        for l in block.split('\n') {
+            if l.is_empty() {
+                continue;
+            }
+            if first_block {
+                self.enhancer.append(&mut line_parser::to_chars(l)?);
+            } else {
+                self.image.push(line_parser::to_chars(l)?);
+            }
         }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // println!(
+        //     "{:?}",
+        //     &self
+        //         .enhancer
+        //         .iter()
+        //         .map(|c| format!("{}", c))
+        //         .collect::<Vec<String>>()
+        //         .join("")
+        // );
+        // println!("{:?}", &self.image);
+        // for v in self.image.iter() {
+        //     println!(
+        //         "{:?}",
+        //         v.iter()
+        //             .map(|c| format!("{}", c))
+        //             .collect::<Vec<_>>()
+        //             .join(""),
+        //     );
+        // }
+        println!(
+            "{:?}",
+            self.enhancer[..70]
+                .iter()
+                .map(|c| format!("{}", c))
+                .collect::<Vec<_>>()
+                .join("")
+        );
+        println!(
+            "{:?}",
+            self.enhancer[441..512]
+                .iter()
+                .map(|c| format!("{}", c))
+                .collect::<Vec<_>>()
+                .join("")
+        );
+        assert_eq!(self.enhancer.len(), 512);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut image = self.image.clone();
+        for count in 0..2 {
+            let c = if count % 2 == 0 { '.' } else { '#' };
+            for v in image.iter_mut() {
+                v.insert(0, c);
+                v.insert(0, c);
+                v.insert(0, c);
+                v.push(c);
+                v.push(c);
+                v.push(c);
+            }
+            let mut v = Vec::new();
+            v.resize(image[0].len(), c);
+            image.insert(0, v.clone());
+            image.insert(0, v.clone());
+            image.insert(0, v.clone());
+            image.push(v.clone());
+            image.push(v.clone());
+            image.push(v.clone());
+
+            println!("before {}", count);
+            for v in image.iter() {
+                println!(
+                    "{:?}",
+                    v.iter()
+                        .map(|c| format!("{}", c))
+                        .collect::<Vec<_>>()
+                        .join(""),
+                );
+            }
+
+            let height = image.len();
+            let width = image[0].len();
+            let mut next = image.clone();
+
+            for (j, v) in next.iter_mut().enumerate() {
+                for (i, n) in v.iter_mut().enumerate() {
+                    let key: usize = geometric::neighbors9(j, i, height, width)
+                        .iter()
+                        .map(|(jj, ii)| (image[*jj][*ii] == '#') as usize)
+                        .fold(0, |t, x| 2 * t + x);
+                    *n = self.enhancer[key];
+                }
+            }
+
+            if count == 1 {
+                // trim outer frame
+                for v in next.iter_mut() {
+                    v.remove(0);
+                    v.pop().unwrap();
+                }
+                next.remove(0);
+                next.pop();
+            }
+
+            std::mem::swap(&mut image, &mut next);
+            println!("after {}", count);
+            for v in image.iter() {
+                println!(
+                    "{:?}",
+                    v.iter()
+                        .map(|c| format!("{}", c))
+                        .collect::<Vec<_>>()
+                        .join(""),
+                );
+            }
+        }
+        println!();
+        for v in image.iter() {
+            println!(
+                "{:?}",
+                v.iter()
+                    .map(|c| format!("{}", c))
+                    .collect::<Vec<_>>()
+                    .join(""),
+            );
+        }
+        image
+            .iter()
+            .map(|v| v.iter().filter(|c| **c == '#').count())
+            .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
-    }
-}
+        let mut image = self.image.clone();
+        for count in 0..50 {
+            let c = if count % 2 == 0 { '.' } else { '#' };
+            for v in image.iter_mut() {
+                v.insert(0, c);
+                v.insert(0, c);
+                v.insert(0, c);
+                v.push(c);
+                v.push(c);
+                v.push(c);
+            }
+            let mut v = Vec::new();
+            v.resize(image[0].len(), c);
+            image.insert(0, v.clone());
+            image.insert(0, v.clone());
+            image.insert(0, v.clone());
+            image.push(v.clone());
+            image.push(v.clone());
+            image.push(v.clone());
 
-#[cfg(feature = "y2021")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
+            let height = image.len();
+            let width = image[0].len();
+            let mut next = image.clone();
 
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
+            for (j, v) in next.iter_mut().enumerate() {
+                for (i, n) in v.iter_mut().enumerate() {
+                    let key: usize = geometric::neighbors9(j, i, height, width)
+                        .iter()
+                        .map(|(jj, ii)| (image[*jj][*ii] == '#') as usize)
+                        .fold(0, |t, x| 2 * t + x);
+                    *n = self.enhancer[key];
+                }
+            }
+
+            if count != 100 {
+                // trim outer frame
+                for v in next.iter_mut() {
+                    v.remove(0);
+                    v.pop().unwrap();
+                }
+                next.remove(0);
+                next.pop();
+            }
+
+            std::mem::swap(&mut image, &mut next);
+            /*
+            println!("after {}", count);
+            for v in image.iter() {
+                println!(
+                    "{:?}",
+                    v.iter()
+                        .map(|c| format!("{}", c))
+                        .collect::<Vec<_>>()
+                        .join(""),
+                );
+            }
+            */
+        }
+        println!();
+        for v in image.iter() {
+            println!(
+                "{:?}",
+                v.iter()
+                    .map(|c| format!("{}", c))
+                    .collect::<Vec<_>>()
+                    .join(""),
+            );
+        }
+        image
+            .iter()
+            .map(|v| v.iter().filter(|c| **c == '#').count())
+            .sum()
     }
 }
