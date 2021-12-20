@@ -18,7 +18,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2021, 19)]
+#[aoc(2021, 25)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {
