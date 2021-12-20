@@ -1,24 +1,21 @@
 //! <https://adventofcode.com/2020/day/10>
-use crate::y2020::traits::{Description, ProblemSolver};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
-pub fn day10(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     vec: Vec<usize>,
 }
 
-impl ProblemSolver<usize, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 10;
+#[aoc(2020, 10)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting { vec: vec![0] }
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        dbg!(&block);
+        self.vec.push(block.parse::<usize>()?);
+        Ok(())
     }
-    fn insert(&mut self, n: usize) {
-        self.vec.push(n);
+    fn after_insert(&mut self) {
+        self.vec.insert(0, 0);
     }
     fn part1(&mut self) -> usize {
         self.vec.sort_unstable();
@@ -59,7 +56,7 @@ impl ProblemSolver<usize, usize, usize> for Setting {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     const TEST1: &str = "\
@@ -75,7 +72,7 @@ mod test {
 12
 4";
 
-    const TEST2: &str = "\"
+    const TEST2: &str = "\
 28
 33
 18
@@ -110,7 +107,7 @@ mod test {
     #[test]
     fn test_part1_1() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
             Answer::Part1(7 * 5)
         );
     }
@@ -118,7 +115,7 @@ mod test {
     #[test]
     fn test_part2_1() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 2),
             Answer::Part2(8)
         );
     }
@@ -126,14 +123,14 @@ mod test {
     #[test]
     fn test_part1_2() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST2.to_string()), 1),
             Answer::Part1(22 * 10)
         );
     }
     #[test]
     fn test_part2_2() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST2.to_string()), 2),
             Answer::Part2(19208)
         );
     }

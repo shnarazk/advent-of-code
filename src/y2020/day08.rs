@@ -1,10 +1,6 @@
 //! <https://adventofcode.com/2020/day/8>
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 use {lazy_static::lazy_static, regex::Regex};
-
-pub fn day08(part: usize, desc: Description) {
-    dbg!(Machine::parse(desc).run(part));
-}
 
 #[derive(Clone, Debug, PartialEq)]
 enum Instruction {
@@ -13,7 +9,7 @@ enum Instruction {
     Nop(isize),
 }
 
-impl ProblemObject for Instruction {
+/* impl ProblemObject for Instruction {
     fn parse(line: &str) -> Option<Instruction> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
@@ -33,7 +29,7 @@ impl ProblemObject for Instruction {
         }
         None
     }
-}
+} */
 
 impl Instruction {
     fn from(mnemonic: &str, n: isize) -> Option<Self> {
@@ -53,20 +49,37 @@ impl Instruction {
     }
 }
 
-#[derive(Debug, PartialEq)]
-struct Machine {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     code: Vec<(Instruction, bool)>,
 }
 
-impl ProblemSolver<Instruction, isize, isize> for Machine {
-    const YEAR: usize = 2020;
-    const DAY: usize = 8;
+#[aoc_at(2020, 8)]
+impl AdventOfCode for Puzzle {
+    type Output1 = isize;
+    type Output2 = isize;
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Machine { code: Vec::new() }
-    }
-    fn insert(&mut self, ins: Instruction) {
-        self.code.push((ins, false));
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
+        }
+        if let Some(m) = RE.captures(block) {
+            let mnemonic = &m[1];
+            let val = match (&m[2], &m[3]) {
+                ("+", n) => n.parse::<isize>().ok(),
+                ("-", n) => n.parse::<isize>().map(|n| -n).ok(),
+                _ => None,
+            };
+            if let Some(n) = val {
+                if let Some(inst) = Instruction::from(mnemonic, n) {
+                    self.code.push((inst, false));
+                    return Ok(());
+                }
+            } else {
+                panic!("mnemonic.{}, sign.{}, val.{}", mnemonic, &m[2], &m[3]);
+            }
+        }
+        Err(ParseError)
     }
     fn part1(&mut self) -> isize {
         if let Some(result) = CPU::run1(&mut self.code) {
@@ -187,20 +200,20 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Machine::parse(Description::FileTag("test".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test".to_string()), 1),
             Answer::Part1(5)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            Machine::parse(Description::FileTag("test".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test".to_string()), 2),
             Answer::Part2(8)
         );
     }

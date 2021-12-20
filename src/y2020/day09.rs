@@ -1,35 +1,24 @@
 //! <https://adventofcode.com/2020/day/9>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashSet,
 };
 
-pub fn day09(part: usize, desc: Description) {
-    if desc == Description::FileTag("test1".to_string()) {
-        dbg!(Setting::parse(desc).set_len(5).run(part));
-    } else {
-        dbg!(Setting::parse(desc).run(part));
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     vec: Vec<usize>,
     len: usize,
 }
 
-impl ProblemSolver<usize, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 9;
+#[aoc(2020, 9)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting {
-            vec: Vec::new(),
-            len: 25,
-        }
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.vec.push(block.parse::<usize>()?);
+        Ok(())
     }
-    fn insert(&mut self, n: usize) {
-        self.vec.push(n);
+    fn after_insert(&mut self) {
+        self.len = if 100 < self.vec.len() { 25 } else { 5 };
     }
     fn part1(&mut self) -> usize {
         let len = self.len;
@@ -80,36 +69,25 @@ impl ProblemSolver<usize, usize, usize> for Setting {
     }
 }
 
-impl Setting {
-    fn set_len(&mut self, n: usize) -> &mut Setting {
-        self.len = n;
-        self
-    }
-}
-
 #[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string()))
-                .set_len(5)
-                .run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(127)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string()))
-                .set_len(5)
-                .run(2),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
             Answer::Part2(62)
         );
     }
