@@ -1,14 +1,10 @@
 //! <https://adventofcode.com/2020/day/7>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashSet,
 };
-
-pub fn day07(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
 
 #[derive(Eq, Debug, Hash, PartialEq)]
 struct Link {
@@ -17,28 +13,22 @@ struct Link {
     amount: usize,
 }
 
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     links: HashSet<Link>,
 }
 
-impl ProblemSolver<String, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 7;
+#[aoc(2020, 7)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting {
-            links: HashSet::new(),
-        }
-    }
-    fn insert(&mut self, line: String) {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref HEAD: Regex =
                 Regex::new(r"^([a-z]+ [a-z]+) bags? contain (.*)").expect("wrong");
             static ref PREP: Regex =
                 Regex::new(r"(\d+) ([a-z]+ [a-z]+) bags?(, (.*))?").expect("wrong");
         }
-        if let Some(head) = HEAD.captures(&line) {
+        if let Some(head) = HEAD.captures(block) {
             let mut b: String = head[2].to_string();
             while let Some(prep) = PREP.captures(&b) {
                 self.links.insert(Link {
@@ -56,6 +46,7 @@ impl ProblemSolver<String, usize, usize> for Setting {
                 }
             }
         }
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut outers: HashSet<String> = HashSet::new();
@@ -93,13 +84,13 @@ fn collects(links: &HashSet<Link>, origin: &str) -> usize {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(4)
         );
     }
@@ -107,7 +98,7 @@ mod test {
     #[test]
     fn test_part2_1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
             Answer::Part2(32)
         );
     }
@@ -115,7 +106,7 @@ mod test {
     #[test]
     fn test_part2_2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test2".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
             Answer::Part2(126)
         );
     }
