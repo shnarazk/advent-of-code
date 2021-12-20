@@ -1,10 +1,10 @@
 //! <https://adventofcode.com/2020/day/4>
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
-use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
-
-pub fn day04(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
+use {
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    lazy_static::lazy_static,
+    regex::Regex,
+    std::collections::HashMap,
+};
 
 #[derive(Debug, PartialEq)]
 struct Rule {
@@ -12,17 +12,6 @@ struct Rule {
 }
 
 const KEYS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-
-impl ProblemObject for Rule {
-    fn parse(s: &str) -> Option<Self> {
-        let mut dic: HashMap<String, String> = HashMap::new();
-        for kv in s.split_ascii_whitespace() {
-            let k_v = kv.split(':').collect::<Vec<_>>();
-            dic.insert(k_v[0].to_string(), k_v[1].to_string());
-        }
-        Some(Rule { dic })
-    }
-}
 
 impl Rule {
     fn check_keys(&self) -> bool {
@@ -47,20 +36,22 @@ impl Rule {
     }
 }
 
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     entry: Vec<Rule>,
 }
 
-impl ProblemSolver<Rule, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 4;
+#[aoc(2020, 4)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        Setting { entry: Vec::new() }
-    }
-    fn insert(&mut self, rule: Rule) {
-        self.entry.push(rule);
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        let mut dic: HashMap<String, String> = HashMap::new();
+        for kv in block.split_ascii_whitespace() {
+            let k_v = kv.split(':').collect::<Vec<_>>();
+            dic.insert(k_v[0].to_string(), k_v[1].to_string());
+        }
+        self.entry.push(Rule { dic });
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.entry.iter().filter(|r| r.check_keys()).count()
@@ -146,7 +137,7 @@ hgt:179cm
 hcl:#cfa07d eyr:2025 pid:166559648
 iyr:2011 ecl:brn hgt:59in";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::parse(Description::TestData(TEST.to_string())).run(1),
             Answer::Part1(2)
         );
     }
@@ -167,7 +158,7 @@ hgt:59cm ecl:zzz
 eyr:2038 hcl:74454a iyr:2023
 pid:3556412378 byr:2007";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::parse(Description::TestData(TEST.to_string())).run(2),
             Answer::Part2(0)
         );
     }
@@ -187,7 +178,7 @@ eyr:2022
 
 iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::parse(Description::TestData(TEST.to_string())).run(2),
             Answer::Part2(4)
         );
     }
