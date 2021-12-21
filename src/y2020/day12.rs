@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2020/day/12>
-use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
-    lazy_static::lazy_static,
-    regex::Regex,
-};
-
-pub fn day12(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
+use crate::framework::{aoc, AdventOfCode, ParseError};
+use {lazy_static::lazy_static, regex::Regex};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Dir {
@@ -47,12 +40,6 @@ enum Instruction {
     F(usize),
 }
 
-impl ProblemObject for Instruction {
-    fn parse(s: &str) -> Option<Self> {
-        Instruction::from(s)
-    }
-}
-
 impl Instruction {
     fn from(str: &str) -> Option<Self> {
         lazy_static! {
@@ -81,7 +68,7 @@ impl Instruction {
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {
+pub struct Puzzle {
     codes: Vec<Instruction>,
     dir: Dir,
     waypoint_sn: isize,
@@ -92,12 +79,9 @@ struct Setting {
     mode: usize,
 }
 
-impl ProblemSolver<Instruction, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 12;
-    const DELIMITER: &'static str = "\n";
+impl Default for Puzzle {
     fn default() -> Self {
-        Setting {
+        Puzzle {
             codes: Vec::new(),
             dir: Dir::E,
             waypoint_sn: 1,
@@ -108,8 +92,14 @@ impl ProblemSolver<Instruction, usize, usize> for Setting {
             mode: 0,
         }
     }
-    fn insert(&mut self, inst: Instruction) {
-        self.codes.push(inst);
+}
+
+#[aoc(2020, 12)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.codes.push(Instruction::from(block).ok_or(ParseError)?);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.mode = 1;
@@ -123,7 +113,7 @@ impl ProblemSolver<Instruction, usize, usize> for Setting {
     }
 }
 
-impl Setting {
+impl Puzzle {
     fn distance(&self) -> usize {
         (self.dist_sn.abs() as usize) + (self.dist_we.abs() as usize)
     }
@@ -277,20 +267,20 @@ impl Setting {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test".to_string()), 1),
             Answer::Part1(25)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test".to_string()), 2),
             Answer::Part2(286)
         );
     }
