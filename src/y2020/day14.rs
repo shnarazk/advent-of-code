@@ -1,52 +1,11 @@
 //! <https://adventofcode.com/2020/day/14>
-use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
-
-pub fn day14(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
+use crate::framework::{aoc, AdventOfCode, ParseError};
+use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
 
 #[derive(Clone, Debug, PartialEq)]
 enum OP {
     Mask(usize, usize, Vec<usize>),
     Set(usize, usize),
-}
-
-impl ProblemObject for OP {
-    fn parse(str: &str) -> Option<Self> {
-        lazy_static! {
-            static ref MASK: Regex = Regex::new(r"^mask = ((X|0|1)+)").expect("wrong");
-            static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
-        }
-        if let Some(m) = MASK.captures(str) {
-            let zeros = m[1]
-                .chars()
-                .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
-            let ones = m[1]
-                .chars()
-                .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
-            let wilds = m[1]
-                .chars()
-                .enumerate()
-                .fold(Vec::new(), |mut v, (i, letter)| {
-                    if letter == 'X' {
-                        v.push(35 - i);
-                    }
-                    v
-                });
-            return Some(OP::Mask(zeros, ones, wilds));
-        }
-        if let Some(m) = SET.captures(str) {
-            let address = m[1].parse::<usize>().unwrap();
-            let val = m[2].parse::<usize>().unwrap();
-            return Some(OP::Set(address, val));
-        }
-        None
-    }
 }
 
 impl OP {
@@ -78,23 +37,54 @@ impl OP {
 }
 
 #[derive(Debug, PartialEq)]
-struct Setting {
+pub struct Puzzle {
     mask: OP,
     code: Vec<OP>,
 }
 
-impl ProblemSolver<OP, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 14;
-    const DELIMITER: &'static str = "\n";
+impl Default for Puzzle {
     fn default() -> Self {
-        Setting {
+        Puzzle {
             mask: OP::Mask(0, 0, vec![]),
             code: Vec::new(),
         }
     }
-    fn insert(&mut self, op: OP) {
-        self.code.push(op);
+}
+
+#[aoc(2020, 14)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        lazy_static! {
+            static ref MASK: Regex = Regex::new(r"^mask = ((X|0|1)+)").expect("wrong");
+            static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
+        }
+        if let Some(m) = MASK.captures(block) {
+            let zeros = m[1]
+                .chars()
+                .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
+            let ones = m[1]
+                .chars()
+                .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
+            let wilds = m[1]
+                .chars()
+                .enumerate()
+                .fold(Vec::new(), |mut v, (i, letter)| {
+                    if letter == 'X' {
+                        v.push(35 - i);
+                    }
+                    v
+                });
+            self.code.push(OP::Mask(zeros, ones, wilds));
+            return Ok(());
+        }
+        if let Some(m) = SET.captures(block) {
+            let address = m[1].parse::<usize>().unwrap();
+            let val = m[2].parse::<usize>().unwrap();
+            self.code.push(OP::Set(address, val));
+            return Ok(());
+        }
+        Err(ParseError)
     }
     fn part1(&mut self) -> usize {
         let mut mem: HashMap<usize, usize> = HashMap::new();
@@ -133,20 +123,20 @@ impl ProblemSolver<OP, usize, usize> for Setting {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(165)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test2".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
             Answer::Part2(208)
         );
     }
