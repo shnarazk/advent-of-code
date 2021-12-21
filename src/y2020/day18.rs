@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2020/day/18>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},
 };
-
-pub fn day18(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
 
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -25,20 +21,19 @@ enum Expr {
     NUM(isize),
 }
 
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     expr: Vec<String>,
 }
 
-impl ProblemSolver<String, isize, isize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 18;
+#[aoc_at(2020, 18)]
+impl AdventOfCode for Puzzle {
+    type Output1 = isize;
+    type Output2 = isize;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, expr: String) {
-        self.expr.push(expr);
-    }
-    fn default() -> Self {
-        Setting { expr: Vec::new() }
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.expr.push(block.to_string());
+        Ok(())
     }
     fn part1(&mut self) -> isize {
         let mut result = 0;
@@ -220,45 +215,50 @@ fn an_expr2(input: &str) -> IResult<&str, Expr> {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test1() {
         assert_eq!(
-            Setting::parse(Description::TestData("1 + 2 * 3 + 4 * 5 + 6".to_string())).run(1),
+            Puzzle::solve(
+                Description::TestData("1 + 2 * 3 + 4 * 5 + 6".to_string()),
+                1
+            ),
             Answer::Part1(71)
         );
         assert_eq!(
-            Setting::parse(Description::TestData(
-                "1 + (2 * 3) + (4 * (5 + 6))".to_string()
-            ))
-            .run(1),
+            Puzzle::solve(
+                Description::TestData("1 + (2 * 3) + (4 * (5 + 6))".to_string()),
+                1
+            ),
             Answer::Part1(51)
         );
         assert_eq!(
-            Setting::parse(Description::TestData("2 * 3 + (4 * 5)".to_string())).run(1),
+            Puzzle::solve(Description::TestData("2 * 3 + (4 * 5)".to_string()), 1),
             Answer::Part1(26)
         );
         assert_eq!(
-            Setting::parse(Description::TestData(
-                "5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string()
-            ))
-            .run(1),
+            Puzzle::solve(
+                Description::TestData("5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string()),
+                1
+            ),
             Answer::Part1(437)
         );
         assert_eq!(
-            Setting::parse(Description::TestData(
-                "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string()
-            ))
-            .run(1),
+            Puzzle::solve(
+                Description::TestData("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string()),
+                1
+            ),
             Answer::Part1(12240)
         );
         assert_eq!(
-            Setting::parse(Description::TestData(
-                "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string()
-            ))
-            .run(1),
+            Puzzle::solve(
+                Description::TestData(
+                    "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string()
+                ),
+                1
+            ),
             Answer::Part1(13632)
         );
     }
