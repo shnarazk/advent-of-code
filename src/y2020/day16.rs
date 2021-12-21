@@ -1,18 +1,15 @@
 //! <https://adventofcode.com/2020/day/16>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, Description, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
+    std::borrow::Borrow,
 };
-
-pub fn day16(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
 
 type Range = (String, usize, usize, usize, usize);
 
-#[derive(Debug, PartialEq)]
-struct Setting {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     dic: Vec<Range>,
     samples: Vec<Vec<usize>>,
     ticket: Vec<usize>,
@@ -20,24 +17,16 @@ struct Setting {
     good_samples: Vec<Vec<usize>>,
 }
 
-impl ProblemSolver<(), usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 16;
+#[aoc(2020, 16)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, _object: ()) {}
-    fn default() -> Self {
-        Setting {
-            dic: Vec::new(),
-            samples: Vec::new(),
-            ticket: Vec::new(),
-            field_cands: Vec::new(),
-            good_samples: Vec::new(),
-        }
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
     }
-    fn parse(desc: Description) -> Self {
-        let mut setting = Setting::default();
+    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
+        let mut puzzle = Puzzle::default();
         let mut phase = 0;
-        let body = Setting::load(desc).expect("load error");
+        let body = Puzzle::load(desc.borrow()).expect("load error");
         for l in body.split('\n') {
             match l {
                 "your ticket:" => {
@@ -49,29 +38,29 @@ impl ProblemSolver<(), usize, usize> for Setting {
                 "" => (),
                 _ if phase == 0 => {
                     if let Some(r) = parse_range(l) {
-                        setting.dic.push(r);
+                        puzzle.dic.push(r);
                     }
                 }
                 _ if phase == 1 => {
-                    setting.ticket = parse_sample(l);
+                    puzzle.ticket = parse_sample(l);
                 }
                 _ if phase == 2 => {
-                    setting.samples.push(parse_sample(l));
+                    puzzle.samples.push(parse_sample(l));
                 }
                 _ => (),
             }
         }
         // build cands
-        for field in &setting.ticket {
+        for field in &puzzle.ticket {
             let mut res: Vec<Range> = Vec::new();
-            for pair in &setting.dic {
+            for pair in &puzzle.dic {
                 if valid(pair, *field) {
                     res.push(pair.clone());
                 }
             }
-            setting.field_cands.push(res);
+            puzzle.field_cands.push(res);
         }
-        setting
+        Ok(puzzle)
     }
     fn part1(&mut self) -> usize {
         // dbg!(&field_cands);
@@ -199,7 +188,7 @@ fn parse_sample(str: &str) -> Vec<usize> {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
@@ -218,7 +207,7 @@ nearby tickets:
 55,2,20
 38,6,12";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(71)
         );
     }
@@ -238,7 +227,7 @@ nearby tickets:
 15,1,5
 5,14,9";
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(1)
         );
     }
