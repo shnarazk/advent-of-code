@@ -1,45 +1,21 @@
 //! <https://adventofcode.com/2020/day/11>
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
+};
 
-pub fn day11(part: usize, desc: Description) {
-    dbg!(World::parse(desc).run(part));
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct Chars {
-    char: Vec<char>,
-}
-
-impl ProblemObject for Chars {
-    fn parse(s: &str) -> Option<Self> {
-        if s.is_empty() {
-            None
-        } else {
-            Some(Chars {
-                char: s.chars().collect::<Vec<char>>(),
-            })
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct World {
-    data: Vec<Chars>,
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
+    data: Vec<Vec<char>>,
     size: usize,
 }
 
-impl ProblemSolver<Chars, usize, usize> for World {
-    const YEAR: usize = 2020;
-    const DAY: usize = 11;
+#[aoc(2020, 11)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        World {
-            data: Vec::new(),
-            size: 0,
-        }
-    }
-    fn insert(&mut self, cs: Chars) {
-        self.data.push(cs);
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.data.push(line_parser::to_chars(block)?);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         loop {
@@ -61,9 +37,9 @@ impl ProblemSolver<Chars, usize, usize> for World {
     }
 }
 
-impl World {
+impl Puzzle {
     fn at(&self, i: usize, j: usize) -> char {
-        self.data[i].char[j]
+        self.data[i][j]
     }
     fn neighbors(&self, i: usize, j: usize) -> Vec<char> {
         let mut vec: Vec<char> = Vec::new();
@@ -72,13 +48,13 @@ impl World {
                 continue;
             }
             for oj in &[-1, 0, 1] {
-                if (0 == j && *oj == -1) || (j == self.data[0].char.len() - 1 && *oj == 1) {
+                if (0 == j && *oj == -1) || (j == self.data[0].len() - 1 && *oj == 1) {
                     continue;
                 }
                 if *oi == 0 && *oj == 0 {
                     continue;
                 }
-                vec.push(self.data[(i as isize + oi) as usize].char[((j as isize) + oj) as usize]);
+                vec.push(self.data[(i as isize + oi) as usize][((j as isize) + oj) as usize]);
             }
         }
         vec
@@ -86,11 +62,7 @@ impl World {
     fn with_offset(&self, i: usize, j: usize, oi: isize, oj: isize) -> Option<char> {
         let ii: isize = i as isize + oi;
         let jj: isize = j as isize + oj;
-        if ii < 0
-            || self.data.len() as isize <= ii
-            || jj < 0
-            || self.data[0].char.len() as isize <= jj
-        {
+        if ii < 0 || self.data.len() as isize <= ii || jj < 0 || self.data[0].len() as isize <= jj {
             return None;
         }
         Some(self.at(ii as usize, jj as usize))
@@ -98,7 +70,7 @@ impl World {
     fn num_occupied(&self) -> usize {
         self.data
             .iter()
-            .map(|cs| cs.char.iter().filter(|c| **c == '#').count())
+            .map(|cs| cs.iter().filter(|c| **c == '#').count())
             .sum()
     }
     fn num_occupied_around(&self, i: usize, j: usize) -> usize {
@@ -141,29 +113,30 @@ impl World {
             .count()
     }
 
-    fn next1(&mut self) -> Vec<Chars> {
-        let mut v: Vec<Chars> = self.data.clone();
-        let len = self.data[0].char.len();
+    fn next1(&mut self) -> Vec<Vec<char>> {
+        let mut v: Vec<Vec<char>> = self.data.clone();
+        let len = self.data[0].len();
         for (i, vi) in v.iter_mut().enumerate() {
-            for j in 0..len {
+            for (j, v) in vi.iter_mut().enumerate().take(len) {
                 let no = self.num_occupied_around(i, j);
                 match self.at(i, j) {
-                    'L' if no == 0 => vi.char[j] = '#',
-                    '#' if 4 <= no => vi.char[j] = 'L',
+                    'L' if no == 0 => *v = '#',
+                    '#' if 4 <= no => *v = 'L',
                     _ => (),
                 }
             }
         }
         v
     }
-    fn next2(&mut self) -> Vec<Chars> {
-        let mut v: Vec<Chars> = self.data.clone();
+    fn next2(&mut self) -> Vec<Vec<char>> {
+        let mut v: Vec<Vec<char>> = self.data.clone();
+        let len = self.data[0].len();
         for (i, vi) in v.iter_mut().enumerate() {
-            for j in 0..self.data[0].char.len() {
+            for (j, v) in vi.iter_mut().enumerate().take(len) {
                 let no = self.num_occupied_around_through(i, j);
                 match self.at(i, j) {
-                    'L' if no == 0 => vi.char[j] = '#',
-                    '#' if 5 <= no => vi.char[j] = 'L',
+                    'L' if no == 0 => *v = '#',
+                    '#' if 5 <= no => *v = 'L',
                     _ => (),
                 }
             }
@@ -177,20 +150,20 @@ impl World {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            World::parse(Description::FileTag("test1".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(37)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            World::parse(Description::FileTag("test1".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
             Answer::Part2(26)
         );
     }
