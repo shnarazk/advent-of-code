@@ -1,46 +1,54 @@
 //! <https://adventofcode.com/2020/day/19>
+
+use std::borrow::Borrow;
+
 use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, Description, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashMap,
 };
 
-pub fn day19(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
 #[derive(Debug, PartialEq)]
-struct NumberedRule {
-    num: usize,
-    rule: Rule,
+enum Rule {
+    Match(char),
+    Or(Vec<usize>, Vec<usize>),
+    Seq(Vec<usize>),
 }
 
-impl ProblemObject for NumberedRule {
-    fn parse(str: &str) -> Option<Self> {
+// #[derive(Debug, Default, PartialEq)]
+// struct NumberedRule {
+//     num: usize,
+//     rule: Rule,
+// }
+
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
+    rule: HashMap<usize, Rule>,
+    message: Vec<Vec<char>>,
+}
+
+#[aoc(2020, 19)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref R0: Regex = Regex::new(r#"^(\d+): "(.)""#).expect("error");
             static ref R1: Regex = Regex::new(r"^(\d+):(( \d+)+)$").expect("error");
             static ref R2: Regex = Regex::new(r"^(\d+):(( \d+)+) \|(( \d+)+)$").expect("error");
         }
-        if let Some(m) = R0.captures(str) {
+        if let Some(m) = R0.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let c = m[2].parse::<char>().expect("wrong");
-            return Some(NumberedRule {
-                num: i,
-                rule: Rule::Match(c),
-            });
-        } else if let Some(m) = R1.captures(str) {
+            self.rule.insert(i, Rule::Match(c));
+        } else if let Some(m) = R1.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let mut vec: Vec<usize> = Vec::new();
             for n in m[2].split_ascii_whitespace() {
                 vec.push(n.parse::<usize>().expect("strange"));
             }
-            return Some(NumberedRule {
-                num: i,
-                rule: Rule::Seq(vec),
-            });
-        } else if let Some(m) = R2.captures(str) {
+            self.rule.insert(i, Rule::Seq(vec));
+        } else if let Some(m) = R2.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let mut vec1: Vec<usize> = Vec::new();
             for n in m[2].split_ascii_whitespace() {
@@ -50,56 +58,31 @@ impl ProblemObject for NumberedRule {
             for n in m[4].split_ascii_whitespace() {
                 vec2.push(n.parse::<usize>().expect("strange"));
             }
-            return Some(NumberedRule {
-                num: i,
-                rule: Rule::Or(vec1, vec2),
-            });
+            self.rule.insert(i, Rule::Or(vec1, vec2));
         }
-        None
+        Ok(())
     }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
-    rule: HashMap<usize, Rule>,
-    message: Vec<Vec<char>>,
-}
-
-impl ProblemSolver<NumberedRule, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 19;
-    const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        Setting {
-            rule: HashMap::new(),
-            message: Vec::new(),
-        }
-    }
-    fn insert(&mut self, r: NumberedRule) {
-        self.rule.insert(r.num, r.rule);
-    }
-    fn parse(desc: Description) -> Self {
+    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
         let mut instance = Self::default();
-        if let Some(buffer) = Self::load(desc) {
-            let mut iter = buffer.split(Self::DELIMITER);
-            if let Some(block) = iter.next() {
-                for l in block.split('\n') {
-                    if let Some(element) = NumberedRule::parse(l) {
-                        instance.insert(element);
-                    }
-                }
-            }
-            if let Some(block) = iter.next() {
-                for line in block.split('\n') {
-                    if line.is_empty() {
-                        break;
-                    }
-                    let cs = line.chars().collect::<Vec<char>>();
-                    instance.message.push(cs);
+        let buffer = Self::load(desc.borrow())?;
+        let mut iter = buffer.split(Self::DELIMITER);
+        if let Some(block) = iter.next() {
+            for l in block.split('\n') {
+                if !l.is_empty() {
+                    instance.insert(l)?;
                 }
             }
         }
-        instance
+        if let Some(block) = iter.next() {
+            for line in block.split('\n') {
+                if line.is_empty() {
+                    break;
+                }
+                let cs = line.chars().collect::<Vec<char>>();
+                instance.message.push(cs);
+            }
+        }
+        Ok(instance)
     }
     fn part1(&mut self) -> usize {
         self.message
@@ -182,25 +165,18 @@ fn check_trace(
     target.len() == from
 }
 
-#[derive(Debug, PartialEq)]
-enum Rule {
-    Match(char),
-    Or(Vec<usize>, Vec<usize>),
-    Seq(Vec<usize>),
-}
-
 #[cfg(feature = "y2020")]
 #[cfg(test)]
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(2)
         );
     }
@@ -208,7 +184,7 @@ mod test {
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test2".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
             Answer::Part2(12)
         );
     }
