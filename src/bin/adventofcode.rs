@@ -24,7 +24,7 @@ pub fn main() {
         panic!();
     }
     let year = arg.get(1).map_or("2021", |s| s.as_str()).parse::<usize>().expect("wrong year");
-    let day = arg.get(3).map_or("1", |s| s.as_str()).parse::<usize>().expect("wrong day");
+    let day = arg.get(2).map_or("1", |s| s.as_str()).parse::<usize>().expect("wrong day");
     let part = arg.get(3).map_or("0", |s| s.as_str()).parse::<usize>().expect("wrong part");
     let desc: Description = match arg.get(4) {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
