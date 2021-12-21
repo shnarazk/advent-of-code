@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2020/day/24>
 use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
-
-pub fn day24(part: usize, desc: Description) {
-    dbg!(World::parse(desc).run(part));
-}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Dir {
@@ -20,22 +16,12 @@ pub enum Dir {
 
 pub type Location = (isize, isize);
 
-impl ProblemObject for Location {
-    fn parse(s: &str) -> Option<Self> {
-        if s.is_empty() {
-            None
-        } else {
-            Some(location(&dirs_from(s)))
-        }
-    }
-}
-
 /// ```
-/// use adventofcode::y2020::{traits::ProblemObject, day24::*};
+/// use adventofcode::y2020::day24::*;
 /// assert_eq!(location(&[Dir::E, Dir::SE, Dir::W]), (-1, 1));
 /// assert_eq!(location(&[Dir::NW, Dir::W, Dir::SW, Dir::E, Dir::E]), (0, 0));
-/// assert_eq!(Location::parse("nwwswee"), Some((0, 0)));
-/// assert_eq!(Location::parse("nwesw"), Some((0, 0)));
+/// assert_eq!(location(&dirs_from("nwwswee")), (0, 0));
+/// assert_eq!(location(&dirs_from("nwesw")), (0, 0));
 /// ```
 pub fn location(dirs: &[Dir]) -> Location {
     let up = dirs
@@ -101,23 +87,21 @@ pub fn neighbors((i, j): &Location) -> [Location; 6] {
     ]
 }
 
-#[derive(Clone, Debug, PartialEq)]
-struct World {
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Puzzle {
     cell: HashMap<Location, bool>,
 }
 
-impl ProblemSolver<Location, usize, usize> for World {
-    const YEAR: usize = 2020;
-    const DAY: usize = 24;
+#[aoc(2020, 24)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, loc: Location) {
-        self.flip(loc);
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.flip(location(&dirs_from(block)));
+        Ok(())
     }
-    fn default() -> Self {
-        World {
-            cell: HashMap::new(),
-        }
-    }
+    // fn insert(&mut self, loc: Location) {
+    //     self.flip(loc);
+    // }
     fn part1(&mut self) -> usize {
         self.count()
     }
@@ -133,7 +117,7 @@ impl ProblemSolver<Location, usize, usize> for World {
     }
 }
 
-impl World {
+impl Puzzle {
     fn flip(&mut self, loc: Location) {
         let entry = self.cell.entry(loc).or_insert(false);
         *entry = !*entry;
@@ -159,8 +143,8 @@ impl World {
             black_neighbors == 2
         }
     }
-    fn next_day(&self) -> World {
-        let mut next: World = World::default();
+    fn next_day(&self) -> Puzzle {
+        let mut next: Puzzle = Puzzle::default();
         for (k, _v) in self.cell.iter() {
             /*
             if *v {
@@ -189,7 +173,7 @@ impl World {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::y2020::traits::*;
+    use crate::framework::*;
     const TEST1: &str = "\
 sesenwnenenewseeswwswswwnenewsewsw
 neeenesenwnwwswnenewnwwsewnenwseswesw
@@ -215,14 +199,14 @@ wseweeenwnesenwwwswnew";
     #[test]
     fn test1() {
         assert_eq!(
-            World::parse(Description::TestData(TEST1.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
             Answer::Part1(10)
         );
     }
     #[test]
     fn test2() {
         assert_eq!(
-            World::parse(Description::TestData(TEST1.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST1.to_string()), 2),
             Answer::Part2(2208)
         );
     }
