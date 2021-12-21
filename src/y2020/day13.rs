@@ -1,49 +1,24 @@
 //! <https://adventofcode.com/2020/day/13>
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
-pub fn day13(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
-#[derive(Debug, PartialEq)]
-struct Object {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     time: usize,
     bus: Vec<(usize, usize)>,
 }
 
-impl ProblemObject for Object {
-    fn parse(s: &str) -> Option<Self> {
-        let mut bus: Vec<(usize, usize)> = Vec::new();
-        let mut iter = s.split('\n');
-        let time = iter.next().unwrap().parse::<usize>().unwrap();
+#[aoc(2020, 13)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        let mut iter = block.split('\n');
+        self.time = iter.next().unwrap().parse::<usize>().unwrap();
         for (i, b) in iter.next().unwrap().split(',').enumerate() {
             if let Ok(n) = b.parse::<usize>() {
-                bus.push((n, i));
+                self.bus.push((n, i));
             }
         }
-        Some(Object { time, bus })
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
-    time: usize,
-    bus: Vec<(usize, usize)>,
-}
-
-impl ProblemSolver<Object, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 13;
-    const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        Setting {
-            time: 0,
-            bus: Vec::new(),
-        }
-    }
-    fn insert(&mut self, mut object: Object) {
-        std::mem::swap(&mut self.time, &mut object.time);
-        std::mem::swap(&mut self.bus, &mut object.bus);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut bus: usize = self.bus[0].0;
@@ -118,7 +93,7 @@ fn solve1(a: usize, m: usize) -> usize {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
@@ -132,14 +107,14 @@ mod test {
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test".to_string()), 1),
             Answer::Part1(295)
         );
     }
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test".to_string()), 2),
             Answer::Part2(1068781)
         );
     }
