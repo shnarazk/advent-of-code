@@ -1,17 +1,14 @@
 //! <https://adventofcode.com/2020/day/22>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, Description, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::{
+        borrow::Borrow,
         cmp::Ordering,
         collections::{HashSet, VecDeque},
     },
 };
-
-pub fn day22(part: usize, desc: Description) {
-    dbg!(World::parse(desc).run(part));
-}
 
 fn parse(block: &str) -> Option<VecDeque<usize>> {
     lazy_static! {
@@ -33,17 +30,12 @@ fn parse(block: &str) -> Option<VecDeque<usize>> {
 type Player = VecDeque<usize>;
 type Config = (Player, Player);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 struct Cache {
     set: HashSet<Config>,
 }
 
 impl Cache {
-    fn new() -> Cache {
-        Cache {
-            set: HashSet::new(),
-        }
-    }
     fn saw(&mut self, player1: &Player, player2: &Player) -> Option<usize> {
         if self.set.contains(&(player1.clone(), player2.clone())) {
             return Some(1);
@@ -59,40 +51,34 @@ impl Cache {
     }
 }
 
-#[derive(Debug, PartialEq)]
-struct World {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     player1: Player,
     player2: Player,
     cache: Cache,
 }
 
-impl ProblemSolver<(), usize, usize> for World {
-    const YEAR: usize = 2020;
-    const DAY: usize = 22;
+#[aoc(2020, 22)]
+impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        World {
-            player1: VecDeque::new(),
-            player2: VecDeque::new(),
-            cache: Cache::new(),
-        }
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
     }
-    fn parse(desc: Description) -> Self {
+    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
         let mut instance = Self::default();
-        if let Some(buffer) = Self::load(desc) {
-            let mut iter = buffer.split(Self::DELIMITER);
-            if let Some(text) = iter.next() {
-                if let Some(element) = parse(text) {
-                    instance.player1 = element;
-                }
-            }
-            if let Some(text) = iter.next() {
-                if let Some(element) = parse(text) {
-                    instance.player2 = element;
-                }
+        let buffer = Self::load(desc.borrow())?;
+        let mut iter = buffer.split(Self::DELIMITER);
+        if let Some(text) = iter.next() {
+            if let Some(element) = parse(text) {
+                instance.player1 = element;
             }
         }
-        instance
+        if let Some(text) = iter.next() {
+            if let Some(element) = parse(text) {
+                instance.player2 = element;
+            }
+        }
+        Ok(instance)
     }
     fn part1(&mut self) -> usize {
         let mut stopper = None;
@@ -140,7 +126,7 @@ impl ProblemSolver<(), usize, usize> for World {
     }
 }
 
-impl World {
+impl Puzzle {
     fn check_winner(&self, exception: Option<usize>) -> Option<usize> {
         if exception.is_some() {
             return exception;
@@ -193,9 +179,11 @@ impl World {
             if let Some(p2_head) = self.player2.pop_front() {
                 let append_to_p1: bool = {
                     if p1_head <= self.player1.len() && p2_head <= self.player2.len() {
-                        let mut child = World::default();
-                        child.player1 = self.player1.clone();
-                        child.player2 = self.player2.clone();
+                        let mut child = Puzzle {
+                            player1: self.player1.clone(),
+                            player2: self.player2.clone(),
+                            ..Default::default()
+                        };
                         child.player1.truncate(p1_head);
                         child.player2.truncate(p2_head);
                         println!(
@@ -230,7 +218,7 @@ impl World {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
     #[test]
     fn test0() {
@@ -243,7 +231,7 @@ Player 2:
 7
 10";
         assert_eq!(
-            World::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(58)
         );
     }
@@ -259,7 +247,7 @@ Player 2:
 29
 14";
         assert_eq!(
-            World::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(43 * 2 + 19 * 1)
         );
     }
@@ -280,7 +268,7 @@ Player 2:
 7
 10";
         assert_eq!(
-            World::parse(Description::TestData(TEST.to_string())).run(2),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
             Answer::Part2(291)
         );
     }
@@ -296,7 +284,7 @@ Player 1:
 Player 2:
 1";
         assert_eq!(
-            World::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1 * 1)
         );
     }
