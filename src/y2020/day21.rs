@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2020/day/21>
 use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     splr::*,
@@ -9,6 +9,12 @@ use {
         convert::TryFrom,
     },
 };
+
+#[derive(Clone, Debug, Default, PartialEq)]
+struct Rule {
+    ingredients: Vec<String>,
+    allergens: Vec<String>,
+}
 
 /// ## 変数
 /// ingredient x allergen
@@ -27,77 +33,54 @@ use {
 ///
 /// ## 目的
 /// どの属性でもtrueにしたらUNSATになるようなindredientを探せ
-pub fn day21(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct Rule {
-    ingredients: Vec<String>,
-    allergens: Vec<String>,
-}
-
-impl ProblemObject for Rule {
-    fn parse(line: &str) -> Option<Self> {
-        lazy_static! {
-            static ref RE: Regex =
-                Regex::new(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$").expect("error");
-        }
-        if let Some(m) = RE.captures(line) {
-            let ingredients = m[1]
-                .trim()
-                .split(' ')
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>();
-            let allergens = m[2]
-                .trim()
-                .split(", ")
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>();
-            // dbg!((&ingredients, &allergens));
-            return Some(Rule {
-                ingredients,
-                allergens,
-            });
-        }
-        None
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct Setting {
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Puzzle {
     ingredients: HashMap<String, usize>,
     allergens: HashMap<String, usize>,
     rules: Vec<Rule>,
 }
 
-impl ProblemSolver<Rule, usize, String> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 21;
+#[aoc_at(2020, 21)]
+impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, rule: Rule) {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        lazy_static! {
+            static ref RE: Regex =
+                Regex::new(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$").expect("error");
+        }
+        let m = RE.captures(block).ok_or(ParseError)?;
+        let ingredients = m[1]
+            .trim()
+            .split(' ')
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+        let allergens = m[2]
+            .trim()
+            .split(", ")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+        // dbg!((&ingredients, &allergens));
         let mut num_ingredient = self.ingredients.len();
-        for ing in rule.ingredients.iter() {
+        for ing in ingredients.iter() {
             if self.ingredients.get(ing).is_none() {
                 self.ingredients.insert(ing.to_string(), num_ingredient);
                 num_ingredient += 1;
             }
         }
         let mut num_allergen = self.allergens.len();
-        for ale in rule.allergens.iter() {
+        for ale in allergens.iter() {
             if self.allergens.get(ale).is_none() {
                 self.allergens.insert(ale.to_string(), num_allergen);
                 num_allergen += 1;
             }
         }
-        self.rules.push(rule);
-    }
-    fn default() -> Self {
-        Setting {
-            ingredients: HashMap::new(),
-            allergens: HashMap::new(),
-            rules: Vec::new(),
-        }
+        self.rules.push(Rule {
+            ingredients,
+            allergens,
+        });
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let cnf = self.make_cnf();
@@ -173,7 +156,7 @@ impl ProblemSolver<Rule, usize, String> for Setting {
     }
 }
 
-impl Setting {
+impl Puzzle {
     fn var_of(&self, ing: &str, all: &str) -> i32 {
         if let Some(ni) = self.ingredients.get(ing) {
             if let Some(na) = self.allergens.get(all) {
@@ -238,7 +221,7 @@ impl Setting {
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
     const TEST: &str = "\
 mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
@@ -248,7 +231,7 @@ sqjhc mxmxvkd sbzzf (contains fish)";
     #[test]
     fn test1() {
         assert_eq!(
-            Setting::parse(Description::TestData(TEST.to_string())).run(1),
+            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
             Answer::Part1(5)
         );
     }
