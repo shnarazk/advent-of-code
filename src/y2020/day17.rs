@@ -1,14 +1,39 @@
 //! <https://adventofcode.com/2020/day/17>
 use {
-    crate::y2020::traits::{Description, ProblemSolver},
-    std::{cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
+    crate::framework::{aoc, AdventOfCode, Answer, Description, ParseError},
+    std::{borrow::Borrow, cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
 };
 
-pub fn day17(part: usize, desc: Description) {
-    if part == 1 {
-        dbg!(World::<LOC>::parse(desc).run(part));
-    } else {
-        dbg!(World::<LOC4>::parse(desc).run(part));
+#[derive(Debug, Default)]
+pub struct Puzzle {}
+
+#[aoc(2020, 17)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "";
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
+    }
+    fn part1(&mut self) -> Self::Output1 {
+        0
+    }
+    fn part2(&mut self) -> Self::Output1 {
+        0
+    }
+    fn solve(
+        description: impl Borrow<Description>,
+        part: usize,
+    ) -> Answer<Self::Output1, Self::Output2> {
+        match part {
+            1 => World::<LOC>::solve(description, 1),
+            2 => World::<LOC4>::solve(description, 2),
+            _ => match (
+                World::<LOC>::solve(description.borrow(), 1),
+                World::<LOC4>::solve(description.borrow(), 2),
+            ) {
+                (Answer::Part1(a), Answer::Part2(b)) => Answer::Answers(a, b),
+                _ => unreachable!(),
+            },
+        }
     }
 }
 
@@ -20,9 +45,21 @@ type LOC = (isize, isize, isize);
 #[allow(clippy::upper_case_acronyms)]
 type LOC4 = (isize, isize, isize, isize);
 
-#[derive(Debug, PartialEq)]
-struct World<DIM: Eq + Hash + PartialEq> {
+#[derive(Debug, Default, PartialEq)]
+struct World<DIM: Eq + Default + Hash + PartialEq> {
     loc: HashMap<DIM, bool>,
+    generation: usize,
+}
+
+#[derive(Debug, Default, PartialEq)]
+struct World0 {
+    loc: HashMap<LOC, bool>,
+    generation: usize,
+}
+
+#[derive(Debug, Default, PartialEq)]
+struct World4 {
+    loc: HashMap<LOC4, bool>,
     generation: usize,
 }
 
@@ -206,18 +243,17 @@ impl CellParser for World<LOC4> {
     }
 }
 
-impl<DIM: Debug + Eq + Hash + PartialEq> ProblemSolver<(), usize, usize> for World<DIM>
+#[aoc(2020, 17)]
+impl<DIM: Debug + Default + Eq + Hash + PartialEq> AdventOfCode for World<DIM>
 where
     World<DIM>: CellParser,
 {
-    const YEAR: usize = 2020;
-    const DAY: usize = 17;
     const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Self::default_()
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
     }
-    fn parse(desc: Description) -> Self {
-        Self::default().parse_(&Self::load(desc).unwrap())
+    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
+        Ok(Self::default().parse_(&Self::load(desc)?))
     }
     fn part1(&mut self) -> usize {
         self.next().next().next().next().next().next().actives()
@@ -227,7 +263,7 @@ where
     }
 }
 
-impl<DIM: Eq + Hash + PartialEq> World<DIM>
+impl<DIM: Default + Eq + Hash + PartialEq> World<DIM>
 where
     World<DIM>: CellParser,
 {
@@ -261,7 +297,7 @@ where
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     const TEST1: &str = "\
@@ -272,7 +308,7 @@ mod test {
     #[test]
     fn test_part1() {
         assert_eq!(
-            World::<LOC>::parse(Description::TestData(TEST1.to_string())).run(1),
+            World::<LOC>::solve(Description::TestData(TEST1.to_string()), 1),
             Answer::Part1(112)
         );
     }
@@ -281,7 +317,7 @@ mod test {
     // #[test] too long
     fn test_part2() {
         assert_eq!(
-            World::<LOC4>::parse(Description::TestData(TEST1.to_string())).run(2),
+            World::<LOC4>::solve(Description::TestData(TEST1.to_string()), 2),
             Answer::Part2(848)
         );
     }
