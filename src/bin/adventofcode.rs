@@ -12,7 +12,8 @@ use {
 };
 
 pub fn main() {
-    if args().count() == 1 {
+    let arg = args().collect::<Vec<String>>();
+    if arg.is_empty() {
         println!("USAGE:");
         println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/YYYY/input-dayDD.txtを入力として実行");
         println!(
@@ -22,25 +23,12 @@ pub fn main() {
         println!(" $0 YYYY DD P -\t\tYYYY年DD日目のパートPを入力なしで実行");
         panic!();
     }
-    let mut a = args();
-    let year = a
-        .nth(1)
-        .unwrap_or_else(|| "2021".to_string())
-        .parse::<usize>()
-        .unwrap_or(1);
-    let day = a
-        .next()
-        .unwrap_or_else(|| "1".to_string())
-        .parse::<usize>()
-        .unwrap_or(1);
-    let part = a
-        .next()
-        .unwrap_or_else(|| "0".to_string())
-        .parse::<usize>()
-        .unwrap_or(0);
-    let desc: Description = match a.next() {
+    let year = arg.get(1).map_or("2021", |s| s.as_str()).parse::<usize>().expect("wrong year");
+    let day = arg.get(3).map_or("1", |s| s.as_str()).parse::<usize>().expect("wrong day");
+    let part = arg.get(3).map_or("0", |s| s.as_str()).parse::<usize>().expect("wrong part");
+    let desc: Description = match arg.get(4) {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
-        Some(ext) => Description::FileTag(ext),
+        Some(ext) => Description::FileTag(ext.to_string()),
         None => Description::None,
     };
     match year {
