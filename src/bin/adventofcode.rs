@@ -23,9 +23,10 @@ pub fn main() {
         println!(" $0 YYYY DD P -\t\tYYYY年DD日目のパートPを入力なしで実行");
         panic!();
     }
-    let year = arg.get(1).map_or("2021", |s| s.as_str()).parse::<usize>().expect("wrong year");
-    let day = arg.get(2).map_or("1", |s| s.as_str()).parse::<usize>().expect("wrong day");
-    let part = arg.get(3).map_or("0", |s| s.as_str()).parse::<usize>().expect("wrong part");
+    let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
+    let year = parse(arg.get(1), 2021, "wrong year");
+    let day = parse(arg.get(2), 1, "wrong day");
+    let part = parse(arg.get(3), 0, "wrong part");
     let desc: Description = match arg.get(4) {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
         Some(ext) => Description::FileTag(ext.to_string()),
