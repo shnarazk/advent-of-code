@@ -1,24 +1,32 @@
 //! <https://adventofcode.com/2020/day/20>
 use {
-    crate::y2020::traits::{Description, ProblemObject, ProblemSolver},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::ops::Index,
 };
 
-pub fn day20(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Tile {
+    pub id: usize,
+    pub sign: [usize; 4],
+    pub len: usize,
+    pub image: Vec<String>,
 }
 
-#[derive(Debug, PartialEq)]
-struct Object {}
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
+    tile: Vec<Tile>,
+}
 
-impl ProblemObject for Tile {
-    fn parse(b: &str) -> Option<Tile> {
+#[aoc(2020, 20)]
+impl AdventOfCode for Puzzle {
+    const DELIMITER: &'static str = "\n\n";
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"^Tile (\d+):$").expect("error");
         }
-        let mut lines = b.split('\n').collect::<Vec<_>>();
+        let mut lines = block.split('\n').collect::<Vec<_>>();
         if let Some(m) = RE.captures(lines[0]) {
             let id = m[1].parse::<usize>().expect("wrong");
             if let Some(l) = lines.last() {
@@ -26,26 +34,9 @@ impl ProblemObject for Tile {
                     lines.pop();
                 }
             }
-            return Some(Tile::from(id, &lines[1..]));
+            self.tile.push(Tile::from(id, &lines[1..]));
         }
-        None
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {
-    tile: Vec<Tile>,
-}
-
-impl ProblemSolver<Tile, usize, usize> for Setting {
-    const YEAR: usize = 2020;
-    const DAY: usize = 20;
-    const DELIMITER: &'static str = "\n\n";
-    fn default() -> Self {
-        Setting { tile: Vec::new() }
-    }
-    fn insert(&mut self, t: Tile) {
-        self.tile.push(t);
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let p = eval(&self.tile).expect("impossible");
@@ -98,14 +89,6 @@ impl ProblemSolver<Tile, usize, usize> for Setting {
         }
         count_sharps(&image) - total * 15
     }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Tile {
-    pub id: usize,
-    pub sign: [usize; 4],
-    pub len: usize,
-    pub image: Vec<String>,
 }
 
 pub enum Dir {
@@ -467,7 +450,7 @@ fn search(
 mod test {
     use {
         super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::framework::{Answer, Description},
     };
 
     #[test]
@@ -487,7 +470,7 @@ mod test {
     #[test]
     fn test_part1() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(1),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
             Answer::Part1(20899048083289)
         );
     }
@@ -495,7 +478,7 @@ mod test {
     #[test]
     fn test_part2() {
         assert_eq!(
-            Setting::parse(Description::FileTag("test1".to_string())).run(2),
+            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
             Answer::Part2(273)
         );
     }
