@@ -1,7 +1,40 @@
 //! <https://adventofcode.com/2020/day/25>
-use crate::y2020::traits::Description;
+use {
+    crate::framework::{aoc_at, AdventOfCode, Answer, Description, ParseError},
+    std::borrow::Borrow,
+};
 
-pub fn day25(_: usize, tag: Description) {
+#[derive(Debug, Default)]
+pub struct Puzzle {}
+
+#[aoc_at(2020, 25)]
+impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
+    const DELIMITER: &'static str = "\n";
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
+    }
+    fn part1(&mut self) -> usize {
+        day25(0, Description::None);
+        day25(0, Description::TestData("".to_string()))
+    }
+    fn part2(&mut self) -> Self::Output2 {
+        "That's it!".to_string()
+    }
+    fn solve(
+        _description: impl Borrow<Description>,
+        part: usize,
+    ) -> Answer<Self::Output1, Self::Output2> {
+        match part {
+            1 => Answer::Part1(Puzzle::default().part1()),
+            2 => Answer::Part2(Puzzle::default().part2()),
+            _ => Answer::Answers(Puzzle::default().part1(), Puzzle::default().part2()),
+        }
+    }
+}
+
+fn day25(_: usize, tag: Description) -> usize {
     if tag != Description::None {
         let card_pubkey = 5764801;
         let door_pubkey = 17807724;
@@ -17,6 +50,8 @@ pub fn day25(_: usize, tag: Description) {
         dbg!(encryption_key_by_door);
 
         assert_eq!(encryption_key_by_card, encryption_key_by_door);
+
+        encryption_key_by_card
     } else {
         let card_pubkey = 12320657;
         let door_pubkey = 9659666;
@@ -32,6 +67,8 @@ pub fn day25(_: usize, tag: Description) {
         dbg!(encryption_key_by_door);
 
         assert_eq!(encryption_key_by_card, encryption_key_by_door);
+
+        encryption_key_by_card
     }
 }
 
