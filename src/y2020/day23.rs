@@ -1,36 +1,24 @@
 //! <https://adventofcode.com/2020/day/23>
-use crate::y2020::traits::{Description, ProblemSolver};
+use {
+    crate::framework::{aoc_at, AdventOfCode, Answer, Description, ParseError},
+    std::borrow::Borrow,
+};
 
-pub fn day23(part: usize, desc: Description) {
-    let ncups = if part == 1 { 9 } else { 1_000_000 };
-    let nround = if part == 1 { 100 } else { 10_000_000 };
-    let cups = if desc == Description::None {
-        vec![3, 6, 2, 9, 8, 1, 7, 5, 4]
-    } else {
-        vec![3, 8, 9, 1, 2, 5, 4, 6, 7]
-    };
-    dbg!(Config::new(ncups, &cups).set_round(nround).run(part));
-}
-
-#[derive(Debug, PartialEq)]
-struct Config {
+#[derive(Debug, Default, PartialEq)]
+pub struct Puzzle {
     next_cup: Vec<usize>,
     start_from: usize,
     round_end: usize,
     highest: usize,
 }
 
-impl ProblemSolver<(), String, usize> for Config {
-    const YEAR: usize = 2020;
-    const DAY: usize = 23;
+#[aoc_at(2020, 23)]
+impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = usize;
     const DELIMITER: &'static str = "";
-    fn default() -> Self {
-        Config {
-            next_cup: Vec::new(),
-            start_from: 1,
-            round_end: 0,
-            highest: 1,
-        }
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+        Ok(())
     }
     fn part1(&mut self) -> String {
         if 20 < self.next_cup.len() {
@@ -39,16 +27,26 @@ impl ProblemSolver<(), String, usize> for Config {
         self.turn_rounds().answer1()
     }
     fn part2(&mut self) -> usize {
-        let mut current = self.start_from;
-        for _ in 0..self.round_end {
-            current = self.round(current);
-        }
         self.turn_rounds().answer2()
+    }
+    fn solve(
+        _description: impl Borrow<Description>,
+        part: usize,
+    ) -> Answer<Self::Output1, Self::Output2> {
+        let cups = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
+        match part {
+            1 => Answer::Part1(Puzzle::new(9, 100, &cups).part1()),
+            2 => Answer::Part2(Puzzle::new(1_000_000, 10_000_000, &cups).part2()),
+            _ => Answer::Answers(
+                Puzzle::new(9, 100, &cups).part1(),
+                Puzzle::new(1_000_000, 10_000_000, &cups).part2(),
+            ),
+        }
     }
 }
 
-impl Config {
-    fn new(len: usize, init: &[usize]) -> Config {
+impl Puzzle {
+    fn new(len: usize, nr: usize, init: &[usize]) -> Puzzle {
         let mut next_cup: Vec<usize> = Vec::new();
         for i in 0..=len {
             next_cup.push(i + 1);
@@ -67,16 +65,12 @@ impl Config {
             next_cup[*last_of_init] = init[0];
         }
         // dbg!(&next_cup[1..]);
-        Config {
+        Puzzle {
             next_cup,
             start_from: init[0],
-            round_end: 0,
+            round_end: nr,
             highest: len,
         }
-    }
-    fn set_round(&mut self, nr: usize) -> &mut Self {
-        self.round_end = nr;
-        self
     }
     fn round(&mut self, current: usize) -> usize {
         let pick1: usize = self.next_cup[current];
@@ -132,7 +126,7 @@ mod test {
 
     #[test]
     fn test0() {
-        let mut conf = Config::new(9, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Puzzle::new(9, 0, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
         let mut current = 3;
         dbg!(&conf);
         for _ in 0..10 {
@@ -143,7 +137,7 @@ mod test {
     }
     #[test]
     fn test1() {
-        let mut conf = Config::new(9, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut conf = Puzzle::new(9, 0, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
         let mut current = 3;
         dbg!(&conf);
         for _ in 0..100 {
@@ -154,7 +148,7 @@ mod test {
     }
     #[test]
     fn test2() {
-        let mut conf = Config::new(9, &vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
+        let mut conf = Puzzle::new(9, 0, &vec![3, 6, 2, 9, 8, 1, 7, 5, 4]);
         let mut current = 3;
         dbg!(&conf);
         for _ in 0..100 {
@@ -162,5 +156,15 @@ mod test {
             dbg!(&conf);
         }
         assert_eq!(conf.answer1(), "24798635");
+    }
+    #[test]
+    fn test3() {
+        let mut conf = Puzzle::new(1_000_000, 0, &vec![3, 8, 9, 1, 2, 5, 4, 6, 7]);
+        let mut current = 3;
+        dbg!(&conf);
+        for _ in 0..10_000_000 {
+            current = conf.round(current);
+        }
+        assert_eq!(conf.answer2(), 149245887792);
     }
 }
