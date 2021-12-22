@@ -133,21 +133,73 @@ impl AdventOfCode for Puzzle {
         new_bag.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut rule = self.rule.iter()
-            .map(|(k, seq)| {
-                let mut qes = seq.clone();
-                qes.reverse();
-                (qes, k)
-            })
-            .collect::<Vec<_>>();
-        rule.sort_unstable();
-        for r in rule.iter() {
-            println!("{:?} => {}", r.0, r.1);
+        self.dic.insert("e".to_string(), self.num_atom);
+        dbg!(self.line.len());
+        dbg!(&self.rule.len());
+        let mut to_mnemonic = Vec::new();
+        to_mnemonic.resize(self.num_atom + 1, "");
+        for (w, n) in self.dic.iter() {
+            to_mnemonic[*n] = w;
         }
-        let mut med = self.line.clone();
-        med.reverse();
-        println!("{:?}", med.join(""));
-        0
+        let rule = self.rule.iter()
+            .map( |(atom, a)|
+                    (
+                        *self.dic.get(atom).unwrap(),
+                        a.iter().map(|atom| *self.dic.get(atom).unwrap()).collect::<Vec<usize>>(),
+                    )
+            )
+            .collect::<Vec<(usize, Vec<usize>)>>();
+        let medicine = self.line.iter()
+            .map(|s| *self.dic.get(s).unwrap())
+            .collect::<Vec<usize>>();
+        dbg!((0..medicine.len())
+             .filter(|i| rule.iter().any(|(atom, poly)| medicine[*i] == *atom))
+             .count()
+        );
+        let mut bag: HashSet<Vec<usize>> = HashSet::new();
+        let mut new_bag: HashSet<Vec<usize>> = HashSet::new();
+        bag.insert(vec![0]);
+        for i in 1.. {
+            for st in bag.iter() {
+                for (i, n) in st.iter().enumerate() {
+                    for (_, seq) in rule.iter().filter(|(key, _)| key == n) {
+                        let mut new_string: Vec<usize> = st.clone();
+                        new_string.remove(i);
+                        for x in seq.iter().rev() {
+                            new_string.insert(i, *x);
+                        }
+                        if new_string.starts_with(&medicine[..12]) {
+                            dbg!(new_string.iter().map(|n| to_mnemonic[*n]).collect::<Vec<&str>>().join(""));
+                            return i;
+                        }
+                        if new_string.len() < medicine.len() {
+                            new_bag.insert(new_string);
+                        }
+                    }
+                }
+            }
+            std::mem::swap(&mut bag, &mut new_bag);
+            new_bag.clear();
+        }
+        for s in new_bag.iter() {
+            println!("{:?}", s.iter().map(|n| to_mnemonic[*n]).collect::<Vec<&str>>().join(""));
+        }
+        new_bag.len()
+
+        // let mut rule = self.rule.iter()
+        //     .map(|(k, seq)| {
+        //         let mut qes = seq.clone();
+        //         qes.reverse();
+        //         (qes, k)
+        //     })
+        //     .collect::<Vec<_>>();
+        // rule.sort_unstable();
+        // for r in rule.iter() {
+        //     println!("{:?} => {}", r.0, r.1);
+        // }
+        // let mut med = self.line.clone();
+        // med.reverse();
+        // println!("{:?}", med.join(""));
     }
 }
 
