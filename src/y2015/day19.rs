@@ -20,7 +20,7 @@ pub struct Puzzle {
     num_atom: usize,
     dic: HashMap<String, usize>,
     line: Vec<String>,
-    rule: Vec<(String,Vec<String>)>
+    rule: Vec<(String, Vec<String>)>,
 }
 
 fn parse_atoms(mut stream: Vec<String>, line: &str) -> Vec<String> {
@@ -47,7 +47,8 @@ impl AdventOfCode for Puzzle {
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
-            static ref RULE: Regex = Regex::new(r"^([A-Z][a-zA-Z]*) => ([A-Z][a-zA-Z]*)$").expect("wrong");
+            static ref RULE: Regex =
+                Regex::new(r"^([A-Z][a-zA-Z]*) => ([A-Z][a-zA-Z]*)$").expect("wrong");
             static ref BIGBANG: Regex = Regex::new(r"^e => ([A-Z][a-zA-Z]*)$").expect("wrong");
             static ref STRING: Regex = Regex::new(r"^([A-Z][a-zA-Z]+)$").expect("wrong");
         }
@@ -101,15 +102,21 @@ impl AdventOfCode for Puzzle {
         for (w, n) in self.dic.iter() {
             dic[*n] = w;
         }
-        let rule = self.rule.iter()
-            .map( |(atom, a)|
-                    (
-                        *self.dic.get(atom).unwrap(),
-                        a.iter().map(|atom| *self.dic.get(atom).unwrap()).collect::<Vec<usize>>(),
-                    )
-            )
+        let rule = self
+            .rule
+            .iter()
+            .map(|(atom, a)| {
+                (
+                    *self.dic.get(atom).unwrap(),
+                    a.iter()
+                        .map(|atom| *self.dic.get(atom).unwrap())
+                        .collect::<Vec<usize>>(),
+                )
+            })
             .collect::<Vec<(usize, Vec<usize>)>>();
-        let string = self.line.iter()
+        let string = self
+            .line
+            .iter()
             .map(|s| *self.dic.get(s).unwrap())
             .collect::<Vec<usize>>();
         let mut bag: HashSet<Vec<usize>> = HashSet::new();
@@ -128,7 +135,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         for s in new_bag.iter() {
-            println!("{:?}", s.iter().map(|n| dic[*n]).collect::<Vec<&str>>().join(""));
+            println!(
+                "{:?}",
+                s.iter().map(|n| dic[*n]).collect::<Vec<&str>>().join("")
+            );
         }
         new_bag.len()
     }
@@ -141,21 +151,26 @@ impl AdventOfCode for Puzzle {
         for (w, n) in self.dic.iter() {
             to_mnemonic[*n] = w;
         }
-        let rule = self.rule.iter()
-            .map( |(atom, a)|
-                    (
-                        *self.dic.get(atom).unwrap(),
-                        a.iter().map(|atom| *self.dic.get(atom).unwrap()).collect::<Vec<usize>>(),
-                    )
-            )
+        let rule = self
+            .rule
+            .iter()
+            .map(|(atom, a)| {
+                (
+                    *self.dic.get(atom).unwrap(),
+                    a.iter()
+                        .map(|atom| *self.dic.get(atom).unwrap())
+                        .collect::<Vec<usize>>(),
+                )
+            })
             .collect::<Vec<(usize, Vec<usize>)>>();
-        let medicine = self.line.iter()
+        let medicine = self
+            .line
+            .iter()
             .map(|s| *self.dic.get(s).unwrap())
             .collect::<Vec<usize>>();
         dbg!((0..medicine.len())
-             .filter(|i| rule.iter().any(|(atom, poly)| medicine[*i] == *atom))
-             .count()
-        );
+            .filter(|i| rule.iter().any(|(atom, poly)| medicine[*i] == *atom))
+            .count());
         let mut bag: HashSet<Vec<usize>> = HashSet::new();
         let mut new_bag: HashSet<Vec<usize>> = HashSet::new();
         bag.insert(vec![0]);
@@ -169,7 +184,11 @@ impl AdventOfCode for Puzzle {
                             new_string.insert(i, *x);
                         }
                         if new_string.starts_with(&medicine[..12]) {
-                            dbg!(new_string.iter().map(|n| to_mnemonic[*n]).collect::<Vec<&str>>().join(""));
+                            dbg!(new_string
+                                .iter()
+                                .map(|n| to_mnemonic[*n])
+                                .collect::<Vec<&str>>()
+                                .join(""));
                             return i;
                         }
                         if new_string.len() < medicine.len() {
@@ -182,7 +201,13 @@ impl AdventOfCode for Puzzle {
             new_bag.clear();
         }
         for s in new_bag.iter() {
-            println!("{:?}", s.iter().map(|n| to_mnemonic[*n]).collect::<Vec<&str>>().join(""));
+            println!(
+                "{:?}",
+                s.iter()
+                    .map(|n| to_mnemonic[*n])
+                    .collect::<Vec<&str>>()
+                    .join("")
+            );
         }
         new_bag.len()
 
