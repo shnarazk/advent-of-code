@@ -23,9 +23,11 @@ pub struct Puzzle {
 #[derive(Clone, Debug, Default)]
 struct P1 {
     // val: usize,
+    id: usize,
     cost: usize,
     state: [char; 7],
     rooms: [[char; 2]; 4],
+    pre: usize,
 }
 
 impl PartialOrd for P1 {
@@ -49,9 +51,11 @@ impl PartialEq for P1 {
 impl Eq for P1 {}
 
 const GOAL: P1 = P1 {
+    id: 0,
     cost: 0,
     state: ['.', '.', '.', '.', '.', '.', '.'],
     rooms: [['A', 'A'], ['B', 'B'], ['C', 'C'], ['D', 'D']],
+    pre: 0,
 };
 
 trait Game {
@@ -64,16 +68,17 @@ trait Game {
     fn heuristics(&self) -> isize;
 }
 
-
 impl Game for P1 {
     fn heuristics(&self) -> isize {
-        self.rooms.iter().enumerate()
+        self.rooms
+            .iter()
+            .enumerate()
             .map(|(i, r)| {
                 let target = (b'A' + i as u8) as char;
                 let point = 10isize.pow(i as u32);
                 match (r[0], r[1]) {
                     (r0, r1) if r0 == target && r1 == target => 11 * point,
-                    ('.',r1) if r1 == target => 10 * point,
+                    ('.', r1) if r1 == target => 10 * point,
                     (c, r1) if r1 == target => 9 * point,
                     ('.', '.') => 0,
                     ('.', r1) => -10 * point,
@@ -101,11 +106,13 @@ impl Game for P1 {
     fn walkable_between(&self, s: usize, room_number: usize, maybe_me: Option<char>) -> bool {
         if s < room_number + 2 {
             (s..room_number + 2).all(|i| {
-                self.state[i] == '.' || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.'
+                    || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
             })
         } else {
             (room_number + 2..=s).all(|i| {
-                self.state[i] == '.' || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.'
+                    || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
             })
         }
     }
@@ -130,6 +137,7 @@ impl Game for P1 {
                 news.rooms[i][0] = '.';
                 news.cost += 10usize.pow((r[0] as u8 - b'A') as u32) * DIST_FROM_ROOM[i][j];
                 news.check_them("1");
+                news.pre = self.id;
                 result.push(news);
             }
         }
@@ -151,6 +159,7 @@ impl Game for P1 {
                 news.rooms[i][1] = '.';
                 news.cost += 10usize.pow((r[1] as u8 - b'A') as u32) * (DIST_FROM_ROOM[i][j] + 1);
                 news.check_them("2");
+                news.pre = self.id;
                 result.push(news);
             }
         }
@@ -175,12 +184,14 @@ impl Game for P1 {
                     news.rooms[j][1] = *amph;
                     news.cost +=
                         10usize.pow((*amph as u8 - b'A') as u32) * (DIST_FROM_ROOM[j][i] + 1);
+                    news.pre = self.id;
                     result.push(news);
                 } else {
                     let mut news = (*self).clone();
                     news.state[i] = '.';
                     news.rooms[j][0] = *amph;
                     news.cost += 10usize.pow((*amph as u8 - b'A') as u32) * DIST_FROM_ROOM[j][i];
+                    news.pre = self.id;
                     result.push(news);
                 }
             }
@@ -209,6 +220,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let init = P1 {
+            id: 0,
             cost: 0,
             state: GOAL.state,
             rooms: [
@@ -217,30 +229,57 @@ impl AdventOfCode for Puzzle {
                 [self.line[2], self.line[6]],
                 [self.line[3], self.line[7]],
             ],
+            pre: 0,
         };
         let mut point: isize = init.heuristics();
         let mut expanded: Vec<P1> = vec![init];
         let mut updated: Vec<P1> = expanded.clone();
+        let mut id_counter = 0;
         while let Some(rstate) = updated.iter().min_by_key(|s| s.cost) {
             let state = rstate.clone();
-            updated.retain(|s| *s != state);
-            for news in state.neighbor_states() {
-                if point < news.heuristics() {
-                    point = news.heuristics();
-                    println!("{:>6}({:>6}), {:?}", news.cost, point, news.rooms);
+            if state == GOAL {
+                assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
+                let mut s = &state;
+                while s.id != 0 {
+                    println!("#{}{}.{}.{}.{}.{}{}#", s.state[0], s.state[1], s.state[2], s.state[3], s.state[4], s.state[5], s.state[6]);
+                    println!("###{}#{}#{}#{}###", s.rooms[0][0], s.rooms[1][0], s.rooms[2][0], s.rooms[3][0]);
+                    println!("  #{}#{}#{}#{}#", s.rooms[0][1], s.rooms[1][1], s.rooms[2][1], s.rooms[3][1]);
+                    println!("  ######### {}", s.cost);
+                    s = expanded.iter().find(|p| p.id == s.pre).unwrap();
                 }
-                if news == GOAL {
-                    assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= news.cost);
-                    return news.cost;
-                }
+                return state.cost;
+            }
+            if point < state.heuristics() {
+                point = state.heuristics();
+                println!("{:>6}({:>6}), {:?} {:?}", state.cost, point, state.state, state.rooms);
+            }
+            let nn = updated.len();
+            updated.retain(|s| s.id != state.id);
+            assert_eq!(nn, updated.len() + 1);
+            for mut news in state.neighbor_states() {
                 if let Some(found) = expanded.iter_mut().find(|e| **e == news) {
                     if news.cost < found.cost {
+                        if let Some(found2) = updated.iter_mut().find(|e| **e == news) {
+                            assert_eq!(found2.cost, found.cost);
+                            found2.cost = news.cost;
+                            found2.pre = news.pre;
+                            found.cost = news.cost;
+                            found.pre = news.pre;
+                            continue;
+                        }
+                        news.id = found.id;
                         found.cost = news.cost;
+                        found.pre = news.pre;
+                        // assert!(updated.iter().all(|s| *s != news));
                         updated.push(news);
                     }
                 } else {
+                    news.id = id_counter;
+                    id_counter += 1;
+                    assert!(expanded.iter().all(|s| *s != news));
                     expanded.push(news.clone());
-                    updated.push(news)
+                    assert!(updated.iter().all(|s| *s != news));
+                    updated.push(news);
                 }
             }
         }
