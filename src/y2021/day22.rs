@@ -1,13 +1,8 @@
 //! <https://adventofcode.com/2021/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         line_parser,
     },
     lazy_static::lazy_static,
@@ -58,9 +53,9 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let offset = |p: isize| (p + 50isize) as usize;
         let mut grid: Vec<Vec<Vec<bool>>> = Vec::new();
-        for k in 0..=101 {
+        for _ in 0..=101 {
             let mut v = Vec::new();
-            for j in 0..=101 {
+            for _ in 0..=101 {
                 let mut w = Vec::new();
                 w.resize(101, false);
                 v.push(w);
@@ -102,9 +97,21 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut xs: Vec<isize> = self.line.iter().flat_map(|(_, x1, x2, _, _, _, _)| vec![*x1, *x2+1]).collect();
-        let mut ys: Vec<isize> = self.line.iter().flat_map(|(_, _, _, y1, y2, _, _)| vec![*y1, *y2+1]).collect();
-        let mut zs: Vec<isize> = self.line.iter().flat_map(|(_, _, _, _, _, z1, z2)| vec![*z1, *z2+1]).collect();
+        let mut xs: Vec<isize> = self
+            .line
+            .iter()
+            .flat_map(|(_, x1, x2, _, _, _, _)| vec![*x1, *x2 + 1])
+            .collect();
+        let mut ys: Vec<isize> = self
+            .line
+            .iter()
+            .flat_map(|(_, _, _, y1, y2, _, _)| vec![*y1, *y2 + 1])
+            .collect();
+        let mut zs: Vec<isize> = self
+            .line
+            .iter()
+            .flat_map(|(_, _, _, _, _, z1, z2)| vec![*z1, *z2 + 1])
+            .collect();
 
         let mut hx: HashSet<isize> = HashSet::new();
         for x in xs.iter() {
@@ -135,17 +142,17 @@ impl AdventOfCode for Puzzle {
         let mut to_index_z: HashMap<isize, usize> = HashMap::new();
         for (i, x) in xs.iter().enumerate() {
             to_index_x.insert(*x, i);
-        } 
+        }
         for (i, y) in ys.iter().enumerate() {
             to_index_y.insert(*y, i);
-        } 
+        }
         for (i, z) in zs.iter().enumerate() {
             to_index_z.insert(*z, i);
         }
         let mut grid: Vec<Vec<Vec<bool>>> = Vec::new();
-        for z in 0..zs.len() {
+        for _ in 0..zs.len() {
             let mut w: Vec<Vec<bool>> = Vec::new();
-            for y in 0..ys.len() {
+            for _ in 0..ys.len() {
                 let mut v: Vec<bool> = Vec::new();
                 v.resize(xs.len(), false);
                 w.push(v);
@@ -154,31 +161,45 @@ impl AdventOfCode for Puzzle {
         }
 
         for (to, x1, x2, y1, y2, z1, z2) in self.line.iter() {
-            for z in *to_index_z.get(z1).unwrap()..*to_index_z.get(&(*z2+1)).unwrap() {
-                for y in *to_index_y.get(y1).unwrap()..*to_index_y.get(&(*y2+1)).unwrap() {
-                    for x in *to_index_x.get(x1).unwrap()..*to_index_x.get(&(*x2+1)).unwrap() {
-                        grid[z][y][x] = *to;
+            for k in grid
+                .iter_mut()
+                .take(*to_index_z.get(&(*z2 + 1)).unwrap())
+                .skip(*to_index_z.get(z1).unwrap())
+            {
+                for l in k
+                    .iter_mut()
+                    .take(*to_index_y.get(&(*y2 + 1)).unwrap())
+                    .skip(*to_index_y.get(y1).unwrap())
+                {
+                    for m in l
+                        .iter_mut()
+                        .take(*to_index_x.get(&(*x2 + 1)).unwrap())
+                        .skip(*to_index_x.get(x1).unwrap())
+                    {
+                        *m = *to;
                     }
                 }
             }
         }
         zs.windows(2)
-            .map(|pz|
-                 ys.windows(2)
-                 .map(|py|
-                      xs.windows(2)
-                      .map(|px|
-                           if grid[*to_index_z.get(&pz[0]).unwrap()][*to_index_y.get(&py[0]).unwrap()][*to_index_x.get(&px[0]).unwrap()] {
-                               ((pz[1] - pz[0]) * (py[1] - py[0]) * (px[1] - px[0])) as usize
-                           } else {
-                               0
-                           }
-                      )
-                      .sum::<usize>()
-                 )
-                 .sum::<usize>()
-            )
+            .map(|pz| {
+                ys.windows(2)
+                    .map(|py| {
+                        xs.windows(2)
+                            .map(|px| {
+                                if grid[*to_index_z.get(&pz[0]).unwrap()]
+                                    [*to_index_y.get(&py[0]).unwrap()]
+                                    [*to_index_x.get(&px[0]).unwrap()]
+                                {
+                                    ((pz[1] - pz[0]) * (py[1] - py[0]) * (px[1] - px[0])) as usize
+                                } else {
+                                    0
+                                }
+                            })
+                            .sum::<usize>()
+                    })
+                    .sum::<usize>()
+            })
             .sum()
     }
 }
-
