@@ -1,46 +1,39 @@
 //! <https://adventofcode.com/2021/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
 };
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<char>>,
 }
 
 #[aoc(2021, 25)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(object);
+        self.line.push(line_parser::to_chars(block)?);
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut grid = Grid {
+            height: self.line.len(),
+            width: self.line[0].len(),
+            loc: self.line.clone(),
+        };
+        grid.show();
+        for i in 1.. {
+            let new_grid = grid.shift_right().shift_down();
+            if grid == new_grid {
+                grid.show();
+                return i;
+            }
+            grid = new_grid;
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -48,20 +41,61 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-#[cfg(feature = "y2021")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Grid {
+    height: usize,
+    width: usize,
+    loc: Vec<Vec<char>>,
+}
 
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(0)
-        );
+impl Grid {
+    fn show(&self) {
+        for v in self.loc.iter() {
+            for c in v.iter() {
+                print!("{}", c);
+            }
+            println!();
+        }
+        println!();
+    }
+    fn below(&self, n: usize) -> usize {
+        (n + 1) % self.height
+    }
+    fn right(&self, n: usize) -> usize {
+        (n + 1) % self.width
+    }
+    fn shift_right(&self) -> Self {
+        let mut grid = self.loc.clone();
+        for (j, v) in self.loc.iter().enumerate() {
+            for (i, p) in v.iter().enumerate() {
+                let t = self.right(i);
+                if *p == '>' && v[t] == '.' {
+                    grid[j][i] = '.';
+                    grid[j][t] = '>';
+                }
+            }
+        }
+        Grid {
+            height: self.height,
+            width: self.width,
+            loc: grid,
+        }
+    }
+    fn shift_down(&self) -> Self {
+        let mut grid = self.loc.clone();
+        for (j, v) in self.loc.iter().enumerate() {
+            let t = self.below(j);
+            for (i, p) in v.iter().enumerate() {
+                if *p == 'v' && self.loc[t][i] == '.' {
+                    grid[j][i] = '.';
+                    grid[t][i] = 'v';
+                }
+            }
+        }
+        Grid {
+            height: self.height,
+            width: self.width,
+            loc: grid,
+        }
     }
 }
