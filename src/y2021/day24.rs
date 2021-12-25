@@ -1,14 +1,8 @@
 //! <https://adventofcode.com/2021/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-        *,
+        line_parser, *,
     },
     lazy_static::lazy_static,
     regex::Regex,
@@ -37,7 +31,6 @@ enum Inst {
     Div(char, Opr),
     Mod(char, Opr),
     Eql(char, Opr),
-    Jit(isize, isize, isize),
 }
 
 #[derive(Debug, Default)]
@@ -96,21 +89,31 @@ impl AdventOfCode for Puzzle {
                         "{} ",
                         &match &self.line[j] {
                             Inst::Inp(c) => format!("In{}", c),
-                            Inst::Add(c, d) => format!("Ad{}{}{:?}{}",
-                                                       c,
-                                                       if [4, 5, 15].contains(&(j % 18)) { RED } else { RESET },
-                                                       d,
-                                                       RESET,
+                            Inst::Add(c, d) => format!(
+                                "Ad{}{}{:?}{}",
+                                c,
+                                if [4, 5, 15].contains(&(j % 18)) {
+                                    RED
+                                } else {
+                                    RESET
+                                },
+                                d,
+                                RESET,
                             ),
                             Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
-                            Inst::Div(c, d) => format!("Di{}{}{:?}{}", c,
-                                                       if [4, 5, 15].contains(&(j % 18)) { RED } else { RESET },
-                                                       d,
-                                                       RESET,
+                            Inst::Div(c, d) => format!(
+                                "Di{}{}{:?}{}",
+                                c,
+                                if [4, 5, 15].contains(&(j % 18)) {
+                                    RED
+                                } else {
+                                    RESET
+                                },
+                                d,
+                                RESET,
                             ),
                             Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
                             Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
-                            _ => unreachable!(),
                         }
                     );
                 }
@@ -141,7 +144,9 @@ impl AdventOfCode for Puzzle {
             if z == 0 {
                 println!("{:?}", n);
                 return 0;
-            } else if z < 200 { println!("{}", z); }
+            } else if z < 200 {
+                println!("{}", z);
+            }
             fourteen_digit_number = decl(fourteen_digit_number);
         }
         0
@@ -164,6 +169,7 @@ struct Cpu {
     reg: [isize; 3],
 }
 
+#[allow(dead_code)]
 fn decl(vec: Option<Vec<usize>>) -> Option<Vec<usize>> {
     let v = vec.unwrap();
     let mut nv = v.clone();
@@ -178,6 +184,7 @@ fn decl(vec: Option<Vec<usize>>) -> Option<Vec<usize>> {
     None
 }
 
+#[allow(dead_code)]
 fn incl(vec: Option<Vec<usize>>) -> Option<Vec<usize>> {
     let v = vec.unwrap();
     let mut nv = v.clone();
@@ -193,7 +200,8 @@ fn incl(vec: Option<Vec<usize>>) -> Option<Vec<usize>> {
 }
 
 impl Puzzle {
-        fn old_part1(&mut self) -> isize {
+    #[allow(dead_code)]
+    fn old_part1(&mut self) -> isize {
         let mut cpu: HashMap<char, isize> = HashMap::new();
         let mut fourteen_digit_number = Some([1usize; 14].to_vec());
         // let mut fourteen_digit_number = Some([9usize; 5].to_vec());
@@ -207,15 +215,8 @@ impl Puzzle {
             let input2 = input.clone();
             input.reverse();
             let mut z: isize = 0;
-            for (pc, inst) in self.line.iter().enumerate() {
+            for (_pc, inst) in self.line.iter().enumerate() {
                 match inst {
-                    Inst::Jit(a1, a2, a3) => {
-                        let w: isize = input.pop().unwrap() as isize;
-                        // z = z * (25 * (z % 26) + a2 != w) + a1 + (w + a3) * x
-                        let z: &mut isize = cpu.entry('z').or_default();
-                        let tmp: isize = ((*z % 26) + a2 != w) as isize;
-                        *z = (*z / a1) * ((25 * tmp) + 1) + (w + a3) * tmp;
-                    }
                     Inst::Inp(r1) => {
                         if let Some(index) = 13_usize.checked_sub(input.len()) {
                             let (a1, a2, a3) = self.jit[index];
@@ -274,16 +275,16 @@ impl Puzzle {
                     }
                 }
             }
-/*
-            let mut z = 0;
-            for (i, w) in input2.iter().enumerate() {
-                if let Inst::Jit(a1, a2, a3) = self.jit[i] {
-                    dbg!((a1, a2, a3, z));
-                    z = run_with(a1, a2, a3, z, *w);
-                }
-            }
-            assert_eq!(z, *cpu.get(&'z').unwrap());
-*/
+            /*
+                        let mut z = 0;
+                        for (i, w) in input2.iter().enumerate() {
+                            if let Inst::Jit(a1, a2, a3) = self.jit[i] {
+                                dbg!((a1, a2, a3, z));
+                                z = run_with(a1, a2, a3, z, *w);
+                            }
+                        }
+                        assert_eq!(z, *cpu.get(&'z').unwrap());
+            */
             if *cpu.get(&'z').unwrap() == 0 {
                 dbg!(n);
                 return 0;
