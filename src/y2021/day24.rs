@@ -1,8 +1,10 @@
 //! <https://adventofcode.com/2021/day/24>
+
+use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser, *,
+        line_parser,
     },
     lazy_static::lazy_static,
     regex::Regex,
@@ -37,6 +39,8 @@ enum Inst {
 pub struct Puzzle {
     line: Vec<Inst>,
     jit: Vec<(isize, isize, isize)>,
+    z_pool: HashSet<(usize, isize)>,
+    best: Vec<usize>,
 }
 
 #[aoc(2021, 24)]
@@ -80,60 +84,46 @@ impl AdventOfCode for Puzzle {
         Err(ParseError)
     }
     fn after_insert(&mut self) {
-        let mut jit: Vec<(isize, isize, isize)> = Vec::new();
-        for (i, l) in self.line.iter().enumerate() {
-            if matches!(l, Inst::Inp(_)) {
-                print!("{:>3}: ", i);
-                for j in i..i + 18 {
-                    print!(
-                        "{} ",
-                        &match &self.line[j] {
-                            Inst::Inp(c) => format!("In{}", c),
-                            Inst::Add(c, d) => format!(
-                                "Ad{}{}{:?}{}",
-                                c,
-                                if [4, 5, 15].contains(&(j % 18)) {
-                                    RED
-                                } else {
-                                    RESET
-                                },
-                                d,
-                                RESET,
-                            ),
-                            Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
-                            Inst::Div(c, d) => format!(
-                                "Di{}{}{:?}{}",
-                                c,
-                                if [4, 5, 15].contains(&(j % 18)) {
-                                    RED
-                                } else {
-                                    RESET
-                                },
-                                d,
-                                RESET,
-                            ),
-                            Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
-                            Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
+        self.jit = self.build();
+        assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
+        println!("pass");
+        for n in (0..14).rev() {
+            print!("{}, ",
+                     26usize.pow(
+                     self
+                     .jit
+                     .iter()
+                     .take(13 - n)
+                     .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
+                     .sum::<isize>() as u32),
+            );
+        }
+        println!();
+    }
+    fn part1(&mut self) -> Self::Output1 {
+        self.search(Vec::new());
+        /*
+                let mut good: Vec<usize> = Vec::new();
+                for z_start in -1000000..1000000 {
+                    for w in 1..=9 {
+                        let input = vec![w, 8, 9, 9, 9, 9, 9, 9];
+                        let mut z = z_start;
+                        for (n, pc) in (14-input.len()..14).enumerate() {
+                            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
                         }
-                    );
-                }
-                println!();
-                if let Inst::Div(_, Opr::Lit(a1)) = self.line[i + 4] {
-                    if let Inst::Add(_, Opr::Lit(a2)) = self.line[i + 5] {
-                        if let Inst::Add(_, Opr::Lit(a3)) = self.line[i + 15] {
-                            // println!("{:>3},{:>3},{:>3}", a1, a2, a3);
-                            jit.push((a1, a2, a3));
+                        if z == 0 && (good.is_empty() || good < input) {
+                            println!("found w={:?}, z_start={}", input, z_start);
+                            good = input;
                         }
                     }
                 }
-            }
-        }
-        for l in jit.iter() {
-            println!("{:?}", l);
-        }
-        self.jit = jit;
+        */
+        0
     }
-    fn part1(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
+        self.best = [9; 14].to_vec();
+        self.search2(Vec::new());
+/*
         let mut fourteen_digit_number = Some([9usize; 14].to_vec());
         while let Some(ref n) = fourteen_digit_number {
             let mut z: isize = 0;
@@ -149,10 +139,117 @@ impl AdventOfCode for Puzzle {
             }
             fourteen_digit_number = decl(fourteen_digit_number);
         }
+*/
         0
     }
-    fn part2(&mut self) -> Self::Output2 {
+    // fn part2(&mut self) -> Self::Output2 {
+    //     0
+    // }
+}
+
+impl Puzzle {
+    fn check(&self, ans: Vec<usize>) -> bool {
+        let mut z = 0;
+        println!("{:?}", ans);
+        print!("{}, ", z);
+        for (pc, w) in ans.iter().enumerate() {
+            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, *w);
+            print!("{}, ", z);
+        }
+        println!();
+        z == 0
+    }
+    fn dump_z(&self, ans: Vec<usize>) {
+        let mut z = 0;
+        print!("{}, ", z);
+        for (pc, w) in ans.iter().enumerate() {
+            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, *w);
+            print!("{}, ", z);
+        }
+        assert_eq!(z, 0);
+        println!();
+    }
+    #[allow(dead_code)]
+    fn estimate_z(&self, n: usize) -> isize {
+        let mut z = 0;
+        for pc in 0..n {
+            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, n);
+        }
         0
+    }
+    fn search(&mut self, base: Vec<usize>) {
+        // println!("{:?}", base);
+        let mut good: Vec<Vec<usize>> = Vec::new();
+        let range = self
+            .jit
+            .iter()
+            .take(14 - base.len() - 1)
+            .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
+            .sum::<isize>() as u32;
+        for z_start in 0..26isize.pow(range) {
+            for w in (1..=9).rev() {
+                let mut input = base.clone();
+                input.insert(0, w);
+                let mut z = z_start;
+                for (n, pc) in (14 - input.len()..14).enumerate() {
+                    z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
+                }
+                if input.len() == 14 {
+                    if z == 0 && z_start == 0 {
+                        println!("{:?}", &input);
+                        self.dump_z(input);
+                    }
+                    continue;
+                }
+                if z == 0
+                    && !self.z_pool.contains(&(input.len(), z_start))
+                    && good.iter().all(|i| *i != input)
+                {
+                    self.z_pool.insert((input.len(), z_start));
+                    good.push(input);
+                }
+            }
+        }
+        good.sort();
+        while let Some(g) = good.pop() {
+            self.search(g);
+        }
+    }
+    fn search2(&mut self, base: Vec<usize>) {
+        // println!("{:?}", base);
+        let mut good: Vec<Vec<usize>> = Vec::new();
+        let range = self
+            .jit
+            .iter()
+            .take(14 - base.len() - 1)
+            .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
+            .sum::<isize>() as u32;
+        for w in 1..=9 {
+            for z_start in 0..=26isize.pow(range) + 26 {
+                let mut input = base.clone();
+                input.insert(0, w);
+                let mut z = z_start;
+                for (n, pc) in (14 - input.len()..14).enumerate() {
+                    z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
+                }
+                if input.len() == 14 {
+                    if z == 0 && z_start == 0 && input < self.best {
+                        self.best = input.clone();
+                        println!("{:?}", &input);
+                        self.dump_z(input);
+                    }
+                    continue;
+                }
+                if z == 0 {
+                    good.push(input);
+                    break;
+                }
+            }
+        }
+        good.reverse();
+        while let Some(g) = good.pop() {
+            self.search2(g);
+        }
     }
 }
 
@@ -162,11 +259,6 @@ fn run_with(a1: isize, a2: isize, a3: isize, z: isize, wu: usize) -> isize {
     let y: isize = (w + a3) * x;
     let z: isize = (z / a1) * ((25 * x) + 1);
     z + y
-}
-
-#[derive(Debug, Default, Eq, PartialEq)]
-struct Cpu {
-    reg: [isize; 3],
 }
 
 #[allow(dead_code)]
@@ -200,6 +292,63 @@ fn incl(vec: Option<Vec<usize>>) -> Option<Vec<usize>> {
 }
 
 impl Puzzle {
+    fn build(&self) -> Vec<(isize, isize, isize)> {
+        let mut jit: Vec<(isize, isize, isize)> = Vec::new();
+        for (i, l) in self.line.iter().enumerate() {
+            if matches!(l, Inst::Inp(_)) {
+                /*
+                                // print!("{:>3}: ", i);
+                                for j in i..i + 18 {
+                                    print!(
+                                        "{} ",
+                                        &match &self.line[j] {
+                                            Inst::Inp(c) => format!("In{}", c),
+                                            Inst::Add(c, d) => format!(
+                                                "Ad{}{}{:?}{}",
+                                                c,
+                                                if [4, 5, 15].contains(&(j % 18)) {
+                                                    RED
+                                                } else {
+                                                    RESET
+                                                },
+                                                d,
+                                                RESET,
+                                            ),
+                                            Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
+                                            Inst::Div(c, d) => format!(
+                                                "Di{}{}{:?}{}",
+                                                c,
+                                                if [4, 5, 15].contains(&(j % 18)) {
+                                                    RED
+                                                } else {
+                                                    RESET
+                                                },
+                                                d,
+                                                RESET,
+                                            ),
+                                            Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
+                                            Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
+                                        }
+                                    );
+                                }
+                                println!();
+                */
+                if let Inst::Div(_, Opr::Lit(a1)) = self.line[i + 4] {
+                    if let Inst::Add(_, Opr::Lit(a2)) = self.line[i + 5] {
+                        if let Inst::Add(_, Opr::Lit(a3)) = self.line[i + 15] {
+                            // println!("{:>3},{:>3},{:>3}", a1, a2, a3);
+                            jit.push((a1, a2, a3));
+                        }
+                    }
+                }
+            }
+        }
+        for l in jit.iter() {
+            print!("{:?},", l.0);
+        }
+        println!();
+        jit
+    }
     #[allow(dead_code)]
     fn old_part1(&mut self) -> isize {
         let mut cpu: HashMap<char, isize> = HashMap::new();
