@@ -72,7 +72,7 @@ impl Game for P1 {
     }
     fn check_them(&self, _msg: &str) {
         /*
-                assert!(
+                debug_assert!(
                     self.state.iter().filter(|c| **c != '.').count()
                         + self
                             .rooms
@@ -99,6 +99,7 @@ impl Game for P1 {
         }
     }
     fn neighbor_states(&self) -> Vec<Self> {
+        const COST: [usize; 4] = [1, 10, 100, 1000];
         let mut result: Vec<Self> = Vec::new();
         // move out from a room
         for (i, r) in self.rooms.iter().enumerate() {
@@ -115,11 +116,10 @@ impl Game for P1 {
                         continue;
                     }
                     let mut news = (*self).clone();
-                    assert_eq!(*v, '.');
+                    debug_assert_eq!(*v, '.');
                     news.state[j] = *amph;
                     news.rooms[i][d] = '.';
-                    news.cost +=
-                        10usize.pow((*amph as u8 - b'A') as u32) * (DIST_FROM_ROOM[i][j] + d);
+                    news.cost += COST[(*amph as u8 - b'A') as usize] * (DIST_FROM_ROOM[i][j] + d);
                     // news.check_them("out");
                     news.pre = self.id;
                     result.push(news);
@@ -145,10 +145,9 @@ impl Game for P1 {
                     }
                     let mut news = (*self).clone();
                     news.state[i] = '.';
-                    assert_eq!(news.rooms[j][d], '.');
+                    debug_assert_eq!(news.rooms[j][d], '.');
                     news.rooms[j][d] = *amph;
-                    news.cost +=
-                        10usize.pow((*amph as u8 - b'A') as u32) * (DIST_FROM_ROOM[j][i] + d);
+                    news.cost += COST[(*amph as u8 - b'A') as usize] * (DIST_FROM_ROOM[j][i] + d);
                     news.pre = self.id;
                     result.push(news);
                 }
@@ -208,7 +207,7 @@ impl AdventOfCode for Puzzle {
         while let Some(rstate) = updated.iter().min_by_key(|s| s.cost) {
             let state = rstate.clone();
             if state == goal {
-                assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
+                debug_assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
                 let mut s = &state;
                 while s.id != 0 {
                     println!(
@@ -237,7 +236,7 @@ impl AdventOfCode for Puzzle {
             if point < state.heuristics() {
                 point = state.heuristics();
                 println!(
-                    "{:>6}({:>6}), {:?} {:?}, {:>8}",
+                    "{:>6}/{:>6}, {:?} {:?}; {:>8}",
                     state.cost,
                     point,
                     state.state.iter().collect::<String>(),
@@ -251,13 +250,13 @@ impl AdventOfCode for Puzzle {
             }
             let nn = updated.len();
             updated.retain(|s| s.id != state.id);
-            assert_eq!(nn, updated.len() + 1);
+            debug_assert_eq!(nn, updated.len() + 1);
             for mut news in state.neighbor_states() {
                 // println!("-- {:?} {:?}", news.state, news.rooms);
                 if let Some(found) = expanded.iter_mut().find(|e| **e == news) {
                     if news.cost < found.cost {
                         if let Some(found2) = updated.iter_mut().find(|e| **e == news) {
-                            assert_eq!(found2.cost, found.cost);
+                            debug_assert_eq!(found2.cost, found.cost);
                             found2.cost = news.cost;
                             found2.pre = news.pre;
                             found.cost = news.cost;
@@ -267,15 +266,15 @@ impl AdventOfCode for Puzzle {
                         news.id = found.id;
                         found.cost = news.cost;
                         found.pre = news.pre;
-                        // assert!(updated.iter().all(|s| *s != news));
+                        // debug_assert!(updated.iter().all(|s| *s != news));
                         updated.push(news);
                     }
                 } else {
                     news.id = id_counter;
                     id_counter += 1;
-                    assert!(expanded.iter().all(|s| *s != news));
+                    debug_assert!(expanded.iter().all(|s| *s != news));
                     expanded.push(news.clone());
-                    assert!(updated.iter().all(|s| *s != news));
+                    debug_assert!(updated.iter().all(|s| *s != news));
                     updated.push(news);
                 }
             }
@@ -317,7 +316,7 @@ impl AdventOfCode for Puzzle {
         while let Some(rstate) = updated.iter().min_by_key(|s| s.cost) {
             let state = rstate.clone();
             if state == goal {
-                // assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
+                // debug_assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
                 let mut s = &state;
                 while s.id != 0 {
                     println!(
