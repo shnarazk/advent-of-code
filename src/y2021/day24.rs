@@ -175,7 +175,9 @@ impl Puzzle {
                     if z == z_pre && z_start == 0 && Some(best.cmp(&self.best)) == self.direction {
                         print!(
                             "{}: ",
-                            best.iter().map(|c| format!("{}", c)).collect::<String>()
+                            best.iter()
+                                .map(|c| (b'0' + *c as u8) as char)
+                                .collect::<String>()
                         );
                         self.dump_z(&best);
                         self.best = best;

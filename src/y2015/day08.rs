@@ -44,7 +44,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         // for l in self.line.iter() {
         //     println!("{} = {}",
-        //              &l.iter().map(|c| format!("{}", c)).collect::<Vec<String>>().join(""),
+        //              l.iter().collect::<String>(),
         //              count(&l[1..l.len() - 1]),
         //     );
         // }
@@ -54,10 +54,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         // for l in self.line.iter() {
-        //     println!("{} = {}",
-        //              &l.iter().map(|c| format!("{}", c)).collect::<Vec<String>>().join(""),
-        //              encode(l) + 2,
-        //     );
+        //     println!("{} = {}", l.iter().collect::<String>(),encode(l) + 2);
         // }
         let effective: usize = self.line.iter().map(|v| 2 + encode(v)).sum();
         dbg!(effective);

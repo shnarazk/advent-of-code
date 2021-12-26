@@ -60,13 +60,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|c| now.iter().filter(|d| c == *d).count())
             .collect::<Vec<usize>>();
-        println!(
-            "{:?}",
-            now.iter()
-                .map(|c| format!("{}", c))
-                .collect::<Vec<String>>()
-                .join("")
-        );
+        println!("{}", now.iter().collect::<String>());
         occurs.iter().max().unwrap() - occurs.iter().min().unwrap()
     }
     fn part2(&mut self) -> Self::Output2 {

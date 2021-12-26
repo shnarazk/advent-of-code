@@ -53,19 +53,8 @@ impl AdventOfCode for Puzzle {
             while !valid(&p) {
                 increment(&mut p);
             }
-            result = p
-                .iter()
-                .map(|c| format!("{}", c))
-                .collect::<Vec<String>>()
-                .join("");
-            println!(
-                "{} => {}",
-                l.iter()
-                    .map(|c| format!("{}", c))
-                    .collect::<Vec<String>>()
-                    .join(""),
-                result,
-            );
+            result = p.iter().collect::<String>();
+            println!("{} => {}", l.iter().collect::<String>(), result);
         }
         result
     }
@@ -75,10 +64,6 @@ impl AdventOfCode for Puzzle {
         while !valid(&next_one) {
             increment(&mut next_one);
         }
-        return next_one
-            .iter()
-            .map(|c| format!("{}", c))
-            .collect::<Vec<String>>()
-            .join("");
+        return next_one.iter().collect::<String>();
     }
 }

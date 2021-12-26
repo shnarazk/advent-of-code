@@ -28,41 +28,13 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        // println!(
-        //     "{:?}",
-        //     &self
-        //         .enhancer
-        //         .iter()
-        //         .map(|c| format!("{}", c))
-        //         .collect::<Vec<String>>()
-        //         .join("")
-        // );
+        // println!("{}", self.enhancer.iter().collect::<String>());
         // println!("{:?}", &self.image);
         // for v in self.image.iter() {
-        //     println!(
-        //         "{:?}",
-        //         v.iter()
-        //             .map(|c| format!("{}", c))
-        //             .collect::<Vec<_>>()
-        //             .join(""),
-        //     );
+        //     println!({}",v.iter().collect::<String>());
         // }
-        println!(
-            "{:?}",
-            self.enhancer[..70]
-                .iter()
-                .map(|c| format!("{}", c))
-                .collect::<Vec<_>>()
-                .join("")
-        );
-        println!(
-            "{:?}",
-            self.enhancer[441..512]
-                .iter()
-                .map(|c| format!("{}", c))
-                .collect::<Vec<_>>()
-                .join("")
-        );
+        println!("{}", self.enhancer[..70].iter().collect::<String>());
+        println!("{}", self.enhancer[441..512].iter().collect::<String>());
         assert_eq!(self.enhancer.len(), 512);
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -88,13 +60,7 @@ impl AdventOfCode for Puzzle {
 
             println!("before {}", count);
             for v in image.iter() {
-                println!(
-                    "{:?}",
-                    v.iter()
-                        .map(|c| format!("{}", c))
-                        .collect::<Vec<_>>()
-                        .join(""),
-                );
+                println!("{}", v.iter().collect::<String>());
             }
 
             let height = image.len();
@@ -124,24 +90,12 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut image, &mut next);
             println!("after {}", count);
             for v in image.iter() {
-                println!(
-                    "{:?}",
-                    v.iter()
-                        .map(|c| format!("{}", c))
-                        .collect::<Vec<_>>()
-                        .join(""),
-                );
+                println!("{}", v.iter().collect::<String>());
             }
         }
         println!();
         for v in image.iter() {
-            println!(
-                "{:?}",
-                v.iter()
-                    .map(|c| format!("{}", c))
-                    .collect::<Vec<_>>()
-                    .join(""),
-            );
+            println!("{}", v.iter().collect::<String>());
         }
         image
             .iter()
@@ -197,25 +151,13 @@ impl AdventOfCode for Puzzle {
             /*
             println!("after {}", count);
             for v in image.iter() {
-                println!(
-                    "{:?}",
-                    v.iter()
-                        .map(|c| format!("{}", c))
-                        .collect::<Vec<_>>()
-                        .join(""),
-                );
+                println!("{}", v.iter().collect::<String>());
             }
             */
         }
         println!();
         for v in image.iter() {
-            println!(
-                "{:?}",
-                v.iter()
-                    .map(|c| format!("{}", c))
-                    .collect::<Vec<_>>()
-                    .join(""),
-            );
+            println!("{}", v.iter().collect::<String>());
         }
         image
             .iter()

@@ -82,7 +82,12 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.extend5();
         for l in self.line.iter() {
-            println! {"{:?}", l.iter().map(|c| format!("{}", c)).collect::<Vec<String>>().join(""), };
+            println!(
+                "{}",
+                l.iter()
+                    .map(|n| (*n as u8 + b'0') as char)
+                    .collect::<String>()
+            );
         }
         self.part1()
     }

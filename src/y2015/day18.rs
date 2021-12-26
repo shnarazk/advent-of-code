@@ -52,17 +52,11 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut grid, &mut next);
             // println!("");
             // for v in grid.iter() {
-            //     println!("{:?}", v.iter().map(|c| format!("{}", c)).collect::<Vec<_>>().join(""));
+            //     println!("{:?}", v.iter().collect::<String>());
             // }
         }
         for v in grid.iter() {
-            println!(
-                "{:?}",
-                v.iter()
-                    .map(|c| format!("{}", c))
-                    .collect::<Vec<_>>()
-                    .join("")
-            );
+            println!("{}", v.iter().collect::<String>());
         }
         grid.iter()
             .map(|v| v.iter().filter(|l| **l == '#').count())
@@ -109,17 +103,11 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut grid, &mut next);
             // println!("");
             // for v in grid.iter() {
-            //     println!("{:?}", v.iter().map(|c| format!("{}", c)).collect::<Vec<_>>().join(""));
+            //     println!("{}", v.iter().collect::<String>());
             // }
         }
         for v in grid.iter() {
-            println!(
-                "{:?}",
-                v.iter()
-                    .map(|c| format!("{}", c))
-                    .collect::<Vec<_>>()
-                    .join("")
-            );
+            println!("{}", v.iter().collect::<String>());
         }
         grid.iter()
             .map(|v| v.iter().filter(|l| **l == '#').count())
