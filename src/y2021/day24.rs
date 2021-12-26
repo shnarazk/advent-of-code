@@ -163,7 +163,7 @@ impl Puzzle {
         //     println!("|| {:?} {}-{} -> {}", base, cand, cand+26, z_pre);
         // }
         for w in 1..=9 {
-            for z_start in cand..=cand + 1027 {
+            for z_start in cand..=cand + 26 {
                 let pc = 13 - base.len();
                 let z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z_start, w);
                 // if w == 6 && base == vec![8, 4] {
