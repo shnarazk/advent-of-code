@@ -237,8 +237,16 @@ impl AdventOfCode for Puzzle {
             if point < state.heuristics() {
                 point = state.heuristics();
                 println!(
-                    "{:>6}({:>6}), {:?} {:?}",
-                    state.cost, point, state.state, state.rooms
+                    "{:>6}({:>6}), {:?} {:?}, {:>8}",
+                    state.cost,
+                    point,
+                    state.state.iter().collect::<String>(),
+                    state
+                        .rooms
+                        .iter()
+                        .map(|r| r.iter().collect::<String>())
+                        .collect::<Vec<_>>(),
+                    expanded.len(),
                 );
             }
             let nn = updated.len();
@@ -346,19 +354,27 @@ impl AdventOfCode for Puzzle {
             if point < state.heuristics() {
                 point = state.heuristics();
                 println!(
-                    "{:>6}({:>6}), {:?} {:?}",
-                    state.cost, point, state.state, state.rooms
+                    "{:>6}({:>6}), {:?} {:?}, {:>8}",
+                    state.cost,
+                    point,
+                    state.state.iter().collect::<String>(),
+                    state
+                        .rooms
+                        .iter()
+                        .map(|r| r.iter().collect::<String>())
+                        .collect::<Vec<_>>(),
+                    expanded.len(),
                 );
             }
             let nn = updated.len();
             updated.retain(|s| s.id != state.id);
-            assert_eq!(nn, updated.len() + 1);
+            debug_assert_eq!(nn, updated.len() + 1);
 
             for mut news in state.neighbor_states() {
                 if let Some(found) = expanded.iter_mut().find(|e| **e == news) {
                     if news.cost < found.cost {
                         if let Some(found2) = updated.iter_mut().find(|e| **e == news) {
-                            assert_eq!(found2.cost, found.cost);
+                            debug_assert_eq!(found2.cost, found.cost);
                             found2.cost = news.cost;
                             found2.pre = news.pre;
                             found.cost = news.cost;
@@ -368,15 +384,15 @@ impl AdventOfCode for Puzzle {
                         news.id = found.id;
                         found.cost = news.cost;
                         found.pre = news.pre;
-                        // assert!(updated.iter().all(|s| *s != news));
+                        // debug_assert!(updated.iter().all(|s| *s != news));
                         updated.push(news);
                     }
                 } else {
                     news.id = id_counter;
                     id_counter += 1;
-                    // assert!(expanded.iter().all(|s| *s != news));
+                    // debug_assert!(expanded.iter().all(|s| *s != news));
                     expanded.push(news.clone());
-                    // assert!(updated.iter().all(|s| *s != news));
+                    // debug_assert!(updated.iter().all(|s| *s != news));
                     updated.push(news);
                 }
             }
