@@ -16,7 +16,7 @@ impl Puzzle {
     fn progress(&mut self, flash: Vec<(usize, usize)>, mut total: usize) -> usize {
         let mut secondary: Vec<(usize, usize)> = Vec::new();
         if flash.is_empty() {
-            assert!(self.line.iter().all(|v| v.iter().all(|i| *i <= 9)));
+            debug_assert!(self.line.iter().all(|v| v.iter().all(|i| *i <= 9)));
             if self.step == 0 {
                 for v in self.line.iter() {
                     for i in v.iter() {

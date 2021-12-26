@@ -132,9 +132,9 @@ impl AdventOfCode for Puzzle {
         xs.sort_unstable();
         ys.sort_unstable();
         zs.sort_unstable();
-        assert!(xs.windows(2).all(|a| a[0] != a[1]));
-        assert!(ys.windows(2).all(|a| a[0] != a[1]));
-        assert!(zs.windows(2).all(|a| a[0] != a[1]));
+        debug_assert!(xs.windows(2).all(|a| a[0] != a[1]));
+        debug_assert!(ys.windows(2).all(|a| a[0] != a[1]));
+        debug_assert!(zs.windows(2).all(|a| a[0] != a[1]));
         dbg!(xs.len(), ys.len(), zs.len());
         dbg!(&xs[1..20]);
         let mut to_index_x: HashMap<isize, usize> = HashMap::new();
