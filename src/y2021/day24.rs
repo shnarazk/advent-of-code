@@ -1,15 +1,13 @@
 //! <https://adventofcode.com/2021/day/24>
 
-use std::collections::HashSet;
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        framework::{aoc_at, AdventOfCode, ParseError},
+        line_parser, *,
     },
     lazy_static::lazy_static,
     regex::Regex,
-    std::collections::HashMap,
-    std::fmt,
+    std::{cmp::Ordering, collections::HashMap, fmt},
 };
 
 enum Opr {
@@ -39,12 +37,14 @@ enum Inst {
 pub struct Puzzle {
     line: Vec<Inst>,
     jit: Vec<(isize, isize, isize)>,
-    z_pool: HashSet<(usize, isize)>,
     best: Vec<usize>,
+    direction: Option<Ordering>,
 }
 
-#[aoc(2021, 24)]
+#[aoc_at(2021, 24)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
@@ -88,63 +88,37 @@ impl AdventOfCode for Puzzle {
         assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
         println!("pass");
         for n in (0..14).rev() {
-            print!("{}, ",
-                     26usize.pow(
-                     self
-                     .jit
-                     .iter()
-                     .take(13 - n)
-                     .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
-                     .sum::<isize>() as u32),
+            print!(
+                "{}, ",
+                26usize.pow(
+                    self.jit
+                        .iter()
+                        .take(13 - n)
+                        .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
+                        .sum::<isize>() as u32
+                ),
             );
         }
         println!();
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.search(Vec::new());
-        /*
-                let mut good: Vec<usize> = Vec::new();
-                for z_start in -1000000..1000000 {
-                    for w in 1..=9 {
-                        let input = vec![w, 8, 9, 9, 9, 9, 9, 9];
-                        let mut z = z_start;
-                        for (n, pc) in (14-input.len()..14).enumerate() {
-                            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
-                        }
-                        if z == 0 && (good.is_empty() || good < input) {
-                            println!("found w={:?}, z_start={}", input, z_start);
-                            good = input;
-                        }
-                    }
-                }
-        */
-        0
+        self.direction = Some(Ordering::Greater);
+        self.best = [1; 14].to_vec();
+        self.search(Vec::new(), 0);
+        self.best
+            .iter()
+            .map(|n| format!("{}", n))
+            .collect::<String>()
     }
     fn part2(&mut self) -> Self::Output2 {
+        self.direction = Some(Ordering::Less);
         self.best = [9; 14].to_vec();
-        self.search2(Vec::new());
-/*
-        let mut fourteen_digit_number = Some([9usize; 14].to_vec());
-        while let Some(ref n) = fourteen_digit_number {
-            let mut z: isize = 0;
-            println!("{:?}", n);
-            for (i, w) in n.to_vec().iter().enumerate() {
-                z = run_with(self.jit[i].0, self.jit[i].1, self.jit[i].2, z, *w);
-            }
-            if z == 0 {
-                println!("{:?}", n);
-                return 0;
-            } else if z < 200 {
-                println!("{}", z);
-            }
-            fourteen_digit_number = decl(fourteen_digit_number);
-        }
-*/
-        0
+        self.search(Vec::new(), 0);
+        self.best
+            .iter()
+            .map(|n| format!("{}", n))
+            .collect::<String>()
     }
-    // fn part2(&mut self) -> Self::Output2 {
-    //     0
-    // }
 }
 
 impl Puzzle {
@@ -159,7 +133,7 @@ impl Puzzle {
         println!();
         z == 0
     }
-    fn dump_z(&self, ans: Vec<usize>) {
+    fn dump_z(&self, ans: &[usize]) {
         let mut z = 0;
         print!("{}, ", z);
         for (pc, w) in ans.iter().enumerate() {
@@ -177,78 +151,43 @@ impl Puzzle {
         }
         0
     }
-    fn search(&mut self, base: Vec<usize>) {
-        // println!("{:?}", base);
-        let mut good: Vec<Vec<usize>> = Vec::new();
-        let range = self
-            .jit
-            .iter()
-            .take(14 - base.len() - 1)
-            .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
-            .sum::<isize>() as u32;
-        for z_start in 0..26isize.pow(range) {
-            for w in (1..=9).rev() {
-                let mut input = base.clone();
-                input.insert(0, w);
-                let mut z = z_start;
-                for (n, pc) in (14 - input.len()..14).enumerate() {
-                    z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
-                }
-                if input.len() == 14 {
-                    if z == 0 && z_start == 0 {
-                        println!("{:?}", &input);
-                        self.dump_z(input);
-                    }
-                    continue;
-                }
-                if z == 0
-                    && !self.z_pool.contains(&(input.len(), z_start))
-                    && good.iter().all(|i| *i != input)
-                {
-                    self.z_pool.insert((input.len(), z_start));
-                    good.push(input);
-                }
-            }
-        }
-        good.sort();
-        while let Some(g) = good.pop() {
-            self.search(g);
-        }
-    }
-    fn search2(&mut self, base: Vec<usize>) {
-        // println!("{:?}", base);
-        let mut good: Vec<Vec<usize>> = Vec::new();
-        let range = self
-            .jit
-            .iter()
-            .take(14 - base.len() - 1)
-            .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
-            .sum::<isize>() as u32;
+    fn search(&mut self, base: Vec<usize>, z_pre: isize) {
+        let cand = if self.jit[13 - base.len()].0 == 26 {
+            z_pre * 26
+        } else {
+            z_pre / 26
+        };
+        // print!("scale {} : ", self.jit[13 - base.len()].0);
+        // println!("{}..{} => {}: {:?}", cand, cand + 26, z_pre, base);
+        // if base.len() <= 2 {
+        //     println!("|| {:?} {}-{} -> {}", base, cand, cand+26, z_pre);
+        // }
         for w in 1..=9 {
-            for z_start in 0..=26isize.pow(range) + 26 {
-                let mut input = base.clone();
-                input.insert(0, w);
-                let mut z = z_start;
-                for (n, pc) in (14 - input.len()..14).enumerate() {
-                    z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, input[n]);
-                }
-                if input.len() == 14 {
-                    if z == 0 && z_start == 0 && input < self.best {
-                        self.best = input.clone();
-                        println!("{:?}", &input);
-                        self.dump_z(input);
+            for z_start in cand..=cand + 1027 {
+                let pc = 13 - base.len();
+                let z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z_start, w);
+                // if w == 6 && base == vec![8, 4] {
+                //     println!("-- {}", z_start);
+                // }
+                if base.len() == 13 {
+                    let mut best = base.clone();
+                    best.insert(0, w);
+                    if z == z_pre && z_start == 0 && Some(best.cmp(&self.best)) == self.direction {
+                        print!(
+                            "{}: ",
+                            best.iter().map(|c| format!("{}", c)).collect::<String>()
+                        );
+                        self.dump_z(&best);
+                        self.best = best;
                     }
                     continue;
                 }
-                if z == 0 {
-                    good.push(input);
-                    break;
+                if z == z_pre {
+                    let mut input = base.clone();
+                    input.insert(0, w);
+                    self.search(input, z_start);
                 }
             }
-        }
-        good.reverse();
-        while let Some(g) = good.pop() {
-            self.search2(g);
         }
     }
 }
@@ -296,43 +235,43 @@ impl Puzzle {
         let mut jit: Vec<(isize, isize, isize)> = Vec::new();
         for (i, l) in self.line.iter().enumerate() {
             if matches!(l, Inst::Inp(_)) {
-                /*
-                                // print!("{:>3}: ", i);
-                                for j in i..i + 18 {
-                                    print!(
-                                        "{} ",
-                                        &match &self.line[j] {
-                                            Inst::Inp(c) => format!("In{}", c),
-                                            Inst::Add(c, d) => format!(
-                                                "Ad{}{}{:?}{}",
-                                                c,
-                                                if [4, 5, 15].contains(&(j % 18)) {
-                                                    RED
-                                                } else {
-                                                    RESET
-                                                },
-                                                d,
-                                                RESET,
-                                            ),
-                                            Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
-                                            Inst::Div(c, d) => format!(
-                                                "Di{}{}{:?}{}",
-                                                c,
-                                                if [4, 5, 15].contains(&(j % 18)) {
-                                                    RED
-                                                } else {
-                                                    RESET
-                                                },
-                                                d,
-                                                RESET,
-                                            ),
-                                            Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
-                                            Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
-                                        }
-                                    );
-                                }
-                                println!();
-                */
+                // /*
+                // print!("{:>3}: ", i);
+                for j in i..i + 18 {
+                    print!(
+                        "{} ",
+                        &match &self.line[j] {
+                            Inst::Inp(c) => format!("In{}", c),
+                            Inst::Add(c, d) => format!(
+                                "Ad{}{}{:?}{}",
+                                c,
+                                if [4, 5, 15].contains(&(j % 18)) {
+                                    RED
+                                } else {
+                                    RESET
+                                },
+                                d,
+                                RESET,
+                            ),
+                            Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
+                            Inst::Div(c, d) => format!(
+                                "Di{}{}{:?}{}",
+                                c,
+                                if [4, 5, 15].contains(&(j % 18)) {
+                                    RED
+                                } else {
+                                    RESET
+                                },
+                                d,
+                                RESET,
+                            ),
+                            Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
+                            Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
+                        }
+                    );
+                }
+                println!();
+                // */
                 if let Inst::Div(_, Opr::Lit(a1)) = self.line[i + 4] {
                     if let Inst::Add(_, Opr::Lit(a2)) = self.line[i + 5] {
                         if let Inst::Add(_, Opr::Lit(a3)) = self.line[i + 15] {
