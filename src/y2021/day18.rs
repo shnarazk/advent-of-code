@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2021/day/18>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        color,
+        framework::{aoc, AdventOfCode, ParseError},
+    },
     std::fmt,
 };
 
@@ -17,9 +20,9 @@ impl fmt::Debug for Tree {
                 Tree::Num(n) => {
                     if 9 < *n {
                         if 4 < level {
-                            format!("\x1B[001m\x1B[032m{}\x1B[001m\x1B[031m", n)
+                            format!("{}{}{}", color::GREEN, n, color::RED)
                         } else {
-                            format!("\x1B[001m\x1B[032m{}\x1B[000m", n)
+                            format!("{}{}{}", color::GREEN, n, color::RESET)
                         }
                     } else {
                         format!("{}", n)
@@ -34,7 +37,7 @@ impl fmt::Debug for Tree {
                             .join(",")
                     );
                     if 4 == level {
-                        format!("\x1B[001m\x1B[031m{}\x1B[000m", str)
+                        format!("{}{}{}", color::RED, str, color::RESET)
                     } else {
                         str
                     }
@@ -142,7 +145,7 @@ impl Tree {
                     {
                         match (&v[0], &v[1]) {
                             (Tree::Num(a1), Tree::Num(a2)) => {
-                                println!(" - explode {:?} at {}", &new_vec, start);
+                                // println!(" - explode {:?} at {}", &new_vec, start);
                                 return (Tree::Num(0), start, Some((*a1, *a2)));
                             }
                             _ => unreachable!(),

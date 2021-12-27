@@ -2,8 +2,9 @@
 
 use {
     crate::{
+        color,
         framework::{aoc_at, AdventOfCode, ParseError},
-        line_parser, *,
+        line_parser,
     },
     lazy_static::lazy_static,
     regex::Regex,
@@ -248,24 +249,24 @@ impl Puzzle {
                                 "Ad{}{}{:?}{}",
                                 c,
                                 if [4, 5, 15].contains(&(j % 18)) {
-                                    RED
+                                    color::RED
                                 } else {
-                                    RESET
+                                    color::RESET
                                 },
                                 d,
-                                RESET,
+                                color::RESET,
                             ),
                             Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
                             Inst::Div(c, d) => format!(
                                 "Di{}{}{:?}{}",
                                 c,
                                 if [4, 5, 15].contains(&(j % 18)) {
-                                    RED
+                                    color::RED
                                 } else {
-                                    RESET
+                                    color::RESET
                                 },
                                 d,
-                                RESET,
+                                color::RESET,
                             ),
                             Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
                             Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
