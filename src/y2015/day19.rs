@@ -3,7 +3,6 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -14,6 +13,7 @@ use {
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashMap,
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Default)]
@@ -103,6 +103,47 @@ impl AdventOfCode for Puzzle {
             }
         }
         println!();
+        // make all combination of pairs
+        let nrules = self.rule.iter().filter(|(from, _)| *from != "e").count();
+        let rule2: Vec<String> = self.rule
+            .iter()
+            .filter(|(from, _)| *from != "e")
+            .map(|(_, chs)| chs.iter().cloned().collect::<String>())
+            .flat_map(|to1|
+                self.rule
+                      .iter()
+                      .filter(|(from, _)| *from != "e")
+                      .map(|(_, chs)| chs.iter().cloned().collect::<String>())
+                      .map(|to2| format!("{}{}", to1, to2))
+                      .collect::<Vec<String>>()
+            )
+            .collect::<Vec<String>>()
+            ;
+        assert_eq!(rule2.len(), nrules * nrules);
+        for (i, (from, tos)) in self.rule.iter().enumerate().filter(|p| p.1.0 != "e") {
+            // for to in tos.iter().filter(|s1| rule2.iter().filter(|s2| s2.contains(*s1)).count() == 2 * self.rule.len()) {
+            //     println!("{}", to);
+            // }
+            let target = tos.iter().cloned().collect::<String>();
+            if rule2.iter().filter(|s| s.contains(&target)).count() == 2 * nrules - 1 {
+                println!("{:>2}: {:>2} -> {:<11}", i, from, target);
+            }
+        }
+        let unique_terminators: Vec<String> = 
+            self.rule
+            .iter()
+            .filter(|p| p.0 != "e")
+            .map(|(_, to)| to.iter().cloned().collect::<String>())
+            .filter(|target| rule2.iter().filter(|s| s.contains(target)).count() == 2 * nrules - 1)
+            .collect::<Vec<_>>()
+            ;
+        println!("{:?}", unique_terminators);
+        let mut m: String = self.line.iter().cloned().collect::<String>();
+        for pat in unique_terminators.iter() {
+            let re = Regex::new(pat).unwrap();
+            m = re.replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET)).to_string();
+        }
+        println!("{}", m);
         panic!();
     }
     fn part1(&mut self) -> Self::Output1 {
