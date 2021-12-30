@@ -1,14 +1,8 @@
 //! <https://adventofcode.com/2015/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
         color,
+        framework::{aoc, AdventOfCode, ParseError},
     },
     lazy_static::lazy_static,
     regex::Regex,
@@ -97,7 +91,9 @@ impl AdventOfCode for Puzzle {
                 // unique
                 "Si" | "Th" => print!("{}{}{}", color::RED, ch, color::RESET),
                 // expandable
-                "Al"| "B"| "Ca"| "F"| "H"| "Mg"| "N"| "O"| "P"| "Ti" | "e" => print!("{}", ch),
+                "Al" | "B" | "Ca" | "F" | "H" | "Mg" | "N" | "O" | "P" | "Ti" | "e" => {
+                    print!("{}", ch)
+                }
                 // not expandable
                 _ => print!("{}{}{}", color::BLUE, ch, color::RESET),
             }
@@ -105,46 +101,55 @@ impl AdventOfCode for Puzzle {
         println!();
         // make all combination of pairs
         let nrules = self.rule.iter().filter(|(from, _)| *from != "e").count();
-        let rule2: Vec<String> = self.rule
+        let rule2: Vec<String> = self
+            .rule
             .iter()
             .filter(|(from, _)| *from != "e")
             .map(|(_, chs)| chs.iter().cloned().collect::<String>())
-            .flat_map(|to1|
+            .flat_map(|to1| {
                 self.rule
-                      .iter()
-                      .filter(|(from, _)| *from != "e")
-                      .map(|(_, chs)| chs.iter().cloned().collect::<String>())
-                      .map(|to2| format!("{}{}", to1, to2))
-                      .collect::<Vec<String>>()
-            )
-            .collect::<Vec<String>>()
-            ;
+                    .iter()
+                    .filter(|(from, _)| *from != "e")
+                    .map(|(_, chs)| chs.iter().cloned().collect::<String>())
+                    .map(|to2| format!("{}{}", to1, to2))
+                    .collect::<Vec<String>>()
+            })
+            .collect::<Vec<String>>();
         assert_eq!(rule2.len(), nrules * nrules);
-        for (i, (from, tos)) in self.rule.iter().enumerate().filter(|p| p.1.0 != "e") {
-            // for to in tos.iter().filter(|s1| rule2.iter().filter(|s2| s2.contains(*s1)).count() == 2 * self.rule.len()) {
-            //     println!("{}", to);
-            // }
+        for (i, (from, tos)) in self.rule.iter().enumerate().filter(|p| p.1 .0 != "e") {
             let target = tos.iter().cloned().collect::<String>();
             if rule2.iter().filter(|s| s.contains(&target)).count() == 2 * nrules - 1 {
                 println!("{:>2}: {:>2} -> {:<11}", i, from, target);
             }
         }
-        let unique_terminators: Vec<String> = 
-            self.rule
+        let unique_terminators: Vec<(String, String)> = self
+            .rule
             .iter()
             .filter(|p| p.0 != "e")
-            .map(|(_, to)| to.iter().cloned().collect::<String>())
-            .filter(|target| rule2.iter().filter(|s| s.contains(target)).count() == 2 * nrules - 1)
-            .collect::<Vec<_>>()
-            ;
+            .map(|(from, to)| (from.clone(), to.iter().cloned().collect::<String>()))
+            .filter(|(_, target)| {
+                rule2.iter().filter(|s| s.contains(target)).count() == 2 * nrules - 1
+            })
+            .collect::<Vec<_>>();
         println!("{:?}", unique_terminators);
         let mut m: String = self.line.iter().cloned().collect::<String>();
-        for pat in unique_terminators.iter() {
-            let re = Regex::new(pat).unwrap();
-            m = re.replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET)).to_string();
+        let mut counter = 0;
+        for _ in 0..56 {
+            for (from, pat) in unique_terminators.iter() {
+                let re = Regex::new(pat).unwrap();
+                let c = counter;
+                counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
+                if c != counter {
+                    let p = re
+                        .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
+                        .to_string();
+                    println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
+                    m = re.replace_all(&m, from).to_string();
+                }
+            }
         }
-        println!("{}", m);
-        panic!();
+        println!("212;     NAl => e : NAl");
+        println!("212;              : e");
     }
     fn part1(&mut self) -> Self::Output1 {
         // dbg!(&self.rule);
@@ -194,6 +199,57 @@ impl AdventOfCode for Puzzle {
         new_bag.len()
     }
     fn part2(&mut self) -> Self::Output2 {
+        // make all combination of pairs
+        let nrules = self.rule.iter().filter(|(from, _)| *from != "e").count();
+        let rule2: Vec<String> = self
+            .rule
+            .iter()
+            .filter(|(from, _)| *from != "e")
+            .map(|(_, chs)| chs.iter().cloned().collect::<String>())
+            .flat_map(|to1| {
+                self.rule
+                    .iter()
+                    .filter(|(from, _)| *from != "e")
+                    .map(|(_, chs)| chs.iter().cloned().collect::<String>())
+                    .map(|to2| format!("{}{}", to1, to2))
+                    .collect::<Vec<String>>()
+            })
+            .collect::<Vec<String>>();
+        assert_eq!(rule2.len(), nrules * nrules);
+        let unique_terminators: Vec<(String, String)> = self
+            .rule
+            .iter()
+            .filter(|p| p.0 != "e")
+            .map(|(from, to)| (from.clone(), to.iter().cloned().collect::<String>()))
+            .filter(|(_, target)| {
+                rule2.iter().filter(|s| s.contains(target)).count() == 2 * nrules - 1
+            })
+            .collect::<Vec<_>>();
+        let mut m: String = self.line.iter().cloned().collect::<String>();
+        let mut counter = 0;
+        for _ in 0..56 {
+            for (from, pat) in unique_terminators.iter() {
+                let re = Regex::new(pat).unwrap();
+                let c = counter;
+                counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
+                if c != counter {
+                    let p = re
+                        .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
+                        .to_string();
+                    println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
+                    m = re.replace_all(&m, from).to_string();
+                }
+            }
+        }
+        println!("212;     NAl => e : NAl");
+        println!("212;              : e");
+        counter + 1
+    }
+}
+
+impl Puzzle {
+    #[allow(dead_code)]
+    fn part2_not_work(&mut self) -> usize {
         // self.dic.insert("e".to_string(), self.num_atom);
         dbg!(self.line.len());
         dbg!(&self.rule.len());
@@ -220,12 +276,12 @@ impl AdventOfCode for Puzzle {
             .map(|s| *self.dic.get(s).unwrap())
             .collect::<Vec<usize>>();
         dbg!((0..medicine.len())
-            .filter(|i| rule.iter().any(|(atom, poly)| medicine[*i] == *atom))
+            .filter(|i| rule.iter().any(|(atom, _)| medicine[*i] == *atom))
             .count());
         let mut bag: HashSet<Vec<usize>> = HashSet::new();
         let mut new_bag: HashSet<Vec<usize>> = HashSet::new();
         bag.insert(vec![0]);
-        for i in 1.. {
+        for _ in 1.. {
             for st in bag.iter() {
                 for (i, n) in st.iter().enumerate() {
                     for (_, seq) in rule.iter().filter(|(key, _)| key == n) {
@@ -234,7 +290,7 @@ impl AdventOfCode for Puzzle {
                         for x in seq.iter().rev() {
                             new_string.insert(i, *x);
                         }
-                        if new_string.starts_with(&medicine[..12]) {
+                        if new_string.starts_with(&medicine) {
                             dbg!(new_string
                                 .iter()
                                 .map(|n| to_mnemonic[*n])
@@ -261,37 +317,5 @@ impl AdventOfCode for Puzzle {
             );
         }
         new_bag.len()
-
-        // let mut rule = self.rule.iter()
-        //     .map(|(k, seq)| {
-        //         let mut qes = seq.clone();
-        //         qes.reverse();
-        //         (qes, k)
-        //     })
-        //     .collect::<Vec<_>>();
-        // rule.sort_unstable();
-        // for r in rule.iter() {
-        //     println!("{:?} => {}", r.0, r.1);
-        // }
-        // let mut med = self.line.clone();
-        // med.reverse();
-        // println!("{:?}", med.join(""));
     }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
