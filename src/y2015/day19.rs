@@ -9,6 +9,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser,
+        color,
     },
     lazy_static::lazy_static,
     regex::Regex,
@@ -37,14 +38,6 @@ fn parse_atoms(mut stream: Vec<String>, line: &str) -> Vec<String> {
 #[aoc(2015, 19)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
             static ref RULE: Regex =
@@ -91,12 +84,29 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
+        self.dic.insert("e".to_string(), self.num_atom);
+        self.num_atom += 1;
         // dbg!(&self.rule);
         // dbg!(&self.line);
         // dbg!(&self.dic);
+        // coloring teminator
+        println!("- {}unique rule{}", color::RED, color::RESET);
+        println!("- {}without rule{}", color::BLUE, color::RESET);
+        for ch in self.line.iter() {
+            match ch.as_str() {
+                // unique
+                "Si" | "Th" => print!("{}{}{}", color::RED, ch, color::RESET),
+                // expandable
+                "Al"| "B"| "Ca"| "F"| "H"| "Mg"| "N"| "O"| "P"| "Ti" | "e" => print!("{}", ch),
+                // not expandable
+                _ => print!("{}{}{}", color::BLUE, ch, color::RESET),
+            }
+        }
+        println!();
+        panic!();
     }
     fn part1(&mut self) -> Self::Output1 {
-        dbg!(&self.rule);
+        // dbg!(&self.rule);
         let mut dic = Vec::new();
         dic.resize(self.num_atom, "");
         for (w, n) in self.dic.iter() {
@@ -143,7 +153,7 @@ impl AdventOfCode for Puzzle {
         new_bag.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.dic.insert("e".to_string(), self.num_atom);
+        // self.dic.insert("e".to_string(), self.num_atom);
         dbg!(self.line.len());
         dbg!(&self.rule.len());
         let mut to_mnemonic = Vec::new();
