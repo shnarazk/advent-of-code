@@ -1,66 +1,63 @@
 //! <https://adventofcode.com/2015/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Puzzle {
-    line: Vec<()>,
-}
+pub struct Puzzle {}
 
 #[aoc(2015, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn after_insert(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
+        const INPUT: usize = 34000000;
+        for n in 2..INPUT {
+            let nq = (n as f64).sqrt().floor() as usize;
+            let mut sum = 1 + n;
+            for k in 2..nq {
+                if n % k == 0 {
+                    sum += k;
+                    sum += n / k;
+                }
+            }
+            if nq * nq == n {
+                sum += nq;
+            }
+            if INPUT <= sum * 10 {
+                return n;
+            }
+            if n % 10000 == 0 {
+                dbg!(n, sum);
+            }
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        const INPUT: usize = 34000000;
+        for n in 2..INPUT {
+            let nq = (n as f64).sqrt().floor() as usize;
+            let mut sum = 0;
+            for k in 1..=nq {
+                if n % k == 0 {
+                    if n / k <= 50 {
+                        sum += k;
+                    }
+                    if k <= 50 {
+                        sum += n / k;
+                    }
+                }
+            }
+            if nq * nq == n && nq <= 50 {
+                sum += nq;
+            }
+            if INPUT <= sum * 11 {
+                return n;
+            }
+            if n % 10000 == 0 {
+                dbg!(n, sum);
+            }
+        }
         0
     }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
