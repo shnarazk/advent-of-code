@@ -1,16 +1,8 @@
 //! <https://adventofcode.com/2015/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
-    std::collections::HashMap,
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -90,7 +82,11 @@ impl State {
         if 0 < self.extra_mana {
             self.mana += 101;
         }
-        let damage = if 0 < self.extra_damage { self.damage + 3 } else { self.damage };
+        let damage = if 0 < self.extra_damage {
+            self.damage + 3
+        } else {
+            self.damage
+        };
         if enemy.hit_point <= damage {
             enemy.hit_point = 0;
             return;
@@ -99,9 +95,21 @@ impl State {
         }
         self.damage = 0;
         // enemy turn
-        self.extra_damage = self.extra_damage.abs().checked_sub(1).map_or_else(|| 0, |v| v);
-        self.extra_armor = self.extra_armor.abs().checked_sub(1).map_or_else(|| 0, |v| v);
-        self.extra_mana = self.extra_mana.abs().checked_sub(1).map_or_else(|| 0, |v| v);
+        self.extra_damage = self
+            .extra_damage
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_armor = self
+            .extra_armor
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_mana = self
+            .extra_mana
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
         if 0 < self.extra_mana {
             self.mana += 101;
         }
@@ -112,7 +120,7 @@ impl State {
                 enemy.hit_point = 0;
                 return;
             } else {
-            enemy.hit_point -= 3;
+                enemy.hit_point -= 3;
             }
         }
 
@@ -128,9 +136,108 @@ impl State {
         } else {
             self.hit_point -= enemy.damage - armor;
         }
-        self.extra_damage = self.extra_damage.abs().checked_sub(1).map_or_else(|| 0, |v| v);
-        self.extra_armor = self.extra_armor.abs().checked_sub(1).map_or_else(|| 0, |v| v);
-        self.extra_mana = self.extra_mana.abs().checked_sub(1).map_or_else(|| 0, |v| v);
+        self.extra_damage = self
+            .extra_damage
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_armor = self
+            .extra_armor
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_mana = self
+            .extra_mana
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+    }
+    fn turn2(&mut self, enemy: &mut State) {
+        assert!(0 < enemy.hit_point);
+        if 0 < self.hit_point {
+            self.hit_point -= 1;
+        } else {
+            self.hit_point = 0;
+            return;
+        }
+        if 0 < self.extra_mana {
+            self.mana += 101;
+        }
+        let damage = if 0 < self.extra_damage {
+            self.damage + 3
+        } else {
+            self.damage
+        };
+        if enemy.hit_point <= damage {
+            enemy.hit_point = 0;
+            return;
+        } else {
+            enemy.hit_point -= damage;
+        }
+        self.damage = 0;
+        // enemy turn
+        if 0 < self.hit_point {
+            self.hit_point -= 1;
+        } else {
+            self.hit_point = 0;
+            return;
+        }
+        self.extra_damage = self
+            .extra_damage
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_armor = self
+            .extra_armor
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_mana = self
+            .extra_mana
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        if 0 < self.extra_mana {
+            self.mana += 101;
+        }
+        let armor = if 0 < self.extra_armor { 7 } else { 0 };
+
+        if 0 < self.extra_damage {
+            if enemy.hit_point <= 3 {
+                enemy.hit_point = 0;
+                return;
+            } else {
+                enemy.hit_point -= 3;
+            }
+        }
+
+        if enemy.damage <= armor {
+            if self.hit_point == 1 {
+                self.hit_point = 0;
+                return;
+            }
+            self.hit_point -= 1;
+        } else if self.hit_point + armor <= enemy.damage {
+            self.hit_point = 0;
+            return;
+        } else {
+            self.hit_point -= enemy.damage - armor;
+        }
+        self.extra_damage = self
+            .extra_damage
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_armor = self
+            .extra_armor
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
+        self.extra_mana = self
+            .extra_mana
+            .abs()
+            .checked_sub(1)
+            .map_or_else(|| 0, |v| v);
     }
 }
 
@@ -152,7 +259,7 @@ impl AdventOfCode for Puzzle {
             self.hit_point = segment[1].parse::<usize>()?;
         }
         if let Ok(segment) = DAMAGE.captures(block).ok_or(ParseError) {
-            self.damage = segment[1].parse::<usize>()?;            
+            self.damage = segment[1].parse::<usize>()?;
         }
         Ok(())
     }
@@ -161,21 +268,24 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut sid: usize = 0;
-        let mut bag: Vec<(State, State)> =
-            vec![(
-                State {
-                    hit_point: 50,
-                    mana: 500,
-                    born: true,
-                    ..State::default()
-                },
-                State {
-                    hit_point: 58,
-                    damage: 9,
-                    ..State::default()
-                }
-            )];
-        while let Some(s) = bag.iter_mut().filter(|s| s.0.born).min_by_key(|s| s.0.used_mana) {
+        let mut bag: Vec<(State, State)> = vec![(
+            State {
+                hit_point: 50,
+                mana: 500,
+                born: true,
+                ..State::default()
+            },
+            State {
+                hit_point: 58,
+                damage: 9,
+                ..State::default()
+            },
+        )];
+        while let Some(s) = bag
+            .iter_mut()
+            .filter(|s| s.0.born)
+            .min_by_key(|s| s.0.used_mana)
+        {
             // dbg!(&s);
             s.0.born = false;
             let parent = s.0.id;
@@ -185,12 +295,13 @@ impl AdventOfCode for Puzzle {
                 let mut target = s.0.id;
                 while target != 0 {
                     let s = bag.iter().find(|s| s.0.id == target).unwrap();
-                    println!("[{}H, {}A, {}M, {}U] : [{}H]",
-                             s.0.hit_point,
-                             if 0 < s.0.extra_armor { 7 } else { 0 },
-                             s.0.mana,
-                             s.0.used_mana,
-                             s.1.hit_point,
+                    println!(
+                        "[{}H, {}A, {}M, {}U] : [{}H]",
+                        s.0.hit_point,
+                        if 0 < s.0.extra_armor { 7 } else { 0 },
+                        s.0.mana,
+                        s.0.used_mana,
+                        s.1.hit_point,
                     );
                     target = s.0.pre;
                 }
@@ -213,23 +324,60 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut sid: usize = 0;
+        let mut bag: Vec<(State, State)> = vec![(
+            State {
+                hit_point: 50,
+                mana: 500,
+                born: true,
+                ..State::default()
+            },
+            State {
+                hit_point: 58,
+                damage: 9,
+                ..State::default()
+            },
+        )];
+        while let Some(s) = bag
+            .iter_mut()
+            .filter(|s| s.0.born)
+            .min_by_key(|s| s.0.used_mana)
+        {
+            // dbg!(&s);
+            s.0.born = false;
+            let parent = s.0.id;
+            let state = s.clone();
+            // bag.retain(|t| state != *t);
+            if state.1.hit_point == 0 {
+                let mut target = s.0.id;
+                while target != 0 {
+                    let s = bag.iter().find(|s| s.0.id == target).unwrap();
+                    println!(
+                        "[{}H, {}A, {}M, {}U] : [{}H]",
+                        s.0.hit_point,
+                        if 0 < s.0.extra_armor { 7 } else { 0 },
+                        s.0.mana,
+                        s.0.used_mana,
+                        s.1.hit_point,
+                    );
+                    target = s.0.pre;
+                }
+                return state.0.used_mana;
+            }
+            if state.0.hit_point == 0 {
+                continue;
+            }
+            for i in 1..=5 {
+                if let Some(mut n) = state.0.spell(i) {
+                    let mut enemy = state.1.clone();
+                    n.turn2(&mut enemy);
+                    sid += 1;
+                    n.id = sid;
+                    n.pre = parent;
+                    bag.push((n, enemy));
+                }
+            }
+        }
         0
     }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
