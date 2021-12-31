@@ -1,17 +1,5 @@
 //! <https://adventofcode.com/2015/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -33,28 +21,33 @@ impl AdventOfCode for Puzzle {
         let noptions = self.line.len();
         let mut test = 0;
         let target: usize = self.line.iter().sum::<usize>() / 3;
-        let m = self.line.iter().max().unwrap();
-        let mut bag: Vec<(usize, usize, [bool; 29], usize)>
-            = vec![(0, 1, [false; 29], 0)];
+        let mut bag: Vec<(usize, usize, [bool; 29], usize)> = vec![(0, 1, [false; 29], 0)];
         while let Some(smallest) = bag.iter().min() {
             // smallest.3 = false;
             let len = smallest.0;
             let qe = smallest.1;
-            let sum = smallest.2.iter()
+            let sum = smallest
+                .2
+                .iter()
                 .enumerate()
                 .filter(|(_, b)| **b)
                 .map(|(i, _)| self.line[i])
                 .sum::<usize>();
-            if test < sum  {
+            if test < sum {
                 println!("{}/{} (QE={})", sum, len, qe);
                 test = sum;
             }
             if sum == target {
-                println!("{:?}(QE = {:>3})",
-                         smallest.2.iter().enumerate().filter(|(_, b)| **b)
-                         .map(|(i, _)| self.line[i])
-                         .collect::<Vec<_>>(),
-                         qe
+                println!(
+                    "{:?}(QE = {:>3})",
+                    smallest
+                        .2
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, b)| **b)
+                        .map(|(i, _)| self.line[i])
+                        .collect::<Vec<_>>(),
+                    qe
                 );
                 return qe;
             }
@@ -62,18 +55,69 @@ impl AdventOfCode for Puzzle {
             let s = *smallest;
             bag.retain(|k| *k != s);
             for k in s.3..noptions {
-                if s.2[k] || target < sum + self.line[k] { continue; }
+                if s.2[k] || target < sum + self.line[k] {
+                    continue;
+                }
                 let mut new = s;
                 new.0 += 1;
                 new.1 *= self.line[k];
                 new.2[k] = true;
-                new.3 = k + 1 ;
+                new.3 = k + 1;
                 bag.push(new);
             }
         }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        self.line.reverse();
+        let noptions = self.line.len();
+        let mut test = 0;
+        let target: usize = self.line.iter().sum::<usize>() / 4;
+        let mut bag: Vec<(usize, usize, [bool; 29], usize)> = vec![(0, 1, [false; 29], 0)];
+        while let Some(smallest) = bag.iter().min() {
+            // smallest.3 = false;
+            let len = smallest.0;
+            let qe = smallest.1;
+            let sum = smallest
+                .2
+                .iter()
+                .enumerate()
+                .filter(|(_, b)| **b)
+                .map(|(i, _)| self.line[i])
+                .sum::<usize>();
+            if test < sum {
+                println!("{}/{} (QE={})", sum, len, qe);
+                test = sum;
+            }
+            if sum == target {
+                println!(
+                    "{:?}(QE = {:>3})",
+                    smallest
+                        .2
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, b)| **b)
+                        .map(|(i, _)| self.line[i])
+                        .collect::<Vec<_>>(),
+                    qe
+                );
+                return qe;
+            }
+            // if 5 <= len { continue; }
+            let s = *smallest;
+            bag.retain(|k| *k != s);
+            for k in s.3..noptions {
+                if s.2[k] || target < sum + self.line[k] {
+                    continue;
+                }
+                let mut new = s;
+                new.0 += 1;
+                new.1 *= self.line[k];
+                new.2[k] = true;
+                new.3 = k + 1;
+                bag.push(new);
+            }
+        }
         0
     }
 }
