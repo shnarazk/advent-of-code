@@ -1,19 +1,5 @@
 //! <https://adventofcode.com/2015/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use itertools::Itertools;
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 const WEAPONS: [(&str, usize, usize, usize); 5] = [
     //Weapons:    Cost  Damage  Armor
@@ -74,6 +60,7 @@ struct Inventory {
     cost: usize,
 }
 
+#[allow(dead_code)]
 impl Inventory {
     fn set_cost(&mut self) {
         self.cost = WEAPONS[self.weapon].1 + ARMOR[self.armor].1 + RINGS[self.ring].1;
@@ -120,24 +107,10 @@ pub struct Puzzle {
 #[aoc(2015, 21)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // lazy_static! {
-        //     static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        // }
-        // let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
         for (weapon, w) in WEAPONS.iter().enumerate() {
             for (armor, a) in ARMOR.iter().enumerate() {
                 for (ring, r) in RINGS.iter().enumerate() {
@@ -168,47 +141,21 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.invetories.reverse();
-        'next: for i in self.invetories.iter() {
-            for j in self.invetories.iter() {
-                if !i.compatible(j) {
-                    continue;
-                }
-                let mut me = State {
-                    hitpoint: 100,
-                    damage: WEAPONS[i.weapon].2 + RINGS[i.ring].2,
-                    armor: ARMOR[i.armor].3 + RINGS[i.ring].3,
+        for i in self.invetories.iter() {
+            let mut me = State {
+                hitpoint: 100,
+                damage: WEAPONS[i.weapon].2 + RINGS[i.ring].2,
+                armor: ARMOR[i.armor].3 + RINGS[i.ring].3,
                 };
-                let mut boss = State {
-                    hitpoint: 103,
-                    damage: 9,
-                    // damage: WEAPONS[j.weapon].2 + RINGS[j.ring].2,
-                    armor: 2
-                    // armor: ARMOR[j.armor].3 + RINGS[j.ring].3,
-                };
-                if me.beats(&mut boss) {
-                    println!("{} is not enough.", i.cost);
-                    continue 'next;
-                }
+            let mut boss = State {
+                hitpoint: 103,
+                damage: 9,
+                armor: 2
+            };
+            if !me.beats(&mut boss) {
+                return i.cost;
             }
-            return i.cost;
         }
         0
-    }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        // assert_eq!(
-        //     Puzzle::solve(Description::TestData("".to_string()), 1),
-        //     Answer::Part1(0)
-        // );
     }
 }
