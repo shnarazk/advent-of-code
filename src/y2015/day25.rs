@@ -1,66 +1,50 @@
 //! <https://adventofcode.com/2015/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
-    lazy_static::lazy_static,
-    regex::Regex,
-    std::collections::HashMap,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Puzzle {
-    line: Vec<()>,
+fn at(j: usize, i: usize) -> usize {
+    (1..j + i - 1).sum::<usize>() + i
 }
 
-#[aoc(2015, 25)]
+fn code(j: usize, i: usize) -> usize {
+    let mut n = 20151125;
+    for _ in 1..at(j, i) {
+        n *= 252533;
+        n %= 33554393;
+    }
+    n
+}
+
+#[derive(Debug, Default)]
+pub struct Puzzle {}
+
+#[aoc_at(2015, 25)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for j in 1..=6 {
+            for i in 1..=6 {
+                print!("{:>4}", at(j, i));
+            }
+            println!();
+        }
+        println!();
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        // Enter the code at row 2981, column 3075.
+        for j in 1..=6 {
+            for i in 1..=6 {
+                print!("{:>10}", code(j, i));
+            }
+            println!();
+        }
+        code(2981, 3075)
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        "That's it.".to_string()
     }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
