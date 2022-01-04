@@ -10,7 +10,7 @@ aoc_macro = { version = "^0.2", path = "aoc_macro" }
 lazy_static = "^1.4"
 regex = "^1.3"
 # 2020
-nom = { version = "^6.2", optional = true }
+nom = { version = "^7.1", optional = true }
 splr = { version = "^0.14", optional = true }
 # 2015
 itertools = { version = "0.10", optional = true }
