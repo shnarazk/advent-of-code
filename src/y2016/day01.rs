@@ -21,7 +21,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = ", ";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        dbg!(block);
         lazy_static! {
             static ref PARSER: Regex = Regex::new(r"^([LR])([0-9]+)\n?$").expect("wrong");
         }
@@ -35,7 +34,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut rot: isize = 0;
