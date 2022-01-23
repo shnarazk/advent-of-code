@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2016/day/>
+//! <https://adventofcode.com/2016/day/03>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -18,7 +18,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2016, 0)]
+#[aoc(2016, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Maybe<Option<String>> {
