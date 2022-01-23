@@ -1,6 +1,8 @@
 //! advent of code runner
 #[cfg(feature = "y2015")]
 use adventofcode::y2015;
+#[cfg(feature = "y2016")]
+use adventofcode::y2016;
 #[cfg(feature = "y2020")]
 use adventofcode::y2020;
 #[cfg(feature = "y2021")]
@@ -37,6 +39,8 @@ pub fn main() {
         2021 => aoc_arms!(2021),
         #[cfg(feature = "y2020")]
         2020 => aoc_arms!(2020),
+        #[cfg(feature = "y2016")]
+        2016 => aoc_arms!(2016, 1),
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
         _ => println!("{:?}", y2021::template::Puzzle::solve(desc, part)),
