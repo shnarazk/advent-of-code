@@ -1,66 +1,101 @@
 //! <https://adventofcode.com/2016/day/04>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
+#[allow(clippy::type_complexity)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(HashMap<char, usize>, usize, Vec<char>, Vec<Vec<char>>)>,
 }
 
 #[aoc(2016, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
+            static ref PARSER: Regex = Regex::new(r"^([0-9]+)\[([a-z]+)\]$").expect("wrong");
         }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        let mut letters: HashMap<char, usize> = HashMap::new();
+        let mut sector_id: usize = 0;
+        let mut checksum: Vec<char> = Vec::new();
+        let mut tokens: Vec<Vec<char>> = Vec::new();
+        for token in block.split('-') {
+            if let Some(segment) = PARSER.captures(token) {
+                sector_id = segment[1].parse::<usize>()?;
+                checksum = segment[2].chars().collect::<Vec<char>>();
+                break;
+            } else {
+                tokens.push(token.chars().collect::<Vec<_>>());
+                for c in token.chars() {
+                    *letters.entry(c).or_insert(0) += 1;
+                }
+            }
+        }
+        self.line.push((letters, sector_id, checksum, tokens));
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.line
+            .iter()
+            .filter(|(letters, _, checksum, _)| {
+                let mut v = letters
+                    .iter()
+                    .map(|(l, n)| (-(*n as isize), l))
+                    .collect::<Vec<_>>();
+                v.sort_unstable();
+                let valids = v
+                    .iter()
+                    .take(5)
+                    .map(|(_, l)| l)
+                    .copied()
+                    .collect::<Vec<_>>();
+                checksum.iter().all(|c| valids.contains(&c))
+            })
+            .map(|e| e.1)
+            .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.line
+            .iter()
+            .filter(|(letters, _, checksum, _)| {
+                let mut v = letters
+                    .iter()
+                    .map(|(l, n)| (-(*n as isize), l))
+                    .collect::<Vec<_>>();
+                v.sort_unstable();
+                let valids = v
+                    .iter()
+                    .take(5)
+                    .map(|(_, l)| l)
+                    .copied()
+                    .collect::<Vec<_>>();
+                checksum.iter().all(|c| valids.contains(&c))
+            })
+            .filter(|(_, sector_id, _, tokens)| {
+                let mut words = Vec::new();
+                for token in tokens.iter() {
+                    let word = token
+                        .iter()
+                        .map(|c| {
+                            (((((*c as u8 - b'a') as usize) + sector_id) % 26) as u8 + b'a') as char
+                        })
+                        .collect::<String>();
+                    words.push(word);
+                }
+                if words.join("").contains("northpole") {
+                    println!("{sector_id}, {:?}", words);
+                    return true;
+                }
+                false
+            })
+            .map(|e| e.1)
+            .collect::<Vec<usize>>()[0]
     }
-}
-
-#[cfg(feature = "y2016")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
