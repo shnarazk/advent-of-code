@@ -1,7 +1,8 @@
 //! <https://adventofcode.com/2021/day/5>
-use crate::framework::{aoc, AdventOfCode, ParseError};
-use lazy_static::lazy_static;
-use regex::Regex;
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
+};
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -25,11 +26,8 @@ impl AdventOfCode for Puzzle {
             beg: (0, 0),
             end: (0, 0),
         };
-        lazy_static! {
-            static ref PARSER: Regex =
-                Regex::new(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$");
+        let segment = parser.captures(block).ok_or(ParseError)?;
         i.beg.0 = segment[1].parse::<usize>()?;
         i.beg.1 = segment[2].parse::<usize>()?;
         i.end.0 = segment[3].parse::<usize>()?;

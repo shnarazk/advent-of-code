@@ -1,8 +1,7 @@
 //! <https://adventofcode.com/2021/day/8>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, PartialEq)]
@@ -144,10 +143,8 @@ fn segments_to_num(vec: &[usize]) -> usize {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([ a-g]+)\|([ a-g]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(r"^([ a-g]+)\|([ a-g]+)$");
+        let segment = parser.captures(block).ok_or(ParseError)?;
         let mut pattern: Vec<Vec<char>> = Vec::new();
         let mut target: Vec<Vec<char>> = Vec::new();
         for w in segment[1].trim().split(' ') {

@@ -3,10 +3,8 @@ use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        line_parser, regex,
     },
-    lazy_static::lazy_static,
-    regex::Regex,
     std::collections::HashMap,
 };
 
@@ -20,10 +18,10 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
 
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^(on|off) x=(-?[0-9]+)\.\.(-?[0-9]+),y=(-?[0-9]+)\.\.(-?[0-9]+),z=(-?[0-9]+)\.\.(-?[0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(
+            r"^(on|off) x=(-?[0-9]+)\.\.(-?[0-9]+),y=(-?[0-9]+)\.\.(-?[0-9]+),z=(-?[0-9]+)\.\.(-?[0-9]+)$"
+        );
+        let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
             &segment[1] == "on",
             line_parser::to_isize(&segment[2])?,

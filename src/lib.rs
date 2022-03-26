@@ -19,3 +19,11 @@ pub mod y2016;
 
 pub use aoc_macro::aoc_arms;
 pub use framework::Description;
+
+#[macro_export]
+macro_rules! regex {
+    ($re:literal $(,)?) => {{
+        static RE: once_cell::sync::OnceCell<regex::Regex> = once_cell::sync::OnceCell::new();
+        RE.get_or_init(|| regex::Regex::new($re).unwrap())
+    }};
+}

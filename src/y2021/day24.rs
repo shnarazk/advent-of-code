@@ -4,10 +4,8 @@ use {
     crate::{
         color,
         framework::{aoc_at, AdventOfCode, ParseError},
-        line_parser,
+        line_parser, regex,
     },
-    lazy_static::lazy_static,
-    regex::Regex,
     std::{cmp::Ordering, collections::HashMap, fmt},
 };
 
@@ -48,16 +46,14 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref INP: Regex = Regex::new(r"^inp ([a-z])$").expect("wrong");
-            static ref OPR: Regex = Regex::new(r"^([a-z]+) ([a-z]) ([a-z])$").expect("wrong");
-            static ref OPL: Regex = Regex::new(r"^([a-z]+) ([a-z]) (-?[0-9]+)$").expect("wrong");
-        }
-        if let Some(segment) = INP.captures(block) {
+        let inp = regex!(r"^inp ([a-z])$");
+        let opr = regex!(r"^([a-z]+) ([a-z]) ([a-z])$");
+        let opl = regex!(r"^([a-z]+) ([a-z]) (-?[0-9]+)$");
+        if let Some(segment) = inp.captures(block) {
             self.line
                 .push(Inst::Inp(segment[1].chars().next().unwrap()));
             return Ok(());
-        } else if let Some(segment) = OPR.captures(block) {
+        } else if let Some(segment) = opr.captures(block) {
             let reg1 = segment[2].chars().next().unwrap();
             let reg2 = Opr::Var(segment[3].chars().next().unwrap());
             self.line.push(match &segment[1] {
@@ -69,7 +65,7 @@ impl AdventOfCode for Puzzle {
                 _ => unreachable!(),
             });
             return Ok(());
-        } else if let Some(segment) = OPL.captures(block) {
+        } else if let Some(segment) = opl.captures(block) {
             let reg1 = segment[2].chars().next().unwrap();
             let val = Opr::Lit(line_parser::to_isize(&segment[3])?);
             self.line.push(match &segment[1] {
