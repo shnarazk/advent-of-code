@@ -14,7 +14,7 @@ use {
 };
 
 pub fn main() {
-    let arg = args().collect::<Vec<String>>();
+    let arg = args().skip(1).collect::<Vec<String>>();
     if arg.is_empty() {
         println!("USAGE:");
         println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/YYYY/input-dayDD.txtを入力として実行");
@@ -26,10 +26,10 @@ pub fn main() {
         panic!();
     }
     let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
-    let year = parse(arg.get(1), 2021, "wrong year");
-    let day = parse(arg.get(2), 1, "wrong day");
-    let part = parse(arg.get(3), 0, "wrong part");
-    let desc: Description = match arg.get(4) {
+    let year = parse(arg.get(0), 2021, "wrong year");
+    let day = parse(arg.get(1), 1, "wrong day");
+    let part = parse(arg.get(2), 0, "wrong part");
+    let desc: Description = match arg.get(3) {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
         Some(ext) => Description::FileTag(ext.to_string()),
         None => Description::None,
