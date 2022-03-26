@@ -6,10 +6,8 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser,
+        line_parser, regex,
     },
-    lazy_static::lazy_static,
-    regex::Regex,
     std::collections::HashMap,
 };
 
@@ -30,10 +28,8 @@ impl AdventOfCode for Puzzle {
     //     Ok(Some(segment[2].to_string()))
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([0-9]+)$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(r"^([0-9]+)$");
+        let segment = parser.captures(block).ok_or(ParseError)?;
         // self.line.push(segment[0].parse::<_>());
         Ok(())
     }

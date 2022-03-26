@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2016/day/01>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
     std::collections::HashSet,
 };
 
@@ -21,10 +22,8 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = ", ";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([LR])([0-9]+)\n?$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(r"^([LR])([0-9]+)\n?$");
+        let segment = parser.captures(block).ok_or(ParseError)?;
         let dist = segment[2].parse::<usize>()?;
         self.line.push(match &segment[1] {
             "L" => Turn::Left(dist),
