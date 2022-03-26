@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/4>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
     std::collections::HashMap,
 };
 
@@ -62,14 +63,10 @@ impl AdventOfCode for Puzzle {
 }
 
 fn valid(key: &str, val: &str) -> bool {
-    lazy_static! {
-        static ref HIGHT: Regex = Regex::new(r"^(\d+)(cm|in)$").expect("wrong regex");
-        static ref HAIR: Regex = Regex::new(r"^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$")
-            .expect("wrong regex");
-        static ref EYE: Regex =
-            Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").expect("wrong regex");
-        static ref PID: Regex = Regex::new(r"^\d{9}$").expect("wrong regex");
-    }
+    let hight = regex!(r"^(\d+)(cm|in)$");
+    let hair = regex!(r"^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$");
+    let eye = regex!(r"^(amb|blu|brn|gry|grn|hzl|oth)$");
+    let pid = regex!(r"^\d{9}$");
     match key {
         "byr" => {
             if let Ok(y) = val.parse::<usize>() {
@@ -87,7 +84,7 @@ fn valid(key: &str, val: &str) -> bool {
             }
         }
         "hgt" => {
-            if let Some(m) = HIGHT.captures(val) {
+            if let Some(m) = hight.captures(val) {
                 if m[2] == *"cm" {
                     if let Ok(v) = m[1].parse::<usize>() {
                         return (150..=193).contains(&v);
@@ -100,13 +97,13 @@ fn valid(key: &str, val: &str) -> bool {
             }
         }
         "hcl" => {
-            return HAIR.captures(val).is_some();
+            return hair.captures(val).is_some();
         }
         "ecl" => {
-            return EYE.captures(val).is_some();
+            return eye.captures(val).is_some();
         }
         "pid" => {
-            return PID.captures(val).is_some();
+            return pid.captures(val).is_some();
         }
         _ => (),
     }

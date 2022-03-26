@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/16>
 use {
-    crate::framework::{aoc, AdventOfCode, Description, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, Description, ParseError},
+        regex,
+    },
     std::borrow::Borrow,
 };
 
@@ -155,11 +156,8 @@ fn invalid(dic: &[Range], x: usize) -> Option<usize> {
 }
 
 fn parse_range(str: &str) -> Option<Range> {
-    lazy_static! {
-        static ref LINE: Regex =
-            Regex::new(r"^([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)$").expect("wrong");
-    }
-    if let Some(m) = LINE.captures(str) {
+    let line = regex!(r"^([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)$");
+    if let Some(m) = line.captures(str) {
         if let Ok(a) = m[2].parse::<usize>() {
             if let Ok(b) = m[3].parse::<usize>() {
                 if let Ok(c) = m[4].parse::<usize>() {

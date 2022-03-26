@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/7>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
     std::collections::HashSet,
 };
 
@@ -22,15 +23,11 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref HEAD: Regex =
-                Regex::new(r"^([a-z]+ [a-z]+) bags? contain (.*)").expect("wrong");
-            static ref PREP: Regex =
-                Regex::new(r"(\d+) ([a-z]+ [a-z]+) bags?(, (.*))?").expect("wrong");
-        }
-        if let Some(head) = HEAD.captures(block) {
+        let head = regex!(r"^([a-z]+ [a-z]+) bags? contain (.*)");
+        let prep = regex!(r"(\d+) ([a-z]+ [a-z]+) bags?(, (.*))?");
+        if let Some(head) = head.captures(block) {
             let mut b: String = head[2].to_string();
-            while let Some(prep) = PREP.captures(&b) {
+            while let Some(prep) = prep.captures(&b) {
                 self.links.insert(Link {
                     outer: head[1].to_string(),
                     inner: prep[2].to_string(),

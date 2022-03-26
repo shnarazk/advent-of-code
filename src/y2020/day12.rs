@@ -1,6 +1,8 @@
 //! <https://adventofcode.com/2020/day/12>
-use crate::framework::{aoc, AdventOfCode, ParseError};
-use {lazy_static::lazy_static, regex::Regex};
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Dir {
@@ -42,10 +44,8 @@ enum Instruction {
 
 impl Instruction {
     fn from(str: &str) -> Option<Self> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^(N|S|E|W|L|R|F)(\d+)$").expect("bad");
-        }
-        if let Some(m) = RE.captures(str) {
+        let re = regex!(r"^(N|S|E|W|L|R|F)(\d+)$");
+        if let Some(m) = re.captures(str) {
             if let Ok(n) = &m[2].parse::<usize>() {
                 match &m[1] {
                     "N" => Some(Instruction::N(*n)),

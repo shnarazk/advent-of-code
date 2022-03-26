@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/21>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc_at, AdventOfCode, ParseError},
+        regex,
+    },
     splr::*,
     std::{
         collections::{HashMap, HashSet},
@@ -46,11 +47,8 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref RE: Regex =
-                Regex::new(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$").expect("error");
-        }
-        let m = RE.captures(block).ok_or(ParseError)?;
+        let re = regex!(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$");
+        let m = re.captures(block).ok_or(ParseError)?;
         let ingredients = m[1]
             .trim()
             .split(' ')

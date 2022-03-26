@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/22>
 use {
-    crate::framework::{aoc, AdventOfCode, Description, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, Description, ParseError},
+        regex,
+    },
     std::{
         borrow::Borrow,
         cmp::Ordering,
@@ -11,10 +12,8 @@ use {
 };
 
 fn parse(block: &str) -> Option<VecDeque<usize>> {
-    lazy_static! {
-        static ref HEAD: Regex = Regex::new(r"^Player (\d+):").expect("error");
-    }
-    if HEAD.captures(block).is_some() {
+    let head = regex!(r"^Player (\d+):");
+    if head.captures(block).is_some() {
         let mut q: VecDeque<usize> = VecDeque::new();
         for l in block.split('\n').skip(1) {
             if l.is_empty() {
@@ -248,7 +247,7 @@ Player 2:
 14";
         assert_eq!(
             Puzzle::solve(Description::TestData(TEST.to_string()), 2),
-            Answer::Part2(43 * 2 + 19 * 1)
+            Answer::Part2(43 * 2 + 19)
         );
     }
     #[test]
@@ -285,7 +284,7 @@ Player 2:
 1";
         assert_eq!(
             Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1 * 1)
+            Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1)
         );
     }
 }

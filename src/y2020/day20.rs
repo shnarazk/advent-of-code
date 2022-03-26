@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2020/day/20>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
     std::ops::Index,
 };
 
@@ -23,11 +24,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^Tile (\d+):$").expect("error");
-        }
+        let re = regex!(r"^Tile (\d+):$");
         let mut lines = block.split('\n').collect::<Vec<_>>();
-        if let Some(m) = RE.captures(lines[0]) {
+        if let Some(m) = re.captures(lines[0]) {
             let id = m[1].parse::<usize>().expect("wrong");
             if let Some(l) = lines.last() {
                 if l.is_empty() {
@@ -387,18 +386,16 @@ fn count_sharps(vec: &[String]) -> usize {
 }
 
 fn check_sea_monstar(image: &[String]) -> usize {
-    lazy_static! {
-        static ref MONSTER_HEAD: Regex = Regex::new(r"^..................#.").expect("error");
-        static ref MONSTER_BODY: Regex = Regex::new(r"^#....##....##....###").expect("error");
-        static ref MONSTER_DOWN: Regex = Regex::new(r"^.#..#..#..#..#..#...").expect("error");
-    }
+    let monster_head = regex!(r"^..................#.");
+    let monster_body = regex!(r"^#....##....##....###");
+    let monster_down = regex!(r"^.#..#..#..#..#..#...");
     let mut count = 0;
     let len = image.len();
     for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
         for j in 0..line.len() {
-            if MONSTER_BODY.captures(&line[j..]).is_some()
-                && MONSTER_HEAD.captures(&image[i - 1][j..]).is_some()
-                && MONSTER_DOWN.captures(&image[i + 1][j..]).is_some()
+            if monster_body.captures(&line[j..]).is_some()
+                && monster_head.captures(&image[i - 1][j..]).is_some()
+                && monster_down.captures(&image[i + 1][j..]).is_some()
             {
                 count += 1;
             }

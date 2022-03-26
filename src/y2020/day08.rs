@@ -1,6 +1,8 @@
 //! <https://adventofcode.com/2020/day/8>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
-use {lazy_static::lazy_static, regex::Regex};
+use crate::{
+    framework::{aoc_at, AdventOfCode, ParseError},
+    regex,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Instruction {
@@ -11,10 +13,8 @@ enum Instruction {
 
 /* impl ProblemObject for Instruction {
     fn parse(line: &str) -> Option<Instruction> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
-        }
-        if let Some(m) = RE.captures(line) {
+        let re = regex!(r"^(acc|jmp|nop) ([+-])(\d+)$");
+        if let Some(m) = re.captures(line) {
             let mnemonic = &m[1];
             let val = match (&m[2], &m[3]) {
                 ("+", n) => n.parse::<isize>().ok(),
@@ -60,10 +60,8 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^(acc|jmp|nop) ([+-])(\d+)$").expect("bad");
-        }
-        if let Some(m) = RE.captures(block) {
+        let re = regex!(r"^(acc|jmp|nop) ([+-])(\d+)$");
+        if let Some(m) = re.captures(block) {
             let mnemonic = &m[1];
             let val = match (&m[2], &m[3]) {
                 ("+", n) => n.parse::<isize>().ok(),

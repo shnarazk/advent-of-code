@@ -1,8 +1,7 @@
 //! <https://adventofcode.com/2020/day/2>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Default, PartialEq)]
@@ -26,11 +25,8 @@ impl AdventOfCode for Puzzle {
 }
 
 fn check_line1(str: &str) -> usize {
-    lazy_static! {
-        static ref PARSER: Regex =
-            Regex::new(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$").expect("wrong regex");
-    }
-    if let Some(m) = PARSER.captures(str) {
+    let parser = regex!(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$");
+    if let Some(m) = parser.captures(str) {
         let mi = m[1].parse::<usize>().unwrap();
         let ma = m[2].parse::<usize>().unwrap();
         let target: char = m[3].chars().next().unwrap();
@@ -43,11 +39,8 @@ fn check_line1(str: &str) -> usize {
 }
 
 fn check_line2(str: &str) -> usize {
-    lazy_static! {
-        static ref PARSER: Regex =
-            Regex::new(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$").expect("wrong regex");
-    }
-    if let Some(m) = PARSER.captures(str) {
+    let parser = regex!(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$");
+    if let Some(m) = parser.captures(str) {
         let pos1 = m[1].parse::<usize>().unwrap();
         let pos2 = m[2].parse::<usize>().unwrap();
         let ch: char = m[3].chars().next().unwrap();

@@ -1,6 +1,11 @@
 //! <https://adventofcode.com/2020/day/14>
-use crate::framework::{aoc, AdventOfCode, ParseError};
-use {lazy_static::lazy_static, regex::Regex, std::collections::HashMap};
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
+    std::collections::HashMap,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 enum OP {
@@ -55,11 +60,9 @@ impl Default for Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref MASK: Regex = Regex::new(r"^mask = ((X|0|1)+)").expect("wrong");
-            static ref SET: Regex = Regex::new(r"^mem\[(\d+)\] = (\d+)").expect("wrong");
-        }
-        if let Some(m) = MASK.captures(block) {
+        let mask = regex!(r"^mask = ((X|0|1)+)");
+        let set = regex!(r"^mem\[(\d+)\] = (\d+)");
+        if let Some(m) = mask.captures(block) {
             let zeros = m[1]
                 .chars()
                 .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
@@ -78,7 +81,7 @@ impl AdventOfCode for Puzzle {
             self.code.push(OP::Mask(zeros, ones, wilds));
             return Ok(());
         }
-        if let Some(m) = SET.captures(block) {
+        if let Some(m) = set.captures(block) {
             let address = m[1].parse::<usize>().unwrap();
             let val = m[2].parse::<usize>().unwrap();
             self.code.push(OP::Set(address, val));

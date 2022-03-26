@@ -3,9 +3,10 @@
 use std::borrow::Borrow;
 
 use {
-    crate::framework::{aoc, AdventOfCode, Description, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, Description, ParseError},
+        regex,
+    },
     std::collections::HashMap,
 };
 
@@ -32,23 +33,21 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref R0: Regex = Regex::new(r#"^(\d+): "(.)""#).expect("error");
-            static ref R1: Regex = Regex::new(r"^(\d+):(( \d+)+)$").expect("error");
-            static ref R2: Regex = Regex::new(r"^(\d+):(( \d+)+) \|(( \d+)+)$").expect("error");
-        }
-        if let Some(m) = R0.captures(block) {
+        let r0 = regex!(r#"^(\d+): "(.)""#);
+        let r1 = regex!(r"^(\d+):(( \d+)+)$");
+        let r2 = regex!(r"^(\d+):(( \d+)+) \|(( \d+)+)$");
+        if let Some(m) = r0.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let c = m[2].parse::<char>().expect("wrong");
             self.rule.insert(i, Rule::Match(c));
-        } else if let Some(m) = R1.captures(block) {
+        } else if let Some(m) = r1.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let mut vec: Vec<usize> = Vec::new();
             for n in m[2].split_ascii_whitespace() {
                 vec.push(n.parse::<usize>().expect("strange"));
             }
             self.rule.insert(i, Rule::Seq(vec));
-        } else if let Some(m) = R2.captures(block) {
+        } else if let Some(m) = r2.captures(block) {
             let i = m[1].parse::<usize>().expect("wrong");
             let mut vec1: Vec<usize> = Vec::new();
             for n in m[2].split_ascii_whitespace() {
