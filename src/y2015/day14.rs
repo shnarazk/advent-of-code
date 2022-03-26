@@ -1,8 +1,7 @@
 //! <https://adventofcode.com/2015/day/14>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -14,10 +13,10 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([A-Za-z]+) can fly ([0-9]+) km/s for ([0-9]+) seconds, but then must rest for ([0-9]+) seconds\.$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(
+            r"^([A-Za-z]+) can fly ([0-9]+) km/s for ([0-9]+) seconds, but then must rest for ([0-9]+) seconds\.$"
+        );
+        let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
             segment[1].to_string(),
             segment[2].parse::<usize>()?,

@@ -1,8 +1,7 @@
 //! <https://adventofcode.com/2015/day/22>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -251,14 +250,12 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref HP: Regex = Regex::new(r"^Hit Points: ([0-9]+)$").expect("wrong");
-            static ref DAMAGE: Regex = Regex::new(r"^Damage: ([0-9]+)$").expect("wrong");
-        }
-        if let Ok(segment) = HP.captures(block).ok_or(ParseError) {
+        let hp = regex!(r"^Hit Points: ([0-9]+)$");
+        let damage = regex!(r"^Damage: ([0-9]+)$");
+        if let Ok(segment) = hp.captures(block).ok_or(ParseError) {
             self.hit_point = segment[1].parse::<usize>()?;
         }
-        if let Ok(segment) = DAMAGE.captures(block).ok_or(ParseError) {
+        if let Ok(segment) = damage.captures(block).ok_or(ParseError) {
             self.damage = segment[1].parse::<usize>()?;
         }
         Ok(())

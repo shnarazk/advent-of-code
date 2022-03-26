@@ -3,8 +3,8 @@ use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
+        regex,
     },
-    lazy_static::lazy_static,
     regex::Regex,
     std::collections::HashMap,
     std::collections::HashSet,
@@ -19,10 +19,8 @@ pub struct Puzzle {
 }
 
 fn parse_atoms(mut stream: Vec<String>, line: &str) -> Vec<String> {
-    lazy_static! {
-        static ref ATOM: Regex = Regex::new(r"^([A-Z][^A-Z]*)(.*)$").expect("wrong");
-    }
-    if let Some(segment) = ATOM.captures(line) {
+    let atom = regex!(r"^([A-Z][^A-Z]*)(.*)$");
+    if let Some(segment) = atom.captures(line) {
         stream.push(segment[1].to_string());
         return parse_atoms(stream, &segment[2]);
     }
@@ -33,13 +31,10 @@ fn parse_atoms(mut stream: Vec<String>, line: &str) -> Vec<String> {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref RULE: Regex =
-                Regex::new(r"^([A-Z][a-zA-Z]*) => ([A-Z][a-zA-Z]*)$").expect("wrong");
-            static ref BIGBANG: Regex = Regex::new(r"^e => ([A-Z][a-zA-Z]*)$").expect("wrong");
-            static ref STRING: Regex = Regex::new(r"^([A-Z][a-zA-Z]+)$").expect("wrong");
-        }
-        if let Some(segment) = RULE.captures(block) {
+        let rule = regex!(r"^([A-Z][a-zA-Z]*) => ([A-Z][a-zA-Z]*)$");
+        let bigbang = regex!(r"^e => ([A-Z][a-zA-Z]*)$");
+        let string = regex!(r"^([A-Z][a-zA-Z]+)$");
+        if let Some(segment) = rule.captures(block) {
             let prec = parse_atoms(Vec::new(), &segment[1]);
             let post = parse_atoms(Vec::new(), &segment[2]);
             assert!(prec.len() == 1, "{:?}", prec);
@@ -56,7 +51,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
             self.rule.push((prec[0].to_string(), post));
-        } else if let Some(segment) = BIGBANG.captures(block) {
+        } else if let Some(segment) = bigbang.captures(block) {
             let post = parse_atoms(Vec::new(), &segment[1]);
             for w in post.iter() {
                 if !self.dic.contains_key(w) {
@@ -65,7 +60,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
             self.rule.push(("e".to_string(), post));
-        } else if let Some(segment) = STRING.captures(block) {
+        } else if let Some(segment) = string.captures(block) {
             let string = parse_atoms(Vec::new(), &segment[0]);
             for w in string.iter() {
                 if !self.dic.contains_key(w) {

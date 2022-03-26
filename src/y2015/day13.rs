@@ -1,9 +1,10 @@
 //! <https://adventofcode.com/2015/day/13>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc_at, AdventOfCode, ParseError},
+        regex,
+    },
     itertools::Itertools,
-    lazy_static::lazy_static,
-    regex::Regex,
     std::collections::{HashMap, HashSet},
 };
 
@@ -19,10 +20,10 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER: Regex = Regex::new(r"^([A-Z][a-z]+) would (gain|lose) ([0-9]+) happiness units by sitting next to ([A-Z][a-z]+)\.$").expect("wrong");
-        }
-        let segment = PARSER.captures(block).ok_or(ParseError)?;
+        let parser = regex!(
+            r"^([A-Z][a-z]+) would (gain|lose) ([0-9]+) happiness units by sitting next to ([A-Z][a-z]+)\.$"
+        );
+        let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
             segment[1].to_string(),
             segment[4].to_string(),

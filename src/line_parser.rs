@@ -1,6 +1,6 @@
 //! misc implementations of string-to-object parsers
 
-use {crate::framework::ParseError, lazy_static::lazy_static, regex::Regex};
+use crate::{framework::ParseError, regex};
 
 /// parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it
 /// ```
@@ -101,10 +101,8 @@ pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
 /// assert_eq!(line_parser::to_binaries(""), Err(ParseError));
 /// ```
 pub fn to_binaries(line: &str) -> Result<Vec<bool>, ParseError> {
-    lazy_static! {
-        static ref PARSER: Regex = Regex::new(r"^[01]+$").expect("wrong");
-    }
-    let segment = PARSER.captures(line.trim()).ok_or(ParseError)?;
+    let parser = regex!(r"^[01]+$");
+    let segment = parser.captures(line.trim()).ok_or(ParseError)?;
     Ok(segment[0].chars().map(|s| s == '1').collect::<Vec<bool>>())
 }
 

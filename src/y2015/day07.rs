@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2015/day/7>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
     std::collections::HashMap,
 };
 
@@ -79,24 +80,17 @@ impl AdventOfCode for Puzzle {
     //     Ok(Some(segment[2].to_string()))
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        lazy_static! {
-            static ref PARSER1: Regex =
-                Regex::new(r"^([0-9]+|[a-z]+) -> ([a-z]+)$").expect("wrong");
-            static ref PARSER2: Regex =
-                Regex::new(r"^([0-9]+|[a-z]+) (AND|OR) ([0-9]+|[a-z]+) -> ([a-z]+)$")
-                    .expect("wrong");
-            static ref PARSER3: Regex =
-                Regex::new(r"^([0-9]+|[a-z]+) (LSHIFT|RSHIFT) ([0-9]+) -> ([a-z]+)$")
-                    .expect("wrong");
-            static ref PARSER4: Regex = Regex::new(r"^NOT ([a-z]+) -> ([a-z]+)$").expect("wrong");
-        }
-        if let Ok(segment) = PARSER1.captures(block).ok_or(ParseError) {
+        let parser1 = regex!(r"^([0-9]+|[a-z]+) -> ([a-z]+)$");
+        let parser2 = regex!(r"^([0-9]+|[a-z]+) (AND|OR) ([0-9]+|[a-z]+) -> ([a-z]+)$");
+        let parser3 = regex!(r"^([0-9]+|[a-z]+) (LSHIFT|RSHIFT) ([0-9]+) -> ([a-z]+)$");
+        let parser4 = regex!(r"^NOT ([a-z]+) -> ([a-z]+)$");
+        if let Ok(segment) = parser1.captures(block).ok_or(ParseError) {
             let op1: Id = Id::try_from(&segment[1])?;
             let op2: Id = Id::try_from(&segment[2])?;
             self.line.push(Code::Input(op1, op2));
             return Ok(());
         }
-        if let Ok(segment) = PARSER2.captures(block).ok_or(ParseError) {
+        if let Ok(segment) = parser2.captures(block).ok_or(ParseError) {
             let op1: Id = Id::try_from(&segment[1])?;
             let op2: Id = Id::try_from(&segment[3])?;
             let op3: Id = Id::try_from(&segment[4])?;
@@ -107,7 +101,7 @@ impl AdventOfCode for Puzzle {
             });
             return Ok(());
         }
-        if let Ok(segment) = PARSER3.captures(block).ok_or(ParseError) {
+        if let Ok(segment) = parser3.captures(block).ok_or(ParseError) {
             let op1: Id = Id::try_from(&segment[1])?;
             let op2: Id = Id::try_from(&segment[4])?;
             self.line.push(match &segment[2] {
@@ -117,7 +111,7 @@ impl AdventOfCode for Puzzle {
             });
             return Ok(());
         }
-        if let Ok(segment) = PARSER4.captures(block).ok_or(ParseError) {
+        if let Ok(segment) = parser4.captures(block).ok_or(ParseError) {
             let op1: Id = Id::try_from(&segment[1])?;
             let op2: Id = Id::try_from(&segment[2])?;
             self.line.push(Code::Not(op1, op2));

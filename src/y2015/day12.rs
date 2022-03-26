@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2015/day/12>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
-    lazy_static::lazy_static,
-    regex::Regex,
+    crate::{
+        framework::{aoc_at, AdventOfCode, ParseError},
+        regex,
+    },
     serde_json,
 };
 
@@ -20,10 +21,8 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         const PART1: bool = false;
         if PART1 {
-            lazy_static! {
-                static ref NON_DIGIT: Regex = Regex::new(r"[^---0-9]+").expect("wrong");
-            }
-            let mut after = NON_DIGIT.replace_all(block, " ").to_string();
+            let non_digit = regex!(r"[^---0-9]+");
+            let mut after = non_digit.replace_all(block, " ").to_string();
             after = after.trim().to_string();
             self.line.push(
                 after
