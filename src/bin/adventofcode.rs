@@ -40,7 +40,7 @@ pub fn main() {
         #[cfg(feature = "y2020")]
         2020 => aoc_arms!(2020),
         #[cfg(feature = "y2016")]
-        2016 => aoc_arms!(2016, 6),
+        2016 => aoc_arms!(2016, 9),
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
         _ => println!("{:?}", y2021::template::Puzzle::solve(desc, part)),
