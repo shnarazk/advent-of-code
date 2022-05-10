@@ -62,7 +62,7 @@ example ← ⟨
     "value 2 goes to bot 2"
     ⟩
 •Show ≍⟜(Decode¨) example
-data ← ⥊ •FLines "../data/2016/input-day10.txt"
+data ← ⥊ •FLines "../../data/2016/input-day10.txt"
 •Show ≍⟜(Decode¨) 2↑ data
 insts ← ⌽ Decode¨ data
 network ← (¯∞‿¯∞˙¨ ↕220) Link´ insts

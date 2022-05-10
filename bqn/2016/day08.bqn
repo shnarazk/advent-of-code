@@ -19,11 +19,11 @@ Eval ← {
 }
 screen ← 6‿50 ⥊ '.'˙↕300
 example ← ⟨ "rect 3x2", "rotate column x=1 by 1", "rotate row y=0 by 4", "rotate column y=1 by 1" ⟩
-# example ← ⥊ •FLines "../data/2016/input-day08.txt"
+# example ← ⥊ •FLines "../../data/2016/input-day08.txt"
 •Show ≍⟜(Decode¨) example
 •Show screen Eval´⌽ Decode¨ example
 •Show +´'#'=¨ ⥊ screen Eval´⌽ Decode¨ example
-•Show +´'#'=¨ ⥊ screen Eval´⌽ Decode¨ ⥊ •FLines "../data/2016/input-day08.txt"
+•Show +´'#'=¨ ⥊ screen Eval´⌽ Decode¨ ⥊ •FLines "../../data/2016/input-day08.txt"
 
 # Part 2: #####################################
-•Show screen Eval´⌽ Decode¨ ⥊ •FLines "../data/2016/input-day08.txt"
+•Show screen Eval´⌽ Decode¨ ⥊ •FLines "../../data/2016/input-day08.txt"
