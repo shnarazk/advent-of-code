@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2016/day/06>
+//! <https://adventofcode.com/2016/day/10>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -17,14 +17,14 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2016, 6)]
+#[aoc(2016, 10)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        if let Ok(output) = Command::new("bqn/2016/day06.bqn").output() {
+        if let Ok(output) = Command::new("bqn/2016/day10.bqn").output() {
             println!("{}", String::from_utf8_lossy(&output.stdout));
         }
         0
