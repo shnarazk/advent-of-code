@@ -1,4 +1,4 @@
-#!/usr/bin/env bqn
+#!/usr/bin/env cbqn
 $⟨StartsWith⟩ ← •Import "../lib.bqn"
 CallMd5 ← { ¯1↓1⊑ •SH "md5"‿"-qs"‿𝕩 }
 # IsPassword ← ("00000"˙⊸StartsWith˜)

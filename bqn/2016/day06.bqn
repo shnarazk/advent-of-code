@@ -1,4 +1,4 @@
-#!/usr/bin/env bqn
+#!/usr/bin/env cbqn
 
 example ← "eedadn
 drvtee

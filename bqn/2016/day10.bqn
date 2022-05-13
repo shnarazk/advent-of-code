@@ -1,4 +1,4 @@
-#!/usr/bin/env bqn
+#!/usr/bin/env cbqn
 ⟨Min, Max, StartsWith, Switch, Tokenize⟩ ← •Import "../lib.bqn"
 Decode ← {
     l ← Tokenize 𝕩
