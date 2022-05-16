@@ -33,4 +33,3 @@ impl AdventOfCode for Puzzle {
         0
     }
 }
-$
