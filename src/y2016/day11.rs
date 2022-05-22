@@ -113,7 +113,7 @@ impl<const N: usize> State<N> {
         };
         s.is_safe().then(|| s)
     }
-    fn adjacent(&self) -> Vec<Self> {
+    fn adjacent(&self) -> std::vec::IntoIter<State<N>> {
         let mut list: Vec<State<N>> = Vec::new();
         let floor = self.elevator();
         for i in 1..N {
@@ -136,7 +136,7 @@ impl<const N: usize> State<N> {
                 }
             }
         }
-        list
+        list.into_iter()
     }
 }
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -165,10 +165,8 @@ impl AdventOfCode for Puzzle {
         //     }
         //     // dbg!(state.cost);
         //     visit.insert(state.index());
-        //     for s in state.adjacent() {
-        //         if !visit.contains(&s.index()) {
-        //             bag.push(s);
-        //         }
+        //     for s in state.adjacent().filter(|s| !visit.contains(&s.index())) {
+        //         bag.push(s);
         //     }
         //     if 1000 < bag.len() {
         //         dbg!(bag);
@@ -176,41 +174,30 @@ impl AdventOfCode for Puzzle {
         //         return 0;
         //     }
         // }
-        let start: State<11> = State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1]);
-        assert_eq!(start.num_kinds(), 5);
         let mut visit: HashSet<usize> = HashSet::new();
         let mut bag: BinaryHeap<State<11>> = BinaryHeap::new();
-        bag.push(start);
+        bag.push(State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1]));
         while let Some(state) = bag.pop() {
             if state.is_goal() {
                 return state.cost;
             }
             visit.insert(state.index());
-            for s in state
-                .adjacent()
-                .into_iter()
-                .filter(|s| !visit.contains(&s.index()))
-            {
+            for s in state.adjacent().filter(|s| !visit.contains(&s.index())) {
                 bag.push(s);
             }
         }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let start: State<15> = State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0]);
         let mut visit: HashSet<usize> = HashSet::new();
         let mut bag: BinaryHeap<State<15>> = BinaryHeap::new();
-        bag.push(start);
+        bag.push(State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0]));
         while let Some(state) = bag.pop() {
             if state.is_goal() {
                 return state.cost;
             }
             visit.insert(state.index());
-            for s in state
-                .adjacent()
-                .into_iter()
-                .filter(|s| !visit.contains(&s.index()))
-            {
+            for s in state.adjacent().filter(|s| !visit.contains(&s.index())) {
                 bag.push(s);
             }
         }
