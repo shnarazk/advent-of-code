@@ -21,8 +21,8 @@ impl AdventOfCode for Puzzle {
         let mut passed = 0;
         let mut queue: VecDeque<(String, Vec<char>)> = VecDeque::new();
         let salt = "ahsbgdzn";
-        // let salt = "abc";
         let mut hasher = Md5::new();
+        // let salt = "abc";
         // let mut count = 0;
         for i in 0..1000 {
             hasher.update(format!("{salt}{i}"));
@@ -69,29 +69,73 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        0
+        check - 1
     }
+    #[allow(unused)]
     fn part2(&mut self) -> Self::Output2 {
+        let limit = 64;
+        let mut passed = 0;
+        let mut queue: VecDeque<(String, Vec<char>)> = VecDeque::new();
+        // let salt = "abc";
+        let salt = "ahsbgdzn";
         let mut hasher = Md5::new();
-        let mut count = 0;
-        let mut ans: [Option<u8>; 8] = [None; 8];
-        for i in 0.. {
-            hasher.update(format!("wtnhxymk{i}"));
-            let result = hasher.finalize_reset();
-            if result[0] == 0
-                && result[1] == 0
-                && result[2] < 8
-                && ans[result[2] as usize].is_none()
+        // let mut count = 0;
+        for i in 0..1000 {
+            hasher.update(format!("{salt}{i}"));
+            let mut result = hasher.finalize_reset();
             {
-                println!("{:x}", result);
-                ans[result[2] as usize] = Some(result[3] >> 4);
-                count += 1;
-                if 8 <= count {
+                for _ in 0..2016 {
+                    hasher.update(format!("{:x}", result));
+                    result = hasher.finalize_reset();
+                }
+            }
+            let phrase = format!("{:x}", result);
+            let occ5 = phrase
+                .chars()
+                .collect::<Vec<char>>()
+                .windows(5)
+                .filter(|s| s.iter().all(|c| *c == s[0]))
+                .map(|s| s[0])
+                .collect::<Vec<_>>();
+            queue.push_back((phrase, occ5));
+        }
+        let mut check = 0;
+        // let's start generate and check phase.
+        'next_phrase: while passed < limit {
+            // generate
+            hasher.update(format!("{}{}", salt, check + 1000));
+            let mut result = hasher.finalize_reset();
+            {
+                for _ in 0..2016 {
+                    hasher.update(format!("{:x}", result));
+                    result = hasher.finalize_reset();
+                }
+            }
+            let phrase = format!("{:x}", result);
+            let occ5 = phrase
+                .chars()
+                .collect::<Vec<char>>()
+                .windows(5)
+                .filter(|s| s.iter().all(|c| *c == s[0]))
+                .map(|s| s[0])
+                .collect::<Vec<_>>();
+
+            queue.push_back((phrase, occ5));
+            check += 1;
+            // check
+            let phrase = queue.pop_front().unwrap();
+            for s in phrase.0.chars().collect::<Vec<char>>().windows(3) {
+                if s[0] == s[1] && s[0] == s[2] {
+                    let ch = s[0];
+                    if queue.iter().any(|(_, cs)| cs.contains(&ch)) {
+                        passed += 1;
+                        println!("{:3>}, {:9>}: {:?}", passed, check - 1, phrase);
+                        continue 'next_phrase;
+                    }
                     break;
                 }
             }
         }
-        println!("{:?}", ans);
-        0
+        check - 1
     }
 }
