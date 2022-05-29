@@ -1,11 +1,8 @@
 //! <https://adventofcode.com/2016/day/12>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    std::process::Command,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Puzzle { }
+pub struct Puzzle {}
 
 #[aoc(2016, 12)]
 impl AdventOfCode for Puzzle {
