@@ -1,15 +1,7 @@
 //! <https://adventofcode.com/2016/day/08>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    md5::{Digest, Md5},
-    std::{collections::HashMap, process::Command},
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    std::process::Command,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -20,7 +12,7 @@ pub struct Puzzle {
 #[aoc(2016, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {

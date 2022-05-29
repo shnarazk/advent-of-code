@@ -1,19 +1,8 @@
 //! <https://adventofcode.com/2016/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    md5::{Digest, Md5},
-    std::{
-        collections::{BinaryHeap, HashSet},
-        process::Command,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    std::collections::{BinaryHeap, HashSet},
 };
 
 #[derive(Debug)]
@@ -72,9 +61,6 @@ impl<const N: usize> State<N> {
     }
     fn kinds(&self) -> std::ops::Range<usize> {
         0..(N - 1) / 2
-    }
-    fn num_kinds(&self) -> usize {
-        (N - 1) / 2
     }
     fn elevator(&self) -> u8 {
         self.state[0]
@@ -147,7 +133,7 @@ pub struct Puzzle {
 #[aoc(2016, 11)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {

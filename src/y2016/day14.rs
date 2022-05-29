@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2016/day/05>
+//! <https://adventofcode.com/2016/day/14>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     md5::{Digest, Md5},
@@ -9,7 +9,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2016, 5)]
+#[aoc(2016, 14)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
