@@ -27,7 +27,6 @@ impl AdventOfCode for Puzzle {
         // self.line.push((2, 0));
         // self.line.push((7, 2));
         let mut x = self.line[0];
-        let len = self.line.len();
         for (i, tuple) in self.line.iter().enumerate() {
             let mut m = (tuple.0 + tuple.1 + ((i + 1) % tuple.0)) % tuple.0;
             m = tuple.0 - m;
@@ -54,20 +53,19 @@ impl AdventOfCode for Puzzle {
         x.1
     }
     fn part2(&mut self) -> usize {
-        // let mut x = self.bus[0];
-        // for tuple in self.bus.iter().skip(1) {
-        //     let offset = if tuple.1 <= tuple.0 {
-        //         tuple.0 - tuple.1
-        //     } else {
-        //         println!("逆転{}, {}", tuple.0, tuple.1);
-        //         (tuple.0 * tuple.1 - tuple.1) % tuple.0
-        //     };
-        //     println!("周期{}で{}余る", tuple.0, offset);
-        //     x = chinese(x, (tuple.0, offset));
-        //     //assert_eq!(tuple.0 - x.1 % tuple.0, tuple.1);
-        // }
-        // x.1
-        0
+        self.line.push((11, 0));
+        let mut x = self.line[0];
+        for (i, tuple) in self.line.iter().enumerate() {
+            let mut m = (tuple.0 + tuple.1 + ((i + 1) % tuple.0)) % tuple.0;
+            m = tuple.0 - m;
+            println!("周期{}で{}start", tuple.0, m);
+            if i == 0 {
+                x = (tuple.0, m);
+            } else {
+                x = chinese(x, (tuple.0, m));
+            }
+        }
+        x.1
     }
 }
 
