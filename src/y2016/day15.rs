@@ -14,29 +14,42 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let numbers = regex!(r"(\d+)\D+(\d+)\D+(\d+)\D+(\d+)");
-        let offset = self.line.len() + 1;
         if let Ok(n) = numbers.captures(block).ok_or(ParseError) {
             let n2 = n[2].parse::<usize>().expect("-");
             let n4 = n[4].parse::<usize>().expect("-");
-            let n_4 = (n4 + offset) % n2;
-            self.line.push((n2, n_4));
+            self.line.push((n2, n4));
         }
         Ok(())
     }
     fn part1(&mut self) -> usize {
-        assert_eq!(chinese((5, 0), (2, 1)).1, 5);
+        // self.line.clear();
+        // self.line.push((5, 4));
+        // self.line.push((2, 0));
+        // self.line.push((7, 2));
         let mut x = self.line[0];
-        for tuple in self.line.iter().skip(1) {
-            let offset = if tuple.1 <= tuple.0 {
-                tuple.0 - tuple.1
+        let len = self.line.len();
+        for (i, tuple) in self.line.iter().enumerate() {
+            let mut m = (tuple.0 + tuple.1 + ((i + 1) % tuple.0)) % tuple.0;
+            m = tuple.0 - m;
+            println!("周期{}で{}start", tuple.0, m);
+            if i == 0 {
+                x = (tuple.0, m);
             } else {
-                println!("逆転{}, {}", tuple.0, tuple.1);
-                (tuple.0 * tuple.1 - tuple.1) % tuple.0
-            };
-            println!("周期{}で{}余る", tuple.0, offset);
-            // x = chinese(x, (tuple.0, offset));
-            x = chinese(x, *tuple);
-            // assert_eq!(tuple.0 - x.1 % tuple.0, tuple.1);
+                x = chinese(x, (tuple.0, m));
+            }
+        }
+        dbg!(&x);
+        let mut vec = self.line.iter().map(|(_, o)| *o).collect::<Vec<_>>();
+        for t in 0..=(x.1 + self.line.len()) {
+            if x.1 < t + self.line.len() {
+                println!("{:>4}: {:?}", t, vec);
+            }
+            for (i, v) in vec.iter_mut().enumerate() {
+                *v = (*v + 1) % self.line[i].0;
+            }
+            if t == x.1 {
+                println!("-------------------");
+            }
         }
         x.1
     }
