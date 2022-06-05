@@ -23,6 +23,21 @@ pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> 
     }
 }
 
+/// parse a line like '312'
+/// ```
+/// use adventofcode::{framework::ParseError, line_parser};
+/// assert_eq!(line_parser::to_isize("-0189"), Ok(0189));
+/// assert_eq!(line_parser::to_isize("0"), Ok(0));
+/// assert_eq!(line_parser::to_isize("448"), Ok(448));
+/// ```
+pub fn to_usize(line: &str) -> Result<usize, ParseError> {
+    if line.starts_with('-') {
+        Ok(line.trim_matches('-').parse::<usize>()?)
+    } else {
+        Ok(line.parse::<usize>()?)
+    }
+}
+
 /// parse a line like '-312'
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
