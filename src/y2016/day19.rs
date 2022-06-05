@@ -1,6 +1,4 @@
 //! <https://adventofcode.com/2016/day/19>
-use std::usize;
-
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
     line_parser,
@@ -53,29 +51,8 @@ impl AdventOfCode for Puzzle {
             } else {
                 dist -= 1;
             }
-            assert_eq!(remain / 2, dist);
+            debug_assert_eq!(remain / 2, dist);
         }
         index
     }
-    // fn part2(&mut self) -> Self::Output2 {
-    //     // self.input = 5;
-    //     let mut next = vec![0];
-    //     for i in 1..=self.input {
-    //         next.push(i + 1);
-    //     }
-    //     next[self.input] = 1;
-    //     let mut index = 1;
-    //     let mut remain = self.input;
-    //     while next[index] != index {
-    //         let mut i = index;
-    //         for _ in 1..remain / 2 {
-    //             i = next[i];
-    //         }
-    //         next[i] = next[next[i]];
-    //         index = next[index];
-    //         assert_ne!(remain, 0);
-    //         remain -= 1;
-    //     }
-    //     index
-    // }
 }
