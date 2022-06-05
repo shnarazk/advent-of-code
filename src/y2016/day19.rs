@@ -34,6 +34,24 @@ impl AdventOfCode for Puzzle {
         index
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        // self.input = 5;
+        let mut next = vec![0];
+        for i in 1..=self.input {
+            next.push(i + 1);
+        }
+        next[self.input] = 1;
+        let mut index = 1;
+        let mut remain = self.input;
+        while next[index] != index {
+            let mut i = index;
+            for _ in 1..remain / 2 {
+                i = next[i];
+            }
+            next[i] = next[next[i]];
+            index = next[index];
+            assert_ne!(remain, 0);
+            remain -= 1;
+        }
+        index
     }
 }
