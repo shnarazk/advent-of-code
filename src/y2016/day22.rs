@@ -13,31 +13,42 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(usize, usize, usize, usize, usize, usize)>,
 }
 
 #[aoc(2016, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
+    fn header(&mut self, input: String) -> Result<String, ParseError> {
+        let parser = regex!(r"^.+\n.+\n((.|\n)+)$");
+        let segment = parser.captures(&input).ok_or(ParseError)?;
+        Ok(segment[1].to_string())
+    }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        let parser = regex!(r"/dev/grid/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line.push((
+            segment[1].parse::<usize>()?,
+            segment[2].parse::<usize>()?,
+            segment[3].parse::<usize>()?,
+            segment[4].parse::<usize>()?,
+            segment[5].parse::<usize>()?,
+            segment[6].parse::<usize>()?,
+        ));
         Ok(())
     }
-    fn after_insert(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.line.sort_unstable_by_key(|line| line.4);
+        let n = self.line.len();
+        let mut count = 0;
+        for (i, dev) in self.line.iter().enumerate() {
+            for (j, other) in self.line.iter().enumerate() {
+                if 0 < dev.3 && i != j && dev.3 <= other.4 {
+                    count += 1;
+                }
+            }
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
