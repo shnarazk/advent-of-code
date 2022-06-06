@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -42,7 +42,46 @@ impl AdventOfCode for Puzzle {
         result
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut result: usize = 0;
+        let mut pres: HashSet<usize> = HashSet::new();
+        for (l, h) in self.line.iter() {
+            // assert!(*l < *h);
+            pres.insert(*l);
+            pres.insert(*h);
+        }
+        let mut vals: Vec<usize> = Vec::new();
+        for v in pres.iter() {
+            vals.push(*v);
+        }
+        for (l, h) in self.line.iter() {
+            if l == h {
+                dbg!(l);
+                vals.push(*l);
+            }
+        }
+        vals.sort_unstable();
+        let mut carry = false;
+        // dbg!(&vals[0..10]);
+        for vec in vals.windows(2) {
+            let r0 = vec[0];
+            let r1 = vec[1];
+            if self
+                .line
+                .iter()
+                .any(|(l, h)| *l <= r0 && r0 <= *h && *l <= r1 && r1 <= *h)
+            {
+                result += r1 - r0;
+                carry = true;
+            } else {
+                result += carry as usize;
+                carry = false;
+            }
+        }
+        if carry {
+            result += 1;
+        }
+        dbg!(result);
+        u32::MAX as usize - result
     }
 }
 
