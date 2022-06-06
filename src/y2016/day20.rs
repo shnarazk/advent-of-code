@@ -53,15 +53,8 @@ impl AdventOfCode for Puzzle {
         for v in pres.iter() {
             vals.push(*v);
         }
-        for (l, h) in self.line.iter() {
-            if l == h {
-                dbg!(l);
-                vals.push(*l);
-            }
-        }
         vals.sort_unstable();
         let mut carry = false;
-        // dbg!(&vals[0..10]);
         for vec in vals.windows(2) {
             let r0 = vec[0];
             let r1 = vec[1];
@@ -81,7 +74,7 @@ impl AdventOfCode for Puzzle {
             result += 1;
         }
         dbg!(result);
-        u32::MAX as usize - result
+        u32::MAX as usize - result + 1
     }
 }
 
