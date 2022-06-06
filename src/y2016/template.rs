@@ -19,13 +19,13 @@ pub struct Puzzle {
 #[aoc(2016, 0)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
+    // fn header(&mut self, input: String) -> Result<String, ParseError> {
+    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
+    //     let segment = parser.captures(&input).ok_or(ParseError)?;
     //     for num in segment[1].split(',') {
     //         let _value = num.parse::<usize>()?;
     //     }
-    //     Ok(Some(segment[2].to_string()))
+    //     Ok(segment[2].to_string())
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let parser = regex!(r"^([0-9]+)$");
