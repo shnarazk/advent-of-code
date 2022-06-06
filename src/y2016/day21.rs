@@ -1,17 +1,9 @@
 //! <https://adventofcode.com/2016/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use std::collections::VecDeque;
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser, regex,
 };
+use std::collections::VecDeque;
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum OpCode {
@@ -68,7 +60,9 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut phrase: VecDeque<u8> = VecDeque::from(b"abcdefgh".to_vec());
+        // let p = b"fbgdceah";
+        let p = b"fcdbahge";
+        let mut phrase: VecDeque<u8> = VecDeque::from(p.to_vec());
         // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
         for code in self.line.iter() {
             match code {
@@ -124,23 +118,79 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let p = b"fbgdceah";
+        // let p = b"decab";
+        let mut phrase: VecDeque<u8> = VecDeque::from(p.to_vec());
+        // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
+        for code in self.line.iter().rev() {
+            match code {
+                OpCode::Swap0(arg1, arg2) => {
+                    phrase.swap(*arg1, *arg2);
+                }
+                OpCode::Swap1(arg1, arg2) => {
+                    for c in phrase.iter_mut() {
+                        match *c {
+                            _ if *c == *arg1 => *c = *arg2,
+                            _ if *c == *arg2 => *c = *arg1,
+                            _ => (),
+                        }
+                    }
+                }
+                OpCode::Reverse(arg1, arg2) => {
+                    let mut left = *arg1;
+                    let mut right = *arg2;
+                    while left < right {
+                        phrase.swap(left, right);
+                        left += 1;
+                        right -= 1;
+                    }
+                }
+                OpCode::Rotate0(to_right, arg) => {
+                    if !*to_right {
+                        phrase.rotate_right(*arg);
+                    } else {
+                        phrase.rotate_left(*arg);
+                    }
+                }
+                OpCode::Move(arg2, arg1) => {
+                    let c = phrase.remove(*arg1).unwrap();
+                    phrase.insert(*arg2, c);
+                }
+                OpCode::Rotate1(arg) => {
+                    for (j, c) in phrase.iter().enumerate() {
+                        if *c == *arg {
+                            let m = phrase.len();
+                            let i = match j {
+                                1 => 0,
+                                3 => 1,
+                                5 => 2,
+                                7 => 3,
+                                2 => 4,
+                                4 => 5,
+                                6 => 6,
+                                0 => 7,
+                                _ => unreachable!(),
+                            };
+                            // let i = match j {
+                            //     1 => 0,
+                            //     3 => 1,
+                            //     2 => 3,
+                            //     0 => 4,
+                            //     _ => unreachable!(),
+                            // };
+                            phrase.rotate_left((m + j - i) % m);
+                            break;
+                        }
+                    }
+                }
+            }
+            dbg!(String::from_utf8_lossy(
+                &phrase.iter().copied().collect::<Vec<u8>>()
+            ));
+        }
+        dbg!(String::from_utf8_lossy(
+            &phrase.iter().copied().collect::<Vec<u8>>()
+        ));
         0
     }
-}
-
-#[cfg(feature = "y2016")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
