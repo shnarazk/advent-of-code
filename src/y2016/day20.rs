@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2016/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::HashSet,
 };
@@ -76,21 +72,4 @@ impl AdventOfCode for Puzzle {
         dbg!(result);
         u32::MAX as usize - result + 1
     }
-}
-
-#[cfg(feature = "y2016")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
