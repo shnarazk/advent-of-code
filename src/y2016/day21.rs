@@ -68,8 +68,8 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcdefgh".to_vec());
-        let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
+        let mut phrase: VecDeque<u8> = VecDeque::from(b"abcdefgh".to_vec());
+        // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
         for code in self.line.iter() {
             match code {
                 OpCode::Swap0(arg1, arg2) => {
