@@ -2,13 +2,14 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{binary_heap::BinaryHeap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -51,6 +52,19 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
+        type State = Vec<usize>;
+        let mut to_visit: BinaryHeap<(usize, State)> = BinaryHeap::new();
+        let mut visited: HashSet<State> = HashSet::new();
+        let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
+        to_visit.push((0, init));
+        while let Some(state) = to_visit.pop() {
+            for (i, used) in state.1.iter().enumerate() {
+                if *used == 0 {
+                    dbg!(i);
+                }
+            }
+            visited.insert(state.1);
+        }
         0
     }
 }
