@@ -31,8 +31,8 @@ impl AdventOfCode for Puzzle {
         let parser = regex!(r"/dev/grid/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$");
         let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
-            segment[1].parse::<usize>()?,
-            segment[2].parse::<usize>()?,
+            segment[2].parse::<usize>()?, // y
+            segment[1].parse::<usize>()?, // x
             segment[3].parse::<usize>()?,
             segment[4].parse::<usize>()?,
             segment[5].parse::<usize>()?,
@@ -57,21 +57,36 @@ impl AdventOfCode for Puzzle {
         type State = Vec<usize>;
         let mut w = 0;
         let mut h = 0;
+        self.line.sort_unstable();
         for cell in self.line.iter() {
-            w = w.max(cell.0);
-            h = h.max(cell.1);
+            h = h.max(cell.0);
+            w = w.max(cell.1);
         }
         let width = w + 1;
         let height = h + 1;
         dbg!(width, height);
         assert_eq!(width * height, self.line.len());
-        let mut to_visit: BinaryHeap<(usize, usize, State, usize)> = BinaryHeap::new();
+        let mut to_visit: BinaryHeap<(isize, usize, State, usize)> = BinaryHeap::new();
         let mut visited: HashSet<State> = HashSet::new();
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
+        dbg!(&init);
         to_visit.push((0, 0, init, width - 1));
         let mut check = width;
         while let Some(state) = to_visit.pop() {
-            assert!(visited.len() < 1_000_000);
+            for (i, c) in state.2.iter().enumerate() {
+                if i == state.3 {
+                    print!("G");
+                } else if *c == 0 {
+                    print!("_");
+                } else {
+                    print!("{}", *c);
+                }
+                if (i + 1) % width == 0 {
+                    println!();
+                }
+            }
+            println!();
+            assert!(visited.len() < 40000);
             if 0 == state.3 {
                 dbg!(state.1);
                 return 0;
@@ -85,19 +100,20 @@ impl AdventOfCode for Puzzle {
             }
             let a_star = state.3 % width + state.3 / width;
             if a_star < check {
-                dbg!(a_star);
+                dbg!(a_star, visited.len());
                 check = a_star;
             }
             // Up
-            if width <= empty && state.2[empty - width] < self.line[empty].2 {
+            if width <= empty && state.2[empty - width] <= self.line[empty].2 {
                 let mut new = state.2.clone();
                 new.swap(empty, empty - width);
                 if !visited.contains(&new) {
                     to_visit.push((
-                        state.0 + a_star,
-                        state.0 + 1,
+                        -((state.1 + 1 + a_star) as isize),
+                        state.1 + 1,
                         new,
                         if empty - width == state.3 {
+                            dbg!("up");
                             empty
                         } else {
                             state.3
@@ -106,15 +122,16 @@ impl AdventOfCode for Puzzle {
                 }
             };
             // Down
-            if empty + width < self.line.len() && state.2[empty + width] < self.line[empty].2 {
+            if empty + width < self.line.len() && state.2[empty + width] <= self.line[empty].2 {
                 let mut new = state.2.clone();
                 new.swap(empty, empty + width);
                 if !visited.contains(&new) {
                     to_visit.push((
-                        state.0 + a_star,
-                        state.0 + 1,
+                        -((state.1 + 1 + a_star) as isize),
+                        state.1 + 1,
                         new,
                         if empty + width == state.3 {
+                            dbg!("down");
                             empty
                         } else {
                             state.3
@@ -123,28 +140,38 @@ impl AdventOfCode for Puzzle {
                 }
             };
             // Left
-            if 0 < empty % width && state.2[empty - 1] < self.line[empty].2 {
+            if 0 < empty % width && state.2[empty - 1] <= self.line[empty].2 {
                 let mut new = state.2.clone();
                 new.swap(empty, empty - 1);
                 if !visited.contains(&new) {
                     to_visit.push((
-                        state.0 + a_star,
-                        state.0 + 1,
+                        -((state.1 + 1 + a_star) as isize),
+                        state.1 + 1,
                         new,
-                        if empty - 1 == state.3 { empty } else { state.3 },
+                        if empty - 1 == state.3 {
+                            dbg!("right");
+                            empty
+                        } else {
+                            state.3
+                        },
                     ));
                 }
             };
             // Right
-            if 0 < (empty + 1) % width && state.2[empty + 1] < self.line[empty].2 {
+            if 0 < (empty + 1) % width && state.2[empty + 1] <= self.line[empty].2 {
                 let mut new = state.2.clone();
                 new.swap(empty, empty + 1);
                 if !visited.contains(&new) {
                     to_visit.push((
-                        state.0 + a_star,
-                        state.0 + 1,
+                        -((state.1 + a_star) as isize),
+                        state.1 + 1,
                         new,
-                        if empty + 1 == state.3 { empty } else { state.3 },
+                        if empty + 1 == state.3 {
+                            dbg!("left");
+                            empty
+                        } else {
+                            state.3
+                        },
                     ));
                 }
             };
