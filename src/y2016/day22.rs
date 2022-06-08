@@ -3,6 +3,8 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
+use std::usize;
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -53,35 +55,101 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         type State = Vec<usize>;
-        let mut to_visit: BinaryHeap<(usize, State)> = BinaryHeap::new();
+        let mut w = 0;
+        let mut h = 0;
+        for cell in self.line.iter() {
+            w = w.max(cell.0);
+            h = h.max(cell.1);
+        }
+        let width = w + 1;
+        let height = h + 1;
+        dbg!(width, height);
+        assert_eq!(width * height, self.line.len());
+        let mut to_visit: BinaryHeap<(usize, usize, State, usize)> = BinaryHeap::new();
         let mut visited: HashSet<State> = HashSet::new();
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
-        to_visit.push((0, init));
+        to_visit.push((0, 0, init, width - 1));
+        let mut check = width;
         while let Some(state) = to_visit.pop() {
-            for (i, used) in state.1.iter().enumerate() {
+            assert!(visited.len() < 1_000_000);
+            if 0 == state.3 {
+                dbg!(state.1);
+                return 0;
+            }
+            let mut empty = 0;
+            for (i, used) in state.2.iter().enumerate() {
                 if *used == 0 {
-                    dbg!(i);
+                    empty = i;
+                    break;
                 }
             }
-            visited.insert(state.1);
+            let a_star = state.3 % width + state.3 / width;
+            if a_star < check {
+                dbg!(a_star);
+                check = a_star;
+            }
+            // Up
+            if width <= empty && state.2[empty - width] < self.line[empty].2 {
+                let mut new = state.2.clone();
+                new.swap(empty, empty - width);
+                if !visited.contains(&new) {
+                    to_visit.push((
+                        state.0 + a_star,
+                        state.0 + 1,
+                        new,
+                        if empty - width == state.3 {
+                            empty
+                        } else {
+                            state.3
+                        },
+                    ));
+                }
+            };
+            // Down
+            if empty + width < self.line.len() && state.2[empty + width] < self.line[empty].2 {
+                let mut new = state.2.clone();
+                new.swap(empty, empty + width);
+                if !visited.contains(&new) {
+                    to_visit.push((
+                        state.0 + a_star,
+                        state.0 + 1,
+                        new,
+                        if empty + width == state.3 {
+                            empty
+                        } else {
+                            state.3
+                        },
+                    ));
+                }
+            };
+            // Left
+            if 0 < empty % width && state.2[empty - 1] < self.line[empty].2 {
+                let mut new = state.2.clone();
+                new.swap(empty, empty - 1);
+                if !visited.contains(&new) {
+                    to_visit.push((
+                        state.0 + a_star,
+                        state.0 + 1,
+                        new,
+                        if empty - 1 == state.3 { empty } else { state.3 },
+                    ));
+                }
+            };
+            // Right
+            if 0 < (empty + 1) % width && state.2[empty + 1] < self.line[empty].2 {
+                let mut new = state.2.clone();
+                new.swap(empty, empty + 1);
+                if !visited.contains(&new) {
+                    to_visit.push((
+                        state.0 + a_star,
+                        state.0 + 1,
+                        new,
+                        if empty + 1 == state.3 { empty } else { state.3 },
+                    ));
+                }
+            };
+            visited.insert(state.2);
         }
         0
     }
-}
-
-#[cfg(feature = "y2016")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
