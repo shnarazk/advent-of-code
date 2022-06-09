@@ -71,22 +71,22 @@ impl AdventOfCode for Puzzle {
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
         dbg!(&init);
         to_visit.push((0, 0, init, width - 1));
-        let mut check = width;
+        let mut check = 10 * width;
         while let Some(state) = to_visit.pop() {
-            for (i, c) in state.2.iter().enumerate() {
-                if i == state.3 {
-                    print!("G");
-                } else if *c == 0 {
-                    print!("_");
-                } else {
-                    print!("{}", *c);
-                }
-                if (i + 1) % width == 0 {
-                    println!();
-                }
-            }
-            println!();
-            assert!(visited.len() < 40000);
+            // for (i, c) in state.2.iter().enumerate() {
+            //     if i == state.3 {
+            //         print!("G");
+            //     } else if *c == 0 {
+            //         print!("_");
+            //     } else {
+            //         print!("{}", *c);
+            //     }
+            //     if (i + 1) % width == 0 {
+            //         println!();
+            //     }
+            // }
+            // println!();
+            assert!(visited.len() < 1_000_000);
             if 0 == state.3 {
                 dbg!(state.1);
                 return 0;
@@ -98,27 +98,13 @@ impl AdventOfCode for Puzzle {
                     break;
                 }
             }
-            let a_star = state.3 % width + state.3 / width;
-            if a_star < check {
-                dbg!(a_star, visited.len());
-                check = a_star;
-            }
+            let mut neighbors: Vec<(usize, Vec<usize>)> = Vec::new();
             // Up
             if width <= empty && state.2[empty - width] <= self.line[empty].2 {
                 let mut new = state.2.clone();
                 new.swap(empty, empty - width);
                 if !visited.contains(&new) {
-                    to_visit.push((
-                        -((state.1 + 1 + a_star) as isize),
-                        state.1 + 1,
-                        new,
-                        if empty - width == state.3 {
-                            dbg!("up");
-                            empty
-                        } else {
-                            state.3
-                        },
-                    ));
+                    neighbors.push((empty - width, new));
                 }
             };
             // Down
@@ -126,17 +112,7 @@ impl AdventOfCode for Puzzle {
                 let mut new = state.2.clone();
                 new.swap(empty, empty + width);
                 if !visited.contains(&new) {
-                    to_visit.push((
-                        -((state.1 + 1 + a_star) as isize),
-                        state.1 + 1,
-                        new,
-                        if empty + width == state.3 {
-                            dbg!("down");
-                            empty
-                        } else {
-                            state.3
-                        },
-                    ));
+                    neighbors.push((empty + width, new));
                 }
             };
             // Left
@@ -144,17 +120,7 @@ impl AdventOfCode for Puzzle {
                 let mut new = state.2.clone();
                 new.swap(empty, empty - 1);
                 if !visited.contains(&new) {
-                    to_visit.push((
-                        -((state.1 + 1 + a_star) as isize),
-                        state.1 + 1,
-                        new,
-                        if empty - 1 == state.3 {
-                            dbg!("right");
-                            empty
-                        } else {
-                            state.3
-                        },
-                    ));
+                    neighbors.push((empty - 1, new));
                 }
             };
             // Right
@@ -162,19 +128,20 @@ impl AdventOfCode for Puzzle {
                 let mut new = state.2.clone();
                 new.swap(empty, empty + 1);
                 if !visited.contains(&new) {
-                    to_visit.push((
-                        -((state.1 + a_star) as isize),
-                        state.1 + 1,
-                        new,
-                        if empty + 1 == state.3 {
-                            dbg!("left");
-                            empty
-                        } else {
-                            state.3
-                        },
-                    ));
+                    neighbors.push((empty + 1, new));
                 }
             };
+            while let Some((index, neighbor)) = neighbors.pop() {
+                let goal = if index == state.3 { empty } else { state.3 };
+                let a_star = 2 * (goal % width + goal / width)
+                    + (index % width).abs_diff(goal % width)
+                    + (index / width).abs_diff(goal / width);
+                if a_star < check {
+                    dbg!(a_star, visited.len());
+                    check = a_star;
+                }
+                to_visit.push((-((state.1 + a_star) as isize), state.1 + 1, neighbor, goal));
+            }
             visited.insert(state.2);
         }
         0
