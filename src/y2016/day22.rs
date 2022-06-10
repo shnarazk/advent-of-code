@@ -30,14 +30,21 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let parser = regex!(r"/dev/grid/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
+        let site = (
             segment[2].parse::<usize>()?, // y
             segment[1].parse::<usize>()?, // x
             segment[3].parse::<usize>()?,
             segment[4].parse::<usize>()?,
             segment[5].parse::<usize>()?,
             segment[6].parse::<usize>()?,
-        ));
+        );
+        self.line.push(site);
+        // if 17 != site.0 && 100 < site.2.min(site.3) {
+        //     dbg!(site);
+        // }
+        if 0 == site.3 {
+            dbg!(site);
+        }
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -65,15 +72,37 @@ impl AdventOfCode for Puzzle {
         let width = w + 1;
         let height = h + 1;
         dbg!(width, height);
+        // for (i, cell) in self.line.iter().enumerate() {
+        //     print!("{:>3},", cell.2);
+        //     if (i + 1) % width == 0 {
+        //         println!();
+        //     }
+        // }
+        // if 0 < self.line.len() {
+        //     return 0;
+        // }
         assert_eq!(width * height, self.line.len());
         let mut to_visit: BinaryHeap<(isize, usize, State, usize)> = BinaryHeap::new();
         let mut visited: HashSet<State> = HashSet::new();
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
         dbg!(&init);
-        let mut check: isize = -10_000;
+        let mut check: isize = -1_000_000;
         to_visit.push((check + 1, 0, init, width - 1));
         while let Some(state) = to_visit.pop() {
-            if check < state.0 || 0 == state.3 {
+            // if 267 <= state.1 {
+            //     continue;
+            // }
+            assert!(visited.len() < 1_000_000);
+            let mut empty = 0;
+            for (i, used) in state.2.iter().enumerate() {
+                if *used == 0 {
+                    empty = i;
+                    break;
+                }
+            }
+            if (/* 2 < empty / width */check < -170 && check < state.0 + state.1 as isize)
+                || 0 == state.3
+            {
                 for (i, c) in state.2.iter().enumerate() {
                     if i == state.3 {
                         print!(" G ,");
@@ -86,20 +115,12 @@ impl AdventOfCode for Puzzle {
                         println!();
                     }
                 }
-                check = state.0;
+                check = state.0 + state.1 as isize;
                 dbg!(check, visited.len());
             }
-            assert!(visited.len() < 1_000_000);
             if 0 == state.3 {
                 dbg!(state.1);
                 return 0;
-            }
-            let mut empty = 0;
-            for (i, used) in state.2.iter().enumerate() {
-                if *used == 0 {
-                    empty = i;
-                    break;
-                }
             }
             let mut neighbors: Vec<(usize, Vec<usize>)> = Vec::new();
             // Up
@@ -136,11 +157,22 @@ impl AdventOfCode for Puzzle {
             };
             while let Some((index, neighbor)) = neighbors.pop() {
                 let goal = if index == state.3 { empty } else { state.3 };
-                let a_star = 2 * (goal % width + goal / width)
-                    + (index % width).abs_diff(0 /* goal % width */)
-                    + (index / width).abs_diff(0 /* goal / width */);
+                let a_star = if 17 < index / width
+                /* && 1 < index % width */
+                {
+                    10000 + ((index % width).abs_diff(1) + (index / width).abs_diff(0))
+                } else if 2 < index / width {
+                    1000 + ((index % width).abs_diff((goal % width).saturating_sub(1))
+                        + (index / width).abs_diff(goal / width + 1))
+                } else {
+                    // 2 * (goal % width + goal / width) + (index % width + index / width)
+                    3 * (goal % width) + (index % width)
+                    // + (index % width).abs_diff(0)
+                    // + (index / width).abs_diff(0)
+                    // + ((index % width).abs_diff((goal % width).saturating_sub(1)) + (index / width).abs_diff(goal / width))
+                };
                 to_visit.push((
-                    -((/* state.1 + */a_star) as isize),
+                    -((state.1 + 1 + a_star) as isize),
                     state.1 + 1,
                     neighbor,
                     goal,
