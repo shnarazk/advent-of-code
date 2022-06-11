@@ -1,15 +1,8 @@
 //! <https://adventofcode.com/2016/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use std::usize;
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{binary_heap::BinaryHeap, HashSet},
 };
@@ -47,9 +40,19 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
+    fn after_insert(&mut self) {
+        self.line.sort_unstable();
+        let mut w = 0;
+        for cell in self.line.iter() {
+            w = w.max(cell.1);
+        }
+        let width = w + 1;
+        for (i, site) in self.line.iter().enumerate() {
+            assert_eq!(i, site.0 * width + site.1);
+        }
+    }
     fn part1(&mut self) -> Self::Output1 {
         self.line.sort_unstable_by_key(|line| line.4);
-        let n = self.line.len();
         let mut count = 0;
         for (i, dev) in self.line.iter().enumerate() {
             for (j, other) in self.line.iter().enumerate() {
@@ -64,7 +67,6 @@ impl AdventOfCode for Puzzle {
         type State = Vec<usize>;
         let mut w = 0;
         let mut h = 0;
-        self.line.sort_unstable();
         for cell in self.line.iter() {
             h = h.max(cell.0);
             w = w.max(cell.1);
@@ -72,42 +74,26 @@ impl AdventOfCode for Puzzle {
         let width = w + 1;
         let height = h + 1;
         dbg!(width, height);
-        // for (i, cell) in self.line.iter().enumerate() {
-        //     print!("{:>3},", cell.2);
-        //     if (i + 1) % width == 0 {
-        //         println!();
-        //     }
-        // }
-        // if 0 < self.line.len() {
-        //     return 0;
-        // }
         assert_eq!(width * height, self.line.len());
         let mut to_visit: BinaryHeap<(isize, usize, State, usize)> = BinaryHeap::new();
-        let mut visited: HashSet<State> = HashSet::new();
+        let mut visited: HashSet<(State, usize)> = HashSet::new();
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
-        dbg!(&init);
         let mut check: isize = -1_000_000;
         to_visit.push((check + 1, 0, init, width - 1));
-        while let Some(state) = to_visit.pop() {
-            // if 267 <= state.1 {
-            //     continue;
-            // }
+        while let Some((a_star, cost, state, goal)) = to_visit.pop() {
             assert!(visited.len() < 1_000_000);
-            let mut empty = 0;
-            for (i, used) in state.2.iter().enumerate() {
-                if *used == 0 {
-                    empty = i;
-                    break;
-                }
-            }
-            if (/* 2 < empty / width */check < -170 && check < state.0 + state.1 as isize)
-                || 0 == state.3
-            {
-                for (i, c) in state.2.iter().enumerate() {
-                    if i == state.3 {
-                        print!(" G ,");
+            let empty = state
+                .iter()
+                .enumerate()
+                .find(|(_, used)| **used == 0)
+                .unwrap()
+                .0;
+            if (-1400 < check && check < a_star + cost as isize) || 0 == goal {
+                for (i, c) in state.iter().enumerate() {
+                    if i == goal {
+                        print!("G{:>2},", *c);
                     } else if *c == 0 {
-                        print!(" _ ,");
+                        print!("  _,");
                     } else {
                         print!("{:>3},", *c);
                     }
@@ -115,70 +101,58 @@ impl AdventOfCode for Puzzle {
                         println!();
                     }
                 }
-                check = state.0 + state.1 as isize;
-                dbg!(check, visited.len());
+                dbg!(cost);
             }
-            if 0 == state.3 {
-                dbg!(state.1);
-                return 0;
+            check = check.max(a_star + cost as isize);
+
+            if 0 == goal {
+                return dbg!(cost);
             }
             let mut neighbors: Vec<(usize, Vec<usize>)> = Vec::new();
+            macro_rules! ADD {
+                ($pos: expr) => {
+                    let mut new = state.clone();
+                    new.swap(empty, $pos);
+                    let new_goal = if $pos == goal { empty } else { goal };
+                    if !visited.contains(&(new.clone(), new_goal)) {
+                        neighbors.push(($pos, new));
+                    }
+                };
+            }
             // Up
-            if width <= empty && state.2[empty - width] <= self.line[empty].2 {
-                let mut new = state.2.clone();
-                new.swap(empty, empty - width);
-                if !visited.contains(&new) {
-                    neighbors.push((empty - width, new));
-                }
+            if width <= empty && state[empty - width] <= self.line[empty].2 {
+                ADD!(empty - width);
             };
             // Down
-            if empty + width < self.line.len() && state.2[empty + width] <= self.line[empty].2 {
-                let mut new = state.2.clone();
-                new.swap(empty, empty + width);
-                if !visited.contains(&new) {
-                    neighbors.push((empty + width, new));
-                }
+            if empty + width < self.line.len() && state[empty + width] <= self.line[empty].2 {
+                ADD!(empty + width);
             };
             // Left
-            if 0 < empty % width && state.2[empty - 1] <= self.line[empty].2 {
-                let mut new = state.2.clone();
-                new.swap(empty, empty - 1);
-                if !visited.contains(&new) {
-                    neighbors.push((empty - 1, new));
-                }
+            if 0 < empty % width && state[empty - 1] <= self.line[empty].2 {
+                ADD!(empty - 1);
             };
             // Right
-            if 0 < (empty + 1) % width && state.2[empty + 1] <= self.line[empty].2 {
-                let mut new = state.2.clone();
-                new.swap(empty, empty + 1);
-                if !visited.contains(&new) {
-                    neighbors.push((empty + 1, new));
-                }
+            if 0 < (empty + 1) % width && state[empty + 1] <= self.line[empty].2 {
+                ADD!(empty + 1);
             };
             while let Some((index, neighbor)) = neighbors.pop() {
-                let goal = if index == state.3 { empty } else { state.3 };
-                let a_star = if 17 < index / width
-                /* && 1 < index % width */
-                {
+                let new_goal = if index == goal { empty } else { goal };
+                let a_star = if 17 < index / width {
                     10000 + ((index % width).abs_diff(1) + (index / width).abs_diff(0))
-                } else if 2 < index / width {
-                    1000 + ((index % width).abs_diff((goal % width).saturating_sub(1))
-                        + (index / width).abs_diff(goal / width + 1))
+                } else if new_goal == width - 1 {
+                    1000 + ((index % width).abs_diff((new_goal % width).saturating_sub(1))
+                        + (index / width).abs_diff(new_goal / width))
                 } else {
-                    // 2 * (goal % width + goal / width) + (index % width + index / width)
-                    3 * (goal % width) + (index % width)
-                    // + (index % width).abs_diff(0)
-                    // + (index / width).abs_diff(0)
-                    // + ((index % width).abs_diff((goal % width).saturating_sub(1)) + (index / width).abs_diff(goal / width))
+                    5 * ((new_goal % width) + (new_goal / width))
                 };
                 to_visit.push((
-                    -((state.1 + 1 + a_star) as isize),
-                    state.1 + 1,
+                    -((cost + 1 + a_star) as isize),
+                    cost + 1,
                     neighbor,
-                    goal,
+                    new_goal,
                 ));
             }
-            visited.insert(state.2);
+            visited.insert((state, goal));
         }
         0
     }
