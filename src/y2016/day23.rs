@@ -81,7 +81,6 @@ impl Puzzle {
         }
     }
     fn run(&mut self) {
-        self.register[0] = 7;
         let mut pc = Some(0usize);
         while let Some(i) = pc {
             pc = self.execute(i);
@@ -137,10 +136,13 @@ impl AdventOfCode for Puzzle {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        self.register[0] = 7;
         self.run();
         self.register[0]
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.register[0] = 12;
+        self.run();
+        self.register[0]
     }
 }
