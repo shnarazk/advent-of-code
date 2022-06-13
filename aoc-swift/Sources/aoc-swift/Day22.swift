@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import OrderedCollections
 
 class Day22: PuzzleSolver {
     var line: [(Int, Int, Int, Int)] = []
