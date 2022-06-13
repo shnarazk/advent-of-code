@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2016/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors4,
-        line_parser, regex,
     },
     std::{
         cmp::Reverse,
@@ -43,9 +39,9 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
-        self.targets.sort();
+        self.targets.sort_unstable();
         let targets = self.targets.len();
-        for j in 0..targets {
+        for _ in 0..targets {
             self.cost
                 .push((0..targets).map(|_| usize::MAX).collect::<Vec<usize>>());
         }
@@ -118,23 +114,30 @@ impl AdventOfCode for Puzzle {
         least
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let goal = self.targets.len();
+        let mut pathes: BinaryHeap<Reverse<(usize, Vec<usize>)>> = BinaryHeap::new();
+        let mut least = usize::MAX;
+        pathes.push(Reverse((0, vec![0])));
+        while let Some(Reverse((cost, path))) = pathes.pop() {
+            if path.len() == goal {
+                let lst = *path.last().unwrap();
+                let c = cost + self.cost[lst][0];
+                if c < least {
+                    least = c;
+                    dbg!(least);
+                }
+                continue;
+            }
+            for i in 0..goal {
+                if path.contains(&i) {
+                    continue;
+                }
+                let lst = *path.last().unwrap();
+                let mut p = path.clone();
+                p.push(i);
+                pathes.push(Reverse((cost + self.cost[lst][i], p)))
+            }
+        }
+        least
     }
-}
-
-#[cfg(feature = "y2016")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
