@@ -40,8 +40,12 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
+        // Add the start point
+        self.targets.sort();
+        if (1, 1) != self.targets[0] {
+            self.targets.insert(0, (1, 1));
+        }
         let targets = self.targets.len();
-        // Build the cost table
         for j in 0..targets {
             self.cost
                 .push((0..targets).map(|_| usize::MAX).collect::<Vec<usize>>());
@@ -82,11 +86,11 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        for l in self.cost.iter() {
+        for (i, l) in self.cost.iter().enumerate() {
             for d in l.iter() {
                 print!("{d:>4},");
             }
-            println!();
+            println!("\t{:?}", self.targets[i]);
         }
     }
     fn part1(&mut self) -> Self::Output1 {
