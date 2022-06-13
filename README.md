@@ -16,9 +16,11 @@
 
 ![](https://user-images.githubusercontent.com/997855/103133983-1f3baf80-46f1-11eb-9f72-f6a002a30701.png)
 
-## 2016 in progress
+## 2016 completed
 
 * [calendar](https://adventofcode.com/2016)
+
+![](https://user-images.githubusercontent.com/997855/173385043-6d868c3a-c54e-4846-80b2-23e3243d9987.png)
 
 ## 2015 completed
 
