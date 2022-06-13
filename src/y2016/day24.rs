@@ -5,36 +5,86 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
+        geometric::neighbors4,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, VecDeque},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<bool>>,
+    targets: Vec<(usize, usize)>,
+    cost: Vec<Vec<usize>>,
+    height: usize,
+    width: usize,
 }
 
 #[aoc(2016, 24)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        let mut line = Vec::new();
+        let j = self.line.len();
+        for (i, c) in block.chars().enumerate() {
+            if c.is_ascii_digit() {
+                self.targets.push((j, i));
+                line.push(true);
+            } else {
+                line.push(c == '.');
+            }
+        }
+        self.line.push(line);
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        self.height = self.line.len();
+        self.width = self.line[0].len();
+        let targets = self.targets.len();
+        // Build the cost table
+        for j in 0..targets {
+            self.cost
+                .push((0..targets).map(|_| usize::MAX).collect::<Vec<usize>>());
+        }
+        'next_target: for (k, start) in self.targets.iter().enumerate() {
+            let mut cost: HashMap<(usize, usize), usize> = HashMap::new();
+            for (j, i) in self.targets.iter() {
+                cost.insert((*j, *i), usize::MAX);
+            }
+            let mut to_check: VecDeque<(usize, usize)> = VecDeque::new();
+            let mut found = 1;
+            self.cost[k][k] = 0;
+            cost.insert(*start, 0);
+            to_check.push_back(*start);
+            while let Some(p) = to_check.pop_front() {
+                let c = cost.get(&p).unwrap() + 1;
+                for (j, i) in neighbors4(p.0, p.1, self.height, self.width) {
+                    if !self.line[j][i] {
+                        continue;
+                    }
+                    if let Some(w) = cost.get(&(j, i)) {
+                        if *w == usize::MAX {
+                            found += 1;
+                            cost.insert((j, i), c);
+                            for (l, goal) in self.targets.iter().enumerate() {
+                                if goal.0 == j && goal.1 == i {
+                                    self.cost[k][l] = c;
+                                    self.cost[l][k] = c;
+                                }
+                            }
+                            if found == targets {
+                                continue 'next_target;
+                            }
+                        }
+                    } else {
+                        cost.insert((j, i), c);
+                        to_check.push_back((j, i));
+                    }
+                }
+            }
+        }
+        dbg!(&self.targets);
+        dbg!(&self.cost);
     }
     fn part1(&mut self) -> Self::Output1 {
         0
