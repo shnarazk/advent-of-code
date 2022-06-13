@@ -53,8 +53,8 @@ impl AdventOfCode for Puzzle {
             }
             let mut to_check: VecDeque<(usize, usize)> = VecDeque::new();
             let mut found = 1;
-            self.cost[k][k] = 0;
             cost.insert(*start, 0);
+            self.cost[k][k] = 0;
             to_check.push_back(*start);
             while let Some(p) = to_check.pop_front() {
                 let c = cost.get(&p).unwrap() + 1;
@@ -63,28 +63,31 @@ impl AdventOfCode for Puzzle {
                         continue;
                     }
                     if let Some(w) = cost.get(&(j, i)) {
-                        if *w == usize::MAX {
-                            found += 1;
-                            cost.insert((j, i), c);
-                            for (l, goal) in self.targets.iter().enumerate() {
-                                if goal.0 == j && goal.1 == i {
-                                    self.cost[k][l] = c;
-                                    self.cost[l][k] = c;
-                                }
-                            }
-                            if found == targets {
-                                continue 'next_target;
+                        if *w != usize::MAX {
+                            continue;
+                        }
+                        found += 1;
+                        for (l, goal) in self.targets.iter().enumerate() {
+                            if goal.0 == j && goal.1 == i {
+                                self.cost[k][l] = c;
+                                self.cost[l][k] = c;
                             }
                         }
-                    } else {
-                        cost.insert((j, i), c);
-                        to_check.push_back((j, i));
+                        if found == targets {
+                            continue 'next_target;
+                        }
                     }
+                    cost.insert((j, i), c);
+                    to_check.push_back((j, i));
                 }
             }
         }
-        dbg!(&self.targets);
-        dbg!(&self.cost);
+        for l in self.cost.iter() {
+            for d in l.iter() {
+                print!("{d:>4},");
+            }
+            println!();
+        }
     }
     fn part1(&mut self) -> Self::Output1 {
         0
