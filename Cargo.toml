@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode"
-version = "0.9.1"
+version = "0.9.2"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
@@ -17,8 +17,9 @@ serde_json = { version = "1.0", optional = true }
 splr = { version = "^0.15", optional = true }
 
 [features]
-default = ["y2021", "y2016"]
+default = ["y2019"]
 y2021 = []
 y2020 = ["nom", "splr"]
+y2019 = []
 y2016 = ["md-5"]
 y2015 = ["itertools", "md-5", "serde_json"]
