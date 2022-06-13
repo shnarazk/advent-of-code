@@ -8,13 +8,16 @@ use {
         geometric::neighbors4,
         line_parser, regex,
     },
-    std::collections::{HashMap, VecDeque},
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap, VecDeque},
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
-    targets: Vec<(usize, usize)>,
+    targets: Vec<(usize, (usize, usize))>,
     cost: Vec<Vec<usize>>,
     height: usize,
     width: usize,
@@ -28,7 +31,7 @@ impl AdventOfCode for Puzzle {
         let j = self.line.len();
         for (i, c) in block.chars().enumerate() {
             if c.is_ascii_digit() {
-                self.targets.push((j, i));
+                self.targets.push(((c as u8 - b'0') as usize, (j, i)));
                 line.push(true);
             } else {
                 line.push(c == '.');
@@ -40,25 +43,21 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
-        // Add the start point
         self.targets.sort();
-        if (1, 1) != self.targets[0] {
-            self.targets.insert(0, (1, 1));
-        }
         let targets = self.targets.len();
         for j in 0..targets {
             self.cost
                 .push((0..targets).map(|_| usize::MAX).collect::<Vec<usize>>());
         }
-        'next_target: for (k, start) in self.targets.iter().enumerate() {
+        'next_target: for (k, start) in self.targets.iter() {
             let mut cost: HashMap<(usize, usize), usize> = HashMap::new();
-            for (j, i) in self.targets.iter() {
-                cost.insert((*j, *i), usize::MAX);
+            for (_, p) in self.targets.iter() {
+                cost.insert(*p, usize::MAX);
             }
             let mut to_check: VecDeque<(usize, usize)> = VecDeque::new();
             let mut found = 1;
             cost.insert(*start, 0);
-            self.cost[k][k] = 0;
+            self.cost[*k][*k] = 0;
             to_check.push_back(*start);
             while let Some(p) = to_check.pop_front() {
                 let c = cost.get(&p).unwrap() + 1;
@@ -71,10 +70,10 @@ impl AdventOfCode for Puzzle {
                             continue;
                         }
                         found += 1;
-                        for (l, goal) in self.targets.iter().enumerate() {
+                        for (l, goal) in self.targets.iter() {
                             if goal.0 == j && goal.1 == i {
-                                self.cost[k][l] = c;
-                                self.cost[l][k] = c;
+                                self.cost[*k][*l] = c;
+                                self.cost[*l][*k] = c;
                             }
                         }
                         if found == targets {
@@ -94,7 +93,29 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let goal = self.targets.len();
+        let mut pathes: BinaryHeap<Reverse<(usize, Vec<usize>)>> = BinaryHeap::new();
+        let mut least = usize::MAX;
+        pathes.push(Reverse((0, vec![0])));
+        while let Some(Reverse((cost, path))) = pathes.pop() {
+            if path.len() == goal {
+                if cost < least {
+                    least = cost;
+                    dbg!(least);
+                }
+                continue;
+            }
+            for i in 0..goal {
+                if path.contains(&i) {
+                    continue;
+                }
+                let lst = *path.last().unwrap();
+                let mut p = path.clone();
+                p.push(i);
+                pathes.push(Reverse((cost + self.cost[lst][i], p)))
+            }
+        }
+        least
     }
     fn part2(&mut self) -> Self::Output2 {
         0
