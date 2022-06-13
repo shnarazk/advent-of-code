@@ -20,6 +20,8 @@
 
 * [calendar](https://adventofcode.com/2016)
 
+![](https://user-images.githubusercontent.com/997855/173385043-6d868c3a-c54e-4846-80b2-23e3243d9987.png)
+
 ## 2015 completed
 
 * [calendar](https://adventofcode.com/2015)
