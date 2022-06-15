@@ -6,6 +6,7 @@
 //
 
 import Foundation
+// import Regex
 
 class Day22: PuzzleSolver {
     var line: [(Int, Int, Int, Int)] = []
@@ -21,7 +22,7 @@ class Day22: PuzzleSolver {
     }
     func insert() {
         if #available(macOS 13.0, *) {
-            let parse: Regex = #/dev\/grid\/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$/#
+            // let parse: Regex = /dev/grid/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$/
         } else {
             // Fallback on earlier versions
         }
