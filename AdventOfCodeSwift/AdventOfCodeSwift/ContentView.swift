@@ -7,22 +7,31 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
-    private var days: [SolverDescripter] = [
-        SolverDescripter(name: "Day1")
+    private var days: [PuzzleDescripter] = [
+        day1,
+        PuzzleDescripter(year: 2019, day: 1, title: "Day1"),
+        PuzzleDescripter(year: 2019, day: 2, title: "Day1"),
+        PuzzleDescripter(year: 2019, day: 3, title: "Day1"),
     ]
     var body: some View {
         VStack {
             NavigationStack {
                 Text("Advent of Code")
                     .font(.title)
-                List(days) {
-                    NavigationLink($0.name, value: $0)
+                Section(header: Text("2019")) {
+                    List(days) {puzzle in
+                        NavigationLink(String("\(puzzle.day), \(puzzle.title)"), value: puzzle)
+                    }
+                    .navigationDestination(for: PuzzleDescripter.self) { puzzle in
+                        PuzzleView(puzzle: puzzle)
+                    }
+                    .navigationTitle("Result")
                 }
-                .navigationDestination(for: SolverDescripter.self) { solver in
-                    Text("\(solver.name)")
+                Section(header: Text("Others")) {
+                    Text("None")
                 }
-                .navigationTitle("Result")
             }
         }
     }

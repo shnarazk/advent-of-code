@@ -7,6 +7,8 @@
 
 import Foundation
 
+let day1 = PuzzleDescripter(year: 2019, day: 1, title: "???")
+
 struct Day1: Hashable, Identifiable, Solver {
     static func == (lhs: Day1, rhs: Day1) -> Bool {
         true
