@@ -7,14 +7,9 @@
 
 import SwiftUI
 
-struct Solver: Identifiable, Hashable {
-    let name: String
-    let id = UUID()
-}
-
 struct ContentView: View {
-    private var days = [
-        Solver(name: "y2019 day1")
+    private var days: [SolverDescripter] = [
+        SolverDescripter(name: "Day1")
     ]
     var body: some View {
         VStack {
@@ -24,7 +19,7 @@ struct ContentView: View {
                 List(days) {
                     NavigationLink($0.name, value: $0)
                 }
-                .navigationDestination(for: Solver.self) { solver in
+                .navigationDestination(for: SolverDescripter.self) { solver in
                     Text("\(solver.name)")
                 }
                 .navigationTitle("Result")
