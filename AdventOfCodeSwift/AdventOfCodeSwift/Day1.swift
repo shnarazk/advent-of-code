@@ -7,18 +7,13 @@
 
 import Foundation
 
-let day1 = PuzzleDescripter(year: 2019, day: 1, title: "???")
+let day1 = PuzzleDescripter(year: 2019, day: 1, title: "The Tyranny of the Rocket Equation", solver: Day1())
 
-struct Day1: Hashable, Identifiable, Solver {
-    static func == (lhs: Day1, rhs: Day1) -> Bool {
-        true
+struct Day1: Solver {
+    init() {}
+    func reset() {}
+    func part1() -> String? {
+        return "under construction"
     }
-    var name: String = "Day1"
-    var url: String = ""
-    var id = UUID()
-    init() {
-//            self.name = name
-//            self.url = url
-//            self.id = id
-    }
+    func part2() -> String? { return nil }
 }
