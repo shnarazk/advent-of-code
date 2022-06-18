@@ -11,9 +11,9 @@ import SwiftUI
 struct ContentView: View {
     private var days: [PuzzleDescripter] = [
         day1,
-        PuzzleDescripter(year: 2019, day: 10, title: "DayX"),
-        PuzzleDescripter(year: 2019, day: 11, title: "DayY"),
-        PuzzleDescripter(year: 2019, day: 12, title: "DayZ"),
+        PuzzleDescripter(year: 2019, day: 10, title: "DayX", solver: nil),
+        PuzzleDescripter(year: 2019, day: 11, title: "DayY", solver: nil),
+        PuzzleDescripter(year: 2019, day: 12, title: "DayZ", solver: nil),
     ]
     var body: some View {
         VStack {

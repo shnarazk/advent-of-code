@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import WebKit
 
 struct PuzzleDescripter: Hashable, Identifiable {
     static func == (lhs: PuzzleDescripter, rhs: PuzzleDescripter) -> Bool {
@@ -33,6 +34,11 @@ struct PuzzleDescripter: Hashable, Identifiable {
         self.title = title
         self.solver = solver
     }
+}
+
+#if !os(macOS)
+struct PuzzlePageView: UIViewRepresentable {
+    var url: String
 }
 
 struct PuzzleView: View {
@@ -71,3 +77,6 @@ struct PuzzleView_Previews: PreviewProvider {
         PuzzleView(puzzle: PuzzleDescripter(year: 2022, day: 1, title: "test", solver: nil))
     }
 }
+
+#endif
+
