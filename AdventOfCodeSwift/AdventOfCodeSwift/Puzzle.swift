@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import AppKit
 import WebKit
 
 struct PuzzleDescripter: Hashable, Identifiable {
@@ -36,8 +37,13 @@ struct PuzzleDescripter: Hashable, Identifiable {
     }
 }
 
-#if !os(macOS)
-struct PuzzlePageView: UIViewRepresentable {
+struct PuzzlePageView: NSViewRepresentable {
+    func makeNSView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+    func updateNSView(_ nsView: WKWebView, context: Context) {
+        nsView.load(URLRequest(url: URL(string: url)!))
+    }
     var url: String
 }
 
@@ -51,6 +57,7 @@ struct PuzzleView: View {
             Text("URL: \(puzzle.url)")
                 .padding(.vertical)
             Text("Description")
+            PuzzlePageView(url: puzzle.url)
             Spacer()
             Section {
                 Button("Run part 1") {
@@ -77,6 +84,3 @@ struct PuzzleView_Previews: PreviewProvider {
         PuzzleView(puzzle: PuzzleDescripter(year: 2022, day: 1, title: "test", solver: nil))
     }
 }
-
-#endif
-

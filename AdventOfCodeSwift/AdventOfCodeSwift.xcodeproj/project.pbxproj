@@ -14,7 +14,6 @@
 		C6034FBF285B63D500587F82 /* AdventOfCodeSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FBE285B63D500587F82 /* AdventOfCodeSwiftTests.swift */; };
 		C6034FC9285B63D500587F82 /* AdventOfCodeSwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FC8285B63D500587F82 /* AdventOfCodeSwiftUITests.swift */; };
 		C6034FCB285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FCA285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift */; };
-		C62467BD285DECC500564DA4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C62467BC285DECC500564DA4 /* UIKit.framework */; };
 		C62B0357285D3ACE00C83819 /* Solver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62B0356285D3ACE00C83819 /* Solver.swift */; };
 		C6B2569D285BF610005FAB5E /* Puzzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2569C285BF610005FAB5E /* Puzzle.swift */; };
 		C6B2569F285BF639005FAB5E /* Day1.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2569E285BF639005FAB5E /* Day1.swift */; };
@@ -60,7 +59,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C62467BD285DECC500564DA4 /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
