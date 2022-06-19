@@ -38,13 +38,13 @@ struct PuzzleDescripter: Hashable, Identifiable {
 }
 
 struct PuzzlePageView: NSViewRepresentable {
+    var url: String
     func makeNSView(context: Context) -> WKWebView {
         return WKWebView()
     }
     func updateNSView(_ nsView: WKWebView, context: Context) {
         nsView.load(URLRequest(url: URL(string: url)!))
     }
-    var url: String
 }
 
 struct PuzzleView: View {
@@ -53,9 +53,8 @@ struct PuzzleView: View {
     @State var part2: String?
     var body: some View {
         VStack {
-            Text("Year: \(puzzle.year), Day: \(puzzle.title)")
-            Text("URL: \(puzzle.url)")
-                .padding(.vertical)
+            Text("Year: \(puzzle.year), Day: \(puzzle.title), URL: \(puzzle.url)")
+                .font(.headline)
             PuzzlePageView(url: puzzle.url)
             Spacer()
             Section {
@@ -65,6 +64,7 @@ struct PuzzleView: View {
                     part1 = solver.part1() ?? "Not yet implemented"
                 }
                 Text(part1 ?? "")
+                    .textSelection(.enabled)
             }
             Section {
                 Button("Run part 2") {
@@ -73,6 +73,7 @@ struct PuzzleView: View {
                     part2 = solver.part2() ?? "Not yet implemented"
                 }
                 Text(part2 ?? "")
+                    .textSelection(.enabled)
             }
         }
     }
