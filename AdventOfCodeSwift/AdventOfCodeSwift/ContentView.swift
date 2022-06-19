@@ -9,11 +9,12 @@ import SwiftUI
 
 
 struct ContentView: View {
-    private var days: [PuzzleDescripter] = [
+    private var y2019: [PuzzleDescripter] = [
         day1,
-        PuzzleDescripter(year: 2019, day: 10, title: "DayX", solver: nil),
-        PuzzleDescripter(year: 2019, day: 11, title: "DayY", solver: nil),
-        PuzzleDescripter(year: 2019, day: 12, title: "DayZ", solver: nil),
+        day2,
+        PuzzleDescripter(year: 2019, day: 3, title: "Day 3", solver: nil),
+        PuzzleDescripter(year: 2019, day: 4, title: "Day 4", solver: nil),
+        PuzzleDescripter(year: 2019, day: 5, title: "Day 5", solver: nil),
     ]
     var body: some View {
         VStack {
@@ -21,13 +22,12 @@ struct ContentView: View {
                 Text("Advent of Code")
                     .font(.title)
                 Section(header: Text("2019")) {
-                    List(days) {puzzle in
-                        NavigationLink(String("\(puzzle.day), \(puzzle.title)"), value: puzzle)
+                    List(y2019) {puzzle in
+                        NavigationLink(destination: PuzzleView(puzzle: puzzle)) {
+                            Text("--- Day \(puzzle.day): \(puzzle.title) ---")
+                        }
                     }
-                    .navigationDestination(for: PuzzleDescripter.self) { puzzle in
-                        PuzzleView(puzzle: puzzle)
-                    }
-                    .navigationTitle("Result")
+                    .navigationTitle("Table of Contents")
                 }
                 Section(header: Text("Others")) {
                     Text("None")

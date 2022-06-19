@@ -37,7 +37,21 @@ class Day1: Solver {
         }
         return "\(total)"
     }
-    func part2() -> String? { return nil }
+    func part2() -> String? {
+        var total: Int = 0
+        guard let input else { return nil }
+        for l in input.split(separator: "\n") {
+            guard let n = Int(l) else {
+                fatalError("Something is wrong.")
+            }
+            var fuel = n / 3 - 2
+            while 0 < fuel {
+                total += fuel
+                fuel = fuel / 3 - 2
+            }
+        }
+        return "\(total)"
+    }
     private func visit(page url: URL) {
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             guard

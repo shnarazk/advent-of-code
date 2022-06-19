@@ -56,7 +56,6 @@ struct PuzzleView: View {
             Text("Year: \(puzzle.year), Day: \(puzzle.title)")
             Text("URL: \(puzzle.url)")
                 .padding(.vertical)
-            Text("Description")
             PuzzlePageView(url: puzzle.url)
             Spacer()
             Section {
@@ -71,7 +70,7 @@ struct PuzzleView: View {
                 Button("Run part 2") {
                     guard let solver = puzzle.solver else { return }
                     solver.reset()
-                    part1 = solver.part2() ?? "Not yet implemented"
+                    part2 = solver.part2() ?? "Not yet implemented"
                 }
                 Text(part2 ?? "")
             }

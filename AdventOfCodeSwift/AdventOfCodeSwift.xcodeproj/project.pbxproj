@@ -15,6 +15,7 @@
 		C6034FC9285B63D500587F82 /* AdventOfCodeSwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FC8285B63D500587F82 /* AdventOfCodeSwiftUITests.swift */; };
 		C6034FCB285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FCA285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift */; };
 		C62B0357285D3ACE00C83819 /* Solver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62B0356285D3ACE00C83819 /* Solver.swift */; };
+		C6755325285ED85F000658EA /* Day2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6755324285ED85F000658EA /* Day2.swift */; };
 		C6B2569D285BF610005FAB5E /* Puzzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2569C285BF610005FAB5E /* Puzzle.swift */; };
 		C6B2569F285BF639005FAB5E /* Day1.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2569E285BF639005FAB5E /* Day1.swift */; };
 		C6B4CE89285EA8E900D7AA55 /* input-y2019-day01.txt in Resources */ = {isa = PBXBuildFile; fileRef = C6B4CE88285EA8E900D7AA55 /* input-y2019-day01.txt */; };
@@ -51,6 +52,7 @@
 		C6034FCA285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdventOfCodeSwiftUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		C62467BC285DECC500564DA4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		C62B0356285D3ACE00C83819 /* Solver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solver.swift; sourceTree = "<group>"; };
+		C6755324285ED85F000658EA /* Day2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day2.swift; sourceTree = "<group>"; };
 		C6B2569C285BF610005FAB5E /* Puzzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Puzzle.swift; sourceTree = "<group>"; };
 		C6B2569E285BF639005FAB5E /* Day1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day1.swift; sourceTree = "<group>"; };
 		C6B4CE88285EA8E900D7AA55 /* input-y2019-day01.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "input-y2019-day01.txt"; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				C6B2569C285BF610005FAB5E /* Puzzle.swift */,
 				C62B0356285D3ACE00C83819 /* Solver.swift */,
 				C6B2569E285BF639005FAB5E /* Day1.swift */,
+				C6755324285ED85F000658EA /* Day2.swift */,
 			);
 			path = AdventOfCodeSwift;
 			sourceTree = "<group>";
@@ -299,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C62B0357285D3ACE00C83819 /* Solver.swift in Sources */,
+				C6755325285ED85F000658EA /* Day2.swift in Sources */,
 				C6B2569F285BF639005FAB5E /* Day1.swift in Sources */,
 				C6034FAF285B63D300587F82 /* ContentView.swift in Sources */,
 				C6034FAD285B63D300587F82 /* AdventOfCodeSwiftApp.swift in Sources */,
