@@ -27,13 +27,15 @@ struct PuzzleDescripter: Hashable, Identifiable {
         }}
     var tags: [String]?
     var status: Int = 0
-    var solver: (any Solver)?
+    var view: AnyView
+    // var solver: (any Solver)?
     var id: UUID = UUID()
-    init(year: Int, day: Int, title: String, solver: Solver?) {
+    init(year: Int, day: Int, title: String, view: AnyView) {
         self.year = year
         self.day = day
         self.title = title
-        self.solver = solver
+        // self.solver = solver
+        self.view = view
     }
 }
 
@@ -47,40 +49,38 @@ struct PuzzlePageView: NSViewRepresentable {
     }
 }
 
-struct PuzzleView: View {
-    @State var puzzle: PuzzleDescripter
-    @State var part1: String?
-    @State var part2: String?
-    var body: some View {
-        VStack {
-            Text("Year: \(puzzle.year), Day: \(puzzle.title), URL: \(puzzle.url)")
-                .font(.headline)
-            PuzzlePageView(url: puzzle.url)
-            Spacer()
-            Section {
-                Button("Run part 1") {
-                    guard let solver = puzzle.solver else { return }
-                    solver.reset()
-                    part1 = solver.part1() ?? "Not yet implemented"
-                }
-                Text(part1 ?? "")
-                    .textSelection(.enabled)
-            }
-            Section {
-                Button("Run part 2") {
-                    guard let solver = puzzle.solver else { return }
-                    solver.reset()
-                    part2 = solver.part2() ?? "Not yet implemented"
-                }
-                Text(part2 ?? "")
-                    .textSelection(.enabled)
-            }
-        }
-    }
-}
+//struct PuzzleView: View {
+//    @State var puzzle: PuzzleDescripter
+//    @State var part2: String?
+//    var body: some View {
+//        VStack {
+//            Text("Year: \(puzzle.year), Day: \(puzzle.title), URL: \(puzzle.url)")
+//                .font(.headline)
+//            PuzzlePageView(url: puzzle.url)
+//            Section {
+//                Button("Run part 1") {
+//                    guard let solver = puzzle.solver else { return }
+//                    solver.reset()
+//                    solver.solvePart1()
+//                    // part1 = solver.part1() // ?? "Not yet implemented"
+//                }
+//                // Part1View(puzzle)
+//            }
+//            Section {
+//                Button("Run part 2") {
+//                    guard let solver = puzzle.solver else { return }
+//                    solver.reset()
+//                    // part2 = solver.part2() ?? "Not yet implemented"
+//                }
+//                Text(part2 ?? "")
+//                    .textSelection(.enabled)
+//            }
+//        }
+//    }
+//}
 
-struct PuzzleView_Previews: PreviewProvider {
-    static var previews: some View {
-        PuzzleView(puzzle: PuzzleDescripter(year: 2022, day: 1, title: "test", solver: nil))
-    }
-}
+//struct PuzzleView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PuzzleView<SimpleAnswer>(puzzle: PuzzleDescripter(year: 2022, day: 1, title: "test", solver: nil))
+//    }
+//}

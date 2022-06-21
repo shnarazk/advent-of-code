@@ -9,12 +9,9 @@ import SwiftUI
 
 
 struct ContentView: View {
-    private var y2019: [PuzzleDescripter] = [
-        day1,
-        day2,
-        PuzzleDescripter(year: 2019, day: 3, title: "Day 3", solver: nil),
-        PuzzleDescripter(year: 2019, day: 4, title: "Day 4", solver: nil),
-        PuzzleDescripter(year: 2019, day: 5, title: "Day 5", solver: nil),
+    private var y2019: [(any Solver, AnyView)] = [
+       (Day1(), AnyView(Day1())),
+       (Day2(), AnyView(Day2()))
     ]
     var body: some View {
         VStack {
@@ -22,9 +19,9 @@ struct ContentView: View {
                 Text("Advent of Code")
                     .font(.title)
                 Section(header: Text("2019")) {
-                    List(y2019) {puzzle in
-                        NavigationLink(destination: PuzzleView(puzzle: puzzle)) {
-                            Text("--- Day \(puzzle.day): \(puzzle.title) ---")
+                    List(y2019, id: \.self.0.id) {puzzle in
+                        NavigationLink(destination: puzzle.1) {
+                            Text("--- Day \(puzzle.0.day): \(puzzle.0.title)---")
                         }
                     }
                     .navigationTitle("Table of Contents")

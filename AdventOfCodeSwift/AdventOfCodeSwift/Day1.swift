@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import SwiftUI
 
-let day1 = PuzzleDescripter(year: 2019, day: 1, title: "The Tyranny of the Rocket Equation", solver: Day1())
-
-class Day1: Solver {
-    var input: String?
-    var inputFrom =  "input-y2019-day01" // URL(string: "https://adventofcode.com/2019/day/1/input")!
-    private let semaphore = DispatchSemaphore(value: 0)
+struct Day1: Solver, View, Identifiable, Hashable {
+    var year: Int = 2019
+    var day: Int = 1
+    var title: String = "The Tyranny of the Rocket Equation"
+    var inputFrom = "input-y2019-day01" // URL(string: "https://adventofcode.com/2019/day/1/input")!
+    @State var input: String?
+    @State var answerPart1: Int?
+    @State var answerPart2: Int?
     func reset() {
-        // self.visit(page: inputFrom)
-        // input = Bundle.main.path(forResource: inputFrom, ofType: "txt")
         guard let path = Bundle.main.path(forResource: inputFrom, ofType: "txt") else {
             fatalError("Couldn't load \(inputFrom).txt")
         }
@@ -25,43 +26,50 @@ class Day1: Solver {
             fatalError("Couldn't read \(inputFrom).txt")
         }
     }
-    func part1() -> String? {
+    func solvePart1() {
         var total: Int = 0
-        // return "got input from \(inputFrom): \(input ?? "nil")"
-        guard let input else { return nil }
+        guard let input else { return }
         for l in input.split(separator: "\n") {
-            guard let n = Int(l) else {
-                fatalError("Something is wrong.")
-            }
+            guard let n = Int(l) else {fatalError("Something is wrong.") }
             total += n / 3 - 2
         }
-        return "\(total)"
+        answerPart1 = total
     }
-    func part2() -> String? {
+    func solvePart2() {
         var total: Int = 0
-        guard let input else { return nil }
+        guard let input else { return }
         for l in input.split(separator: "\n") {
-            guard let n = Int(l) else {
-                fatalError("Something is wrong.")
-            }
+            guard let n = Int(l) else { fatalError("Something is wrong.") }
             var fuel = n / 3 - 2
             while 0 < fuel {
                 total += fuel
                 fuel = fuel / 3 - 2
             }
         }
-        return "\(total)"
+        answerPart2 = total
     }
-    private func visit(page url: URL) {
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            guard
-                let data = data,
-                error == nil,
-                let document = String(data: data, encoding: .utf8) else { return }
-            self.input = document
-            self.semaphore.signal()
+    var body: some View {
+        VStack {
+            PuzzlePageView(url: url)
+            Section {
+                Button("Run part 1") { solvePart1() }
+                Text(answerPart1 != nil ? "\(answerPart1!)" : "not computed yet")
+                    .textSelection(.enabled)
+            }
+            Section {
+                Button("Run part 2") { solvePart2() }
+                Text(answerPart2 != nil ? "\(answerPart2!)" : "not computed yet")
+                    .textSelection(.enabled)
+            }
+            Text("Year: \(year), Day: \(title), URL: \(url)")
+                .font(.headline)
+                .padding(.all)
         }
-        task.resume()
-        self.semaphore.wait()
+    }
+}
+
+struct Day1View_Previews: PreviewProvider {
+    static var previews: some View {
+        Day1()
     }
 }
