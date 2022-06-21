@@ -10,8 +10,8 @@ import SwiftUI
 
 struct ContentView: View {
     private var y2019: [(any Solver, AnyView)] = [
-       (Day1(), AnyView(Day1())),
-       (Day2(), AnyView(Day2()))
+       (day1, AnyView(day1)),
+       (day2, AnyView(day2))
     ]
     var body: some View {
         VStack {

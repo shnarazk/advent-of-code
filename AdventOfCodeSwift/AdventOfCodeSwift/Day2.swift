@@ -8,6 +8,8 @@
 import Foundation
 import SwiftUI
 
+var day2 = Day2()
+
 struct Day2: Solver, View, Identifiable, Hashable {
     var year: Int = 2019
     var day: Int = 2

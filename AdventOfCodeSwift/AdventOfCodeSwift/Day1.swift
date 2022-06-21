@@ -7,6 +7,15 @@
 
 import Foundation
 import SwiftUI
+import Charts
+
+struct HistOfInt: Identifiable {
+    let x: Int
+    let y: Int
+    var id: Int { get { return x } }
+}
+
+var day1 = Day1()
 
 struct Day1: Solver, View, Identifiable, Hashable {
     var year: Int = 2019
@@ -16,6 +25,7 @@ struct Day1: Solver, View, Identifiable, Hashable {
     @State var input: String?
     @State var answerPart1: Int?
     @State var answerPart2: Int?
+    @State var hist: [HistOfInt] = []
     func reset() {
         guard let path = Bundle.main.path(forResource: inputFrom, ofType: "txt") else {
             fatalError("Couldn't load \(inputFrom).txt")
@@ -27,6 +37,7 @@ struct Day1: Solver, View, Identifiable, Hashable {
         }
     }
     func solvePart1() {
+        reset()
         var total: Int = 0
         guard let input else { return }
         for l in input.split(separator: "\n") {
@@ -36,34 +47,53 @@ struct Day1: Solver, View, Identifiable, Hashable {
         answerPart1 = total
     }
     func solvePart2() {
+        reset()
         var total: Int = 0
+        var hi: [Int: Int] = [:]
         guard let input else { return }
         for l in input.split(separator: "\n") {
             guard let n = Int(l) else { fatalError("Something is wrong.") }
             var fuel = n / 3 - 2
+            var hist_count = 0
             while 0 < fuel {
                 total += fuel
                 fuel = fuel / 3 - 2
+                hist_count += 1
             }
+            hi[hist_count] = 1 + (hi[hist_count] ?? 0)
         }
         answerPart2 = total
+        hist = hi.map { HistOfInt(x: $0, y: $1) }
     }
     var body: some View {
         VStack {
             PuzzlePageView(url: url)
             Section {
                 Button("Run part 1") { solvePart1() }
-                Text(answerPart1 != nil ? "\(answerPart1!)" : "not computed yet")
-                    .textSelection(.enabled)
+                if let answer = answerPart1 {
+                    Text("\(answer)")
+                        .textSelection(.enabled)
+                }
             }
             Section {
                 Button("Run part 2") { solvePart2() }
-                Text(answerPart2 != nil ? "\(answerPart2!)" : "not computed yet")
-                    .textSelection(.enabled)
+                if let answer = answerPart2 {
+                    Text("\(answer)")
+                        .textSelection(.enabled)
+                    Chart {
+                        ForEach(hist) {
+                            BarMark(
+                                x: .value("iteration", $0.x),
+                                y: .value("occurence", $0.y)
+                            )
+                        }
+                    }
+                }
             }
-            Text("Year: \(year), Day: \(title), URL: \(url)")
+            Text("Year: \(year), Day: \(day): \(title), URL: \(url)")
                 .font(.headline)
                 .padding(.all)
+            
         }
     }
 }

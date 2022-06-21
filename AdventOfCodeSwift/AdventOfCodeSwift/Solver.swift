@@ -10,7 +10,6 @@ import SwiftUI
 
 protocol Solver: Identifiable, Hashable, View {
     func reset()
-    func solvePart1()
     var year: Int { get }
     var day: Int { get }
     var title: String { get }
