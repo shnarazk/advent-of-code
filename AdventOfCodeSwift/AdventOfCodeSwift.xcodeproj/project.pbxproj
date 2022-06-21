@@ -14,6 +14,7 @@
 		C6034FBF285B63D500587F82 /* AdventOfCodeSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FBE285B63D500587F82 /* AdventOfCodeSwiftTests.swift */; };
 		C6034FC9285B63D500587F82 /* AdventOfCodeSwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FC8285B63D500587F82 /* AdventOfCodeSwiftUITests.swift */; };
 		C6034FCB285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6034FCA285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift */; };
+		C615A3B62861FD330085DB6D /* input-y2019-day02.txt in Resources */ = {isa = PBXBuildFile; fileRef = C615A3B52861FD330085DB6D /* input-y2019-day02.txt */; };
 		C62B0357285D3ACE00C83819 /* Solver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62B0356285D3ACE00C83819 /* Solver.swift */; };
 		C6755325285ED85F000658EA /* Day2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6755324285ED85F000658EA /* Day2.swift */; };
 		C6B2569D285BF610005FAB5E /* Puzzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2569C285BF610005FAB5E /* Puzzle.swift */; };
@@ -50,6 +51,7 @@
 		C6034FC4285B63D500587F82 /* AdventOfCodeSwiftUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdventOfCodeSwiftUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6034FC8285B63D500587F82 /* AdventOfCodeSwiftUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdventOfCodeSwiftUITests.swift; sourceTree = "<group>"; };
 		C6034FCA285B63D500587F82 /* AdventOfCodeSwiftUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdventOfCodeSwiftUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C615A3B52861FD330085DB6D /* input-y2019-day02.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = "input-y2019-day02.txt"; path = "AdventOfCodeSwift/input/input-y2019-day02.txt"; sourceTree = SOURCE_ROOT; };
 		C62467BC285DECC500564DA4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		C62B0356285D3ACE00C83819 /* Solver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solver.swift; sourceTree = "<group>"; };
 		C6755324285ED85F000658EA /* Day2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day2.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				C6B4CE88285EA8E900D7AA55 /* input-y2019-day01.txt */,
+				C615A3B52861FD330085DB6D /* input-y2019-day02.txt */,
 			);
 			path = 2019;
 			sourceTree = "<group>";
@@ -276,6 +279,7 @@
 			files = (
 				C6034FB5285B63D500587F82 /* Preview Assets.xcassets in Resources */,
 				C6B4CE89285EA8E900D7AA55 /* input-y2019-day01.txt in Resources */,
+				C615A3B62861FD330085DB6D /* input-y2019-day02.txt in Resources */,
 				C6034FB1285B63D500587F82 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

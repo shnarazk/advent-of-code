@@ -15,7 +15,7 @@ struct Day2: Solver, View, Identifiable, Hashable {
     var day: Int = 2
     var title: String = "1202 Program Alarm"
     var inputFrom =  "input-y2019-day02"
-    @State var input: String?
+    @State var input: [Int] = []
     @State var answerPart1: Int?
     @State var answerPart2: Int?
     func reset() {
@@ -23,32 +23,25 @@ struct Day2: Solver, View, Identifiable, Hashable {
             fatalError("Couldn't load \(inputFrom).txt")
         }
         do {
-            input = try String(contentsOfFile: path)
+            input = []
+            let lines = try String(contentsOfFile: path)
+            for l in lines.split(separator: "\n") {
+                for segment in l.split(separator: ",") {
+                    guard let n = Int(segment) else { fatalError("parse errew")}
+                    input.append(n)
+                }
+            }
         } catch {
             fatalError("Couldn't read \(inputFrom).txt")
         }
     }
     func solvePart1() {
-        var total: Int = 0
-        guard let input else { return }
-        for l in input.split(separator: "\n") {
-            guard let n = Int(l) else { fatalError("Something is wrong.") }
-            total += n / 3 - 2
-        }
-        answerPart1 = total
+        reset()
+        answerPart1 = 0
     }
     func solvePart2() {
-        var total: Int = 0
-        guard let input else { return }
-        for l in input.split(separator: "\n") {
-            guard let n = Int(l) else { fatalError("Something is wrong.") }
-            var fuel = n / 3 - 2
-            while 0 < fuel {
-                total += fuel
-                fuel = fuel / 3 - 2
-            }
-        }
-       answerPart2 = total
+        reset()
+        answerPart2 = 0
     }
     var body: some View {
         VStack {
@@ -57,6 +50,7 @@ struct Day2: Solver, View, Identifiable, Hashable {
                 Button("Run part 1") { solvePart1() }
                 Text(answerPart1 != nil ? "\(answerPart1!)" : "not computed yet")
                     .textSelection(.enabled)
+                Text("loaded \(input.count) elements")
             }
             Section {
                 Button("Run part 2") { solvePart2() }
