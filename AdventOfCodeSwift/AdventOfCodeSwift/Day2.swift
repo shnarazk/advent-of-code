@@ -18,6 +18,7 @@ struct Day2: Solver, View, Identifiable, Hashable {
     @State var input: [Int] = []
     @State var answerPart1: Int?
     @State var answerPart2: Int?
+    @State var answerExample: Int?
     func reset() {
         guard let path = Bundle.main.path(forResource: inputFrom, ofType: "txt") else {
             fatalError("Couldn't load \(inputFrom).txt")
@@ -35,9 +36,42 @@ struct Day2: Solver, View, Identifiable, Hashable {
             fatalError("Couldn't read \(inputFrom).txt")
         }
     }
-    func solvePart1() {
-        reset()
-        answerPart1 = 0
+    func solvePart1(_ example: Bool) {
+        if example {
+            input = [1,9,10,3,2,3,11,0,99,30,40,50]
+        } else {
+            reset()
+            input[1] = 12
+            input[2] = 2
+        }
+        var pc = 0
+        var loop = true
+        while loop {
+            switch input[pc] {
+            case 1:
+                let op1 = input[pc + 1]
+                let op2 = input[pc + 2]
+                let op3 = input[pc + 3]
+                input[op3] = input[op1] + input[op2]
+                pc += 4
+            case 2:
+                let op1 = input[pc + 1]
+                let op2 = input[pc + 2]
+                let op3 = input[pc + 3]
+                input[op3] = input[op1] * input[op2]
+                pc += 4
+            case 99:
+                loop = false
+                break
+            default:
+                fatalError("strange")
+            }
+        }
+        if example {
+            answerExample = input[0]
+        } else {
+            answerPart1 = input[0]
+        }
     }
     func solvePart2() {
         reset()
@@ -47,10 +81,13 @@ struct Day2: Solver, View, Identifiable, Hashable {
         VStack {
             PuzzlePageView(url: url)
             Section {
-                Button("Run part 1") { solvePart1() }
+                Button("check the sample") { solvePart1(true) }
+                Text(answerExample != nil ? "\(answerExample!)" : "not computed yet")
+            }
+            Section {
+                Button("Run part 1") { solvePart1(false) }
                 Text(answerPart1 != nil ? "\(answerPart1!)" : "not computed yet")
                     .textSelection(.enabled)
-                Text("loaded \(input.count) elements")
             }
             Section {
                 Button("Run part 2") { solvePart2() }
