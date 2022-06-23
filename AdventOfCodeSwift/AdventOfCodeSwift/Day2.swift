@@ -74,8 +74,39 @@ struct Day2: Solver, View, Identifiable, Hashable {
         }
     }
     func solvePart2() {
-        reset()
-        answerPart2 = 0
+        for noun in 0...100 {
+            for verb in 0...100 {
+                reset()
+                input[1] = noun
+                input[2] = verb
+                var ip = 0 // instruction pointer
+                var loop = true
+                while loop {
+                    switch input[ip] {
+                    case 1:
+                        let op1 = input[ip + 1]
+                        let op2 = input[ip + 2]
+                        let op3 = input[ip + 3]
+                        input[op3] = input[op1] + input[op2]
+                        ip += 4
+                    case 2:
+                        let op1 = input[ip + 1]
+                        let op2 = input[ip + 2]
+                        let op3 = input[ip + 3]
+                        input[op3] = input[op1] * input[op2]
+                        ip += 4
+                    case 99:
+                        loop = false
+                        break
+                    default:
+                        fatalError("strange")
+                    }
+                }
+                if input[0] == 19690720 {
+                    answerPart2 = 100 * noun + verb
+                }
+            }
+        }
     }
     var body: some View {
         VStack {
