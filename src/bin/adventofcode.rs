@@ -3,6 +3,12 @@
 use adventofcode::y2015;
 #[cfg(feature = "y2016")]
 use adventofcode::y2016;
+// #[cfg(feature = "y2017")]
+// use adventofcode::y2017;
+// #[cfg(feature = "y2018")]
+// use adventofcode::y2018;
+#[cfg(feature = "y2019")]
+use adventofcode::y2019;
 #[cfg(feature = "y2020")]
 use adventofcode::y2020;
 #[cfg(feature = "y2021")]
@@ -35,14 +41,22 @@ pub fn main() {
         None => Description::None,
     };
     match year {
-        #[cfg(feature = "y2021")]
-        2021 => aoc_arms!(2021),
-        #[cfg(feature = "y2020")]
-        2020 => aoc_arms!(2020),
-        #[cfg(feature = "y2016")]
-        2016 => aoc_arms!(2016),
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
-        _ => println!("{:?}", y2021::template::Puzzle::solve(desc, part)),
+        #[cfg(feature = "y2016")]
+        2016 => aoc_arms!(2016),
+        // #[cfg(feature = "y2017")]
+        // 2017 => aoc_arms!(2017),
+        // #[cfg(feature = "y2018")]
+        // 2018 => aoc_arms!(2018),
+        #[cfg(feature = "y2019")]
+        2019 => aoc_arms!(2019, 3),
+        #[cfg(feature = "y2020")]
+        2020 => aoc_arms!(2020),
+        #[cfg(feature = "y2021")]
+        2021 => aoc_arms!(2021),
+        #[cfg(feature = "y2022")]
+        2022 => aoc_arms!(2022),
+        _ => println!("invalid year: {year}"),
     };
 }
