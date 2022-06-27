@@ -13,31 +13,30 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<usize>,
 }
 
 #[aoc(2019, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        if let Ok(v) = line_parser::to_usizes(block, '-') {
+            self.line = v;
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut count = 0;
+        for i in self.line[0]..=self.line[1] {
+            let s = format!("{i}").chars().map(|c| c as u8).collect::<Vec<u8>>();
+            if s.windows(2).any(|v| v[0] == v[1]) && s.windows(2).all(|v| v[0] <= v[1]) {
+                count += 1;
+            }
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
