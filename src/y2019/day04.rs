@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2019/day/4>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -39,23 +32,28 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut count = 0;
+        for i in self.line[0]..=self.line[1] {
+            let s = format!("{i}").chars().map(|c| c as u8).collect::<Vec<u8>>();
+            let mut ch = b' ';
+            let mut cnt = 1;
+            for c in s.iter() {
+                if ch == *c {
+                    cnt += 1;
+                } else if cnt == 2 {
+                    break;
+                } else {
+                    ch = *c;
+                    cnt = 1;
+                }
+            }
+            if cnt != 2 {
+                continue;
+            }
+            if s.windows(2).all(|v| v[0] <= v[1]) {
+                count += 1;
+            }
+        }
+        count
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
