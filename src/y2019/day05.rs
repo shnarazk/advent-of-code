@@ -13,50 +13,56 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<isize>,
 }
 
 #[aoc(2019, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
     fn after_insert(&mut self) {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut pc = 0;
+        loop {
+            match self.line[pc] {
+                1 => {
+                    let op1 = self.line[pc + 1];
+                    let op2 = self.line[pc + 2];
+                    let op3 = self.line[pc + 3];
+                    self.line[op3 as usize] = self.line[op1 as usize] + self.line[op2 as usize];
+                    pc += 4;
+                }
+                2 => {
+                    let op1 = self.line[pc + 1];
+                    let op2 = self.line[pc + 2];
+                    let op3 = self.line[pc + 3];
+                    self.line[op3 as usize] = self.line[op1 as usize] * self.line[op2 as usize];
+                    pc += 4;
+                }
+                3 => {
+                    let op1 = self.line[pc + 1];
+                    self.line[op1 as usize] = op1;
+                    pc += 2;
+                }
+                4 => {
+                    let op1 = self.line[pc + 1];
+                    dbg!(op1);
+                    pc += 2;
+                }
+                99 => {
+                    break;
+                }
+                _ => panic!(),
+            }
+        }
+        dbg!(self.line[0]) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         0
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
