@@ -1,4 +1,6 @@
 //! <https://adventofcode.com/2019/day/7>
+
+use std::usize;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -10,6 +12,7 @@ use {
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<isize>,
+    pc: usize,
 }
 
 #[aoc(2019, 7)]
@@ -179,6 +182,7 @@ impl Puzzle {
                 }
                 4 => {
                     let op1 = fetch!(1);
+                    dbg!("output");
                     output.push(op1);
                     pc += 2;
                 }
@@ -225,5 +229,91 @@ impl Puzzle {
         assert!(1 == output.len());
         dbg!(&output);
         output
+    }
+    fn run(&mut self, inputs: &mut VecDeque<isize>) -> Option<isize> {
+        loop {
+            let op = self.line[self.pc] % 100;
+            let immediate: Vec<bool> = {
+                let mut v = Vec::new();
+                let mut val = self.line[self.pc] / 100;
+                while 0 < val {
+                    v.push(0 < val % 10);
+                    val /= 10;
+                }
+                v
+            };
+            macro_rules! fetch {
+                ($offset: expr) => {{
+                    if let Some(true) = immediate.get($offset - 1) {
+                        self.line[self.pc + $offset]
+                    } else {
+                        self.line[self.line[self.pc + $offset] as usize]
+                    }
+                }};
+                ($offset: expr, true) => {{
+                    self.line[self.pc + $offset] as usize
+                }};
+            }
+            match op {
+                1 => {
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) + fetch!(2);
+                    self.pc += 4;
+                }
+                2 => {
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) * fetch!(2);
+                    self.pc += 4;
+                }
+                3 => {
+                    let dst = fetch!(1, true);
+                    println!("input at {}", self.pc);
+                    self.line[dst] = inputs.pop_front().expect("not enough input");
+                    self.pc += 2;
+                }
+                4 => {
+                    let op1 = fetch!(1);
+                    self.pc += 2;
+                    return Some(dbg!(op1));
+                }
+                5 => {
+                    let op1 = fetch!(1);
+                    let dst = fetch!(2) as usize;
+                    if 0 != op1 {
+                        self.pc = dst;
+                    } else {
+                        self.pc += 3;
+                    }
+                }
+                6 => {
+                    let op1 = fetch!(1);
+                    let dst = fetch!(2) as usize;
+                    if 0 == op1 {
+                        self.pc = dst;
+                    } else {
+                        self.pc += 3;
+                    }
+                }
+                7 => {
+                    let op1 = fetch!(1);
+                    let op2 = fetch!(2);
+                    let dst = fetch!(3, true);
+                    self.line[dst] = (op1 < op2) as usize as isize;
+                    self.pc += 4;
+                }
+                8 => {
+                    let op1 = fetch!(1);
+                    let op2 = fetch!(2);
+                    let dst = fetch!(3, true);
+                    self.line[dst] = (op1 == op2) as usize as isize;
+                    self.pc += 4;
+                }
+                99 => {
+                    break;
+                }
+                _ => panic!("op: {} at {}", op, self.pc),
+            }
+        }
+        None
     }
 }
