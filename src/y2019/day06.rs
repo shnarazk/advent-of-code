@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2019/day/6>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashSet,
 };
@@ -45,6 +41,30 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
+        let to_santa = self.path_to("SAN");
+        let to_you = self.path_to("YOU");
+        for i in 0..to_santa.len().min(to_you.len()) {
+            if to_santa[i] != to_you[i] {
+                return to_santa.len() + to_you.len() - 2 * i;
+            }
+        }
         0
+    }
+}
+
+impl Puzzle {
+    fn path_to(&self, target: &str) -> Vec<String> {
+        let mut tgt = Some(target);
+        let mut path = Vec::new();
+        while let Some(ref target) = tgt {
+            if let Some((center, _)) = self.orbit.iter().find(|(_, p)| p == target) {
+                path.push(center.to_string());
+                tgt = Some(center);
+            } else {
+                tgt = None;
+            }
+        }
+        path.reverse();
+        path
     }
 }
