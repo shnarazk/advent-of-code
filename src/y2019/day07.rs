@@ -89,15 +89,20 @@ impl AdventOfCode for Puzzle {
             for (i, v) in perm.iter().enumerate() {
                 channel[i].push_back(*v as isize);
             }
-            for i in 0..5 {
-                let output = amp[i].execute(&mut channel[0]);
-                for o in output.iter() {
-                    channel[(i + 1) % 5].push_back(*o);
+            let mut score = 0;
+            'terminate: loop {
+                for i in 0..5 {
+                    let output = amp[i].execute(&mut channel[0]);
+                    if output.is_empty() {
+                        break 'terminate;
+                    }
+                    for o in output.iter() {
+                        channel[(i + 1) % 5].push_back(*o);
+                    }
                 }
+                score = channel[0].front().unwrap();
             }
-            if highest_score < *channel[0].front().unwrap() {
-                highest_score = *channel[0].front().unwrap();
-            }
+            highest_score = highest_score.max(score);
         }
         dbg!(highest_score) as usize
     }
