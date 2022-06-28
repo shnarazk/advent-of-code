@@ -1,16 +1,7 @@
 //! <https://adventofcode.com/2019/day/5>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use std::usize;
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -87,7 +78,92 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(*output.last().unwrap()) as usize
     }
-    fn part2(&mut self) -> Self::Output2 {
-        0
+    fn part2(&mut self) -> Self::Output1 {
+        let input = 5;
+        let mut output: Vec<isize> = Vec::new();
+        let mut pc = 0;
+        loop {
+            let op = self.line[pc] % 100;
+            let immediate: Vec<bool> = {
+                let mut v = Vec::new();
+                let mut val = self.line[pc] / 100;
+                while 0 < val {
+                    v.push(0 < val % 10);
+                    val /= 10;
+                }
+                v
+            };
+            macro_rules! fetch {
+                ($offset: expr) => {{
+                    if let Some(true) = immediate.get($offset - 1) {
+                        self.line[pc + $offset]
+                    } else {
+                        self.line[self.line[pc + $offset] as usize]
+                    }
+                }};
+                ($offset: expr, true) => {{
+                    self.line[pc + $offset] as usize
+                }};
+            }
+            match op {
+                1 => {
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) + fetch!(2);
+                    pc += 4;
+                }
+                2 => {
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) * fetch!(2);
+                    pc += 4;
+                }
+                3 => {
+                    let dst = fetch!(1, true);
+                    self.line[dst] = input;
+                    pc += 2;
+                }
+                4 => {
+                    let op1 = fetch!(1);
+                    output.push(op1);
+                    pc += 2;
+                }
+                5 => {
+                    let op1 = fetch!(1);
+                    let dst = fetch!(2) as usize;
+                    if 0 != op1 {
+                        pc = dst;
+                    } else {
+                        pc += 3;
+                    }
+                }
+                6 => {
+                    let op1 = fetch!(1);
+                    let dst = fetch!(2) as usize;
+                    if 0 == op1 {
+                        pc = dst;
+                    } else {
+                        pc += 3;
+                    }
+                }
+                7 => {
+                    let op1 = fetch!(1);
+                    let op2 = fetch!(2);
+                    let dst = fetch!(3, true);
+                    self.line[dst] = (op1 < op2) as usize as isize;
+                    pc += 4;
+                }
+                8 => {
+                    let op1 = fetch!(1);
+                    let op2 = fetch!(2);
+                    let dst = fetch!(3, true);
+                    self.line[dst] = (op1 == op2) as usize as isize;
+                    pc += 4;
+                }
+                99 => {
+                    break;
+                }
+                _ => panic!("op: {op} at {pc}"),
+            }
+        }
+        dbg!(*output.last().unwrap()) as usize
     }
 }
