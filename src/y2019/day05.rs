@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
+use std::usize;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -24,34 +26,57 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let input = 1;
+        let mut output: Vec<isize> = Vec::new();
         let mut pc = 0;
         loop {
-            match self.line[pc] {
+            let op = self.line[pc] % 100;
+            let immediate: Vec<bool> = {
+                let mut v = Vec::new();
+                let mut val = self.line[pc] / 100;
+                // dbg!(val);
+                while 0 < val {
+                    v.push(0 < val % 10);
+                    val /= 10;
+                }
+                v
+            };
+            // dbg!(&op, &immediate);
+            macro_rules! fetch {
+                ($offset: expr) => {{
+                    if let Some(true) = immediate.get($offset - 1) {
+                        self.line[pc + $offset]
+                    } else {
+                        self.line[self.line[pc + $offset] as usize]
+                    }
+                }};
+                ($offset: expr, true) => {{
+                    self.line[pc + $offset] as usize
+                }};
+            }
+            match op {
                 1 => {
-                    let op1 = self.line[pc + 1];
-                    let op2 = self.line[pc + 2];
-                    let op3 = self.line[pc + 3];
-                    self.line[op3 as usize] = self.line[op1 as usize] + self.line[op2 as usize];
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) + fetch!(2);
                     pc += 4;
                 }
                 2 => {
-                    let op1 = self.line[pc + 1];
-                    let op2 = self.line[pc + 2];
-                    let op3 = self.line[pc + 3];
-                    self.line[op3 as usize] = self.line[op1 as usize] * self.line[op2 as usize];
+                    let dst = fetch!(3, true);
+                    self.line[dst] = fetch!(1) * fetch!(2);
                     pc += 4;
                 }
                 3 => {
-                    let op1 = self.line[pc + 1];
-                    self.line[op1 as usize] = op1;
+                    let dst = fetch!(1, true);
+                    self.line[dst] = input;
                     pc += 2;
                 }
                 4 => {
-                    let op1 = self.line[pc + 1];
+                    let op1 = fetch!(1);
                     dbg!(op1);
+                    output.push(op1);
                     pc += 2;
                 }
                 99 => {
@@ -60,7 +85,7 @@ impl AdventOfCode for Puzzle {
                 _ => panic!(),
             }
         }
-        dbg!(self.line[0]) as usize
+        dbg!(*output.last().unwrap()) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         0
