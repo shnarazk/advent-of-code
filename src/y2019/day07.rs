@@ -70,15 +70,15 @@ impl AdventOfCode for Puzzle {
         dbg!(highest_score) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut amp: [Puzzle; 5] = [
-            self.clone(),
-            self.clone(),
-            self.clone(),
-            self.clone(),
-            self.clone(),
-        ];
         let mut highest_score = 0;
-        for perm in permutation(0, 5).into_iter() {
+        for perm in permutations(5, 9).into_iter() {
+            let mut amp: [Puzzle; 5] = [
+                self.clone(),
+                self.clone(),
+                self.clone(),
+                self.clone(),
+                self.clone(),
+            ];
             let mut channel: [VecDeque<isize>; 5] = [
                 VecDeque::new(),
                 VecDeque::new(),
@@ -89,10 +89,11 @@ impl AdventOfCode for Puzzle {
             for (i, v) in perm.iter().enumerate() {
                 channel[i].push_back(*v as isize);
             }
-            let mut score = 0;
+            channel[0].push_back(0);
+            let mut score: isize = 0;
             'terminate: loop {
                 for i in 0..5 {
-                    let output = amp[i].execute(&mut channel[0]);
+                    let output = amp[i].execute(&mut channel[i]);
                     if output.is_empty() {
                         break 'terminate;
                     }
@@ -100,12 +101,35 @@ impl AdventOfCode for Puzzle {
                         channel[(i + 1) % 5].push_back(*o);
                     }
                 }
-                score = channel[0].front().unwrap();
+                score = *channel[0].front().unwrap();
             }
             highest_score = highest_score.max(score);
         }
         dbg!(highest_score) as usize
     }
+}
+
+fn permutations(from: usize, to: usize) -> Vec<Vec<usize>> {
+    fn perm(cands: &[usize]) -> Vec<Vec<usize>> {
+        if cands.is_empty() {
+            return vec![vec![]];
+        }
+        let mut ret = Vec::new();
+        for c in cands.iter() {
+            let remains = cands
+                .iter()
+                .filter(|i| *i != c)
+                .copied()
+                .collect::<Vec<usize>>();
+            for mut v in perm(&remains).into_iter() {
+                v.push(*c);
+                ret.push(v);
+            }
+        }
+        ret
+    }
+    let cands = (from..=to).collect::<Vec<usize>>();
+    perm(&cands)
 }
 
 impl Puzzle {
@@ -149,6 +173,7 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = fetch!(1, true);
+                    println!("input at {pc}");
                     memory[dst] = inputs.pop_front().expect("not enough input");
                     pc += 2;
                 }
@@ -158,6 +183,7 @@ impl Puzzle {
                     pc += 2;
                 }
                 5 => {
+                    dbg!("5");
                     let op1 = fetch!(1);
                     let dst = fetch!(2) as usize;
                     if 0 != op1 {
@@ -167,6 +193,7 @@ impl Puzzle {
                     }
                 }
                 6 => {
+                    dbg!("6");
                     let op1 = fetch!(1);
                     let dst = fetch!(2) as usize;
                     if 0 == op1 {
@@ -196,26 +223,7 @@ impl Puzzle {
             }
         }
         assert!(1 == output.len());
+        dbg!(&output);
         output
     }
-}
-
-fn permutation(from: usize, to: usize) -> Vec<Vec<usize>> {
-    fn perm(cands: &[usize]) -> Vec<Vec<usize>> {
-        let mut ret = Vec::new();
-        for c in cands.iter() {
-            let remains = cands
-                .iter()
-                .filter(|i| *i != c)
-                .copied()
-                .collect::<Vec<usize>>();
-            for mut v in perm(&remains).into_iter() {
-                v.push(*c);
-                ret.push(v);
-            }
-        }
-        ret
-    }
-    let cands = (from..to).collect::<Vec<usize>>();
-    perm(&cands)
 }
