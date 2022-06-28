@@ -4,7 +4,7 @@ use crate::{
     line_parser,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<isize>,
 }
@@ -22,22 +22,22 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let mut highest_score = 0;
         for init_a in 0..5 {
-            let out_a = self.execute(vec![init_a, 0]);
+            let out_a = self.clone().execute(vec![init_a, 0]);
             for init_b in 0..5 {
                 if init_b == init_a {
                     continue;
                 }
-                let out_b = self.execute(vec![init_b, out_a[0]]);
+                let out_b = self.clone().execute(vec![init_b, out_a[0]]);
                 for init_c in 0..5 {
                     if init_c == init_b || init_c == init_a {
                         continue;
                     }
-                    let out_c = self.execute(vec![init_c, out_b[0]]);
+                    let out_c = self.clone().execute(vec![init_c, out_b[0]]);
                     for init_d in 0..5 {
                         if init_d == init_c || init_d == init_b || init_d == init_a {
                             continue;
                         }
-                        let out_d = self.execute(vec![init_d, out_c[0]]);
+                        let out_d = self.clone().execute(vec![init_d, out_c[0]]);
                         for init_e in 0..5 {
                             if init_e == init_d
                                 || init_e == init_c
@@ -46,7 +46,7 @@ impl AdventOfCode for Puzzle {
                             {
                                 continue;
                             }
-                            let out_e = self.execute(vec![init_e, out_d[0]]);
+                            let out_e = self.clone().execute(vec![init_e, out_d[0]]);
                             if highest_score < out_e[0] {
                                 println!("{},{},{},{},{}", init_a, init_b, init_c, init_d, init_e);
                                 highest_score = out_e[0];
@@ -59,13 +59,24 @@ impl AdventOfCode for Puzzle {
         dbg!(highest_score) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut amp = vec![
+            self.clone(),
+            self.clone(),
+            self.clone(),
+            self.clone(),
+            self.clone(),
+        ];
+        let mut highest_score = 0;
+        // for perm in permutations(0, 5) {
+        //     todo!();
+        // }
+        dbg!(highest_score) as usize
     }
 }
 
 impl Puzzle {
-    fn execute(&self, inputs: Vec<isize>) -> Vec<isize> {
-        let mut memory = self.line.clone();
+    fn execute(&mut self, inputs: Vec<isize>) -> Vec<isize> {
+        let memory = &mut self.line;
         let mut input_index = 0;
         let mut output: Vec<isize> = Vec::new();
         let mut pc = 0;
