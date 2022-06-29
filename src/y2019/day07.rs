@@ -96,12 +96,10 @@ impl AdventOfCode for Puzzle {
             let mut score: isize = 0;
             'terminate: loop {
                 for i in 0..5 {
-                    let output = amp[i].execute(&mut channel[i]);
-                    if output.is_empty() {
+                    if let Some(output) = amp[i].run(&mut channel[i]) {
+                        channel[(i + 1) % 5].push_back(output);
+                    } else {
                         break 'terminate;
-                    }
-                    for o in output.iter() {
-                        channel[(i + 1) % 5].push_back(*o);
                     }
                 }
                 score = *channel[0].front().unwrap();
