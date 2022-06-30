@@ -4,8 +4,6 @@ use crate::framework::{aoc, AdventOfCode, ParseError};
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<u8>,
-    width: usize,
-    height: usize,
 }
 
 #[aoc(2019, 8)]
@@ -19,9 +17,9 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.width = 25;
-        self.height = 6;
-        let delta = self.width * self.height;
+        let width = 25;
+        let height = 6;
+        let delta = width * height;
         let n_layers = self.line.len() / delta;
         let mut target: usize = 0;
         let mut min_zeros: usize = delta;
@@ -42,6 +40,28 @@ impl AdventOfCode for Puzzle {
                 .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        let width = 25;
+        let height = 6;
+        let delta = width * height;
+        let n_layers = self.line.len() / delta;
+        for j in 0..height {
+            for i in 0..width {
+                for q in (0..n_layers).map(|l| l * delta + j * width + i) {
+                    match self.line[q] {
+                        0 => {
+                            print!(" ");
+                            break;
+                        }
+                        1 => {
+                            print!("*");
+                            break;
+                        }
+                        _ => (),
+                    }
+                }
+            }
+            println!();
+        }
         0
     }
 }
