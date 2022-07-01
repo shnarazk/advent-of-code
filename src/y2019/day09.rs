@@ -1,12 +1,11 @@
 //! <https://adventofcode.com/2019/day/9>
 
-use std::usize;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         line_parser,
     },
-    std::collections::VecDeque,
+    std::collections::{HashMap, VecDeque},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -26,7 +25,9 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut inputs = VecDeque::new();
+        inputs.push_back(1);
+        dbg!(self.execute(&mut inputs))[0] as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         0
@@ -35,15 +36,18 @@ impl AdventOfCode for Puzzle {
 
 impl Puzzle {
     fn execute(&mut self, inputs: &mut VecDeque<isize>) -> Vec<isize> {
-        let memory = &mut self.line;
+        let mut memory: HashMap<usize, isize> = HashMap::new();
+        for (i, v) in self.line.iter().enumerate() {
+            memory.insert(i, *v);
+        }
         let mut output: Vec<isize> = Vec::new();
         let mut pc: usize = 0;
         let mut r_base: usize = 0;
         loop {
-            let op = memory[pc] % 100;
+            let op = memory[&pc] % 100;
             let immediate: Vec<u8> = {
                 let mut v = Vec::new();
-                let mut val = memory[pc] / 100;
+                let mut val = memory[&pc] / 100;
                 while 0 < val {
                     v.push((val % 10) as u8);
                     val /= 10;
@@ -51,19 +55,21 @@ impl Puzzle {
                 v
             };
             macro_rules! deref {
-                ($offset: expr, true) => {{
+                ($offset: expr) => {{
                     match immediate.get($offset - 1) {
-                        Some(0) | None => memory[memory[pc + $offset] as usize],
-                        Some(1) => memory[pc + $offset],
-                        Some(2) => memory[memory[pc + $offset] as usize + r_base],
+                        Some(0) | None => memory[&(pc + $offset)] as usize,
+                        Some(1) => (pc + $offset) as usize,
+                        Some(2) => (r_base as isize + memory[&(pc + $offset)]) as usize,
                         _ => unreachable!(),
                     }
                 }};
-                ($offset: expr) => {{
+                ($offset: expr, true) => {{
+                    dbg!(r_base);
+                    dbg!(memory[&(pc + $offset)]);
                     match immediate.get($offset - 1) {
-                        Some(0) | None => memory[pc + $offset] as usize,
-                        Some(1) => (pc + $offset) as usize,
-                        Some(2) => memory[pc + $offset] as usize + r_base,
+                        Some(0) | None => memory[&(memory[&(pc + $offset)] as usize)],
+                        Some(1) => memory[&(pc + $offset)],
+                        Some(2) => memory[&((r_base as isize + memory[&(pc + $offset)]) as usize)],
                         _ => unreachable!(),
                     }
                 }};
@@ -71,18 +77,21 @@ impl Puzzle {
             match op {
                 1 => {
                     let dst = deref!(3);
-                    memory[dst] = deref!(1, true) + deref!(2, true);
+                    // memory[&dst] = deref!(1, true) + deref!(2, true);
+                    memory.insert(dst, deref!(1, true) + deref!(2, true));
                     pc += 4;
                 }
                 2 => {
                     let dst = deref!(3);
-                    memory[dst] = deref!(1, true) * deref!(2, true);
+                    // memory[&dst] = deref!(1, true) * deref!(2, true);
+                    memory.insert(dst, deref!(1, true) * deref!(2, true));
                     pc += 4;
                 }
                 3 => {
                     let dst = deref!(1);
                     println!("input at {pc}");
-                    memory[dst] = inputs.pop_front().expect("not enough input");
+                    // memory[&dst] = inputs.pop_front().expect("not enough input");
+                    memory.insert(dst, inputs.pop_front().expect("not enough input"));
                     pc += 2;
                 }
                 4 => {
@@ -112,14 +121,16 @@ impl Puzzle {
                     let op1 = deref!(1, true);
                     let op2 = deref!(2, true);
                     let dst = deref!(3);
-                    memory[dst] = (op1 < op2) as usize as isize;
+                    // memory[&dst] = (op1 < op2) as usize as isize;
+                    memory.insert(dst, (op1 < op2) as usize as isize);
                     pc += 4;
                 }
                 8 => {
                     let op1 = deref!(1, true);
                     let op2 = deref!(2, true);
                     let dst = deref!(3);
-                    memory[dst] = (op1 == op2) as usize as isize;
+                    // memory[&dst] = (op1 == op2) as usize as isize;
+                    memory.insert(dst, (op1 == op2) as usize as isize);
                     pc += 4;
                 }
                 9 => {
