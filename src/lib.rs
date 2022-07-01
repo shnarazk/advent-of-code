@@ -2,6 +2,8 @@ pub mod color;
 pub mod framework;
 pub mod geometric;
 pub mod line_parser;
+pub mod math;
+
 #[cfg(feature = "y2015")]
 pub mod y2015;
 #[cfg(feature = "y2016")]
