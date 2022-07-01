@@ -30,7 +30,9 @@ impl AdventOfCode for Puzzle {
         dbg!(self.execute(&mut inputs))[0] as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut inputs = VecDeque::new();
+        inputs.push_back(2);
+        dbg!(self.execute(&mut inputs))[0] as usize
     }
 }
 
@@ -64,8 +66,6 @@ impl Puzzle {
                     }
                 }};
                 ($offset: expr, true) => {{
-                    dbg!(r_base);
-                    dbg!(memory[&(pc + $offset)]);
                     match immediate.get($offset - 1) {
                         Some(0) | None => memory[&(memory[&(pc + $offset)] as usize)],
                         Some(1) => memory[&(pc + $offset)],
@@ -77,20 +77,17 @@ impl Puzzle {
             match op {
                 1 => {
                     let dst = deref!(3);
-                    // memory[&dst] = deref!(1, true) + deref!(2, true);
                     memory.insert(dst, deref!(1, true) + deref!(2, true));
                     pc += 4;
                 }
                 2 => {
                     let dst = deref!(3);
-                    // memory[&dst] = deref!(1, true) * deref!(2, true);
                     memory.insert(dst, deref!(1, true) * deref!(2, true));
                     pc += 4;
                 }
                 3 => {
                     let dst = deref!(1);
                     println!("input at {pc}");
-                    // memory[&dst] = inputs.pop_front().expect("not enough input");
                     memory.insert(dst, inputs.pop_front().expect("not enough input"));
                     pc += 2;
                 }
@@ -121,7 +118,6 @@ impl Puzzle {
                     let op1 = deref!(1, true);
                     let op2 = deref!(2, true);
                     let dst = deref!(3);
-                    // memory[&dst] = (op1 < op2) as usize as isize;
                     memory.insert(dst, (op1 < op2) as usize as isize);
                     pc += 4;
                 }
@@ -129,7 +125,6 @@ impl Puzzle {
                     let op1 = deref!(1, true);
                     let op2 = deref!(2, true);
                     let dst = deref!(3);
-                    // memory[&dst] = (op1 == op2) as usize as isize;
                     memory.insert(dst, (op1 == op2) as usize as isize);
                     pc += 4;
                 }
