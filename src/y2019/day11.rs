@@ -30,9 +30,23 @@ impl AdventOfCode for Puzzle {
         env.panel.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut inputs = VecDeque::new();
-        // inputs.push_back(2);
-        // dbg!(self.execute(&mut inputs))[0] as usize
+        let mut env = Env::default();
+        env.panel.insert((0, 0), (true, 0));
+        self.start(&mut env);
+        let y_beg = env.panel.iter().map(|(loc, _)| loc.0).min().unwrap();
+        let y_end = env.panel.iter().map(|(loc, _)| loc.0).max().unwrap();
+        let x_beg = env.panel.iter().map(|(loc, _)| loc.1).min().unwrap();
+        let x_end = env.panel.iter().map(|(loc, _)| loc.1).max().unwrap();
+        for y in y_beg..=y_end {
+            for x in x_beg..=x_end {
+                if env.panel.get(&(y, x)).map_or(false, |(c, _)| *c) {
+                    print!("*");
+                } else {
+                    print!(" ");
+                }
+            }
+            println!();
+        }
         0
     }
 }
