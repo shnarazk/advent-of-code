@@ -3,10 +3,10 @@
 use adventofcode::y2015;
 #[cfg(feature = "y2016")]
 use adventofcode::y2016;
-// #[cfg(feature = "y2017")]
-// use adventofcode::y2017;
-// #[cfg(feature = "y2018")]
-// use adventofcode::y2018;
+#[cfg(feature = "y2017")]
+use adventofcode::y2017;
+#[cfg(feature = "y2018")]
+use adventofcode::y2018;
 #[cfg(feature = "y2019")]
 use adventofcode::y2019;
 #[cfg(feature = "y2020")]
@@ -45,8 +45,8 @@ pub fn main() {
         2015 => aoc_arms!(2015),
         #[cfg(feature = "y2016")]
         2016 => aoc_arms!(2016),
-        // #[cfg(feature = "y2017")]
-        // 2017 => aoc_arms!(2017),
+        #[cfg(feature = "y2017")]
+        2017 => aoc_arms!(2017, 1),
         // #[cfg(feature = "y2018")]
         // 2018 => aoc_arms!(2018),
         #[cfg(feature = "y2019")]
