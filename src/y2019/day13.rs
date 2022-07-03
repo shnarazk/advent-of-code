@@ -9,6 +9,7 @@ use {
         line_parser, regex,
     },
     std::collections::HashMap,
+    std::io::Write,
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -29,8 +30,9 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut env = Env::default();
+        env.display(true);
         self.start(&mut env);
-        env.display();
+        env.display(false);
         env.objects
             .iter()
             .filter(|(_, o)| **o == Object::Block)
@@ -39,8 +41,9 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
         let mut env = Env::default();
+        env.display(true);
         self.start(&mut env);
-        env.display();
+        env.display(false);
         0
     }
 }
@@ -178,40 +181,54 @@ impl TryFrom<usize> for Object {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Env {
     panel: HashMap<(isize, isize), (bool, usize)>,
-    location: (isize, isize),
-    direction: (isize, isize),
     output_mode: usize,
     packet: [isize; 3],
     objects: HashMap<(isize, isize), Object>,
     score: usize,
-}
-
-impl Default for Env {
-    fn default() -> Self {
-        Env {
-            panel: HashMap::new(),
-            location: (0, 0),
-            direction: (-1, 0),
-            output_mode: 0,
-            packet: [0; 3],
-            objects: HashMap::new(),
-            score: 0,
-        }
-    }
+    input_stream: Vec<isize>,
+    buffer: String,
+    input_history: Vec<isize>,
 }
 
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
-        self.display();
-        let input = if let Some(color) = self.panel.get(&self.location) {
-            color.0 as usize as isize
+        self.display(false);
+        if let Some(recorded) = self.input_stream.pop() {
+            self.input_history.push(recorded);
+            recorded
         } else {
-            0
-        };
-        input
+            let stdin = std::io::stdin();
+            loop {
+                self.buffer.clear();
+                stdin.read_line(&mut self.buffer).expect("strange error");
+                // I'm an Engram user.
+                match self.buffer.chars().next().unwrap_or('_') {
+                    'c' => {
+                        self.input_history.push(-1);
+                        return -1;
+                    }
+                    'i' | ' ' | '\n' => {
+                        self.input_history.push(0);
+                        return 0;
+                    }
+                    'e' => {
+                        self.input_history.push(1);
+                        return 1;
+                    }
+                    's' => {
+                        if let Ok(f) = std::fs::File::create("keyinputs.rs") {
+                            let mut obuf = std::io::BufWriter::new(f);
+                            obuf.write_all(format!("{:?}", self.input_history).as_bytes())
+                                .expect("save error");
+                        }
+                    }
+                    _ => (),
+                }
+            }
+        }
     }
     pub fn hanle_output(&mut self, output: isize) {
         self.packet[self.output_mode] = output;
@@ -227,42 +244,33 @@ impl Env {
         }
         self.output_mode = (self.output_mode + 1) % 3;
     }
-    fn paint_at(&mut self, paint_white: isize) {
-        let entry = self.panel.entry(self.location).or_insert((false, 0));
-        *entry = (paint_white == 1, entry.1 + 1);
-    }
-    fn rotate(&mut self, turn_right: isize) {
-        self.direction = match (self.direction, turn_right) {
-            ((-1, 0), 0) => (0, -1),
-            ((-1, 0), 1) => (0, 1),
-            ((0, 1), 0) => (-1, 0),
-            ((0, 1), 1) => (1, 0),
-            ((1, 0), 0) => (0, 1),
-            ((1, 0), 1) => (0, -1),
-            ((0, -1), 0) => (1, 0),
-            ((0, -1), 1) => (-1, 0),
-            _ => unreachable!(),
-        };
-        self.location.0 += self.direction.0;
-        self.location.1 += self.direction.1;
-    }
-    fn display(&self) {
+    fn display(&self, init: bool) {
+        if !init {
+            print!("\x1B[25A\x1B[1G");
+        } else {
+            println!();
+        }
         for y in 0..24 {
-            for x in 0..70 {
+            for x in 0..42 {
                 if let Some(o) = self.objects.get(&(y, x)) {
                     let d = match o {
                         Object::Empty => " ",
                         Object::Wall => "#",
-                        Object::Block => "W",
-                        Object::Paddle => "_",
-                        Object::Ball => "O",
+                        Object::Block => "*",
+                        Object::Paddle => "T",
+                        Object::Ball => "o",
                     };
                     print!("{}", d);
                 } else {
                     print!(" ");
                 }
             }
-            println!();
+            if y == 23 {
+                println!(" SCORE: {}", self.score);
+            } else {
+                println!();
+            }
         }
+        std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
