@@ -1,14 +1,8 @@
 //! <https://adventofcode.com/2019/day/12>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    math::lcm,
+    regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -79,11 +73,13 @@ impl AdventOfCode for Puzzle {
         total
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut factor: [usize; 3] = [0, 0, 0];
         let mut delta = Vec::new();
         for _ in self.line.iter() {
             delta.push([0; 3]);
         }
-        for time in 0.. {
+        let start = self.line.clone();
+        for time in 1.. {
             // calculate gravities
             for i in 0..self.line.len() {
                 for j in i + 1..self.line.len() {
@@ -107,7 +103,27 @@ impl AdventOfCode for Puzzle {
                     moon[axis] += moon[axis + 3];
                 }
             }
-            if self.line.iter().all(|m| m.iter().skip(3).all(|v| *v == 0)) {
+            // if self.line.iter().all(|m| m.iter().skip(3).all(|v| *v == 0)) {
+            //     return time;
+            // }
+            if self.line.iter().all(|m| m[3] == 0) && factor[0] == 0 {
+                factor[0] = time;
+                dbg!("X", time);
+            }
+            if self.line.iter().all(|m| m[4] == 0) && factor[1] == 0 {
+                factor[1] = time;
+                dbg!("Y", time);
+            }
+            if self.line.iter().all(|m| m[5] == 0) && factor[2] == 0 {
+                factor[2] = time;
+                dbg!("Z", time);
+            }
+            if factor.iter().all(|a| 0 != *a) {
+                dbg!(&factor);
+                let least = lcm(factor[2], lcm(factor[1], factor[0]));
+                return least * 2; // least wasn't a solution. So try doubled one.
+            }
+            if self.line == start {
                 return time;
             }
         }
