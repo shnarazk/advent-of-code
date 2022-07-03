@@ -33,14 +33,14 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut delta = Vec::new();
+        for _ in self.line.iter() {
+            delta.push([0; 3]);
+        }
         for _ in 0..1000 {
-            let mut delta = Vec::new();
-            for _ in self.line.iter() {
-                delta.push([0; 3]);
-            }
             // calculate gravities
             for i in 0..self.line.len() {
                 for j in i + 1..self.line.len() {
@@ -79,23 +79,38 @@ impl AdventOfCode for Puzzle {
         total
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut delta = Vec::new();
+        for _ in self.line.iter() {
+            delta.push([0; 3]);
+        }
+        for time in 0.. {
+            // calculate gravities
+            for i in 0..self.line.len() {
+                for j in i + 1..self.line.len() {
+                    for axis in 0..3 {
+                        let d = (self.line[j][axis] - self.line[i][axis]).signum();
+                        delta[i][axis] += d;
+                        delta[j][axis] -= d;
+                    }
+                }
+            }
+            // update the velocities by applying gravity
+            for (i, moon) in self.line.iter_mut().enumerate() {
+                for (axis, m) in moon.iter_mut().skip(3).enumerate() {
+                    *m += delta[i][axis];
+                    delta[i][axis] = 0;
+                }
+            }
+            // update the positions
+            for moon in self.line.iter_mut() {
+                for axis in 0..3 {
+                    moon[axis] += moon[axis + 3];
+                }
+            }
+            if self.line.iter().all(|m| m.iter().skip(3).all(|v| *v == 0)) {
+                return time;
+            }
+        }
         0
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
