@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, VecDeque},
     std::io::Write,
 };
 
@@ -41,6 +41,11 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
         let mut env = Env::default();
+        env.input_stream = VecDeque::from([
+            0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ]);
         env.display(true);
         self.start(&mut env);
         env.display(false);
@@ -188,7 +193,7 @@ pub struct Env {
     packet: [isize; 3],
     objects: HashMap<(isize, isize), Object>,
     score: usize,
-    input_stream: Vec<isize>,
+    input_stream: VecDeque<isize>,
     buffer: String,
     input_history: Vec<isize>,
 }
@@ -196,7 +201,8 @@ pub struct Env {
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
         self.display(false);
-        if let Some(recorded) = self.input_stream.pop() {
+        if let Some(recorded) = self.input_stream.pop_front() {
+            println!();
             self.input_history.push(recorded);
             recorded
         } else {
