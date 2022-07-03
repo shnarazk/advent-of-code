@@ -30,29 +30,17 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let mut env = Env::default();
         self.start(&mut env);
-        for y in 0..24 {
-            for x in 0..70 {
-                if let Some(o) = env.objects.get(&(y, x)) {
-                    let d = match o {
-                        Object::Empty => " ",
-                        Object::Wall => "#",
-                        Object::Block => "W",
-                        Object::Paddle => "_",
-                        Object::Ball => "O",
-                    };
-                    print!("{}", d);
-                } else {
-                    print!(" ");
-                }
-            }
-            println!();
-        }
+        env.display();
         env.objects
             .iter()
             .filter(|(_, o)| **o == Object::Block)
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        self.line[0] = 2;
+        let mut env = Env::default();
+        self.start(&mut env);
+        env.display();
         0
     }
 }
@@ -198,6 +186,7 @@ pub struct Env {
     output_mode: usize,
     packet: [isize; 3],
     objects: HashMap<(isize, isize), Object>,
+    score: usize,
 }
 
 impl Default for Env {
@@ -209,12 +198,14 @@ impl Default for Env {
             output_mode: 0,
             packet: [0; 3],
             objects: HashMap::new(),
+            score: 0,
         }
     }
 }
 
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
+        self.display();
         let input = if let Some(color) = self.panel.get(&self.location) {
             color.0 as usize as isize
         } else {
@@ -225,10 +216,14 @@ impl Env {
     pub fn hanle_output(&mut self, output: isize) {
         self.packet[self.output_mode] = output;
         if self.output_mode == 2 {
-            self.objects.insert(
-                (self.packet[1], self.packet[0]),
-                Object::try_from(self.packet[2] as usize).unwrap(),
-            );
+            if self.packet[0] == -1 && self.packet[1] == 0 {
+                self.score = self.packet[2] as usize;
+            } else {
+                self.objects.insert(
+                    (self.packet[1], self.packet[0]),
+                    Object::try_from(self.packet[2] as usize).unwrap(),
+                );
+            }
         }
         self.output_mode = (self.output_mode + 1) % 3;
     }
@@ -250,6 +245,24 @@ impl Env {
         };
         self.location.0 += self.direction.0;
         self.location.1 += self.direction.1;
-        // println!("({}, {})", self.location.0, self.location.1);
+    }
+    fn display(&self) {
+        for y in 0..24 {
+            for x in 0..70 {
+                if let Some(o) = self.objects.get(&(y, x)) {
+                    let d = match o {
+                        Object::Empty => " ",
+                        Object::Wall => "#",
+                        Object::Block => "W",
+                        Object::Paddle => "_",
+                        Object::Ball => "O",
+                    };
+                    print!("{}", d);
+                } else {
+                    print!(" ");
+                }
+            }
+            println!();
+        }
     }
 }
