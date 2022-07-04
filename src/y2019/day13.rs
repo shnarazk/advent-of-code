@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2019/day/13>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::{HashMap, VecDeque},
     std::io::Write,
@@ -40,13 +36,10 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
-        let mut env = Env::default();
-        env.input_stream = VecDeque::from(include!("day13-joystick.rs"));
-        //     [
-        //     0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // ]
+        let mut env = Env {
+            input_stream: VecDeque::from(include!("day13-joystick.rs")),
+            ..Default::default()
+        };
         env.display(true);
         self.start(&mut env);
         env.display(false);
@@ -189,7 +182,6 @@ impl TryFrom<usize> for Object {
 }
 #[derive(Clone, Debug, Default)]
 pub struct Env {
-    panel: HashMap<(isize, isize), (bool, usize)>,
     output_mode: usize,
     packet: [isize; 3],
     objects: HashMap<(isize, isize), Object>,
