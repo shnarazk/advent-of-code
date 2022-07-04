@@ -41,11 +41,12 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
         let mut env = Env::default();
-        env.input_stream = VecDeque::from([
-            0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        ]);
+        env.input_stream = VecDeque::from(include!("day13-joystick.rs"));
+        //     [
+        //     0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // ]
         env.display(true);
         self.start(&mut env);
         env.display(false);
@@ -225,9 +226,9 @@ impl Env {
                         return 1;
                     }
                     's' => {
-                        if let Ok(f) = std::fs::File::create("keyinputs.rs") {
+                        if let Ok(f) = std::fs::File::create("day13-joystick.rs") {
                             let mut obuf = std::io::BufWriter::new(f);
-                            obuf.write_all(format!("{:?}", self.input_history).as_bytes())
+                            obuf.write_all(format!("{:?}\n", self.input_history).as_bytes())
                                 .expect("save error");
                         }
                     }
@@ -277,6 +278,6 @@ impl Env {
                 println!();
             }
         }
-        std::thread::sleep(std::time::Duration::from_millis(100));
+        std::thread::sleep(std::time::Duration::from_millis(2));
     }
 }
