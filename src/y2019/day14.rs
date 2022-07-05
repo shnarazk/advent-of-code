@@ -54,23 +54,36 @@ impl AdventOfCode for Puzzle {
         let mut bag: HashMap<&str, usize> = HashMap::new();
         let mut extra: HashMap<&str, usize> = HashMap::new();
         bag.insert("FUEL", 1);
+        let mut num_ore: usize = 0;
         while let Some((key, amount)) = bag.iter().next() {
             let k: &str = *key;
-            let amount = *amount;
+            let mut amount = *amount;
             bag.remove(k);
             if let Some(requires) = hash.get(k) {
-                let num_repeat: usize = amount / requires.amount;
-                dbg!(num_repeat);
+                if let Some(remains) = extra.get(k) {
+                    if amount <= *remains {
+                        *extra.entry(k).or_insert(0) -= amount;
+                        continue;
+                    } else {
+                        amount -= remains;
+                        extra.remove(k);
+                    }
+                }
+                let num_repeat: usize = (amount + requires.amount - 1) / requires.amount;
                 for (name, amnt) in requires.requirements {
-                    println!("{}, {}", name, amnt * num_repeat);
+                    if name == "ORE" {
+                        num_ore += amnt * num_repeat;
+                    } else {
+                        println!("{}, {}", name, amnt * num_repeat);
+                        bag.insert(name, amnt * num_repeat);
+                    }
                 }
                 let remains = requires.amount * num_repeat - amount;
                 let entry = extra.entry(k).or_insert(0);
                 *entry += remains;
-                dbg!(&extra);
             }
         }
-        0
+        num_ore
     }
     fn part2(&mut self) -> Self::Output2 {
         0
