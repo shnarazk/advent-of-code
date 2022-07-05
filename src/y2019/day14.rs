@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2019/day/14>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -87,7 +83,54 @@ impl AdventOfCode for Puzzle {
         num_ore
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let max_ore = 1_000_000_000_000;
+        let hash = self.make_hash();
+        dbg!(&hash.keys().count());
+        let mut range = (1, 100_000_000_000);
+        while 1 < range.1 - range.0 {
+            let trying = (range.1 + range.0) / 2;
+            let mut bag: HashMap<&str, usize> = HashMap::new();
+            let mut extra: HashMap<&str, usize> = HashMap::new();
+            bag.insert("FUEL", trying);
+            let mut num_ore: usize = 0;
+            while let Some((key, amount)) = bag.iter().next() {
+                let k: &str = *key;
+                let mut amount = *amount;
+                bag.remove(k);
+                if let Some(requires) = hash.get(k) {
+                    if let Some(remains) = extra.get(k) {
+                        if amount <= *remains {
+                            *extra.entry(k).or_insert(0) -= amount;
+                            continue;
+                        } else {
+                            amount -= remains;
+                            extra.remove(k);
+                        }
+                    }
+                    let num_repeat: usize = (amount + requires.amount - 1) / requires.amount;
+                    for (name, amnt) in requires.requirements {
+                        if name == "ORE" {
+                            // println!("- {} ORE to produce {amount} {k}", amnt * num_repeat);
+                            num_ore += amnt * num_repeat;
+                        } else {
+                            // println!("- {} {name} for {amount} {k}", amnt * num_repeat);
+                            *bag.entry(name).or_insert(0) += amnt * num_repeat;
+                        }
+                    }
+                    let remains = requires.amount * num_repeat - amount;
+                    let entry = extra.entry(k).or_insert(0);
+                    *entry += remains;
+                }
+            }
+            if max_ore < num_ore {
+                range.1 = trying;
+            } else {
+                range.0 = trying;
+            }
+            // dbg!(&range);
+        }
+        dbg!(&range);
+        range.0
     }
 }
 
@@ -105,21 +148,4 @@ impl Puzzle {
         }
         hash
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
