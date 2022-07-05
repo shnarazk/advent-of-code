@@ -24,6 +24,12 @@ fn parse_chemical_unit(s: &str) -> Result<ChemicalUnit, ParseError> {
     Ok((segment[2].to_string(), segment[1].parse::<usize>()?))
 }
 
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Resource<'a> {
+    requirements: &'a [ChemicalUnit],
+    amount: usize,
+}
+
 #[aoc(2019, 14)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
@@ -43,15 +49,47 @@ impl AdventOfCode for Puzzle {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut hash: HashMap<&str, (&[ChemicalUnit], usize)> = HashMap::new();
-        for (vec, (c, u)) in self.line.iter() {
-            hash.insert(c, (vec, *u));
+        let hash = self.make_hash();
+        dbg!(&hash.keys().count());
+        let mut bag: HashMap<&str, usize> = HashMap::new();
+        let mut extra: HashMap<&str, usize> = HashMap::new();
+        bag.insert("FUEL", 1);
+        while let Some((key, amount)) = bag.iter().next() {
+            let k: &str = *key;
+            let amount = *amount;
+            bag.remove(k);
+            if let Some(requires) = hash.get(k) {
+                let num_repeat: usize = amount / requires.amount;
+                dbg!(num_repeat);
+                for (name, amnt) in requires.requirements {
+                    println!("{}, {}", name, amnt * num_repeat);
+                }
+                let remains = requires.amount * num_repeat - amount;
+                let entry = extra.entry(k).or_insert(0);
+                *entry += remains;
+                dbg!(&extra);
+            }
         }
-        dbg!(&hash);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+impl Puzzle {
+    fn make_hash<'a>(&'a self) -> HashMap<&'a str, Resource<'a>> {
+        let mut hash: HashMap<&'a str, Resource<'a>> = HashMap::new();
+        for (vec, (c, u)) in self.line.iter() {
+            hash.insert(
+                c,
+                Resource {
+                    requirements: vec,
+                    amount: *u,
+                },
+            );
+        }
+        hash
     }
 }
 
