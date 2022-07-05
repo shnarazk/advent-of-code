@@ -72,10 +72,11 @@ impl AdventOfCode for Puzzle {
                 let num_repeat: usize = (amount + requires.amount - 1) / requires.amount;
                 for (name, amnt) in requires.requirements {
                     if name == "ORE" {
+                        // println!("- {} ORE to produce {amount} {k}", amnt * num_repeat);
                         num_ore += amnt * num_repeat;
                     } else {
-                        println!("{}, {}", name, amnt * num_repeat);
-                        bag.insert(name, amnt * num_repeat);
+                        // println!("- {} {name} for {amount} {k}", amnt * num_repeat);
+                        *bag.entry(name).or_insert(0) += amnt * num_repeat;
                     }
                 }
                 let remains = requires.amount * num_repeat - amount;
