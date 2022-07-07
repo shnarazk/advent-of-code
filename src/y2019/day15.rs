@@ -2,6 +2,9 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
+use std::ops::Add;
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -20,6 +23,80 @@ pub struct Puzzle {
     r_base: usize,
 }
 
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq)]
+struct Location(isize, isize);
+
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq)]
+enum Direction {
+    #[default]
+    North,
+    East,
+    South,
+    West,
+}
+impl Direction {
+    fn rotate_forward(&self) -> Self {
+        match self {
+            Direction::North => Direction::East,
+            Direction::East => Direction::South,
+            Direction::South => Direction::West,
+            Direction::West => Direction::North,
+        }
+    }
+    fn rotate_backward(&self) -> Self {
+        match self {
+            Direction::North => Direction::West,
+            Direction::East => Direction::North,
+            Direction::South => Direction::East,
+            Direction::West => Direction::South,
+        }
+    }
+    fn encode(&self) -> isize {
+        match self {
+            Direction::North => 1,
+            Direction::East => 4,
+            Direction::South => 2,
+            Direction::West => 3,
+        }
+    }
+    fn as_location(&self) -> Location {
+        match self {
+            Direction::North => Location(-1, 0),
+            Direction::East => Location(0, 1),
+            Direction::South => Location(1, 0),
+            Direction::West => Location(0, -1),
+        }
+    }
+}
+
+impl Add for Location {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self(self.0 + other.0, self.1 + other.1)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+enum Cell {
+    #[default]
+    Empty,
+    Target,
+    Wall,
+    Unknown,
+}
+
+impl From<isize> for Cell {
+    fn from(v: isize) -> Self {
+        match v {
+            0 => Cell::Wall,
+            1 => Cell::Empty,
+            2 => Cell::Target,
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[aoc(2019, 15)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
@@ -31,6 +108,58 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut map: HashMap<Location, Cell> = HashMap::new();
+        let mut location = Location(0, 0);
+        let mut direction = Direction::North;
+        map.insert(location, Cell::Empty);
+        let mut output: Cell = Cell::default();
+        self.initialize();
+        let mut count = 0;
+        while output != Cell::Target {
+            count += 1;
+            output = Cell::from(self.run(direction.encode()));
+            // println!(
+            //     "Try {:?} @ ({}, {}) got {:?}",
+            //     direction, location.0, location.1, output
+            // );
+            match output {
+                Cell::Empty => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Target => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                }
+                Cell::Wall => {
+                    let loc = location + direction.as_location();
+                    map.insert(loc, output);
+                    direction = direction.rotate_forward();
+                }
+                _ => unreachable!(),
+            }
+            {
+                print!("\x1B[24A\x1B[1G");
+                for y in -4..20 {
+                    for x in -15..50 {
+                        print!(
+                            "{}",
+                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+                                Cell::Empty => " ",
+                                Cell::Target => "!",
+                                Cell::Wall => "#",
+                                Cell::Unknown => "?",
+                            }
+                        );
+                    }
+                    println!();
+                }
+            }
+            if output == Cell::Target || 5000 < count {
+                break;
+            }
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
