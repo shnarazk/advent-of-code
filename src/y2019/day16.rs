@@ -52,6 +52,32 @@ impl AdventOfCode for Puzzle {
         self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut v = Vec::new();
+        for _ in 0..10_000 {
+            v.append(&mut self.line.clone());
+        }
+        self.line = v;
+        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
+        let base_pattern: Vec<isize> = vec![0, 1, 0, -1];
+        let mut scratch = self.line.clone();
+        for _ in 0..100 {
+            for (step, x) in scratch.iter_mut().enumerate() {
+                let mut result = 0;
+                for (i, p) in self.line.iter().enumerate() {
+                    let ptn = base_pattern[((i + 1) / (step + 1)) % 4];
+                    result += p * ptn;
+                }
+                *x = result;
+            }
+            for (i, v) in scratch.iter().enumerate() {
+                self.line[i] = (*v % 10).abs();
+            }
+        }
+        println!("{:?}", &self.line[0..8]);
+        self.line
+            .iter()
+            .skip(skip)
+            .take(8)
+            .fold(0, |s, d| s * 10 + *d) as usize
     }
 }
