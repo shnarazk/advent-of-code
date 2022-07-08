@@ -1,18 +1,12 @@
 //! <https://adventofcode.com/2019/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::{
         cmp::Reverse,
-        collections::{BinaryHeap, HashMap, HashSet, VecDeque},
-        io::Write,
+        collections::{BinaryHeap, HashMap, HashSet},
         ops::Add,
     },
 };
@@ -237,8 +231,128 @@ impl AdventOfCode for Puzzle {
         }
         0
     }
-    fn part2(&mut self) -> Self::Output2 {
-        0
+    fn part2(&mut self) -> Self::Output1 {
+        let mut map: HashMap<Location, Cell> = HashMap::new();
+        let mut target = Location(0, 0);
+        let mut location = Location(0, 0);
+        let mut direction = Direction::North;
+        map.insert(location, Cell::Empty);
+        let mut output: Cell = Cell::default();
+        self.initialize();
+        let mut count = 0;
+        while output != Cell::Target {
+            output = Cell::from(self.run(direction.encode()));
+            match output {
+                Cell::Empty => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Target => {
+                    location = location + direction.as_location();
+                    target = location;
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Wall => {
+                    let loc = location + direction.as_location();
+                    map.insert(loc, output);
+                    direction = direction.rotate_forward();
+                }
+                _ => unreachable!(),
+            }
+            if false {
+                print!("\x1B[45A\x1B[1G");
+                for y in -25..20 {
+                    for x in -40..50 {
+                        print!(
+                            "{}",
+                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+                                Cell::Empty => " ",
+                                Cell::Target => "!",
+                                Cell::Wall => "#",
+                                Cell::Unknown => "?",
+                            }
+                        );
+                    }
+                    println!();
+                }
+            }
+        }
+        while location != Location(0, 0) && count < 5000 {
+            count += 1;
+            output = Cell::from(self.run(direction.encode()));
+            match output {
+                Cell::Empty => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Target => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Wall => {
+                    let loc = location + direction.as_location();
+                    map.insert(loc, output);
+                    direction = direction.rotate_forward();
+                }
+                _ => unreachable!(),
+            }
+            if false {
+                print!("\x1B[45A\x1B[1G");
+                for y in -25..20 {
+                    for x in -40..50 {
+                        print!(
+                            "{}",
+                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+                                Cell::Empty => " ",
+                                Cell::Target => "!",
+                                Cell::Wall => "#",
+                                Cell::Unknown => "?",
+                            }
+                        );
+                    }
+                    println!();
+                }
+            }
+        }
+        let mut max_cost = 0;
+        let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
+        let mut visited: HashSet<Location> = HashSet::new();
+        visited.insert(target);
+        to_visit.push(Reverse((0, target)));
+        while let Some(Reverse((cost, pos))) = to_visit.pop() {
+            for p in pos
+                .neighbors()
+                .iter()
+                .filter(|l| map.get(l) == Some(&Cell::Empty) && !visited.contains(l))
+            {
+                to_visit.push(Reverse((cost + 1, *p)));
+                max_cost = max_cost.max(cost + 1);
+            }
+            visited.insert(pos);
+            if true {
+                print!("\x1B[42A\x1B[1G");
+                for y in -22..20 {
+                    for x in -40..50 {
+                        print!(
+                            "{}",
+                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+                                Cell::Empty if visited.contains(&Location(y, x)) => "O",
+                                Cell::Empty => " ",
+                                Cell::Target => "!",
+                                Cell::Wall => "#",
+                                Cell::Unknown => "?",
+                            }
+                        );
+                    }
+                    println!();
+                }
+            }
+        }
+        max_cost
     }
 }
 
