@@ -116,6 +116,48 @@ impl AdventOfCode for Puzzle {
         self.initialize();
         let mut count = 0;
         while output != Cell::Target {
+            output = Cell::from(self.run(direction.encode()));
+            // println!(
+            //     "Try {:?} @ ({}, {}) got {:?}",
+            //     direction, location.0, location.1, output
+            // );
+            match output {
+                Cell::Empty => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Target => {
+                    location = location + direction.as_location();
+                    map.insert(location, output);
+                    direction = direction.rotate_backward();
+                }
+                Cell::Wall => {
+                    let loc = location + direction.as_location();
+                    map.insert(loc, output);
+                    direction = direction.rotate_forward();
+                }
+                _ => unreachable!(),
+            }
+            {
+                print!("\x1B[45A\x1B[1G");
+                for y in -25..20 {
+                    for x in -40..50 {
+                        print!(
+                            "{}",
+                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+                                Cell::Empty => " ",
+                                Cell::Target => "!",
+                                Cell::Wall => "#",
+                                Cell::Unknown => "?",
+                            }
+                        );
+                    }
+                    println!();
+                }
+            }
+        }
+        while location != Location(0, 0) && count < 5000 {
             count += 1;
             output = Cell::from(self.run(direction.encode()));
             // println!(
@@ -131,6 +173,7 @@ impl AdventOfCode for Puzzle {
                 Cell::Target => {
                     location = location + direction.as_location();
                     map.insert(location, output);
+                    direction = direction.rotate_backward();
                 }
                 Cell::Wall => {
                     let loc = location + direction.as_location();
@@ -140,9 +183,9 @@ impl AdventOfCode for Puzzle {
                 _ => unreachable!(),
             }
             {
-                print!("\x1B[24A\x1B[1G");
-                for y in -4..20 {
-                    for x in -15..50 {
+                print!("\x1B[45A\x1B[1G");
+                for y in -25..20 {
+                    for x in -40..50 {
                         print!(
                             "{}",
                             match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
@@ -155,9 +198,6 @@ impl AdventOfCode for Puzzle {
                     }
                     println!();
                 }
-            }
-            if output == Cell::Target || 5000 < count {
-                break;
             }
         }
         0
