@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         0
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         0
     }
     fn solve(

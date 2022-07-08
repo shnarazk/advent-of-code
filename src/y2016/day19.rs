@@ -31,7 +31,7 @@ impl AdventOfCode for Puzzle {
         }
         index
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         // self.input = 5;
         let mut next = vec![0];
         for i in 1..=self.input {

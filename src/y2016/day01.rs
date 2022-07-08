@@ -61,7 +61,7 @@ impl AdventOfCode for Puzzle {
         }
         (x.abs() + y.abs()) as usize
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         let mut pos: HashSet<(isize, isize)> = HashSet::new();
 
         let mut rot: isize = 0;

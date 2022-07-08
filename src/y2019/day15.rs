@@ -231,7 +231,7 @@ impl AdventOfCode for Puzzle {
         }
         0
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         let mut map: HashMap<Location, Cell> = HashMap::new();
         let mut target = Location(0, 0);
         let mut location = Location(0, 0);

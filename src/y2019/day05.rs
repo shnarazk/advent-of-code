@@ -78,7 +78,7 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(*output.last().unwrap()) as usize
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         let input = 5;
         let mut output: Vec<isize> = Vec::new();
         let mut pc = 0;
