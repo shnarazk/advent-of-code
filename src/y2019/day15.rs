@@ -3,16 +3,18 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use std::ops::Add;
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::{HashMap, VecDeque},
-    std::io::Write,
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap, HashSet, VecDeque},
+        io::Write,
+        ops::Add,
+    },
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -23,8 +25,22 @@ pub struct Puzzle {
     r_base: usize,
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Location(isize, isize);
+
+impl Location {
+    fn neighbors(&self) -> Vec<Location> {
+        [
+            Direction::North,
+            Direction::East,
+            Direction::South,
+            Direction::West,
+        ]
+        .iter()
+        .map(|d| *self + d.as_location())
+        .collect::<Vec<_>>()
+    }
+}
 
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq)]
 enum Direction {
@@ -109,6 +125,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Location, Cell> = HashMap::new();
+        let mut target = Location(0, 0);
         let mut location = Location(0, 0);
         let mut direction = Direction::North;
         map.insert(location, Cell::Empty);
@@ -129,6 +146,7 @@ impl AdventOfCode for Puzzle {
                 }
                 Cell::Target => {
                     location = location + direction.as_location();
+                    target = location;
                     map.insert(location, output);
                     direction = direction.rotate_backward();
                 }
@@ -139,7 +157,7 @@ impl AdventOfCode for Puzzle {
                 }
                 _ => unreachable!(),
             }
-            {
+            if false {
                 print!("\x1B[45A\x1B[1G");
                 for y in -25..20 {
                     for x in -40..50 {
@@ -182,7 +200,7 @@ impl AdventOfCode for Puzzle {
                 }
                 _ => unreachable!(),
             }
-            {
+            if false {
                 print!("\x1B[45A\x1B[1G");
                 for y in -25..20 {
                     for x in -40..50 {
@@ -199,6 +217,23 @@ impl AdventOfCode for Puzzle {
                     println!();
                 }
             }
+        }
+        dbg!(map.len());
+        let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
+        let mut visited: HashSet<Location> = HashSet::new();
+        to_visit.push(Reverse((0, Location(0, 0))));
+        while let Some(Reverse((cost, pos))) = to_visit.pop() {
+            if pos == target {
+                return cost;
+            }
+            for p in pos
+                .neighbors()
+                .iter()
+                .filter(|l| map.get(l) != Some(&Cell::Wall) && !visited.contains(l))
+            {
+                to_visit.push(Reverse((cost + 1, *p)));
+            }
+            visited.insert(pos);
         }
         0
     }
