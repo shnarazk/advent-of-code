@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -52,6 +53,58 @@ impl AdventOfCode for Puzzle {
         self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut v = self.line.clone();
+        for _ in 0..10_000 {
+            v.append(&mut self.line.clone());
+        }
+        self.line = v;
+        let len = self.line.len();
+        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
+        assert!(self.line.len() < 2 * skip);
+        self.line.iter_mut().for_each(|p| *p = 0);
+        for i in skip..len {
+            let mut sum = 0;
+            for j in i..len {
+                sum += self.line[j];
+            }
+        }
+
+        0
+    }
+}
+
+impl Puzzle {
+    fn part4(&mut self) -> usize {
+        let mut v = self.line.clone();
+        for _ in 0..10_000 {
+            v.append(&mut self.line.clone());
+        }
+        self.line = v;
+        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
+        assert!(self.line.len() < 2 * skip);
+        self.line.iter_mut().for_each(|p| *p = 0);
+        const PATTERN: [i32; 4] = [0, 1, 0, -1];
+        let factor = |i: usize, j: usize| PATTERN[((i + 1) / (j + 1)) % 4];
+        let mut tmp = self.line.clone();
+        self.line[0] = 1;
+        for rep in 0..10 {
+            tmp.iter_mut().for_each(|p| *p = 0);
+            for (j, x) in self.line.iter().enumerate().filter(|(_, p)| **p != 0) {
+                for (i, p) in tmp.iter_mut().enumerate() {
+                    match PATTERN[((i + 1) / (j + 1)) % 4] {
+                        0 => (),
+                        _ => *p = 1,
+                    }
+                }
+                print!("\x1B[1A\x1B[1G");
+                println!("{}/{}", j, self.line.len());
+            }
+            std::mem::swap(&mut self.line, &mut tmp);
+        }
+        dbg!(self.line.iter().filter(|p| **p == 1).count() as f64 / self.line.len() as f64);
+        0
+    }
+    fn part3(&mut self) -> usize {
         let mut v = self.line.clone();
         for _ in 0..10_000 {
             v.append(&mut self.line.clone());
