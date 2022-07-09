@@ -57,19 +57,22 @@ impl AdventOfCode for Puzzle {
         for _ in 0..10_000 {
             v.append(&mut self.line.clone());
         }
-        self.line = v;
-        let len = self.line.len();
-        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
-        assert!(self.line.len() < 2 * skip);
-        self.line.iter_mut().for_each(|p| *p = 0);
-        for i in skip..len {
-            let mut sum = 0;
-            for j in i..len {
-                sum += self.line[j];
-            }
+        let skip = v.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
+        assert!(v.len() < 2 * skip);
+        self.line.clear();
+        for x in v.iter().skip(skip) {
+            self.line.push(*x);
         }
-
-        0
+        let len = self.line.len();
+        for rep in 0..100 {
+            let mut tmp: Vec<i32> = Vec::new();
+            for (i, n) in v.iter().enumerate() {
+                tmp.push(self.line.iter().skip(i).copied().sum::<i32>() % 10);
+            }
+            std::mem::swap(&mut self.line, &mut tmp);
+        }
+        println!("{:?}", &self.line[0..8]);
+        self.line.iter().take(8).fold(0, |s, d| s * 10 + *d) as usize
     }
 }
 
