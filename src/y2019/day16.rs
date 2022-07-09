@@ -1,16 +1,5 @@
 //! <https://adventofcode.com/2019/day/16>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -53,89 +42,32 @@ impl AdventOfCode for Puzzle {
         self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut v = self.line.clone();
+        let mut v = Vec::new();
         for _ in 0..10_000 {
             v.append(&mut self.line.clone());
         }
-        let skip = v.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
+        dbg!(v.len());
+        let skip = v.iter().take(7).fold(0, |sum, d| sum * 10 + *d) as usize;
+        dbg!(skip);
         assert!(v.len() < 2 * skip);
         self.line.clear();
         for x in v.iter().skip(skip) {
             self.line.push(*x);
         }
         let len = self.line.len();
-        for rep in 0..100 {
-            let mut tmp: Vec<i32> = Vec::new();
-            for (i, n) in v.iter().enumerate() {
-                tmp.push(self.line.iter().skip(i).copied().sum::<i32>() % 10);
+        dbg!(len);
+        v.truncate(len);
+        for _repeat in 0..100 {
+            let mut psum = 0;
+            v.iter_mut().for_each(|p| *p = 0);
+            for (i, n) in self.line.iter().enumerate().rev() {
+                psum = (psum + n) % 10;
+                v[i] = psum;
             }
-            std::mem::swap(&mut self.line, &mut tmp);
+            std::mem::swap(&mut self.line, &mut v);
         }
+        dbg!(self.line.last().unwrap());
         println!("{:?}", &self.line[0..8]);
         self.line.iter().take(8).fold(0, |s, d| s * 10 + *d) as usize
-    }
-}
-
-impl Puzzle {
-    fn part4(&mut self) -> usize {
-        let mut v = self.line.clone();
-        for _ in 0..10_000 {
-            v.append(&mut self.line.clone());
-        }
-        self.line = v;
-        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
-        assert!(self.line.len() < 2 * skip);
-        self.line.iter_mut().for_each(|p| *p = 0);
-        const PATTERN: [i32; 4] = [0, 1, 0, -1];
-        let factor = |i: usize, j: usize| PATTERN[((i + 1) / (j + 1)) % 4];
-        let mut tmp = self.line.clone();
-        self.line[0] = 1;
-        for rep in 0..10 {
-            tmp.iter_mut().for_each(|p| *p = 0);
-            for (j, x) in self.line.iter().enumerate().filter(|(_, p)| **p != 0) {
-                for (i, p) in tmp.iter_mut().enumerate() {
-                    match PATTERN[((i + 1) / (j + 1)) % 4] {
-                        0 => (),
-                        _ => *p = 1,
-                    }
-                }
-                print!("\x1B[1A\x1B[1G");
-                println!("{}/{}", j, self.line.len());
-            }
-            std::mem::swap(&mut self.line, &mut tmp);
-        }
-        dbg!(self.line.iter().filter(|p| **p == 1).count() as f64 / self.line.len() as f64);
-        0
-    }
-    fn part3(&mut self) -> usize {
-        let mut v = self.line.clone();
-        for _ in 0..10_000 {
-            v.append(&mut self.line.clone());
-        }
-        self.line = v;
-        let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
-        const PATTERN: [i32; 4] = [0, 1, 0, -1];
-        let mut scratch = self.line.clone();
-        for step in 0..100 {
-            dbg!(step);
-            for (j, x) in scratch.iter_mut().enumerate() {
-                let mut result = 0;
-                for (i, p) in self.line.iter().enumerate() {
-                    match PATTERN[((i + 1) / (j + 1)) % 4] {
-                        -1 => result -= p,
-                        1 => result += p,
-                        _ => (),
-                    }
-                }
-                *x = (result % 10).abs();
-            }
-            std::mem::swap(&mut self.line, &mut scratch);
-        }
-        println!("{:?}", &self.line[0..8]);
-        self.line
-            .iter()
-            .skip(skip)
-            .take(8)
-            .fold(0, |sum, d| sum * 10 + *d) as usize
     }
 }
