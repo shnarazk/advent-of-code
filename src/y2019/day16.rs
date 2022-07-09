@@ -13,7 +13,7 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<isize>,
+    line: Vec<i32>,
 }
 
 #[aoc(2019, 16)]
@@ -22,21 +22,21 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block
             .chars()
-            .map(|c| (c as u8 - b'0') as isize)
-            .collect::<Vec<isize>>();
+            .map(|c| (c as u8 - b'0') as i32)
+            .collect::<Vec<i32>>();
         Ok(())
     }
     fn after_insert(&mut self) {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let base_pattern: Vec<isize> = vec![0, 1, 0, -1];
+        let base_pattern: Vec<i32> = vec![0, 1, 0, -1];
         let mut scratch = self.line.clone();
         for _ in 0..100 {
-            for (step, x) in scratch.iter_mut().enumerate() {
+            for (j, x) in scratch.iter_mut().enumerate() {
                 let mut result = 0;
                 for (i, p) in self.line.iter().enumerate() {
-                    let ptn = base_pattern[((i + 1) / (step + 1)) % 4];
+                    let ptn = base_pattern[((i + 1) / (j + 1)) % 4];
                     result += p * ptn;
                     // print!("{ptn}, ");
                 }
@@ -52,32 +52,34 @@ impl AdventOfCode for Puzzle {
         self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut v = Vec::new();
+        let mut v = self.line.clone();
         for _ in 0..10_000 {
             v.append(&mut self.line.clone());
         }
         self.line = v;
         let skip = self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize;
-        let base_pattern: Vec<isize> = vec![0, 1, 0, -1];
+        const PATTERN: [i32; 4] = [0, 1, 0, -1];
         let mut scratch = self.line.clone();
-        for _ in 0..100 {
-            for (step, x) in scratch.iter_mut().enumerate() {
+        for step in 0..100 {
+            dbg!(step);
+            for (j, x) in scratch.iter_mut().enumerate() {
                 let mut result = 0;
                 for (i, p) in self.line.iter().enumerate() {
-                    let ptn = base_pattern[((i + 1) / (step + 1)) % 4];
-                    result += p * ptn;
+                    match PATTERN[((i + 1) / (j + 1)) % 4] {
+                        -1 => result -= p,
+                        1 => result += p,
+                        _ => (),
+                    }
                 }
-                *x = result;
+                *x = (result % 10).abs();
             }
-            for (i, v) in scratch.iter().enumerate() {
-                self.line[i] = (*v % 10).abs();
-            }
+            std::mem::swap(&mut self.line, &mut scratch);
         }
         println!("{:?}", &self.line[0..8]);
         self.line
             .iter()
             .skip(skip)
             .take(8)
-            .fold(0, |s, d| s * 10 + *d) as usize
+            .fold(0, |sum, d| sum * 10 + *d) as usize
     }
 }
