@@ -5,8 +5,7 @@ use {
         line_parser,
     },
     std::{
-        cmp::Reverse,
-        collections::{BinaryHeap, HashMap, HashSet},
+        collections::{HashMap, VecDeque},
         ops::Add,
     },
 };
@@ -44,31 +43,32 @@ enum Direction {
     South,
     West,
 }
+
 impl Direction {
-    fn rotate_forward(&self) -> Self {
-        match self {
-            Direction::North => Direction::East,
-            Direction::East => Direction::South,
-            Direction::South => Direction::West,
-            Direction::West => Direction::North,
-        }
-    }
-    fn rotate_backward(&self) -> Self {
-        match self {
-            Direction::North => Direction::West,
-            Direction::East => Direction::North,
-            Direction::South => Direction::East,
-            Direction::West => Direction::South,
-        }
-    }
-    fn encode(&self) -> isize {
-        match self {
-            Direction::North => 1,
-            Direction::East => 4,
-            Direction::South => 2,
-            Direction::West => 3,
-        }
-    }
+    // fn rotate_forward(&self) -> Self {
+    //     match self {
+    //         Direction::North => Direction::East,
+    //         Direction::East => Direction::South,
+    //         Direction::South => Direction::West,
+    //         Direction::West => Direction::North,
+    //     }
+    // }
+    // fn rotate_backward(&self) -> Self {
+    //     match self {
+    //         Direction::North => Direction::West,
+    //         Direction::East => Direction::North,
+    //         Direction::South => Direction::East,
+    //         Direction::West => Direction::South,
+    //     }
+    // }
+    // fn encode(&self) -> isize {
+    //     match self {
+    //         Direction::North => 1,
+    //         Direction::East => 4,
+    //         Direction::South => 2,
+    //         Direction::West => 3,
+    //     }
+    // }
     fn as_location(&self) -> Location {
         match self {
             Direction::North => Location(-1, 0),
@@ -87,35 +87,6 @@ impl Add for Location {
     }
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-enum Cell {
-    #[default]
-    Empty,
-    Newline,
-    Wall,
-    RobotUp,
-    RobotDown,
-    RobotLeft,
-    RobotRight,
-    RobotOutOfControl,
-}
-
-impl From<isize> for Cell {
-    fn from(v: isize) -> Self {
-        match v as u8 {
-            35 => Cell::Wall,
-            46 => Cell::Empty,
-            b'^' => Cell::RobotUp,
-            b'v' => Cell::RobotDown,
-            b'<' => Cell::RobotLeft,
-            b'>' => Cell::RobotRight,
-            b'X' => Cell::RobotOutOfControl,
-            10 => Cell::Newline,
-            _ => unreachable!(),
-        }
-    }
-}
-
 #[aoc(2019, 17)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
@@ -127,10 +98,48 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut map: HashMap<Location, Cell> = HashMap::new();
-        // let mut output: Cell = Cell::default();
+        let mut map: HashMap<Location, u8> = HashMap::new();
+        let mut output: VecDeque<u8> = VecDeque::new();
         self.initialize();
-        0
+        while let Some(o) = self.run(None) {
+            output.push_back(o as u8);
+        }
+        let mut y = 0;
+        let mut x = 0;
+        while let Some(cell) = output.pop_front() {
+            if cell == b'\n' {
+                y += 1;
+                x = 0;
+                continue;
+            }
+            map.insert(Location(y, x), cell);
+            x += 1;
+        }
+        // for y in -1..46 {
+        //     print!("|");
+        //     for x in -2..39 {
+        //         print!("{}", *map.get(&Location(y, x)).unwrap_or(&b' ') as char);
+        //     }
+        //     println!("|");
+        // }
+        let mut count: usize = 0;
+        let mut val: usize = 0;
+        for (loc, cell) in map.iter() {
+            if *cell != b'#' {
+                continue;
+            }
+            if 2 < loc
+                .neighbors()
+                .iter()
+                .filter(|l| map.get(l) == Some(&b'#'))
+                .count()
+            {
+                count += 1;
+                val += (loc.0 * loc.1) as usize;
+            }
+        }
+        dbg!(count);
+        val
     }
     fn part2(&mut self) -> Self::Output2 {
         0
@@ -146,7 +155,7 @@ impl Puzzle {
         self.pc = 0;
         self.r_base = 0;
     }
-    fn run(&mut self, input: isize) -> isize {
+    fn run(&mut self, mut input: Option<isize>) -> Option<isize> {
         loop {
             let op = self.memory[&self.pc] % 100;
             let immediate: Vec<u8> = {
@@ -199,13 +208,14 @@ impl Puzzle {
                 3 => {
                     let dst = deref!(1);
                     // println!("input at {self.pc}");
-                    self.memory.insert(dst, input);
+                    self.memory.insert(dst, input.expect("empty input"));
+                    input = None;
                     self.pc += 2;
                 }
                 4 => {
                     let op1 = deref!(1, true);
                     self.pc += 2;
-                    return op1;
+                    return Some(op1);
                 }
                 5 => {
                     let op1 = deref!(1, true);
@@ -250,6 +260,6 @@ impl Puzzle {
                 _ => panic!("op: {op} at {}", self.pc),
             }
         }
-        -1
+        None
     }
 }
