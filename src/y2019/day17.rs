@@ -45,22 +45,22 @@ enum Direction {
 }
 
 impl Direction {
-    // fn rotate_forward(&self) -> Self {
-    //     match self {
-    //         Direction::North => Direction::East,
-    //         Direction::East => Direction::South,
-    //         Direction::South => Direction::West,
-    //         Direction::West => Direction::North,
-    //     }
-    // }
-    // fn rotate_backward(&self) -> Self {
-    //     match self {
-    //         Direction::North => Direction::West,
-    //         Direction::East => Direction::North,
-    //         Direction::South => Direction::East,
-    //         Direction::West => Direction::South,
-    //     }
-    // }
+    fn rotate_clockwise(&self) -> Self {
+        match self {
+            Direction::North => Direction::East,
+            Direction::East => Direction::South,
+            Direction::South => Direction::West,
+            Direction::West => Direction::North,
+        }
+    }
+    fn rotate_counterclockwise(&self) -> Self {
+        match self {
+            Direction::North => Direction::West,
+            Direction::East => Direction::North,
+            Direction::South => Direction::East,
+            Direction::West => Direction::South,
+        }
+    }
     // fn encode(&self) -> isize {
     //     match self {
     //         Direction::North => 1,
@@ -98,30 +98,14 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut map: HashMap<Location, u8> = HashMap::new();
-        let mut output: VecDeque<u8> = VecDeque::new();
-        self.initialize();
-        while let Some(o) = self.run(None) {
-            output.push_back(o as u8);
-        }
-        let mut y = 0;
-        let mut x = 0;
-        while let Some(cell) = output.pop_front() {
-            if cell == b'\n' {
-                y += 1;
-                x = 0;
-                continue;
+        let map: HashMap<Location, u8> = self.recognize();
+        for y in -1..46 {
+            print!("|");
+            for x in -2..39 {
+                print!("{}", *map.get(&Location(y, x)).unwrap_or(&b' ') as char);
             }
-            map.insert(Location(y, x), cell);
-            x += 1;
+            println!("|");
         }
-        // for y in -1..46 {
-        //     print!("|");
-        //     for x in -2..39 {
-        //         print!("{}", *map.get(&Location(y, x)).unwrap_or(&b' ') as char);
-        //     }
-        //     println!("|");
-        // }
         let mut count: usize = 0;
         let mut val: usize = 0;
         for (loc, cell) in map.iter() {
@@ -142,7 +126,95 @@ impl AdventOfCode for Puzzle {
         val
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let map: HashMap<Location, u8> = self.recognize();
+        let mut location: Location = *map.iter().find(|(_, v)| **v == b'^').unwrap().0;
+        let mut direction = Direction::North;
+        let mut prev_location: Location = location;
+        let mut trace: Vec<u8> = Vec::new();
+        let mut last_action: u8 = 0;
+        while let Some(action) = seek(&map, location, direction, prev_location) {
+            let act = if action == last_action { b'F' } else { action };
+            trace.push(act);
+            match act {
+                b'F' => {
+                    prev_location = location;
+                    location = location + direction.as_location();
+                }
+                b'L' => {
+                    direction = direction.rotate_counterclockwise();
+                }
+                b'R' => {
+                    direction = direction.rotate_clockwise();
+                }
+                _ => unreachable!(),
+            }
+            last_action = act;
+        }
+        dbg!(&location);
+        for c in trace.iter() {
+            print!("{}", *c as char);
+        }
+        println!();
+        self.line[0] = 2;
+        self.initialize();
+        map.len()
+    }
+}
+
+fn seek(
+    map: &HashMap<Location, u8>,
+    loc: Location,
+    dir: Direction,
+    prev_loc: Location,
+) -> Option<u8> {
+    // Firstly try to go forward.
+    if map.get(&(loc + dir.as_location())) == Some(&b'#') {
+        return Some(b'F');
+    }
+    // then seek the right direcotion.
+    for next in loc.neighbors() {
+        if next != prev_loc && map.get(&next) == Some(&b'#') {
+            if next == loc + dir.rotate_clockwise().as_location() {
+                return Some(b'R');
+            }
+            if next == loc + dir.rotate_counterclockwise().as_location() {
+                return Some(b'L');
+            }
+            if next == loc + dir.as_location() {
+                unreachable!();
+            }
+        }
+    }
+    None
+}
+
+impl Puzzle {
+    fn recognize(&mut self) -> HashMap<Location, u8> {
+        let mut map: HashMap<Location, u8> = HashMap::new();
+        let mut output: VecDeque<u8> = VecDeque::new();
+        self.initialize();
+        while let Some(o) = self.run(None) {
+            output.push_back(o as u8);
+        }
+        let mut y = 0;
+        let mut x = 0;
+        while let Some(cell) = output.pop_front() {
+            if cell == b'\n' {
+                y += 1;
+                x = 0;
+                continue;
+            }
+            map.insert(Location(y, x), cell);
+            x += 1;
+        }
+        for y in -1..46 {
+            print!("|");
+            for x in -2..39 {
+                print!("{}", *map.get(&Location(y, x)).unwrap_or(&b' ') as char);
+            }
+            println!("|");
+        }
+        map
     }
 }
 
