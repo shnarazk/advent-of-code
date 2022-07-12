@@ -5,10 +5,118 @@ use {
         line_parser,
     },
     std::{
-        collections::{HashMap, VecDeque},
+        collections::{HashMap, HashSet, VecDeque},
         ops::Add,
     },
 };
+
+#[derive(Clone, Copy, Eq, Debug, Hash, PartialEq)]
+enum Segment {
+    L(usize),
+    R(usize),
+}
+
+fn is_valid(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
+    for start_len in 1..6 {
+        let mut v: &[Segment] = original_v;
+        let seg_beg = v[0..start_len].to_vec();
+        let mut vv = Vec::new();
+        let mut i = 0;
+        while start_len <= v[i..].len() {
+            if v[i..].starts_with(&seg_beg) {
+                if 0 < i {
+                    vv.push(&v[..i]);
+                }
+                v = &v[i + start_len..];
+                i = 0;
+            } else {
+                i += 1;
+            }
+        }
+        if !v.is_empty() {
+            vv.push(v);
+        }
+        for end_len in 1..6.min(v.len()) {
+            let seg_end = v[v.len() - end_len..v.len()].to_vec();
+            let mut vvv = Vec::new();
+            for pv in vv.iter() {
+                let mut v = *pv;
+                let mut i = 0;
+                while end_len <= v[i..].len() {
+                    if v[i..].starts_with(&seg_end) {
+                        if 0 < i {
+                            vvv.push(&v[..i]);
+                        }
+                        v = &v[i + end_len..];
+                        i = 0;
+                    } else {
+                        i += 1;
+                    }
+                }
+                if !v.is_empty() {
+                    vvv.push(v);
+                }
+            }
+            let mut kinds: HashSet<&[Segment]> = HashSet::new();
+            for v in vvv.iter() {
+                kinds.insert(*v);
+            }
+            if 1 == kinds.len() && vvv[0].len() <= 10 {
+                println!("{vvv:?}");
+                return Some(vec![seg_beg, vvv[0].to_vec(), seg_end]);
+            }
+            let mut seg_mid = vvv[0];
+            for another in vvv.iter() {
+                if another.len() < seg_mid.len() {
+                    seg_mid = another;
+                }
+            }
+            if seg_mid.len() <= 10
+                && vvv
+                    .iter()
+                    .all(|v| v.iter().all(|seg| seg_mid.contains(seg)))
+                && vvv.iter().all(|v| v[0] == seg_mid[0])
+                && vvv.iter().all(|v| v[1] == seg_mid[1])
+                && vvv.iter().all(|v| v.last() == seg_mid.last())
+                && vvv
+                    .iter()
+                    .all(|v| v.len() != seg_mid.len() || **v == *seg_mid)
+            {
+                // println!("{seg_beg:?}, {seg_mid:?}, {seg_end:?}");
+                println!("{vvv:?}");
+                return Some(vec![seg_beg, seg_mid.to_vec(), seg_end]);
+            }
+            // let mut vvvv = Vec::new();
+            // for pv in vvv.iter() {
+            //     let mut v = *pv;
+            //     let mut i = 0;
+            //     while end_len <= v[i..].len() {
+            //         if v[i..].starts_with(seg_mid) {
+            //             if 0 < i {
+            //                 vvvv.push(&v[..i]);
+            //             }
+            //             v = &v[i + end_len..];
+            //             i = 0;
+            //         } else {
+            //             i += 1;
+            //         }
+            //     }
+            //     if !v.is_empty() {
+            //         vvvv.push(v);
+            //     }
+            // }
+            // if vvvv.is_empty() {
+            //     println!("{seg_beg:?}, {seg_mid:?}, {seg_end:?}");
+            //     return Some(vec![seg_beg, seg_mid.to_vec(), seg_end]);
+            // }
+        }
+        // panic!();
+        // if vvvv.is_empty() {
+        //     return Some(vec![seg_beg, mid_seg, seg_end]);
+        // }
+    }
+    None
+}
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
@@ -126,11 +234,6 @@ impl AdventOfCode for Puzzle {
         val
     }
     fn part2(&mut self) -> Self::Output2 {
-        #[derive(Clone, Copy, Eq, Debug, Hash, PartialEq)]
-        enum Segment {
-            L(usize),
-            R(usize),
-        }
         let map: HashMap<Location, u8> = self.recognize();
         for (loc, cell) in map.iter() {
             if *cell != b'#' {
@@ -148,8 +251,7 @@ impl AdventOfCode for Puzzle {
         self.cross_points.sort();
         assert_eq!(12, self.cross_points.len());
         let mut valids = 0;
-        let mut min_kinds = 0;
-        let mut best: Vec<Segment> = Vec::new();
+        // let mut best: Vec<Segment> = Vec::new();
         for permutation in 0..3usize.pow(12_u32) {
             let mut location: Location = *map.iter().find(|(_, v)| **v == b'^').unwrap().0;
             let mut direction = Direction::North;
@@ -229,15 +331,11 @@ impl AdventOfCode for Puzzle {
                 for seg in segments.iter() {
                     *kinds.entry(seg).or_insert(0) += 1;
                 }
-                if min_kinds < *kinds.values().min().unwrap() {
-                    min_kinds = *kinds.values().min().unwrap();
-                    best = segments;
-                }
+                is_valid(&segments);
             }
             // assert_eq!(259, debug_trace.len());
         }
-        println!("{min_kinds} by {best:?}");
-        assert_eq!(0, valids);
+        assert_eq!(1, valids);
         // for y in -1..46 {
         //     print!("|");
         //     for x in -2..39 {
