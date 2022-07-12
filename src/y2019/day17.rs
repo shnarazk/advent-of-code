@@ -5,15 +5,24 @@ use {
         line_parser,
     },
     std::{
-        collections::{HashMap, HashSet, VecDeque},
+        collections::{HashMap, VecDeque},
         ops::Add,
     },
 };
 
-#[derive(Clone, Copy, Eq, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 enum Segment {
     L(usize),
     R(usize),
+}
+
+impl std::fmt::Debug for Segment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Segment::L(n) => write!(f, "L{}", n),
+            Segment::R(n) => write!(f, "R{}", n),
+        }
+    }
 }
 
 fn is_valid(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
@@ -57,14 +66,6 @@ fn is_valid(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
                     vvv.push(v);
                 }
             }
-            let mut kinds: HashSet<&[Segment]> = HashSet::new();
-            for v in vvv.iter() {
-                kinds.insert(*v);
-            }
-            if 1 == kinds.len() && vvv[0].len() <= 10 {
-                println!("{vvv:?}");
-                return Some(vec![seg_beg, vvv[0].to_vec(), seg_end]);
-            }
             let mut seg_mid = vvv[0];
             for another in vvv.iter() {
                 if another.len() < seg_mid.len() {
@@ -82,38 +83,14 @@ fn is_valid(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
                     .iter()
                     .all(|v| v.len() != seg_mid.len() || **v == *seg_mid)
             {
-                // println!("{seg_beg:?}, {seg_mid:?}, {seg_end:?}");
-                println!("{vvv:?}");
+                println!("Whole path: {original_v:?}");
+                println!("Function A: {seg_beg:?}");
+                println!("Function B: {seg_mid:?}");
+                println!("Function C: {seg_end:?}");
+                println!("Some proof: {vvv:?}");
                 return Some(vec![seg_beg, seg_mid.to_vec(), seg_end]);
             }
-            // let mut vvvv = Vec::new();
-            // for pv in vvv.iter() {
-            //     let mut v = *pv;
-            //     let mut i = 0;
-            //     while end_len <= v[i..].len() {
-            //         if v[i..].starts_with(seg_mid) {
-            //             if 0 < i {
-            //                 vvvv.push(&v[..i]);
-            //             }
-            //             v = &v[i + end_len..];
-            //             i = 0;
-            //         } else {
-            //             i += 1;
-            //         }
-            //     }
-            //     if !v.is_empty() {
-            //         vvvv.push(v);
-            //     }
-            // }
-            // if vvvv.is_empty() {
-            //     println!("{seg_beg:?}, {seg_mid:?}, {seg_end:?}");
-            //     return Some(vec![seg_beg, seg_mid.to_vec(), seg_end]);
-            // }
         }
-        // panic!();
-        // if vvvv.is_empty() {
-        //     return Some(vec![seg_beg, mid_seg, seg_end]);
-        // }
     }
     None
 }
@@ -170,14 +147,6 @@ impl Direction {
             Direction::West => Direction::South,
         }
     }
-    // fn encode(&self) -> isize {
-    //     match self {
-    //         Direction::North => 1,
-    //         Direction::East => 4,
-    //         Direction::South => 2,
-    //         Direction::West => 3,
-    //     }
-    // }
     fn as_location(&self) -> Location {
         match self {
             Direction::North => Location(-1, 0),
@@ -250,9 +219,10 @@ impl AdventOfCode for Puzzle {
         }
         self.cross_points.sort();
         assert_eq!(12, self.cross_points.len());
-        let mut valids = 0;
+        let mut flow: Vec<u8> = Vec::new();
+        let mut functions: Vec<Vec<Segment>> = Vec::new();
         // let mut best: Vec<Segment> = Vec::new();
-        for permutation in 0..3usize.pow(12_u32) {
+        'found: for permutation in 0..3usize.pow(12_u32) {
             let mut location: Location = *map.iter().find(|(_, v)| **v == b'^').unwrap().0;
             let mut direction = Direction::North;
             let mut prev_location: Location = location;
@@ -273,11 +243,6 @@ impl AdventOfCode for Puzzle {
                         _ => action = b'F',
                     }
                 }
-                // if location == self.cross_points[0] || location == self.cross_points[5] {
-                //     action = b'R';
-                // } else if location == self.cross_points[4] {
-                //     // action = b'L';
-                // }
                 let act = if action == last_action { b'F' } else { action };
                 trace.push(act);
                 debug_trace.insert(location);
@@ -298,9 +263,7 @@ impl AdventOfCode for Puzzle {
             }
             debug_trace.insert(location);
             if 259 == debug_trace.len() {
-                valids += 1;
                 let mut kinds = HashMap::new();
-                // dbg!(valids, permutation);
                 let mut segments: Vec<Segment> = Vec::new();
                 let mut clockwise = false;
                 let mut steps = 0;
@@ -331,64 +294,80 @@ impl AdventOfCode for Puzzle {
                 for seg in segments.iter() {
                     *kinds.entry(seg).or_insert(0) += 1;
                 }
-                is_valid(&segments);
+                if let Some(fs) = is_valid(&segments) {
+                    let mut seg: &[Segment] = &segments;
+                    while !seg.is_empty() {
+                        match () {
+                            _ if seg.starts_with(&fs[0]) => {
+                                flow.push(0);
+                                seg = &seg[fs[0].len()..];
+                            }
+                            _ if seg.starts_with(&fs[1]) => {
+                                flow.push(1);
+                                seg = &seg[fs[1].len()..];
+                            }
+                            _ if seg.starts_with(&fs[2]) => {
+                                flow.push(2);
+                                seg = &seg[fs[2].len()..];
+                            }
+                            _ => (),
+                        }
+                    }
+                    functions = fs;
+                    println!("Main func:  {:?}", &flow);
+                    break 'found;
+                }
             }
             // assert_eq!(259, debug_trace.len());
         }
-        assert_eq!(1, valids);
-        // for y in -1..46 {
-        //     print!("|");
-        //     for x in -2..39 {
-        //         print!(
-        //             "{}",
-        //             if debug_trace.contains(&Location(y, x)) {
-        //                 'R'
-        //             } else {
-        //                 *map.get(&Location(y, x)).unwrap_or(&b'?') as char
-        //             }
-        //         );
-        //     }
-        //     println!("|");
-        // }
-        // dbg!(&location);
-        // for c in trace.iter() {
-        //     print!("{}", *c as char);
-        // }
-        // println!();
-        /*
-        let mut segments: Vec<Segment> = Vec::new();
-        let mut clockwise = false;
-        let mut steps = 0;
-        for a in trace.iter() {
-            match *a {
-                b'F' => {
-                    steps += 1;
-                }
-                b'R' | b'L' => {
-                    if 0 < steps {
-                        segments.push(if clockwise {
-                            Segment::R(steps)
-                        } else {
-                            Segment::L(steps)
-                        });
-                        steps = 0;
-                    }
-                    clockwise = *a == b'R';
-                }
-                _ => unreachable!(),
-            }
+        // build input!
+        let mut inputs: VecDeque<isize> = VecDeque::new();
+        for num in flow.iter() {
+            inputs.push_back((b'A' + num) as isize);
+            inputs.push_back(b',' as isize);
         }
-        segments.push(if clockwise {
-            Segment::R(steps)
-        } else {
-            Segment::L(steps)
-        });
-        println!("{segments:?}");
+        inputs.pop_back();
+        inputs.push_back(b'\n' as isize);
+        for v in functions.iter() {
+            for seg in v.iter() {
+                match seg {
+                    Segment::L(n) => {
+                        inputs.push_back(b'L' as isize);
+                        inputs.push_back(b',' as isize);
+                        if 9 < *n {
+                            inputs.push_back((b'0' + (*n / 10) as u8) as isize);
+                        }
+                        inputs.push_back((b'0' + (*n % 10) as u8) as isize);
+                        inputs.push_back(b',' as isize);
+                    }
+                    Segment::R(n) => {
+                        inputs.push_back(b'R' as isize);
+                        inputs.push_back(b',' as isize);
+                        if 9 < *n {
+                            inputs.push_back((b'0' + (*n / 10) as u8) as isize);
+                        }
+                        inputs.push_back((b'0' + (*n % 10) as u8) as isize);
+                        inputs.push_back(b',' as isize);
+                    }
+                }
+            }
+            inputs.pop_back();
+            inputs.push_back(b'\n' as isize);
+        }
+        inputs.push_back(b'n' as isize);
+        inputs.push_back(b'\n' as isize);
+        // println!("{:?}", inputs);
+        for c in inputs.iter() {
+            print!("{}", *c as u8 as char);
+        }
+        println!();
         self.line[0] = 2;
         self.initialize();
-        map.len()
-        */
-        0
+        let mut total: usize = 0;
+        while let Some(dusts) = self.run(&mut inputs) {
+            total = dusts as usize;
+        }
+        total
     }
 }
 
@@ -424,7 +403,7 @@ impl Puzzle {
         let mut map: HashMap<Location, u8> = HashMap::new();
         let mut output: VecDeque<u8> = VecDeque::new();
         self.initialize();
-        while let Some(o) = self.run(None) {
+        while let Some(o) = self.run(&mut VecDeque::new()) {
             output.push_back(o as u8);
         }
         let mut y = 0;
@@ -438,13 +417,6 @@ impl Puzzle {
             map.insert(Location(y, x), cell);
             x += 1;
         }
-        // for y in -1..46 {
-        //     print!("|");
-        //     for x in -2..39 {
-        //         print!("{}", *map.get(&Location(y, x)).unwrap_or(&b' ') as char);
-        //     }
-        //     println!("|");
-        // }
         map
     }
 }
@@ -458,7 +430,7 @@ impl Puzzle {
         self.pc = 0;
         self.r_base = 0;
     }
-    fn run(&mut self, mut input: Option<isize>) -> Option<isize> {
+    fn run(&mut self, inputs: &mut VecDeque<isize>) -> Option<isize> {
         loop {
             let op = self.memory[&self.pc] % 100;
             let immediate: Vec<u8> = {
@@ -510,9 +482,11 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = deref!(1);
-                    // println!("input at {self.pc}");
-                    self.memory.insert(dst, input.expect("empty input"));
-                    input = None;
+                    if let Some(i) = inputs.pop_front() {
+                        self.memory.insert(dst, i);
+                    } else {
+                        panic!("No more input.");
+                    }
                     self.pc += 2;
                 }
                 4 => {
