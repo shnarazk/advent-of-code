@@ -25,7 +25,7 @@ impl std::fmt::Debug for Segment {
     }
 }
 
-fn is_valid(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
+fn decompose(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
     for start_len in 1..6 {
         let mut v: &[Segment] = original_v;
         let seg_beg = v[0..start_len].to_vec();
@@ -294,7 +294,7 @@ impl AdventOfCode for Puzzle {
                 for seg in segments.iter() {
                     *kinds.entry(seg).or_insert(0) += 1;
                 }
-                if let Some(fs) = is_valid(&segments) {
+                if let Some(fs) = decompose(&segments) {
                     let mut seg: &[Segment] = &segments;
                     while !seg.is_empty() {
                         match () {
@@ -318,7 +318,6 @@ impl AdventOfCode for Puzzle {
                     break 'found;
                 }
             }
-            // assert_eq!(259, debug_trace.len());
         }
         // build input!
         let mut inputs: VecDeque<isize> = VecDeque::new();
