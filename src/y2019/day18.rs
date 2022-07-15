@@ -11,9 +11,13 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+type Location = (usize, usize);
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
+    map: HashMap<Location, u8>,
+    location: HashMap<u8, Location>,
 }
 
 #[aoc(2019, 18)]
@@ -25,7 +29,16 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(self.line.len());
+        for (j, v) in self.line.iter().enumerate() {
+            for (i, c) in v.iter().enumerate() {
+                self.map.insert((j, i), *c);
+                if (b'A' <= *c && *c <= b'Z') || (b'a' <= *c && *c <= b'z') {
+                    self.location.insert(*c, (j, i));
+                }
+            }
+        }
+        // dbg!(self.line.len());
+        dbg!(&self.location.len() / 2);
     }
     fn part1(&mut self) -> Self::Output1 {
         0
@@ -35,19 +48,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
+impl Puzzle {
+    fn distance(&self, from: u8, to: u8, inventy: &[u8]) -> usize {
+        0
+    }
 }
