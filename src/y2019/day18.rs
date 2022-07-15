@@ -3,14 +3,16 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use crate::geometric::neighbors4;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
+        geometric::neighbors4,
         line_parser, regex,
     },
-    std::collections::{HashMap, VecDeque},
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap, VecDeque},
+    },
 };
 
 type Location = (usize, usize);
@@ -45,12 +47,41 @@ impl AdventOfCode for Puzzle {
         self.width = self.line[0].len();
         // dbg!(self.line.len());
         dbg!(&self.location.len() / 2);
-        dbg!(self.distance(b'@', b'a', &[]));
-        dbg!(self.distance(b'@', b'b', &[]));
         dbg!(self.distance(b'@', b'c', &[]));
-        dbg!(self.distance(b'@', b'p', &[]));
+        dbg!(self.distance(b'@', b'a', &[b'c']));
+        dbg!(self.distance(b'@', b'b', &[b'c']));
+        dbg!(self.distance(b'@', b'd', &[b'c']));
     }
     fn part1(&mut self) -> Self::Output1 {
+        let keys = self
+            .map
+            .values()
+            .filter(|c| b'a' <= **c && **c <= b'z')
+            .copied()
+            .collect::<Vec<u8>>();
+        dbg!(keys.len());
+        let mut to_check: BinaryHeap<Reverse<(usize, Vec<u8>)>> = BinaryHeap::new();
+        to_check.push(Reverse((0, vec![])));
+        let mut len = 0;
+        while let Some(Reverse((cost, inventry))) = to_check.pop() {
+            if inventry.len() == keys.len() {
+                dbg!(inventry.iter().map(|c| *c as char).collect::<String>());
+                return cost;
+            }
+            if len < inventry.len() {
+                len = inventry.len();
+                dbg!(len);
+            }
+            // Here we should build complete cost map and reuse it over the following loop.
+            // let cost_map = self.build_cost_map(&inventry);
+            for key in keys.iter().filter(|k| !inventry.contains(k)) {
+                if let Some(c) = self.distance(*inventry.last().unwrap_or(&b'@'), *key, &inventry) {
+                    let mut inv = inventry.clone();
+                    inv.push(*key);
+                    to_check.push(Reverse((cost + c, inv)));
+                }
+            }
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -59,6 +90,10 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
+    // TODO:
+    fn build_cost_map(&self, inventry: &[u8]) -> HashMap<Location, usize> {
+        todo!()
+    }
     fn distance(&self, from: u8, to: u8, inventy: &[u8]) -> Option<usize> {
         let mut cost: HashMap<Location, usize> = HashMap::new();
         let mut to_visit: VecDeque<Location> = VecDeque::new();
@@ -74,7 +109,11 @@ impl Puzzle {
             for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
                 if !self.map.get(l).map_or_else(
                     || false,
-                    |k| *k == b'.' || (b'a' <= *k && *k <= b'z') || inventy.contains(k),
+                    |k| {
+                        [b'.', b'@'].contains(k)
+                            || (b'a' <= *k && *k <= b'z')
+                            || ((b'A' <= *k && *k <= b'Z') && inventy.contains(&(*k + b'a' - b'A')))
+                    },
                 ) {
                     continue;
                 }
