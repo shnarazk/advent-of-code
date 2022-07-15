@@ -72,10 +72,9 @@ impl AdventOfCode for Puzzle {
                 len = inventry.len();
                 dbg!(len);
             }
-            // Here we should build complete cost map and reuse it over the following loop.
-            // let cost_map = self.build_cost_map(&inventry);
+            let cost_map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
             for key in keys.iter().filter(|k| !inventry.contains(k)) {
-                if let Some(c) = self.distance(*inventry.last().unwrap_or(&b'@'), *key, &inventry) {
+                if let Some(c) = cost_map.get(key) {
                     let mut inv = inventry.clone();
                     inv.push(*key);
                     to_check.push(Reverse((cost + c, inv)));
@@ -90,11 +89,40 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    // TODO:
-    fn build_cost_map(&self, inventry: &[u8]) -> HashMap<Location, usize> {
-        todo!()
+    fn build_cost_map(&self, from: u8, inventry: &[u8]) -> HashMap<u8, usize> {
+        let mut cost: HashMap<Location, usize> = HashMap::new();
+        let mut result: HashMap<u8, usize> = HashMap::new();
+        let mut to_visit: VecDeque<Location> = VecDeque::new();
+        let start = *self.location.get(&from).unwrap();
+        to_visit.push_back(start);
+        cost.insert(start, 0);
+        while let Some(loc) = to_visit.pop_front() {
+            let c = *cost.get(&loc).unwrap();
+            for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
+                if !self.map.get(l).map_or_else(
+                    || false,
+                    |k| {
+                        [b'.', b'@'].contains(k)
+                            || (b'a' <= *k && *k <= b'z')
+                            || ((b'A' <= *k && *k <= b'Z')
+                                && inventry.contains(&(*k + b'a' - b'A')))
+                    },
+                ) {
+                    continue;
+                }
+                if !cost.contains_key(l) {
+                    cost.insert(*l, c + 1);
+                    let k = self.map.get(l).unwrap();
+                    if ![b'.', b'@'].contains(k) {
+                        result.insert(*k, c + 1);
+                    }
+                    to_visit.push_back(*l);
+                }
+            }
+        }
+        result
     }
-    fn distance(&self, from: u8, to: u8, inventy: &[u8]) -> Option<usize> {
+    fn distance(&self, from: u8, to: u8, inventry: &[u8]) -> Option<usize> {
         let mut cost: HashMap<Location, usize> = HashMap::new();
         let mut to_visit: VecDeque<Location> = VecDeque::new();
         let start = *self.location.get(&from).unwrap();
@@ -112,7 +140,8 @@ impl Puzzle {
                     |k| {
                         [b'.', b'@'].contains(k)
                             || (b'a' <= *k && *k <= b'z')
-                            || ((b'A' <= *k && *k <= b'Z') && inventy.contains(&(*k + b'a' - b'A')))
+                            || ((b'A' <= *k && *k <= b'Z')
+                                && inventry.contains(&(*k + b'a' - b'A')))
                     },
                 ) {
                     continue;
