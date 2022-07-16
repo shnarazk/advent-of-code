@@ -10,12 +10,46 @@ use {
         line_parser, regex,
     },
     std::{
-        cmp::Reverse,
+        cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet, VecDeque},
     },
 };
 
 type Location = (usize, usize);
+
+#[derive(Clone, Debug)]
+struct State {
+    estimate: usize,
+    current_cost: usize,
+    inventry: Vec<u8>,
+    cost_map: HashMap<(u8, u8), usize>,
+}
+
+impl PartialEq for State {
+    fn eq(&self, other: &Self) -> bool {
+        self.inventry.eq(&other.inventry)
+    }
+}
+
+impl Eq for State {}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.estimate.partial_cmp(&other.estimate) {
+            Some(Ordering::Equal) => self.current_cost.partial_cmp(&other.current_cost),
+            result => result,
+        }
+    }
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.estimate.cmp(&other.estimate) {
+            Ordering::Equal => self.current_cost.cmp(&other.current_cost),
+            result => result,
+        }
+    }
+}
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
@@ -57,8 +91,19 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<u8>>();
         let n_keys = keys.len();
         dbg!(n_keys);
-        // firstly build A* cost map
-        let mut astar_cost: HashMap<(u8, u8), usize> = HashMap::new();
+        // Firstly build the initial cost_map
+        let mut cost_map: HashMap<(u8, u8), usize> = HashMap::new();
+        {
+            let from = b'@';
+            let cost = self.build_cost_map(from, &keys);
+            for to in keys.iter() {
+                if let Some(d) = cost.get(to) {
+                    cost_map.insert((from, *to), *d);
+                }
+            }
+        }
+        // then build A* cost map based on the cost_map
+        let mut astar_cost = cost_map.clone();
         let mut shortest = usize::MAX;
         for from in keys.iter() {
             let cost = self.build_cost_map(*from, &keys);
@@ -71,21 +116,33 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        let mut to_check: BinaryHeap<Reverse<(usize, usize, Vec<u8>)>> = BinaryHeap::new();
-        to_check.push(Reverse((n_keys * shortest, 0, vec![])));
+        let mut to_check: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+        to_check.push(Reverse(State {
+            estimate: n_keys * shortest,
+            current_cost: 0,
+            inventry: vec![],
+            cost_map,
+        }));
         let mut len = 0;
-        while let Some(Reverse((estimated, cost, inventry))) = to_check.pop() {
+        while let Some(Reverse(State {
+            estimate,
+            current_cost,
+            inventry,
+            cost_map,
+        })) = to_check.pop()
+        {
             if inventry.len() == keys.len() {
                 dbg!(inventry.iter().map(|c| *c as char).collect::<String>());
-                return cost;
+                return current_cost;
             }
             if len < inventry.len() {
                 len = inventry.len();
                 dbg!(len, to_check.len());
             }
-            let cost_map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
+            // FIXME: under re-construction
+            let map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
             for next in keys.iter().filter(|k| !inventry.contains(k)) {
-                if let Some(c) = cost_map.get(next) {
+                if let Some(c) = map.get(next) {
                     let mut inv = inventry.clone();
                     // we should leave only the best (so far) states by dropping old history.
                     inv.sort();
@@ -105,12 +162,17 @@ impl AdventOfCode for Puzzle {
                             }
                         }
                     }
-                    let e: usize = cost + c + n_path * shortest;
+                    let e: usize = current_cost + c + n_path * shortest;
                     if !to_check
                         .iter()
-                        .any(|Reverse(cngr)| inv == cngr.2 && cngr.0 < e)
+                        .any(|Reverse(cngr)| inv == cngr.inventry && cngr.estimate < e)
                     {
-                        to_check.push(Reverse((e, cost + c, inv)));
+                        to_check.push(Reverse(State {
+                            estimate: e,
+                            current_cost: current_cost + c,
+                            inventry: inv,
+                            cost_map: cost_map.clone(), // for now
+                        }));
                     }
                 }
             }
