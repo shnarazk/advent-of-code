@@ -55,18 +55,26 @@ impl AdventOfCode for Puzzle {
             .filter(|c| b'a' <= **c && **c <= b'z')
             .copied()
             .collect::<Vec<u8>>();
-        dbg!(keys.len());
-        let mut to_check: BinaryHeap<Reverse<(usize, Vec<u8>)>> = BinaryHeap::new();
-        to_check.push(Reverse((0, vec![])));
-        let mut len = 0;
+        let n_keys = keys.len();
+        dbg!(n_keys);
         // firstly build A* cost map
-        let mut astar_cost = self.build_cost_map(b'@', &keys);
-        for key in keys.iter() {
-            for (k, c) in self.build_cost_map(*key, &keys).iter() {
-                astar_cost.insert(*k, *c);
+        let mut astar_cost: HashMap<(u8, u8), usize> = HashMap::new();
+        let mut shortest = usize::MAX;
+        for from in keys.iter() {
+            let cost = self.build_cost_map(*from, &keys);
+            for to in keys.iter() {
+                if let Some(d) = cost.get(to) {
+                    astar_cost.insert((*from, *to), *d);
+                    if 0 < *d && *d < shortest {
+                        shortest = *d;
+                    }
+                }
             }
         }
-        while let Some(Reverse((cost, inventry))) = to_check.pop() {
+        let mut to_check: BinaryHeap<Reverse<(usize, usize, Vec<u8>)>> = BinaryHeap::new();
+        to_check.push(Reverse((n_keys * shortest, 0, vec![])));
+        let mut len = 0;
+        while let Some(Reverse((estimated, cost, inventry))) = to_check.pop() {
             if inventry.len() == keys.len() {
                 dbg!(inventry.iter().map(|c| *c as char).collect::<String>());
                 return cost;
@@ -76,17 +84,33 @@ impl AdventOfCode for Puzzle {
                 dbg!(len, to_check.len());
             }
             let cost_map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
-            for key in keys.iter().filter(|k| !inventry.contains(k)) {
-                if let Some(c) = cost_map.get(key) {
+            for next in keys.iter().filter(|k| !inventry.contains(k)) {
+                if let Some(c) = cost_map.get(next) {
                     let mut inv = inventry.clone();
                     // we should leave only the best (so far) states by dropping old history.
                     inv.sort();
-                    inv.push(*key);
+                    inv.push(*next);
+                    let mut shortest = usize::MAX;
+                    let mut n_path = 0;
+                    for from in keys.iter().filter(|k| !inv.contains(k)) {
+                        n_path += 1;
+                        for to in keys.iter().filter(|k| !inv.contains(k)) {
+                            if *from == *to {
+                                continue;
+                            }
+                            if let Some(d) = astar_cost.get(&(*from, *to)) {
+                                if *d < shortest {
+                                    shortest = *d;
+                                }
+                            }
+                        }
+                    }
+                    let e: usize = cost + c + n_path * shortest;
                     if !to_check
                         .iter()
-                        .any(|Reverse(cngr)| inv == cngr.1 && cngr.0 < cost + c)
+                        .any(|Reverse(cngr)| inv == cngr.2 && cngr.0 < e)
                     {
-                        to_check.push(Reverse((cost + c, inv)));
+                        to_check.push(Reverse((e, cost + c, inv)));
                     }
                 }
             }
