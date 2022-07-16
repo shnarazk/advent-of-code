@@ -11,7 +11,7 @@ use {
     },
     std::{
         cmp::Reverse,
-        collections::{BinaryHeap, HashMap, VecDeque},
+        collections::{BinaryHeap, HashMap, HashSet, VecDeque},
     },
 };
 
@@ -47,10 +47,6 @@ impl AdventOfCode for Puzzle {
         self.width = self.line[0].len();
         // dbg!(self.line.len());
         dbg!(&self.location.len() / 2);
-        dbg!(self.distance(b'@', b'c', &[]));
-        dbg!(self.distance(b'@', b'a', &[b'c']));
-        dbg!(self.distance(b'@', b'b', &[b'c']));
-        dbg!(self.distance(b'@', b'd', &[b'c']));
     }
     fn part1(&mut self) -> Self::Output1 {
         let keys = self
@@ -63,6 +59,13 @@ impl AdventOfCode for Puzzle {
         let mut to_check: BinaryHeap<Reverse<(usize, Vec<u8>)>> = BinaryHeap::new();
         to_check.push(Reverse((0, vec![])));
         let mut len = 0;
+        // firstly build A* cost map
+        let mut astar_cost = self.build_cost_map(b'@', &keys);
+        for key in keys.iter() {
+            for (k, c) in self.build_cost_map(*key, &keys).iter() {
+                astar_cost.insert(*k, *c);
+            }
+        }
         while let Some(Reverse((cost, inventry))) = to_check.pop() {
             if inventry.len() == keys.len() {
                 dbg!(inventry.iter().map(|c| *c as char).collect::<String>());
@@ -70,14 +73,21 @@ impl AdventOfCode for Puzzle {
             }
             if len < inventry.len() {
                 len = inventry.len();
-                dbg!(len);
+                dbg!(len, to_check.len());
             }
             let cost_map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
             for key in keys.iter().filter(|k| !inventry.contains(k)) {
                 if let Some(c) = cost_map.get(key) {
                     let mut inv = inventry.clone();
+                    // we should leave only the best (so far) states by dropping old history.
+                    inv.sort();
                     inv.push(*key);
-                    to_check.push(Reverse((cost + c, inv)));
+                    if !to_check
+                        .iter()
+                        .any(|Reverse(cngr)| inv == cngr.1 && cngr.0 < cost + c)
+                    {
+                        to_check.push(Reverse((cost + c, inv)));
+                    }
                 }
             }
         }
