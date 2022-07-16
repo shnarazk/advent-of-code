@@ -22,7 +22,7 @@ struct State {
     estimate: usize,
     current_cost: usize,
     inventry: Vec<u8>,
-    cost_map: HashMap<(u8, u8), usize>,
+    // cost_map: HashMap<(u8, u8), usize>,
 }
 
 impl PartialEq for State {
@@ -95,20 +95,23 @@ impl AdventOfCode for Puzzle {
         let mut cost_map: HashMap<(u8, u8), usize> = HashMap::new();
         {
             let from = b'@';
-            let cost = self.build_cost_map(from, &keys);
+            let cost = self.build_cost_map(from, &[]);
             for to in keys.iter() {
                 if let Some(d) = cost.get(to) {
                     cost_map.insert((from, *to), *d);
                 }
             }
+            dbg!(cost_map.len());
         }
+        assert_eq!(0, cost_map.len());
         // then build A* cost map based on the cost_map
         let mut astar_cost = cost_map.clone();
         let mut shortest = usize::MAX;
         for from in keys.iter() {
-            let cost = self.build_cost_map(*from, &keys);
+            let cost = self.build_cost_map(*from, &[]);
             for to in keys.iter() {
                 if let Some(d) = cost.get(to) {
+                    cost_map.insert((*from, *to), *d);
                     astar_cost.insert((*from, *to), *d);
                     if 0 < *d && *d < shortest {
                         shortest = *d;
@@ -121,14 +124,14 @@ impl AdventOfCode for Puzzle {
             estimate: n_keys * shortest,
             current_cost: 0,
             inventry: vec![],
-            cost_map,
+            // cost_map,
         }));
         let mut len = 0;
         while let Some(Reverse(State {
             estimate,
             current_cost,
             inventry,
-            cost_map,
+            // cost_map,
         })) = to_check.pop()
         {
             if inventry.len() == keys.len() {
@@ -137,16 +140,21 @@ impl AdventOfCode for Puzzle {
             }
             if len < inventry.len() {
                 len = inventry.len();
-                dbg!(len, to_check.len());
+                println!("{}:{}", len, to_check.len());
             }
-            // FIXME: under re-construction
-            let map = self.build_cost_map(*inventry.last().unwrap_or(&b'@'), &inventry);
+            let now = *inventry.last().unwrap_or(&b'@');
             for next in keys.iter().filter(|k| !inventry.contains(k)) {
-                if let Some(c) = map.get(next) {
+                if let Some(c) = cost_map.get(&(now, *next)) {
                     let mut inv = inventry.clone();
                     // we should leave only the best (so far) states by dropping old history.
                     inv.sort();
                     inv.push(*next);
+                    // let mut map = cost_map.clone();
+                    // for k in keys.iter().filter(|k| !inv.contains(k)) {
+                    //     if let Some(c) = self.distance(*next, *k, &inv) {
+                    //         map.insert((*next, *k), c);
+                    //     }
+                    // }
                     let mut shortest = usize::MAX;
                     let mut n_path = 0;
                     for from in keys.iter().filter(|k| !inv.contains(k)) {
@@ -171,7 +179,7 @@ impl AdventOfCode for Puzzle {
                             estimate: e,
                             current_cost: current_cost + c,
                             inventry: inv,
-                            cost_map: cost_map.clone(), // for now
+                            // cost_map: cost_map.clone(), // for now
                         }));
                     }
                 }
