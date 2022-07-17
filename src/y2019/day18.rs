@@ -92,7 +92,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let n_keys = self.keys.len();
-        let shortest = 60;
+        let shortest = 5;
         let mut to_check: BinaryHeap<Reverse<State>> = BinaryHeap::new();
         to_check.push(Reverse(State {
             estimate: n_keys * shortest,
@@ -101,8 +101,7 @@ impl AdventOfCode for Puzzle {
         }));
         let mut len = 0;
         while let Some(Reverse(state)) = to_check.pop() {
-            if 2600 <= state.current_cost {
-                dbg!();
+            if 4545 <= state.current_cost {
                 continue;
             }
             if state.inventry.len() == self.keys.len() {
@@ -164,6 +163,10 @@ impl Puzzle {
                     let k = self.map.get(l).unwrap();
                     if ![OPEN, ENTRANCE].contains(k) {
                         result.insert(*k, c + 1);
+                    }
+                    // if we can get a new key, there's no reason to skip it and go further.
+                    if b'a' <= *k && *k <= b'z' && !inventry.contains(k) {
+                        continue;
                     }
                     to_visit.push_back(*l);
                 }
