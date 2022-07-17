@@ -92,33 +92,8 @@ impl AdventOfCode for Puzzle {
         let n_keys = keys.len();
         dbg!(n_keys);
         // Firstly build the initial cost_map
-        let mut cost_map: HashMap<(u8, u8), usize> = HashMap::new();
-        {
-            let from = b'@';
-            let cost = self.build_cost_map(from, &[]);
-            for to in keys.iter() {
-                if let Some(d) = cost.get(to) {
-                    cost_map.insert((from, *to), *d);
-                }
-            }
-            dbg!(cost_map.len());
-        }
-        assert_eq!(0, cost_map.len());
-        // then build A* cost map based on the cost_map
-        let mut astar_cost = cost_map.clone();
-        let mut shortest = usize::MAX;
-        for from in keys.iter() {
-            let cost = self.build_cost_map(*from, &[]);
-            for to in keys.iter() {
-                if let Some(d) = cost.get(to) {
-                    cost_map.insert((*from, *to), *d);
-                    astar_cost.insert((*from, *to), *d);
-                    if 0 < *d && *d < shortest {
-                        shortest = *d;
-                    }
-                }
-            }
-        }
+        let mut cost_map: HashMap<(u8, u8), (usize, Vec<u8>)> = self.build_cost_map();
+        let mut shortest = 5;
         let mut to_check: BinaryHeap<Reverse<State>> = BinaryHeap::new();
         to_check.push(Reverse(State {
             estimate: n_keys * shortest,
@@ -163,7 +138,7 @@ impl AdventOfCode for Puzzle {
                             if *from == *to {
                                 continue;
                             }
-                            if let Some(d) = astar_cost.get(&(*from, *to)) {
+                            if let Some(d) = cost_map.get(&(*from, *to)) {
                                 if *d < shortest {
                                     shortest = *d;
                                 }
@@ -193,7 +168,44 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn build_cost_map(&self, from: u8, inventry: &[u8]) -> HashMap<u8, usize> {
+    fn build_cost_map(&self) -> HashMap<(u8, u8), (usize, Vec<u8>)> {
+        let keys = self
+            .map
+            .values()
+            .filter(|c| b'a' <= **c && **c <= b'z')
+            .copied()
+            .collect::<Vec<u8>>();
+        // Firstly build the initial cost_map
+        let mut reachable: HashMap<u8, Vec<u8>> = HashMap::new();
+        let mut cost_map: HashMap<(u8, u8), (usize, Vec<u8>)> = HashMap::new();
+        let mut shortest = usize::MAX;
+        {
+            let from = b'@';
+            let cost = self.build_cost_map_from(from, &[]);
+            for to in keys.iter() {
+                if let Some(d) = cost.get(to) {
+                    cost_map.insert((from, *to), (*d, Vec::new()));
+                }
+            }
+            dbg!(cost_map.len());
+            assert_eq!(0, cost_map.len());
+            for from in keys.iter() {
+                let cost = self.build_cost_map_from(*from, &[]);
+                let cond = reachable.get(from).unwrap_or(&Vec::new());
+                for to in keys.iter() {
+                    if let Some(d) = cost.get(to) {
+                        cost_map.insert((*from, *to), (*d, cond.clone()));
+                        cost_map.insert((*to, *from), (*d, cond.clone()));
+                        if 0 < *d && *d < shortest {
+                            shortest = *d;
+                        }
+                    }
+                }
+            }
+        }
+        cost_map
+    }
+    fn build_cost_map_from(&self, from: u8, inventry: &[u8]) -> HashMap<u8, usize> {
         let mut cost: HashMap<Location, usize> = HashMap::new();
         let mut result: HashMap<u8, usize> = HashMap::new();
         let mut to_visit: VecDeque<Location> = VecDeque::new();
@@ -225,37 +237,5 @@ impl Puzzle {
             }
         }
         result
-    }
-    fn distance(&self, from: u8, to: u8, inventry: &[u8]) -> Option<usize> {
-        let mut cost: HashMap<Location, usize> = HashMap::new();
-        let mut to_visit: VecDeque<Location> = VecDeque::new();
-        let start = *self.location.get(&from).unwrap();
-        let goal = *self.location.get(&to).unwrap();
-        to_visit.push_back(start);
-        cost.insert(start, 0);
-        while let Some(loc) = to_visit.pop_front() {
-            let c = *cost.get(&loc).unwrap();
-            if loc == goal {
-                return Some(c);
-            }
-            for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
-                if !self.map.get(l).map_or_else(
-                    || false,
-                    |k| {
-                        [b'.', b'@'].contains(k)
-                            || (b'a' <= *k && *k <= b'z')
-                            || ((b'A' <= *k && *k <= b'Z')
-                                && inventry.contains(&(*k + b'a' - b'A')))
-                    },
-                ) {
-                    continue;
-                }
-                if !cost.contains_key(l) {
-                    cost.insert(*l, c + 1);
-                    to_visit.push_back(*l);
-                }
-            }
-        }
-        None
     }
 }
