@@ -227,6 +227,8 @@ impl Puzzle {
             self.cost_map.insert(p, d);
         }
     }
+    // This should return not only cost but also requirements,
+    // which are the passing keys on the way.
     fn build_cost_map_from(&self, from: u8, inventry: &[u8]) -> HashMap<u8, usize> {
         let mut cost: HashMap<Location, usize> = HashMap::new();
         let mut result: HashMap<u8, usize> = HashMap::new();
