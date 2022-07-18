@@ -1,17 +1,12 @@
 //! <https://adventofcode.com/2019/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors4,
-        line_parser, regex,
     },
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet, VecDeque},
+        collections::{BinaryHeap, HashMap, VecDeque},
     },
 };
 
@@ -21,6 +16,9 @@ const WALL: u8 = b'#';
 
 type Location = (usize, usize);
 
+///
+/// For part 1
+///
 #[derive(Clone, Debug)]
 struct State {
     estimate: usize,
@@ -46,6 +44,42 @@ impl PartialOrd for State {
 }
 
 impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.estimate.cmp(&other.estimate) {
+            Ordering::Equal => self.current_cost.cmp(&other.current_cost),
+            result => result,
+        }
+    }
+}
+
+///
+/// For part 2
+///
+#[derive(Clone, Debug)]
+struct State4 {
+    estimate: usize,
+    current_cost: usize,
+    inventry: [Vec<u8>; 4],
+}
+
+impl PartialEq for State4 {
+    fn eq(&self, other: &Self) -> bool {
+        self.inventry.eq(&other.inventry)
+    }
+}
+
+impl Eq for State4 {}
+
+impl PartialOrd for State4 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.estimate.partial_cmp(&other.estimate) {
+            Some(Ordering::Equal) => self.current_cost.partial_cmp(&other.current_cost),
+            result => result,
+        }
+    }
+}
+
+impl Ord for State4 {
     fn cmp(&self, other: &Self) -> Ordering {
         match self.estimate.cmp(&other.estimate) {
             Ordering::Equal => self.current_cost.cmp(&other.current_cost),
@@ -135,6 +169,81 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        {
+            let orig_ent = *self.location.get(&ENTRANCE).unwrap();
+            let mut ent: u8 = b'0';
+            for j in -1_isize..=1 {
+                for i in -1_isize..=1 {
+                    let loc = (
+                        (orig_ent.0 as isize + j) as usize,
+                        (orig_ent.1 as isize + i) as usize,
+                    );
+                    let is_ent = (j * i).abs() == 1;
+                    self.map.insert(loc, if is_ent { ent } else { WALL });
+                    if is_ent {
+                        self.location.insert(ent, loc);
+                        ent += 1;
+                    }
+                }
+            }
+        }
+        let n_keys = self.keys.len();
+        let shortest = 80;
+        let mut to_check: BinaryHeap<Reverse<State4>> = BinaryHeap::new();
+        to_check.push(Reverse(State4 {
+            estimate: n_keys * shortest,
+            current_cost: 0,
+            inventry: [vec![], vec![], vec![], vec![]],
+        }));
+        let mut len = 0;
+        while let Some(Reverse(state)) = to_check.pop() {
+            if 1693 <= state.current_cost {
+                continue;
+            }
+            let len_inventry = state.inventry.iter().map(|v| v.len()).sum::<usize>();
+            {
+                if len_inventry == n_keys {
+                    return state.current_cost;
+                }
+                if len < len_inventry {
+                    len = len_inventry;
+                    println!(
+                        "got {}: estimated cost={}, states={}",
+                        len,
+                        state.estimate,
+                        to_check.len()
+                    );
+                }
+            }
+            for i in 0..4 {
+                let from = *state.inventry[i].last().unwrap_or(&(b'0' + i as u8));
+                let map = self.build_cost_map2(from, &state.inventry);
+                for to in self.keys.iter().filter(|k| {
+                    !state.inventry[0].contains(k)
+                        && !state.inventry[1].contains(k)
+                        && !state.inventry[2].contains(k)
+                        && !state.inventry[3].contains(k)
+                }) {
+                    if let Some(c) = map.get(to) {
+                        let mut inv = state.inventry.clone();
+                        inv[i].sort();
+                        inv[i].push(*to);
+                        let n_inv = len_inventry + 1;
+                        let e: usize = state.current_cost + c + (n_keys - n_inv) * shortest;
+                        if !to_check
+                            .iter()
+                            .any(|Reverse(s)| inv == s.inventry && s.estimate < e)
+                        {
+                            to_check.push(Reverse(State4 {
+                                estimate: e,
+                                current_cost: state.current_cost + c,
+                                inventry: inv,
+                            }));
+                        }
+                    }
+                }
+            }
+        }
         0
     }
 }
@@ -166,6 +275,42 @@ impl Puzzle {
                     }
                     // if we can get a new key, there's no reason to skip it and go further.
                     if b'a' <= *k && *k <= b'z' && !inventry.contains(k) {
+                        continue;
+                    }
+                    to_visit.push_back(*l);
+                }
+            }
+        }
+        result
+    }
+    fn build_cost_map2(&self, from: u8, inventry: &[Vec<u8>; 4]) -> HashMap<u8, usize> {
+        let mut cost: HashMap<Location, usize> = HashMap::new();
+        let mut result: HashMap<u8, usize> = HashMap::new();
+        let mut to_visit: VecDeque<Location> = VecDeque::new();
+        let start = *self.location.get(&from).unwrap();
+        to_visit.push_back(start);
+        cost.insert(start, 0);
+        while let Some(loc) = to_visit.pop_front() {
+            let c = *cost.get(&loc).unwrap();
+            for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
+                if self.map.get(l).map_or_else(
+                    || false,
+                    |k| {
+                        [b'0', b'1', b'2', b'3', OPEN].contains(k)
+                            || (b'a' <= *k && *k <= b'z')
+                            || (b'A' <= *k
+                                && *k <= b'Z'
+                                && inventry.iter().any(|v| v.contains(&(*k + b'a' - b'A'))))
+                    },
+                ) && !cost.contains_key(l)
+                {
+                    cost.insert(*l, c + 1);
+                    let k = self.map.get(l).unwrap();
+                    if ![OPEN, b'0', b'1', b'2', b'3'].contains(k) {
+                        result.insert(*k, c + 1);
+                    }
+                    // if we can get a new key, there's no reason to skip it and go further.
+                    if b'a' <= *k && *k <= b'z' && inventry.iter().all(|v| !v.contains(k)) {
                         continue;
                     }
                     to_visit.push_back(*l);
