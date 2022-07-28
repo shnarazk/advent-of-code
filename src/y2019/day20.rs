@@ -11,30 +11,32 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+type Location = (usize, usize);
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<u8>>,
+    map: HashMap<Location, u8>,
+    gate: HashMap<[u8; 2], Location>, // HashMap<String, Location>
 }
 
 #[aoc(2019, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line
+            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (y, l) in self.line.iter().enumerate() {
+            for (x, c) in l.iter().enumerate() {
+                if *c != b' ' {
+                    self.map.insert((y, x), *c);
+                }
+            }
+        }
+        dbg!(&self.map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
