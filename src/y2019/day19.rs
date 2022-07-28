@@ -1,14 +1,10 @@
 //! <https://adventofcode.com/2019/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
-    std::collections::{HashMap, HashSet, VecDeque},
+    std::collections::{HashMap, VecDeque},
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -43,23 +39,31 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut border: HashSet<(usize, usize)> = HashSet::new();
+        let mut border: HashMap<usize, usize> = HashMap::new();
         self.initialize();
         let mut count: usize = 0;
-        'next_y: for y in 0..50 {
-            let mut in_domain: bool = false;
-            for x in 0..50 {
+        let mut start: usize = 0;
+        'next_y: for y in 100.. {
+            let mut span = 0;
+            for x in start.. {
                 let on = self.is_pulling(y as isize, x as isize);
-                if !in_domain && on {
-                    border.insert((y, x));
-                    in_domain = true;
-                } else if in_domain && !on {
-                    border.insert((y, x - 1));
-                    dbg!(x);
-                    continue 'next_y;
+                if span == 0 && on {
+                    if let Some(xx) = border.get(&(y - 99)) {
+                        if x + 99 <= *xx {
+                            return x * 10_000 + (y - 99);
+                        }
+                    }
+                    span = 1;
+                    start = x - 1;
+                } else if 0 < span {
+                    if on {
+                        span += 1;
+                    } else {
+                        border.insert(y, x - 1);
+                        continue 'next_y;
+                    }
                 }
                 count += on as usize;
-                print!("{}", if on { "#" } else { "." });
             }
             println!();
         }
@@ -197,21 +201,4 @@ impl Puzzle {
         }
         None
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
