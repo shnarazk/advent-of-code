@@ -30,7 +30,14 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.initialize();
+        let mut count: usize = 0;
+        for y in 0..50 {
+            for x in 0..50 {
+                count += self.is_pulling(y, x) as usize;
+            }
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
@@ -38,6 +45,18 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
+    fn is_pulling(&mut self, y: isize, x: isize) -> bool {
+        let mut input: VecDeque<isize> = VecDeque::new();
+        assert!(0 <= x);
+        input.push_back(x);
+        assert!(0 <= y);
+        input.push_back(y);
+        self.initialize(); // required
+        if let Some(flag) = self.run(&mut input) {
+            return flag == 1;
+        }
+        panic!();
+    }
     fn initialize(&mut self) {
         self.memory = HashMap::new();
         for (i, v) in self.line.iter().enumerate() {
