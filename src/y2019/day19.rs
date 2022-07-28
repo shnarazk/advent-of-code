@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::{HashMap, VecDeque},
+    std::collections::{HashMap, HashSet, VecDeque},
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -43,7 +43,27 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut border: HashSet<(usize, usize)> = HashSet::new();
+        self.initialize();
+        let mut count: usize = 0;
+        'next_y: for y in 0..50 {
+            let mut in_domain: bool = false;
+            for x in 0..50 {
+                let on = self.is_pulling(y as isize, x as isize);
+                if !in_domain && on {
+                    border.insert((y, x));
+                    in_domain = true;
+                } else if in_domain && !on {
+                    border.insert((y, x - 1));
+                    dbg!(x);
+                    continue 'next_y;
+                }
+                count += on as usize;
+                print!("{}", if on { "#" } else { "." });
+            }
+            println!();
+        }
+        count
     }
 }
 
