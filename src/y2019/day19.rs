@@ -34,8 +34,11 @@ impl AdventOfCode for Puzzle {
         let mut count: usize = 0;
         for y in 0..50 {
             for x in 0..50 {
-                count += self.is_pulling(y, x) as usize;
+                let on = self.is_pulling(y, x);
+                count += on as usize;
+                print!("{}", if on { "#" } else { "." });
             }
+            println!();
         }
         count
     }
