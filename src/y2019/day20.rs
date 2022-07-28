@@ -17,7 +17,7 @@ type Location = (usize, usize);
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     map: HashMap<Location, u8>,
-    gate: HashMap<[u8; 2], Location>, // HashMap<String, Location>
+    gate: HashMap<[u8; 2], Vec<Location>>, // HashMap<String, Location>
 }
 
 #[aoc(2019, 20)]
