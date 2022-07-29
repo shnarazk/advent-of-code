@@ -152,13 +152,9 @@ impl Puzzle {
     fn check_portal_distances(&mut self) {
         let mut xs: HashMap<usize, isize> = HashMap::new();
         let mut ys: HashMap<usize, isize> = HashMap::new();
-        for vec in self.gate.values() {
-            if 2 == vec.len() {
-                *ys.entry(vec[0].0 .0).or_insert(0) -= 1;
-                *ys.entry(vec[1].0 .0).or_insert(0) -= 1;
-                *xs.entry(vec[0].0 .1).or_insert(0) -= 1;
-                *xs.entry(vec[1].0 .1).or_insert(0) -= 1;
-            }
+        for (loc, _) in self.map.iter().filter(|(_, kind)| **kind == b'*') {
+            *ys.entry(loc.0).or_insert(0) -= 1;
+            *xs.entry(loc.1).or_insert(0) -= 1;
         }
         let mut ys = ys.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
         ys.sort_by_key(|(_, count)| *count);
@@ -170,8 +166,19 @@ impl Puzzle {
         inner_y.sort_unstable();
         let mut inner_x = xs[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
         inner_x.sort_unstable();
-        let inner =
-            move |l: &Location| inner_y[1..3].contains(&l.0) && inner_x[1..3].contains(&l.1);
+        let inner = move |l: &Location| {
+            (inner_y[1..3].contains(&l.0) && inner_x[1] <= l.1 && l.1 <= inner_x[2])
+                || (inner_x[1..3].contains(&l.1) && inner_y[1] <= l.0 && l.0 <= inner_y[2])
+        };
+        for (name, entries) in self.gate.iter() {
+            for portal_entry in entries.iter() {
+                for (dest, (cost, flag)) in self.build_cost_table(&inner, portal_entry.1).iter() {
+                    if 0 < *cost {
+                        println!("{:?} -> {:?}/{}, {}", portal_entry.0, dest, cost, flag);
+                    }
+                }
+            }
+        }
     }
     fn build_cost_table(
         &self,
