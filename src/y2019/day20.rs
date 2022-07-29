@@ -143,7 +143,67 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        self.check_portal_distances();
         0
+    }
+}
+
+impl Puzzle {
+    fn check_portal_distances(&mut self) {
+        let mut xs: HashMap<usize, isize> = HashMap::new();
+        let mut ys: HashMap<usize, isize> = HashMap::new();
+        for vec in self.gate.values() {
+            if 2 == vec.len() {
+                *ys.entry(vec[0].0 .0).or_insert(0) -= 1;
+                *ys.entry(vec[1].0 .0).or_insert(0) -= 1;
+                *xs.entry(vec[0].0 .1).or_insert(0) -= 1;
+                *xs.entry(vec[1].0 .1).or_insert(0) -= 1;
+            }
+        }
+        let mut ys = ys.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
+        ys.sort_by_key(|(_, count)| *count);
+        let mut xs = xs.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
+        xs.sort_by_key(|(_, count)| *count);
+        dbg!(&ys[0..4]);
+        dbg!(&xs[0..4]);
+        let mut inner_y = ys[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
+        inner_y.sort_unstable();
+        let mut inner_x = xs[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
+        inner_x.sort_unstable();
+        let inner =
+            move |l: &Location| inner_y[1..3].contains(&l.0) && inner_x[1..3].contains(&l.1);
+    }
+    fn build_cost_table(
+        &self,
+        inner: impl Fn(&Location) -> bool,
+        start: Location,
+    ) -> HashMap<Location, (usize, isize)> {
+        let height = self.line.len();
+        let width = self.line[0].len();
+        let mut table: HashMap<Location, (usize, isize)> = HashMap::new();
+        let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
+        let mut visited: HashSet<Location> = HashSet::new();
+        to_visit.push(Reverse((0, start)));
+        while let Some(Reverse((cost, loc))) = to_visit.pop() {
+            visited.insert(loc);
+            for next in neighbors4(loc.0, loc.1, height, width).iter() {
+                if visited.contains(next) {
+                    continue;
+                }
+                visited.insert(*next);
+                match self.map.get(next) {
+                    Some(&b'.') => {
+                        to_visit.push(Reverse((cost + 1, *next)));
+                    }
+                    Some(&b'*') => {
+                        let sgn = if inner(next) { 1 } else { -1 };
+                        table.insert(*next, (cost, sgn));
+                    }
+                    _ => (),
+                }
+            }
+        }
+        table
     }
 }
 
