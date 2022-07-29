@@ -10,7 +10,7 @@ use {
         geometric::neighbors,
     },
     std::{
-        cmp::Reverse,
+        cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
     },
 };
@@ -23,6 +23,26 @@ pub struct Puzzle {
     map: HashMap<Location, u8>,
     gate: HashMap<String, Vec<(Location, Location)>>,
     portal: HashMap<Location, Location>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
+struct State {
+    cost: usize,
+    current_level: isize,
+    most_outer_level: isize,
+    location: Location,
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.cost.partial_cmp(&other.cost)
+    }
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.cost.cmp(&other.cost)
+    }
 }
 
 #[aoc(2019, 20)]
@@ -57,8 +77,13 @@ impl AdventOfCode for Puzzle {
                                 } else {
                                     unreachable!()
                                 };
-                                if portal_name != "AA" {
+                                if portal_name == "AA" {
+                                    self.portal.insert((0, 0), locs.1);
+                                } else {
                                     self.map.insert(locs.0, b'*');
+                                }
+                                if portal_name == "ZZ" {
+                                    self.portal.insert(locs.1, (0, 0));
                                 }
                                 self.gate
                                     .entry(portal_name)
@@ -80,8 +105,13 @@ impl AdventOfCode for Puzzle {
                                 } else {
                                     unreachable!()
                                 };
-                                if portal_name != "AA" {
+                                if portal_name == "AA" {
+                                    self.portal.insert((0, 0), locs.1);
+                                } else {
                                     self.map.insert(locs.0, b'*');
+                                }
+                                if portal_name == "ZZ" {
+                                    self.portal.insert(locs.1, (0, 0));
                                 }
                                 self.gate
                                     .entry(portal_name)
@@ -143,13 +173,62 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.check_portal_distances();
+        let distance = self.check_portal_distances();
+        let height = self.line.len();
+        let width = self.line[0].len();
+        // cost, level, location
+        let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+        let mut visited: HashSet<Location> = HashSet::new();
+        let start = (0, 0);
+        let goal = self.gate.get("ZZ").unwrap()[0].0;
+        dbg!(&goal);
+        to_visit.push(Reverse(State {
+            cost: 0,
+            current_level: 0,
+            most_outer_level: 0,
+            location: start,
+        }));
+        while let Some(Reverse(state)) = to_visit.pop() {
+            if state.location == goal {
+                if state.current_level == state.most_outer_level {
+                    return state.cost;
+                }
+                continue;
+            }
+            visited.insert(state.location);
+            assert!(
+                self.map.get(&state.location) == Some(&b'*') || state.location == start,
+                "L188: {:?} at {:?}",
+                *self.map.get(&state.location).unwrap() as char,
+                state.location,
+            );
+            let warp = *self.portal.get(&state.location).unwrap();
+            println!("b for {:?} from {:?}", warp, state.location);
+            for ((_, next), (step_cost, flag)) in distance.iter().filter(|(from, _)| from.0 == warp)
+            {
+                if visited.contains(next) {
+                    continue;
+                }
+                assert!(self.map.get(next) == Some(&b'*'));
+                if *next == goal && state.current_level == state.most_outer_level {
+                    return state.cost + step_cost;
+                }
+                to_visit.push(Reverse(State {
+                    cost: state.cost + step_cost,
+                    current_level: state.current_level + flag,
+                    most_outer_level: state.most_outer_level.max(state.current_level + flag),
+                    location: *next,
+                }));
+            }
+        }
+        println!("Fail to search");
         0
     }
 }
 
 impl Puzzle {
-    fn check_portal_distances(&mut self) {
+    fn check_portal_distances(&mut self) -> HashMap<(Location, Location), (usize, isize)> {
+        let mut table: HashMap<(Location, Location), (usize, isize)> = HashMap::new();
         let mut xs: HashMap<usize, isize> = HashMap::new();
         let mut ys: HashMap<usize, isize> = HashMap::new();
         for (loc, _) in self.map.iter().filter(|(_, kind)| **kind == b'*') {
@@ -160,8 +239,8 @@ impl Puzzle {
         ys.sort_by_key(|(_, count)| *count);
         let mut xs = xs.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
         xs.sort_by_key(|(_, count)| *count);
-        dbg!(&ys[0..4]);
-        dbg!(&xs[0..4]);
+        println!("{:?}", &ys[0..4]);
+        println!("{:?}", &xs[0..4]);
         let mut inner_y = ys[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
         inner_y.sort_unstable();
         let mut inner_x = xs[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
@@ -170,15 +249,32 @@ impl Puzzle {
             (inner_y[1..3].contains(&l.0) && inner_x[1] <= l.1 && l.1 <= inner_x[2])
                 || (inner_x[1..3].contains(&l.1) && inner_y[1] <= l.0 && l.0 <= inner_y[2])
         };
+        let goal = self.gate.get("ZZ").unwrap()[0].0;
         for (name, entries) in self.gate.iter() {
             for portal_entry in entries.iter() {
                 for (dest, (cost, flag)) in self.build_cost_table(&inner, portal_entry.1).iter() {
+                    if name == "AA" {
+                        dbg!(portal_entry.1, dest, cost);
+                    }
                     if 0 < *cost {
-                        println!("{:?} -> {:?}/{}, {}", portal_entry.0, dest, cost, flag);
+                        assert!(self.map.get(dest) == Some(&b'*'));
+                        table.insert((portal_entry.1, *dest), (*cost, *flag));
+                        if goal == *dest {
+                            println!(
+                                "to ZZ: {:?} -> {:?}/{}, {}",
+                                portal_entry.0, dest, cost, flag
+                            );
+                        }
                     }
                 }
             }
         }
+        dbg!(table.len());
+        dbg!(&table
+            .iter()
+            .filter(|((s, e), _)| *s == (2_usize, 53_usize))
+            .collect::<Vec<_>>());
+        table
     }
     fn build_cost_table(
         &self,
@@ -204,6 +300,7 @@ impl Puzzle {
                     }
                     Some(&b'*') => {
                         let sgn = if inner(next) { 1 } else { -1 };
+                        assert!(self.map.get(next) == Some(&b'*'));
                         table.insert(*next, (cost, sgn));
                     }
                     _ => (),
