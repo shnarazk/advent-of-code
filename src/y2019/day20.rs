@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2019/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use crate::geometric::neighbors4;
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -29,7 +22,6 @@ pub struct Puzzle {
 struct State {
     cost: usize,
     current_level: isize,
-    most_outer_level: isize,
     location: Location,
 }
 
@@ -174,28 +166,22 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let distance = self.check_portal_distances();
-        let height = self.line.len();
-        let width = self.line[0].len();
         // cost, level, location
         let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
-        let mut visited: HashSet<Location> = HashSet::new();
+        let mut visited: HashSet<(Location, isize)> = HashSet::new();
         let start = (0, 0);
         let goal = self.gate.get("ZZ").unwrap()[0].0;
         dbg!(&goal);
         to_visit.push(Reverse(State {
             cost: 0,
             current_level: 0,
-            most_outer_level: 0,
             location: start,
         }));
         while let Some(Reverse(state)) = to_visit.pop() {
             if state.location == goal {
-                if state.current_level == state.most_outer_level {
-                    return state.cost;
-                }
                 continue;
             }
-            visited.insert(state.location);
+            visited.insert((state.location, state.current_level));
             assert!(
                 self.map.get(&state.location) == Some(&b'*') || state.location == start,
                 "L188: {:?} at {:?}",
@@ -203,22 +189,32 @@ impl AdventOfCode for Puzzle {
                 state.location,
             );
             let warp = *self.portal.get(&state.location).unwrap();
-            println!("b for {:?} from {:?}", warp, state.location);
+            println!(
+                "search from {warp:?} warped from {:?} (current cost {}, level {})",
+                state.location, state.cost, state.current_level,
+            );
             for ((_, next), (step_cost, flag)) in distance.iter().filter(|(from, _)| from.0 == warp)
             {
-                if visited.contains(next) {
+                if visited.contains(&(*next, state.current_level + flag)) {
                     continue;
                 }
                 assert!(self.map.get(next) == Some(&b'*'));
-                if *next == goal && state.current_level == state.most_outer_level {
-                    return state.cost + step_cost;
+                if *next == goal && state.current_level == 0 {
+                    println!(
+                        "found the path to goal (cost {}, level {})",
+                        state.cost + step_cost - 1,
+                        state.current_level
+                    );
+                    return state.cost + step_cost - 1;
                 }
-                to_visit.push(Reverse(State {
-                    cost: state.cost + step_cost,
-                    current_level: state.current_level + flag,
-                    most_outer_level: state.most_outer_level.max(state.current_level + flag),
-                    location: *next,
-                }));
+                let current_level = state.current_level + flag;
+                if 0 <= current_level {
+                    to_visit.push(Reverse(State {
+                        cost: state.cost + step_cost,
+                        current_level,
+                        location: *next,
+                    }));
+                }
             }
         }
         println!("Fail to search");
@@ -229,25 +225,38 @@ impl AdventOfCode for Puzzle {
 impl Puzzle {
     fn check_portal_distances(&mut self) -> HashMap<(Location, Location), (usize, isize)> {
         let mut table: HashMap<(Location, Location), (usize, isize)> = HashMap::new();
-        let mut xs: HashMap<usize, isize> = HashMap::new();
-        let mut ys: HashMap<usize, isize> = HashMap::new();
-        for (loc, _) in self.map.iter().filter(|(_, kind)| **kind == b'*') {
-            *ys.entry(loc.0).or_insert(0) -= 1;
-            *xs.entry(loc.1).or_insert(0) -= 1;
+        // find inner boader
+        let mut top_left = (0, 0);
+        let mut bottom_right = (0, 0);
+        let height = self.line.len();
+        let width = self.line[0].len();
+        'loop1: for y in 2..height {
+            for x in 2..width {
+                if self.map.get(&(y, x)).is_none()
+                    && self.map.get(&(y - 1, x - 1)) == Some(&b'#')
+                    && self.map.get(&(y - 1, x)) == Some(&b'#')
+                    && self.map.get(&(y, x - 1)) == Some(&b'#')
+                {
+                    top_left = (y, x);
+                    break 'loop1;
+                }
+            }
         }
-        let mut ys = ys.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
-        ys.sort_by_key(|(_, count)| *count);
-        let mut xs = xs.iter().map(|(l, c)| (*l, *c)).collect::<Vec<_>>();
-        xs.sort_by_key(|(_, count)| *count);
-        println!("{:?}", &ys[0..4]);
-        println!("{:?}", &xs[0..4]);
-        let mut inner_y = ys[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
-        inner_y.sort_unstable();
-        let mut inner_x = xs[0..4].iter().map(|(p, _)| *p).collect::<Vec<_>>();
-        inner_x.sort_unstable();
+        'loop2: for y in 2..height {
+            for x in 2..width {
+                if self.map.get(&(y, x)).is_none()
+                    && self.map.get(&(y + 1, x + 1)) == Some(&b'#')
+                    && self.map.get(&(y + 1, x)) == Some(&b'#')
+                    && self.map.get(&(y, x + 1)) == Some(&b'#')
+                {
+                    bottom_right = (y, x);
+                    break 'loop2;
+                }
+            }
+        }
+        // dbg!(top_left, bottom_right);
         let inner = move |l: &Location| {
-            (inner_y[1..3].contains(&l.0) && inner_x[1] <= l.1 && l.1 <= inner_x[2])
-                || (inner_x[1..3].contains(&l.1) && inner_y[1] <= l.0 && l.0 <= inner_y[2])
+            top_left.0 <= l.0 && l.0 <= bottom_right.0 && top_left.1 <= l.1 && l.1 <= bottom_right.1
         };
         let goal = self.gate.get("ZZ").unwrap()[0].0;
         for (name, entries) in self.gate.iter() {
@@ -272,7 +281,7 @@ impl Puzzle {
         dbg!(table.len());
         dbg!(&table
             .iter()
-            .filter(|((s, e), _)| *s == (2_usize, 53_usize))
+            // .filter(|((s, e), _)| *s == (2_usize, 53_usize))
             .collect::<Vec<_>>());
         table
     }
@@ -301,7 +310,7 @@ impl Puzzle {
                     Some(&b'*') => {
                         let sgn = if inner(next) { 1 } else { -1 };
                         assert!(self.map.get(next) == Some(&b'*'));
-                        table.insert(*next, (cost, sgn));
+                        table.insert(*next, (cost + 1, sgn));
                     }
                     _ => (),
                 }
@@ -309,21 +318,4 @@ impl Puzzle {
         }
         table
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
