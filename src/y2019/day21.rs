@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2019/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -56,6 +52,11 @@ impl AdventOfCode for Puzzle {
             "NOT C T", // 3rd
             "OR T J",  // combine conditions
             "AND D J", // whether the landing point is ground
+            // AがtrueでEとHがともにfalseなら跳ぶべきでない
+            "NOT A T", //
+            "OR E T",  //
+            "OR H T",  //
+            "AND T J", //
             "RUN",
         ];
         let output: Vec<isize> = self.interprete(&sample);
