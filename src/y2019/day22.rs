@@ -11,30 +11,38 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Hash, PartialEq)]
+enum Shuffle {
+    Stack,
+    Cut(i32),
+    Increment(u32),
+}
+
+#[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Shuffle>,
 }
 
 #[aoc(2019, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        let stack = regex!(r"^deal into new stack$");
+        let cut = regex!(r"^cut (-?\d+)$");
+        let increment = regex!(r"^deal with increment (\d+)$");
+        if let Some(segment) = stack.captures(block) {
+            self.line.push(Shuffle::Stack);
+        } else if let Some(segment) = cut.captures(block) {
+            let val: i32 = segment[1].parse::<i32>()?;
+            self.line.push(Shuffle::Cut(val));
+        } else if let Some(segment) = increment.captures(block) {
+            let val: u32 = segment[1].parse::<u32>()?;
+            self.line.push(Shuffle::Increment(val));
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
