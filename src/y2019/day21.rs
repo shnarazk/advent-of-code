@@ -31,18 +31,47 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let sample = vec![
-            "NOT A J", "NOT B T", "AND T J", "NOT C T", "AND T J", "AND D J", "WALK",
+            "NOT A J", // closest
+            "NOT B T", // 2nd
+            "OR T J",  // combine conditions
+            "NOT C T", // 3rd
+            "OR T J",  // combine conditions
+            "AND D J", // whether the landing point is ground
+            "WALK",
         ];
-        print!("{}", self.interprete(&sample));
-        0
+        let output: Vec<isize> = self.interprete(&sample);
+        if output.last().map_or(false, |c| 255 < *c) {
+            *output.last().unwrap() as usize
+        } else {
+            let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
+            print!("{}", illustration);
+            0
+        }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let sample = vec![
+            "NOT A J", // closest
+            "NOT B T", // 2nd
+            "OR T J",  // combine conditions
+            "NOT C T", // 3rd
+            "OR T J",  // combine conditions
+            "AND D J", // whether the landing point is ground
+            "RUN",
+        ];
+        let output: Vec<isize> = self.interprete(&sample);
+        if output.last().map_or(false, |c| 255 < *c) {
+            *output.last().unwrap() as usize
+        } else {
+            let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
+            print!("{}", illustration);
+            0
+        }
     }
 }
 
 impl Puzzle {
-    fn interprete(&mut self, instructions: &[impl AsRef<str>]) -> String {
+    fn interprete(&mut self, instructions: &[impl AsRef<str>]) -> Vec<isize> {
+        assert!([Some("WALK"), Some("RUN")].contains(&instructions.last().map(|s| s.as_ref())));
         let mut input: VecDeque<isize> = VecDeque::new();
         for i in instructions.iter() {
             for c in i.as_ref().chars() {
@@ -51,11 +80,11 @@ impl Puzzle {
             input.push_back(b'\n' as isize);
         }
         self.initialize();
-        let mut buffer: Vec<u8> = Vec::new();
+        let mut buffer: Vec<isize> = Vec::new();
         while let Some(c) = self.run(&mut input) {
-            buffer.push(c as u8);
+            buffer.push(c);
         }
-        buffer.iter().map(|c| *c as char).collect::<String>()
+        buffer
     }
     fn initialize(&mut self) {
         self.memory = HashMap::new();
