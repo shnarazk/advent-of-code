@@ -94,42 +94,68 @@ impl AdventOfCode for Puzzle {
         // work in the world of Linear Congruential Functions
         const N: usize = PART2_SIZE;
         const K: usize = 101741582076661;
+        // check the correctness of inverting functions
+        for i in 1..1000 {
+            assert!(Shuffle::<N>::Stack.cancel(Shuffle::<N>::Stack.shuffle(i)) == i);
+            assert!(
+                Shuffle::<N>::Cut(i as isize).cancel(Shuffle::<N>::Cut(i as isize).shuffle(i)) == i
+            );
+            assert!(Shuffle::<N>::Increment(i).cancel(Shuffle::<N>::Increment(i).shuffle(i)) == i);
+        }
         let start: usize = 2020;
-        let suit = self.line.iter().map(|t| t.part2()).collect::<Vec<_>>();
-        let b = suit.iter().fold(0, |i, t| t.cancel(i));
-        let m = {
-            let b_m = dbg!(suit.iter().fold(1, |i, t| t.cancel(i)));
-            (b_m + 2 * N - b) % N
+        // Build the converting LCF
+        let suit = self.line.iter().rev().map(|t| t.part2());
+        let b = suit.clone().fold(0, |i, t| t.cancel(i));
+        let a = {
+            let a_b = suit.clone().fold(1, |i, t| t.cancel(i));
+            (a_b + 2 * N - b) % N
         };
+        // test the correctness of the coefficients
         {
-            let step2 = dbg!(suit.iter().fold(b, |i, t| t.cancel(i)));
+            let step2 = suit.clone().fold(b, |i, t| t.cancel(i));
             assert_eq!(
                 step2,
-                ((b as u128 + (b as u128) * (m as u128)) % (N as u128)) as usize
+                ((b as u128 + (b as u128) * (a as u128)) % (N as u128)) as usize
             );
         }
-        let convert = Lcf::<N>(b, m).pow(K);
-        convert.eval(start)
+        let convert = Lcf::<N>(a, b).pow(K);
+        let result = convert.eval(start);
+        {
+            // test the unitness
+            let suit = self.line.iter().map(|t| t.part2());
+            let b = suit.clone().fold(0, |i, t| t.shuffle(i));
+            let a = {
+                let a_b = suit.clone().fold(1, |i, t| t.shuffle(i));
+                (a_b + 2 * N - b) % N
+            };
+            assert_eq!(Lcf::<N>(a, b).pow(K).eval(result), start);
+        }
+        result
     }
 }
 
 /// Linear Congruential Function
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 struct Lcf<const N: usize>(usize, usize);
 
+impl<const N: usize> Default for Lcf<N> {
+    fn default() -> Self {
+        Lcf(1, 0)
+    }
+}
 impl<const N: usize> Lcf<N> {
     fn eval(&self, n: usize) -> usize {
-        ((self.0 as u128 + self.1 as u128 * n as u128) % N as u128) as usize
+        ((self.0 as u128 * n as u128 + self.1 as u128) % N as u128) as usize
     }
     fn compose(&self, other: Lcf<N>) -> Lcf<N> {
         Lcf::<N>(
             ((self.0 as u128 * other.0 as u128) % N as u128) as usize,
-            ((self.1 as u128 * other.0 as u128) + other.1 as u128) as usize,
+            ((self.1 as u128 * other.0 as u128 + other.1 as u128) % N as u128) as usize,
         )
     }
     fn pow(&self, p: usize) -> Lcf<N> {
         let mut f = *self;
-        let mut g = Lcf(0, 1);
+        let mut g = Lcf::default();
         let mut k = p;
         while 0 < k {
             if k % 2 == 1 {
