@@ -42,6 +42,20 @@ impl<const N: usize> Shuffle<N> {
             Shuffle::Increment(i) => (n * i) % N,
         }
     }
+    fn cancel(&self, n: usize) -> usize {
+        match self {
+            Shuffle::Stack => N - 1 - n,
+            Shuffle::Cut(c) => ((n + N) as isize + *c) as usize % N,
+            Shuffle::Increment(i) => {
+                for x in (0..).map(|k| n + k * N) {
+                    if x % i == 0 {
+                        return x / i;
+                    }
+                }
+                unreachable!()
+            }
+        }
+    }
 }
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
@@ -76,10 +90,18 @@ impl AdventOfCode for Puzzle {
             .fold(2019_usize, |i, s| s.part1().shuffle(i))
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut index: usize = 2020;
-        let suit = self.line.iter().map(|t| t.part2()).collect::<Vec<_>>();
-        for i in 0..101_741_582_076_661_usize {
-            index = suit.iter().fold(index, |i, t| t.shuffle(i));
+        let start: usize = 1;
+        let mut index: usize = start;
+        let suit = self
+            .line
+            .iter()
+            .rev()
+            .map(|t| t.part2())
+            .collect::<Vec<_>>();
+        // for i in 0..101_741_582_076_661_usize {
+        for i in 0..((101_741_582_076_661.0_f64.sqrt() * 30.0) as usize) {
+            index = suit.iter().fold(index, |i, t| t.cancel(i));
+            assert!(start != index);
         }
         index
     }
