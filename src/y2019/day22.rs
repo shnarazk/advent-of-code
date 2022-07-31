@@ -18,6 +18,12 @@ enum Shuffle {
     Increment(u32),
 }
 
+impl Shuffle {
+    fn cancel(&self, n: usize) -> usize {
+        0
+    }
+}
+
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Shuffle>,
@@ -45,7 +51,11 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut index: usize = 10;
+        while let Some(shuffle) = self.line.pop() {
+            index = shuffle.cancel(index);
+        }
+        index
     }
     fn part2(&mut self) -> Self::Output2 {
         0
