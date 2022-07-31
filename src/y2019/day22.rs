@@ -89,20 +89,55 @@ impl AdventOfCode for Puzzle {
             .iter()
             .fold(2019_usize, |i, s| s.part1().shuffle(i))
     }
+    /// https://www.reddit.com/r/adventofcode/comments/engeuy/comment/fdzr3d5/?utm_source=reddit&utm_medium=web2x&context=3
     fn part2(&mut self) -> Self::Output2 {
-        let start: usize = 1;
-        let mut index: usize = start;
-        let suit = self
-            .line
-            .iter()
-            .rev()
-            .map(|t| t.part2())
-            .collect::<Vec<_>>();
-        // for i in 0..101_741_582_076_661_usize {
-        for i in 0..((101_741_582_076_661.0_f64.sqrt() * 30.0) as usize) {
-            index = suit.iter().fold(index, |i, t| t.cancel(i));
-            assert!(start != index);
+        // work in the world of Linear Congruential Functions
+        const N: usize = PART2_SIZE;
+        const K: usize = 101741582076661;
+        let start: usize = 2020;
+        let suit = self.line.iter().map(|t| t.part2()).collect::<Vec<_>>();
+        let b = suit.iter().fold(0, |i, t| t.cancel(i));
+        let m = {
+            let b_m = dbg!(suit.iter().fold(1, |i, t| t.cancel(i)));
+            (b_m + 2 * N - b) % N
+        };
+        {
+            let step2 = dbg!(suit.iter().fold(b, |i, t| t.cancel(i)));
+            assert_eq!(
+                step2,
+                ((b as u128 + (b as u128) * (m as u128)) % (N as u128)) as usize
+            );
         }
-        index
+        let convert = Lcf::<N>(b, m).pow(K);
+        convert.eval(start)
+    }
+}
+
+/// Linear Congruential Function
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct Lcf<const N: usize>(usize, usize);
+
+impl<const N: usize> Lcf<N> {
+    fn eval(&self, n: usize) -> usize {
+        ((self.0 as u128 + self.1 as u128 * n as u128) % N as u128) as usize
+    }
+    fn compose(&self, other: Lcf<N>) -> Lcf<N> {
+        Lcf::<N>(
+            ((self.0 as u128 * other.0 as u128) % N as u128) as usize,
+            ((self.1 as u128 * other.0 as u128) + other.1 as u128) as usize,
+        )
+    }
+    fn pow(&self, p: usize) -> Lcf<N> {
+        let mut f = *self;
+        let mut g = Lcf(0, 1);
+        let mut k = p;
+        while 0 < k {
+            if k % 2 == 1 {
+                g = g.compose(f);
+            }
+            k /= 2;
+            f = f.compose(f);
+        }
+        g
     }
 }
