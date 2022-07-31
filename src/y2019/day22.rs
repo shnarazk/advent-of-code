@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2019/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashSet,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -70,7 +63,7 @@ impl AdventOfCode for Puzzle {
         let stack = regex!(r"^deal into new stack$");
         let cut = regex!(r"^cut (-?\d+)$");
         let increment = regex!(r"^deal with increment (\d+)$");
-        if let Some(segment) = stack.captures(block) {
+        if stack.captures(block).is_some() {
             self.line.push(Shuffle::Stack);
         } else if let Some(segment) = cut.captures(block) {
             let val: isize = segment[1].parse::<isize>()?;
@@ -89,9 +82,10 @@ impl AdventOfCode for Puzzle {
             .iter()
             .fold(2019_usize, |i, s| s.part1().shuffle(i))
     }
+    /// to the world of Linear Congruential Functions
+    /// https://codeforces.com/blog/entry/72593
     /// https://www.reddit.com/r/adventofcode/comments/engeuy/comment/fdzr3d5/?utm_source=reddit&utm_medium=web2x&context=3
     fn part2(&mut self) -> Self::Output2 {
-        // work in the world of Linear Congruential Functions
         const N: usize = PART2_SIZE;
         const K: usize = 101741582076661;
         // check the correctness of inverting functions
@@ -110,8 +104,8 @@ impl AdventOfCode for Puzzle {
             let a_b = suit.clone().fold(1, |i, t| t.cancel(i));
             (a_b + 2 * N - b) % N
         };
-        // test the correctness of the coefficients
         {
+            // test the correctness of the coefficients
             let step2 = suit.clone().fold(b, |i, t| t.cancel(i));
             assert_eq!(
                 step2,
