@@ -8,36 +8,45 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Eq, Hash, PartialEq)]
-enum Shuffle<const N: u32> {
+enum Shuffle<const N: usize> {
     Stack,
-    Cut(i32),
-    Increment(u32),
+    Cut(isize),
+    Increment(usize),
 }
+const PART1_SIZE: usize = 10007;
+const PART2_SIZE: usize = 119315717514047;
 
-impl<const N: u32> Shuffle<N> {
-    fn shuffle(&self, n: u32) -> u32 {
+impl<const N: usize> Shuffle<N> {
+    fn part1(&self) -> Shuffle<PART1_SIZE> {
         match self {
-            Shuffle::Stack => N - 1 - n,
-            Shuffle::Cut(c) => (((N + n) as i32 - *c) as u32) % N,
-            Shuffle::Increment(i) => (n * i) % N,
+            Self::Stack => Shuffle::<PART1_SIZE>::Stack,
+            Self::Cut(c) => Shuffle::<PART1_SIZE>::Cut(*c),
+            Self::Increment(i) => Shuffle::<PART1_SIZE>::Increment(*i),
         }
     }
-    fn cancel(&self, n: u32) -> u32 {
+    fn part2(&self) -> Shuffle<PART2_SIZE> {
         match self {
-            Shuffle::Stack => N - n,
-            Shuffle::Cut(c) => todo!(),
-            Shuffle::Increment(i) => todo!(),
+            Self::Stack => Shuffle::<PART2_SIZE>::Stack,
+            Self::Cut(c) => Shuffle::<PART2_SIZE>::Cut(*c),
+            Self::Increment(i) => Shuffle::<PART2_SIZE>::Increment(*i),
+        }
+    }
+    fn shuffle(&self, n: usize) -> usize {
+        match self {
+            Shuffle::Stack => N - 1 - n,
+            Shuffle::Cut(c) => (((N + n) as isize - *c) as usize) % N,
+            Shuffle::Increment(i) => (n * i) % N,
         }
     }
 }
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
-    line: Vec<Shuffle<10007>>,
+    line: Vec<Shuffle<0>>,
 }
 
 #[aoc(2019, 22)]
@@ -50,42 +59,28 @@ impl AdventOfCode for Puzzle {
         if let Some(segment) = stack.captures(block) {
             self.line.push(Shuffle::Stack);
         } else if let Some(segment) = cut.captures(block) {
-            let val: i32 = segment[1].parse::<i32>()?;
+            let val: isize = segment[1].parse::<isize>()?;
             self.line.push(Shuffle::Cut(val));
         } else if let Some(segment) = increment.captures(block) {
-            let val: u32 = segment[1].parse::<u32>()?;
+            let val: usize = segment[1].parse::<usize>()?;
             self.line.push(Shuffle::Increment(val));
         }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line.len());
+        // dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut index: u32 = 2019;
-        for technique in self.line.iter() {
-            index = technique.shuffle(index);
-        }
-        index as usize
+        self.line
+            .iter()
+            .fold(2019_usize, |i, s| s.part1().shuffle(i))
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut index: usize = 2020;
+        let suit = self.line.iter().map(|t| t.part2()).collect::<Vec<_>>();
+        for i in 0..101_741_582_076_661_usize {
+            index = suit.iter().fold(index, |i, t| t.shuffle(i));
+        }
+        index
     }
-}
-
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
