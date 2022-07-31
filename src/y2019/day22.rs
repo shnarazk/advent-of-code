@@ -12,21 +12,32 @@ use {
 };
 
 #[derive(Debug, Eq, Hash, PartialEq)]
-enum Shuffle {
+enum Shuffle<const N: u32> {
     Stack,
     Cut(i32),
     Increment(u32),
 }
 
-impl Shuffle {
-    fn cancel(&self, n: usize) -> usize {
-        0
+impl<const N: u32> Shuffle<N> {
+    fn shuffle(&self, n: u32) -> u32 {
+        match self {
+            Shuffle::Stack => N - 1 - n,
+            Shuffle::Cut(c) => (((N + n) as i32 - *c) as u32) % N,
+            Shuffle::Increment(i) => (n * i) % N,
+        }
+    }
+    fn cancel(&self, n: u32) -> u32 {
+        match self {
+            Shuffle::Stack => N - n,
+            Shuffle::Cut(c) => todo!(),
+            Shuffle::Increment(i) => todo!(),
+        }
     }
 }
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
-    line: Vec<Shuffle>,
+    line: Vec<Shuffle<10007>>,
 }
 
 #[aoc(2019, 22)]
@@ -51,11 +62,11 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut index: usize = 10;
-        while let Some(shuffle) = self.line.pop() {
-            index = shuffle.cancel(index);
+        let mut index: u32 = 2019;
+        for technique in self.line.iter() {
+            index = technique.shuffle(index);
         }
-        index
+        index as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         0
