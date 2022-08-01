@@ -8,35 +8,65 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, VecDeque},
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<isize>,
 }
 
 #[aoc(2019, 23)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut nodes: Vec<Intcode> = (0..50).map(|n| Intcode::default()).collect::<Vec<_>>();
+        for (i, node) in nodes.iter_mut().enumerate() {
+            node.initialize(&self.line);
+        }
+        let mut network: HashMap<usize, (VecDeque<isize>, VecDeque<isize>)> = HashMap::new();
+        for i in 0..50 {
+            network
+                .entry(i)
+                .or_insert((VecDeque::new(), VecDeque::new()))
+                .0
+                .push_back(i as isize);
+        }
+        for _ in 0.. {
+            for node in nodes.iter_mut() {
+                node.run();
+            }
+            for (i, node) in nodes.iter().enumerate() {
+                if let State::HasOutput(v) = node.state() {
+                    let output_queue = &mut network.get_mut(&i).unwrap().1;
+                    output_queue.push_back(*v);
+                    if 2 < output_queue.len() {
+                        let dist = output_queue.pop_front().unwrap() as usize;
+                        let x = output_queue.pop_front().unwrap();
+                        let y = output_queue.pop_front().unwrap();
+                        if dist == 255 {
+                            return y as usize;
+                        }
+                        let input_queue = &mut network.get_mut(&dist).unwrap().0;
+                        input_queue.push_back(x);
+                        input_queue.push_back(y);
+                    }
+                }
+            }
+            for (i, node) in nodes.iter_mut().enumerate() {
+                if let State::WaitInput(v) = node.state() {
+                    let value = network.get_mut(&i).unwrap().0.pop_front().unwrap_or(-1);
+                    node.resume_in(value);
+                }
+            }
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -44,19 +74,145 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-#[cfg(feature = "y2019")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
+#[derive(Debug, Default, Eq, PartialEq)]
+enum State {
+    #[default]
+    None,
+    WaitInput(usize), // addr
+    HasOutput(isize), // value
+}
 
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Intcode {
+    memory: HashMap<usize, isize>,
+    pc: usize,
+    r_base: usize,
+    state: State,
+}
+
+impl Intcode {
+    fn state(&self) -> &State {
+        &self.state
+    }
+    fn initialize(&mut self, code: &[isize]) {
+        self.memory = HashMap::new();
+        for (i, v) in code.iter().enumerate() {
+            self.memory.insert(i, *v);
+        }
+        self.pc = 0;
+        self.r_base = 0;
+        self.state = State::None;
+    }
+    fn resume_in(&mut self, val: isize) {
+        if let State::WaitInput(addr) = self.state {
+            self.memory.insert(addr as usize, val);
+            self.pc += 2;
+        }
+    }
+    fn run(&mut self) -> &State {
+        loop {
+            let op = self.memory[&self.pc] % 100;
+            let immediate: Vec<u8> = {
+                let mut v = Vec::new();
+                let mut val = self.memory[&self.pc] / 100;
+                while 0 < val {
+                    v.push((val % 10) as u8);
+                    val /= 10;
+                }
+                v
+            };
+            macro_rules! deref {
+                ($offset: expr) => {{
+                    match immediate.get($offset - 1) {
+                        Some(0) | None => self.memory[&(self.pc + $offset)] as usize,
+                        Some(1) => (self.pc + $offset) as usize,
+                        Some(2) => {
+                            (self.r_base as isize + self.memory[&(self.pc + $offset)]) as usize
+                        }
+                        _ => unreachable!(),
+                    }
+                }};
+                ($offset: expr, true) => {{
+                    let addr: usize = match immediate.get($offset - 1) {
+                        Some(0) | None => self.memory[&(self.pc + $offset)] as usize,
+                        Some(1) => self.pc + $offset,
+                        Some(2) => {
+                            (self.r_base as isize + self.memory[&(self.pc + $offset)]) as usize
+                        }
+                        _ => unreachable!(),
+                    };
+                    self.memory.get(&addr).map_or(0, |p| *p)
+                }};
+            }
+            match op {
+                1 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    let dst = deref!(3);
+                    self.memory.insert(dst, op1 + op2);
+                    self.pc += 4;
+                }
+                2 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    let dst = deref!(3);
+                    self.memory.insert(dst, op1 * op2);
+                    self.pc += 4;
+                }
+                3 => {
+                    let dst = deref!(1);
+                    self.state = State::WaitInput(dst);
+                    return &self.state;
+                }
+                4 => {
+                    let op1 = deref!(1, true);
+                    self.pc += 2;
+                    self.state = State::HasOutput(op1);
+                    return &self.state;
+                }
+                5 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    if 0 != op1 {
+                        self.pc = op2 as usize;
+                    } else {
+                        self.pc += 3;
+                    }
+                }
+                6 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    if 0 == op1 {
+                        self.pc = op2 as usize;
+                    } else {
+                        self.pc += 3;
+                    }
+                }
+                7 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    let dst = deref!(3);
+                    self.memory.insert(dst, (op1 < op2) as usize as isize);
+                    self.pc += 4;
+                }
+                8 => {
+                    let op1 = deref!(1, true);
+                    let op2 = deref!(2, true);
+                    let dst = deref!(3);
+                    self.memory.insert(dst, (op1 == op2) as usize as isize);
+                    self.pc += 4;
+                }
+                9 => {
+                    let op1 = deref!(1, true);
+                    self.r_base = (self.r_base as isize + op1) as usize;
+                    self.pc += 2;
+                }
+                99 => {
+                    break;
+                }
+                _ => panic!("op: {op} at {}", self.pc),
+            }
+        }
+        &State::None
+    }
 }
