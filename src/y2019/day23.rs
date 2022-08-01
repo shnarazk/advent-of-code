@@ -70,7 +70,90 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut last_y: isize = -4;
+        let mut nodes: Vec<Intcode> = (0..50).map(|n| Intcode::default()).collect::<Vec<_>>();
+        for (i, node) in nodes.iter_mut().enumerate() {
+            node.initialize(&self.line);
+        }
+        let mut network: HashMap<usize, (VecDeque<isize>, VecDeque<isize>)> = HashMap::new();
+        for i in 0..50 {
+            network
+                .entry(i)
+                .or_insert((VecDeque::new(), VecDeque::new()))
+                .0
+                .push_back(i as isize);
+        }
+        let mut nat: Nat = Nat::default();
+        for _ in 0.. {
+            for node in nodes.iter_mut() {
+                node.run();
+            }
+            for (i, node) in nodes.iter().enumerate() {
+                if let State::HasOutput(v) = node.state() {
+                    let output_queue = &mut network.get_mut(&i).unwrap().1;
+                    output_queue.push_back(*v);
+                    if 2 < output_queue.len() {
+                        let dist = output_queue.pop_front().unwrap() as usize;
+                        let x = output_queue.pop_front().unwrap();
+                        let y = output_queue.pop_front().unwrap();
+                        if dist == 255 {
+                            nat.receive(x, y);
+                        } else {
+                            let input_queue = &mut network.get_mut(&dist).unwrap().0;
+                            input_queue.push_back(x);
+                            input_queue.push_back(y);
+                        }
+                    }
+                }
+            }
+            if let Some((x, y)) = nat.monitor_network_is_idle(&nodes, &network) {
+                if y == last_y {
+                    return y as usize;
+                }
+                last_y = y;
+                dbg!(y);
+                let input_queue = &mut network.get_mut(&0).unwrap().0;
+                input_queue.push_back(x);
+                input_queue.push_back(y);
+            }
+            for (i, node) in nodes.iter_mut().enumerate() {
+                if let State::WaitInput(v) = node.state() {
+                    let value = network.get_mut(&i).unwrap().0.pop_front().unwrap_or(-1);
+                    node.resume_in(value);
+                }
+            }
+        }
         0
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Nat {
+    x: isize,
+    y: isize,
+    idling: usize,
+}
+
+impl Nat {
+    fn receive(&mut self, x: isize, y: isize) {
+        self.x = x;
+        self.y = y;
+    }
+    fn monitor_network_is_idle(
+        &mut self,
+        nodes: &[Intcode],
+        network: &HashMap<usize, (VecDeque<isize>, VecDeque<isize>)>,
+    ) -> Option<(isize, isize)> {
+        let cond = network.values().all(|(in_q, _out_q)| in_q.is_empty())
+            && nodes
+                .iter()
+                .all(|n| matches!(n.state(), State::WaitInput(_)));
+        if cond {
+            self.idling += 1;
+        } else {
+            self.idling = 0;
+        }
+        (2 < self.idling).then(|| (self.x, self.y))
     }
 }
 
