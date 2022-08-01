@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2019/day/23>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -27,8 +23,8 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut nodes: Vec<Intcode> = (0..50).map(|n| Intcode::default()).collect::<Vec<_>>();
-        for (i, node) in nodes.iter_mut().enumerate() {
+        let mut nodes: Vec<Intcode> = (0..50).map(|_| Intcode::default()).collect::<Vec<_>>();
+        for node in nodes.iter_mut() {
             node.initialize(&self.line);
         }
         let mut network: HashMap<usize, (VecDeque<isize>, VecDeque<isize>)> = HashMap::new();
@@ -61,7 +57,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
             for (i, node) in nodes.iter_mut().enumerate() {
-                if let State::WaitInput(v) = node.state() {
+                if let State::WaitInput(_v) = node.state() {
                     let value = network.get_mut(&i).unwrap().0.pop_front().unwrap_or(-1);
                     node.resume_in(value);
                 }
@@ -71,8 +67,8 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut last_y: isize = -4;
-        let mut nodes: Vec<Intcode> = (0..50).map(|n| Intcode::default()).collect::<Vec<_>>();
-        for (i, node) in nodes.iter_mut().enumerate() {
+        let mut nodes: Vec<Intcode> = (0..50).map(|_| Intcode::default()).collect::<Vec<_>>();
+        for node in nodes.iter_mut() {
             node.initialize(&self.line);
         }
         let mut network: HashMap<usize, (VecDeque<isize>, VecDeque<isize>)> = HashMap::new();
@@ -117,7 +113,7 @@ impl AdventOfCode for Puzzle {
                 input_queue.push_back(y);
             }
             for (i, node) in nodes.iter_mut().enumerate() {
-                if let State::WaitInput(v) = node.state() {
+                if let State::WaitInput(_) = node.state() {
                     let value = network.get_mut(&i).unwrap().0.pop_front().unwrap_or(-1);
                     node.resume_in(value);
                 }
