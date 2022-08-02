@@ -61,7 +61,22 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut state: HashMap<i32, u32> = HashMap::new();
+        state.insert(0, self.to_u32());
+        state.insert(1, 0);
+        state.insert(-1, 0);
+        let mut plane = Plane { state };
+        plane.dump(0);
+        println!();
+        for _ in 0..200 {
+            plane = plane.proceed();
+            // plane.dump(0);
+            // println!();
+        }
+        plane.dump(0);
+        println!();
+        dbg!(plane.state.len());
+        plane.bugs()
     }
 }
 
@@ -89,23 +104,44 @@ fn dump(state: u32) {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct Plane {
     state: HashMap<i32, u32>,
 }
 
 impl Plane {
-    fn proceed(&self) -> Plane {
-        let mut next_state = *self.clone();
-        let mut i: i32 = 0;
-        while self.extending(i) {
-            i += 1;
-            self.update_ring(i, &mut next_state);
+    fn dump(&self, level: i32) {
+        if let Some(state) = self.state.get(&level) {
+            for i in 0..25 {
+                print!(
+                    "{}{}",
+                    if 0 != (state & (1 << i)) { '#' } else { '.' },
+                    if i % 5 == 4 { '\n' } else { ' ' },
+                )
+            }
         }
-        i = 0;
-        while self.shrinking(i) {
-            i -= 1;
-            self.update_ring(i, &mut next_state);
+    }
+    fn bugs(&self) -> usize {
+        let mut num = 0;
+        for level in self.state.keys() {
+            num += self.bugs_at(*level);
+        }
+        num
+    }
+    fn bugs_at(&self, level: i32) -> usize {
+        if let Some(state) = self.state.get(&level) {
+            (0..25).filter(|i| 0 != (state & (1 << i))).count()
+        } else {
+            0
+        }
+    }
+    fn proceed(&self) -> Plane {
+        let mut next_state = (*self).clone();
+        self.update_ring(0, &mut next_state);
+        for i in -200..200 {
+            if 0 < self.bugs_at(i) || self.shrinking(i - 1) || self.extending(i + 1) {
+                self.update_ring(i, &mut next_state);
+            }
         }
         next_state
     }
@@ -133,7 +169,7 @@ impl Plane {
             vec![(0, 3), (0, 9), (0, 13), (0, 7)],
             vec![(0, 4), (-1, 13), (0, 14), (0, 8)],
             // 3rd row
-            vec![(0, 5), (-1, 11), (0, 15), (-1, 11)],
+            vec![(0, 5), (0, 11), (0, 15), (-1, 11)],
             vec![
                 (0, 6),
                 (1, 0),
@@ -144,6 +180,7 @@ impl Plane {
                 (0, 16),
                 (0, 10),
             ],
+            vec![],
             vec![
                 (0, 8),
                 (0, 14),
@@ -171,35 +208,35 @@ impl Plane {
             vec![(0, 13), (0, 19), (0, 23), (0, 17)],
             vec![(0, 14), (-1, 13), (0, 24), (0, 18)],
             // last row
-            vec![(0, 15), (-1, 21), (-1, 17), (-1, 11)],
+            vec![(0, 15), (0, 21), (-1, 17), (-1, 11)],
             vec![(0, 16), (0, 22), (-1, 17), (0, 20)],
             vec![(0, 17), (0, 23), (-1, 17), (0, 21)],
             vec![(0, 18), (0, 24), (-1, 17), (0, 22)],
             vec![(0, 19), (-1, 13), (-1, 17), (0, 23)],
         ];
-        let state = *self.state.get(&level).unwrap_or(&0);
-        let mut new_state: u32 = state;
-        for i in 0..25 {
-            let mut neighbors = 0;
-            if 4 < i {
-                neighbors += (0 != (state & (1 << (i - 5)))) as u32;
-            }
-            if i < 20 {
-                neighbors += (0 != (state & (1 << (i + 5)))) as u32;
-            }
-            if 0 < i && i % 5 != 0 {
-                neighbors += (0 != (state & (1 << (i - 1)))) as u32;
-            }
-            if i < 24 && i % 5 != 4 {
-                neighbors += (0 != (state & (1 << (i + 1)))) as u32;
-            }
-            match (0 != state & (1 << i), neighbors) {
+        let plane = *self.state.get(&level).unwrap_or(&0);
+        let inner = *self.state.get(&(level + 1)).unwrap_or(&0);
+        let outer = *self.state.get(&(level - 1)).unwrap_or(&0);
+        let mut new_state: u32 = plane;
+        for (i, neighbors) in join.iter().enumerate() {
+            let nn = neighbors
+                .iter()
+                .filter(|(level, ii)| {
+                    0 != match level {
+                        1 => inner,
+                        -1 => outer,
+                        _ => plane,
+                    } & (1 << ii)
+                })
+                .count();
+            match (0 != plane & (1 << i), nn) {
+                _ if i == 12 => (),
                 (true, n) if n != 1 => new_state &= !(1 << i),
                 (false, 1) | (false, 2) => new_state |= 1 << i,
                 _ => (),
             }
         }
-        todo!()
+        next.state.insert(level, new_state);
     }
     fn extending(&self, level: i32) -> bool {
         self.state.get(&level).map_or(false, |state| {
@@ -210,7 +247,7 @@ impl Plane {
     }
     fn shrinking(&self, level: i32) -> bool {
         self.state.get(&level).map_or(false, |state| {
-            [8, 12, 14, 18].iter().any(|i| 0 != state & (1 << i))
+            [7, 11, 13, 17].iter().any(|i| 0 != state & (1 << i))
         })
     }
 }
