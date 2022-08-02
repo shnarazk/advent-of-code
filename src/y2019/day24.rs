@@ -1,12 +1,6 @@
 //! <https://adventofcode.com/2019/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -30,7 +24,6 @@ impl AdventOfCode for Puzzle {
         let mut visited: HashSet<u32> = HashSet::new();
         let mut state: u32 = self.to_u32();
         loop {
-            // dump(state);
             let mut new_state: u32 = state;
             for i in 0..25 {
                 let mut neighbors = 0;
@@ -54,6 +47,7 @@ impl AdventOfCode for Puzzle {
             }
             dbg!(state);
             if visited.contains(&new_state) {
+                dump(state);
                 return new_state as usize;
             }
             visited.insert(new_state);
