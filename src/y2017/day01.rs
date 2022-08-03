@@ -39,7 +39,16 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>())
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let len = self.line.len();
+        let offset = len / 2;
+        let mut result: usize = 0;
+        for (i, n) in self.line.iter().enumerate() {
+            let t = (i + offset) % len;
+            if *n == self.line[t] {
+                result += *n;
+            }
+        }
+        result
     }
 }
 
