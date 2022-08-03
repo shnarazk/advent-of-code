@@ -1,15 +1,5 @@
 //! <https://adventofcode.com/2017/day/2>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
