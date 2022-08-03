@@ -40,23 +40,20 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.line
+            .iter()
+            .map(|row| {
+                let mut v = row.clone();
+                v.sort_unstable();
+                for (i, a) in v.iter().enumerate() {
+                    for b in &v[i + 1..] {
+                        if b % a == 0 {
+                            return b / a;
+                        }
+                    }
+                }
+                0
+            })
+            .sum::<usize>()
     }
-}
-
-#[cfg(feature = "y2017")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
