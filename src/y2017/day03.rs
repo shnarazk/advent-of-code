@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2017/day/3>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -29,6 +22,7 @@ impl AdventOfCode for Puzzle {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut distance = 0;
         'next: for n in self.line.iter() {
             for radius in 0_usize.. {
                 let max_node = (2 * radius + 1).pow(2);
@@ -36,11 +30,11 @@ impl AdventOfCode for Puzzle {
                     if 0 < radius {
                         let start = (2 * (radius - 1) + 1).pow(2) + 1;
                         let mut corner: usize = max_node;
-                        for i in 0..4 {
+                        for _ in 0..4 {
                             corner -= 2 * radius;
                             if corner <= *n {
                                 let base = corner + radius;
-                                let distance = radius + n.abs_diff(base);
+                                distance = radius + n.abs_diff(base);
                                 dbg!(n, radius, start, max_node, corner, base, distance);
                                 println!();
                                 continue 'next;
@@ -51,11 +45,10 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        0
+        distance
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut map: HashMap<(isize, isize), usize> = HashMap::new();
-        let mut n = 1;
         let mut x: isize = 0;
         let mut y: isize = 0;
         macro_rules! insert {
@@ -95,7 +88,6 @@ impl AdventOfCode for Puzzle {
                         3 => x += 1,
                         _ => unreachable!(),
                     }
-                    n += 1;
                     insert!();
                     if i == 0 && j == radius * 2 - 2 {
                         break;
@@ -107,21 +99,4 @@ impl AdventOfCode for Puzzle {
         }
         0
     }
-}
-
-#[cfg(feature = "y2017")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
