@@ -13,30 +13,44 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<usize>,
 }
 
 #[aoc(2017, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        if !block.is_empty() {
+            self.line.push(block.trim().parse::<usize>()?);
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        'next: for n in self.line.iter() {
+            for radius in 0_usize.. {
+                let max_node = (2 * radius + 1).pow(2);
+                if *n <= max_node {
+                    if 0 < radius {
+                        let start = (2 * (radius - 1) + 1).pow(2) + 1;
+                        let mut corner: usize = max_node;
+                        for i in 0..4 {
+                            corner -= 2 * radius;
+                            if corner <= *n {
+                                let base = corner + radius;
+                                let distance = radius + n.abs_diff(base);
+                                dbg!(n, radius, start, max_node, corner, base, distance);
+                                println!();
+                                continue 'next;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
