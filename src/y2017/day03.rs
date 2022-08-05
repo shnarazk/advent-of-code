@@ -54,6 +54,57 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut map: HashMap<(isize, isize), usize> = HashMap::new();
+        let mut n = 1;
+        let mut x: isize = 0;
+        let mut y: isize = 0;
+        macro_rules! insert {
+            () => {{
+                map.insert(
+                    (y, x),
+                    *map.get(&(y - 1, x)).unwrap_or(&0)
+                        + *map.get(&(y - 1, x + 1)).unwrap_or(&0)
+                        + *map.get(&(y, x + 1)).unwrap_or(&0)
+                        + *map.get(&(y + 1, x + 1)).unwrap_or(&0)
+                        + *map.get(&(y + 1, x)).unwrap_or(&0)
+                        + *map.get(&(y + 1, x - 1)).unwrap_or(&0)
+                        + *map.get(&(y, x - 1)).unwrap_or(&0)
+                        + *map.get(&(y - 1, x - 1)).unwrap_or(&0),
+                );
+                // dbg!(map.get(&(y, x)).unwrap());
+                let value = *map.get(&(y, x)).unwrap();
+                if self.line[0] <= value {
+                    println!(" * ({y}, {x}) => {value}");
+                    self.line.remove(0);
+                    if self.line.is_empty() {
+                        return *map.get(&(y, x)).unwrap();
+                    }
+                } else {
+                    println!("   ({y}, {x}) => {}", map.get(&(y, x)).unwrap());
+                }
+            }};
+        }
+        map.insert((y, x), 1);
+        for radius in 0.. {
+            for i in 0..4 {
+                for j in 0..radius * 2 {
+                    match i {
+                        0 => y -= 1,
+                        1 => x -= 1,
+                        2 => y += 1,
+                        3 => x += 1,
+                        _ => unreachable!(),
+                    }
+                    n += 1;
+                    insert!();
+                    if i == 0 && j == radius * 2 - 2 {
+                        break;
+                    }
+                }
+            }
+            x += 1;
+            insert!();
+        }
         0
     }
 }
