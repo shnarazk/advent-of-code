@@ -22,6 +22,10 @@
 
 ![](https://user-images.githubusercontent.com/997855/182404533-3f2328ec-a9ad-4b64-8103-3588eb08ea42.png)
 
+## 2018 DNS
+
+## 2017 ongoing
+
 ## 2016 completed
 
 * [calendar](https://adventofcode.com/2016)
