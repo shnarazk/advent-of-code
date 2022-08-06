@@ -13,50 +13,38 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<u8>>,
 }
 
 #[aoc(2017, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line
+            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
         Ok(())
     }
-    fn after_insert(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        self.line.iter().filter(|p| is_valid(p)).count()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
     }
 }
 
-#[cfg(feature = "y2017")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
+fn is_valid(phrase: &[u8]) -> bool {
+    let mut words: HashMap<Vec<u8>, usize> = HashMap::new();
+    let mut buffer: Vec<u8> = Vec::new();
+    for c in phrase.iter() {
+        if *c == b' ' {
+            *words.entry(buffer).or_insert(0) += 1;
+            buffer = Vec::new();
+        } else {
+            buffer.push(*c);
+        }
+    }
+    if !buffer.is_empty() {
+        *words.entry(buffer).or_insert(0) += 1;
+    }
+    *words.values().max().unwrap_or(&0) < 2
 }
