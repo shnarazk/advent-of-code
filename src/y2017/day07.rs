@@ -11,26 +11,40 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Hash, PartialEq)]
+enum Tree {
+    Leaf(String, usize),
+    Node(String, usize, Vec<String>),
+}
+
+#[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Tree>,
 }
 
 #[aoc(2017, 7)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        // dqyjg (65)
+        let parser1 = regex!(r"^(\w+) \((\d+)\)$");
+        // pqtboz (207) -> ayvns, codwosk
+        let parser2 = regex!(r"^(\w+) \((\d+)\) -> ((\w+, )+\w+)$");
+        if let Some(segment) = parser1.captures(block) {
+            self.line.push(Tree::Leaf(
+                segment[1].to_string(),
+                segment[2].parse::<usize>()?,
+            ));
+        } else if let Some(segment) = parser2.captures(block) {
+            self.line.push(Tree::Node(
+                segment[1].to_string(),
+                segment[2].parse::<usize>()?,
+                segment[3]
+                    .split(", ")
+                    .map(|s| s.to_string())
+                    .collect::<Vec<_>>(),
+            ))
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
