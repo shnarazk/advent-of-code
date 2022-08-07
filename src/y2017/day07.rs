@@ -17,6 +17,15 @@ enum Tree {
     Node(String, usize, Vec<String>),
 }
 
+impl Tree {
+    fn node_name(&self) -> &str {
+        match self {
+            Tree::Leaf(name, _) => &name,
+            Tree::Node(name, _, _) => &name,
+        }
+    }
+}
+
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Tree>,
@@ -48,9 +57,25 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut parent: HashMap<String, String> = HashMap::new();
+        for node in self.line.iter() {
+            match node {
+                Tree::Leaf(name, _) => (),
+                Tree::Node(name, _, subs) => {
+                    for sub in subs.iter() {
+                        parent.insert(sub.clone(), name.clone());
+                    }
+                }
+            }
+        }
+        let mut target: &str = self.line[0].node_name();
+        while let Some(p) = parent.get(target) {
+            target = p;
+        }
+        dbg!(target);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
