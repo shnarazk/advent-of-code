@@ -114,14 +114,11 @@ fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
                 return Some(val);
             }
         }
-        let w = total_weight(subs[0].as_str(), tree);
-        if !subs[1..]
-            .iter()
-            .all(|n| total_weight(n.as_str(), tree) == w)
-        {
+        let w = total_weight(&subs[0], tree);
+        if !subs[1..].iter().all(|n| total_weight(n, tree) == w) {
             let mut weights: Vec<usize> = Vec::new();
             let mut w_count: HashMap<usize, usize> = HashMap::new();
-            for w in subs.iter().map(|s| total_weight(s.as_str(), tree)) {
+            for w in subs.iter().map(|s| total_weight(s, tree)) {
                 weights.push(w);
                 *w_count.entry(w).or_insert(0) += 1;
             }
@@ -131,10 +128,7 @@ fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
                     println!(
                         "{:?}",
                         subs.iter()
-                            .map(|n| (
-                                tree.get(n).unwrap().node_weight(),
-                                total_weight(n.as_str(), tree)
-                            ))
+                            .map(|n| (tree.get(n).unwrap().node_weight(), total_weight(n, tree)))
                             .collect::<Vec<_>>()
                     );
                     return Some(tree.get(name).unwrap().node_weight() + expected - weights[i]);
@@ -145,15 +139,12 @@ fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
     None
 }
 
-fn total_weight(name: &str, tree: &HashMap<String, Tree>) -> usize {
+fn total_weight(name: &String, tree: &HashMap<String, Tree>) -> usize {
     let node = tree.get(name).unwrap();
     match node {
         Tree::Leaf(_, weight) => *weight,
         Tree::Node(_, weight, subs) => {
-            subs.iter()
-                .map(|n| total_weight(n.as_str(), tree))
-                .sum::<usize>()
-                + *weight
+            subs.iter().map(|n| total_weight(n, tree)).sum::<usize>() + *weight
         }
     }
 }
