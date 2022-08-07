@@ -2,20 +2,29 @@
 
 use crate::{framework::ParseError, regex};
 
-/// parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it
+/// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
+/// If delimiter is '\n', then the real delimiter becomes `&[' ', '\t']`
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
 /// assert_eq!(line_parser::to_usizes("0,1,8,9", ','), Ok(vec![0, 1, 8, 9]));
 /// assert_eq!(line_parser::to_usizes("100 200", ' '), Ok(vec![100, 200]));
+/// assert_eq!(line_parser::to_usizes("100  200  300", '\n'), Ok(vec![100, 200, 300]));
 /// assert_eq!(line_parser::to_usizes("", ','), Err(ParseError));
 /// ```
 pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> {
-    let result = line
-        .trim()
-        .split(delimiter)
-        .filter(|s| !s.is_empty())
-        .map(|n| n.parse::<usize>().expect("-"))
-        .collect::<Vec<_>>();
+    let result = if delimiter == '\n' {
+        line.trim()
+            .split(&[' ', '\t'])
+            .filter(|s| !s.is_empty())
+            .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
+            .collect::<Vec<_>>()
+    } else {
+        line.trim()
+            .split(delimiter)
+            .filter(|s| !s.is_empty())
+            .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
+            .collect::<Vec<_>>()
+    };
     if result.is_empty() {
         Err(ParseError)
     } else {
