@@ -1,12 +1,8 @@
-//! <https://adventofcode.com/2017/day/7>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
+//! <https://adventofcode.com/017/day/7>
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -68,12 +64,9 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let mut parent: HashMap<String, String> = HashMap::new();
         for node in self.line.iter() {
-            match node {
-                Tree::Leaf(name, _) => (),
-                Tree::Node(name, _, subs) => {
-                    for sub in subs.iter() {
-                        parent.insert(sub.clone(), name.clone());
-                    }
+            if let Tree::Node(name, _, subs) = node {
+                for sub in subs.iter() {
+                    parent.insert(sub.clone(), name.clone());
                 }
             }
         }
@@ -88,12 +81,9 @@ impl AdventOfCode for Puzzle {
         let mut parent: HashMap<String, String> = HashMap::new();
         let mut tree: HashMap<String, Tree> = HashMap::new();
         for node in self.line.iter() {
-            match node {
-                Tree::Leaf(name, _) => (),
-                Tree::Node(name, _, subs) => {
-                    for sub in subs.iter() {
-                        parent.insert(sub.clone(), name.clone());
-                    }
+            if let Tree::Node(name, _, subs) = node {
+                for sub in subs.iter() {
+                    parent.insert(sub.clone(), name.clone());
                 }
             }
             tree.insert(node.node_name().to_string(), node.clone());
@@ -108,7 +98,7 @@ impl AdventOfCode for Puzzle {
 
 fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
     dbg!(name);
-    if let Some(Tree::Node(_, weight, subs)) = tree.get(name) {
+    if let Some(Tree::Node(_, _, subs)) = tree.get(name) {
         for s in subs.iter() {
             if let Some(val) = seek(s.as_str(), tree) {
                 return Some(val);
