@@ -35,7 +35,7 @@ pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> 
 /// parse a line like '312'
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_isize("-0189"), Ok(0189));
+/// assert_eq!(line_parser::to_isize("-0189"), Ok(-189));
 /// assert_eq!(line_parser::to_isize("0"), Ok(0));
 /// assert_eq!(line_parser::to_isize("448"), Ok(448));
 /// ```
@@ -67,17 +67,27 @@ pub fn to_isize(line: &str) -> Result<isize, ParseError> {
 /// use adventofcode::{framework::ParseError, line_parser};
 /// assert_eq!(line_parser::to_isizes("0,-1,8,-9", ','), Ok(vec![0, -1, 8, -9]));
 /// assert_eq!(line_parser::to_isizes("-100 200", ' '), Ok(vec![-100, 200]));
+/// assert_eq!(line_parser::to_isizes("-100  200  -1", '\n'), Ok(vec![-100, 200, -1]));
 /// assert_eq!(line_parser::to_isizes("", ','), Err(ParseError));
 /// ```
 pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> {
-    let result = line
-        .trim()
-        .split(delimiter)
-        .filter(|s| !s.is_empty())
-        .map(|num| {
-            to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
-        })
-        .collect::<Vec<_>>();
+    let result = if delimiter == '\n' {
+        line.trim()
+            .split(&[' ', '\t'])
+            .filter(|s| !s.is_empty())
+            .map(|num| {
+                to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
+            })
+            .collect::<Vec<_>>()
+    } else {
+        line.trim()
+            .split(delimiter)
+            .filter(|s| !s.is_empty())
+            .map(|num| {
+                to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
+            })
+            .collect::<Vec<_>>()
+    };
     if result.is_empty() {
         Err(ParseError)
     } else {
