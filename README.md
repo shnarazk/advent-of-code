@@ -24,7 +24,11 @@
 
 ## 2018 DNS
 
+* [calendar](https://adventofcode.com/2018)
+
 ## 2017 ongoing
+
+* [calendar](https://adventofcode.com/2017)
 
 ## 2016 completed
 
