@@ -102,35 +102,35 @@ impl AdventOfCode for Puzzle {
         while let Some(p) = parent.get(root) {
             root = p;
         }
-        dbg!(seek(root, &tree).unwrap_or("not found"));
+        seek(root, &tree);
         0
     }
 }
 
-fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<&'a str> {
+fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> bool {
     dbg!(name);
     if let Some(Tree::Node(_, weight, subs)) = tree.get(name) {
-        for sub in subs.iter() {
-            if let Some(found) = seek(sub.as_str(), tree) {
-                return Some(found);
-            }
+        if subs.iter().any(|s| seek(s.as_str(), tree)) {
+            return true;
         }
         let w = total_weight(subs[0].as_str(), tree);
         if !subs[1..]
             .iter()
             .all(|n| total_weight(n.as_str(), tree) == w)
         {
-            dbg!(subs
-                .iter()
-                .map(|n| (
-                    tree.get(n).unwrap().node_weight(),
-                    total_weight(n.as_str(), tree)
-                ))
-                .collect::<Vec<_>>());
-            return dbg!(Some(name));
+            println!(
+                "{:?}",
+                subs.iter()
+                    .map(|n| (
+                        tree.get(n).unwrap().node_weight(),
+                        total_weight(n.as_str(), tree)
+                    ))
+                    .collect::<Vec<_>>()
+            );
+            return true;
         }
     }
-    None
+    false
 }
 
 fn total_weight(name: &str, tree: &HashMap<String, Tree>) -> usize {
