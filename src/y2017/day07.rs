@@ -102,35 +102,47 @@ impl AdventOfCode for Puzzle {
         while let Some(p) = parent.get(root) {
             root = p;
         }
-        seek(root, &tree);
-        0
+        seek(root, &tree).unwrap_or(0)
     }
 }
 
-fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> bool {
+fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
     dbg!(name);
     if let Some(Tree::Node(_, weight, subs)) = tree.get(name) {
-        if subs.iter().any(|s| seek(s.as_str(), tree)) {
-            return true;
+        for s in subs.iter() {
+            if let Some(val) = seek(s.as_str(), tree) {
+                return Some(val);
+            }
         }
         let w = total_weight(subs[0].as_str(), tree);
         if !subs[1..]
             .iter()
             .all(|n| total_weight(n.as_str(), tree) == w)
         {
-            println!(
-                "{:?}",
-                subs.iter()
-                    .map(|n| (
-                        tree.get(n).unwrap().node_weight(),
-                        total_weight(n.as_str(), tree)
-                    ))
-                    .collect::<Vec<_>>()
-            );
-            return true;
+            let mut weights: Vec<usize> = Vec::new();
+            let mut w_count: HashMap<usize, usize> = HashMap::new();
+            for w in subs.iter().map(|s| total_weight(s.as_str(), tree)) {
+                weights.push(w);
+                *w_count.entry(w).or_insert(0) += 1;
+            }
+            for (i, name) in subs.iter().enumerate() {
+                if w_count.get(&weights[i]) == Some(&1) {
+                    let expected = weights[(i == 0) as usize];
+                    println!(
+                        "{:?}",
+                        subs.iter()
+                            .map(|n| (
+                                tree.get(n).unwrap().node_weight(),
+                                total_weight(n.as_str(), tree)
+                            ))
+                            .collect::<Vec<_>>()
+                    );
+                    return Some(tree.get(name).unwrap().node_weight() + expected - weights[i]);
+                }
+            }
         }
     }
-    false
+    None
 }
 
 fn total_weight(name: &str, tree: &HashMap<String, Tree>) -> usize {
