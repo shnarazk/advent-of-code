@@ -51,6 +51,26 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
+        visited.insert(self.line.clone(), 0);
+        for step in 1_usize.. {
+            let mut target = 0;
+            let mut nblocks = 0;
+            for (i, nb) in self.line.iter().enumerate() {
+                if nblocks < *nb {
+                    target = i;
+                    nblocks = *nb;
+                }
+            }
+            self.line[target] = 0;
+            for n in 0..nblocks {
+                self.line[(target + n + 1) % self.len] += 1;
+            }
+            if let Some(past) = visited.get(&self.line) {
+                return step - past;
+            }
+            visited.insert(self.line.clone(), step);
+        }
         0
     }
 }
