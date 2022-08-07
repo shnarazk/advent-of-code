@@ -11,7 +11,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Tree {
     Leaf(String, usize),
     Node(String, usize, Vec<String>),
@@ -20,8 +20,14 @@ enum Tree {
 impl Tree {
     fn node_name(&self) -> &str {
         match self {
-            Tree::Leaf(name, _) => &name,
-            Tree::Node(name, _, _) => &name,
+            Tree::Leaf(name, _) => name,
+            Tree::Node(name, _, _) => name,
+        }
+    }
+    fn node_weight(&self) -> usize {
+        match self {
+            Tree::Leaf(_, weight) => *weight,
+            Tree::Node(_, weight, _) => *weight,
         }
     }
 }
@@ -79,6 +85,63 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut parent: HashMap<String, String> = HashMap::new();
+        let mut tree: HashMap<String, Tree> = HashMap::new();
+        for node in self.line.iter() {
+            match node {
+                Tree::Leaf(name, _) => (),
+                Tree::Node(name, _, subs) => {
+                    for sub in subs.iter() {
+                        parent.insert(sub.clone(), name.clone());
+                    }
+                }
+            }
+            tree.insert(node.node_name().to_string(), node.clone());
+        }
+        let mut root: &str = self.line[0].node_name();
+        while let Some(p) = parent.get(root) {
+            root = p;
+        }
+        dbg!(seek(root, &tree).unwrap_or("not found"));
         0
+    }
+}
+
+fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<&'a str> {
+    dbg!(name);
+    if let Some(Tree::Node(_, weight, subs)) = tree.get(name) {
+        for sub in subs.iter() {
+            if let Some(found) = seek(sub.as_str(), tree) {
+                return Some(found);
+            }
+        }
+        let w = total_weight(subs[0].as_str(), tree);
+        if !subs[1..]
+            .iter()
+            .all(|n| total_weight(n.as_str(), tree) == w)
+        {
+            dbg!(subs
+                .iter()
+                .map(|n| (
+                    tree.get(n).unwrap().node_weight(),
+                    total_weight(n.as_str(), tree)
+                ))
+                .collect::<Vec<_>>());
+            return dbg!(Some(name));
+        }
+    }
+    None
+}
+
+fn total_weight(name: &str, tree: &HashMap<String, Tree>) -> usize {
+    let node = tree.get(name).unwrap();
+    match node {
+        Tree::Leaf(_, weight) => *weight,
+        Tree::Node(_, weight, subs) => {
+            subs.iter()
+                .map(|n| total_weight(n.as_str(), tree))
+                .sum::<usize>()
+                + *weight
+        }
     }
 }
