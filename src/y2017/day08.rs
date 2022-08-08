@@ -95,6 +95,31 @@ impl AdventOfCode for Puzzle {
         dbg!(*reg.values().max().unwrap_or(&0)) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut highest: isize = isize::MIN;
+        let mut reg: HashMap<String, isize> = HashMap::new();
+        for Inst {
+            register,
+            offset,
+            cond_reg,
+            cond_cmp,
+            cond_val,
+        } in self.line.iter()
+        {
+            let reg_val = *reg.entry(cond_reg.clone()).or_insert(0);
+            let satisfied = match cond_cmp {
+                Compare::LessThan => reg_val < *cond_val,
+                Compare::LessEqual => reg_val <= *cond_val,
+                Compare::Equal => reg_val == *cond_val,
+                Compare::NotEqual => reg_val != *cond_val,
+                Compare::GreaterThan => reg_val > *cond_val,
+                Compare::GreaterEqual => reg_val >= *cond_val,
+            };
+            if satisfied {
+                let reg = reg.entry(register.clone()).or_insert(0);
+                *reg += offset;
+                highest = highest.max(*reg);
+            }
+        }
+        dbg!(highest) as usize
     }
 }
