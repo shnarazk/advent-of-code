@@ -1,15 +1,5 @@
 //! <https://adventofcode.com/2017/day/9>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -59,7 +49,6 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut total = 0;
-        let mut level = 0;
         let mut in_garbage = false;
         let mut after_bang = false;
         for ch in self.line.chars() {
@@ -67,12 +56,7 @@ impl AdventOfCode for Puzzle {
                 _ if after_bang => {
                     after_bang = false;
                 }
-                '{' if !in_garbage => {
-                    level += 1;
-                }
-                '}' if !in_garbage => {
-                    level -= 1;
-                }
+                '{' | '}' if !in_garbage => {}
                 '<' if !in_garbage => {
                     in_garbage = true;
                 }
