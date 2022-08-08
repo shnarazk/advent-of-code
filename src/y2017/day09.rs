@@ -13,31 +13,54 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: String,
 }
 
 #[aoc(2017, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line = block.to_string();
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut total = 0;
+        let mut level = 0;
+        let mut in_garbage = false;
+        let mut after_bang = false;
+        for ch in self.line.chars() {
+            match ch {
+                _ if after_bang => {
+                    after_bang = false;
+                    continue;
+                }
+                '{' if !in_garbage => {
+                    level += 1;
+                    total += level;
+                }
+                '}' if !in_garbage => {
+                    level -= 1;
+                }
+                '<' if !in_garbage => {
+                    in_garbage = true;
+                }
+                '>' => {
+                    in_garbage = false;
+                }
+                '!' if in_garbage => {
+                    after_bang = true;
+                }
+                _ => {
+                    if in_garbage {
+                        continue;
+                    }
+                }
+            }
+        }
+        total
     }
     fn part2(&mut self) -> Self::Output2 {
         0
