@@ -35,7 +35,6 @@ impl AdventOfCode for Puzzle {
             match ch {
                 _ if after_bang => {
                     after_bang = false;
-                    continue;
                 }
                 '{' if !in_garbage => {
                     level += 1;
@@ -53,16 +52,43 @@ impl AdventOfCode for Puzzle {
                 '!' if in_garbage => {
                     after_bang = true;
                 }
-                _ => {
-                    if in_garbage {
-                        continue;
-                    }
-                }
+                _ => {}
             }
         }
         total
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut total = 0;
+        let mut level = 0;
+        let mut in_garbage = false;
+        let mut after_bang = false;
+        for ch in self.line.chars() {
+            match ch {
+                _ if after_bang => {
+                    after_bang = false;
+                }
+                '{' if !in_garbage => {
+                    level += 1;
+                }
+                '}' if !in_garbage => {
+                    level -= 1;
+                }
+                '<' if !in_garbage => {
+                    in_garbage = true;
+                }
+                '>' => {
+                    in_garbage = false;
+                }
+                '!' if in_garbage => {
+                    after_bang = true;
+                }
+                _ => {
+                    if in_garbage {
+                        total += 1;
+                    }
+                }
+            }
+        }
+        total
     }
 }
