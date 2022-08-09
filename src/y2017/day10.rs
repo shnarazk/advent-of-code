@@ -27,31 +27,31 @@ impl AdventOfCode for Puzzle {
         // dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut list = (0..5).collect::<Vec<_>>();
-        let m = list.len();
+        let m: usize = 256;
+        let mut list = (0..m).collect::<Vec<_>>();
         let mut current_position = 0;
         for (skip_size, length) in self.line.iter().enumerate() {
+            assert!(*length <= m);
             for j in 0..length / 2 {
-                println!(
-                    "length: {length}, swap: {} and {}",
-                    (current_position + j) % m,
-                    (current_position + length - j - 1) % m
-                );
+                // println!(
+                //     "length: {length}, swap: {} and {}",
+                //     (current_position + j) % m,
+                //     (current_position + length - j - 1) % m
+                // );
                 list.swap(
                     (current_position + j) % m,
                     (current_position + length - j - 1) % m,
                 );
+                assert_ne!(
+                    (current_position + j) % m,
+                    (current_position + length - j - 1) % m,
+                );
             }
-            current_position = (current_position + length + skip_size) % m;
-            println!("{list:?}");
+            current_position += length + skip_size;
+            current_position %= m;
+            // println!("{list:?}");
         }
-        let mut mul = 1;
-        for (i, v) in list.iter().enumerate() {
-            if [0, 1].contains(v) {
-                mul *= i;
-            }
-        }
-        mul
+        list[0] * list[1]
     }
     fn part2(&mut self) -> Self::Output2 {
         0
