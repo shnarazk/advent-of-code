@@ -11,33 +11,77 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Hash, PartialEq)]
+enum Direction {
+    N,
+    NE,
+    SE,
+    S,
+    SW,
+    NW,
+}
+
+impl TryFrom<&str> for Direction {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "n" => Ok(Direction::N),
+            "ne" => Ok(Direction::NE),
+            "se" => Ok(Direction::SE),
+            "s" => Ok(Direction::S),
+            "sw" => Ok(Direction::SW),
+            "nw" => Ok(Direction::NW),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Direction {
+    fn dir(&self) -> (isize, isize) {
+        match self {
+            Direction::N => (1, 1),
+            Direction::NE => (1, 0),
+            Direction::SE => (0, -1),
+            Direction::S => (-1, -1),
+            Direction::SW => (-1, 0),
+            Direction::NW => (0, 1),
+        }
+    }
+}
+
+#[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Direction>,
 }
 
 #[aoc(2017, 11)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line = block
+            .split(',')
+            .map(|s| Direction::try_from(s).expect("parse error"))
+            .collect::<Vec<_>>();
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut dir: (isize, isize) = (0, 0);
+        for d in self.line.iter() {
+            let (ne, nw) = d.dir();
+            dir.0 += ne;
+            dir.1 += nw;
+        }
+        // canelling opposite pairs
+        let ne = dir.0.unsigned_abs();
+        let nw = dir.1.unsigned_abs();
+        if dir.0.signum() == dir.1.signum() {
+            ne + nw - ne.min(nw)
+        } else {
+            ne + nw
+        }
     }
     fn part2(&mut self) -> Self::Output2 {
         0
