@@ -84,6 +84,23 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut max_dist = 0;
+        let mut dir: (isize, isize) = (0, 0);
+        for d in self.line.iter() {
+            let (ne, nw) = d.dir();
+            dir.0 += ne;
+            dir.1 += nw;
+            let tmp = {
+                let ne = dir.0.unsigned_abs();
+                let nw = dir.1.unsigned_abs();
+                if dir.0.signum() == dir.1.signum() {
+                    ne + nw - ne.min(nw)
+                } else {
+                    ne + nw
+                }
+            };
+            max_dist = max_dist.max(tmp);
+        }
+        max_dist
     }
 }
