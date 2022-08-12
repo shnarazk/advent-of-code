@@ -4,26 +4,35 @@ use crate::{framework::ParseError, regex};
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
 /// If delimiter is '\n', then the real delimiter becomes `&[' ', '\t']`
+/// If delimiter is '\t', then the real delimiter becomes `&[' ', '\t', ',']`
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
 /// assert_eq!(line_parser::to_usizes("0,1,8,9", ','), Ok(vec![0, 1, 8, 9]));
 /// assert_eq!(line_parser::to_usizes("100 200", ' '), Ok(vec![100, 200]));
 /// assert_eq!(line_parser::to_usizes("100  200  300", '\n'), Ok(vec![100, 200, 300]));
+/// assert_eq!(line_parser::to_usizes("100, 200   300", '\t'), Ok(vec![100, 200, 300]));
 /// assert_eq!(line_parser::to_usizes("", ','), Err(ParseError));
 /// ```
 pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> {
-    let result = if delimiter == '\n' {
-        line.trim()
+    let result = match delimiter {
+        '\n' => line
+            .trim()
             .split(&[' ', '\t'])
             .filter(|s| !s.is_empty())
             .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
-            .collect::<Vec<_>>()
-    } else {
-        line.trim()
+            .collect::<Vec<_>>(),
+        '\t' => line
+            .trim()
+            .split(&[' ', '\t', ','])
+            .filter(|s| !s.is_empty())
+            .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
+            .collect::<Vec<_>>(),
+        _ => line
+            .trim()
             .split(delimiter)
             .filter(|s| !s.is_empty())
             .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
     };
     if result.is_empty() {
         Err(ParseError)
@@ -63,30 +72,36 @@ pub fn to_isize(line: &str) -> Result<isize, ParseError> {
 }
 
 /// parse a line like '0,-1,2,-3,40' (delimiter == ',') after trimming it
+/// If delimiter is '\n', then the real delimiter becomes `&[' ', '\t']`
+/// If delimiter is '\t', then the real delimiter becomes `&[' ', '\t', ',']`
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
 /// assert_eq!(line_parser::to_isizes("0,-1,8,-9", ','), Ok(vec![0, -1, 8, -9]));
 /// assert_eq!(line_parser::to_isizes("-100 200", ' '), Ok(vec![-100, 200]));
 /// assert_eq!(line_parser::to_isizes("-100  200  -1", '\n'), Ok(vec![-100, 200, -1]));
+/// assert_eq!(line_parser::to_isizes("-100, 200  -1", '\t'), Ok(vec![-100, 200, -1]));
 /// assert_eq!(line_parser::to_isizes("", ','), Err(ParseError));
 /// ```
 pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> {
-    let result = if delimiter == '\n' {
-        line.trim()
+    let result = match delimiter {
+        '\n' => line
+            .trim()
             .split(&[' ', '\t'])
             .filter(|s| !s.is_empty())
-            .map(|num| {
-                to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
-            })
-            .collect::<Vec<_>>()
-    } else {
-        line.trim()
+            .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
+            .collect::<Vec<_>>(),
+        '\t' => line
+            .trim()
+            .split(&[' ', '\t', ','])
+            .filter(|s| !s.is_empty())
+            .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
+            .collect::<Vec<_>>(),
+        _ => line
+            .trim()
             .split(delimiter)
             .filter(|s| !s.is_empty())
-            .map(|num| {
-                to_isize(num).unwrap_or_else(|err| panic!("to_isizes stopped at {}: {}", num, err))
-            })
-            .collect::<Vec<_>>()
+            .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
+            .collect::<Vec<_>>(),
     };
     if result.is_empty() {
         Err(ParseError)

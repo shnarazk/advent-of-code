@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
