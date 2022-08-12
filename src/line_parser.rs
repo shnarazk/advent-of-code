@@ -41,6 +41,26 @@ pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> 
     }
 }
 
+/// Sprit and parse a line like '0, 1, 2, 3, 40' with delimiter `&[',', ' ']`.
+/// ```
+/// use adventofcode::{framework::ParseError, line_parser};
+/// assert_eq!(line_parser::to_usizes_spliting_with("100  200  300", &[' ']), Ok(vec![100, 200, 300]));
+/// assert_eq!(line_parser::to_usizes_spliting_with("100, 200, 300", &[',', ' ']), Ok(vec![100, 200, 300]));
+/// ```
+pub fn to_usizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<usize>, ParseError> {
+    let result = line
+        .trim()
+        .split(delimiter)
+        .filter(|s| !s.is_empty())
+        .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
+        .collect::<Vec<_>>();
+    if result.is_empty() {
+        Err(ParseError)
+    } else {
+        Ok(result)
+    }
+}
+
 /// parse a line like '312'
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};
@@ -103,6 +123,26 @@ pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> 
             .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
             .collect::<Vec<_>>(),
     };
+    if result.is_empty() {
+        Err(ParseError)
+    } else {
+        Ok(result)
+    }
+}
+
+/// Sprit and parse a line like '0, -1, 2, -3, 40' with delimiter `&[',', ' ']`.
+/// ```
+/// use adventofcode::{framework::ParseError, line_parser};
+/// assert_eq!(line_parser::to_isizes_spliting_with("-1  2  -3", &[' ']), Ok(vec![-1, 2, -3]));
+/// assert_eq!(line_parser::to_isizes_spliting_with("-1, 2, -3", &[',', ' ']), Ok(vec![-1, 2, -3]));
+/// ```
+pub fn to_isizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<isize>, ParseError> {
+    let result = line
+        .trim()
+        .split(delimiter)
+        .filter(|s| !s.is_empty())
+        .map(|n| n.parse::<isize>().expect("An invalid input as usize"))
+        .collect::<Vec<_>>();
     if result.is_empty() {
         Err(ParseError)
     } else {
