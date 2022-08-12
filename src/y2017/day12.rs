@@ -53,6 +53,27 @@ impl AdventOfCode for Puzzle {
         linked.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut n_groups = 0;
+        let mut map: HashMap<usize, Vec<usize>> = HashMap::new();
+        for (from, tos) in self.line.iter() {
+            map.insert(*from, tos.clone());
+        }
+        let mut found: HashSet<usize> = HashSet::new();
+        while let Some(start) = (0..self.line.len()).find(|i| !found.contains(i)) {
+            n_groups += 1;
+            found.insert(start);
+            let mut to_visit: Vec<usize> = vec![start];
+            while let Some(n) = to_visit.pop() {
+                if let Some(tos) = map.get(&n) {
+                    for to in tos.iter() {
+                        if !found.contains(to) {
+                            found.insert(*to);
+                            to_visit.push(*to);
+                        }
+                    }
+                }
+            }
+        }
+        n_groups
     }
 }
