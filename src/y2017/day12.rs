@@ -8,36 +8,49 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(usize, Vec<usize>)>,
 }
 
 #[aoc(2017, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        // 41 <-> 1244, 1644
+        let parser = regex!(r"^(\d+) <.> ((\d+, )*\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line.push((
+            segment[1].parse::<usize>()?,
+            line_parser::to_usizes(&segment[2], '\t')?,
+        ));
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut map: HashMap<usize, Vec<usize>> = HashMap::new();
+        for (from, tos) in self.line.iter() {
+            map.insert(*from, tos.clone());
+        }
+        let mut linked: HashSet<usize> = HashSet::new();
+        linked.insert(0);
+        let mut to_visit: Vec<usize> = vec![0];
+        while let Some(n) = to_visit.pop() {
+            if let Some(tos) = map.get(&n) {
+                for to in tos.iter() {
+                    if !linked.contains(to) {
+                        linked.insert(*to);
+                        to_visit.push(*to);
+                    }
+                }
+            }
+        }
+        linked.len()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
