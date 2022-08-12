@@ -32,9 +32,6 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let mut severity: usize = 0;
         for (depth, range) in self.line.iter() {
-            if *depth == 0 {
-                continue;
-            }
             let cycle: usize = 2 * (*range - 1);
             if *depth % cycle == 0 {
                 severity += depth * *range;
@@ -43,6 +40,15 @@ impl AdventOfCode for Puzzle {
         severity
     }
     fn part2(&mut self) -> Self::Output2 {
+        'next_challenge: for delay in 0.. {
+            for (depth, range) in self.line.iter() {
+                let cycle: usize = 2 * (*range - 1);
+                if (*depth + delay) % cycle == 0 {
+                    continue 'next_challenge;
+                }
+            }
+            return delay;
+        }
         0
     }
 }
