@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2017/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -62,13 +55,9 @@ impl AdventOfCode for Puzzle {
             mask,
             check: 8,
         };
-        let mut count = 0;
-        for _ in 0..5_000_000 {
-            if g1.next().unwrap() == g2.next().unwrap() {
-                count += 1;
-            }
-        }
-        count
+        (0..5_000_000)
+            .filter(|_| g1.next().unwrap() == g2.next().unwrap())
+            .count()
     }
 }
 
