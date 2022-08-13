@@ -35,7 +35,40 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        type Location = (isize, isize);
+        let mut map: HashMap<Location, usize> = HashMap::new();
+        for j in 0..128 {
+            let key = format!("{}-{j}", self.line);
+            let val = self.knot_hash(key);
+            for (ii, v) in val.iter().enumerate() {
+                let offset = ii * 8;
+                for i in (0..8).filter(|i| 0 != v & (1 << (7 - i))) {
+                    map.insert((j as isize, (i + offset) as isize), 0);
+                }
+            }
+        }
+        dbg!(map.len());
+        let mut regions = 0;
+        for j in 0..128_isize {
+            for i in 0..128_isize {
+                let pos = (j, i);
+                if map.get(&pos) == Some(&0) {
+                    regions += 1;
+                    *map.entry(pos).or_insert(0) = regions;
+                    let mut to_visit: Vec<Location> = vec![pos];
+                    while let Some(p) = to_visit.pop() {
+                        for offset in [(-1_isize, 0_isize), (0, 1), (1, 0), (0, -1)] {
+                            let neighbor = (p.0 + offset.0, p.1 + offset.1);
+                            if map.get(&neighbor) == Some(&0) {
+                                to_visit.push(neighbor);
+                                *map.entry(neighbor).or_insert(0) = regions;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        regions
     }
 }
 
