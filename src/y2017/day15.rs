@@ -46,6 +46,51 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let modulo = 2147483647;
+        let mask: usize = 2_usize.pow(16) - 1;
+        let mut g1: Generator = Generator {
+            value: self.line[0],
+            factor: self.factor.0,
+            modulo,
+            mask,
+            check: 4,
+        };
+        let mut g2: Generator = Generator {
+            value: self.line[1],
+            factor: self.factor.1,
+            modulo,
+            mask,
+            check: 8,
+        };
+        let mut count = 0;
+        for _ in 0..5_000_000 {
+            if g1.next().unwrap() == g2.next().unwrap() {
+                count += 1;
+            }
+        }
+        count
+    }
+}
+
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Generator {
+    value: usize,
+    factor: usize,
+    modulo: usize,
+    mask: usize,
+    check: usize,
+}
+
+impl Iterator for Generator {
+    type Item = usize;
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut n = self.value;
+        loop {
+            n = (n * self.factor) % self.modulo;
+            if n % self.check == 0 {
+                self.value = n;
+                return Some(n & self.mask);
+            }
+        }
     }
 }
