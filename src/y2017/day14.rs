@@ -12,23 +12,76 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<u8>,
+    line: String,
 }
 
 #[aoc(2017, 14)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = block.trim().chars().map(|c| c as u8).collect::<Vec<u8>>();
+        self.line = block.trim().to_string();
         Ok(())
     }
     fn after_insert(&mut self) {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut count: usize = 0;
+        for i in 0..128 {
+            let key = format!("{}-{i}", self.line);
+            let val = self.knot_hash(key);
+            count += val.iter().map(|v| v.count_ones()).sum::<u32>() as usize;
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+fn to_bin(val: &u8) -> [u8; 4] {
+    [
+        (0 != val & 1 << 3) as u8,
+        (0 != val & 1 << 2) as u8,
+        (0 != val & 1 << 1) as u8,
+        (0 != val & 1 << 0) as u8,
+    ]
+}
+impl Puzzle {
+    fn knot_hash(&self, key: impl AsRef<str>) -> Vec<u8> {
+        let m: usize = 256;
+        let mut list: Vec<u8> = (0..m).map(|d| d as u8).collect::<Vec<u8>>();
+        let lengths: Vec<usize> = {
+            let mut list: Vec<usize> = key.as_ref().chars().map(|c| c as usize).collect::<Vec<_>>();
+            let mut postfix = vec![17, 31, 73, 47, 23];
+            list.append(&mut postfix);
+            list
+        };
+
+        let mut current_position = 0;
+        let mut skip_size = 0;
+        for _ in 0..64 {
+            for length in lengths.iter() {
+                for j in 0..*length / 2 {
+                    list.swap(
+                        (current_position + j) % m,
+                        (current_position + *length - j - 1) % m,
+                    );
+                }
+                current_position += length + skip_size;
+                current_position %= m;
+                skip_size += 1;
+            }
+        }
+        let mut result: Vec<u8> = Vec::new();
+        let mut working: u8 = 0;
+        for (i, c) in list.iter().enumerate() {
+            match i % 16 {
+                0 => working = *c,
+                15 => result.push(working ^ *c),
+                _ => working ^= *c,
+            }
+        }
+        result
     }
 }
