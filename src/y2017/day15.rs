@@ -13,31 +13,37 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    factor: (usize, usize),
+    line: Vec<usize>,
 }
 
 #[aoc(2017, 15)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        // Generator B starts with 325
+        let parser = regex!(r"^Generator (A|B) starts with (\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line.push(segment[2].parse::<usize>()?);
         Ok(())
     }
     fn after_insert(&mut self) {
+        self.factor = (16807, 48271);
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let m = 2147483647;
+        let mask: usize = 2_usize.pow(16) - 1;
+        let mut values: (usize, usize) = (self.line[0], self.line[1]);
+        let mut count = 0;
+        for _ in 0..40_000_000 {
+            values.0 = (values.0 * self.factor.0) % m;
+            values.1 = (values.1 * self.factor.1) % m;
+            if values.0 & mask == values.1 & mask {
+                count += 1;
+            }
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
