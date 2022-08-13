@@ -1,12 +1,6 @@
 //! <https://adventofcode.com/2017/day/14>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -47,7 +41,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(map.len());
         let mut regions = 0;
         for j in 0..128_isize {
             for i in 0..128_isize {
@@ -72,14 +65,6 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn to_bin(val: &u8) -> [u8; 4] {
-    [
-        (0 != val & 1 << 3) as u8,
-        (0 != val & 1 << 2) as u8,
-        (0 != val & 1 << 1) as u8,
-        (0 != val & 1 << 0) as u8,
-    ]
-}
 impl Puzzle {
     fn knot_hash(&self, key: impl AsRef<str>) -> Vec<u8> {
         let m: usize = 256;
