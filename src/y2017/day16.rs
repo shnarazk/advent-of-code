@@ -29,7 +29,7 @@ impl TryFrom<&str> for Dance {
             }
         }
         let spin = regex!(r"^s(\d+)");
-        let exchange = regex!(r"^x(\d+)/(\d+)$");
+        let exchange = &regex!(r"^x(\d+)/(\d+)$");
         let partner = regex!(r"^p([a-p])/([a-p])$");
         if let Some(segment) = spin.captures(value) {
             Ok(Dance::Spin(segment[1].parse::<usize>()?))
@@ -64,7 +64,11 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let list = self.collapse(&self.line.iter().collect::<Vec<_>>());
+        let m = 16;
+        let list = self.collapse(
+            &self.line.iter().collect::<Vec<_>>(),
+            &mut (0..m).collect::<Vec<usize>>(),
+        );
         println!(
             "{}",
             list.iter()
@@ -73,46 +77,35 @@ impl AdventOfCode for Puzzle {
         );
         0
     }
-    /// f^n = (hg)^n = (h^n)(g^n)
-    /// h^(2n) = 1
-    /// Therefore, f^n = g^n
-    fn part2(&mut self) -> Self::Output2 {
-        let g: Vec<&Dance> = self
-            .line
-            .iter()
-            .filter(|d| !matches!(d, Dance::Partner(_, _)))
-            .collect::<Vec<_>>();
-        let mut order = self.collapse(&g);
-        let mut work = order.clone();
-        let mut gs: HashMap<usize, Vec<usize>> = HashMap::new();
-        gs.insert(1, order.clone());
-        for p in (1..30).map(|x| 2_usize.pow(x)) {
-            for (i, x) in order.iter().enumerate() {
-                work[order[*x]] = i;
-            }
-            dbg!(format!("{p:>10}:{work:?}"));
-            gs.insert(p, work.clone());
-            std::mem::swap(&mut order, &mut work);
+    // f^n = (hg)^n = (h^n)(g^n)
+    // h^(2n) = 1
+    // Therefore, f^n = g^n
+    fn part2(&mut self) -> Self::Output1 {
+        let m = 16;
+        // let cycle: usize = (1..=6).product::<usize>();
+        // let remain: usize = 1_000_000_000_usize % cycle;
+        // dbg!(cycle, remain);
+        // let dance = self.line.iter().collect::<Vec<_>>();
+        // let mut order1 = (0..m).collect::<Vec<usize>>();
+        // for _ in 0..cycle {
+        //     let mut work1 = self.collapse(&dance, &order1);
+        //     std::mem::swap(&mut order1, &mut work1);
+        //     // dbg!(format!("{order1:?}"));
+        // }
+        // dbg!(format!("{order1:?}"));
+        let cycle: usize = (1..=6).product::<usize>();
+        let remain: usize = 1_000_000_000_usize % cycle;
+        dbg!(cycle, remain);
+        let dance = self.line.iter().collect::<Vec<_>>();
+        let mut order1 = (0..m).collect::<Vec<usize>>();
+        for _ in 0..remain {
+            let mut work1 = self.collapse(&dance, &order1);
+            std::mem::swap(&mut order1, &mut work1);
+            // dbg!(format!("{order1:?}"));
         }
-
-        for (i, x) in order.iter_mut().enumerate() {
-            *x = i;
-        }
-        let mut remain = 1_000_000_000;
-        for p in (0..30).map(|n| 2_usize.pow(n)).rev() {
-            if p <= remain {
-                let ord = gs.get(&p).unwrap();
-                for (i, x) in order.iter().enumerate() {
-                    work[ord[*x]] = i;
-                }
-                std::mem::swap(&mut order, &mut work);
-                remain -= p;
-            }
-        }
-        assert_eq!(0, remain);
         println!(
             "{}",
-            order
+            order1
                 .iter()
                 .map(|c| ((*c as u8) + b'a') as char)
                 .collect::<String>()
@@ -122,35 +115,35 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn collapse(&self, dance: &[&Dance]) -> Vec<usize> {
+    fn collapse(&self, dance: &[&Dance], init: &Vec<usize>) -> Vec<usize> {
         let m: usize = 16;
-        let mut list = (0..m).collect::<Vec<_>>();
-        let mut work = list.clone();
+        let mut line = init.clone();
+        let mut work = line.clone();
         for d in dance.iter() {
             match d {
                 Dance::Spin(n) => {
-                    for (i, x) in list.iter().enumerate() {
+                    for (i, x) in line.iter().enumerate() {
                         work[(i + n) % m] = *x;
                     }
-                    std::mem::swap(&mut list, &mut work);
+                    std::mem::swap(&mut line, &mut work);
                 }
                 Dance::Exchange(x, y) => {
-                    list.swap(*x, *y);
+                    line.swap(*x, *y);
                 }
                 Dance::Partner(x, y) => {
                     let mut pos = (0, 0);
-                    for (i, p) in list.iter().enumerate() {
+                    for (i, p) in line.iter().enumerate() {
                         match p {
                             _ if p == x => pos.0 = i,
                             _ if p == y => pos.1 = i,
                             _ => (),
                         }
                     }
-                    list.swap(pos.0, pos.1);
+                    line.swap(pos.0, pos.1);
                 }
             }
         }
-        list
+        line
     }
     fn collapse2(&self, m: usize, dance: &[&Dance]) -> Vec<usize> {
         let mut list = (0..m).collect::<Vec<_>>();
@@ -185,7 +178,7 @@ impl Puzzle {
 
 #[test]
 fn check() {
-    let m = 6;
+    let m = 8;
     let order = (0..m).collect::<Vec<usize>>();
     let puzzle = Puzzle::default();
     let line = vec![Dance::Spin(1), Dance::Exchange(3, 4), Dance::Partner(4, 1)];
@@ -209,13 +202,16 @@ fn check() {
 
     let mut order1 = order.clone();
     let mut work1 = order.clone();
-    for check in [2, 2].iter() {
+    for check in [(1..=m).fold(1, |t, d| t * d)].iter() {
+        dbg!(check);
         for _ in 0..*check {
             for (i, x) in order1.iter().enumerate() {
                 work1[f[*x]] = i;
             }
             std::mem::swap(&mut order1, &mut work1);
+            dbg!(format!("{order1:?}"));
         }
+        dbg!(format!("{order1:?}"));
 
         order2 = order.clone();
         let mut remain = *check;
