@@ -93,6 +93,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        println!("{list:?}");
         println!(
             "{}",
             list.iter()
