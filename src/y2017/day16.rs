@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2017/day/16>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -67,7 +60,7 @@ impl AdventOfCode for Puzzle {
         let m = 16;
         let list = self.collapse(
             &self.line.iter().collect::<Vec<_>>(),
-            &mut (0..m).collect::<Vec<usize>>(),
+            &(0..m).collect::<Vec<usize>>(),
         );
         println!(
             "{}",
@@ -77,22 +70,8 @@ impl AdventOfCode for Puzzle {
         );
         0
     }
-    // f^n = (hg)^n = (h^n)(g^n)
-    // h^(2n) = 1
-    // Therefore, f^n = g^n
     fn part2(&mut self) -> Self::Output1 {
         let m = 16;
-        // let cycle: usize = (1..=6).product::<usize>();
-        // let remain: usize = 1_000_000_000_usize % cycle;
-        // dbg!(cycle, remain);
-        // let dance = self.line.iter().collect::<Vec<_>>();
-        // let mut order1 = (0..m).collect::<Vec<usize>>();
-        // for _ in 0..cycle {
-        //     let mut work1 = self.collapse(&dance, &order1);
-        //     std::mem::swap(&mut order1, &mut work1);
-        //     // dbg!(format!("{order1:?}"));
-        // }
-        // dbg!(format!("{order1:?}"));
         let cycle: usize = (1..=6).product::<usize>();
         let remain: usize = 1_000_000_000_usize % cycle;
         dbg!(cycle, remain);
@@ -115,10 +94,10 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn collapse(&self, dance: &[&Dance], init: &Vec<usize>) -> Vec<usize> {
+    fn collapse(&self, dance: &[&Dance], init: &[usize]) -> Vec<usize> {
         let m: usize = 16;
-        let mut line = init.clone();
-        let mut work = line.clone();
+        let mut line = init.to_owned();
+        let mut work = line.to_owned();
         for d in dance.iter() {
             match d {
                 Dance::Spin(n) => {
@@ -145,6 +124,7 @@ impl Puzzle {
         }
         line
     }
+    #[allow(unused)]
     fn collapse2(&self, m: usize, dance: &[&Dance]) -> Vec<usize> {
         let mut list = (0..m).collect::<Vec<_>>();
         let mut work = list.clone();
@@ -178,6 +158,7 @@ impl Puzzle {
 
 #[test]
 fn check() {
+    use std::collections::HashMap;
     let m = 8;
     let order = (0..m).collect::<Vec<usize>>();
     let puzzle = Puzzle::default();
@@ -202,7 +183,7 @@ fn check() {
 
     let mut order1 = order.clone();
     let mut work1 = order.clone();
-    for check in [(1..=m).fold(1, |t, d| t * d)].iter() {
+    for check in [(1..=m).product(), 2].iter() {
         dbg!(check);
         for _ in 0..*check {
             for (i, x) in order1.iter().enumerate() {
