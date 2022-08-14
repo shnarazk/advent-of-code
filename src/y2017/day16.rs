@@ -11,7 +11,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum Dance {
     Spin(usize),
     Exchange(usize, usize),
@@ -64,36 +64,7 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut list = (0..16).collect::<Vec<_>>();
-        let mut work = list.clone();
-        let len = list.len();
-        for mv in self.line.iter() {
-            match mv {
-                Dance::Spin(x) => {
-                    for i in 0..list.len() {
-                        work[(i + x) % len] = list[i];
-                    }
-                    std::mem::swap(&mut list, &mut work);
-                }
-
-                Dance::Exchange(x, y) => {
-                    list.swap(*x, *y);
-                }
-                Dance::Partner(x, y) => {
-                    let mut xi = 0;
-                    let mut yi = 0;
-                    for (i, v) in list.iter().enumerate() {
-                        if v == x {
-                            xi = i;
-                        } else if v == y {
-                            yi = i;
-                        }
-                    }
-                    list.swap(xi, yi);
-                }
-            }
-        }
-        println!("{list:?}");
+        let list = self.collapse(&self.line.iter().collect::<Vec<_>>());
         println!(
             "{}",
             list.iter()
@@ -102,7 +73,162 @@ impl AdventOfCode for Puzzle {
         );
         0
     }
+    /// f^n = (hg)^n = (h^n)(g^n)
+    /// h^(2n) = 1
+    /// Therefore, f^n = g^n
     fn part2(&mut self) -> Self::Output2 {
+        let g: Vec<&Dance> = self
+            .line
+            .iter()
+            .filter(|d| !matches!(d, Dance::Partner(_, _)))
+            .collect::<Vec<_>>();
+        let mut order = self.collapse(&g);
+        let mut work = order.clone();
+        let mut gs: HashMap<usize, Vec<usize>> = HashMap::new();
+        gs.insert(1, order.clone());
+        for p in (1..30).map(|x| 2_usize.pow(x)) {
+            for (i, x) in order.iter().enumerate() {
+                work[order[*x]] = i;
+            }
+            dbg!(format!("{p:>10}:{work:?}"));
+            gs.insert(p, work.clone());
+            std::mem::swap(&mut order, &mut work);
+        }
+
+        for (i, x) in order.iter_mut().enumerate() {
+            *x = i;
+        }
+        let mut remain = 1_000_000_000;
+        for p in (0..30).map(|n| 2_usize.pow(n)).rev() {
+            if p <= remain {
+                let ord = gs.get(&p).unwrap();
+                for (i, x) in order.iter().enumerate() {
+                    work[ord[*x]] = i;
+                }
+                std::mem::swap(&mut order, &mut work);
+                remain -= p;
+            }
+        }
+        assert_eq!(0, remain);
+        println!(
+            "{}",
+            order
+                .iter()
+                .map(|c| ((*c as u8) + b'a') as char)
+                .collect::<String>()
+        );
         0
+    }
+}
+
+impl Puzzle {
+    fn collapse(&self, dance: &[&Dance]) -> Vec<usize> {
+        let m: usize = 16;
+        let mut list = (0..m).collect::<Vec<_>>();
+        let mut work = list.clone();
+        for d in dance.iter() {
+            match d {
+                Dance::Spin(n) => {
+                    for (i, x) in list.iter().enumerate() {
+                        work[(i + n) % m] = *x;
+                    }
+                    std::mem::swap(&mut list, &mut work);
+                }
+                Dance::Exchange(x, y) => {
+                    list.swap(*x, *y);
+                }
+                Dance::Partner(x, y) => {
+                    let mut pos = (0, 0);
+                    for (i, p) in list.iter().enumerate() {
+                        match p {
+                            _ if p == x => pos.0 = i,
+                            _ if p == y => pos.1 = i,
+                            _ => (),
+                        }
+                    }
+                    list.swap(pos.0, pos.1);
+                }
+            }
+        }
+        list
+    }
+    fn collapse2(&self, m: usize, dance: &[&Dance]) -> Vec<usize> {
+        let mut list = (0..m).collect::<Vec<_>>();
+        let mut work = list.clone();
+        for d in dance.iter() {
+            match d {
+                Dance::Spin(n) => {
+                    for (i, x) in list.iter().enumerate() {
+                        work[(i + n) % m] = *x;
+                    }
+                    std::mem::swap(&mut list, &mut work);
+                }
+                Dance::Exchange(x, y) => {
+                    list.swap(*x, *y);
+                }
+                Dance::Partner(x, y) => {
+                    let mut pos = (0, 0);
+                    for (i, p) in list.iter().enumerate() {
+                        match p {
+                            _ if p == x => pos.0 = i,
+                            _ if p == y => pos.1 = i,
+                            _ => (),
+                        }
+                    }
+                    list.swap(pos.0, pos.1);
+                }
+            }
+        }
+        list
+    }
+}
+
+#[test]
+fn check() {
+    let m = 6;
+    let order = (0..m).collect::<Vec<usize>>();
+    let puzzle = Puzzle::default();
+    let line = vec![Dance::Spin(1), Dance::Exchange(3, 4), Dance::Partner(4, 1)];
+    let f = puzzle.collapse2(m, &line.iter().collect::<Vec<_>>());
+    let g: Vec<&Dance> = line
+        .iter()
+        .filter(|d| !matches!(d, Dance::Partner(_, _)))
+        .collect::<Vec<_>>();
+    let mut gs: HashMap<usize, Vec<usize>> = HashMap::new();
+    let mut order2 = puzzle.collapse2(m, &g);
+    let mut work = order2.clone();
+    gs.insert(1, work.clone());
+    for p in (1..30).map(|x| 2_usize.pow(x)) {
+        for (i, x) in order2.iter().enumerate() {
+            work[order2[*x]] = i;
+        }
+        dbg!(format!("{p:>10}:{work:?}"));
+        gs.insert(p, work.clone());
+        std::mem::swap(&mut order2, &mut work);
+    }
+
+    let mut order1 = order.clone();
+    let mut work1 = order.clone();
+    for check in [2, 2].iter() {
+        for _ in 0..*check {
+            for (i, x) in order1.iter().enumerate() {
+                work1[f[*x]] = i;
+            }
+            std::mem::swap(&mut order1, &mut work1);
+        }
+
+        order2 = order.clone();
+        let mut remain = *check;
+        for p in (0..30).map(|n| 2_usize.pow(n)).rev() {
+            if p <= remain {
+                let ord = gs.get(&p).unwrap();
+                for (i, x) in order2.iter().enumerate() {
+                    work[ord[*x]] = i;
+                }
+                std::mem::swap(&mut order2, &mut work);
+                remain -= p;
+            }
+        }
+        assert_eq!(order1, order2);
     }
 }
