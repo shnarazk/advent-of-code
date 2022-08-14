@@ -3,7 +3,7 @@ pub use aoc_macro::{aoc, aoc_at};
 use std::{borrow::Borrow, fmt, fs::File, io::prelude::*};
 
 /// IT MUST BE UNDER THE HOOD
-#[derive(Clone, fmt::Debug, PartialEq)]
+#[derive(Clone, fmt::Debug, Eq, PartialEq)]
 pub enum Description {
     FileTag(String),
     TestData(String),
@@ -30,7 +30,7 @@ impl Description {
 }
 
 /// IT MUST BE UNDER THE HOOD
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::Debug + PartialEq> {
     Answers(Output1, Output2),
     Part1(Output1),
