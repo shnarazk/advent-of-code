@@ -40,7 +40,7 @@ enum Inst {
 impl TryFrom<&str> for Inst {
     type Error = ParseError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        dbg!(value);
+        // dbg!(value);
         let arg1l = regex!(r"^([[:lower:]]{3}) (-?[[:digit:]]+)$");
         let arg1r = regex!(r"^([[:lower:]]{3}) ([[:lower:]])$");
         let arg2ll = regex!(r"^([[:lower:]]{3}) (-?[[:digit:]]+) (-?[[:digit:]]+)$");
@@ -80,7 +80,7 @@ impl TryFrom<&str> for Inst {
         }
         if let Some(segment) = arg2lr.captures(value) {
             let op1: Val = Val::Lit(segment[2].parse::<isize>()?);
-            let op2: Val = Val::Reg(segment[2].chars().next().ok_or(ParseError)?);
+            let op2: Val = Val::Reg(segment[3].chars().next().ok_or(ParseError)?);
             let ins = match &segment[1] {
                 "set" => Inst::Set(op1, op2),
                 "add" => Inst::Add(op1, op2),
@@ -106,7 +106,7 @@ impl TryFrom<&str> for Inst {
         }
         if let Some(segment) = arg2rr.captures(value) {
             let op1: Val = Val::Reg(segment[2].chars().next().ok_or(ParseError)?);
-            let op2: Val = Val::Reg(segment[2].chars().next().ok_or(ParseError)?);
+            let op2: Val = Val::Reg(segment[3].chars().next().ok_or(ParseError)?);
             let ins = match &segment[1] {
                 "set" => Inst::Set(op1, op2),
                 "add" => Inst::Add(op1, op2),
@@ -126,7 +126,7 @@ struct Runtime {
     pc: usize,
     register: HashMap<Val, isize>,
     memory: HashMap<usize, Inst>,
-    output: Vec<usize>,
+    frequency: usize,
 }
 
 impl Runtime {
@@ -139,60 +139,66 @@ impl Runtime {
             pc: 0,
             register: HashMap::new(),
             memory,
-            output: Vec::new(),
+            frequency: 0,
         }
     }
     fn get(&self, val: &Val) -> isize {
         match val {
             Val::Lit(n) => *n,
-            _ => *self.register.get(&val).unwrap_or(&0),
+            _ => *self.register.get(val).unwrap_or(&0),
         }
     }
     fn set(&mut self, reg: &Val, val: isize) {
         self.register.insert(*reg, val);
     }
-    fn execute(&mut self) {
-        match self
-            .memory
-            .get(&self.pc)
-            .expect("PC points an invalid address")
-        {
-            Inst::Snd(op1) => {
-                let x = self.get(op1);
-            }
-            Inst::Set(op1, op2) if op1.is_reg() => {
-                let y = self.get(op2);
-                self.set(op1, y);
-            }
-            Inst::Add(op1, op2) => {
-                let x = self.get(op1);
-                let y = self.get(op2);
-                self.set(op1, x + y);
-            }
-            Inst::Mul(op1, op2) => {
-                let x = self.get(op1);
-                let y = self.get(op2);
-                self.set(op1, x * y);
-            }
-            Inst::Mod(op1, op2) => {
-                let x = self.get(op1);
-                let y = self.get(op2);
-                self.set(op1, x % y);
-            }
-            Inst::Rcv(op1) => {
-                let x = self.get(op1);
-                if x != 0 {}
-            }
-            Inst::Jgz(op1, op2) => {
-                let x = self.get(op1);
-                let y = self.get(op2);
-                if 0 < x {
-                    self.pc = self.pc.checked_add(y).expect("pc has an invalid value");
+    fn execute(&mut self) -> Option<usize> {
+        if let Some(inst) = self.memory.get(&self.pc) {
+            let ins = *inst;
+            // println!("{:>3} {:?}", self.pc, ins);
+            match ins {
+                Inst::Snd(op1) => {
+                    let x = self.get(&op1);
+                    self.frequency = x as usize;
                 }
-            }
-            _ => unreachable!(),
+                Inst::Set(op1, op2) => {
+                    let y = self.get(&op2);
+                    self.set(&op1, y);
+                }
+                Inst::Add(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    self.set(&op1, x + y);
+                }
+                Inst::Mul(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    self.set(&op1, x * y);
+                }
+                Inst::Mod(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    assert!(0 != y);
+                    self.set(&op1, x % y);
+                }
+                Inst::Rcv(op1) => {
+                    let x = self.get(&op1);
+                    if x != 0 {
+                        return Some(self.frequency);
+                    }
+                }
+                Inst::Jgz(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    if 0 < x {
+                        let n: isize = self.pc as isize + y - 1;
+                        assert!(0 <= n);
+                        self.pc = n as usize;
+                    }
+                }
+            };
+            self.pc += 1;
         }
-        self.pc += 1;
+        None
     }
 }
 
@@ -209,10 +215,15 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut processor: Runtime = Runtime::initialize(&self.line);
+        loop {
+            if let Some(f) = processor.execute() {
+                return f;
+            }
+        }
     }
     fn part2(&mut self) -> Self::Output2 {
         0
