@@ -8,8 +8,10 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, VecDeque},
 };
+
+type Channel = [VecDeque<usize>; 2];
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Val {
@@ -121,25 +123,41 @@ impl TryFrom<&str> for Inst {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+enum RuntimeState {
+    #[default]
+    None,
+    Receiving(usize),
+    Sending(usize, usize),
+}
+
 #[derive(Debug, Default, Eq, PartialEq)]
 struct Runtime {
+    id: usize,
     pc: usize,
     register: HashMap<Val, isize>,
     memory: HashMap<usize, Inst>,
     frequency: usize,
+    state: RuntimeState,
 }
 
 impl Runtime {
-    fn initialize(code: &[Inst]) -> Runtime {
+    fn initialize(iid: isize, code: &[Inst]) -> Runtime {
         let mut memory: HashMap<usize, Inst> = HashMap::new();
         for (addr, inst) in code.iter().enumerate() {
             memory.insert(addr, *inst);
         }
+        let mut register: HashMap<Val, isize> = HashMap::new();
+        if 0 <= iid {
+            register.insert(Val::Reg('p'), iid);
+        }
         Runtime {
+            id: iid as usize,
             pc: 0,
-            register: HashMap::new(),
+            register,
             memory,
             frequency: 0,
+            state: RuntimeState::None,
         }
     }
     fn get(&self, val: &Val) -> isize {
@@ -200,6 +218,68 @@ impl Runtime {
         }
         None
     }
+    fn execute2(&mut self, channel: &mut Channel) -> RuntimeState {
+        let pc: usize = match self.state {
+            RuntimeState::None => self.pc,
+            RuntimeState::Receiving(addr) => addr,
+            RuntimeState::Sending(addr, _) => addr,
+        };
+        self.state = RuntimeState::None;
+        self.pc = pc;
+        if let Some(inst) = self.memory.get(&self.pc) {
+            let ins = *inst;
+            // println!("{:>3} {:?}", self.pc, ins);
+            match ins {
+                Inst::Snd(op1) => {
+                    let x = self.get(&op1);
+                    self.frequency = x as usize;
+                    self.state = RuntimeState::Sending(self.pc + 1, self.frequency);
+                    println!("send {:?}{} => {}", op1, x, self.pc + 1);
+                    return self.state;
+                }
+                Inst::Set(op1, op2) => {
+                    let y = self.get(&op2);
+                    self.set(&op1, y);
+                }
+                Inst::Add(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    self.set(&op1, x + y);
+                }
+                Inst::Mul(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    self.set(&op1, x * y);
+                }
+                Inst::Mod(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    assert!(0 != y);
+                    self.set(&op1, x % y);
+                }
+                Inst::Rcv(op1) => {
+                    if let Some(v) = channel[self.id].pop_front() {
+                        println!("id{} got {}", self.id, v);
+                        self.set(&op1, v as isize);
+                    } else {
+                        self.state = RuntimeState::Receiving(self.pc);
+                        return self.state;
+                    }
+                }
+                Inst::Jgz(op1, op2) => {
+                    let x = self.get(&op1);
+                    let y = self.get(&op2);
+                    if 0 < x {
+                        let n: isize = self.pc as isize + y - 1;
+                        assert!(0 <= n);
+                        self.pc = n as usize;
+                    }
+                }
+            };
+            self.pc += 1;
+        }
+        RuntimeState::None
+    }
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -218,7 +298,7 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut processor: Runtime = Runtime::initialize(&self.line);
+        let mut processor: Runtime = Runtime::initialize(-1, &self.line);
         loop {
             if let Some(f) = processor.execute() {
                 return f;
@@ -226,6 +306,32 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut processor0: Runtime = Runtime::initialize(0, &self.line);
+        let mut processor1: Runtime = Runtime::initialize(1, &self.line);
+        let mut channel: Channel = [VecDeque::new(), VecDeque::new()];
+        let mut count: usize = 0;
+        loop {
+            match (
+                processor0.execute2(&mut channel),
+                processor1.execute2(&mut channel),
+            ) {
+                (RuntimeState::Receiving(_), RuntimeState::Receiving(_)) => {
+                    return count;
+                }
+                (RuntimeState::Sending(_, p0), RuntimeState::Sending(_, p1)) => {
+                    channel[1].push_back(p0);
+                    channel[0].push_back(p1);
+                    count += 1;
+                }
+                (RuntimeState::Sending(_, p0), _) => {
+                    channel[1].push_back(p0);
+                }
+                (_, RuntimeState::Sending(_, p1)) => {
+                    channel[0].push_back(p1);
+                    count += 1;
+                }
+                (RuntimeState::None, _) | (_, RuntimeState::None) => (),
+            }
+        }
     }
 }
