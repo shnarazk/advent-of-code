@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2017/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -17,15 +13,6 @@ type Channel = [VecDeque<usize>; 2];
 enum Val {
     Reg(char),
     Lit(isize),
-}
-
-impl Val {
-    fn is_lit(&self) -> bool {
-        matches!(self, Val::Lit(_))
-    }
-    fn is_reg(&self) -> bool {
-        !self.is_lit()
-    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -234,7 +221,7 @@ impl Runtime {
                     let x = self.get(&op1);
                     self.frequency = x as usize;
                     self.state = RuntimeState::Sending(self.pc + 1, self.frequency);
-                    println!("send {:?}{} => {}", op1, x, self.pc + 1);
+                    // println!("send {:?}{} => {}", op1, x, self.pc + 1);
                     return self.state;
                 }
                 Inst::Set(op1, op2) => {
@@ -259,7 +246,7 @@ impl Runtime {
                 }
                 Inst::Rcv(op1) => {
                     if let Some(v) = channel[self.id].pop_front() {
-                        println!("id{} got {}", self.id, v);
+                        // println!("id{} got {}", self.id, v);
                         self.set(&op1, v as isize);
                     } else {
                         self.state = RuntimeState::Receiving(self.pc);
