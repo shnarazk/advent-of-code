@@ -156,56 +156,56 @@ impl Puzzle {
     }
 }
 
-#[test]
-fn check() {
-    use std::collections::HashMap;
-    let m = 8;
-    let order = (0..m).collect::<Vec<usize>>();
-    let puzzle = Puzzle::default();
-    let line = vec![Dance::Spin(1), Dance::Exchange(3, 4), Dance::Partner(4, 1)];
-    let f = puzzle.collapse2(m, &line.iter().collect::<Vec<_>>());
-    let g: Vec<&Dance> = line
-        .iter()
-        .filter(|d| !matches!(d, Dance::Partner(_, _)))
-        .collect::<Vec<_>>();
-    let mut gs: HashMap<usize, Vec<usize>> = HashMap::new();
-    let mut order2 = puzzle.collapse2(m, &g);
-    let mut work = order2.clone();
-    gs.insert(1, work.clone());
-    for p in (1..30).map(|x| 2_usize.pow(x)) {
-        for (i, x) in order2.iter().enumerate() {
-            work[order2[*x]] = i;
-        }
-        dbg!(format!("{p:>10}:{work:?}"));
-        gs.insert(p, work.clone());
-        std::mem::swap(&mut order2, &mut work);
-    }
+// #[test]
+// fn check() {
+//     use std::collections::HashMap;
+//     let m = 8;
+//     let order = (0..m).collect::<Vec<usize>>();
+//     let puzzle = Puzzle::default();
+//     let line = vec![Dance::Spin(1), Dance::Exchange(3, 4), Dance::Partner(4, 1)];
+//     let f = puzzle.collapse2(m, &line.iter().collect::<Vec<_>>());
+//     let g: Vec<&Dance> = line
+//         .iter()
+//         .filter(|d| !matches!(d, Dance::Partner(_, _)))
+//         .collect::<Vec<_>>();
+//     let mut gs: HashMap<usize, Vec<usize>> = HashMap::new();
+//     let mut order2 = puzzle.collapse2(m, &g);
+//     let mut work = order2.clone();
+//     gs.insert(1, work.clone());
+//     for p in (1..30).map(|x| 2_usize.pow(x)) {
+//         for (i, x) in order2.iter().enumerate() {
+//             work[order2[*x]] = i;
+//         }
+//         dbg!(format!("{p:>10}:{work:?}"));
+//         gs.insert(p, work.clone());
+//         std::mem::swap(&mut order2, &mut work);
+//     }
 
-    let mut order1 = order.clone();
-    let mut work1 = order.clone();
-    for check in [(1..=m).product(), 2].iter() {
-        dbg!(check);
-        for _ in 0..*check {
-            for (i, x) in order1.iter().enumerate() {
-                work1[f[*x]] = i;
-            }
-            std::mem::swap(&mut order1, &mut work1);
-            dbg!(format!("{order1:?}"));
-        }
-        dbg!(format!("{order1:?}"));
+//     let mut order1 = order.clone();
+//     let mut work1 = order.clone();
+//     for check in [(1..=m).product(), 2].iter() {
+//         dbg!(check);
+//         for _ in 0..*check {
+//             for (i, x) in order1.iter().enumerate() {
+//                 work1[f[*x]] = i;
+//             }
+//             std::mem::swap(&mut order1, &mut work1);
+//             dbg!(format!("{order1:?}"));
+//         }
+//         dbg!(format!("{order1:?}"));
 
-        order2 = order.clone();
-        let mut remain = *check;
-        for p in (0..30).map(|n| 2_usize.pow(n)).rev() {
-            if p <= remain {
-                let ord = gs.get(&p).unwrap();
-                for (i, x) in order2.iter().enumerate() {
-                    work[ord[*x]] = i;
-                }
-                std::mem::swap(&mut order2, &mut work);
-                remain -= p;
-            }
-        }
-        assert_eq!(order1, order2);
-    }
-}
+//         order2 = order.clone();
+//         let mut remain = *check;
+//         for p in (0..30).map(|n| 2_usize.pow(n)).rev() {
+//             if p <= remain {
+//                 let ord = gs.get(&p).unwrap();
+//                 for (i, x) in order2.iter().enumerate() {
+//                     work[ord[*x]] = i;
+//                 }
+//                 std::mem::swap(&mut order2, &mut work);
+//                 remain -= p;
+//             }
+//         }
+//         assert_eq!(order1, order2);
+//     }
+// }
