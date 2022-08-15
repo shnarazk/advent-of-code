@@ -67,14 +67,12 @@ impl AdventOfCode for Puzzle {
             if self.map.get(&next).is_some() {
                 to_visit = Some(next);
                 direction = (next.0 - p.0, next.1 - p.1);
-                println!("turn");
                 continue;
             }
             direction = (-direction.0, -direction.1);
             next = (p.0 + direction.0, p.1 + direction.1);
             if self.map.get(&next).is_some() {
                 to_visit = Some(next);
-                println!("turn");
                 continue;
             }
             to_visit = None;
