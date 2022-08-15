@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
         );
         0
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         let m = 16;
         let cycle: usize = (1..=6).product::<usize>();
         let remain: usize = 1_000_000_000_usize % cycle;
