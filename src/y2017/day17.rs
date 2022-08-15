@@ -33,15 +33,26 @@ impl AdventOfCode for Puzzle {
             pos = (step + pos) % ring.len();
             if pos == ring.len() - 1 {
                 ring.push(i);
-                pos = ring.len() - 1;
             } else {
                 ring.insert(pos + 1, i);
-                pos += 1;
+            }
+            pos += 1;
+            if pos == 1 {
+                println!("{i:>6} {:?}", &ring[0..ring.len().min(20)]);
             }
         }
         ring[(pos + 1) % ring.len()]
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut at_pos_1 = 0;
+        let step = self.line;
+        let mut pos = 0;
+        for i in 1..=50_000_000 {
+            pos = (step + pos) % i + 1;
+            if pos == 1 {
+                at_pos_1 = dbg!(i);
+            }
+        }
+        at_pos_1
     }
 }
