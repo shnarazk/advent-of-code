@@ -11,13 +11,22 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Val {
     Reg(char),
     Lit(isize),
 }
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+impl Val {
+    fn is_lit(&self) -> bool {
+        matches!(self, Val::Lit(_))
+    }
+    fn is_reg(&self) -> bool {
+        !self.is_lit()
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Inst {
     Snd(Val),
     Set(Val, Val),
@@ -111,6 +120,82 @@ impl TryFrom<&str> for Inst {
         Err(ParseError)
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Runtime {
+    pc: usize,
+    register: HashMap<Val, isize>,
+    memory: HashMap<usize, Inst>,
+    output: Vec<usize>,
+}
+
+impl Runtime {
+    fn initialize(code: &[Inst]) -> Runtime {
+        let mut memory: HashMap<usize, Inst> = HashMap::new();
+        for (addr, inst) in code.iter().enumerate() {
+            memory.insert(addr, *inst);
+        }
+        Runtime {
+            pc: 0,
+            register: HashMap::new(),
+            memory,
+            output: Vec::new(),
+        }
+    }
+    fn get(&self, val: &Val) -> isize {
+        match val {
+            Val::Lit(n) => *n,
+            _ => *self.register.get(&val).unwrap_or(&0),
+        }
+    }
+    fn set(&mut self, reg: &Val, val: isize) {
+        self.register.insert(*reg, val);
+    }
+    fn execute(&mut self) {
+        match self
+            .memory
+            .get(&self.pc)
+            .expect("PC points an invalid address")
+        {
+            Inst::Snd(op1) => {
+                let x = self.get(op1);
+            }
+            Inst::Set(op1, op2) if op1.is_reg() => {
+                let y = self.get(op2);
+                self.set(op1, y);
+            }
+            Inst::Add(op1, op2) => {
+                let x = self.get(op1);
+                let y = self.get(op2);
+                self.set(op1, x + y);
+            }
+            Inst::Mul(op1, op2) => {
+                let x = self.get(op1);
+                let y = self.get(op2);
+                self.set(op1, x * y);
+            }
+            Inst::Mod(op1, op2) => {
+                let x = self.get(op1);
+                let y = self.get(op2);
+                self.set(op1, x % y);
+            }
+            Inst::Rcv(op1) => {
+                let x = self.get(op1);
+                if x != 0 {}
+            }
+            Inst::Jgz(op1, op2) => {
+                let x = self.get(op1);
+                let y = self.get(op2);
+                if 0 < x {
+                    self.pc = self.pc.checked_add(y).expect("pc has an invalid value");
+                }
+            }
+            _ => unreachable!(),
+        }
+        self.pc += 1;
+    }
+}
+
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Inst>,
