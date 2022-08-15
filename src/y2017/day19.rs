@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2017/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::{HashMap, HashSet},
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    std::collections::HashMap,
 };
 
 type Location = (isize, isize);
@@ -19,8 +12,10 @@ pub struct Puzzle {
     map: HashMap<Location, u8>,
 }
 
-#[aoc(2017, 19)]
+#[aoc_at(2017, 19)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = usize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line
@@ -40,7 +35,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let start_position: Location = {
             let mut l = (0, 0);
-            for (loc, p) in self.map.iter() {
+            for loc in self.map.keys() {
                 if loc.0 == 0 {
                     l = *loc;
                     break;
@@ -77,13 +72,12 @@ impl AdventOfCode for Puzzle {
             }
             to_visit = None;
         }
-        println!("{}", letters.iter().map(|c| *c as char).collect::<String>());
-        0
+        letters.iter().map(|c| *c as char).collect::<String>()
     }
-    fn part2(&mut self) -> Self::Output1 {
+    fn part2(&mut self) -> Self::Output2 {
         let start_position: Location = {
             let mut l = (0, 0);
-            for (loc, p) in self.map.iter() {
+            for loc in self.map.keys() {
                 if loc.0 == 0 {
                     l = *loc;
                     break;
