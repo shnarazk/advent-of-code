@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2017/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -29,9 +25,6 @@ struct Particle {
 }
 
 impl Particle {
-    fn distance(&self) -> usize {
-        distance(&self.position)
-    }
     fn update(&mut self) -> &Self {
         self.velocity = add(&self.velocity, &self.accelerate);
         self.position = add(&self.position, &self.velocity);
