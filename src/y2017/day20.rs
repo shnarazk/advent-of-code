@@ -92,6 +92,25 @@ impl AdventOfCode for Puzzle {
         mi
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut count: HashMap<Dim3, usize> = HashMap::new();
+        let mut c = self.line.len();
+        for _ in 0..10000 {
+            for p in self.line.iter_mut() {
+                p.update();
+                *count.entry(p.position).or_insert(0) += 1;
+            }
+            let mut tmp = self
+                .line
+                .iter()
+                .filter(|p| count.get(&p.position) == Some(&1))
+                .cloned()
+                .collect::<Vec<_>>();
+            std::mem::swap(&mut self.line, &mut tmp);
+            count.clear();
+            if self.line.len() < c {
+                c = dbg!(self.line.len());
+            }
+        }
+        c
     }
 }
