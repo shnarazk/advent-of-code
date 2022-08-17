@@ -24,13 +24,24 @@ struct Plane {
 
 impl Plane {
     fn divide(&self) -> Divided {
-        todo!()
+        if self.size % 2 == 0 {
+            for j in 0..self.size / 2 {
+                todo!();
+            }
+        } else if self.size % 3 == 0 {
+            for j in 0..self.size / 3 {
+                todo!();
+            }
+        }
+        Divided::None
     }
-    fn extend(&self) -> Plane {
+    fn extend(&self) -> Option<Plane> {
         match self.divide() {
             Divided::By2(v) => {}
             Divided::By3(v) => {}
-            Divided::None => (),
+            Divided::None => {
+                return None;
+            }
         }
         todo!()
     }
