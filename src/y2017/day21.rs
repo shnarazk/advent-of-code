@@ -25,13 +25,35 @@ struct Plane {
 impl Plane {
     fn divide(&self) -> Divided {
         if self.size % 2 == 0 {
-            for j in 0..self.size / 2 {
-                todo!();
+            let mut result = Vec::new();
+            for index in 0..(self.size / 2).pow(2) {
+                let j_start = index / (self.size / 2);
+                let i_start = index % (self.size / 2);
+                let mut pack: Vec<bool> = Vec::new();
+                for j in j_start..(j_start + 2) {
+                    for i in i_start..(i_start + 2) {
+                        pack.push(self.plane[j * self.size + i]);
+                    }
+                }
+                result.push(Plane2([pack[0], pack[1], pack[2], pack[3]]));
             }
+            return Divided::By2(result);
         } else if self.size % 3 == 0 {
-            for j in 0..self.size / 3 {
-                todo!();
+            let mut result = Vec::new();
+            for index in 0..(self.size / 3).pow(2) {
+                let j_start = index / (self.size / 3);
+                let i_start = index % (self.size / 3);
+                let mut pack: Vec<bool> = Vec::new();
+                for j in j_start..(j_start + 3) {
+                    for i in i_start..(i_start + 3) {
+                        pack.push(self.plane[j * self.size + i]);
+                    }
+                }
+                result.push(Plane3([
+                    pack[0], pack[1], pack[2], pack[3], pack[4], pack[5], pack[6], pack[7], pack[8],
+                ]));
             }
+            return Divided::By3(result);
         }
         Divided::None
     }
