@@ -11,32 +11,76 @@ use {
     std::collections::HashMap,
 };
 
-trait Block {
-    fn rotate(&self) -> Self;
-    fn flip(&self) -> Self;
-    fn permutations(&self, index: usize) -> Self;
+enum Divided {
+    By2(Vec<Plane2>),
+    By3(Vec<Plane3>),
+    None,
+}
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Plane {
+    size: usize,
+    plane: Vec<bool>,
+}
+
+impl Plane {
+    fn divide(&self) -> Divided {
+        todo!()
+    }
+    fn extend(&self) -> Plane {
+        match self.divide() {
+            Divided::By2(v) => {}
+            Divided::By3(v) => {}
+            Divided::None => (),
+        }
+        todo!()
+    }
+}
+
+trait Block: Clone {
+    fn rotate_cw(&self) -> Self;
+    fn flip_h(&self) -> Self;
+    fn permutations(&self, index: usize) -> Self {
+        assert!(index < 8);
+        let mut p: Self = self.clone();
+        for _ in 0..(index >> 1) {
+            p = p.rotate_cw();
+        }
+        if 0 != index & 1 {
+            p = p.flip_h();
+        }
+        p
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Plane2([bool; 4]);
 
 impl Block for Plane2 {
-    fn rotate(&self) -> Self {
+    fn rotate_cw(&self) -> Self {
         Plane2([self.0[2], self.0[0], self.0[3], self.0[1]])
     }
-    fn flip(&self) -> Self {
+    fn flip_h(&self) -> Self {
         Plane2([self.0[1], self.0[0], self.0[3], self.0[2]])
     }
-    fn permutations(&self, index: usize) -> Self {
-        assert!(index < 8);
-        let mut p = self.clone();
-        for _ in 0..(index >> 1) {
-            p = p.rotate();
-        }
-        if 0 != index & 1 {
-            p = p.flip();
-        }
-        p
+}
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Plane3([bool; 9]);
+
+impl Block for Plane3 {
+    fn rotate_cw(&self) -> Self {
+        Plane3([
+            self.0[6], self.0[3], self.0[0], // first row
+            self.0[7], self.0[4], self.0[1], // center row
+            self.0[8], self.0[5], self.0[2], // last row
+        ])
+    }
+    fn flip_h(&self) -> Self {
+        Plane3([
+            self.0[2], self.0[1], self.0[0], // first row
+            self.0[5], self.0[4], self.0[3], // center row
+            self.0[8], self.0[7], self.0[6], // last row
+        ])
     }
 }
 
