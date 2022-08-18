@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2017/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -36,7 +32,7 @@ impl std::fmt::Debug for Plane {
     }
 }
 impl Plane {
-    fn divide(&self, rule: &Rule) -> Divided {
+    fn divide(&self) -> Divided {
         if self.size % 2 == 0 {
             let mut result = Vec::new();
             let block_len = self.size / 2;
@@ -73,7 +69,7 @@ impl Plane {
         Divided::None
     }
     fn extend(&self, rule: &Rule) -> Option<Plane> {
-        match self.divide(rule) {
+        match self.divide() {
             Divided::By2(tiles) => {
                 let block_len = self.size / 2;
                 let size = self.size / 2 * 3;
@@ -275,10 +271,9 @@ impl AdventOfCode for Puzzle {
             size: 3,
             plane: vec![false, true, false, false, false, true, true, true, true],
         };
-        for i in 0..18 {
+        for _ in 0..18 {
             grid = grid.extend(&self.rule).expect("something is wrong.");
             // TODO: check multiple occurences of a block: we can reduce to a linear recursion.
-            // println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
         }
         grid.count()
     }
