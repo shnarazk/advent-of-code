@@ -22,8 +22,10 @@ struct Plane {
     plane: Vec<bool>,
 }
 
+type Rule = HashMap<Vec<bool>, Vec<bool>>;
+
 impl Plane {
-    fn divide(&self) -> Divided {
+    fn divide(&self, rule: &Rule) -> Divided {
         if self.size % 2 == 0 {
             let mut result = Vec::new();
             for index in 0..(self.size / 2).pow(2) {
@@ -57,13 +59,13 @@ impl Plane {
         }
         Divided::None
     }
-    fn extend(&self) -> Option<Plane> {
-        match self.divide() {
+    fn extend(&self, rule: &Rule) -> Option<Plane> {
+        match self.divide(rule) {
             Divided::By2(tiles) => {
                 let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
                     .map(|_| false)
                     .collect::<Vec<_>>();
-                let extended = tiles.iter().map(|t| t.extend()).collect::<Vec<_>>();
+                let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
                 let mut j = 0;
                 for (ii, t) in extended.iter().enumerate() {
                     let i = ii % self.size;
@@ -83,7 +85,7 @@ impl Plane {
                 let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
                     .map(|_| false)
                     .collect::<Vec<_>>();
-                let extended = tiles.iter().map(|t| t.extend()).collect::<Vec<_>>();
+                let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
                 let mut j = 0;
                 for (ii, t) in extended.iter().enumerate() {
                     let i = ii % self.size;
@@ -108,7 +110,7 @@ trait Block: Clone {
     type Extended;
     fn rotate_cw(&self) -> Self;
     fn flip_h(&self) -> Self;
-    fn permutations(&self, index: usize) -> Self {
+    fn permutation(&self, index: usize) -> Self {
         assert!(index < 8);
         let mut p: Self = self.clone();
         for _ in 0..(index >> 1) {
@@ -119,7 +121,7 @@ trait Block: Clone {
         }
         p
     }
-    fn extend(&self) -> Self::Extended;
+    fn extend(&self, rule: &Rule) -> Self::Extended;
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -133,7 +135,7 @@ impl Block for Plane2 {
     fn flip_h(&self) -> Self {
         Plane2([self.0[1], self.0[0], self.0[3], self.0[2]])
     }
-    fn extend(&self) -> Self::Extended {
+    fn extend(&self, rule: &Rule) -> Self::Extended {
         todo!();
     }
 }
@@ -157,7 +159,7 @@ impl Block for Plane3 {
             self.0[8], self.0[7], self.0[6], // last row
         ])
     }
-    fn extend(&self) -> Self::Extended {
+    fn extend(&self, rule: &Rule) -> Self::Extended {
         todo!();
     }
 }
@@ -165,9 +167,10 @@ impl Block for Plane3 {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Plane4([bool; 16]);
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<(Vec<u8>, Vec<u8>)>,
+    line: Vec<(Vec<bool>, Vec<bool>)>,
+    rule: Rule,
 }
 
 #[aoc(2017, 21)]
@@ -180,25 +183,36 @@ impl AdventOfCode for Puzzle {
             segment[1]
                 .chars()
                 .filter(|c| *c != '/')
-                .map(|c| c as u8)
+                .map(|c| c == '#')
                 .collect::<Vec<_>>(),
             segment[2]
                 .chars()
                 .filter(|c| *c != '/')
-                .map(|c| c as u8)
+                .map(|c| c == '#')
                 .collect::<Vec<_>>(),
         ));
         Ok(())
     }
     fn after_insert(&mut self) {
         for l in self.line.iter() {
-            println!(
-                "{:?} => {:?}",
-                l.0.iter().map(|c| *c as char).collect::<String>(),
-                l.1.iter().map(|c| *c as char).collect::<String>(),
-            );
+            println!("{:?} => {:?}", l.0, l.1,);
+            if l.0.len() == 4 {
+                let p2 = Plane2([l.0[0], l.0[1], l.0[2], l.0[3]]);
+                for perm_index in 0..8 {
+                    self.rule
+                        .insert(p2.permutation(perm_index).0.to_vec(), l.1.clone());
+                }
+            } else {
+                let p3 = Plane3([
+                    l.0[0], l.0[1], l.0[2], l.0[3], l.0[4], l.0[5], l.0[6], l.0[7], l.0[8],
+                ]);
+                for perm_index in 0..8 {
+                    self.rule
+                        .insert(p3.permutation(perm_index).0.to_vec(), l.1.clone());
+                }
+            }
         }
-        dbg!(&self.line.len());
+        dbg!(&self.rule.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
