@@ -28,7 +28,7 @@ impl std::fmt::Debug for Plane {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, b) in self.plane.iter().enumerate() {
             let _ = write!(f, "{}", if *b { '#' } else { '.' });
-            if (i + 1) % self.size == 0 {
+            if (i + 1) % self.size == 0 && i + 1 < self.plane.len() {
                 let _ = writeln!(f);
             }
         }
@@ -39,32 +39,34 @@ impl Plane {
     fn divide(&self, rule: &Rule) -> Divided {
         if self.size % 2 == 0 {
             let mut result = Vec::new();
-            for index in 0..(self.size / 2).pow(2) {
-                let j_start = 2 * (index % (self.size / 2));
-                let i_start = 2 * (index / (self.size / 2));
+            let block_len = self.size / 2;
+            let size = self.size;
+            for index in 0..block_len.pow(2) {
+                let j_start = (size * 2) * (index / block_len);
+                let i_start = 2 * (index % block_len);
                 let mut pack: Vec<bool> = vec![];
                 for j in 0..2 {
                     for i in 0..2 {
-                        pack.push(self.plane[j_start + j * self.size + i_start + i]);
+                        pack.push(self.plane[j_start + j * size + i_start + i]);
                     }
                 }
-                result.push(Plane2(vec![pack[0], pack[1], pack[2], pack[3]]));
+                result.push(Plane2(pack));
             }
             return Divided::By2(result);
         } else if self.size % 3 == 0 {
             let mut result = Vec::new();
-            for index in 0..(self.size / 3).pow(2) {
-                let j_start = (self.size * 3) * (index / (self.size / 3));
-                let i_start = 3 * (index % (self.size / 3));
+            let block_len = self.size / 3;
+            let size = self.size;
+            for index in 0..block_len.pow(2) {
+                let j_start = (size * 3) * (index / block_len);
+                let i_start = 3 * (index % block_len);
                 let mut pack: Vec<bool> = vec![];
                 for j in 0..3 {
                     for i in 0..3 {
-                        pack.push(self.plane[j_start + j * self.size + i_start + i]);
+                        pack.push(self.plane[j_start + j * size + i_start + i]);
                     }
                 }
-                result.push(Plane3(vec![
-                    pack[0], pack[1], pack[2], pack[3], pack[4], pack[5], pack[6], pack[7], pack[8],
-                ]));
+                result.push(Plane3(pack));
             }
             return Divided::By3(result);
         }
@@ -73,44 +75,38 @@ impl Plane {
     fn extend(&self, rule: &Rule) -> Option<Plane> {
         match self.divide(rule) {
             Divided::By2(tiles) => {
-                let mut plane: Vec<bool> = (0..(3 * self.size / 2).pow(2))
-                    .map(|_| false)
-                    .collect::<Vec<_>>();
+                let block_len = self.size / 2;
+                let size = self.size / 2 * 3;
                 let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
-                let mut j = 0;
-                for (ii, t) in extended.iter().enumerate() {
-                    let i = ii % self.size;
-                    for k in 0..9 {
-                        plane[(j * self.size + i) * 9 + k] = t.0[k];
-                    }
-                    if i == self.size - 1 {
-                        j += 1;
+                let mut plane: Vec<bool> = (0..size.pow(2)).map(|_| false).collect::<Vec<_>>();
+                for (index, t) in extended.iter().enumerate() {
+                    // dbg!(index / block_len, index % block_len);
+                    let j_start = (size * 3) * (index / block_len);
+                    let i_start = 3 * (index % block_len);
+                    // dbg!(j_start, i_start);
+                    for j in 0..3 {
+                        for i in 0..3 {
+                            plane[j_start + j * size + i_start + i] = t.0[j * 3 + i];
+                        }
                     }
                 }
-                Some(Plane {
-                    size: self.size / 2 * 3,
-                    plane,
-                })
+                Some(Plane { size, plane })
             }
             Divided::By3(tiles) => {
-                let mut plane: Vec<bool> = (0..(4 * self.size / 3).pow(2))
-                    .map(|_| false)
-                    .collect::<Vec<_>>();
+                let block_len = self.size / 3;
+                let size = self.size / 3 * 4;
                 let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
-                let mut j = 0;
-                for (ii, t) in extended.iter().enumerate() {
-                    let i = ii % self.size;
-                    for k in 0..16 {
-                        plane[(j * self.size + i) * 16 + k] = t.0[k];
-                    }
-                    if i == self.size - 1 {
-                        j += 1;
+                let mut plane: Vec<bool> = (0..size.pow(2)).map(|_| false).collect::<Vec<_>>();
+                for (index, t) in extended.iter().enumerate() {
+                    let j_start = (size * 4) * (index / block_len);
+                    let i_start = 4 * (index % block_len);
+                    for j in 0..4 {
+                        for i in 0..4 {
+                            plane[j_start + j * size + i_start + i] = t.0[j * 4 + i];
+                        }
                     }
                 }
-                Some(Plane {
-                    size: self.size / 3 * 4,
-                    plane,
-                })
+                Some(Plane { size, plane })
             }
             Divided::None => None,
         }
@@ -138,9 +134,20 @@ trait Block: Clone {
     fn extend(&self, rule: &Rule) -> Self::Extended;
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Plane2(Vec<bool>);
 
+impl std::fmt::Debug for Plane2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, b) in self.0.iter().enumerate() {
+            let _ = write!(f, "{}", if *b { '#' } else { '.' });
+            if (i + 1) % 2 == 0 && i < 3 {
+                let _ = write!(f, "/");
+            }
+        }
+        Ok(())
+    }
+}
 impl Block for Plane2 {
     type Extended = Plane3;
     fn rotate_cw(&self) -> Self {
@@ -150,7 +157,7 @@ impl Block for Plane2 {
         Plane2(vec![self.0[1], self.0[0], self.0[3], self.0[2]])
     }
     fn extend(&self, rule: &Rule) -> Self::Extended {
-        dbg!(&self);
+        // dbg!(&self);
         for (k, v) in rule.iter() {
             if *k == self.0 {
                 return Plane3(v.clone());
@@ -160,9 +167,20 @@ impl Block for Plane2 {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Plane3(Vec<bool>);
 
+impl std::fmt::Debug for Plane3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, b) in self.0.iter().enumerate() {
+            let _ = write!(f, "{}", if *b { '#' } else { '.' });
+            if (i + 1) % 3 == 0 && i < 8 {
+                let _ = write!(f, "/");
+            }
+        }
+        Ok(())
+    }
+}
 impl Block for Plane3 {
     type Extended = Plane4;
     fn rotate_cw(&self) -> Self {
@@ -247,9 +265,8 @@ impl AdventOfCode for Puzzle {
             plane: vec![false, true, false, false, false, true, true, true, true],
         };
         for i in 0..5 {
-            println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
             grid = grid.extend(&self.rule).expect("something is wrong.");
-            println!("{:?}", grid.plane);
+            println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
         }
         grid.count()
     }
