@@ -11,19 +11,30 @@ use {
     std::collections::HashMap,
 };
 
+type Rule = HashMap<Vec<bool>, Vec<bool>>;
+
 enum Divided {
     By2(Vec<Plane2>),
     By3(Vec<Plane3>),
     None,
 }
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Plane {
     size: usize,
     plane: Vec<bool>,
 }
 
-type Rule = HashMap<Vec<bool>, Vec<bool>>;
-
+impl std::fmt::Debug for Plane {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, b) in self.plane.iter().enumerate() {
+            let _ = write!(f, "{}", if *b { '#' } else { '.' });
+            if (i + 1) % self.size == 0 {
+                let _ = writeln!(f);
+            }
+        }
+        Ok(())
+    }
+}
 impl Plane {
     fn divide(&self, rule: &Rule) -> Divided {
         if self.size % 2 == 0 {
@@ -37,7 +48,7 @@ impl Plane {
                         pack.push(self.plane[j * self.size + i]);
                     }
                 }
-                result.push(Plane2([pack[0], pack[1], pack[2], pack[3]]));
+                result.push(Plane2(vec![pack[0], pack[1], pack[2], pack[3]]));
             }
             return Divided::By2(result);
         } else if self.size % 3 == 0 {
@@ -51,7 +62,7 @@ impl Plane {
                         pack.push(self.plane[j * self.size + i]);
                     }
                 }
-                result.push(Plane3([
+                result.push(Plane3(vec![
                     pack[0], pack[1], pack[2], pack[3], pack[4], pack[5], pack[6], pack[7], pack[8],
                 ]));
             }
@@ -62,7 +73,7 @@ impl Plane {
     fn extend(&self, rule: &Rule) -> Option<Plane> {
         match self.divide(rule) {
             Divided::By2(tiles) => {
-                let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
+                let mut plane: Vec<bool> = (0..(3 * self.size / 2).pow(2))
                     .map(|_| false)
                     .collect::<Vec<_>>();
                 let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
@@ -82,7 +93,7 @@ impl Plane {
                 })
             }
             Divided::By3(tiles) => {
-                let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
+                let mut plane: Vec<bool> = (0..(4 * self.size / 3).pow(2))
                     .map(|_| false)
                     .collect::<Vec<_>>();
                 let extended = tiles.iter().map(|t| t.extend(rule)).collect::<Vec<_>>();
@@ -125,47 +136,57 @@ trait Block: Clone {
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-struct Plane2([bool; 4]);
+struct Plane2(Vec<bool>);
 
 impl Block for Plane2 {
     type Extended = Plane3;
     fn rotate_cw(&self) -> Self {
-        Plane2([self.0[2], self.0[0], self.0[3], self.0[1]])
+        Plane2(vec![self.0[2], self.0[0], self.0[3], self.0[1]])
     }
     fn flip_h(&self) -> Self {
-        Plane2([self.0[1], self.0[0], self.0[3], self.0[2]])
+        Plane2(vec![self.0[1], self.0[0], self.0[3], self.0[2]])
     }
     fn extend(&self, rule: &Rule) -> Self::Extended {
-        todo!();
+        for (k, v) in rule.iter() {
+            if *k == self.0 {
+                return Plane3(v.clone());
+            }
+        }
+        unreachable!()
     }
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-struct Plane3([bool; 9]);
+struct Plane3(Vec<bool>);
 
 impl Block for Plane3 {
     type Extended = Plane4;
     fn rotate_cw(&self) -> Self {
-        Plane3([
+        Plane3(vec![
             self.0[6], self.0[3], self.0[0], // first row
             self.0[7], self.0[4], self.0[1], // center row
             self.0[8], self.0[5], self.0[2], // last row
         ])
     }
     fn flip_h(&self) -> Self {
-        Plane3([
+        Plane3(vec![
             self.0[2], self.0[1], self.0[0], // first row
             self.0[5], self.0[4], self.0[3], // center row
             self.0[8], self.0[7], self.0[6], // last row
         ])
     }
     fn extend(&self, rule: &Rule) -> Self::Extended {
-        todo!();
+        for (k, v) in rule.iter() {
+            if *k == self.0 {
+                return Plane4(v.clone());
+            }
+        }
+        unreachable!();
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct Plane4([bool; 16]);
+struct Plane4(Vec<bool>);
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
@@ -195,15 +216,15 @@ impl AdventOfCode for Puzzle {
     }
     fn after_insert(&mut self) {
         for l in self.line.iter() {
-            println!("{:?} => {:?}", l.0, l.1,);
+            // println!("{:?} => {:?}", l.0, l.1,);
             if l.0.len() == 4 {
-                let p2 = Plane2([l.0[0], l.0[1], l.0[2], l.0[3]]);
+                let p2 = Plane2(vec![l.0[0], l.0[1], l.0[2], l.0[3]]);
                 for perm_index in 0..8 {
                     self.rule
                         .insert(p2.permutation(perm_index).0.to_vec(), l.1.clone());
                 }
             } else {
-                let p3 = Plane3([
+                let p3 = Plane3(vec![
                     l.0[0], l.0[1], l.0[2], l.0[3], l.0[4], l.0[5], l.0[6], l.0[7], l.0[8],
                 ]);
                 for perm_index in 0..8 {
@@ -215,6 +236,14 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.rule.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut grid: Plane = Plane {
+            size: 3,
+            plane: vec![false, true, false, false, false, true, true, true, true],
+        };
+        for i in 0..3 {
+            println!("{i}:\n{:?}", grid);
+            grid = grid.extend(&self.rule).expect("something is wrong.");
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
