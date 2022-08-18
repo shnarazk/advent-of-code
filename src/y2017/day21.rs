@@ -271,6 +271,15 @@ impl AdventOfCode for Puzzle {
         grid.count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut grid: Plane = Plane {
+            size: 3,
+            plane: vec![false, true, false, false, false, true, true, true, true],
+        };
+        for i in 0..18 {
+            grid = grid.extend(&self.rule).expect("something is wrong.");
+            // TODO: check multiple occurences of a block: we can reduce to a linear recursion.
+            // println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
+        }
+        grid.count()
     }
 }
