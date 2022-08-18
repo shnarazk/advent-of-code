@@ -40,12 +40,12 @@ impl Plane {
         if self.size % 2 == 0 {
             let mut result = Vec::new();
             for index in 0..(self.size / 2).pow(2) {
-                let j_start = index / (self.size / 2);
-                let i_start = index % (self.size / 2);
-                let mut pack: Vec<bool> = Vec::new();
-                for j in j_start..(j_start + 2) {
-                    for i in i_start..(i_start + 2) {
-                        pack.push(self.plane[j * self.size + i]);
+                let j_start = 2 * (index % (self.size / 2));
+                let i_start = 2 * (index / (self.size / 2));
+                let mut pack: Vec<bool> = vec![];
+                for j in 0..2 {
+                    for i in 0..2 {
+                        pack.push(self.plane[j_start + j * self.size + i_start + i]);
                     }
                 }
                 result.push(Plane2(vec![pack[0], pack[1], pack[2], pack[3]]));
@@ -54,12 +54,12 @@ impl Plane {
         } else if self.size % 3 == 0 {
             let mut result = Vec::new();
             for index in 0..(self.size / 3).pow(2) {
-                let j_start = index / (self.size / 3);
-                let i_start = index % (self.size / 3);
-                let mut pack: Vec<bool> = Vec::new();
-                for j in j_start..(j_start + 3) {
-                    for i in i_start..(i_start + 3) {
-                        pack.push(self.plane[j * self.size + i]);
+                let j_start = (self.size * 3) * (index / (self.size / 3));
+                let i_start = 3 * (index % (self.size / 3));
+                let mut pack: Vec<bool> = vec![];
+                for j in 0..3 {
+                    for i in 0..3 {
+                        pack.push(self.plane[j_start + j * self.size + i_start + i]);
                     }
                 }
                 result.push(Plane3(vec![
@@ -80,7 +80,7 @@ impl Plane {
                 let mut j = 0;
                 for (ii, t) in extended.iter().enumerate() {
                     let i = ii % self.size;
-                    for k in 0..4 {
+                    for k in 0..9 {
                         plane[(j * self.size + i) * 9 + k] = t.0[k];
                     }
                     if i == self.size - 1 {
@@ -100,7 +100,7 @@ impl Plane {
                 let mut j = 0;
                 for (ii, t) in extended.iter().enumerate() {
                     let i = ii % self.size;
-                    for k in 0..9 {
+                    for k in 0..16 {
                         plane[(j * self.size + i) * 16 + k] = t.0[k];
                     }
                     if i == self.size - 1 {
@@ -114,6 +114,9 @@ impl Plane {
             }
             Divided::None => None,
         }
+    }
+    fn count(&self) -> usize {
+        self.plane.iter().filter(|b| **b).count()
     }
 }
 
@@ -147,6 +150,7 @@ impl Block for Plane2 {
         Plane2(vec![self.0[1], self.0[0], self.0[3], self.0[2]])
     }
     fn extend(&self, rule: &Rule) -> Self::Extended {
+        dbg!(&self);
         for (k, v) in rule.iter() {
             if *k == self.0 {
                 return Plane3(v.clone());
@@ -178,6 +182,8 @@ impl Block for Plane3 {
     fn extend(&self, rule: &Rule) -> Self::Extended {
         for (k, v) in rule.iter() {
             if *k == self.0 {
+                // dbg!(&v);
+                // println!("{:?}", Plane4(v.clone()));
                 return Plane4(v.clone());
             }
         }
@@ -240,11 +246,12 @@ impl AdventOfCode for Puzzle {
             size: 3,
             plane: vec![false, true, false, false, false, true, true, true, true],
         };
-        for i in 0..3 {
-            println!("{i}:\n{:?}", grid);
+        for i in 0..5 {
+            println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
             grid = grid.extend(&self.rule).expect("something is wrong.");
+            println!("{:?}", grid.plane);
         }
-        0
+        grid.count()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
