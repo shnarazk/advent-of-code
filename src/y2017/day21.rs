@@ -59,17 +59,53 @@ impl Plane {
     }
     fn extend(&self) -> Option<Plane> {
         match self.divide() {
-            Divided::By2(v) => {}
-            Divided::By3(v) => {}
-            Divided::None => {
-                return None;
+            Divided::By2(tiles) => {
+                let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
+                    .map(|_| false)
+                    .collect::<Vec<_>>();
+                let extended = tiles.iter().map(|t| t.extend()).collect::<Vec<_>>();
+                let mut j = 0;
+                for (ii, t) in extended.iter().enumerate() {
+                    let i = ii % self.size;
+                    for k in 0..4 {
+                        plane[(j * self.size + i) * 9 + k] = t.0[k];
+                    }
+                    if i == self.size - 1 {
+                        j += 1;
+                    }
+                }
+                Some(Plane {
+                    size: self.size / 2 * 3,
+                    plane,
+                })
             }
+            Divided::By3(tiles) => {
+                let mut plane: Vec<bool> = (0..(2 * self.size).pow(2))
+                    .map(|_| false)
+                    .collect::<Vec<_>>();
+                let extended = tiles.iter().map(|t| t.extend()).collect::<Vec<_>>();
+                let mut j = 0;
+                for (ii, t) in extended.iter().enumerate() {
+                    let i = ii % self.size;
+                    for k in 0..9 {
+                        plane[(j * self.size + i) * 16 + k] = t.0[k];
+                    }
+                    if i == self.size - 1 {
+                        j += 1;
+                    }
+                }
+                Some(Plane {
+                    size: self.size / 3 * 4,
+                    plane,
+                })
+            }
+            Divided::None => None,
         }
-        todo!()
     }
 }
 
 trait Block: Clone {
+    type Extended;
     fn rotate_cw(&self) -> Self;
     fn flip_h(&self) -> Self;
     fn permutations(&self, index: usize) -> Self {
@@ -83,17 +119,22 @@ trait Block: Clone {
         }
         p
     }
+    fn extend(&self) -> Self::Extended;
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Plane2([bool; 4]);
 
 impl Block for Plane2 {
+    type Extended = Plane3;
     fn rotate_cw(&self) -> Self {
         Plane2([self.0[2], self.0[0], self.0[3], self.0[1]])
     }
     fn flip_h(&self) -> Self {
         Plane2([self.0[1], self.0[0], self.0[3], self.0[2]])
+    }
+    fn extend(&self) -> Self::Extended {
+        todo!();
     }
 }
 
@@ -101,6 +142,7 @@ impl Block for Plane2 {
 struct Plane3([bool; 9]);
 
 impl Block for Plane3 {
+    type Extended = Plane4;
     fn rotate_cw(&self) -> Self {
         Plane3([
             self.0[6], self.0[3], self.0[0], // first row
@@ -115,7 +157,13 @@ impl Block for Plane3 {
             self.0[8], self.0[7], self.0[6], // last row
         ])
     }
+    fn extend(&self) -> Self::Extended {
+        todo!();
+    }
 }
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Plane4([bool; 16]);
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
