@@ -51,7 +51,7 @@ impl AdventOfCode for Puzzle {
         self.maximize_bridge(init)
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.maximize_bridge2(Bridge::default()).1
     }
 }
 
@@ -66,6 +66,20 @@ impl Puzzle {
                 value = value.max(self.maximize_bridge(bridge.extends(i, link.0, link.1)));
             } else if bridge.open_end == link.1 {
                 value = value.max(self.maximize_bridge(bridge.extends(i, link.1, link.0)));
+            }
+        }
+        value
+    }
+    fn maximize_bridge2(&self, bridge: Bridge) -> (usize, usize) {
+        let mut value: (usize, usize) = (bridge.link.len(), bridge.weight);
+        for (i, link) in self.line.iter().enumerate() {
+            if bridge.link.contains(&i) {
+                continue;
+            }
+            if bridge.open_end == link.0 {
+                value = value.max(self.maximize_bridge2(bridge.extends(i, link.0, link.1)));
+            } else if bridge.open_end == link.1 {
+                value = value.max(self.maximize_bridge2(bridge.extends(i, link.1, link.0)));
             }
         }
         value
