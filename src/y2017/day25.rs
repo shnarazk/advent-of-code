@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2017/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -29,7 +22,7 @@ pub struct Puzzle {
 #[aoc(2017, 25)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn after_insert(&mut self) {
@@ -186,7 +179,7 @@ impl AdventOfCode for Puzzle {
         let mut tape: HashMap<isize, usize> = HashMap::new();
         let mut cursor: isize = 0;
         let mut state: u8 = b'A';
-        for i in 0..self.step {
+        for _ in 0..self.step {
             if let Some(rule) = self.line.iter().find(|&r| {
                 r.current_state == state && *tape.get(&cursor).unwrap_or(&0) == r.current_value
             }) {
