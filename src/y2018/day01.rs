@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -19,7 +19,7 @@ pub struct Puzzle {
 #[aoc_at(2018, 1)]
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
-    type Output2 = usize;
+    type Output2 = isize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(line_parser::to_isize(block)?);
@@ -32,6 +32,16 @@ impl AdventOfCode for Puzzle {
         self.line.iter().copied().sum::<isize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut seen: HashSet<isize> = HashSet::new();
+        let mut sum: isize = 0;
+        seen.insert(sum);
+        for f in self.line.iter().cycle() {
+            sum += *f;
+            if seen.contains(&sum) {
+                return sum;
+            }
+            seen.insert(sum);
+        }
+        unreachable!();
     }
 }
