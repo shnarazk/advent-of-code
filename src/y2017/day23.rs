@@ -4,6 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
+        color::REVERT,
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser, regex,
@@ -35,7 +36,46 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        println!();
+        let mut b = 67 * 100 + 100000;
+        let c = b + 17000;
+        // let mut d = 2;
+        let e = 2;
+        let f = 1;
+        let mut h = 0;
+        loop {
+            // println!("{REVERT}B:{b:>8}, D:{d:>8}, E:{e:>8}, F:{f:>8}, H:{h:>8}");
+            // //            if d * e == b {
+            // //                f = 0;
+            // //            }
+            // e += 1;
+            // if e != b {
+            //     continue;
+            // }
+            // e = b;
+
+            // //            d += 1;
+            // //            if d != b {
+            // //                // e = 2;
+            // //                continue;
+            // //            }
+            // // d = b;
+
+            // //            if f == 0 {
+            // //                h += 1;
+            // //            }
+            if (2..=((b as f64).sqrt() as usize)).any(|k| b % k == 0) {
+                h += 1;
+            }
+
+            if c == b {
+                break;
+            }
+            b += 17;
+            // d = 2;
+            // e = 2;
+        }
+        h
     }
 }
 
