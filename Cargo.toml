@@ -17,7 +17,7 @@ serde_json = { version = "1.0", optional = true }
 splr = { version = "^0.15", optional = true }
 
 [features]
-default = ["y2017"]
+default = ["y2018"]
 y2022 = []
 y2021 = []
 y2020 = ["nom", "splr"]
