@@ -24,13 +24,15 @@
 
 ![](https://user-images.githubusercontent.com/997855/182404533-3f2328ec-a9ad-4b64-8103-3588eb08ea42.png)
 
-## 2018 DNS
+## 2018 ongoing
 
 * [calendar](https://adventofcode.com/2018)
 
-## 2017 ongoing
+## 2017 completed
 
 * [calendar](https://adventofcode.com/2017)
+ 
+![](https://user-images.githubusercontent.com/997855/185718427-a07f1447-a476-465e-9d96-89688e13d7d1.png)
 
 ## 2016 completed
 
