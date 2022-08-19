@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2017/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -99,7 +92,7 @@ impl AdventOfCode for Puzzle {
         let mut carrier_direction: Location = UP;
         let mut infects = 0;
         self.render();
-        for step in 0..10000 {
+        for _ in 0..10000 {
             let mode = self.infection_map.contains(&carrier_position);
             carrier_direction = turn_to(carrier_direction, mode);
             if mode {
@@ -121,7 +114,7 @@ impl AdventOfCode for Puzzle {
         let mut carrier_direction: Location = UP;
         let mut infects = 0;
         self.render2();
-        for step in 0..10_000_000 {
+        for _ in 0..10_000_000 {
             let mode: &Mode2 = self
                 .infection_map2
                 .get(&carrier_position)
