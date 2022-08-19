@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
 };
 
 type Location = (isize, isize);
@@ -39,9 +39,29 @@ fn rotate_ccw(dir: Location) -> Location {
 
 fn turn_to(dir: Location, infected: bool) -> Location {
     if infected {
-        rotate_cw(dir)
+        rotate_cw(dir) // right
     } else {
-        rotate_ccw(dir)
+        rotate_ccw(dir) // left
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
+enum Mode2 {
+    #[default]
+    Clean,
+    Weakened,
+    Infected,
+    Flagged,
+}
+
+impl Mode2 {
+    fn shift(&self) -> Mode2 {
+        match self {
+            Mode2::Clean => Mode2::Weakened,
+            Mode2::Weakened => Mode2::Infected,
+            Mode2::Infected => Mode2::Flagged,
+            Mode2::Flagged => Mode2::Clean,
+        }
     }
 }
 
@@ -49,6 +69,7 @@ fn turn_to(dir: Location, infected: bool) -> Location {
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     infection_map: HashSet<Location>,
+    infection_map2: HashMap<Location, Mode2>,
 }
 
 #[aoc(2017, 22)]
@@ -65,6 +86,8 @@ impl AdventOfCode for Puzzle {
             for (i, b) in line.iter().enumerate() {
                 if *b {
                     self.infection_map.insert((j as isize, i as isize));
+                    self.infection_map2
+                        .insert((j as isize, i as isize), Mode2::Infected);
                 }
             }
         }
@@ -93,7 +116,41 @@ impl AdventOfCode for Puzzle {
         infects
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let len = self.line.len();
+        let mut carrier_position: Location = ((len / 2) as isize, (len / 2) as isize);
+        let mut carrier_direction: Location = UP;
+        let mut infects = 0;
+        self.render2();
+        for step in 0..10_000_000 {
+            let mode: &Mode2 = self
+                .infection_map2
+                .get(&carrier_position)
+                .unwrap_or(&Mode2::Clean);
+            match mode {
+                Mode2::Clean => {
+                    carrier_direction = turn_to(carrier_direction, false); // left
+                    self.infection_map2.insert(carrier_position, mode.shift());
+                }
+                Mode2::Weakened => {
+                    self.infection_map2.insert(carrier_position, mode.shift());
+                    infects += 1;
+                }
+                Mode2::Infected => {
+                    carrier_direction = turn_to(carrier_direction, true); // right
+                    self.infection_map2.insert(carrier_position, mode.shift());
+                }
+                Mode2::Flagged => {
+                    carrier_direction = turn_to(carrier_direction, true);
+                    carrier_direction = turn_to(carrier_direction, true);
+                    self.infection_map2.remove(&carrier_position);
+                }
+            }
+            carrier_position.0 += carrier_direction.0;
+            carrier_position.1 += carrier_direction.1;
+            // println!("{:?}@{step}", carrier_position);
+            // self.render2();
+        }
+        infects
     }
 }
 
@@ -107,6 +164,22 @@ impl Puzzle {
                         '#'
                     } else {
                         '.'
+                    }
+                );
+            }
+            println!();
+        }
+    }
+    fn render2(&self) {
+        for j in -3..5_isize {
+            for i in -3..6_isize {
+                print!(
+                    "{}",
+                    match self.infection_map2.get(&(j, i)) {
+                        Some(Mode2::Clean) | None => '.',
+                        Some(Mode2::Weakened) => 'W',
+                        Some(Mode2::Infected) => '#',
+                        Some(Mode2::Flagged) => 'F',
                     }
                 );
             }
