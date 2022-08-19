@@ -1,15 +1,11 @@
 //! <https://adventofcode.com/2017/day/23>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
-        color::REVERT,
+        // color::REVERT,
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
-    std::collections::{HashMap, VecDeque},
+    std::collections::HashMap,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -40,8 +36,8 @@ impl AdventOfCode for Puzzle {
         let mut b = 67 * 100 + 100000;
         let c = b + 17000;
         // let mut d = 2;
-        let e = 2;
-        let f = 1;
+        // // let e = 2;
+        // // let f = 1;
         let mut h = 0;
         loop {
             // println!("{REVERT}B:{b:>8}, D:{d:>8}, E:{e:>8}, F:{f:>8}, H:{h:>8}");
@@ -79,15 +75,6 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-type Channel = [VecDeque<usize>; 2];
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-enum RuntimeState {
-    #[default]
-    None,
-    Receiving(usize),
-    Sending(usize, usize),
-}
-
 #[derive(Debug, Default, Eq, PartialEq)]
 struct Runtime {
     id: usize,
@@ -95,7 +82,6 @@ struct Runtime {
     register: HashMap<Val, isize>,
     memory: HashMap<usize, Inst>,
     frequency: usize,
-    state: RuntimeState,
     debug_counter: usize,
 }
 
@@ -115,7 +101,6 @@ impl Runtime {
             register,
             memory,
             frequency: 0,
-            state: RuntimeState::None,
             debug_counter: 0,
         }
     }
