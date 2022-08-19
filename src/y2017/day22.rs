@@ -71,24 +71,46 @@ impl AdventOfCode for Puzzle {
         dbg!(self.infection_map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut carrier_position: Location = (0, 0);
+        let len = self.line.len();
+        let mut carrier_position: Location = ((len / 2) as isize, (len / 2) as isize);
         let mut carrier_direction: Location = UP;
-        let mut bursts = 0;
-        for _ in 0..50 {
+        let mut infects = 0;
+        self.render();
+        for step in 0..10000 {
             let mode = self.infection_map.contains(&carrier_position);
             carrier_direction = turn_to(carrier_direction, mode);
             if mode {
-                bursts += 1;
-                self.infection_map.insert(carrier_position);
-            } else {
                 self.infection_map.remove(&carrier_position);
+            } else {
+                infects += 1;
+                self.infection_map.insert(carrier_position);
             }
             carrier_position.0 += carrier_direction.0;
             carrier_position.1 += carrier_direction.1;
+            // println!("{step}");
+            // self.render();
         }
-        bursts
+        infects
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+impl Puzzle {
+    fn render(&self) {
+        for j in -3..6_isize {
+            for i in -3..6_isize {
+                print!(
+                    "{}",
+                    if self.infection_map.contains(&(j, i)) {
+                        '#'
+                    } else {
+                        '.'
+                    }
+                );
+            }
+            println!();
+        }
     }
 }
