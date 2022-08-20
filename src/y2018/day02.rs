@@ -13,31 +13,32 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<u8>>,
 }
 
 #[aoc(2018, 2)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line
+            .push(block.chars().map(|c| c as u8).collect::<Vec<_>>());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut twice: usize = 0;
+        let mut thrice: usize = 0;
+        for w in self.line.iter() {
+            let mut count: HashMap<u8, usize> = HashMap::new();
+            for c in w.iter() {
+                *count.entry(*c).or_insert(0) += 1;
+            }
+            twice += count.values().any(|c| *c == 2) as usize;
+            thrice += count.values().any(|c| *c == 3) as usize;
+        }
+        twice * thrice
     }
     fn part2(&mut self) -> Self::Output2 {
         0
