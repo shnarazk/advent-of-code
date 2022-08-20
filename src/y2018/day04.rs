@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/4>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -117,10 +113,10 @@ impl AdventOfCode for Puzzle {
         let mut days: HashMap<usize, HashSet<Day>> = HashMap::new();
         for (l, r) in self.line.iter().enumerate() {
             match r {
-                Record::Start(ts, g) => {
+                Record::Start(_ts, g) => {
                     guard = Some(*g);
                 }
-                Record::Sleep(ts, b) => {
+                Record::Sleep(_ts, b) => {
                     beg = Some(*b);
                 }
                 Record::Wake_(ts, e) => {
@@ -156,13 +152,13 @@ impl AdventOfCode for Puzzle {
         let mut minute = [0_usize; 60];
         for r in self.line.iter() {
             match r {
-                Record::Start(ts, g) => {
+                Record::Start(_ts, g) => {
                     guard = Some(*g);
                 }
-                Record::Sleep(ts, b) => {
+                Record::Sleep(_ts, b) => {
                     beg = Some(*b);
                 }
-                Record::Wake_(ts, e) => {
+                Record::Wake_(_ts, e) => {
                     if guard == Some(id_max) {
                         if let Some(b) = beg {
                             for p in &mut minute[b..*e] {
@@ -190,23 +186,18 @@ impl AdventOfCode for Puzzle {
         let mut beg: Option<usize> = None;
         let mut total: HashMap<usize, usize> = HashMap::new();
         let mut minite_report: HashMap<usize, [usize; 60]> = HashMap::new();
-        for (l, r) in self.line.iter().enumerate() {
+        for r in self.line.iter() {
             match r {
-                Record::Start(ts, g) => {
+                Record::Start(_ts, g) => {
                     guard = Some(*g);
                 }
-                Record::Sleep(ts, b) => {
+                Record::Sleep(_ts, b) => {
                     beg = Some(*b);
                 }
-                Record::Wake_(ts, e) => {
+                Record::Wake_(_ts, e) => {
                     if let Some(g) = guard {
                         if let Some(b) = beg {
-                            if *e < b {
-                                for i in l - 2..l + 2 {
-                                    println!("{:?}", &self.line[i]);
-                                }
-                                panic!();
-                            }
+                            assert!(b < *e);
                             *total.entry(g).or_insert(0) += e - b;
                             for t in b..*e {
                                 minite_report.entry(g).or_insert([0; 60])[t] += 1;
