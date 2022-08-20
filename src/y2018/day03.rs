@@ -6,38 +6,55 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
 
+type Dim2 = (usize, usize);
+
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Claim {
+    id: usize,
+    left: usize,
+    top: usize,
+    width: usize,
+    height: usize,
+}
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Claim>,
 }
 
 #[aoc(2018, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        // #50 @ 718,864: 26x16
+        let parser = regex!(r"^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line.push(Claim {
+            id: segment[1].parse::<usize>()?,
+            left: segment[2].parse::<usize>()?,
+            top: segment[3].parse::<usize>()?,
+            width: segment[4].parse::<usize>()?,
+            height: segment[5].parse::<usize>()?,
+        });
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut used: HashMap<Dim2, usize> = HashMap::new();
+        for c in self.line.iter() {
+            for j in (c.top..).take(c.height) {
+                for i in (c.left..).take(c.width) {
+                    *used.entry((j, i)).or_insert(0) += 1;
+                }
+            }
+        }
+        used.values().filter(|&&n| 1 < n).count()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
