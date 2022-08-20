@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
 type Dim2 = (usize, usize);
@@ -57,6 +57,29 @@ impl AdventOfCode for Puzzle {
         used.values().filter(|&&n| 1 < n).count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut used: HashMap<Dim2, usize> = HashMap::new();
+        let mut duplicated: HashSet<usize> = HashSet::new();
+        for c in self.line.iter() {
+            let mut dup = false;
+            for j in (c.top..).take(c.height) {
+                for i in (c.left..).take(c.width) {
+                    if let Some(d) = used.get(&(j, i)) {
+                        duplicated.insert(*d);
+                        dup = true;
+                    } else {
+                        used.insert((j, i), c.id);
+                    }
+                }
+            }
+            if dup {
+                duplicated.insert(c.id);
+            }
+        }
+        for id in self.line.iter().map(|c| c.id) {
+            if !duplicated.contains(&id) {
+                return id;
+            }
+        }
+        unreachable!();
     }
 }
