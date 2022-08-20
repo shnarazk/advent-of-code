@@ -127,7 +127,6 @@ impl AdventOfCode for Puzzle {
                     if let Some(g) = guard {
                         if let Some(b) = beg {
                             if *e < b {
-                                dbg!(l);
                                 for i in l - 2..l + 2 {
                                     println!("{:?}", &self.line[i]);
                                 }
@@ -153,7 +152,6 @@ impl AdventOfCode for Puzzle {
                 id_max = *guard_id;
             }
         }
-        dbg!(id_max);
         let mut minute = [0_usize; 60];
         for r in self.line.iter() {
             match r {
@@ -180,8 +178,8 @@ impl AdventOfCode for Puzzle {
         let mut occurs_max = 0;
         for (i, o) in minute.iter().enumerate() {
             if occurs_max < *o {
-                occurs_max = dbg!(*o);
-                minute_max = dbg!(i);
+                occurs_max = *o;
+                minute_max = i;
             }
         }
         id_max * minute_max
