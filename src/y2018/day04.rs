@@ -114,7 +114,7 @@ impl AdventOfCode for Puzzle {
         let mut guard: Option<usize> = None;
         let mut beg: Option<usize> = None;
         let mut total: HashMap<usize, usize> = HashMap::new();
-        let mut occur: HashMap<usize, HashSet<Day>> = HashMap::new();
+        let mut days: HashMap<usize, HashSet<Day>> = HashMap::new();
         for (l, r) in self.line.iter().enumerate() {
             match r {
                 Record::Start(ts, g) => {
@@ -133,8 +133,9 @@ impl AdventOfCode for Puzzle {
                                 panic!();
                             }
                             *total.entry(g).or_insert(0) += e - b;
-                            let e = occur.entry(g).or_insert_with(HashSet::new);
-                            e.insert(ts.as_day());
+                            days.entry(g)
+                                .or_insert_with(HashSet::new)
+                                .insert(ts.as_day());
                         }
                     }
                     beg = None;
@@ -145,8 +146,8 @@ impl AdventOfCode for Puzzle {
         let mut len_max: f64 = 0.0;
         let mut id_max: usize = 0;
         for (guard_id, val) in total.iter() {
-            let n_occurs = occur.get(guard_id).unwrap();
-            let v = *val as f64 / (n_occurs.len() as f64);
+            let n_days = days.get(guard_id).unwrap();
+            let v = *val as f64 / (n_days.len() as f64);
             if len_max < v {
                 len_max = v;
                 id_max = *guard_id;
@@ -184,7 +185,48 @@ impl AdventOfCode for Puzzle {
         }
         id_max * minute_max
     }
-    fn part2(&mut self) -> Self::Output2 {
-        0
+    fn part2(&mut self) -> Self::Output1 {
+        let mut guard: Option<usize> = None;
+        let mut beg: Option<usize> = None;
+        let mut total: HashMap<usize, usize> = HashMap::new();
+        let mut minite_report: HashMap<usize, [usize; 60]> = HashMap::new();
+        for (l, r) in self.line.iter().enumerate() {
+            match r {
+                Record::Start(ts, g) => {
+                    guard = Some(*g);
+                }
+                Record::Sleep(ts, b) => {
+                    beg = Some(*b);
+                }
+                Record::Wake_(ts, e) => {
+                    if let Some(g) = guard {
+                        if let Some(b) = beg {
+                            if *e < b {
+                                for i in l - 2..l + 2 {
+                                    println!("{:?}", &self.line[i]);
+                                }
+                                panic!();
+                            }
+                            *total.entry(g).or_insert(0) += e - b;
+                            for t in b..*e {
+                                minite_report.entry(g).or_insert([0; 60])[t] += 1;
+                            }
+                        }
+                    }
+                    beg = None;
+                }
+            }
+        }
+        let mut frequent_max: usize = 0;
+        let mut result: usize = 0;
+        for (guard_id, minites) in minite_report.iter() {
+            for (minite, occ) in minites.iter().enumerate() {
+                if frequent_max < *occ {
+                    frequent_max = *occ;
+                    result = *guard_id * minite;
+                }
+            }
+        }
+        result
     }
 }
