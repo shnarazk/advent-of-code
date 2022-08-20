@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2018/day/2>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -63,6 +56,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        "".to_string()
+        unreachable!()
     }
 }
