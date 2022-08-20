@@ -8,36 +8,183 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Timestamp {
+    year: usize,
+    month: usize,
+    day: usize,
+    hour: usize,
+    min: usize,
+}
+
+impl Timestamp {
+    fn as_day(&self) -> Day {
+        Day {
+            year: self.year,
+            month: self.month,
+            day: self.day,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Day {
+    year: usize,
+    month: usize,
+    day: usize,
+}
+
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+enum Record {
+    Start(Timestamp, usize),
+    Sleep(Timestamp, usize),
+    Wake_(Timestamp, usize),
+}
+
+impl Record {
+    fn timestamp(&self) -> Timestamp {
+        match self {
+            Record::Start(ts, _) => *ts,
+            Record::Sleep(ts, _) => *ts,
+            Record::Wake_(ts, _) => *ts,
+        }
+    }
+}
+
+#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Record>,
 }
 
 #[aoc(2018, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
-        Ok(())
+        //  [1518-06-12 00:00] Guard #1231 begins shift
+        //  [1518-03-06 00:56] wakes up
+        //  [1518-05-30 00:14] falls asleep
+        let begin =
+            regex!(r"^\[(\d{4})\-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] Guard #(\d+) begins shift");
+        let sleep = regex!(r"^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] falls asleep");
+        let wakes = regex!(r"^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] wakes up");
+        if let Some(segment) = begin.captures(block) {
+            let timestamp = Timestamp {
+                year: segment[1].parse::<usize>()?,
+                month: segment[2].parse::<usize>()?,
+                day: segment[3].parse::<usize>()?,
+                hour: segment[4].parse::<usize>()?,
+                min: segment[5].parse::<usize>()?,
+            };
+            self.line
+                .push(Record::Start(timestamp, segment[6].parse::<usize>()?));
+            return Ok(());
+        } else if let Some(segment) = sleep.captures(block) {
+            let timestamp = Timestamp {
+                year: segment[1].parse::<usize>()?,
+                month: segment[2].parse::<usize>()?,
+                day: segment[3].parse::<usize>()?,
+                hour: segment[4].parse::<usize>()?,
+                min: segment[5].parse::<usize>()?,
+            };
+            self.line
+                .push(Record::Sleep(timestamp, segment[5].parse::<usize>()?));
+            return Ok(());
+        } else if let Some(segment) = wakes.captures(block) {
+            let timestamp = Timestamp {
+                year: segment[1].parse::<usize>()?,
+                month: segment[2].parse::<usize>()?,
+                day: segment[3].parse::<usize>()?,
+                hour: segment[4].parse::<usize>()?,
+                min: segment[5].parse::<usize>()?,
+            };
+            self.line
+                .push(Record::Wake_(timestamp, segment[5].parse::<usize>()?));
+            return Ok(());
+        }
+        Err(ParseError)
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        self.line.sort_by_key(|e| e.timestamp());
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut guard: Option<usize> = None;
+        let mut beg: Option<usize> = None;
+        let mut total: HashMap<usize, usize> = HashMap::new();
+        let mut occur: HashMap<usize, HashSet<Day>> = HashMap::new();
+        for (l, r) in self.line.iter().enumerate() {
+            match r {
+                Record::Start(ts, g) => {
+                    guard = Some(*g);
+                }
+                Record::Sleep(ts, b) => {
+                    beg = Some(*b);
+                }
+                Record::Wake_(ts, e) => {
+                    if let Some(g) = guard {
+                        if let Some(b) = beg {
+                            if *e < b {
+                                dbg!(l);
+                                for i in l - 2..l + 2 {
+                                    println!("{:?}", &self.line[i]);
+                                }
+                                panic!();
+                            }
+                            *total.entry(g).or_insert(0) += e - b;
+                            let e = occur.entry(g).or_insert_with(HashSet::new);
+                            e.insert(ts.as_day());
+                        }
+                    }
+                    beg = None;
+                }
+            }
+        }
+        // dbg!(&total);
+        let mut len_max: f64 = 0.0;
+        let mut id_max: usize = 0;
+        for (guard_id, val) in total.iter() {
+            let n_occurs = occur.get(guard_id).unwrap();
+            let v = *val as f64 / (n_occurs.len() as f64);
+            if len_max < v {
+                len_max = v;
+                id_max = *guard_id;
+            }
+        }
+        dbg!(id_max);
+        let mut minute = [0_usize; 60];
+        for r in self.line.iter() {
+            match r {
+                Record::Start(ts, g) => {
+                    guard = Some(*g);
+                }
+                Record::Sleep(ts, b) => {
+                    beg = Some(*b);
+                }
+                Record::Wake_(ts, e) => {
+                    if guard == Some(id_max) {
+                        if let Some(b) = beg {
+                            for p in &mut minute[b..*e] {
+                                *p += 1;
+                            }
+                        }
+                    }
+                    beg = None;
+                }
+            }
+        }
+        // dbg!(&minute);
+        let mut minute_max = 0;
+        let mut occurs_max = 0;
+        for (i, o) in minute.iter().enumerate() {
+            if occurs_max < *o {
+                occurs_max = dbg!(*o);
+                minute_max = dbg!(i);
+            }
+        }
+        id_max * minute_max
     }
     fn part2(&mut self) -> Self::Output2 {
         0
