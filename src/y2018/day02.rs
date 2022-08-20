@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line.len());
+        // dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut twice: usize = 0;
