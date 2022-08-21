@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -50,6 +50,43 @@ impl AdventOfCode for Puzzle {
         self.line.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let dist = b'a' - b'A';
+        let mut units: HashSet<u8> = HashSet::new();
+        for c in self.line.iter().filter(|c| b'A' <= **c && **c <= b'Z') {
+            units.insert(*c);
+        }
+        dbg!(units.len());
+        let mut len = usize::MAX;
+        for unit in units.iter() {
+            let v = self
+                .line
+                .iter()
+                .filter(|c| **c != *unit && **c != *unit + dist)
+                .copied()
+                .collect::<Vec<_>>();
+            len = len.min(shrinkable(v));
+        }
+        len
     }
+}
+
+fn shrinkable(mut p: Vec<u8>) -> usize {
+    let dist = b'a' - b'A';
+    let mut updated = true;
+    while updated {
+        updated = false;
+        let mut index = 0;
+        for i in 0..p.len() - 1 {
+            if p[i] + dist == p[i + 1] || p[i] == p[i + 1] + dist {
+                index = i;
+                updated = true;
+                break;
+            }
+        }
+        if updated {
+            p.remove(index);
+            p.remove(index);
+        }
+    }
+    p.len()
 }
