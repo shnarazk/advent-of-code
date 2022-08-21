@@ -42,7 +42,6 @@ impl AdventOfCode for Puzzle {
         assert!(10 < min_y && 10 < min_x);
         let offset: usize = 10;
         let mut infinite_ids: HashSet<usize> = HashSet::new();
-        // let
         // top edge and bottom edge
         for x in (min_x - offset)..(max_x + offset) {
             for y in [min_y, max_y] {
@@ -61,13 +60,11 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(infinite_ids.len());
         // let's draw the picture
-        // let mut map: HashMap<(usize, usize), usize> = HashMap::new();
         let mut count: HashMap<usize, usize> = HashMap::new();
         for y in min_y..=max_y {
             for x in min_x..=max_x {
                 let ids = self.shortest_to((y, x)).1;
                 if ids.len() == 1 && !infinite_ids.contains(&ids[0]) {
-                    // map.insert((y, x), ids[0]);
                     *count.entry(ids[0]).or_insert(0) += 1;
                 }
             }
