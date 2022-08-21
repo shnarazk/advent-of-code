@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2018/day/5>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashSet,
 };
 
@@ -89,4 +82,33 @@ fn shrinkable(mut p: Vec<u8>) -> usize {
         }
     }
     p.len()
+}
+
+#[allow(dead_code)]
+fn shrinkable2(p: &[u8]) -> usize {
+    let dist = b'a' - b'A';
+    let mut count = 0;
+    let mut pre_index = 0;
+    let mut pre_char = b' ';
+    let mut index = 0;
+    while let Some(c) = p.get(index) {
+        if *c + dist == pre_char || *c == pre_char + dist {
+            if 0 < pre_index {
+                // TODO: This is imcomplete. we need to make 'holes' to skip already
+                // shrunk letters, then skip them.
+                // while p[pre_index] == b' ' { if 0 < pre_index { pre_index -= 1; } else {...}  }
+                pre_index -= 1;
+                pre_char = p[pre_index];
+            } else {
+                pre_index = index;
+                pre_char = b' ';
+            }
+        } else {
+            count += 1;
+            pre_index = index;
+            pre_char = *c;
+        }
+        index += 1;
+    }
+    count
 }
