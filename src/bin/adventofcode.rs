@@ -28,7 +28,6 @@ pub fn main() {
             " $0 YYYY DD P\t\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD.txtを入力として実行"
         );
         println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD-TTT.txtを入力として実行");
-        println!(" $0 YYYY DD P -\t\tYYYY年DD日目のパートPを入力なしで実行");
         panic!();
     }
     let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
