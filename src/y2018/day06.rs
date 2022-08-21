@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/6>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -34,10 +30,10 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let min_y = self.line.iter().map(|(y, x)| *y).min().expect("strange");
-        let max_y = self.line.iter().map(|(y, x)| *y).max().expect("strange");
-        let min_x = self.line.iter().map(|(y, x)| *x).min().expect("strange");
-        let max_x = self.line.iter().map(|(y, x)| *x).max().expect("strange");
+        let min_y = self.line.iter().map(|(y, _)| *y).min().expect("strange");
+        let max_y = self.line.iter().map(|(y, _)| *y).max().expect("strange");
+        let min_x = self.line.iter().map(|(_, x)| *x).min().expect("strange");
+        let max_x = self.line.iter().map(|(_, x)| *x).max().expect("strange");
         dbg!(min_y, min_x, max_y, max_x);
         assert!(10 < min_y && 10 < min_x);
         let offset: usize = 10;
@@ -73,10 +69,10 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let limit = 10000;
-        let min_y = self.line.iter().map(|(y, x)| *y).min().expect("strange");
-        let max_y = self.line.iter().map(|(y, x)| *y).max().expect("strange");
-        let min_x = self.line.iter().map(|(y, x)| *x).min().expect("strange");
-        let max_x = self.line.iter().map(|(y, x)| *x).max().expect("strange");
+        let min_y = self.line.iter().map(|(y, _)| *y).min().expect("strange");
+        let max_y = self.line.iter().map(|(y, _)| *y).max().expect("strange");
+        let min_x = self.line.iter().map(|(_, x)| *x).min().expect("strange");
+        let max_x = self.line.iter().map(|(_, x)| *x).max().expect("strange");
         dbg!(min_y, min_x, max_y, max_x);
         let offset: usize = 0;
         assert!(limit < self.distance_sum((min_y - offset, min_x - offset)));
