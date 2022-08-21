@@ -72,7 +72,26 @@ impl AdventOfCode for Puzzle {
         *count.values().max().unwrap_or(&0)
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let limit = 10000;
+        let min_y = self.line.iter().map(|(y, x)| *y).min().expect("strange");
+        let max_y = self.line.iter().map(|(y, x)| *y).max().expect("strange");
+        let min_x = self.line.iter().map(|(y, x)| *x).min().expect("strange");
+        let max_x = self.line.iter().map(|(y, x)| *x).max().expect("strange");
+        dbg!(min_y, min_x, max_y, max_x);
+        let offset: usize = 0;
+        assert!(limit < self.distance_sum((min_y - offset, min_x - offset)));
+        assert!(limit < self.distance_sum((min_y - offset, max_x + offset)));
+        assert!(limit < self.distance_sum((max_y + offset, min_x - offset)));
+        assert!(limit < self.distance_sum((max_y + offset, max_x + offset)));
+        let mut count = 0;
+        for y in min_y..=max_y {
+            for x in min_x..=max_x {
+                if self.distance_sum((y, x)) < limit {
+                    count += 1;
+                }
+            }
+        }
+        count
     }
 }
 
@@ -96,5 +115,8 @@ impl Puzzle {
             }
         }
         (min_dist, min_ids)
+    }
+    fn distance_sum(&self, p: (usize, usize)) -> usize {
+        self.line.iter().map(|q| mdist!(p, q)).sum::<usize>()
     }
 }
