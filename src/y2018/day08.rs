@@ -35,9 +35,9 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    // return:
-    // - the index of the next entry
-    // - and the sum of metadatas in this range
+    /// return:
+    /// - the index of the next entry
+    /// - and the sum of metadatas in this range
     fn build_span(&self, index: usize) -> (usize, usize) {
         let num_children = self.line[index];
         let num_metadata = self.line[index + 1];
