@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/8>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::HashMap,
 };
@@ -61,9 +57,6 @@ impl Puzzle {
         }
         (i + num_metadata, sum_metas)
     }
-    /// return:
-    /// - the index of the next entry
-    /// - and the sum of metadatas in this range
     fn build_table(&self, index: usize, table: &mut HashMap<usize, Metadata>) -> usize {
         let num_children = self.line[index];
         let num_metadata = self.line[index + 1];
@@ -93,9 +86,8 @@ impl Puzzle {
 }
 
 fn sum_meta(index: usize, table: &HashMap<usize, Metadata>) -> usize {
-    // dbg!(vec.len());
     match table.get(&index) {
-        Some(Metadata::Leaf(n)) => dbg!(*n),
+        Some(Metadata::Leaf(n)) => *n,
         Some(Metadata::Link(v)) => v.iter().map(|n| sum_meta(*n, table)).sum(),
         None => 0,
     }
