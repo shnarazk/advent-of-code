@@ -65,16 +65,16 @@ impl AdventOfCode for Puzzle {
         circle_ptr.resize(self.points, 0);
         let mut current = 0;
         let mut next_ball = 1;
+        let mut cached_ptr = 0;
         for e in (1..=self.players).cycle() {
             if next_ball % 23 == 0 {
                 points[e - 1] += next_ball;
-                let mut ptr = 0;
                 let mut buffer = [0; 8];
                 let mut count = 0;
-                while ptr != current || count < 8 {
+                while cached_ptr != current || count < 8 {
                     count += 1;
-                    buffer[count % 8] = ptr;
-                    ptr = circle_ptr[ptr];
+                    buffer[count % 8] = cached_ptr;
+                    cached_ptr = circle_ptr[cached_ptr];
                 }
                 let prev_of_delete = buffer[(count + 1) % 8];
                 let deletion_target = buffer[(count + 2) % 8];
