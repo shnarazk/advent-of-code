@@ -61,32 +61,32 @@ impl AdventOfCode for Puzzle {
         // self.points = 1618;
         let mut points = Vec::new();
         points.resize(self.players, 0);
-        let mut circle_ptr = Vec::new();
-        circle_ptr.resize(self.points, 0);
+        let mut circle_next = Vec::new();
+        circle_next.resize(self.points, 0);
         let mut current = 0;
         let mut next_ball = 1;
-        let mut cached_ptr = 0;
+        let mut following_ptr = 0;
         for e in (1..=self.players).cycle() {
             if next_ball % 23 == 0 {
                 points[e - 1] += next_ball;
                 let mut buffer = [0; 8];
                 let mut count = 0;
-                while cached_ptr != current || count < 8 {
+                while following_ptr != current || count < 8 {
                     count += 1;
-                    buffer[count % 8] = cached_ptr;
-                    cached_ptr = circle_ptr[cached_ptr];
+                    buffer[count % 8] = following_ptr;
+                    following_ptr = circle_next[following_ptr];
                 }
                 let prev_of_delete = buffer[(count + 1) % 8];
                 let deletion_target = buffer[(count + 2) % 8];
                 // dbg!(count % 8, prev_of_delete, deletion_target, &buffer);
                 points[e - 1] += deletion_target;
-                circle_ptr[prev_of_delete] = circle_ptr[deletion_target];
-                current = circle_ptr[prev_of_delete];
+                circle_next[prev_of_delete] = circle_next[deletion_target];
+                current = circle_next[prev_of_delete];
             } else {
-                let ptr = circle_ptr[current];
-                let next = circle_ptr[ptr];
-                circle_ptr[next_ball] = next;
-                circle_ptr[ptr] = next_ball;
+                let ptr = circle_next[current];
+                let next = circle_next[ptr];
+                circle_next[next_ball] = next;
+                circle_next[ptr] = next_ball;
                 current = next_ball;
             }
             // println!("[{e}] {circle:?}");
@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
                 return *points.iter().max().unwrap();
             }
             // print!("[{e}] ({current}): ");
-            // print_link(&circle_ptr);
+            // print_link(&circle_next);
             next_ball += 1;
         }
         0
