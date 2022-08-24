@@ -1,13 +1,7 @@
 //! <https://adventofcode.com/2018/day/10>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use std::panic::Location;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         regex,
     },
     std::collections::HashMap,
@@ -93,7 +87,7 @@ impl Puzzle {
                     print!("{}", if p.contains(&x) { '#' } else { '.' });
                 }
             } else {
-                for x in x_min..=x_max {
+                for _ in x_min..=x_max {
                     print!(".");
                 }
             }
