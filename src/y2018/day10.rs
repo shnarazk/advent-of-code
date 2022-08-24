@@ -41,8 +41,8 @@ impl AdventOfCode for Puzzle {
         let stdin = std::io::stdin();
         loop {
             let too_big = self.print();
-            buffer.clear();
             if !too_big {
+                buffer.clear();
                 stdin.read_line(&mut buffer).expect("strange error");
                 if buffer.starts_with('c') {
                     return 1;
@@ -52,7 +52,20 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut buffer = String::new();
+        let stdin = std::io::stdin();
+        for step in 0.. {
+            let too_big = self.print();
+            if !too_big {
+                buffer.clear();
+                stdin.read_line(&mut buffer).expect("strange error");
+                if buffer.starts_with('c') {
+                    return step;
+                }
+            }
+            self.update();
+        }
+        unreachable!();
     }
 }
 
