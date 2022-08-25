@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/12>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -85,10 +81,11 @@ impl AdventOfCode for Puzzle {
             }
         }
         print!(" 0: ");
-        for i in -4..34 {
+        for i in -10..140 {
             print!("{}", if gen.contains(&i) { '#' } else { '.' },);
         }
         println!();
+        // It's glider.
         for g in 1..=90 {
             let left: isize = *gen.iter().min().unwrap_or(&0);
             let right: isize = *gen.iter().max().unwrap_or(&0);
