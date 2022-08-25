@@ -1,34 +1,28 @@
 //! <https://adventofcode.com/2018/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
-type Location = (usize, usize);
+type Dim2 = (usize, usize);
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: usize,
-    map: HashMap<Location, isize>,
+    map: HashMap<Dim2, isize>,
 }
 
 #[aoc(2018, 11)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn after_insert(&mut self) {
         self.line = 3463;
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut loc: Location = (1, 1);
+        let mut loc: Dim2 = (1, 1);
         let mut point_max: isize = 0;
         for y in 1..=300 - 2 {
             for x in 1..=300 - 2 {
@@ -74,7 +68,7 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn get(&mut self, at: Location) -> isize {
+    fn get(&mut self, at: Dim2) -> isize {
         if let Some(p) = self.map.get(&at) {
             return *p;
         }
