@@ -13,28 +13,31 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<bool>,
+    rules: Vec<(Vec<bool>, bool)>,
 }
 
 #[aoc(2018, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
+    fn header(&mut self, input: String) -> Result<String, ParseError> {
+        let parser = regex!(r"^initial state: (.+)\n\n((.|\n)+)$");
+        let segment = parser.captures(&input).ok_or(ParseError)?;
+        self.line = segment[1].chars().map(|c| c == '#').collect::<Vec<bool>>();
+        Ok(segment[2].to_string())
+    }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        let parser = regex!(r"^([.#]+) => ([.#]+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.rules.push((
+            segment[0].chars().map(|c| c == '#').collect::<Vec<bool>>(),
+            &segment[1] == "#",
+        ));
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
+        dbg!(&self.rules.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
