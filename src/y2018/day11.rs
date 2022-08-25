@@ -48,6 +48,27 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut loc = (1, 1, 1);
+        let mut point_max: isize = 0;
+        for y in 1..=300 {
+            for x in 1..=300 {
+                let max_square = (301 - y).min(301 - x);
+                let mut sum = 0;
+                for size in 1..=max_square {
+                    for yy in y..y + size {
+                        sum += self.get((x + size - 1, yy));
+                    }
+                    for xx in x..x + size - 1 {
+                        sum += self.get((xx, y + size - 1));
+                    }
+                    if point_max < sum {
+                        point_max = sum;
+                        loc = (x, y, size);
+                    }
+                }
+            }
+        }
+        dbg!(loc);
         0
     }
 }
