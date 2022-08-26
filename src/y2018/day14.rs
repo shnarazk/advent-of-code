@@ -1,15 +1,5 @@
 //! <https://adventofcode.com/2018/day/14>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -31,7 +21,7 @@ impl AdventOfCode for Puzzle {
         let mut elf1: usize = 0;
         let mut elf2: usize = 1;
         let mut remain: Option<usize> = None;
-        for i in 0.. {
+        loop {
             let sum = v[elf1] + v[elf2];
             if 9 < sum {
                 let a1 = sum / 10;
@@ -46,19 +36,15 @@ impl AdventOfCode for Puzzle {
             // println!("{:?} elf1 = {}, elf2 = {}", v, elf1, elf2);
             if let Some(n) = remain {
                 if n == 1 {
-                    println!("{:?}", &v[self.line..]);
                     return v[self.line..].iter().fold(0, |acc, n| acc * 10 + n);
                 }
                 remain = Some(n - 1);
             } else if self.line == v.len() {
-                dbg!();
                 remain = Some(10);
             } else if self.line == v.len() + 1 {
-                dbg!();
                 remain = Some(9);
             }
         }
-        0
     }
     fn part2(&mut self) -> Self::Output2 {
         // self.line = 51590;
@@ -67,7 +53,7 @@ impl AdventOfCode for Puzzle {
         let mut elf1: usize = 0;
         let mut elf2: usize = 1;
         let mut start = 0;
-        for i in 2.. {
+        loop {
             let sum = v[elf1] + v[elf2];
             if 9 < sum {
                 let a1 = sum / 10;
@@ -82,7 +68,6 @@ impl AdventOfCode for Puzzle {
             if v.len() < digits {
                 continue;
             }
-            // println!("{:?} elf1 = {}, elf2 = {}", v, elf1, elf2);
             for _ in 0..=v.len() - digits - start {
                 let val = v[start..start + digits]
                     .iter()
@@ -93,6 +78,5 @@ impl AdventOfCode for Puzzle {
                 start += 1;
             }
         }
-        0
     }
 }
