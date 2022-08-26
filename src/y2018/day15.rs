@@ -6,35 +6,47 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+type Dim2 = (isize, isize);
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<u8>>,
+    map: HashSet<Dim2>,
+    goblins: HashSet<Dim2>,
+    elves: HashSet<Dim2>,
 }
 
 #[aoc(2018, 15)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line
+            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (j, l) in self.line.iter().enumerate() {
+            for (i, c) in l.iter().enumerate() {
+                let pos = (j as isize, i as isize);
+                if *c != b'#' {
+                    self.map.insert(pos);
+                }
+                match *c {
+                    b'G' => {
+                        self.goblins.insert(pos);
+                    }
+                    b'E' => {
+                        self.elves.insert(pos);
+                    }
+                    _ => (),
+                }
+            }
+        }
+        dbg!(self.goblins.len(), self.elves.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
