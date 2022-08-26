@@ -14,13 +14,20 @@ use {
 type Dim2 = (isize, isize);
 
 fn turn_dim2(dir: Dim2, right: bool) -> Dim2 {
-    let dirs = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+    let dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)];
     for (i, d) in dirs.iter().enumerate() {
         if *d == dir {
-            return dirs[(i + 5 - 2 * (right as usize)) % 4];
+            return dirs[(i + 3 + 2 * (right as usize)) % 4];
         }
     }
     unreachable!()
+}
+
+#[test]
+fn y2018day13_turn() {
+    assert_eq!(turn_dim2((-1, 0), true), (0, 1));
+    assert_eq!(turn_dim2((-1, 0), false), (0, -1));
+    assert_eq!(turn_dim2((0, -1), true), (-1, 0));
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -115,25 +122,24 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(self.cart.len());
+        dbg!(self.line.len(), self.line[0].len(), self.cart.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render();
         for _ in 0.. {
+            self.render();
             self.update();
-            // self.render();
             if let Some(clash) = self.check() {
+                self.render();
                 return format!("{},{}", clash.1, clash.0);
             }
         }
         unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        for _ in 0.. {
-            self.update();
-            if let Some(last) = self.check2() {
-                self.render();
-                return format!("{},{}", last.1, last.0);
+        for step in 0.. {
+            if let Some(last) = self.update2() {
+                return format!("{},{} at {}", last.1, last.0, step);
             }
         }
         unreachable!()
@@ -157,11 +163,18 @@ impl Puzzle {
                 _ => unreachable!(),
             }
             c.location = (c.location.0 + c.direction.0, c.location.1 + c.direction.1);
+            assert!(self.map.get(&c.location).is_some());
         }
     }
     fn render(&self) {
         for (y, l) in self.line.iter().enumerate() {
+            if 59 < y {
+                continue;
+            }
             for (x, c) in l.iter().enumerate() {
+                if 147 < x {
+                    continue;
+                }
                 print!(
                     "{}",
                     if self
@@ -188,17 +201,61 @@ impl Puzzle {
         }
         None
     }
+    fn update2(&mut self) -> Option<Dim2> {
+        const DEAD: Dim2 = (0, 0);
+        self.cart.sort();
+        for i in 0..self.cart.len() {
+            if self.cart[i].direction == DEAD {
+                continue;
+            }
+            match self.map.get(&self.cart[i].location) {
+                Some(b'S') => {}
+                Some(b'T') => {
+                    self.cart[i].direction =
+                        turn_dim2(self.cart[i].direction, self.cart[i].direction.0 != 0);
+                }
+                Some(b'H') => {
+                    self.cart[i].direction =
+                        turn_dim2(self.cart[i].direction, self.cart[i].direction.1 != 0);
+                }
+                Some(b'I') => {
+                    self.cart[i].turn();
+                }
+                _ => unreachable!(),
+            }
+            self.cart[i].location = (
+                self.cart[i].location.0 + self.cart[i].direction.0,
+                self.cart[i].location.1 + self.cart[i].direction.1,
+            );
+            for j in 0..self.cart.len() {
+                if i == j {
+                    continue;
+                }
+                if self.cart[j].direction == DEAD {
+                    continue;
+                }
+                if self.cart[i].location == self.cart[j].location {
+                    self.cart[i].direction = DEAD;
+                    self.cart[j].direction = DEAD;
+                }
+            }
+        }
+        let m = self.cart.len();
+        self.cart.retain(|c| c.direction != DEAD);
+        let n = self.cart.len();
+        if m != n {
+            dbg!(self.cart.len());
+        }
+        (self.cart.len() == 1).then(|| self.cart[0].location)
+    }
     fn check2(&mut self) -> Option<Dim2> {
         let mut pos: HashMap<Dim2, usize> = HashMap::new();
         for c in self.cart.iter_mut() {
             *pos.entry(c.location).or_insert(0) += 1;
         }
+        assert!(pos.values().all(|v| *v < 3));
         let n = self.cart.len();
         self.cart.retain(|c| pos.get(&c.location) == Some(&1));
-        let nn = self.cart.len();
-        if n != nn {
-            dbg!(self.cart.len());
-        }
         assert!(!self.cart.is_empty());
         (self.cart.len() == 1).then(|| self.cart[0].location)
     }
