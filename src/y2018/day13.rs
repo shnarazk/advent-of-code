@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2018/day/13>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -126,23 +119,21 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render();
-        for _ in 0.. {
-            self.render();
+        loop {
+            // self.render();
             self.update();
             if let Some(clash) = self.check() {
-                self.render();
+                // self.render();
                 return format!("{},{}", clash.1, clash.0);
             }
         }
-        unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        for step in 0.. {
+        loop {
             if let Some(last) = self.update2() {
-                return format!("{},{} at {}", last.1, last.0, step);
+                return format!("{},{}", last.1, last.0);
             }
         }
-        unreachable!()
     }
 }
 
@@ -166,6 +157,7 @@ impl Puzzle {
             assert!(self.map.get(&c.location).is_some());
         }
     }
+    #[allow(dead_code)]
     fn render(&self) {
         for (y, l) in self.line.iter().enumerate() {
             if 59 < y {
@@ -246,17 +238,6 @@ impl Puzzle {
         if m != n {
             dbg!(self.cart.len());
         }
-        (self.cart.len() == 1).then(|| self.cart[0].location)
-    }
-    fn check2(&mut self) -> Option<Dim2> {
-        let mut pos: HashMap<Dim2, usize> = HashMap::new();
-        for c in self.cart.iter_mut() {
-            *pos.entry(c.location).or_insert(0) += 1;
-        }
-        assert!(pos.values().all(|v| *v < 3));
-        let n = self.cart.len();
-        self.cart.retain(|c| pos.get(&c.location) == Some(&1));
-        assert!(!self.cart.is_empty());
         (self.cart.len() == 1).then(|| self.cart[0].location)
     }
 }
