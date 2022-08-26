@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/13>
 use {
     crate::framework::{aoc_at, AdventOfCode, ParseError},
-    std::collections::{HashMap, HashSet},
+    std::collections::HashMap,
 };
 
 type Dim2 = (isize, isize);
@@ -121,8 +121,7 @@ impl AdventOfCode for Puzzle {
         // self.render();
         loop {
             // self.render();
-            self.update();
-            if let Some(clash) = self.check() {
+            if let Some(clash) = self.update1() {
                 // self.render();
                 return format!("{},{}", clash.1, clash.0);
             }
@@ -138,58 +137,36 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn update(&mut self) {
-        for c in self.cart.iter_mut() {
-            match self.map.get(&c.location) {
+    fn update1(&mut self) -> Option<Dim2> {
+        self.cart.sort();
+        for i in 0..self.cart.len() {
+            match self.map.get(&self.cart[i].location) {
                 Some(b'S') => {}
                 Some(b'T') => {
-                    c.direction = turn_dim2(c.direction, c.direction.0 != 0);
+                    self.cart[i].direction =
+                        turn_dim2(self.cart[i].direction, self.cart[i].direction.0 != 0);
                 }
                 Some(b'H') => {
-                    c.direction = turn_dim2(c.direction, c.direction.1 != 0);
+                    self.cart[i].direction =
+                        turn_dim2(self.cart[i].direction, self.cart[i].direction.1 != 0);
                 }
                 Some(b'I') => {
-                    c.turn();
+                    self.cart[i].turn();
                 }
                 _ => unreachable!(),
             }
-            c.location = (c.location.0 + c.direction.0, c.location.1 + c.direction.1);
-            assert!(self.map.get(&c.location).is_some());
-        }
-    }
-    #[allow(dead_code)]
-    fn render(&self) {
-        for (y, l) in self.line.iter().enumerate() {
-            if 59 < y {
-                continue;
-            }
-            for (x, c) in l.iter().enumerate() {
-                if 147 < x {
+            self.cart[i].location = (
+                self.cart[i].location.0 + self.cart[i].direction.0,
+                self.cart[i].location.1 + self.cart[i].direction.1,
+            );
+            for j in 0..self.cart.len() {
+                if i == j {
                     continue;
                 }
-                print!(
-                    "{}",
-                    if self
-                        .cart
-                        .iter()
-                        .any(|c| c.location == (y as isize, x as isize))
-                    {
-                        'C'
-                    } else {
-                        *c as char
-                    },
-                );
+                if self.cart[i].location == self.cart[j].location {
+                    return Some(self.cart[i].location);
+                }
             }
-            println!();
-        }
-    }
-    fn check(&self) -> Option<Dim2> {
-        let mut pos: HashSet<Dim2> = HashSet::new();
-        for c in self.cart.iter() {
-            if pos.contains(&c.location) {
-                return Some(c.location);
-            }
-            pos.insert(c.location);
         }
         None
     }
@@ -239,5 +216,31 @@ impl Puzzle {
             dbg!(self.cart.len());
         }
         (self.cart.len() == 1).then(|| self.cart[0].location)
+    }
+    #[allow(dead_code)]
+    fn render(&self) {
+        for (y, l) in self.line.iter().enumerate() {
+            if 59 < y {
+                continue;
+            }
+            for (x, c) in l.iter().enumerate() {
+                if 147 < x {
+                    continue;
+                }
+                print!(
+                    "{}",
+                    if self
+                        .cart
+                        .iter()
+                        .any(|c| c.location == (y as isize, x as isize))
+                    {
+                        'C'
+                    } else {
+                        *c as char
+                    },
+                );
+            }
+            println!();
+        }
     }
 }
