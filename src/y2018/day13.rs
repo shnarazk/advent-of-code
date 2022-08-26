@@ -52,7 +52,7 @@ pub struct Puzzle {
 #[aoc_at(2018, 13)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
-    type Output2 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line
@@ -129,7 +129,14 @@ impl AdventOfCode for Puzzle {
         unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        for _ in 0.. {
+            self.update();
+            if let Some(last) = self.check2() {
+                self.render();
+                return format!("{},{}", last.1, last.0);
+            }
+        }
+        unreachable!()
     }
 }
 
@@ -180,5 +187,19 @@ impl Puzzle {
             pos.insert(c.location);
         }
         None
+    }
+    fn check2(&mut self) -> Option<Dim2> {
+        let mut pos: HashMap<Dim2, usize> = HashMap::new();
+        for c in self.cart.iter_mut() {
+            *pos.entry(c.location).or_insert(0) += 1;
+        }
+        let n = self.cart.len();
+        self.cart.retain(|c| pos.get(&c.location) == Some(&1));
+        let nn = self.cart.len();
+        if n != nn {
+            dbg!(self.cart.len());
+        }
+        assert!(!self.cart.is_empty());
+        (self.cart.len() == 1).then(|| self.cart[0].location)
     }
 }
