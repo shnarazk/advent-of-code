@@ -1,12 +1,9 @@
 //! <https://adventofcode.com/2018/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
+// #![allow(dead_code)]
+// #![allow(unused_imports)]
+// #![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     core::cmp::Reverse,
     std::collections::{BinaryHeap, HashMap, HashSet},
 };
@@ -107,7 +104,6 @@ impl Creature {
                 }
             }
         }
-        let pos = self.position();
         let mut p: Vec<Dim2> = valids.iter().copied().collect::<Vec<_>>();
         p.sort_by_key(|t| mdist(t, pos));
         // if self.is_elf() {
@@ -125,11 +121,25 @@ impl Creature {
         //     }
         //     world.render(Some(h));
         // }
-        (!v.is_empty()).then(|| {
-            let d = mdist(&v[0], pos);
-            let mut w = v.iter().filter(|p| mdist(p, pos) == d).collect::<Vec<_>>();
-            w.sort();
-            *w[0]
+        let table = world.build_distance_table(*pos);
+        let mut targets = Vec::new();
+        let mut dist_min = usize::MAX;
+        for p in v.iter() {
+            if let Some(d) = table.get(p) {
+                match d.cmp(&dist_min) {
+                    std::cmp::Ordering::Equal => targets.push(p),
+                    std::cmp::Ordering::Less => {
+                        targets.clear();
+                        targets.push(p);
+                        dist_min = *d;
+                    }
+                    std::cmp::Ordering::Greater => (),
+                }
+            }
+        }
+        (!targets.is_empty()).then(|| {
+            targets.sort();
+            *targets[0]
         })
     }
     fn is_in_a_range<'a, 'b>(&'a self, world: &'b Puzzle) -> Option<Vec<&'b Creature>> {
@@ -144,44 +154,37 @@ impl Creature {
                 }
             }
         }
-        (!targets.is_empty()).then(|| {
-            let mut v = targets.iter().copied().collect::<Vec<_>>();
-            v.sort();
-            v
-        })
-    }
-    //
-    // Attacking
-    //
-    fn best_target_creature(&self, world: &Puzzle) -> Option<Creature> {
-        let mut v = self.target_creatures(world);
-        (!v.is_empty()).then(|| {
-            v.sort();
-            v[0].clone()
-        })
+        (!targets.is_empty()).then(|| targets.iter().copied().collect::<Vec<_>>())
     }
     // return `true `if I attacked.
     fn attack(&mut self, world: &mut Puzzle) -> bool {
-        let mut target = None;
+        let mut targets = Vec::new();
         if let Some(v) = self.is_in_a_range(world) {
             let mut hp = usize::MAX;
-            for e in v.iter() {
-                let h = e.hit_point();
-                if h < hp {
-                    hp = h;
-                    target = Some(*e.position());
+            for enemy in v.iter() {
+                let h = enemy.hit_point();
+                match h.cmp(&hp) {
+                    std::cmp::Ordering::Less => {
+                        targets.clear();
+                        targets.push(enemy.position());
+                        hp = h;
+                    }
+                    std::cmp::Ordering::Equal => {
+                        targets.push(enemy.position());
+                    }
+                    std::cmp::Ordering::Greater => (),
                 }
             }
         }
-        if let Some(t) = target {
-            println!(" - {:?} attacks {:?}", self.position(), t,);
-            if world.reduce_hp(&t) {
-                world.kill_creature(&t);
-                world.render(None);
-            }
-            return true;
+        if targets.is_empty() {
+            return false;
         }
-        false
+        targets.sort();
+        let target = *targets[0];
+        if world.reduce_hp(&target) {
+            world.kill_creature(&target);
+        }
+        true
     }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
         if !world.exists(self.position()) {
@@ -200,23 +203,24 @@ impl Creature {
             //     .map(|(k, v)| (*k, (*v as u8 + b'0') as char))
             //     .collect::<HashMap<Dim2, _>>();
             // world.render(Some(h));
-            let mut cost_so_far = usize::MAX;
+            let mut dist_so_far = usize::MAX;
             let mut r = *pos;
             for ad in DIRS.iter() {
                 let q = (pos.0 + ad.0, pos.1 + ad.1);
-                if let Some(c) = table.get(&q) {
-                    if *c < cost_so_far {
-                        cost_so_far = *c;
+                if let Some(d) = table.get(&q) {
+                    if *d < dist_so_far {
+                        dist_so_far = *d;
                         r = q;
                     }
                 }
             }
+            assert_ne!(r, *pos);
             // println!(" - creatue at {:?} moves to {:?}", pos, r);
             world.move_creature(pos, &r);
             self.set_position(&r);
             updating = true;
         }
-        self.attack(world) || updating
+        updating && self.attack(world)
     }
 }
 
@@ -253,7 +257,11 @@ impl Puzzle {
                     map.get(&(j as isize, i as isize)).unwrap_or(&(*c as char))
                 );
             }
-            println!(" {:?}", v);
+            if v.is_empty() {
+                println!();
+            } else {
+                println!(" {:?}", v);
+            }
         }
     }
     fn build_distance_table(&self, from: Dim2) -> HashMap<Dim2, usize> {
@@ -340,18 +348,28 @@ impl AdventOfCode for Puzzle {
         self.render(None);
         for turn in 0.. {
             self.creatures.sort();
-            let mut updated = false;
             let mut creatures = self.creatures.clone();
             for c in creatures.iter_mut() {
-                updated |= c.turn(self);
+                if !self.exists(c.position()) {
+                    continue;
+                }
+                if c.target_creatures(self).is_empty() {
+                    println!("On turn {}, ", turn + 1);
+                    self.render(None);
+                    assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
+                    let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
+                    dbg!(hit_points);
+                    dbg!((turn - 1) * hit_points);
+                    dbg!(turn * hit_points);
+                    dbg!((turn + 1) * hit_points);
+                    return turn * hit_points;
+                }
+                c.turn(self);
             }
+            println!("turn {} completed.", turn + 1);
             self.render(None);
-            if !updated {
-                dbg!(turn);
-                return turn * self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
-            }
         }
-        0
+        unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
