@@ -80,6 +80,7 @@ impl Creature {
             .collect::<Vec<_>>()
     }
     fn all_ranges(&self, world: &Puzzle) -> Vec<Dim2> {
+        let pos = self.position();
         let v = self.target_creatures(world);
         let mut valids: HashSet<Dim2> = HashSet::new();
         for c in v.iter() {
@@ -94,21 +95,26 @@ impl Creature {
         let pos = self.position();
         let mut p: Vec<Dim2> = valids.iter().copied().collect::<Vec<_>>();
         p.sort_by_key(|t| mdist(t, pos));
+        // if self.is_elf() {
+        //     dbg!(&p);
+        // }
         p
     }
     fn best_moving_position(&self, world: &Puzzle) -> Option<Dim2> {
         let pos = self.position();
-        let mut v = self.all_ranges(world);
-        {
-            let mut h: HashMap<Dim2, char> = HashMap::new();
-            for p in v.iter() {
-                h.insert(*p, '?');
-            }
-            // world.render(Some(h));
-        }
+        let v = self.all_ranges(world);
+        // {
+        //     let mut h: HashMap<Dim2, char> = HashMap::new();
+        //     for p in v.iter() {
+        //         h.insert(*p, '?');
+        //     }
+        //     world.render(Some(h));
+        // }
         (!v.is_empty()).then(|| {
-            v.sort_by_key(|p| mdist(p, pos));
-            v[0]
+            let d = mdist(&v[0], pos);
+            let mut w = v.iter().filter(|p| mdist(p, pos) == d).collect::<Vec<_>>();
+            w.sort();
+            *w[0]
         })
     }
     fn is_in_a_range<'a, 'b>(&'a self, world: &'b Puzzle) -> Option<Vec<&'b Creature>> {
@@ -152,16 +158,23 @@ impl Creature {
         *p -= 3;
         false
     }
-    fn turn(&mut self, world: &mut Puzzle) -> bool {
-        let pos = self.position();
-        if !world.exists(pos) {
-            return false;
-        }
+    // return `true `if I attacked.
+    fn attack(&mut self, world: &mut Puzzle) -> bool {
         if let Some(v) = self.is_in_a_range(world) {
             dbg!();
-            // todo!();
+            return true;
+        }
+        false
+    }
+    fn turn(&mut self, world: &mut Puzzle) -> bool {
+        if !world.exists(self.position()) {
             return false;
-        } else if let Some(target) = self.best_moving_position(world) {
+        }
+        if self.attack(world) {
+            return true;
+        }
+        let pos = self.position();
+        if let Some(target) = self.best_moving_position(world) {
             let table = world.build_distance_table(target);
             // let h = table
             //     .iter()
@@ -184,7 +197,7 @@ impl Creature {
             world.move_creature(pos, &r);
             // todo!();
         }
-        true
+        self.attack(world)
     }
 }
 
