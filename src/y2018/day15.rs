@@ -140,8 +140,28 @@ impl Creature {
     fn turn(&mut self, world: &mut Puzzle) -> bool {
         if let Some(v) = self.is_in_a_range(world) {
             todo!();
-        } else {
-            self.best_moving_position(world);
+        } else if let Some(p) = self.best_moving_position(world) {
+            dbg!(p);
+            let table = world.build_distance_table(p);
+            let h = table
+                .iter()
+                .filter(|(_, v)| **v < 10)
+                .map(|(k, v)| (*k, (*v as u8 + b'0') as char))
+                .collect::<HashMap<Dim2, _>>();
+            world.render(Some(h));
+            let p = self.position();
+            let mut cost_so_far = usize::MAX;
+            let mut r = *p;
+            for ad in DIRS.iter() {
+                let q = (p.0 + ad.0, p.1 + ad.1);
+                if let Some(c) = table.get(&q) {
+                    if *c < cost_so_far {
+                        cost_so_far = *c;
+                        r = q;
+                    }
+                }
+            }
+            println!(" - creatue at {:?} moves to {:?}", p, r);
             // todo!();
         }
         true
@@ -186,12 +206,17 @@ impl Puzzle {
             .iter()
             .map(|c| *c.position())
             .collect::<HashSet<_>>();
+        to_visit.push(Reverse((0, from)));
         while let Some(Reverse((dist, pos))) = to_visit.pop() {
+            if visited.contains_key(&pos) {
+                continue;
+            }
             visited.insert(pos, dist);
             for d in DIRS.iter() {
                 let x = (pos.0 + d.0, pos.1 + d.1);
-                if self.map.contains(&x) && visited.get(&x).is_none() && creatures.get(&x).is_none()
+                if self.map.contains(&x) && !visited.contains_key(&x) && creatures.get(&x).is_none()
                 {
+                    // dbg!(&x);
                     to_visit.push(Reverse((dist + 1, x)));
                 }
             }
