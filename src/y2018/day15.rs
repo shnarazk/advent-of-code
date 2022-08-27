@@ -11,6 +11,9 @@ use {
     std::collections::{BinaryHeap, HashMap, HashSet},
 };
 
+const HIT_POINT: usize = 200;
+const ATTACK_POWER: usize = 3;
+
 type Dim2 = (isize, isize);
 
 /// direction vectors in reading order
@@ -42,11 +45,23 @@ impl Creature {
     fn is_elf(&self) -> bool {
         matches!(self, Creature::Elf(_, _))
     }
-    fn hit_point(&self) -> &usize {
+    fn hit_point(&self) -> usize {
         match self {
+            Creature::Elf(_, hp) => *hp,
+            Creature::Goblin(_, hp) => *hp,
+        }
+    }
+    fn decrement_hit_point(&mut self) -> bool {
+        let p = match self {
             Creature::Elf(_, hp) => hp,
             Creature::Goblin(_, hp) => hp,
+        };
+        if let Some(np) = (*p).checked_sub(ATTACK_POWER) {
+            *p = np;
+        } else {
+            *p = 0;
         }
+        *p == 0
     }
     fn position(&self) -> &Dim2 {
         match self {
@@ -145,23 +160,25 @@ impl Creature {
             v[0].clone()
         })
     }
-    /// return true if I'm killed.
-    fn attacked(&mut self, world: &mut Puzzle) -> bool {
-        let p = match self {
-            Creature::Elf(_, hp) => hp,
-            Creature::Goblin(_, hp) => hp,
-        };
-        if *p < 3 {
-            world.creatures.retain(|c| c != self);
-            return true;
-        }
-        *p -= 3;
-        false
-    }
     // return `true `if I attacked.
     fn attack(&mut self, world: &mut Puzzle) -> bool {
+        let mut target = None;
         if let Some(v) = self.is_in_a_range(world) {
-            dbg!();
+            let mut hp = usize::MAX;
+            for e in v.iter() {
+                let h = e.hit_point();
+                if h < hp {
+                    hp = h;
+                    target = Some(*e.position());
+                }
+            }
+        }
+        if let Some(t) = target {
+            println!(" - {:?} attacks {:?}", self.position(), t,);
+            if world.reduce_hp(&t) {
+                world.kill_creature(&t);
+                world.render(None);
+            }
             return true;
         }
         false
@@ -174,6 +191,7 @@ impl Creature {
             return true;
         }
         let pos = self.position();
+        let mut updating = false;
         if let Some(target) = self.best_moving_position(world) {
             let table = world.build_distance_table(target);
             // let h = table
@@ -193,11 +211,12 @@ impl Creature {
                     }
                 }
             }
-            println!(" - creatue at {:?} moves to {:?}", pos, r);
+            // println!(" - creatue at {:?} moves to {:?}", pos, r);
             world.move_creature(pos, &r);
-            // todo!();
+            self.set_position(&r);
+            updating = true;
         }
-        self.attack(world)
+        self.attack(world) || updating
     }
 }
 
@@ -213,8 +232,10 @@ pub struct Puzzle {
 impl Puzzle {
     fn render(&self, overlay: Option<HashMap<Dim2, char>>) {
         let mut map: HashMap<Dim2, char> = HashMap::new();
+        let mut hps: HashMap<Dim2, usize> = HashMap::new();
         for c in self.creatures.iter() {
             map.insert(*c.position(), if c.is_elf() { 'E' } else { 'G' });
+            hps.insert(*c.position(), c.hit_point());
         }
         if let Some(h) = overlay {
             for (k, v) in h.iter() {
@@ -222,13 +243,17 @@ impl Puzzle {
             }
         }
         for (j, l) in self.line.iter().enumerate() {
+            let mut v: Vec<usize> = Vec::new();
             for (i, c) in l.iter().enumerate() {
+                if let Some(hp) = hps.get(&(j as isize, i as isize)) {
+                    v.push(*hp);
+                }
                 print!(
                     "{}",
                     map.get(&(j as isize, i as isize)).unwrap_or(&(*c as char))
                 );
             }
-            println!();
+            println!(" {:?}", v);
         }
     }
     fn build_distance_table(&self, from: Dim2) -> HashMap<Dim2, usize> {
@@ -266,6 +291,14 @@ impl Puzzle {
             }
         }
     }
+    fn reduce_hp(&mut self, at: &Dim2) -> bool {
+        for c in self.creatures.iter_mut() {
+            if c.position() == at {
+                return c.decrement_hit_point();
+            }
+        }
+        unreachable!()
+    }
     fn kill_creature(&mut self, at: &Dim2) {
         self.creatures.retain(|c| c.position() != at)
     }
@@ -288,11 +321,11 @@ impl AdventOfCode for Puzzle {
                 }
                 match *c {
                     b'E' => {
-                        self.creatures.push(Creature::Elf(pos, 300));
+                        self.creatures.push(Creature::Elf(pos, HIT_POINT));
                         *c = b'.';
                     }
                     b'G' => {
-                        self.creatures.push(Creature::Goblin(pos, 300));
+                        self.creatures.push(Creature::Goblin(pos, HIT_POINT));
                         *c = b'.';
                     }
                     _ => (),
@@ -305,13 +338,18 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.render(None);
-        for turn in 0..3 {
+        for turn in 0.. {
             self.creatures.sort();
+            let mut updated = false;
             let mut creatures = self.creatures.clone();
             for c in creatures.iter_mut() {
-                c.turn(self);
+                updated |= c.turn(self);
             }
             self.render(None);
+            if !updated {
+                dbg!(turn);
+                return turn * self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
+            }
         }
         0
     }
