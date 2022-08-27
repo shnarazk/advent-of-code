@@ -7,7 +7,8 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
     },
-    std::collections::{HashMap, HashSet},
+    core::cmp::Reverse,
+    std::collections::{BinaryHeap, HashMap, HashSet},
 };
 
 type Dim2 = (isize, isize);
@@ -176,6 +177,26 @@ impl Puzzle {
             }
             println!();
         }
+    }
+    fn build_distance_table(&self, from: Dim2) -> HashMap<Dim2, usize> {
+        let mut to_visit: BinaryHeap<Reverse<(usize, Dim2)>> = BinaryHeap::new();
+        let mut visited: HashMap<Dim2, usize> = HashMap::new();
+        let creatures: HashSet<Dim2> = self
+            .creatures
+            .iter()
+            .map(|c| *c.position())
+            .collect::<HashSet<_>>();
+        while let Some(Reverse((dist, pos))) = to_visit.pop() {
+            visited.insert(pos, dist);
+            for d in DIRS.iter() {
+                let x = (pos.0 + d.0, pos.1 + d.1);
+                if self.map.contains(&x) && visited.get(&x).is_none() && creatures.get(&x).is_none()
+                {
+                    to_visit.push(Reverse((dist + 1, x)));
+                }
+            }
+        }
+        visited
     }
 }
 
