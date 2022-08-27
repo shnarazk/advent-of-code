@@ -12,7 +12,9 @@ use {
 };
 
 type Dim2 = (isize, isize);
-const DIRS: [Dim2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+
+/// direction vectors in reading order
+const DIRS: [Dim2; 4] = [(-1, 0), (0, -1), (0, 1), (1, 0)];
 
 fn mdist(a: &Dim2, b: &Dim2) -> usize {
     a.0.abs_diff(b.0) + a.1.abs_diff(b.1)
@@ -84,7 +86,7 @@ impl Creature {
             let p = c.position();
             for adj in DIRS {
                 let q = (p.0 + adj.0, p.1 + adj.1);
-                if world.map.contains(&q) {
+                if world.map.contains(&q) && world.creatures.iter().all(|c| *c.position() != q) {
                     valids.insert(q);
                 }
             }
@@ -95,6 +97,7 @@ impl Creature {
         p
     }
     fn best_moving_position(&self, world: &Puzzle) -> Option<Dim2> {
+        let pos = self.position();
         let mut v = self.all_ranges(world);
         {
             let mut h: HashMap<Dim2, char> = HashMap::new();
@@ -104,7 +107,7 @@ impl Creature {
             // world.render(Some(h));
         }
         (!v.is_empty()).then(|| {
-            v.sort();
+            v.sort_by_key(|p| mdist(p, pos));
             v[0]
         })
     }
@@ -115,7 +118,7 @@ impl Creature {
         for adj in DIRS {
             let q = (p.0 + adj.0, p.1 + adj.1);
             for e in enemies.iter() {
-                if e.position() == p {
+                if *e.position() == q {
                     targets.insert(*e);
                 }
             }
@@ -155,7 +158,9 @@ impl Creature {
             return false;
         }
         if let Some(v) = self.is_in_a_range(world) {
-            todo!();
+            dbg!();
+            // todo!();
+            return false;
         } else if let Some(target) = self.best_moving_position(world) {
             let table = world.build_distance_table(target);
             // let h = table
@@ -269,11 +274,11 @@ impl AdventOfCode for Puzzle {
                     self.map.insert(pos);
                 }
                 match *c {
-                    b'G' => {
+                    b'E' => {
                         self.creatures.push(Creature::Elf(pos, 300));
                         *c = b'.';
                     }
-                    b'E' => {
+                    b'G' => {
                         self.creatures.push(Creature::Goblin(pos, 300));
                         *c = b'.';
                     }
@@ -286,7 +291,8 @@ impl AdventOfCode for Puzzle {
         self.width = self.line[0].len();
     }
     fn part1(&mut self) -> Self::Output1 {
-        for turn in 0..8 {
+        self.render(None);
+        for turn in 0..3 {
             self.creatures.sort();
             let mut creatures = self.creatures.clone();
             for c in creatures.iter_mut() {
