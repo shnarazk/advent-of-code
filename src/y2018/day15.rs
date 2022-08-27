@@ -1,7 +1,4 @@
 //! <https://adventofcode.com/2018/day/15>
-// #![allow(dead_code)]
-// #![allow(unused_imports)]
-// #![allow(unused_variables)]
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     core::cmp::Reverse,
@@ -363,6 +360,7 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         for power in 4.. {
             if let Some(n) = self.clone().experiment(power) {
+                dbg!(power);
                 return n;
             }
         }
@@ -373,9 +371,7 @@ impl AdventOfCode for Puzzle {
 impl Puzzle {
     fn experiment(mut self, power: usize) -> Option<usize> {
         let elves = self.creatures.iter().filter(|c| c.is_elf()).count();
-        dbg!(power);
         self.elf_power = power;
-        // self.render(None);
         for turn in 0.. {
             self.creatures.sort();
             let mut creatures = self.creatures.clone();
@@ -385,7 +381,6 @@ impl Puzzle {
                 }
                 if c.target_creatures(&self).is_empty() {
                     println!("On turn {}, ", turn + 1);
-                    // self.render(None);
                     assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
                     let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
                     dbg!(hit_points);
@@ -396,8 +391,6 @@ impl Puzzle {
                     return None;
                 }
             }
-            // println!("turn {} completed.", turn + 2);
-            // self.render(None);
         }
         unreachable!()
     }
