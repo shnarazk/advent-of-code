@@ -7,7 +7,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
     },
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
 };
 
 type Dim2 = (isize, isize);
@@ -83,6 +83,13 @@ impl Creature {
     }
     fn best_moving_position(&self, world: &Puzzle) -> Option<Dim2> {
         let mut v = self.all_ranges(world);
+        {
+            let mut h: HashMap<Dim2, char> = HashMap::new();
+            for p in v.iter() {
+                h.insert(*p, '?');
+            }
+            world.render(Some(h));
+        }
         (!v.is_empty()).then(|| {
             v.sort();
             v[0]
@@ -133,9 +140,10 @@ impl Creature {
         if let Some(v) = self.is_in_a_range(world) {
             todo!();
         } else {
-            dbg!(self.best_moving_position(world));
-            todo!();
+            self.best_moving_position(world);
+            // todo!();
         }
+        true
     }
 }
 
@@ -144,6 +152,31 @@ pub struct Puzzle {
     line: Vec<Vec<u8>>,
     map: HashSet<Dim2>,
     creatures: Vec<Creature>,
+    height: usize,
+    width: usize,
+}
+
+impl Puzzle {
+    fn render(&self, overlay: Option<HashMap<Dim2, char>>) {
+        let mut map: HashMap<Dim2, char> = HashMap::new();
+        for c in self.creatures.iter() {
+            map.insert(*c.position(), if c.is_elf() { 'E' } else { 'G' });
+        }
+        if let Some(h) = overlay {
+            for (k, v) in h.iter() {
+                map.insert(*k, *v);
+            }
+        }
+        for (j, l) in self.line.iter().enumerate() {
+            for (i, c) in l.iter().enumerate() {
+                print!(
+                    "{}",
+                    map.get(&(j as isize, i as isize)).unwrap_or(&(*c as char))
+                );
+            }
+            println!();
+        }
+    }
 }
 
 #[aoc(2018, 15)]
@@ -155,8 +188,8 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        for (j, l) in self.line.iter().enumerate() {
-            for (i, c) in l.iter().enumerate() {
+        for (j, l) in self.line.iter_mut().enumerate() {
+            for (i, c) in l.iter_mut().enumerate() {
                 let pos = (j as isize, i as isize);
                 if *c != b'#' {
                     self.map.insert(pos);
@@ -164,21 +197,26 @@ impl AdventOfCode for Puzzle {
                 match *c {
                     b'G' => {
                         self.creatures.push(Creature::Elf(pos, 300));
+                        *c = b'.';
                     }
                     b'E' => {
                         self.creatures.push(Creature::Goblin(pos, 300));
+                        *c = b'.';
                     }
                     _ => (),
                 }
             }
         }
         dbg!(self.creatures.len());
+        self.height = self.line.len();
+        self.width = self.line[0].len();
     }
     fn part1(&mut self) -> Self::Output1 {
         self.creatures.sort();
         let mut c = self.creatures[0].clone();
         dbg!(&c);
         c.turn(self);
+        // self.render(None);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
