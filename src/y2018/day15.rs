@@ -50,12 +50,12 @@ impl Creature {
             Creature::Goblin(_, hp, _) => *hp,
         }
     }
-    fn decrement_hit_point(&mut self) -> bool {
+    fn decrement_hit_point(&mut self, power: usize) -> bool {
         let p = match self {
             Creature::Elf(_, hp, _) => hp,
             Creature::Goblin(_, hp, _) => hp,
         };
-        *p = p.saturating_sub(ATTACK_POWER);
+        *p = p.saturating_sub(power);
         *p == 0
     }
     fn position(&self) -> &Dim2 {
@@ -210,13 +210,14 @@ impl Creature {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     map: HashSet<Dim2>,
     creatures: Vec<Creature>,
     height: usize,
     width: usize,
+    elf_power: usize,
 }
 
 impl Puzzle {
@@ -284,7 +285,12 @@ impl Puzzle {
     fn reduce_hp(&mut self, at: &Dim2) -> bool {
         for c in self.creatures.iter_mut() {
             if c.position() == at {
-                return c.decrement_hit_point();
+                let damage = if c.is_elf() {
+                    ATTACK_POWER
+                } else {
+                    self.elf_power
+                };
+                return c.decrement_hit_point(damage);
             }
         }
         unreachable!()
@@ -328,6 +334,7 @@ impl AdventOfCode for Puzzle {
         dbg!(self.creatures.len());
         self.height = self.line.len();
         self.width = self.line[0].len();
+        self.elf_power = ATTACK_POWER;
     }
     fn part1(&mut self) -> Self::Output1 {
         self.render(None);
@@ -354,6 +361,44 @@ impl AdventOfCode for Puzzle {
         unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        for power in 4.. {
+            if let Some(n) = self.clone().experiment(power) {
+                return n;
+            }
+        }
+        unreachable!()
+    }
+}
+
+impl Puzzle {
+    fn experiment(mut self, power: usize) -> Option<usize> {
+        let elves = self.creatures.iter().filter(|c| c.is_elf()).count();
+        dbg!(power);
+        self.elf_power = power;
+        // self.render(None);
+        for turn in 0.. {
+            self.creatures.sort();
+            let mut creatures = self.creatures.clone();
+            for c in creatures.iter_mut() {
+                if !c.exists_on(&self) {
+                    continue;
+                }
+                if c.target_creatures(&self).is_empty() {
+                    println!("On turn {}, ", turn + 1);
+                    // self.render(None);
+                    assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
+                    let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
+                    dbg!(hit_points);
+                    return Some(turn * hit_points);
+                }
+                c.turn(&mut self);
+                if self.creatures.iter().filter(|c| c.is_elf()).count() != elves {
+                    return None;
+                }
+            }
+            // println!("turn {} completed.", turn + 2);
+            // self.render(None);
+        }
+        unreachable!()
     }
 }
