@@ -52,6 +52,18 @@ impl Creature {
             Creature::Goblin(p, _) => p,
         }
     }
+    fn set_position(&mut self, to: &Dim2) {
+        match self {
+            Creature::Elf(p, _) => {
+                p.0 = to.0;
+                p.1 = to.1;
+            }
+            Creature::Goblin(p, _) => {
+                p.0 = to.0;
+                p.1 = to.1;
+            }
+        }
+    }
     //
     // Eeometry
     //
@@ -89,7 +101,7 @@ impl Creature {
             for p in v.iter() {
                 h.insert(*p, '?');
             }
-            world.render(Some(h));
+            // world.render(Some(h));
         }
         (!v.is_empty()).then(|| {
             v.sort();
@@ -138,22 +150,24 @@ impl Creature {
         false
     }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
+        let pos = self.position();
+        if !world.exists(pos) {
+            return false;
+        }
         if let Some(v) = self.is_in_a_range(world) {
             todo!();
-        } else if let Some(p) = self.best_moving_position(world) {
-            dbg!(p);
-            let table = world.build_distance_table(p);
-            let h = table
-                .iter()
-                .filter(|(_, v)| **v < 10)
-                .map(|(k, v)| (*k, (*v as u8 + b'0') as char))
-                .collect::<HashMap<Dim2, _>>();
-            world.render(Some(h));
-            let p = self.position();
+        } else if let Some(target) = self.best_moving_position(world) {
+            let table = world.build_distance_table(target);
+            // let h = table
+            //     .iter()
+            //     .filter(|(_, v)| **v < 10)
+            //     .map(|(k, v)| (*k, (*v as u8 + b'0') as char))
+            //     .collect::<HashMap<Dim2, _>>();
+            // world.render(Some(h));
             let mut cost_so_far = usize::MAX;
-            let mut r = *p;
+            let mut r = *pos;
             for ad in DIRS.iter() {
-                let q = (p.0 + ad.0, p.1 + ad.1);
+                let q = (pos.0 + ad.0, pos.1 + ad.1);
                 if let Some(c) = table.get(&q) {
                     if *c < cost_so_far {
                         cost_so_far = *c;
@@ -161,7 +175,8 @@ impl Creature {
                     }
                 }
             }
-            println!(" - creatue at {:?} moves to {:?}", p, r);
+            println!(" - creatue at {:?} moves to {:?}", pos, r);
+            world.move_creature(pos, &r);
             // todo!();
         }
         true
@@ -223,6 +238,19 @@ impl Puzzle {
         }
         visited
     }
+    fn exists(&mut self, at: &Dim2) -> bool {
+        self.creatures.iter().any(|c| c.position() == at)
+    }
+    fn move_creature(&mut self, from: &Dim2, to: &Dim2) {
+        for c in self.creatures.iter_mut() {
+            if c.position() == from {
+                c.set_position(to);
+            }
+        }
+    }
+    fn kill_creature(&mut self, at: &Dim2) {
+        self.creatures.retain(|c| c.position() != at)
+    }
 }
 
 #[aoc(2018, 15)]
@@ -258,11 +286,14 @@ impl AdventOfCode for Puzzle {
         self.width = self.line[0].len();
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.creatures.sort();
-        let mut c = self.creatures[0].clone();
-        dbg!(&c);
-        c.turn(self);
-        // self.render(None);
+        for turn in 0..8 {
+            self.creatures.sort();
+            let mut creatures = self.creatures.clone();
+            for c in creatures.iter_mut() {
+                c.turn(self);
+            }
+            self.render(None);
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
