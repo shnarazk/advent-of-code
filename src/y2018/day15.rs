@@ -16,14 +16,10 @@ type Dim2 = (isize, isize);
 /// direction vectors in reading order
 const DIRS: [Dim2; 4] = [(-1, 0), (0, -1), (0, 1), (1, 0)];
 
-fn mdist(a: &Dim2, b: &Dim2) -> usize {
-    a.0.abs_diff(b.0) + a.1.abs_diff(b.1)
-}
-
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Creature {
-    Elf(Dim2, usize),
-    Goblin(Dim2, usize),
+    Elf(Dim2, usize, usize),
+    Goblin(Dim2, usize, usize),
 }
 
 impl PartialOrd for Creature {
@@ -40,50 +36,46 @@ impl Ord for Creature {
 
 impl Creature {
     fn is_elf(&self) -> bool {
-        matches!(self, Creature::Elf(_, _))
+        matches!(self, Creature::Elf(_, _, _))
+    }
+    fn id(&self) -> usize {
+        match self {
+            Creature::Elf(_, _, id) => *id,
+            Creature::Goblin(_, _, id) => *id,
+        }
     }
     fn hit_point(&self) -> usize {
         match self {
-            Creature::Elf(_, hp) => *hp,
-            Creature::Goblin(_, hp) => *hp,
+            Creature::Elf(_, hp, _) => *hp,
+            Creature::Goblin(_, hp, _) => *hp,
         }
     }
     fn decrement_hit_point(&mut self) -> bool {
         let p = match self {
-            Creature::Elf(_, hp) => hp,
-            Creature::Goblin(_, hp) => hp,
+            Creature::Elf(_, hp, _) => hp,
+            Creature::Goblin(_, hp, _) => hp,
         };
-        if let Some(np) = (*p).checked_sub(ATTACK_POWER) {
-            *p = np;
-        } else {
-            *p = 0;
-        }
+        *p = p.saturating_sub(ATTACK_POWER);
         *p == 0
     }
     fn position(&self) -> &Dim2 {
         match self {
-            Creature::Elf(p, _) => p,
-            Creature::Goblin(p, _) => p,
+            Creature::Elf(p, _, _) => p,
+            Creature::Goblin(p, _, _) => p,
         }
     }
     fn set_position(&mut self, to: &Dim2) {
         match self {
-            Creature::Elf(p, _) => {
+            Creature::Elf(p, _, _) => {
                 p.0 = to.0;
                 p.1 = to.1;
             }
-            Creature::Goblin(p, _) => {
+            Creature::Goblin(p, _, _) => {
                 p.0 = to.0;
                 p.1 = to.1;
             }
         }
     }
-    //
-    // Eeometry
-    //
-    //
-    // Moving
-    //
     fn target_creatures<'a, 'b>(&'a self, world: &'b Puzzle) -> Vec<&'b Creature> {
         world
             .creatures
@@ -92,7 +84,6 @@ impl Creature {
             .collect::<Vec<_>>()
     }
     fn all_ranges(&self, world: &Puzzle) -> Vec<Dim2> {
-        let pos = self.position();
         let v = self.target_creatures(world);
         let mut valids: HashSet<Dim2> = HashSet::new();
         for c in v.iter() {
@@ -104,12 +95,7 @@ impl Creature {
                 }
             }
         }
-        let mut p: Vec<Dim2> = valids.iter().copied().collect::<Vec<_>>();
-        p.sort_by_key(|t| mdist(t, pos));
-        // if self.is_elf() {
-        //     dbg!(&p);
-        // }
-        p
+        valids.iter().copied().collect::<Vec<Dim2>>()
     }
     fn best_moving_position(&self, world: &Puzzle) -> Option<Dim2> {
         let pos = self.position();
@@ -187,14 +173,14 @@ impl Creature {
         true
     }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
-        if !world.exists(self.position()) {
+        assert!(world.exists(self.position(), self.id()));
+        if !world.exists(self.position(), self.id()) {
             return false;
         }
         if self.attack(world) {
             return true;
         }
         let pos = self.position();
-        let mut updating = false;
         if let Some(target) = self.best_moving_position(world) {
             let table = world.build_distance_table(target);
             // let h = table
@@ -218,9 +204,8 @@ impl Creature {
             // println!(" - creatue at {:?} moves to {:?}", pos, r);
             world.move_creature(pos, &r);
             self.set_position(&r);
-            updating = true;
         }
-        updating && self.attack(world)
+        self.attack(world)
     }
 }
 
@@ -266,7 +251,7 @@ impl Puzzle {
     }
     fn build_distance_table(&self, from: Dim2) -> HashMap<Dim2, usize> {
         let mut to_visit: BinaryHeap<Reverse<(usize, Dim2)>> = BinaryHeap::new();
-        let mut visited: HashMap<Dim2, usize> = HashMap::new();
+        let mut man: HashMap<Dim2, usize> = HashMap::new();
         let creatures: HashSet<Dim2> = self
             .creatures
             .iter()
@@ -274,28 +259,29 @@ impl Puzzle {
             .collect::<HashSet<_>>();
         to_visit.push(Reverse((0, from)));
         while let Some(Reverse((dist, pos))) = to_visit.pop() {
-            if visited.contains_key(&pos) {
+            if man.contains_key(&pos) {
                 continue;
             }
-            visited.insert(pos, dist);
+            man.insert(pos, dist);
             for d in DIRS.iter() {
                 let x = (pos.0 + d.0, pos.1 + d.1);
-                if self.map.contains(&x) && !visited.contains_key(&x) && creatures.get(&x).is_none()
-                {
-                    // dbg!(&x);
+                if self.map.contains(&x) && !man.contains_key(&x) && creatures.get(&x).is_none() {
                     to_visit.push(Reverse((dist + 1, x)));
                 }
             }
         }
-        visited
+        man
     }
-    fn exists(&mut self, at: &Dim2) -> bool {
-        self.creatures.iter().any(|c| c.position() == at)
+    fn exists(&mut self, at: &Dim2, id: usize) -> bool {
+        self.creatures
+            .iter()
+            .any(|c| c.position() == at && c.id() == id)
     }
     fn move_creature(&mut self, from: &Dim2, to: &Dim2) {
         for c in self.creatures.iter_mut() {
             if c.position() == from {
                 c.set_position(to);
+                break;
             }
         }
     }
@@ -321,6 +307,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
+        let mut count = 1;
         for (j, l) in self.line.iter_mut().enumerate() {
             for (i, c) in l.iter_mut().enumerate() {
                 let pos = (j as isize, i as isize);
@@ -329,12 +316,14 @@ impl AdventOfCode for Puzzle {
                 }
                 match *c {
                     b'E' => {
-                        self.creatures.push(Creature::Elf(pos, HIT_POINT));
+                        self.creatures.push(Creature::Elf(pos, HIT_POINT, count));
                         *c = b'.';
+                        count += 1;
                     }
                     b'G' => {
-                        self.creatures.push(Creature::Goblin(pos, HIT_POINT));
+                        self.creatures.push(Creature::Goblin(pos, HIT_POINT, count));
                         *c = b'.';
+                        count += 1;
                     }
                     _ => (),
                 }
@@ -350,7 +339,7 @@ impl AdventOfCode for Puzzle {
             self.creatures.sort();
             let mut creatures = self.creatures.clone();
             for c in creatures.iter_mut() {
-                if !self.exists(c.position()) {
+                if !self.exists(c.position(), c.id()) {
                     continue;
                 }
                 if c.target_creatures(self).is_empty() {
