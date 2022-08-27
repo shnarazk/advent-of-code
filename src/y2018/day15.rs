@@ -11,8 +11,13 @@ use {
 };
 
 type Dim2 = (isize, isize);
+const DIRS: [Dim2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+fn mdist(a: &Dim2, b: &Dim2) -> usize {
+    a.0.abs_diff(b.0) + a.1.abs_diff(b.1)
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Creature {
     Elf(Dim2, usize),
     Goblin(Dim2, usize),
@@ -31,6 +36,9 @@ impl Ord for Creature {
 }
 
 impl Creature {
+    fn is_elf(&self) -> bool {
+        matches!(self, Creature::Elf(_, _))
+    }
     fn hit_point(&self) -> &usize {
         match self {
             Creature::Elf(_, hp) => hp,
@@ -44,21 +52,59 @@ impl Creature {
         }
     }
     //
+    // Eeometry
+    //
+    //
     // Moving
     //
-    fn target_creatures(&self, world: &Puzzle) -> Vec<Creature> {
-        todo!()
+    fn target_creatures<'a, 'b>(&'a self, world: &'b Puzzle) -> Vec<&'b Creature> {
+        world
+            .creatures
+            .iter()
+            .filter(|c| self.is_elf() != c.is_elf())
+            .collect::<Vec<_>>()
     }
     fn all_ranges(&self, world: &Puzzle) -> Vec<Dim2> {
         let v = self.target_creatures(world);
-        todo!()
+        let mut valids: HashSet<Dim2> = HashSet::new();
+        for c in v.iter() {
+            let p = c.position();
+            for adj in DIRS {
+                let q = (p.0 + adj.0, p.1 + adj.1);
+                if world.map.contains(&q) {
+                    valids.insert(q);
+                }
+            }
+        }
+        let pos = self.position();
+        let mut p: Vec<Dim2> = valids.iter().copied().collect::<Vec<_>>();
+        p.sort_by_key(|t| mdist(t, pos));
+        p
     }
     fn best_moving_position(&self, world: &Puzzle) -> Option<Dim2> {
-        let v = self.all_ranges(world);
-        todo!()
+        let mut v = self.all_ranges(world);
+        (!v.is_empty()).then(|| {
+            v.sort();
+            v[0]
+        })
     }
-    fn is_in_a_range(&self, world: &Puzzle) -> bool {
-        todo!()
+    fn is_in_a_range<'a, 'b>(&'a self, world: &'b Puzzle) -> Option<Vec<&'b Creature>> {
+        let p = self.position();
+        let enemies = self.target_creatures(world);
+        let mut targets: HashSet<&Creature> = HashSet::new();
+        for adj in DIRS {
+            let q = (p.0 + adj.0, p.1 + adj.1);
+            for e in enemies.iter() {
+                if e.position() == p {
+                    targets.insert(*e);
+                }
+            }
+        }
+        (!targets.is_empty()).then(|| {
+            let mut v = targets.iter().copied().collect::<Vec<_>>();
+            v.sort();
+            v
+        })
     }
     //
     // Attacking
@@ -67,7 +113,7 @@ impl Creature {
         let mut v = self.target_creatures(world);
         (!v.is_empty()).then(|| {
             v.sort();
-            v[0]
+            v[0].clone()
         })
     }
     /// return true if I'm killed.
@@ -84,7 +130,12 @@ impl Creature {
         false
     }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
-        todo!()
+        if let Some(v) = self.is_in_a_range(world) {
+            todo!();
+        } else {
+            dbg!(self.best_moving_position(world));
+            todo!();
+        }
     }
 }
 
@@ -124,6 +175,10 @@ impl AdventOfCode for Puzzle {
         dbg!(self.creatures.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        self.creatures.sort();
+        let mut c = self.creatures[0].clone();
+        dbg!(&c);
+        c.turn(self);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
