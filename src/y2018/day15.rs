@@ -172,11 +172,12 @@ impl Creature {
         }
         true
     }
+    fn exists_on(&self, world: &Puzzle) -> bool {
+        let id = self.id();
+        world.creatures.iter().any(|c| c.id() == id)
+    }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
-        assert!(world.exists(self.position(), self.id()));
-        if !world.exists(self.position(), self.id()) {
-            return false;
-        }
+        assert!(self.exists_on(world));
         if self.attack(world) {
             return true;
         }
@@ -272,11 +273,6 @@ impl Puzzle {
         }
         man
     }
-    fn exists(&mut self, at: &Dim2, id: usize) -> bool {
-        self.creatures
-            .iter()
-            .any(|c| c.position() == at && c.id() == id)
-    }
     fn move_creature(&mut self, from: &Dim2, to: &Dim2) {
         for c in self.creatures.iter_mut() {
             if c.position() == from {
@@ -339,7 +335,7 @@ impl AdventOfCode for Puzzle {
             self.creatures.sort();
             let mut creatures = self.creatures.clone();
             for c in creatures.iter_mut() {
-                if !self.exists(c.position(), c.id()) {
+                if !c.exists_on(self) {
                     continue;
                 }
                 if c.target_creatures(self).is_empty() {
@@ -348,9 +344,6 @@ impl AdventOfCode for Puzzle {
                     assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
                     let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
                     dbg!(hit_points);
-                    dbg!((turn - 1) * hit_points);
-                    dbg!(turn * hit_points);
-                    dbg!((turn + 1) * hit_points);
                     return turn * hit_points;
                 }
                 c.turn(self);
