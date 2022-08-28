@@ -58,6 +58,7 @@ impl AdventOfCode for Puzzle {
         self.depth = self.map.iter().map(|(y, x)| *y).max().unwrap();
     }
     fn part1(&mut self) -> Self::Output1 {
+        // TODO: another approach: WATER AUTOMATON that simulates fluid dynamics.
         dbg!(basin_below((0, 500), self));
         self.water_map.len()
     }
@@ -76,15 +77,26 @@ fn basin_below(start: Dim2, world: &Puzzle) -> Option<(usize, Option<Dim2>, Opti
             // This is a bad idea.
             // There is a situation with a 'straw' that doesn't touch with the external basin.
             // We must consider the situation in which water drops to the same basin 'recursively'.
-            match west.0.cmp(&east.0) {
+            let possible_region = match west.0.cmp(&east.0) {
                 std::cmp::Ordering::Less => {
                     println!("west: {:?} > east: {:?}", west, east);
+                    ((east.0, west.1 + 1), (bottom.0, east.1))
                 }
                 std::cmp::Ordering::Equal => {
                     println!("west: {:?} = east: {:?}", west, east);
+                    ((west.0, west.1 + 1), (bottom.0, east.1))
                 }
                 std::cmp::Ordering::Greater => {
                     println!("west: {:?} < east: {:?}", west, east);
+                    ((west.0, west.1 + 1), (bottom.0, east.1))
+                }
+            };
+            for y in (possible_region.0 .0 - 1)..possible_region.1 .0 {
+                for x in (possible_region.0 .1 + 1)..possible_region.1 .1 {
+                    if world.map.contains(&(y, x)) {
+                        dbg!((y, x));
+                        panic!();
+                    }
                 }
             }
             break;
