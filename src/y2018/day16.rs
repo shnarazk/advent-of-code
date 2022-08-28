@@ -18,6 +18,7 @@ pub struct Puzzle {
     rules: Vec<(Vec<usize>, Vec<usize>, Vec<usize>)>,
     input_mode: usize,
     input_buffer: Vec<Vec<usize>>,
+    op_map: [usize; 16],
 }
 
 #[aoc(2018, 16)]
@@ -40,7 +41,13 @@ impl AdventOfCode for Puzzle {
     }
     fn after_insert(&mut self) {
         dbg!(&self.rules.len());
+        let mut n_ops: [usize; 16] = [0; 16];
+        for s in self.rules.iter() {
+            n_ops[s.1[0]] += 1;
+        }
+        dbg!(n_ops);
         dbg!(&self.line.len());
+        self.determine_op_code();
     }
     fn part1(&mut self) -> Self::Output1 {
         0
@@ -84,5 +91,8 @@ impl Puzzle {
             _ => unreachable!(),
         }
         Ok(())
+    }
+    fn determine_op_code(&mut self) {
+        todo!()
     }
 }
