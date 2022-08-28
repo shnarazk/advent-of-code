@@ -43,7 +43,6 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
         dbg!(&self.rules.len());
         dbg!(&self.line.len());
-        self.determine_op_code();
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: [usize; 4] = [0; 4];
@@ -62,7 +61,17 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut map = [0; 16];
+        for (f, t) in self.determine_op_code() {
+            map[f] = t;
+        }
+        let mut register = [0; 4];
+        let mut work = [0; 4];
+        for op in self.line.iter() {
+            execute_as(map[op[0]], op, &register, &mut work);
+            std::mem::swap(&mut register, &mut work);
+        }
+        register[0]
     }
 }
 
@@ -100,7 +109,7 @@ impl Puzzle {
         }
         Ok(())
     }
-    fn determine_op_code(&mut self) {
+    fn determine_op_code(&mut self) -> HashMap<usize, usize> {
         let mut result: HashMap<(usize, usize), usize> = HashMap::new();
         let mut fail: HashMap<(usize, usize), usize> = HashMap::new();
         let mut tries: HashMap<usize, usize> = HashMap::new();
@@ -123,8 +132,8 @@ impl Puzzle {
             print!("{:>3}/{:>2}: ", on_note, tries.get(&on_note).unwrap_or(&0),);
             let mut sum = 0;
             for code in 0..16 {
-                let occ = *result.get(&(on_note, code)).unwrap_or(&0);
-                let neg = *fail.get(&(on_note, code)).unwrap_or(&0);
+                let occ = *result.entry((on_note, code)).or_insert(0);
+                let neg = *fail.entry((on_note, code)).or_insert(0);
                 print!(
                     "{}{:>3}/{:>2}{}",
                     if 0 < occ && 0 == neg {
@@ -140,6 +149,35 @@ impl Puzzle {
             }
             println!("  | {:>2}", sum);
         }
+        let mut map: HashMap<usize, usize> = HashMap::new();
+        'found: while !fail.is_empty() {
+            for i in 0..16 {
+                if map.values().any(|x| *x == i) {
+                    continue;
+                }
+                let mut zero = 0;
+                let mut on_note = 0;
+                for (k, v) in fail.iter() {
+                    if k.1 != i {
+                        continue;
+                    }
+                    if *v == 0 {
+                        on_note = k.0;
+                        zero += 1;
+                    }
+                }
+                if 1 == zero {
+                    println!("{} is {}.", on_note, i);
+                    map.insert(on_note, i);
+                    fail.retain(|k, v| k.0 != on_note);
+                    continue 'found;
+                }
+                println!("{} has {} possibilities.", i, zero);
+            }
+            unreachable!();
+        }
+        assert!(map.len() == 16);
+        map
     }
 }
 
