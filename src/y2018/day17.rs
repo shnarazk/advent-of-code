@@ -13,7 +13,7 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(bool, usize, usize, usize)>,
 }
 
 #[aoc(2018, 17)]
@@ -28,13 +28,27 @@ impl AdventOfCode for Puzzle {
     //     Ok(Some(segment[2].to_string()))
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
+        // x=550, y=1443..1454
+        let parser = regex!(r"^(x|y)=(\d+), (x|y)=(\d+)\.\.(\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        assert!(
+            (&segment[1] == "x" && &segment[3] == "y")
+                || (&segment[1] == "y" && &segment[3] == "x")
+        );
+        // println!(
+        //     "{}={}; {}..{}",
+        //     &segment[1], &segment[2], &segment[4], &segment[5]
+        // );
+        self.line.push((
+            &segment[1] != "x",
+            segment[2].parse::<usize>()?,
+            segment[4].parse::<usize>()?,
+            segment[5].parse::<usize>()?,
+        ));
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
