@@ -140,3 +140,41 @@ fn west_end(start: Dim2, world: &Puzzle) -> Dim2 {
     }
     point
 }
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+enum Water {
+    None,
+    On,
+    LeftBound,
+    RightBound,
+    BothBound,
+    Block,
+}
+
+fn transition(
+    state: Water,
+    above: Water,
+    left: Water,
+    right: Water,
+    below: Water,
+) -> Option<Water> {
+    let dry = [Water::None, Water::Block];
+    let solid = [Water::BothBound, Water::Block];
+    let left_solid = [Water::LeftBound, Water::BothBound, Water::Block];
+    let right_solid = [Water::RightBound, Water::BothBound, Water::Block];
+    match (state, above, left, right, below) {
+        (Water::Block, _, _, _, _) => None,
+        (Water::None, a, _, _, _) if !dry.contains(&a) => Some(Water::On),
+        (Water::None, _, l, _, b) if !dry.contains(&l) && solid.contains(&b) => Some(Water::On),
+        (Water::None, _, _, r, b) if !dry.contains(&r) && solid.contains(&b) => Some(Water::On),
+        (Water::On, _, l, r, _) if left_solid.contains(&l) && right_solid.contains(&r) => {
+            Some(Water::BothBound)
+        }
+        (Water::On, _, l, _, _) if left_solid.contains(&l) => Some(Water::LeftBound),
+        (Water::On, _, _, r, _) if right_solid.contains(&r) => Some(Water::RightBound),
+
+        (Water::LeftBound, _, _, r, _) if right_solid.contains(&r) => Some(Water::BothBound),
+        (Water::RightBound, _, l, _, _) if left_solid.contains(&l) => Some(Water::BothBound),
+        _ => None,
+    }
+}
