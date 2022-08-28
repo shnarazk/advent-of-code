@@ -1,13 +1,9 @@
 //! <https://adventofcode.com/2018/day/16>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 
 use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         line_parser, regex,
     },
     std::collections::HashMap,
@@ -50,7 +46,6 @@ impl AdventOfCode for Puzzle {
         for example in self.rules.iter() {
             let mut success = 0;
             for code in 0..16 {
-                let on_note = example.1[0];
                 success +=
                     (*execute_as(code, &example.1, &example.0, &mut buffer) == example.2) as usize;
             }
@@ -169,7 +164,7 @@ impl Puzzle {
                 if 1 == zero {
                     println!("{} is {}.", on_note, i);
                     map.insert(on_note, i);
-                    fail.retain(|k, v| k.0 != on_note);
+                    fail.retain(|k, _| k.0 != on_note);
                     continue 'found;
                 }
                 println!("{} has {} possibilities.", i, zero);
