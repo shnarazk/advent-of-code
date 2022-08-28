@@ -17,6 +17,7 @@ type Dim2 = (usize, usize);
 pub struct Puzzle {
     line: Vec<(bool, usize, usize, usize)>,
     map: HashSet<Dim2>,
+    water_map: HashSet<Dim2>,
     depth: usize,
     width: usize,
 }
@@ -58,7 +59,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         dbg!(basin_below((0, 500), self));
-        0
+        self.water_map.len()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
@@ -74,6 +75,7 @@ fn basin_below(start: Dim2, world: &Puzzle) -> Option<(usize, Option<Dim2>, Opti
             let east = east_end(bottom, world);
             // This is a bad idea.
             // There is a situation with a 'straw' that doesn't touch with the external basin.
+            // We must consider the situation in which water drops to the same basin 'recursively'.
             match west.0.cmp(&east.0) {
                 std::cmp::Ordering::Less => {
                     println!("west: {:?} > east: {:?}", west, east);
