@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
 };
 
 type Dim2 = (usize, usize);
@@ -58,9 +58,32 @@ impl AdventOfCode for Puzzle {
         self.depth = self.map.iter().map(|(y, x)| *y).max().unwrap();
     }
     fn part1(&mut self) -> Self::Output1 {
-        // TODO: another approach: WATER AUTOMATON that simulates fluid dynamics.
         dbg!(basin_below((0, 500), self));
-        self.water_map.len()
+        // self.water_map.len()
+        let start = (0, 500);
+        let mut to_update: Vec<Dim2> = vec![start];
+        let mut water: HashMap<Dim2, Water> = HashMap::new();
+        while let Some(pos) = to_update.pop() {
+            let state = water.get(&pos).unwrap();
+            let above = water.get(&pos).unwrap();
+            let left = water.get(&pos).unwrap();
+            let right = water.get(&pos).unwrap();
+            let below = water.get(&pos).unwrap();
+            if let Some(next) = transition(state, above, left, right, below) {
+                water.insert(pos, next);
+                let left = (pos.0, pos.1 - 1);
+                let right = (pos.0, pos.1 + 1);
+                let below = (pos.0 + 1, pos.1);
+                to_update.push(left);
+                to_update.push(right);
+                to_update.push(below);
+            }
+            self.render(&water);
+        }
+        water
+            .values()
+            .filter(|s| ![Water::None, Water::Block].contains(s))
+            .count()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
@@ -152,11 +175,11 @@ enum Water {
 }
 
 fn transition(
-    state: Water,
-    above: Water,
-    left: Water,
-    right: Water,
-    below: Water,
+    state: &Water,
+    above: &Water,
+    left: &Water,
+    right: &Water,
+    below: &Water,
 ) -> Option<Water> {
     let dry = [Water::None, Water::Block];
     let solid = [Water::BothBound, Water::Block];
@@ -164,17 +187,21 @@ fn transition(
     let right_solid = [Water::RightBound, Water::BothBound, Water::Block];
     match (state, above, left, right, below) {
         (Water::Block, _, _, _, _) => None,
-        (Water::None, a, _, _, _) if !dry.contains(&a) => Some(Water::On),
-        (Water::None, _, l, _, b) if !dry.contains(&l) && solid.contains(&b) => Some(Water::On),
-        (Water::None, _, _, r, b) if !dry.contains(&r) && solid.contains(&b) => Some(Water::On),
-        (Water::On, _, l, r, _) if left_solid.contains(&l) && right_solid.contains(&r) => {
+        (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::On),
+        (Water::None, _, l, _, b) if !dry.contains(l) && solid.contains(b) => Some(Water::On),
+        (Water::None, _, _, r, b) if !dry.contains(r) && solid.contains(b) => Some(Water::On),
+        (Water::On, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
             Some(Water::BothBound)
         }
-        (Water::On, _, l, _, _) if left_solid.contains(&l) => Some(Water::LeftBound),
-        (Water::On, _, _, r, _) if right_solid.contains(&r) => Some(Water::RightBound),
+        (Water::On, _, l, _, _) if left_solid.contains(l) => Some(Water::LeftBound),
+        (Water::On, _, _, r, _) if right_solid.contains(r) => Some(Water::RightBound),
 
-        (Water::LeftBound, _, _, r, _) if right_solid.contains(&r) => Some(Water::BothBound),
-        (Water::RightBound, _, l, _, _) if left_solid.contains(&l) => Some(Water::BothBound),
+        (Water::LeftBound, _, _, r, _) if right_solid.contains(r) => Some(Water::BothBound),
+        (Water::RightBound, _, l, _, _) if left_solid.contains(l) => Some(Water::BothBound),
         _ => None,
     }
+}
+
+impl Puzzle {
+    fn render(&self, water: &HashMap<Dim2, Water>) {}
 }
