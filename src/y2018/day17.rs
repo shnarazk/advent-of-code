@@ -4,6 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
+        color,
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser, regex,
@@ -56,30 +57,58 @@ impl AdventOfCode for Puzzle {
         dbg!(self.map.len());
         self.width = self.map.iter().map(|(y, x)| *x).max().unwrap();
         self.depth = self.map.iter().map(|(y, x)| *y).max().unwrap();
+        // dbg!(self.depth);
+        // panic!();
     }
     fn part1(&mut self) -> Self::Output1 {
-        dbg!(basin_below((0, 500), self));
+        // dbg!(basin_below((0, 500), self));
         // self.water_map.len()
         let start = (0, 500);
-        let mut to_update: Vec<Dim2> = vec![start];
         let mut water: HashMap<Dim2, Water> = HashMap::new();
+        water.insert(start, Water::On);
+        for p in self.map.iter() {
+            water.insert(*p, Water::Block);
+        }
+        let mut to_update: Vec<Dim2> = vec![start];
+        to_update.push((start.0 + 1, start.1));
+        let focus = (30, 500);
+        self.render(&focus, &water, false);
+        let mut count = 0;
+        // self.depth = 20;
         while let Some(pos) = to_update.pop() {
-            let state = water.get(&pos).unwrap();
-            let above = water.get(&pos).unwrap();
-            let left = water.get(&pos).unwrap();
-            let right = water.get(&pos).unwrap();
-            let below = water.get(&pos).unwrap();
+            if pos.0 == 0 || self.depth < pos.0 || pos.1 == 0 || self.width < pos.1 {
+                continue;
+            }
+            count += 1;
+            // dbg!(pos.0);
+            // if 80800 < count {
+            //     break;
+            // }
+            let state = water.get(&pos).unwrap_or(&Water::None);
+            let above = water.get(&(pos.0 - 1, pos.1)).unwrap_or(&Water::None);
+            let left = water.get(&(pos.0, pos.1 - 1)).unwrap_or(&Water::None);
+            let right = water.get(&(pos.0, pos.1 + 1)).unwrap_or(&Water::None);
+            let below = water.get(&(pos.0 + 1, pos.1)).unwrap_or(&Water::None);
             if let Some(next) = transition(state, above, left, right, below) {
                 water.insert(pos, next);
+                let above = (pos.0 - 1, pos.1);
                 let left = (pos.0, pos.1 - 1);
                 let right = (pos.0, pos.1 + 1);
                 let below = (pos.0 + 1, pos.1);
+                to_update.push(above);
                 to_update.push(left);
                 to_update.push(right);
                 to_update.push(below);
             }
-            self.render(&water);
+            // if count % 1 == 0 {
+            self.render(&pos, &water, true);
+            // }
+            // if count == 800 {
+            //     break;
+            // }
         }
+        self.render(&focus, &water, true);
+        // dbg!(water.keys().max());
         water
             .values()
             .filter(|s| ![Water::None, Water::Block].contains(s))
@@ -87,6 +116,125 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+enum Water {
+    None,
+    Drop,
+    On,
+    LeftBound,
+    RightBound,
+    BothBound,
+    Block,
+}
+
+fn transition(
+    state: &Water,
+    above: &Water,
+    left: &Water,
+    right: &Water,
+    below: &Water,
+) -> Option<Water> {
+    let dry = [Water::None, Water::Block];
+    let solid = [Water::BothBound, Water::Block];
+    let left_solid = [Water::LeftBound, Water::BothBound, Water::Block];
+    let right_solid = [Water::RightBound, Water::BothBound, Water::Block];
+    match (state, above, left, right, below) {
+        (Water::Block, _, _, _, _) => None,
+        // (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::On),
+        (Water::None, _, Water::LeftBound, r, b) if solid.contains(r) && solid.contains(b) => {
+            Some(Water::BothBound)
+        }
+        (Water::None, _, Water::On, _, b) if solid.contains(b) => Some(Water::On),
+        (Water::None, _, Water::On, _, Water::None) => Some(Water::Drop),
+        (Water::None, _, Water::LeftBound, _, b) if solid.contains(b) => Some(Water::LeftBound),
+        (Water::None, _, Water::LeftBound, _, Water::None) => Some(Water::Drop),
+
+        (Water::None, _, l, Water::RightBound, b) if solid.contains(l) && solid.contains(b) => {
+            Some(Water::BothBound)
+        }
+        (Water::None, _, _, Water::On, b) if solid.contains(b) => Some(Water::On),
+        (Water::None, _, _, Water::On, Water::None) => Some(Water::Drop),
+        (Water::None, _, _, Water::RightBound, b) if solid.contains(b) => Some(Water::RightBound),
+        (Water::None, _, _, Water::RightBound, Water::None) => Some(Water::Drop),
+
+        (Water::None, a, _, _, b) if !dry.contains(a) && solid.contains(b) => Some(Water::On),
+        (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::Drop),
+
+        // (Water::None, _, Water::BothBound, _, b) if solid.contains(b) => Some(Water::On),
+        // (Water::None, _, l, _, b) if !dry.contains(l) && solid.contains(b) => Some(Water::On),
+        // (Water::None, _, _, Water::BothBound, b) if solid.contains(b) => Some(Water::On),
+        // (Water::None, _, _, r, b) if !dry.contains(r) && solid.contains(b) => Some(Water::On),
+        // (Water::None, _, l, _, _) if !left_solid.contains(l) => Some(Water::On),
+        // (Water::None, _, _, Water::BothBound, b) if *b == Water::Block => Some(Water::On),
+        // (Water::None, _, _, r, _) if !right_solid.contains(r) => Some(Water::On),
+        // (Water::None, a, l, _, _) if !dry.contains(a) && !dry.contains(l) => Some(Water::Drop),
+        // (Water::None, a, _, r, _) if !dry.contains(a) && !dry.contains(r) => Some(Water::Drop),
+        (Water::Drop, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
+            Some(Water::BothBound)
+        }
+        // (Water::Drop, _, l, _, _) if left_solid.contains(l) => Some(Water::LeftBound),
+        // (Water::Drop, _, _, r, _) if right_solid.contains(r) => Some(Water::RightBound),
+        (Water::Drop, _, _, _, b) if solid.contains(b) => Some(Water::On),
+
+        (Water::On, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
+            Some(Water::BothBound)
+        }
+        (Water::On, _, l, _, _) if left_solid.contains(l) => Some(Water::LeftBound),
+        (Water::On, _, _, r, _) if right_solid.contains(r) => Some(Water::RightBound),
+
+        (Water::LeftBound, _, _, r, _) if right_solid.contains(r) => Some(Water::BothBound),
+
+        (Water::RightBound, _, l, _, _) if left_solid.contains(l) => Some(Water::BothBound),
+        _ => None,
+    }
+}
+
+impl Puzzle {
+    fn render(&self, center: &Dim2, water: &HashMap<Dim2, Water>, repaint: bool) {
+        let height: isize = 50;
+        if repaint {
+            for _ in 0..=height {
+                print!("{}", color::REVERT);
+            }
+        }
+        println!("-------------------------------------------- {:?}", center);
+        for y in (center.0 as isize - height + 15)..(center.0 as isize + 15) {
+            if y < 0 {
+                println!();
+                continue;
+            }
+            for x in -45_isize..45 {
+                let xx: usize = (center.1 as isize + x).max(0_isize) as usize;
+                let w = water.get(&(y as usize, xx)).unwrap_or(&Water::None);
+                match w {
+                    Water::None => {
+                        print!(" ");
+                    }
+                    Water::Block => {
+                        print!("#");
+                    }
+                    Water::Drop => {
+                        print!("{}v{}", color::BLUE, color::RESET);
+                    }
+                    Water::On => {
+                        print!("{}~{}", color::BLUE, color::RESET);
+                    }
+                    Water::LeftBound => {
+                        print!("{}>{}", color::BLUE, color::RESET);
+                    }
+                    Water::RightBound => {
+                        print!("{}<{}", color::BLUE, color::RESET);
+                    }
+                    Water::BothBound => {
+                        print!("{}={}", color::BLUE, color::RESET);
+                    }
+                }
+            }
+            println!();
+        }
     }
 }
 
@@ -162,46 +310,4 @@ fn west_end(start: Dim2, world: &Puzzle) -> Dim2 {
         break;
     }
     point
-}
-
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
-enum Water {
-    None,
-    On,
-    LeftBound,
-    RightBound,
-    BothBound,
-    Block,
-}
-
-fn transition(
-    state: &Water,
-    above: &Water,
-    left: &Water,
-    right: &Water,
-    below: &Water,
-) -> Option<Water> {
-    let dry = [Water::None, Water::Block];
-    let solid = [Water::BothBound, Water::Block];
-    let left_solid = [Water::LeftBound, Water::BothBound, Water::Block];
-    let right_solid = [Water::RightBound, Water::BothBound, Water::Block];
-    match (state, above, left, right, below) {
-        (Water::Block, _, _, _, _) => None,
-        (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::On),
-        (Water::None, _, l, _, b) if !dry.contains(l) && solid.contains(b) => Some(Water::On),
-        (Water::None, _, _, r, b) if !dry.contains(r) && solid.contains(b) => Some(Water::On),
-        (Water::On, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
-            Some(Water::BothBound)
-        }
-        (Water::On, _, l, _, _) if left_solid.contains(l) => Some(Water::LeftBound),
-        (Water::On, _, _, r, _) if right_solid.contains(r) => Some(Water::RightBound),
-
-        (Water::LeftBound, _, _, r, _) if right_solid.contains(r) => Some(Water::BothBound),
-        (Water::RightBound, _, l, _, _) if left_solid.contains(l) => Some(Water::BothBound),
-        _ => None,
-    }
-}
-
-impl Puzzle {
-    fn render(&self, water: &HashMap<Dim2, Water>) {}
 }
