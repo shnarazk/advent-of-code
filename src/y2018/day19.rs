@@ -1,16 +1,8 @@
 //! <https://adventofcode.com/2018/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 
-use std::ops::Index;
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -350,6 +342,7 @@ while b <= f {
 }
 */
 
+/*
 fn part2() -> usize {
     let mut a = 0;
     let mut b = 1;
@@ -368,6 +361,7 @@ fn part2() -> usize {
     }
     a
 }
+*/
 
 fn part2_1() -> usize {
     let mut a = 0;
