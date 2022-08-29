@@ -125,7 +125,66 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let min_y = self.map.iter().map(|(y, x)| *y).min().unwrap();
+        let min_x = self.map.iter().map(|(y, x)| *x).min().unwrap();
+        let max_y = self.map.iter().map(|(y, x)| *y).max().unwrap();
+        let max_x = self.map.iter().map(|(y, x)| *x).max().unwrap();
+        // dbg!(basin_below((0, 500), self));
+        // self.water_map.len()
+        let start = (0, 500);
+        let mut water: HashMap<Dim2, Water> = HashMap::new();
+        water.insert(start, Water::On);
+        for p in self.map.iter() {
+            water.insert(*p, Water::Block);
+        }
+        let mut to_update: Vec<Dim2> = vec![start];
+        to_update.push((start.0 + 1, start.1));
+        let focus = (30, 500);
+        self.render(&focus, &water, false);
+        let mut count = 0;
+        // self.depth = 20;
+        while let Some(pos) = to_update.pop() {
+            if pos.0 == 0 || max_y < pos.0 {
+                continue;
+            }
+            count += 1;
+            // dbg!(pos.0);
+            // if 80800 < count {
+            //     break;
+            // }
+            let state = water.get(&pos).unwrap_or(&Water::None);
+            let above = water.get(&(pos.0 - 1, pos.1)).unwrap_or(&Water::None);
+            let left = water.get(&(pos.0, pos.1 - 1)).unwrap_or(&Water::None);
+            let right = water.get(&(pos.0, pos.1 + 1)).unwrap_or(&Water::None);
+            let below = water.get(&(pos.0 + 1, pos.1)).unwrap_or(&Water::None);
+            if let Some(next) = transition(state, above, left, right, below) {
+                water.insert(pos, next);
+                let above = (pos.0 - 1, pos.1);
+                let left = (pos.0, pos.1 - 1);
+                let right = (pos.0, pos.1 + 1);
+                let below = (pos.0 + 1, pos.1);
+                to_update.push(above);
+                to_update.push(left);
+                to_update.push(right);
+                to_update.push(below);
+            }
+            if count % 100 == 0 {
+                self.render(
+                    &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30),
+                    &water,
+                    true,
+                );
+            }
+            // if count == 800 {
+            //     break;
+            // }
+        }
+        self.render(&focus, &water, true);
+        println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
+        water
+            .iter()
+            .filter(|(p, s)| min_y <= p.0 && p.0 <= max_y && **s == Water::BothBound)
+            .count()
     }
 }
 
