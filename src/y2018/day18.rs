@@ -111,10 +111,9 @@ impl AdventOfCode for Puzzle {
         let mut init = self.map.clone();
         let height = self.line.len();
         let width = self.line[0].len();
-        dbg!(height, width);
         let mut tmp: HashMap<Dim2, Field> = HashMap::new();
         let mut step = 1;
-        let limit = 1_000_000_000;
+        let limit: usize = 1_000_000_000;
         while step < limit {
             tmp.clear();
             for j in 0..height {
@@ -137,24 +136,23 @@ impl AdventOfCode for Puzzle {
                 }
             }
             std::mem::swap(&mut tmp, &mut self.map);
+            step += 1;
             if step == 1000 {
-                dbg!(self.map.values().filter(|f| **f == Field::Lumb).count());
                 init = self.map.clone();
             }
-            if 1000 < step && self.map == init {
+            if 1000 < step && step < 2000 && self.map == init {
                 let delta = step - 1000;
-                dbg!(delta);
-                dbg!((limit - 1000) as f64 / delta as f64);
-                dbg!(((limit - 1000) / delta) * delta);
                 let jump = ((limit - 1000) / delta) * delta + 1000;
-                dbg!(jump);
                 assert!(limit < jump + delta);
-                step = jump;
+                step = jump - delta;
+                dbg!(delta, step);
+                assert!((step - 1000) % 28 == 0);
                 self.map = init.clone();
-            } else {
-                step += 1;
             }
         }
-        self.map.values().filter(|f| **f == Field::Lumb).count()
+        assert_eq!(step, limit);
+        let n_tree = self.map.values().filter(|f| **f == Field::Tree).count();
+        let n_lumb = self.map.values().filter(|f| **f == Field::Lumb).count();
+        n_tree * n_lumb
     }
 }
