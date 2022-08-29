@@ -112,8 +112,9 @@ impl AdventOfCode for Puzzle {
         let height = self.line.len();
         let width = self.line[0].len();
         let mut tmp: HashMap<Dim2, Field> = HashMap::new();
-        let mut step = 1;
+        let mut step = 0;
         let limit: usize = 1_000_000_000;
+        let check_point = 1000;
         while step < limit {
             tmp.clear();
             for j in 0..height {
@@ -137,20 +138,20 @@ impl AdventOfCode for Puzzle {
             }
             std::mem::swap(&mut tmp, &mut self.map);
             step += 1;
-            if step == 1000 {
+            if step == check_point {
                 init = self.map.clone();
-            }
-            if 1000 < step && step < 2000 && self.map == init {
-                let delta = step - 1000;
-                let jump = ((limit - 1000) / delta) * delta + 1000;
-                assert!(limit < jump + delta);
-                step = jump - delta;
+            } else if check_point < step && step < check_point + 1000 && self.map == init {
+                let delta = step - check_point;
+                let n = (limit - check_point - 1) / delta;
+                step = n * delta + check_point;
                 dbg!(delta, step);
-                assert!((step - 1000) % 28 == 0);
+                dbg!((limit - check_point) / delta);
+                dbg!((limit - check_point - 1) / delta);
+                assert!(step < limit);
+                assert!(limit <= step + delta);
                 self.map = init.clone();
             }
         }
-        assert_eq!(step, limit);
         let n_tree = self.map.values().filter(|f| **f == Field::Tree).count();
         let n_lumb = self.map.values().filter(|f| **f == Field::Lumb).count();
         n_tree * n_lumb
