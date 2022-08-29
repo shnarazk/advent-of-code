@@ -72,28 +72,46 @@ impl TryFrom<&str> for Inst {
     }
 }
 
-impl Index<usize> for Inst {
-    type Output = usize;
-    fn index(&self, index: usize) -> &Self::Output {
-        let v = match self {
-            Inst::Addr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Addi(o1, o2, o3) => [o1, o2, o3],
-            Inst::Mulr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Muli(o1, o2, o3) => [o1, o2, o3],
-            Inst::Banr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Bani(o1, o2, o3) => [o1, o2, o3],
-            Inst::Borr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Bori(o1, o2, o3) => [o1, o2, o3],
-            Inst::Setr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Seti(o1, o2, o3) => [o1, o2, o3],
-            Inst::Gtir(o1, o2, o3) => [o1, o2, o3],
-            Inst::Gtri(o1, o2, o3) => [o1, o2, o3],
-            Inst::Gtrr(o1, o2, o3) => [o1, o2, o3],
-            Inst::Eqir(o1, o2, o3) => [o1, o2, o3],
-            Inst::Eqri(o1, o2, o3) => [o1, o2, o3],
-            Inst::Eqrr(o1, o2, o3) => [o1, o2, o3],
+impl Inst {
+    fn disassemble(&self, addr: usize, pc_index: usize) -> String {
+        let l = |n: &usize| match *n {
+            _ if *n == pc_index => "pc",
+            0 => "a",
+            1 => "b",
+            2 => "c",
+            3 => "d",
+            4 => "e",
+            5 => "f",
+            _ => unreachable!(),
         };
-        v[index]
+        let r = |n: &usize| match *n {
+            _ if *n == pc_index => format!("{addr}"),
+            0 => "a".to_string(),
+            1 => "b".to_string(),
+            2 => "c".to_string(),
+            3 => "d".to_string(),
+            4 => "e".to_string(),
+            5 => "f".to_string(),
+            _ => unreachable!(),
+        };
+        match self {
+            Inst::Addr(o1, o2, o3) => format!("{} = {} + {};", l(o3), r(o1), r(o2)),
+            Inst::Addi(o1, o2, o3) => format!("{} = {} + {};", l(o3), r(o1), o2),
+            Inst::Mulr(o1, o2, o3) => format!("{} = {} * {};", l(o3), r(o1), r(o2)),
+            Inst::Muli(o1, o2, o3) => format!("{} = {} * {};", l(o3), r(o1), o2),
+            Inst::Banr(o1, o2, o3) => format!("{} = {} & {};", l(o3), r(o1), r(o2)),
+            Inst::Bani(o1, o2, o3) => format!("{} = {} & {};", l(o3), r(o1), o2),
+            Inst::Borr(o1, o2, o3) => format!("{} = {} | {};", l(o3), r(o1), r(o2)),
+            Inst::Bori(o1, o2, o3) => format!("{} = {} | {};", l(o3), r(o1), o2),
+            Inst::Setr(o1, _, o3) => format!("{} = {};", l(o3), r(o1)),
+            Inst::Seti(o1, _, o3) => format!("{} = {};", l(o3), o1),
+            Inst::Gtir(o1, o2, o3) => format!("{} = ({} > {}) as usize;", l(o3), o1, r(o2)),
+            Inst::Gtri(o1, o2, o3) => format!("{} = ({} > {}) as usize;", l(o3), r(o1), o2),
+            Inst::Gtrr(o1, o2, o3) => format!("{} = ({} > {}) as usize;", l(o3), r(o1), r(o2)),
+            Inst::Eqir(o1, o2, o3) => format!("{} = ({} == {}) as usize;", l(o3), o1, r(o2)),
+            Inst::Eqri(o1, o2, o3) => format!("{} = ({} == {}) as usize;", l(o3), r(o1), o2),
+            Inst::Eqrr(o1, o2, o3) => format!("{} = ({} == {}) as usize;", l(o3), r(o1), r(o2)),
+        }
     }
 }
 
@@ -133,8 +151,8 @@ fn execute<'a, 'b>(
         Inst::Borr(o0, o1, o2) => out[set!(o2)] = reg!(o0) | reg!(o1),
         Inst::Bori(o0, o1, o2) => out[set!(o2)] = reg!(o0) | val!(o1),
         // // setr, seti
-        Inst::Setr(o0, o1, o2) => out[set!(o2)] = reg!(o0),
-        Inst::Seti(o0, o1, o2) => out[set!(o2)] = val!(o0),
+        Inst::Setr(o0, _, o2) => out[set!(o2)] = reg!(o0),
+        Inst::Seti(o0, _, o2) => out[set!(o2)] = val!(o0),
         // // gtir, gtri, gtrr
         Inst::Gtir(o0, o1, o2) => out[set!(o2)] = (val!(o0) > reg!(o1)) as usize,
         Inst::Gtri(o0, o1, o2) => out[set!(o2)] = (reg!(o0) > val!(o1)) as usize,
@@ -151,7 +169,6 @@ fn execute<'a, 'b>(
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        dbg!(&block);
         let parser = regex!(r"^#ip (\d)");
         if let Some(segment) = parser.captures(block) {
             self.pc_index = segment[1].parse::<usize>()?;
@@ -176,6 +193,190 @@ impl AdventOfCode for Puzzle {
         register[0]
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        for (i, c) in self.line.iter().enumerate() {
+            println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
+        }
+        part2_1()
     }
+}
+
+/* Source
+  0: pc = 0 + 16;
+  1: b = 1;
+  2: e = 1;
+  3: c = b * e;
+  4: c = (c == f) as usize;
+  5: pc = c + 5;
+  6: pc = 6 + 1;
+  7: a = b + a;
+  8: e = e + 1;
+  9: c = (e > f) as usize;
+ 10: pc = 10 + c;
+ 11: pc = 2;
+ 12: b = b + 1;
+ 13: c = (b > f) as usize;
+ 14: pc = c + 14;
+ 15: pc = 1;
+ 16: pc = 16 * 16;
+ 17: f = f + 2;
+ 18: f = f * f;
+ 19: f = 19 * f;
+ 20: f = f * 11;
+ 21: c = c + 5;
+ 22: c = c * 22;
+ 23: c = c + 21;
+ 24: f = f + c;
+ 25: pc = 25 + a;
+ 26: pc = 0;
+ 27: c = 27;
+ 28: c = c * 28;
+ 29: c = 29 + c;
+ 30: c = 30 * c;
+ 31: c = c * 14;
+ 32: c = c * 32;
+ 33: f = f + c;
+ 34: a = 0;
+ 35: pc = 0;
+*/
+
+/* Source
+   0: pc = 16;
+=> 1: b = 1;
+=> 2: e = 1;
+=> 3: c = b * e;
+   4: c = (c == f) as usize;
+   5: pc = c + 5;
+=> 6: pc = 7;
+=> 7: a = b + a;
+   8: e = e + 1;
+   9: c = (e > f) as usize;
+  10: pc = 10 + c;
+=>11: pc = 2;
+=>12: b = b + 1;
+  13: c = (b > f) as usize;
+  14: pc = c + 14;
+=>15: pc = 1;
+=>16: pc = 256;
+--------------- initialization
+=>17: f = f + 2;  // f = 2
+  18: f = f * f;  // f = 4
+  19: f = 19 * f; // f = 76;
+  20: f = f * 11; // f = 836;
+  21: c = c + 5;  // c = 5;
+  22: c = c * 22; // c = 110;
+  23: c = c + 21; // c = 131;
+  24: f = f + c;  // f = 967;
+  25: pc = 25 + a;
+=>26: pc = 0;
+  27: c = 27;     // c = 27;
+  28: c = c * 28; // c = 756;
+  29: c = 29 + c; // c = 785;
+  30: c = 30 * c; // c = 23550;
+  31: c = c * 14; // c = 329700;
+  32: c = c * 32; // c = 10550400;
+  33: f = f + c; // f = 10551367;
+  34: a = 0;
+  35: pc = 0;
+*/
+
+/* Source
+[a: 0, b: 1, c: 10550400, d: 1, e: 0, f: 10551367]
+while !(b > f) {
+  => 2: e = 1;
+  => 3: c = b * e;
+     4: c = (c == f) as usize;
+     5: pc = c + 5;
+  => 6: pc = 7;
+  => 7: a = b + a;
+     8: e = e + 1;
+     9: c = (e > f) as usize;
+    10: pc = 10 + c;
+  =>11: pc = 2;
+  =>12: b = b + 1;
+}
+*/
+
+/* Source
+[a: 0, b: 1, c: 10550400, d: 1, e: 0, f: 10551367]
+while !(b > f) {
+  => 2: e = 1;
+  => 3: c = b * e;
+     if c == f {
+         c = 1;
+         a += b;
+     } else {
+         c = 0;
+     }
+     8: e += 1;
+     if e > f {
+         c = 1;
+         b += 1;
+     } else {
+         c = 0;
+         goto 3;
+     }
+}
+*/
+
+/* Source
+[a: 0, b: 1, c: 10550400, d: 1, e: 1, f: 10551367]
+while !(b > f) {
+  => 3: c = b * e;
+     if c == f {
+         a += b;
+     }
+     8: e += 1;
+     if e > f {
+         b += 1;
+         e = 1;
+     } else {
+         goto 3;
+     }
+}
+*/
+
+/* Source
+[a: 0, b: 1, c: 10550400, d: 1, e: 1, f: 10551367]
+while b <= f {
+    c = b * e;
+    if c == f {
+        a += b;
+    }
+    e += 1;
+    if f < e {
+        b += 1;
+        e = 1;
+    }
+}
+*/
+
+fn part2() -> usize {
+    let mut a = 0;
+    let mut b = 1;
+    let mut e = 1;
+    let f = 10551367;
+    while b <= f {
+        let c = b * e;
+        if c == f {
+            a += b;
+        }
+        e += 1;
+        if f < e {
+            b += 1;
+            e = 1;
+        }
+    }
+    a
+}
+
+fn part2_1() -> usize {
+    let mut a = 0;
+    let f = 10551367;
+    for i in 1..(f as f64).sqrt() as usize {
+        if f % i == 0 {
+            a += i;
+            a += f / i;
+        }
+    }
+    a
 }
