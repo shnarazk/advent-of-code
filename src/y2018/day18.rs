@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2018/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -81,7 +74,7 @@ impl AdventOfCode for Puzzle {
         let height = self.line.len();
         let width = self.line[0].len();
         let mut tmp: HashMap<Dim2, Field> = HashMap::new();
-        for step in 0..10 {
+        for _ in 0..10 {
             tmp.clear();
             for j in 0..height {
                 for i in 0..width {
@@ -142,13 +135,10 @@ impl AdventOfCode for Puzzle {
                 init = self.map.clone();
             } else if check_point < step && step < check_point + 1000 && self.map == init {
                 let delta = step - check_point;
-                let n = (limit - check_point - 1) / delta;
+                let n = (limit - check_point) / delta;
                 step = n * delta + check_point;
                 dbg!(delta, step);
                 dbg!((limit - check_point) / delta);
-                dbg!((limit - check_point - 1) / delta);
-                assert!(step < limit);
-                assert!(limit <= step + delta);
                 self.map = init.clone();
             }
         }
