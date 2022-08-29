@@ -108,6 +108,53 @@ impl AdventOfCode for Puzzle {
         n_tree * n_lumb
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut init = self.map.clone();
+        let height = self.line.len();
+        let width = self.line[0].len();
+        dbg!(height, width);
+        let mut tmp: HashMap<Dim2, Field> = HashMap::new();
+        let mut step = 1;
+        let limit = 1_000_000_000;
+        while step < limit {
+            tmp.clear();
+            for j in 0..height {
+                for i in 0..width {
+                    let state = self.map.get(&(j as isize, i as isize)).unwrap();
+                    let n_tree = DIRS
+                        .iter()
+                        .map(|d| (j as isize + d.0, i as isize + d.1))
+                        .map(|p| *self.map.get(&p).unwrap_or(&Field::Open))
+                        .filter(|f| *f == Field::Tree)
+                        .count();
+                    let n_lumb = DIRS
+                        .iter()
+                        .map(|d| (j as isize + d.0, i as isize + d.1))
+                        .map(|p| *self.map.get(&p).unwrap_or(&Field::Open))
+                        .filter(|f| *f == Field::Lumb)
+                        .count();
+                    let new_state = state.transition(n_tree, n_lumb);
+                    tmp.insert((j as isize, i as isize), new_state);
+                }
+            }
+            std::mem::swap(&mut tmp, &mut self.map);
+            if step == 1000 {
+                dbg!(self.map.values().filter(|f| **f == Field::Lumb).count());
+                init = self.map.clone();
+            }
+            if 1000 < step && self.map == init {
+                let delta = step - 1000;
+                dbg!(delta);
+                dbg!((limit - 1000) as f64 / delta as f64);
+                dbg!(((limit - 1000) / delta) * delta);
+                let jump = ((limit - 1000) / delta) * delta + 1000;
+                dbg!(jump);
+                assert!(limit < jump + delta);
+                step = jump;
+                self.map = init.clone();
+            } else {
+                step += 1;
+            }
+        }
+        self.map.values().filter(|f| **f == Field::Lumb).count()
     }
 }
