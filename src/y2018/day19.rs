@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
+use std::ops::Index;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -14,6 +16,7 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Inst>,
+    pc_index: usize,
 }
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -68,30 +71,109 @@ impl TryFrom<&str> for Inst {
         }
     }
 }
+
+impl Index<usize> for Inst {
+    type Output = usize;
+    fn index(&self, index: usize) -> &Self::Output {
+        let v = match self {
+            Inst::Addr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Addi(o1, o2, o3) => [o1, o2, o3],
+            Inst::Mulr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Muli(o1, o2, o3) => [o1, o2, o3],
+            Inst::Banr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Bani(o1, o2, o3) => [o1, o2, o3],
+            Inst::Borr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Bori(o1, o2, o3) => [o1, o2, o3],
+            Inst::Setr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Seti(o1, o2, o3) => [o1, o2, o3],
+            Inst::Gtir(o1, o2, o3) => [o1, o2, o3],
+            Inst::Gtri(o1, o2, o3) => [o1, o2, o3],
+            Inst::Gtrr(o1, o2, o3) => [o1, o2, o3],
+            Inst::Eqir(o1, o2, o3) => [o1, o2, o3],
+            Inst::Eqri(o1, o2, o3) => [o1, o2, o3],
+            Inst::Eqrr(o1, o2, o3) => [o1, o2, o3],
+        };
+        v[index]
+    }
+}
+
+fn execute<'a, 'b>(
+    op: &Inst,
+    register: &'a [usize; 6],
+    out: &'b mut [usize; 6],
+) -> &'b mut [usize; 6] {
+    macro_rules! reg {
+        ($num: expr) => {{
+            register[*$num]
+        }};
+    }
+    macro_rules! set {
+        ($num: expr) => {{
+            *$num
+        }};
+    }
+    macro_rules! val {
+        ($num: expr) => {{
+            *$num
+        }};
+    }
+    out[..6].copy_from_slice(&register[..6]);
+    assert_eq!(&register, &out);
+    match op {
+        // addr, addi
+        Inst::Addr(o0, o1, o2) => out[set!(o2)] = reg!(o0) + reg!(o1),
+        Inst::Addi(o0, o1, o2) => out[set!(o2)] = reg!(o0) + val!(o1),
+        // // mulr, muli
+        Inst::Mulr(o0, o1, o2) => out[set!(o2)] = reg!(o0) * reg!(o1),
+        Inst::Muli(o0, o1, o2) => out[set!(o2)] = reg!(o0) * val!(o1),
+        // // banr, bani
+        Inst::Banr(o0, o1, o2) => out[set!(o2)] = reg!(o0) & reg!(o1),
+        Inst::Bani(o0, o1, o2) => out[set!(o2)] = reg!(o0) & val!(o1),
+        // // borr, bori
+        Inst::Borr(o0, o1, o2) => out[set!(o2)] = reg!(o0) | reg!(o1),
+        Inst::Bori(o0, o1, o2) => out[set!(o2)] = reg!(o0) | val!(o1),
+        // // setr, seti
+        Inst::Setr(o0, o1, o2) => out[set!(o2)] = reg!(o0),
+        Inst::Seti(o0, o1, o2) => out[set!(o2)] = val!(o0),
+        // // gtir, gtri, gtrr
+        Inst::Gtir(o0, o1, o2) => out[set!(o2)] = (val!(o0) > reg!(o1)) as usize,
+        Inst::Gtri(o0, o1, o2) => out[set!(o2)] = (reg!(o0) > val!(o1)) as usize,
+        Inst::Gtrr(o0, o1, o2) => out[set!(o2)] = (reg!(o0) > reg!(o1)) as usize,
+        // // eqir, eqri, eqrr
+        Inst::Eqir(o0, o1, o2) => out[set!(o2)] = (val!(o0) == reg!(o1)) as usize,
+        Inst::Eqri(o0, o1, o2) => out[set!(o2)] = (reg!(o0) == val!(o1)) as usize,
+        Inst::Eqrr(o0, o1, o2) => out[set!(o2)] = (reg!(o0) == reg!(o1)) as usize,
+    }
+    out
+}
+
 #[aoc(2018, 19)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         dbg!(&block);
-        let parser = regex!(r"^#");
-        if parser.captures(block).is_none() {
+        let parser = regex!(r"^#ip (\d)");
+        if let Some(segment) = parser.captures(block) {
+            self.pc_index = segment[1].parse::<usize>()?;
+        } else {
             self.line.push(Inst::try_from(block)?);
         }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
+        dbg!(&self.pc_index);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut register: [usize; 6] = [0; 6];
+        let mut work: [usize; 6] = [0; 6];
+        while let Some(op) = self.line.get(register[self.pc_index]) {
+            execute(op, &register, &mut work);
+            std::mem::swap(&mut register, &mut work);
+            register[self.pc_index] += 1;
+        }
+        dbg!(&register);
+        register[0]
     }
     fn part2(&mut self) -> Self::Output2 {
         0
