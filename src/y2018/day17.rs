@@ -1,13 +1,9 @@
 //! <https://adventofcode.com/2018/day/17>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -19,8 +15,6 @@ pub struct Puzzle {
     line: Vec<(bool, usize, usize, usize)>,
     map: HashSet<Dim2>,
     water_map: HashSet<Dim2>,
-    depth: usize,
-    width: usize,
 }
 
 #[aoc(2018, 17)]
@@ -34,10 +28,6 @@ impl AdventOfCode for Puzzle {
             (&segment[1] == "x" && &segment[3] == "y")
                 || (&segment[1] == "y" && &segment[3] == "x")
         );
-        // println!(
-        //     "{}={}; {}..{}",
-        //     &segment[1], &segment[2], &segment[4], &segment[5]
-        // );
         self.line.push((
             &segment[1] != "x",
             segment[2].parse::<usize>()?,
@@ -55,18 +45,12 @@ impl AdventOfCode for Puzzle {
             }
         }
         // dbg!(self.map.len());
-        self.width = self.map.iter().map(|(y, x)| *x).max().unwrap();
-        self.depth = self.map.iter().map(|(y, x)| *y).max().unwrap();
-        dbg!(self.depth);
-        // panic!();
     }
     fn part1(&mut self) -> Self::Output1 {
-        let min_y = self.map.iter().map(|(y, x)| *y).min().unwrap();
-        let min_x = self.map.iter().map(|(y, x)| *x).min().unwrap();
-        let max_y = self.map.iter().map(|(y, x)| *y).max().unwrap();
-        let max_x = self.map.iter().map(|(y, x)| *x).max().unwrap();
-        // dbg!(basin_below((0, 500), self));
-        // self.water_map.len()
+        let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();
+        let min_x = self.map.iter().map(|(_, x)| *x).min().unwrap();
+        let max_y = self.map.iter().map(|(y, _)| *y).max().unwrap();
+        let max_x = self.map.iter().map(|(_, x)| *x).max().unwrap();
         let start = (0, 500);
         let mut water: HashMap<Dim2, Water> = HashMap::new();
         water.insert(start, Water::On);
@@ -125,12 +109,10 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let min_y = self.map.iter().map(|(y, x)| *y).min().unwrap();
-        let min_x = self.map.iter().map(|(y, x)| *x).min().unwrap();
-        let max_y = self.map.iter().map(|(y, x)| *y).max().unwrap();
-        let max_x = self.map.iter().map(|(y, x)| *x).max().unwrap();
-        // dbg!(basin_below((0, 500), self));
-        // self.water_map.len()
+        let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();
+        let min_x = self.map.iter().map(|(_, x)| *x).min().unwrap();
+        let max_y = self.map.iter().map(|(y, _)| *y).max().unwrap();
+        let max_x = self.map.iter().map(|(_, x)| *x).max().unwrap();
         let start = (0, 500);
         let mut water: HashMap<Dim2, Water> = HashMap::new();
         water.insert(start, Water::On);
@@ -142,16 +124,11 @@ impl AdventOfCode for Puzzle {
         let focus = (30, 500);
         self.render(&focus, &water, false);
         let mut count = 0;
-        // self.depth = 20;
         while let Some(pos) = to_update.pop() {
             if pos.0 == 0 || max_y < pos.0 {
                 continue;
             }
             count += 1;
-            // dbg!(pos.0);
-            // if 80800 < count {
-            //     break;
-            // }
             let state = water.get(&pos).unwrap_or(&Water::None);
             let above = water.get(&(pos.0 - 1, pos.1)).unwrap_or(&Water::None);
             let left = water.get(&(pos.0, pos.1 - 1)).unwrap_or(&Water::None);
@@ -175,9 +152,6 @@ impl AdventOfCode for Puzzle {
                     true,
                 );
             }
-            // if count == 800 {
-            //     break;
-            // }
         }
         self.render(&focus, &water, true);
         println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
@@ -238,20 +212,9 @@ fn transition(
         (Water::None, a, _, _, b) if !dry.contains(a) && solid.contains(b) => Some(Water::On),
         (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::Drop),
 
-        // (Water::None, _, Water::BothBound, _, b) if solid.contains(b) => Some(Water::On),
-        // (Water::None, _, l, _, b) if !dry.contains(l) && solid.contains(b) => Some(Water::On),
-        // (Water::None, _, _, Water::BothBound, b) if solid.contains(b) => Some(Water::On),
-        // (Water::None, _, _, r, b) if !dry.contains(r) && solid.contains(b) => Some(Water::On),
-        // (Water::None, _, l, _, _) if !left_solid.contains(l) => Some(Water::On),
-        // (Water::None, _, _, Water::BothBound, b) if *b == Water::Block => Some(Water::On),
-        // (Water::None, _, _, r, _) if !right_solid.contains(r) => Some(Water::On),
-        // (Water::None, a, l, _, _) if !dry.contains(a) && !dry.contains(l) => Some(Water::Drop),
-        // (Water::None, a, _, r, _) if !dry.contains(a) && !dry.contains(r) => Some(Water::Drop),
         (Water::Drop, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
             Some(Water::BothBound)
         }
-        // (Water::Drop, _, l, _, _) if left_solid.contains(l) => Some(Water::LeftBound),
-        // (Water::Drop, _, _, r, _) if right_solid.contains(r) => Some(Water::RightBound),
         (Water::Drop, _, _, _, b) if solid.contains(b) => Some(Water::On),
 
         (Water::On, _, l, r, _) if left_solid.contains(l) && right_solid.contains(r) => {
@@ -317,78 +280,4 @@ impl Puzzle {
             println!();
         }
     }
-}
-
-fn basin_below(start: Dim2, world: &Puzzle) -> Option<(usize, Option<Dim2>, Option<Dim2>)> {
-    for y in start.0..world.depth {
-        if world.map.contains(&(y, start.1)) {
-            let bottom = (y, start.1);
-            dbg!(bottom);
-            let west = west_end(bottom, world);
-            let east = east_end(bottom, world);
-            // This is a bad idea.
-            // There is a situation with a 'straw' that doesn't touch with the external basin.
-            // We must consider the situation in which water drops to the same basin 'recursively'.
-            let possible_region = match west.0.cmp(&east.0) {
-                std::cmp::Ordering::Less => {
-                    println!("west: {:?} > east: {:?}", west, east);
-                    ((east.0, west.1 + 1), (bottom.0, east.1))
-                }
-                std::cmp::Ordering::Equal => {
-                    println!("west: {:?} = east: {:?}", west, east);
-                    ((west.0, west.1 + 1), (bottom.0, east.1))
-                }
-                std::cmp::Ordering::Greater => {
-                    println!("west: {:?} < east: {:?}", west, east);
-                    ((west.0, west.1 + 1), (bottom.0, east.1))
-                }
-            };
-            for y in (possible_region.0 .0 - 1)..possible_region.1 .0 {
-                for x in (possible_region.0 .1 + 1)..possible_region.1 .1 {
-                    if world.map.contains(&(y, x)) {
-                        dbg!((y, x));
-                        panic!();
-                    }
-                }
-            }
-            break;
-        }
-    }
-    None
-}
-
-fn east_end(start: Dim2, world: &Puzzle) -> Dim2 {
-    let mut point = start;
-    loop {
-        let mut check = (point.0, point.1 + 1);
-        if world.map.contains(&check) {
-            point = check;
-            continue;
-        }
-        check = (point.0 - 1, point.1);
-        if world.map.contains(&check) {
-            point = check;
-            continue;
-        }
-        break;
-    }
-    point
-}
-
-fn west_end(start: Dim2, world: &Puzzle) -> Dim2 {
-    let mut point = start;
-    loop {
-        let mut check = (point.0, point.1 - 1);
-        if world.map.contains(&check) {
-            point = check;
-            continue;
-        }
-        check = (point.0 - 1, point.1);
-        if world.map.contains(&check) {
-            point = check;
-            continue;
-        }
-        break;
-    }
-    point
 }
