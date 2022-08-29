@@ -11,30 +11,48 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+type Dim2 = (usize, usize);
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+enum Field {
+    Open,
+    Tree,
+    Lumb,
+}
+
+impl TryFrom<char> for Field {
+    type Error = ParseError;
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            '.' => Ok(Field::Open),
+            '|' => Ok(Field::Tree),
+            '#' => Ok(Field::Lumb),
+            _ => Err(ParseError),
+        }
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<Field>>,
+    map: HashMap<Dim2, Field>,
 }
 
 #[aoc(2018, 18)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line
+            .push(block.chars().map(|c| Field::try_from(c).unwrap()).collect());
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (j, l) in self.line.iter().enumerate() {
+            for (i, c) in l.iter().enumerate() {
+                self.map.insert((j, i), *c);
+            }
+        }
+        dbg!(&self.map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
