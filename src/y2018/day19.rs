@@ -13,10 +13,10 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Inst>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Inst {
     Addr(usize, usize, usize),
     Addi(usize, usize, usize),
@@ -39,7 +39,7 @@ enum Inst {
 impl TryFrom<&str> for Inst {
     type Error = ParseError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let parser = regex!(r"^\w{4} (\d+) (\d+) (\d+) (\d+)$");
+        let parser = regex!(r"^(\w{4}) (\d+) (\d+) (\d+)$");
         if let Some(segment) = parser.captures(value) {
             let opr1 = segment[2].parse::<usize>()?;
             let opr2 = segment[3].parse::<usize>()?;
@@ -80,9 +80,11 @@ impl AdventOfCode for Puzzle {
     //     Ok(Some(segment[2].to_string()))
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        dbg!(&block);
+        let parser = regex!(r"^#");
+        if parser.captures(block).is_none() {
+            self.line.push(Inst::try_from(block)?);
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
