@@ -73,27 +73,23 @@ impl AdventOfCode for Puzzle {
             //     break;
             // }
             let state = water.get(&pos).unwrap_or(&Water::None);
-            let above = water.get(&(pos.0 - 1, pos.1)).unwrap_or(&Water::None);
-            let left = water.get(&(pos.0, pos.1 - 1)).unwrap_or(&Water::None);
-            let right = water.get(&(pos.0, pos.1 + 1)).unwrap_or(&Water::None);
-            let below = water.get(&(pos.0 + 1, pos.1)).unwrap_or(&Water::None);
-            if let Some(next) = transition(state, above, left, right, below) {
+            let above = (pos.0 - 1, pos.1);
+            let left = (pos.0, pos.1 - 1);
+            let right = (pos.0, pos.1 + 1);
+            let below = (pos.0 + 1, pos.1);
+            let a = water.get(&above).unwrap_or(&Water::None);
+            let l = water.get(&left).unwrap_or(&Water::None);
+            let r = water.get(&right).unwrap_or(&Water::None);
+            let b = water.get(&below).unwrap_or(&Water::None);
+            if let Some(next) = transition(state, a, l, r, b) {
                 water.insert(pos, next);
-                let above = (pos.0 - 1, pos.1);
-                let left = (pos.0, pos.1 - 1);
-                let right = (pos.0, pos.1 + 1);
-                let below = (pos.0 + 1, pos.1);
                 to_update.push(above);
                 to_update.push(left);
                 to_update.push(right);
                 to_update.push(below);
             }
             if count % 100 == 0 {
-                self.render(
-                    &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30),
-                    &water,
-                    true,
-                );
+                self.render(&pos, &water, true);
             }
             // if count == 800 {
             //     break;
@@ -110,9 +106,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();
-        let min_x = self.map.iter().map(|(_, x)| *x).min().unwrap();
         let max_y = self.map.iter().map(|(y, _)| *y).max().unwrap();
-        let max_x = self.map.iter().map(|(_, x)| *x).max().unwrap();
         let start = (0, 500);
         let mut water: HashMap<Dim2, Water> = HashMap::new();
         water.insert(start, Water::On);
@@ -130,31 +124,26 @@ impl AdventOfCode for Puzzle {
             }
             count += 1;
             let state = water.get(&pos).unwrap_or(&Water::None);
-            let above = water.get(&(pos.0 - 1, pos.1)).unwrap_or(&Water::None);
-            let left = water.get(&(pos.0, pos.1 - 1)).unwrap_or(&Water::None);
-            let right = water.get(&(pos.0, pos.1 + 1)).unwrap_or(&Water::None);
-            let below = water.get(&(pos.0 + 1, pos.1)).unwrap_or(&Water::None);
-            if let Some(next) = transition(state, above, left, right, below) {
+            let above = (pos.0 - 1, pos.1);
+            let left = (pos.0, pos.1 - 1);
+            let right = (pos.0, pos.1 + 1);
+            let below = (pos.0 + 1, pos.1);
+            let a = water.get(&above).unwrap_or(&Water::None);
+            let l = water.get(&left).unwrap_or(&Water::None);
+            let r = water.get(&right).unwrap_or(&Water::None);
+            let b = water.get(&below).unwrap_or(&Water::None);
+            if let Some(next) = transition(state, a, l, r, b) {
                 water.insert(pos, next);
-                let above = (pos.0 - 1, pos.1);
-                let left = (pos.0, pos.1 - 1);
-                let right = (pos.0, pos.1 + 1);
-                let below = (pos.0 + 1, pos.1);
                 to_update.push(above);
                 to_update.push(left);
                 to_update.push(right);
                 to_update.push(below);
             }
-            if count % 100 == 0 {
-                self.render(
-                    &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30),
-                    &water,
-                    true,
-                );
+            if count % 1000 == 0 {
+                self.render(&pos, &water, true);
             }
         }
         self.render(&focus, &water, true);
-        println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
         water
             .iter()
             .filter(|(p, s)| min_y <= p.0 && p.0 <= max_y && **s == Water::BothBound)
@@ -186,7 +175,6 @@ fn transition(
     let right_solid = [Water::RightBound, Water::BothBound, Water::Block];
     match (state, above, left, right, below) {
         (Water::Block, _, _, _, _) => None,
-        // (Water::None, a, _, _, _) if !dry.contains(a) => Some(Water::On),
         (Water::None, _, Water::LeftBound, r, b) if solid.contains(r) && solid.contains(b) => {
             Some(Water::BothBound)
         }
@@ -231,7 +219,8 @@ fn transition(
 }
 
 impl Puzzle {
-    fn render(&self, center: &Dim2, water: &HashMap<Dim2, Water>, repaint: bool) {
+    fn render(&self, pos: &Dim2, water: &HashMap<Dim2, Water>, repaint: bool) {
+        let center = &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30);
         let height: isize = 50;
         if repaint {
             for _ in 0..=height {
