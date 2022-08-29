@@ -47,20 +47,24 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line.len());
+        // dbg!(&self.line.len());
         for (horizontal, base, from, to) in self.line.iter() {
             for i in *from..=*to {
                 let p = if *horizontal { (*base, i) } else { (i, *base) };
                 self.map.insert(p);
             }
         }
-        dbg!(self.map.len());
+        // dbg!(self.map.len());
         self.width = self.map.iter().map(|(y, x)| *x).max().unwrap();
         self.depth = self.map.iter().map(|(y, x)| *y).max().unwrap();
-        // dbg!(self.depth);
+        dbg!(self.depth);
         // panic!();
     }
     fn part1(&mut self) -> Self::Output1 {
+        let min_y = self.map.iter().map(|(y, x)| *y).min().unwrap();
+        let min_x = self.map.iter().map(|(y, x)| *x).min().unwrap();
+        let max_y = self.map.iter().map(|(y, x)| *y).max().unwrap();
+        let max_x = self.map.iter().map(|(y, x)| *x).max().unwrap();
         // dbg!(basin_below((0, 500), self));
         // self.water_map.len()
         let start = (0, 500);
@@ -76,7 +80,7 @@ impl AdventOfCode for Puzzle {
         let mut count = 0;
         // self.depth = 20;
         while let Some(pos) = to_update.pop() {
-            if pos.0 == 0 || self.depth < pos.0 || pos.1 == 0 || self.width < pos.1 {
+            if pos.0 == 0 || max_y < pos.0 {
                 continue;
             }
             count += 1;
@@ -100,18 +104,24 @@ impl AdventOfCode for Puzzle {
                 to_update.push(right);
                 to_update.push(below);
             }
-            // if count % 1 == 0 {
-            self.render(&pos, &water, true);
-            // }
+            if count % 100 == 0 {
+                self.render(
+                    &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30),
+                    &water,
+                    true,
+                );
+            }
             // if count == 800 {
             //     break;
             // }
         }
         self.render(&focus, &water, true);
-        // dbg!(water.keys().max());
+        println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
         water
-            .values()
-            .filter(|s| ![Water::None, Water::Block].contains(s))
+            .iter()
+            .filter(|(p, s)| {
+                min_y <= p.0 && p.0 <= max_y && ![Water::None, Water::Block].contains(s)
+            })
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -147,6 +157,9 @@ fn transition(
         (Water::None, _, Water::LeftBound, r, b) if solid.contains(r) && solid.contains(b) => {
             Some(Water::BothBound)
         }
+        (Water::None, _, Water::On, r, b) if solid.contains(r) && solid.contains(b) => {
+            Some(Water::RightBound)
+        }
         (Water::None, _, Water::On, _, b) if solid.contains(b) => Some(Water::On),
         (Water::None, _, Water::On, _, Water::None) => Some(Water::Drop),
         (Water::None, _, Water::LeftBound, _, b) if solid.contains(b) => Some(Water::LeftBound),
@@ -154,6 +167,9 @@ fn transition(
 
         (Water::None, _, l, Water::RightBound, b) if solid.contains(l) && solid.contains(b) => {
             Some(Water::BothBound)
+        }
+        (Water::None, _, l, Water::On, b) if solid.contains(l) && solid.contains(b) => {
+            Some(Water::LeftBound)
         }
         (Water::None, _, _, Water::On, b) if solid.contains(b) => Some(Water::On),
         (Water::None, _, _, Water::On, Water::None) => Some(Water::Drop),
@@ -200,9 +216,15 @@ impl Puzzle {
                 print!("{}", color::REVERT);
             }
         }
-        println!("-------------------------------------------- {:?}", center);
+        println!(
+            "-------------------------------------------- ({:>4}, {:>4})",
+            center.0, center.1
+        );
         for y in (center.0 as isize - height + 15)..(center.0 as isize + 15) {
             if y < 0 {
+                for _ in -45_isize..45 {
+                    print!(" ");
+                }
                 println!();
                 continue;
             }
@@ -217,7 +239,7 @@ impl Puzzle {
                         print!("#");
                     }
                     Water::Drop => {
-                        print!("{}v{}", color::BLUE, color::RESET);
+                        print!("{}|{}", color::BLUE, color::RESET);
                     }
                     Water::On => {
                         print!("{}~{}", color::BLUE, color::RESET);
