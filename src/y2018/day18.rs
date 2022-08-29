@@ -11,13 +11,36 @@ use {
     std::collections::HashMap,
 };
 
-type Dim2 = (usize, usize);
+type Dim2 = (isize, isize);
+
+const DIRS: [Dim2; 8] = [
+    (-1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
+    (1, 0),
+    (1, -1),
+    (0, -1),
+    (-1, -1),
+];
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Field {
     Open,
     Tree,
     Lumb,
+}
+
+impl Field {
+    fn transition(&self, n_tree: usize, n_lumb: usize) -> Field {
+        match self {
+            Field::Open if 3 <= n_tree => Field::Tree,
+            Field::Tree if 3 <= n_lumb => Field::Lumb,
+            Field::Lumb if 1 <= n_lumb && 1 <= n_tree => Field::Lumb,
+            Field::Lumb => Field::Open,
+            _ => *self,
+        }
+    }
 }
 
 impl TryFrom<char> for Field {
@@ -49,13 +72,40 @@ impl AdventOfCode for Puzzle {
     fn after_insert(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
-                self.map.insert((j, i), *c);
+                self.map.insert((j as isize, i as isize), *c);
             }
         }
         dbg!(&self.map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let height = self.line.len();
+        let width = self.line[0].len();
+        let mut tmp: HashMap<Dim2, Field> = HashMap::new();
+        for step in 0..10 {
+            tmp.clear();
+            for j in 0..height {
+                for i in 0..width {
+                    let state = self.map.get(&(j as isize, i as isize)).unwrap();
+                    let n_tree = DIRS
+                        .iter()
+                        .map(|d| (j as isize + d.0, i as isize + d.1))
+                        .map(|p| *self.map.get(&p).unwrap_or(&Field::Open))
+                        .filter(|f| *f == Field::Tree)
+                        .count();
+                    let n_lumb = DIRS
+                        .iter()
+                        .map(|d| (j as isize + d.0, i as isize + d.1))
+                        .map(|p| *self.map.get(&p).unwrap_or(&Field::Open))
+                        .filter(|f| *f == Field::Lumb)
+                        .count();
+                    tmp.insert((j as isize, i as isize), state.transition(n_tree, n_lumb));
+                }
+            }
+            std::mem::swap(&mut tmp, &mut self.map);
+        }
+        let n_tree = self.map.values().filter(|f| **f == Field::Tree).count();
+        let n_lumb = self.map.values().filter(|f| **f == Field::Lumb).count();
+        n_tree * n_lumb
     }
     fn part2(&mut self) -> Self::Output2 {
         0
