@@ -16,7 +16,7 @@ struct Reg(Vec<u8>);
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 enum Rege {
-    Run(Reg),
+    Run(Vec<u8>),
     Branch(Vec<Rege>),
 }
 
@@ -28,7 +28,7 @@ pub struct Puzzle {
 fn parse_to_run(string: &[u8], start: usize) -> Result<(Reg, usize), ParseError> {
     let mut i = start;
     while let Some(c) = string.get(i) {
-        if *c == b'(' || *c == b'|' {
+        if *c == b'$' || *c == b')' || *c == b'(' || *c == b'|' {
             break;
         }
         i += 1;
@@ -46,22 +46,36 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
         } else {
         }
     } else if let Ok((element, j)) = parse_to_run(string, i) {
-        vec.push(Rege::Run(element));
+        vec.push(Rege::Run(element.0));
         i = j;
     } else {
     }
     while let Some(c) = string.get(i) {
+        // dbg!(*c as char);
         match c {
+            b'(' => {
+                if let Ok((element, j)) = parse_to_branch(string, i + 1) {
+                    vec.push(element);
+                    i = j;
+                }
+            }
             b'|' => {
                 if let Ok((element, j)) = parse_to_branch(string, i + 1) {
                     vec.push(element);
                     i = j;
                 }
             }
-            b')' => {
+            b')' | b'$' => {
+                // i += 2;
                 break;
             }
-            _ => unreachable!(),
+            _ => {
+                // dbg!(&string[0..=i].iter().map(|c| *c as char).collect::<String>());
+                if let Ok((element, j)) = parse_to_run(string, i) {
+                    vec.push(Rege::Run(element.0));
+                    i = j;
+                }
+            }
         }
     }
     Ok((Rege::Branch(vec), i + 1))
@@ -78,6 +92,8 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        self.line.push(b')');
+        let tree = parse_to_branch(&self.line, 0);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
