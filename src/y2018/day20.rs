@@ -12,25 +12,66 @@ use {
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Reg(Vec<u8>);
+
+#[derive(Debug, Eq, Hash, PartialEq)]
+enum Rege {
+    Run(Reg),
+    Branch(Vec<Rege>),
+}
+
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<u8>,
+}
+
+fn parse_to_run(string: &[u8], start: usize) -> Result<(Reg, usize), ParseError> {
+    let mut i = start;
+    while let Some(c) = string.get(i) {
+        if *c == b'(' || *c == b'|' {
+            break;
+        }
+        i += 1;
+    }
+    Ok((Reg(string[start..i].to_vec()), i))
+}
+
+fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseError> {
+    let mut vec: Vec<Rege> = Vec::new();
+    let mut i = start;
+    if string.get(start) == Some(&b'(') {
+        if let Ok((element, j)) = parse_to_branch(string, i) {
+            vec.push(element);
+            i = j;
+        } else {
+        }
+    } else if let Ok((element, j)) = parse_to_run(string, i) {
+        vec.push(Rege::Run(element));
+        i = j;
+    } else {
+    }
+    while let Some(c) = string.get(i) {
+        match c {
+            b'|' => {
+                if let Ok((element, j)) = parse_to_branch(string, i + 1) {
+                    vec.push(element);
+                    i = j;
+                }
+            }
+            b')' => {
+                break;
+            }
+            _ => unreachable!(),
+        }
+    }
+    Ok((Rege::Branch(vec), i + 1))
 }
 
 #[aoc(2018, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Maybe<Option<String>> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())
     }
     fn after_insert(&mut self) {
