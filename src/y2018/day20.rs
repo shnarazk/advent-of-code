@@ -20,6 +20,25 @@ enum Rege {
     Branch(Vec<Rege>),
 }
 
+impl Rege {
+    fn render(&self) {
+        match self {
+            Rege::Run(v) => print!("{}", v.iter().map(|c| *c as char).collect::<String>()),
+            Rege::Branch(v) => {
+                let n = v.len();
+                print!("(");
+                for (i, r) in v.iter().enumerate() {
+                    r.render();
+                    if i + 1 < n {
+                        print!("|");
+                    }
+                }
+                print!(")");
+            }
+        }
+    }
+}
+
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<u8>,
@@ -60,9 +79,18 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
                 }
             }
             b'|' => {
-                if let Ok((element, j)) = parse_to_branch(string, i + 1) {
-                    vec.push(element);
+                i += 1;
+                if string.get(i) == Some(&b'(') {
+                    if let Ok((element, j)) = parse_to_branch(string, i) {
+                        vec.push(element);
+                        i = j;
+                    }
+                } else if string.get(i) == Some(&b')') {
+                    vec.push(Rege::Run(Vec::new()));
+                } else if let Ok((element, j)) = parse_to_run(string, i) {
+                    vec.push(Rege::Run(element.0));
                     i = j;
+                } else {
                 }
             }
             b')' | b'$' => {
@@ -85,15 +113,18 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        dbg!(block);
         self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.push(b')');
-        let tree = parse_to_branch(&self.line, 0);
+        if let Ok((tree, _)) = parse_to_branch(&self.line, 1) {
+            tree.render();
+        }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
