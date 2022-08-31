@@ -16,14 +16,37 @@ struct Reg(Vec<u8>);
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 enum Rege {
-    Run(Vec<u8>),
+    Segment(Vec<u8>),
+    Sequence(Vec<Rege>),
     Branch(Vec<Rege>),
 }
 
 impl Rege {
+    fn max_path(&self, pathes: &[Vec<u8>]) -> Vec<Vec<u8>> {
+        match self {
+            Rege::Segment(fragment) => merge(pathes, fragment),
+            Rege::Sequence(v) => {
+                let mut tmp: Vec<Vec<u8>> = pathes.to_vec();
+                for c in v.iter() {
+                    tmp = c.max_path(&tmp);
+                }
+                tmp
+            }
+            Rege::Branch(v) => v
+                .iter()
+                .flat_map(|p| p.max_path(pathes))
+                .collect::<Vec<_>>(),
+        }
+    }
     fn render(&self) {
         match self {
-            Rege::Run(v) => print!("{}", v.iter().map(|c| *c as char).collect::<String>()),
+            Rege::Segment(v) => print!("{}", v.iter().map(|c| *c as char).collect::<String>()),
+            Rege::Sequence(v) => {
+                let n = v.len();
+                for (i, r) in v.iter().enumerate() {
+                    r.render();
+                }
+            }
             Rege::Branch(v) => {
                 let n = v.len();
                 print!("(");
@@ -37,6 +60,53 @@ impl Rege {
             }
         }
     }
+}
+
+fn merge(bases: &[Vec<u8>], append: &[u8]) -> Vec<Vec<u8>> {
+    if bases.is_empty() {
+        return vec![append.to_vec()];
+    }
+    if append.is_empty() {
+        return bases.to_vec();
+    }
+    let mut result = Vec::new();
+    'next: for base in bases.iter() {
+        let mut prepend_index = base.len() - 1;
+        for (j, c) in append.iter().enumerate() {
+            if matches!(
+                (base[prepend_index], c),
+                (b'N', b'S') | (b'E', b'W') | (b'S', b'N') | (b'W', b'E')
+            ) {
+                if prepend_index == 0 {
+                    if j + 1 < append.len() {
+                        result.push(append[j + 1..].to_vec());
+                    };
+                    continue 'next;
+                }
+                prepend_index -= 1;
+            } else {
+                let mut res = base[..=prepend_index].to_vec();
+                let mut a = append[j..].to_vec().clone();
+                res.append(&mut a);
+                result.push(res);
+                continue 'next;
+            }
+        }
+        result.push(base[..prepend_index].to_vec());
+    }
+    result
+}
+
+#[test]
+fn y2018d20merge1() {
+    let a1 = vec![b'a'];
+    let a2 = vec![b'a', b'a'];
+    let b2 = vec![b'b', b'b'];
+    assert_eq!(merge(&[a2], &b2), vec![vec![b'a', b'a', b'b', b'b']]);
+    assert_eq!(
+        merge(&[a1.clone(), a1], &b2),
+        vec![vec![b'a', b'b', b'b'], vec![b'a', b'b', b'b']]
+    );
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -55,7 +125,7 @@ fn parse_to_run(string: &[u8], start: usize) -> Result<(Reg, usize), ParseError>
     Ok((Reg(string[start..i].to_vec()), i))
 }
 
-fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseError> {
+fn parse_to_sequence(string: &[u8], start: usize) -> Result<(Rege, usize), ParseError> {
     let mut vec: Vec<Rege> = Vec::new();
     let mut i = start;
     if string.get(start) == Some(&b'(') {
@@ -65,7 +135,48 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
         } else {
         }
     } else if let Ok((element, j)) = parse_to_run(string, i) {
-        vec.push(Rege::Run(element.0));
+        vec.push(Rege::Segment(element.0));
+        i = j;
+    } else {
+    }
+    while let Some(c) = string.get(i) {
+        // dbg!(*c as char);
+        match c {
+            b'|' | b')' | b'$' => {
+                break;
+            }
+            b'(' => {
+                if let Ok((element, j)) = parse_to_branch(string, i + 1) {
+                    vec.push(element);
+                    i = j;
+                }
+            }
+            _ => {
+                if let Ok((element, j)) = parse_to_run(string, i) {
+                    vec.push(Rege::Segment(element.0));
+                    i = j;
+                }
+            }
+        }
+    }
+    if vec.len() == 1 {
+        Ok((vec.pop().unwrap(), i))
+    } else {
+        Ok((Rege::Sequence(vec), i))
+    }
+}
+
+fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseError> {
+    let mut vec: Vec<Rege> = Vec::new();
+    let mut i = start;
+    if string.get(start) == Some(&b'(') {
+        if let Ok((element, j)) = parse_to_branch(string, i) {
+            vec.push(element);
+            i = j;
+        } else {
+        }
+    } else if let Ok((element, j)) = parse_to_sequence(string, i) {
+        vec.push(element);
         i = j;
     } else {
     }
@@ -86,9 +197,9 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
                         i = j;
                     }
                 } else if string.get(i) == Some(&b')') {
-                    vec.push(Rege::Run(Vec::new()));
-                } else if let Ok((element, j)) = parse_to_run(string, i) {
-                    vec.push(Rege::Run(element.0));
+                    vec.push(Rege::Sequence(Vec::new()));
+                } else if let Ok((element, j)) = parse_to_sequence(string, i) {
+                    vec.push(element);
                     i = j;
                 } else {
                 }
@@ -97,13 +208,7 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
                 // i += 2;
                 break;
             }
-            _ => {
-                // dbg!(&string[0..=i].iter().map(|c| *c as char).collect::<String>());
-                if let Ok((element, j)) = parse_to_run(string, i) {
-                    vec.push(Rege::Run(element.0));
-                    i = j;
-                }
-            }
+            _ => unreachable!(),
         }
     }
     Ok((Rege::Branch(vec), i + 1))
@@ -122,8 +227,21 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.push(b')');
-        if let Ok((tree, _)) = parse_to_branch(&self.line, 1) {
+        if let Ok((tree, _)) = parse_to_sequence(&self.line, 1) {
             tree.render();
+            println!();
+            let s = tree.max_path(&Vec::new());
+            // dbg!(s.iter().map(|c| *c as char).collect::<String>());
+            if s.len() < 18 {
+                for p in s.iter() {
+                    println!(
+                        "{}: {}",
+                        p.len(),
+                        p.iter().map(|c| *c as char).collect::<String>()
+                    );
+                }
+            }
+            return s.iter().map(|p| p.len()).max().unwrap();
         }
         0
     }
