@@ -289,6 +289,16 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        self.line.push(b')');
+        if let Ok((tree, _)) = parse_to_sequence(&self.line, 1) {
+            tree.render();
+            println!();
+            let start = HashSet::from([(0, 0)]);
+            let mut map: HashSet<(Dim2, Dim2)> = HashSet::new();
+            let end_points = tree.map_to_map(&start, &mut map);
+            let d = distance(&map);
+            return d.values().filter(|n| 1000 <= **n).count();
+        }
         0
     }
 }
