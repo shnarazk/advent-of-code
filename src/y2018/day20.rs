@@ -8,8 +8,13 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap, HashSet},
+    },
 };
+
+type Dim2 = (isize, isize);
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Reg(Vec<u8>);
@@ -57,6 +62,51 @@ impl Rege {
                     }
                 }
                 print!(")");
+            }
+        }
+    }
+    fn map_to_map(&self, locs: &HashSet<Dim2>, map: &mut HashSet<(Dim2, Dim2)>) -> HashSet<Dim2> {
+        match self {
+            Rege::Segment(v) => {
+                let mut result = HashSet::new();
+                for loc in locs.iter() {
+                    let mut p = *loc;
+                    for c in v.iter() {
+                        let mut n = match c {
+                            b'N' => (p.0 - 1, p.1),
+                            b'E' => (p.0, p.1 + 1),
+                            b'S' => (p.0 + 1, p.1),
+                            b'W' => (p.0, p.1 - 1),
+                            _ => unreachable!(),
+                        };
+                        map.insert((p, n));
+                        std::mem::swap(&mut p, &mut n);
+                    }
+                    result.insert(p);
+                }
+                result
+            }
+            Rege::Sequence(v) => {
+                let mut result = HashSet::new();
+                for loc in locs.iter() {
+                    let mut ls = locs.clone();
+                    for k in v.iter() {
+                        ls = k.map_to_map(&ls, map);
+                    }
+                    for l in ls.iter() {
+                        result.insert(*l);
+                    }
+                }
+                result
+            }
+            Rege::Branch(v) => {
+                let mut result = HashSet::new();
+                for loc in locs.iter() {
+                    for p in v.iter().flat_map(|p| p.map_to_map(locs, map)) {
+                        result.insert(p);
+                    }
+                }
+                result
             }
         }
     }
@@ -230,22 +280,33 @@ impl AdventOfCode for Puzzle {
         if let Ok((tree, _)) = parse_to_sequence(&self.line, 1) {
             tree.render();
             println!();
-            let s = tree.max_path(&Vec::new());
-            // dbg!(s.iter().map(|c| *c as char).collect::<String>());
-            if s.len() < 18 {
-                for p in s.iter() {
-                    println!(
-                        "{}: {}",
-                        p.len(),
-                        p.iter().map(|c| *c as char).collect::<String>()
-                    );
-                }
-            }
-            return s.iter().map(|p| p.len()).max().unwrap();
+            let start = HashSet::from([(0, 0)]);
+            let mut map: HashSet<(Dim2, Dim2)> = HashSet::new();
+            let end_points = tree.map_to_map(&start, &mut map);
+            let d = distance(&map);
+            return *d.values().max().unwrap();
         }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
         0
     }
+}
+
+fn distance(map: &HashSet<(Dim2, Dim2)>) -> HashMap<Dim2, usize> {
+    let mut dist: HashMap<Dim2, usize> = HashMap::new();
+    let mut to_visit: BinaryHeap<Reverse<(usize, Dim2)>> = BinaryHeap::new();
+    to_visit.push(Reverse((0, (0, 0))));
+    while let Some(Reverse((d, p))) = to_visit.pop() {
+        if dist.contains_key(&p) {
+            continue;
+        }
+        dist.insert(p, d);
+        for (from, to) in map.iter().filter(|(from, to)| *from == p) {
+            if !dist.contains_key(to) {
+                to_visit.push(Reverse((d + 1, *to)));
+            }
+        }
+    }
+    dist
 }
