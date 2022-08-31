@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2018/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{
         cmp::Reverse,
         collections::{BinaryHeap, HashMap, HashSet},
@@ -27,28 +20,11 @@ enum Rege {
 }
 
 impl Rege {
-    fn max_path(&self, pathes: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        match self {
-            Rege::Segment(fragment) => merge(pathes, fragment),
-            Rege::Sequence(v) => {
-                let mut tmp: Vec<Vec<u8>> = pathes.to_vec();
-                for c in v.iter() {
-                    tmp = c.max_path(&tmp);
-                }
-                tmp
-            }
-            Rege::Branch(v) => v
-                .iter()
-                .flat_map(|p| p.max_path(pathes))
-                .collect::<Vec<_>>(),
-        }
-    }
     fn render(&self) {
         match self {
             Rege::Segment(v) => print!("{}", v.iter().map(|c| *c as char).collect::<String>()),
             Rege::Sequence(v) => {
-                let n = v.len();
-                for (i, r) in v.iter().enumerate() {
+                for r in v.iter() {
                     r.render();
                 }
             }
@@ -87,76 +63,21 @@ impl Rege {
                 result
             }
             Rege::Sequence(v) => {
-                let mut result = HashSet::new();
-                for loc in locs.iter() {
-                    let mut ls = locs.clone();
-                    for k in v.iter() {
-                        ls = k.map_to_map(&ls, map);
-                    }
-                    for l in ls.iter() {
-                        result.insert(*l);
-                    }
+                let mut ls = locs.clone();
+                for k in v.iter() {
+                    ls = k.map_to_map(&ls, map);
                 }
-                result
+                ls
             }
             Rege::Branch(v) => {
                 let mut result = HashSet::new();
-                for loc in locs.iter() {
-                    for p in v.iter().flat_map(|p| p.map_to_map(locs, map)) {
-                        result.insert(p);
-                    }
+                for p in v.iter().flat_map(|p| p.map_to_map(locs, map)) {
+                    result.insert(p);
                 }
                 result
             }
         }
     }
-}
-
-fn merge(bases: &[Vec<u8>], append: &[u8]) -> Vec<Vec<u8>> {
-    if bases.is_empty() {
-        return vec![append.to_vec()];
-    }
-    if append.is_empty() {
-        return bases.to_vec();
-    }
-    let mut result = Vec::new();
-    'next: for base in bases.iter() {
-        let mut prepend_index = base.len() - 1;
-        for (j, c) in append.iter().enumerate() {
-            if matches!(
-                (base[prepend_index], c),
-                (b'N', b'S') | (b'E', b'W') | (b'S', b'N') | (b'W', b'E')
-            ) {
-                if prepend_index == 0 {
-                    if j + 1 < append.len() {
-                        result.push(append[j + 1..].to_vec());
-                    };
-                    continue 'next;
-                }
-                prepend_index -= 1;
-            } else {
-                let mut res = base[..=prepend_index].to_vec();
-                let mut a = append[j..].to_vec().clone();
-                res.append(&mut a);
-                result.push(res);
-                continue 'next;
-            }
-        }
-        result.push(base[..prepend_index].to_vec());
-    }
-    result
-}
-
-#[test]
-fn y2018d20merge1() {
-    let a1 = vec![b'a'];
-    let a2 = vec![b'a', b'a'];
-    let b2 = vec![b'b', b'b'];
-    assert_eq!(merge(&[a2], &b2), vec![vec![b'a', b'a', b'b', b'b']]);
-    assert_eq!(
-        merge(&[a1.clone(), a1], &b2),
-        vec![vec![b'a', b'b', b'b'], vec![b'a', b'b', b'b']]
-    );
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -268,7 +189,7 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        dbg!(block);
+        // dbg!(block);
         self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())
     }
@@ -282,7 +203,7 @@ impl AdventOfCode for Puzzle {
             println!();
             let start = HashSet::from([(0, 0)]);
             let mut map: HashSet<(Dim2, Dim2)> = HashSet::new();
-            let end_points = tree.map_to_map(&start, &mut map);
+            let _ = tree.map_to_map(&start, &mut map);
             let d = distance(&map);
             return *d.values().max().unwrap();
         }
@@ -291,11 +212,9 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line.push(b')');
         if let Ok((tree, _)) = parse_to_sequence(&self.line, 1) {
-            tree.render();
-            println!();
             let start = HashSet::from([(0, 0)]);
             let mut map: HashSet<(Dim2, Dim2)> = HashSet::new();
-            let end_points = tree.map_to_map(&start, &mut map);
+            let _ = tree.map_to_map(&start, &mut map);
             let d = distance(&map);
             return d.values().filter(|n| 1000 <= **n).count();
         }
@@ -312,7 +231,7 @@ fn distance(map: &HashSet<(Dim2, Dim2)>) -> HashMap<Dim2, usize> {
             continue;
         }
         dist.insert(p, d);
-        for (from, to) in map.iter().filter(|(from, to)| *from == p) {
+        for (_, to) in map.iter().filter(|(from, _)| *from == p) {
             if !dist.contains_key(to) {
                 to_visit.push(Reverse((d + 1, *to)));
             }
