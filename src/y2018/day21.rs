@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -113,64 +109,6 @@ impl Inst {
     }
 }
 
-fn execute<'a, 'b>(
-    op: &Inst,
-    register: &'a [usize; 6],
-    out: &'b mut [usize; 6],
-) -> Option<&'b mut [usize; 6]> {
-    macro_rules! reg {
-        ($num: expr) => {{
-            register[*$num] as isize
-        }};
-    }
-    macro_rules! set {
-        ($num: expr) => {{
-            *$num
-        }};
-    }
-    macro_rules! val {
-        ($num: expr) => {{
-            *$num as isize
-        }};
-    }
-    macro_rules! check {
-        ($num: expr) => {{
-            if $num < 0 {
-                return None;
-            }
-            $num as usize
-        }};
-    }
-    out[..6].copy_from_slice(&register[..6]);
-    assert_eq!(&register, &out);
-    match op {
-        // addr, addi
-        Inst::Addr(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) + reg!(o1)),
-        Inst::Addi(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) + val!(o1)),
-        // // mulr, muli
-        Inst::Mulr(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) * reg!(o1)),
-        Inst::Muli(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) * val!(o1)),
-        // // banr, bani
-        Inst::Banr(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) & reg!(o1)),
-        Inst::Bani(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) & val!(o1)),
-        // // borr, bori
-        Inst::Borr(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) | reg!(o1)),
-        Inst::Bori(o0, o1, o2) => out[set!(o2)] = check!(reg!(o0) | val!(o1)),
-        // // setr, seti
-        Inst::Setr(o0, _, o2) => out[set!(o2)] = check!(reg!(o0)),
-        Inst::Seti(o0, _, o2) => out[set!(o2)] = check!(val!(o0)),
-        // // gtir, gtri, gtrr
-        Inst::Gtir(o0, o1, o2) => out[set!(o2)] = (val!(o0) > reg!(o1)) as usize,
-        Inst::Gtri(o0, o1, o2) => out[set!(o2)] = (reg!(o0) > val!(o1)) as usize,
-        Inst::Gtrr(o0, o1, o2) => out[set!(o2)] = (reg!(o0) > reg!(o1)) as usize,
-        // // eqir, eqri, eqrr
-        Inst::Eqir(o0, o1, o2) => out[set!(o2)] = (val!(o0) == reg!(o1)) as usize,
-        Inst::Eqri(o0, o1, o2) => out[set!(o2)] = (reg!(o0) == val!(o1)) as usize,
-        Inst::Eqrr(o0, o1, o2) => out[set!(o2)] = (reg!(o0) == reg!(o1)) as usize,
-    }
-    Some(out)
-}
-
 #[aoc(2018, 21)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
@@ -191,21 +129,6 @@ impl AdventOfCode for Puzzle {
             println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
         }
         part1()
-        // 'next: for n in 1..5 {
-        //     let mut register: [usize; 6] = [0; 6];
-        //     let mut work: [usize; 6] = [0; 6];
-        //     let mut count = 0;
-        //     while let Some(op) = self.line.get(register[self.pc_index]) {
-        //         if execute(op, &register, &mut work).is_none() {
-        //             return n;
-        //         }
-        //         std::mem::swap(&mut register, &mut work);
-        //         register[self.pc_index] += 1;
-        //         count += 1;
-        //         if 1000 < count {
-        //             continue 'next;
-        //         }
-        //     }
     }
     fn part2(&mut self) -> Self::Output2 {
         part2()
