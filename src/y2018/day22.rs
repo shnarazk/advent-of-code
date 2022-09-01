@@ -83,35 +83,46 @@ impl AdventOfCode for Puzzle {
         self.total_risk_level(&target)
     }
     fn part2(&mut self) -> Self::Output2 {
-        let target = self.target;
+        // self.depth = 510;
+        // self.target = (10, 10);
+        let margin = 100;
+        let target = (self.target.0 + margin, self.target.1 + margin);
         let _ = self.total_risk_level(&target);
         let mut cost_map: HashMap<(Dim2, Tool), usize> = HashMap::new();
         let mut to_visit: BinaryHeap<Reverse<(usize, (Dim2, Tool))>> = BinaryHeap::new();
         to_visit.push(Reverse((0, ((0, 0), Tool::Torch))));
         while let Some(Reverse((cost, (pos, tool)))) = to_visit.pop() {
-            if cost_map.contains_key(&(pos, tool)) {
-                continue;
-            }
-            cost_map.insert((pos, tool), cost);
-            if pos == target {
+            if pos == self.target {
                 if tool != Tool::Torch {
                     to_visit.push(Reverse((cost + 7, (pos, Tool::Torch))));
                     continue;
                 }
                 return cost;
             }
-            for next in geometric::neighbors4(pos.0, pos.1, target.0 + 1, target.1 + 1).iter() {
-                let region = self.region_type_map.get(next).unwrap();
-                for tl in region.suitable_tools().iter() {
+            if cost_map.contains_key(&(pos, tool)) {
+                continue;
+            }
+            cost_map.insert((pos, tool), cost);
+            let region_type = self.region_type_map.get(&pos).unwrap();
+            for tl in region_type.suitable_tools().iter() {
+                for next in geometric::neighbors4(
+                    pos.0,
+                    pos.1,
+                    self.target.0 + margin,
+                    self.target.1 + margin,
+                )
+                .iter()
+                {
+                    let next_region = self.region_type_map.get(next).unwrap();
                     if cost_map.contains_key(&(*next, *tl)) {
                         continue;
                     }
-                    // FIXME: if getting here with other tool before 7min. at the latest,
-                    // this path is useless.
-                    to_visit.push(Reverse((
-                        cost + if *tl == tool { 1 } else { 7 },
-                        (*next, *tl),
-                    )));
+                    if next_region.suitable_tools().contains(tl) {
+                        to_visit.push(Reverse((
+                            cost + if *tl == tool { 1 } else { 8 },
+                            (*next, *tl),
+                        )));
+                    }
                 }
             }
         }
