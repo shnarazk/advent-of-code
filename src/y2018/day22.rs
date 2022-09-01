@@ -2,29 +2,39 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
+        geometric,
     },
-    std::collections::HashMap,
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap},
+    },
 };
 
 type Dim2 = (usize, usize);
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Tool {
     Neither,
     ClimbingGear,
     Torch,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum RegionType {
     Rocky,
     Narrow,
     Wet,
 }
+
+const SUITABLE_TOOLS: [[Tool; 2]; 3] = [
+    [Tool::ClimbingGear, Tool::Torch],
+    [Tool::Neither, Tool::ClimbingGear],
+    [Tool::Neither, Tool::Torch],
+];
 
 impl RegionType {
     fn risk(&self) -> usize {
@@ -34,16 +44,12 @@ impl RegionType {
             RegionType::Wet => 1,
         }
     }
-    fn suitable(&self, tool: &Tool) -> bool {
-        matches!(
-            (self, tool),
-            (&RegionType::Rocky, &Tool::ClimbingGear)
-                | (&RegionType::Rocky, &Tool::Torch)
-                | (&RegionType::Wet, &Tool::Neither)
-                | (&RegionType::Wet, &Tool::ClimbingGear)
-                | (&RegionType::Narrow, &Tool::Neither)
-                | (&RegionType::Narrow, &Tool::Torch)
-        )
+    fn suitable_tools(&self) -> &[Tool; 2] {
+        match self {
+            RegionType::Rocky => &SUITABLE_TOOLS[0],
+            RegionType::Narrow => &SUITABLE_TOOLS[2],
+            RegionType::Wet => &SUITABLE_TOOLS[1],
+        }
     }
 }
 
@@ -53,6 +59,7 @@ pub struct Puzzle {
     target: Dim2,
     geologic_index_map: HashMap<Dim2, usize>,
     erosion_level_map: HashMap<Dim2, usize>,
+    region_type_map: HashMap<Dim2, RegionType>,
 }
 
 #[aoc(2018, 22)]
@@ -76,6 +83,38 @@ impl AdventOfCode for Puzzle {
         self.total_risk_level(&target)
     }
     fn part2(&mut self) -> Self::Output2 {
+        let target = self.target;
+        let _ = self.total_risk_level(&target);
+        let mut cost_map: HashMap<(Dim2, Tool), usize> = HashMap::new();
+        let mut to_visit: BinaryHeap<Reverse<(usize, (Dim2, Tool))>> = BinaryHeap::new();
+        to_visit.push(Reverse((0, ((0, 0), Tool::Torch))));
+        while let Some(Reverse((cost, (pos, tool)))) = to_visit.pop() {
+            if cost_map.contains_key(&(pos, tool)) {
+                continue;
+            }
+            cost_map.insert((pos, tool), cost);
+            if pos == target {
+                if tool != Tool::Torch {
+                    to_visit.push(Reverse((cost + 7, (pos, Tool::Torch))));
+                    continue;
+                }
+                return cost;
+            }
+            for next in geometric::neighbors4(pos.0, pos.1, target.0 + 1, target.1 + 1).iter() {
+                let region = self.region_type_map.get(next).unwrap();
+                for tl in region.suitable_tools().iter() {
+                    if cost_map.contains_key(&(*next, *tl)) {
+                        continue;
+                    }
+                    // FIXME: if getting here with other tool before 7min. at the latest,
+                    // this path is useless.
+                    to_visit.push(Reverse((
+                        cost + if *tl == tool { 1 } else { 7 },
+                        (*next, *tl),
+                    )));
+                }
+            }
+        }
         0
     }
 }
@@ -103,12 +142,17 @@ impl Puzzle {
         val
     }
     fn region_type(&mut self, pos: &Dim2) -> RegionType {
-        match self.erosion_level(pos) % 3 {
+        if let Some(val) = self.region_type_map.get(pos) {
+            return *val;
+        }
+        let val = match self.erosion_level(pos) % 3 {
             0 => RegionType::Rocky,
             1 => RegionType::Wet,
             2 => RegionType::Narrow,
             _ => unreachable!(),
-        }
+        };
+        self.region_type_map.insert(*pos, val);
+        val
     }
     fn total_risk_level(&mut self, pos: &Dim2) -> usize {
         let mut sum: usize = 0;
