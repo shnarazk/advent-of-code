@@ -1,8 +1,4 @@
 //! <https://adventofcode.com/2018/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -65,7 +61,7 @@ pub struct Puzzle {
 #[aoc(2018, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn after_insert(&mut self) {
