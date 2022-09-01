@@ -13,6 +13,13 @@ use {
 type Dim2 = (usize, usize);
 
 #[derive(Debug, Eq, Hash, PartialEq)]
+enum Tool {
+    Neither,
+    ClimbingGear,
+    Torch,
+}
+
+#[derive(Debug, Eq, Hash, PartialEq)]
 enum RegionType {
     Rocky,
     Narrow,
@@ -26,6 +33,17 @@ impl RegionType {
             RegionType::Narrow => 2,
             RegionType::Wet => 1,
         }
+    }
+    fn suitable(&self, tool: &Tool) -> bool {
+        matches!(
+            (self, tool),
+            (&RegionType::Rocky, &Tool::ClimbingGear)
+                | (&RegionType::Rocky, &Tool::Torch)
+                | (&RegionType::Wet, &Tool::Neither)
+                | (&RegionType::Wet, &Tool::ClimbingGear)
+                | (&RegionType::Narrow, &Tool::Neither)
+                | (&RegionType::Narrow, &Tool::Torch)
+        )
     }
 }
 
