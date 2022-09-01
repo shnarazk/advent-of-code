@@ -190,25 +190,26 @@ impl AdventOfCode for Puzzle {
         for (i, c) in self.line.iter().enumerate() {
             println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
         }
-        'next: for n in 1..5 {
-            let mut register: [usize; 6] = [0; 6];
-            let mut work: [usize; 6] = [0; 6];
-            let mut count = 0;
-            while let Some(op) = self.line.get(register[self.pc_index]) {
-                if execute(op, &register, &mut work).is_none() {
-                    return n;
-                }
-                std::mem::swap(&mut register, &mut work);
-                register[self.pc_index] += 1;
-                count += 1;
-                if 1000 < count {
-                    continue 'next;
-                }
-            }
-        }
+        part1();
+        // 'next: for n in 1..5 {
+        //     let mut register: [usize; 6] = [0; 6];
+        //     let mut work: [usize; 6] = [0; 6];
+        //     let mut count = 0;
+        //     while let Some(op) = self.line.get(register[self.pc_index]) {
+        //         if execute(op, &register, &mut work).is_none() {
+        //             return n;
+        //         }
+        //         std::mem::swap(&mut register, &mut work);
+        //         register[self.pc_index] += 1;
+        //         count += 1;
+        //         if 1000 < count {
+        //             continue 'next;
+        //         }
+        //     }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
+        dbg!(123 & 456);
         0
     }
 }
@@ -357,10 +358,6 @@ e>  5: b = 0;
 */
 
 /*
-    b = 123;
-    while b != 72 {
-        b = 123 & 456;
-    }
     b = 0;
     loop {
         c = b | 65536;
@@ -392,3 +389,36 @@ e>  5: b = 0;
         }
     }
 */
+
+fn part1() {
+    let mut b = 0;
+    loop {
+        let mut c = b | 65536;
+        b = 6663054;
+        'outer: loop {
+            let mut e = c & 255;
+            b += e;
+            b &= 16777215;
+            b *= 65899;
+            b &= 16777215;
+            if 256 > c {
+                if 0 < b {
+                    dbg!(b);
+                    return;
+                }
+                // if b == 0 {
+                //     return;
+                // }
+                continue 'outer;
+            }
+            e = 0;
+            loop {
+                if 256 * (e + 1) > c {
+                    break;
+                }
+                e += 1;
+            }
+            c = e;
+        }
+    }
+}
