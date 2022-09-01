@@ -8,7 +8,7 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -209,8 +209,7 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        dbg!(123 & 456);
-        0
+        part2()
     }
 }
 
@@ -406,9 +405,57 @@ fn part1() {
                     dbg!(b);
                     return;
                 }
-                // if b == 0 {
-                //     return;
-                // }
+                continue 'outer;
+            }
+            e = 0;
+            loop {
+                if 256 * (e + 1) > c {
+                    break;
+                }
+                e += 1;
+            }
+            c = e;
+        }
+    }
+}
+
+fn part2() -> usize {
+    let mut found = 0;
+    let mut revisit = 0;
+    let mut record: HashMap<(usize, usize), usize> = HashMap::new();
+    let mut b = 0;
+    loop {
+        let mut c = b | 65536;
+        b = 6663054;
+        'outer: loop {
+            let mut e = c & 255;
+            b += e;
+            b &= 16777215;
+            b *= 65899;
+            b &= 16777215;
+            if 256 > c {
+                if let std::collections::hash_map::Entry::Vacant(e) = record.entry((b, c)) {
+                    e.insert(found);
+                    found += 1;
+                    dbg!(b);
+                } else {
+                    assert!(record.contains_key(&(b, c)));
+                    let n = record.get(&(b, c)).unwrap();
+                    dbg!(n, b);
+                    revisit += 1;
+                    if 10 < revisit {
+                        let mut m = 0;
+                        let mut best = 0;
+                        for (k, v) in record.iter() {
+                            if m < *v {
+                                m = *v;
+                                best = k.0;
+                            }
+                        }
+                        dbg!(best);
+                        return best;
+                    }
+                }
                 continue 'outer;
             }
             e = 0;
