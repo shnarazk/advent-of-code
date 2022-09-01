@@ -190,7 +190,7 @@ impl AdventOfCode for Puzzle {
         for (i, c) in self.line.iter().enumerate() {
             println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
         }
-        part1();
+        part1()
         // 'next: for n in 1..5 {
         //     let mut register: [usize; 6] = [0; 6];
         //     let mut work: [usize; 6] = [0; 6];
@@ -206,7 +206,6 @@ impl AdventOfCode for Puzzle {
         //             continue 'next;
         //         }
         //     }
-        0
     }
     fn part2(&mut self) -> Self::Output2 {
         part2()
@@ -358,10 +357,10 @@ e>  5: b = 0;
 
 /*
     b = 0;
-    loop {
+    'outer: loop {
         c = b | 65536;
         b = 6663054;
-        'outer: loop {
+        loop {
                e = c & 255;
                b = b + e;
                b = b & 16777215;
@@ -389,23 +388,23 @@ e>  5: b = 0;
     }
 */
 
-fn part1() {
-    let mut b = 0;
-    loop {
+fn part1() -> usize {
+    let mut b: usize = 0;
+    'outer: loop {
         let mut c = b | 65536;
         b = 6663054;
-        'outer: loop {
+        loop {
             let mut e = c & 255;
             b += e;
             b &= 16777215;
             b *= 65899;
             b &= 16777215;
             if 256 > c {
-                if 0 < b {
-                    dbg!(b);
-                    return;
-                }
-                continue 'outer;
+                // if 1 < b {
+                dbg!(b);
+                return b;
+                // }
+                // continue 'outer;
             }
             e = 0;
             loop {
@@ -421,29 +420,25 @@ fn part1() {
 
 fn part2() -> usize {
     let mut found = 0;
-    let mut revisit = 0;
     let mut record: HashMap<(usize, usize), usize> = HashMap::new();
     let mut b = 0;
-    loop {
+    'outer: loop {
         let mut c = b | 65536;
         b = 6663054;
-        'outer: loop {
+        loop {
             let mut e = c & 255;
             b += e;
             b &= 16777215;
             b *= 65899;
             b &= 16777215;
             if 256 > c {
-                if let std::collections::hash_map::Entry::Vacant(e) = record.entry((b, c)) {
-                    e.insert(found);
+                if let std::collections::hash_map::Entry::Vacant(ent) = record.entry((b, c)) {
+                    ent.insert(found);
                     found += 1;
-                    dbg!(b);
                 } else {
-                    assert!(record.contains_key(&(b, c)));
-                    let n = record.get(&(b, c)).unwrap();
-                    dbg!(n, b);
-                    revisit += 1;
-                    if 10 < revisit {
+                    // assert!(record.contains_key(&(b, c)));
+                    // let n = record.get(&(b, c)).unwrap();
+                    {
                         let mut m = 0;
                         let mut best = 0;
                         for (k, v) in record.iter() {
@@ -458,6 +453,7 @@ fn part2() -> usize {
                 }
                 continue 'outer;
             }
+            dbg!(c);
             e = 0;
             loop {
                 if 256 * (e + 1) > c {
@@ -466,6 +462,7 @@ fn part2() -> usize {
                 e += 1;
             }
             c = e;
+            dbg!(c);
         }
     }
 }
