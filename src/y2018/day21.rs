@@ -390,7 +390,7 @@ e>  5: b = 0;
 
 fn part1() -> usize {
     let mut b: usize = 0;
-    'outer: loop {
+    loop {
         let mut c = b | 65536;
         b = 6663054;
         loop {
@@ -400,10 +400,7 @@ fn part1() -> usize {
             b *= 65899;
             b &= 16777215;
             if 256 > c {
-                // if 1 < b {
-                dbg!(b);
                 return b;
-                // }
                 // continue 'outer;
             }
             e = 0;
@@ -420,7 +417,8 @@ fn part1() -> usize {
 
 fn part2() -> usize {
     let mut found = 0;
-    let mut record: HashMap<(usize, usize), usize> = HashMap::new();
+    let mut record_status: HashSet<(usize, usize)> = HashSet::new();
+    let mut record: HashMap<usize, usize> = HashMap::new();
     let mut b = 0;
     'outer: loop {
         let mut c = b | 65536;
@@ -432,28 +430,24 @@ fn part2() -> usize {
             b *= 65899;
             b &= 16777215;
             if 256 > c {
-                if let std::collections::hash_map::Entry::Vacant(ent) = record.entry((b, c)) {
+                if record_status.contains(&(b, c)) {
+                    let mut m = 0;
+                    let mut best = 0;
+                    for (k, v) in record.iter() {
+                        if m < *v {
+                            m = *v;
+                            best = *k;
+                        }
+                    }
+                    return best;
+                }
+                record_status.insert((b, c));
+                if let std::collections::hash_map::Entry::Vacant(ent) = record.entry(b) {
                     ent.insert(found);
                     found += 1;
-                } else {
-                    // assert!(record.contains_key(&(b, c)));
-                    // let n = record.get(&(b, c)).unwrap();
-                    {
-                        let mut m = 0;
-                        let mut best = 0;
-                        for (k, v) in record.iter() {
-                            if m < *v {
-                                m = *v;
-                                best = k.0;
-                            }
-                        }
-                        dbg!(best);
-                        return best;
-                    }
                 }
                 continue 'outer;
             }
-            dbg!(c);
             e = 0;
             loop {
                 if 256 * (e + 1) > c {
@@ -462,7 +456,6 @@ fn part2() -> usize {
                 e += 1;
             }
             c = e;
-            dbg!(c);
         }
     }
 }
