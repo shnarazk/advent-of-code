@@ -79,8 +79,7 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut at_least = 903;
-        let mut at_least = 960;
+        let mut at_least = 913;
         let set_x: HashSet<isize> = self
             .line
             .iter()
