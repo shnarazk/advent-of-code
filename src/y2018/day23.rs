@@ -16,6 +16,7 @@ trait Geometry {
     fn y(&self) -> isize;
     fn z(&self) -> isize;
     fn dist(&self, other: &Self) -> usize;
+    fn dist_1d(&self, other: &Self) -> usize;
 }
 
 type Dim3 = (isize, isize, isize);
@@ -34,6 +35,12 @@ impl Geometry for Dim3 {
         (self.0 - other.0).unsigned_abs()
             + (self.1 - other.1).unsigned_abs()
             + (self.2 - other.2).unsigned_abs()
+    }
+    fn dist_1d(&self, other: &Dim3) -> usize {
+        (self.0 - other.0)
+            .unsigned_abs()
+            .min((self.1 - other.1).unsigned_abs())
+            .min((self.2 - other.2).unsigned_abs())
     }
 }
 
@@ -79,112 +86,70 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut at_least = 913;
-        let set_x: HashSet<isize> = self
+        let mut positions: HashMap<Dim3, usize> = self
             .line
             .iter()
-            .flat_map(|p| [p.0 .0 - p.1 as isize, p.0 .0, p.0 .0 + p.1 as isize])
-            .collect::<HashSet<_>>();
-        let cand_x = set_x
-            .iter()
-            .map(|x| {
-                (
-                    *x,
-                    self.line
-                        .iter()
-                        .filter(|b| b.0 .0.abs_diff(*x) <= b.1)
-                        .collect::<HashSet<_>>(),
-                )
+            .flat_map(|(pos, r)| {
+                [
+                    ((pos.0 - *r as isize, pos.1, pos.2), 0),
+                    ((pos.0 + *r as isize, pos.1, pos.2), 0),
+                    ((pos.0, pos.1 - *r as isize, pos.2), 0),
+                    ((pos.0, pos.1 + *r as isize, pos.2), 0),
+                    ((pos.0, pos.1, pos.2 - *r as isize), 0),
+                    ((pos.0, pos.1, pos.2 + *r as isize), 0),
+                    (*pos, 0),
+                ]
             })
-            .filter(|(_, v)| at_least <= v.len())
-            .collect::<HashMap<isize, HashSet<&Nanobot>>>();
-        let set_y: HashSet<isize> = self
-            .line
-            .iter()
-            .flat_map(|p| [p.0 .1 - p.1 as isize, p.0 .1, p.0 .1 + p.1 as isize])
-            .collect::<HashSet<_>>();
-        let cand_y = set_y
-            .iter()
-            .map(|y| {
-                (
-                    *y,
-                    self.line
-                        .iter()
-                        .filter(|b| b.0 .1.abs_diff(*y) <= b.1)
-                        .collect::<HashSet<_>>(),
-                )
-            })
-            .filter(|(_, v)| at_least <= v.len())
-            .collect::<HashMap<isize, HashSet<&Nanobot>>>();
-
-        let set_z: HashSet<isize> = self
-            .line
-            .iter()
-            .flat_map(|p| [p.0 .2 - p.1 as isize, p.0 .2, p.0 .2 + p.1 as isize])
-            .collect::<HashSet<_>>();
-        let cand_z = set_z
-            .iter()
-            .map(|z| {
-                (
-                    *z,
-                    self.line
-                        .iter()
-                        .filter(|b| b.0 .2.abs_diff(*z) <= b.1)
-                        .collect::<HashSet<_>>(),
-                )
-            })
-            .filter(|(_, v)| at_least <= v.len())
-            .collect::<HashMap<isize, HashSet<&Nanobot>>>();
-        dbg!(cand_x.len(), cand_y.len(), cand_z.len());
-
-        let mut best_p = (0, 0, 0);
-        let mut most = 0;
-        for (x, robots_x) in cand_x.iter() {
-            if robots_x.len() < at_least {
-                continue;
-            }
-            for (y, robots_y) in cand_y.iter() {
-                if robots_y.len() < at_least {
-                    continue;
-                }
-                let robots = robots_x
-                    .iter()
-                    .filter(|r| robots_y.contains(*r))
-                    .copied()
-                    .collect::<HashSet<_>>();
-                if robots.len() < at_least {
-                    continue;
-                }
-                for (z, robots_z) in cand_z.iter() {
-                    if robots_z.len() < at_least {
-                        continue;
-                    }
-                    let p = (*x, *y, *z);
-                    let n = robots
-                        .iter()
-                        .filter(|r| robots_z.contains(*r))
-                        .filter(|r| r.0.dist(&p) <= r.1)
-                        .count();
-                    match most.cmp(&n) {
-                        std::cmp::Ordering::Less => {
-                            most = n;
-                            best_p = p;
-                            if at_least < most {
-                                at_least = most;
-                            }
-                            println!("{n:>4}/{at_least:>4}: {p:?}");
-                        }
-                        std::cmp::Ordering::Equal
-                            if p.dist(&(0, 0, 0)) < best_p.dist(&(0, 0, 0)) =>
-                        {
-                            println!("         : {p:?}");
-                            best_p = p;
-                        }
-                        _ => (),
+            .collect::<HashMap<Dim3, usize>>();
+        let mut max_count = 0;
+        let mut max_position = (0, 0, 0);
+        for robot in self.line.iter() {
+            for (pos, count) in positions.iter_mut() {
+                if robot.0.dist(pos) <= robot.1 {
+                    *count += 1;
+                    if max_count < *count {
+                        max_count = *count;
+                        max_position = *pos;
+                    } else if max_count == *count
+                        && pos.dist(&(0, 0, 0)) < max_position.dist(&(0, 0, 0))
+                    {
+                        max_position = *pos;
                     }
                 }
             }
         }
-        best_p.dist(&(0, 0, 0))
+        dbg!(max_position, max_count);
+        let mut dist = max_position.dist(&(0, 0, 0));
+        dbg!(dist);
+
+        let range_x0 = self
+            .line
+            .iter()
+            .filter(|r| r.0.dist(&max_position) <= r.1)
+            .filter(|r| r.0 .0 < max_position.0)
+            .map(|r| r.1 - r.0.dist(&max_position))
+            .min()
+            .unwrap();
+        let range = 400;
+        dbg!(range);
+        for x in -(range as isize)..(range as isize) {
+            for y in -(range as isize)..(range as isize) {
+                for z in -(range as isize)..(range as isize) {
+                    let p = (max_position.0 + x, max_position.1 + y, max_position.2 + z);
+                    let offset = (x, y, z);
+                    let c = self.line.iter().filter(|r| r.0.dist(&p) <= r.1).count();
+                    let d0 = p.dist(&(0, 0, 0));
+                    if max_count < c {
+                        println!("not most {} => {} {:?}", c, d0, offset);
+                        max_count = c;
+                    } else if c == max_count && d0 < dist {
+                        println!("not shortest => {}: {:?}", d0, offset);
+                        dist = d0;
+                    }
+                    // assert!(max_count < c || dist < p.dist(&(0, 0, 0)));
+                }
+            }
+        }
+        dist
     }
 }
