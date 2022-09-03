@@ -17,6 +17,8 @@ trait Geometry {
     fn z(&self) -> isize;
     fn dist(&self, other: &Self) -> usize;
     fn dist_1d(&self, other: &Self) -> usize;
+    fn lift(&self) -> Dim3;
+    fn unlift(&self) -> Dim3;
 }
 
 type Dim3 = (isize, isize, isize);
@@ -41,6 +43,16 @@ impl Geometry for Dim3 {
             .unsigned_abs()
             .min((self.1 - other.1).unsigned_abs())
             .min((self.2 - other.2).unsigned_abs())
+    }
+    fn lift(&self) -> Dim3 {
+        (
+            1 * self.0 + self.1 - self.2,
+            1 * self.1 + self.2 - self.0,
+            1 * self.2 + self.0 - self.1,
+        )
+    }
+    fn unlift(&self) -> Dim3 {
+        todo!()
     }
 }
 
@@ -86,6 +98,14 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        for y in (0..5).rev() {
+            print!("{y}: ");
+            for x in 0..5 {
+                print!("{:?} ", (x, y, 0).lift());
+            }
+            println!();
+        }
+        panic!();
         let mut positions: HashMap<Dim3, usize> = self
             .line
             .iter()
