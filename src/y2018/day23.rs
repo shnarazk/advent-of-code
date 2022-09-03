@@ -53,9 +53,9 @@ impl Geometry for Dim3 {
     }
     fn unlift(&self) -> Dim3 {
         (
-            self.0 - self.1 - self.2,
-            self.1 + self.2 - self.0,
-            self.2 + self.0 - self.1,
+            (self.0 - self.1 - self.2) / 4,
+            (self.1 + self.2 - self.0) / 4,
+            (self.2 + self.0 - self.1) / 4,
         )
     }
 }
