@@ -46,13 +46,17 @@ impl Geometry for Dim3 {
     }
     fn lift(&self) -> Dim3 {
         (
-            1 * self.0 + self.1 - self.2,
-            1 * self.1 + self.2 - self.0,
-            1 * self.2 + self.0 - self.1,
+            self.0 + self.1 + 2 * self.2, // a
+            2 * (self.1 - self.0),        // y
+            2 * self.2 - self.0 - self.1, // z
         )
     }
     fn unlift(&self) -> Dim3 {
-        todo!()
+        (
+            self.0 - self.1 - self.2,
+            self.1 + self.2 - self.0,
+            self.2 + self.0 - self.1,
+        )
     }
 }
 
@@ -98,6 +102,34 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        println!("X-axis");
+        for i in 0..5_isize {
+            println!(
+                "{:?} => {:?} => {:?}",
+                (i, i, i),
+                (i, i, i).lift(),
+                (i, i, i).lift().unlift()
+            );
+        }
+        println!("Y-axis");
+        for i in 0..5_isize {
+            println!(
+                "{:?} => {:?} => {:?}",
+                (-i, i, 0),
+                (-i, i, 0).lift(),
+                (-i, i, 0).lift().unlift()
+            );
+        }
+        println!("Z-axis");
+        for i in 0..5_isize {
+            println!(
+                "{:?} => {:?} => {:?}",
+                (-i, -i, i),
+                (-i, -i, i).lift(),
+                (-i, -i, i).lift().unlift()
+            );
+        }
+        println!();
         for y in (0..5).rev() {
             print!("{y}: ");
             for x in 0..5 {
@@ -105,7 +137,13 @@ impl AdventOfCode for Puzzle {
             }
             println!();
         }
-        panic!();
+        for y in (0..5).rev() {
+            print!("{y}: ");
+            for x in 0..5 {
+                print!("{:?} ", (x, y, 0).lift().unlift());
+            }
+            println!();
+        }
         let mut positions: HashMap<Dim3, usize> = self
             .line
             .iter()
@@ -117,7 +155,6 @@ impl AdventOfCode for Puzzle {
                     ((pos.0, pos.1 + *r as isize, pos.2), 0),
                     ((pos.0, pos.1, pos.2 - *r as isize), 0),
                     ((pos.0, pos.1, pos.2 + *r as isize), 0),
-                    (*pos, 0),
                 ]
             })
             .collect::<HashMap<Dim3, usize>>();
@@ -139,37 +176,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         dbg!(max_position, max_count);
-        let mut dist = max_position.dist(&(0, 0, 0));
-        dbg!(dist);
-
-        let range_x0 = self
-            .line
-            .iter()
-            .filter(|r| r.0.dist(&max_position) <= r.1)
-            .filter(|r| r.0 .0 < max_position.0)
-            .map(|r| r.1 - r.0.dist(&max_position))
-            .min()
-            .unwrap();
-        let range = 400;
-        dbg!(range);
-        for x in -(range as isize)..(range as isize) {
-            for y in -(range as isize)..(range as isize) {
-                for z in -(range as isize)..(range as isize) {
-                    let p = (max_position.0 + x, max_position.1 + y, max_position.2 + z);
-                    let offset = (x, y, z);
-                    let c = self.line.iter().filter(|r| r.0.dist(&p) <= r.1).count();
-                    let d0 = p.dist(&(0, 0, 0));
-                    if max_count < c {
-                        println!("not most {} => {} {:?}", c, d0, offset);
-                        max_count = c;
-                    } else if c == max_count && d0 < dist {
-                        println!("not shortest => {}: {:?}", d0, offset);
-                        dist = d0;
-                    }
-                    // assert!(max_count < c || dist < p.dist(&(0, 0, 0)));
-                }
-            }
-        }
-        dist
+        let dist = max_position.dist(&(0, 0, 0));
+        dbg!(dist)
     }
 }
