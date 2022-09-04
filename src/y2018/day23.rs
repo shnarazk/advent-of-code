@@ -164,13 +164,36 @@ impl AdventOfCode for Puzzle {
     }
 }
 
+const DIRS: [Dim3; 6] = [
+    (-1, 0, 0),
+    (1, 0, 0),
+    (0, -1, 0),
+    (0, 1, 0),
+    (0, 0, -1),
+    (0, 0, 1),
+];
+
+const NUM_ROBOTS: usize = 1000;
+
+#[derive(Debug)]
 struct Partition {
     center: Dim3,
     radius: usize,
-    contains: usize,
+    includes: usize,
+    membership: [[bool; NUM_ROBOTS]; 6],
 }
 
 impl Partition {
+    fn build_membership(&mut self, world: &Puzzle) {
+        todo!()
+    }
+    fn isolated(&self) -> Option<usize> {
+        (self.includes == 0
+            && self.membership[1..]
+                .iter()
+                .all(|m| *m == self.membership[0]))
+        .then(|| self.membership[0].iter().filter(|b| **b).count())
+    }
     fn divide(&self) -> [Partition; 6] {
         let c = self.center;
         let radius = self.radius / 2;
@@ -178,32 +201,38 @@ impl Partition {
             Partition {
                 center: (c.0 - radius as isize, c.1, c.2),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
             Partition {
                 center: (c.0 + radius as isize, c.1, c.2),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
             Partition {
                 center: (c.0, c.1 - radius as isize, c.2),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
             Partition {
                 center: (c.0, c.1 + radius as isize, c.2),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
             Partition {
                 center: (c.0, c.1, c.2 - radius as isize),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
             Partition {
                 center: (c.0, c.1, c.2 + radius as isize),
                 radius,
-                contains: 0,
+                includes: 0,
+                membership: [[false; NUM_ROBOTS]; 6],
             },
         ]
     }
