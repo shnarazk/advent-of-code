@@ -17,8 +17,6 @@ trait Geometry {
     fn z(&self) -> isize;
     fn dist(&self, other: &Self) -> usize;
     fn dist_1d(&self, other: &Self) -> usize;
-    fn lift(&self) -> Dim3;
-    fn unlift(&self) -> Dim3;
 }
 
 type Dim3 = (isize, isize, isize);
@@ -44,23 +42,19 @@ impl Geometry for Dim3 {
             .min((self.1 - other.1).unsigned_abs())
             .min((self.2 - other.2).unsigned_abs())
     }
-    fn lift(&self) -> Dim3 {
-        (
-            self.0 + self.1 + 2 * self.2, // a
-            2 * (self.1 - self.0),        // y
-            2 * self.2 - self.0 - self.1, // z
-        )
-    }
-    fn unlift(&self) -> Dim3 {
-        (
-            (self.0 - self.1 - self.2) / 4,
-            (self.1 + self.2 - self.0) / 4,
-            (self.2 + self.0 - self.1) / 4,
-        )
-    }
 }
 
 type Nanobot = ((isize, isize, isize), usize);
+
+trait InArea {
+    fn in_range(&self, target: &Dim3) -> bool;
+}
+
+impl InArea for Nanobot {
+    fn in_range(&self, target: &Dim3) -> bool {
+        self.0.dist(target) <= self.1
+    }
+}
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -102,48 +96,6 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        println!("X-axis");
-        for i in 0..5_isize {
-            println!(
-                "{:?} => {:?} => {:?}",
-                (i, i, i),
-                (i, i, i).lift(),
-                (i, i, i).lift().unlift()
-            );
-        }
-        println!("Y-axis");
-        for i in 0..5_isize {
-            println!(
-                "{:?} => {:?} => {:?}",
-                (-i, i, 0),
-                (-i, i, 0).lift(),
-                (-i, i, 0).lift().unlift()
-            );
-        }
-        println!("Z-axis");
-        for i in 0..5_isize {
-            println!(
-                "{:?} => {:?} => {:?}",
-                (-i, -i, i),
-                (-i, -i, i).lift(),
-                (-i, -i, i).lift().unlift()
-            );
-        }
-        println!();
-        for y in (0..5).rev() {
-            print!("{y}: ");
-            for x in 0..5 {
-                print!("{:?} ", (x, y, 0).lift());
-            }
-            println!();
-        }
-        for y in (0..5).rev() {
-            print!("{y}: ");
-            for x in 0..5 {
-                print!("{:?} ", (x, y, 0).lift().unlift());
-            }
-            println!();
-        }
         let mut positions: HashMap<Dim3, usize> = self
             .line
             .iter()
@@ -159,24 +111,100 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<HashMap<Dim3, usize>>();
         let mut max_count = 0;
-        let mut max_position = (0, 0, 0);
+        let mut max_positions = Vec::new();
         for robot in self.line.iter() {
             for (pos, count) in positions.iter_mut() {
                 if robot.0.dist(pos) <= robot.1 {
                     *count += 1;
-                    if max_count < *count {
-                        max_count = *count;
-                        max_position = *pos;
-                    } else if max_count == *count
-                        && pos.dist(&(0, 0, 0)) < max_position.dist(&(0, 0, 0))
-                    {
-                        max_position = *pos;
+                    match max_count.cmp(count) {
+                        std::cmp::Ordering::Less => {
+                            max_count = *count;
+                            max_positions.clear();
+                            max_positions.push(*pos);
+                        }
+                        std::cmp::Ordering::Equal => {
+                            max_positions.push(*pos);
+                        }
+                        _ => (),
                     }
                 }
             }
         }
-        dbg!(max_position, max_count);
-        let dist = max_position.dist(&(0, 0, 0));
-        dbg!(dist)
+        dbg!(&max_positions, max_count);
+        let base = max_positions[0];
+        let mut range_min = usize::MAX;
+        for robot in self.line.iter() {
+            if robot.in_range(&base) {
+                range_min = range_min.min(robot.1);
+            }
+        }
+        dbg!(range_min);
+        for x in 0..200 {
+            for y in 0..200 {
+                for z in 0..200 {
+                    let p = (
+                        base.0 - x as isize,
+                        base.1 - y as isize,
+                        base.2 - z as isize,
+                    );
+                    let count = self
+                        .line
+                        .iter()
+                        .filter(|robot| robot.0.dist(&p) <= robot.1)
+                        .count();
+                    if max_count < count {
+                        panic!();
+                    }
+                }
+            }
+        }
+        // let dist = max_position.dist(&(0, 0, 0));
+        // dist
+        0
+    }
+}
+
+struct Partition {
+    center: Dim3,
+    radius: usize,
+    contains: usize,
+}
+
+impl Partition {
+    fn divide(&self) -> [Partition; 6] {
+        let c = self.center;
+        let radius = self.radius / 2;
+        [
+            Partition {
+                center: (c.0 - radius as isize, c.1, c.2),
+                radius,
+                contains: 0,
+            },
+            Partition {
+                center: (c.0 + radius as isize, c.1, c.2),
+                radius,
+                contains: 0,
+            },
+            Partition {
+                center: (c.0, c.1 - radius as isize, c.2),
+                radius,
+                contains: 0,
+            },
+            Partition {
+                center: (c.0, c.1 + radius as isize, c.2),
+                radius,
+                contains: 0,
+            },
+            Partition {
+                center: (c.0, c.1, c.2 - radius as isize),
+                radius,
+                contains: 0,
+            },
+            Partition {
+                center: (c.0, c.1, c.2 + radius as isize),
+                radius,
+                contains: 0,
+            },
+        ]
     }
 }
