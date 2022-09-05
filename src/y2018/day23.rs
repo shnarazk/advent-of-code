@@ -115,7 +115,7 @@ impl AdventOfCode for Puzzle {
         start.setup_membership(self);
         dbg!(start.radius, start.completely_inside);
         let mut to_visit: BinaryHeap<Reverse<Cubic>> = BinaryHeap::new();
-        let mut max_value = 1;
+        let mut max_value = 200;
         let mut max_position = (0, 0, 0);
         let mut best_distance = 0;
         to_visit.push(Reverse(start));
@@ -123,27 +123,26 @@ impl AdventOfCode for Puzzle {
         let mut rin = 1;
         while let Some(Reverse(mut p)) = to_visit.pop() {
             out += 1;
-            if p.affecting(self) < max_value
+            if p.affecting() < max_value
             // || (p.affecting(self) == max_value && best_distance < p.closest().abs_dist())
             {
                 continue;
             }
             if let Some(n) = p.is_coherent(self) {
-                if 0 < p.radius {
-                    dbg!(n, p.center);
-                }
+                // if 0 < n && 0 < p.radius {
+                //     dbg!(n, p.radius);
+                // }
                 match max_value.cmp(&n) {
                     std::cmp::Ordering::Less => {
                         max_value = n;
-                        max_position = p.closest();
-                        best_distance = max_position.abs_dist();
+                        (best_distance, max_position) = p.closest();
                         dbg!(max_value, best_distance);
                     }
                     std::cmp::Ordering::Equal => {
-                        let d = p.closest();
-                        if d.abs_dist() < max_position.abs_dist() {
-                            max_position = d;
-                            best_distance = max_position.abs_dist();
+                        let (d, p) = p.closest();
+                        if d < max_position.abs_dist() {
+                            max_position = p;
+                            best_distance = d;
                             dbg!(best_distance);
                         }
                     }
@@ -169,17 +168,17 @@ impl AdventOfCode for Puzzle {
                     _ => (),
                 }
             }
-            if p.radius == 0 {
-                continue;
+            if 0 == p.radius {
+                dbg!(p);
+                panic!();
             }
-            for sub in p.divide().iter() {
-                let mut q = sub.clone();
-                q.setup_membership(self);
+            assert!(0 < p.radius);
+            for sub in p.divide(self).iter() {
                 // if 2 < q.affecting {
                 //     println!("{:?}, {}", q.center, q.max_bound());
                 // }
                 // record_list.push(q.center);
-                to_visit.push(Reverse(q));
+                to_visit.push(Reverse(sub.clone()));
                 rin += 1;
             }
         }
@@ -208,8 +207,8 @@ struct Cubic {
 }
 
 impl Cubic {
-    fn affecting(&self, world: &Puzzle) -> usize {
-        world.num_robots - self.completely_outside
+    fn affecting(&self) -> usize {
+        1000 - self.completely_outside
     }
     fn setup_membership(&mut self, world: &Puzzle) {
         self.completely_inside = world
@@ -222,15 +221,23 @@ impl Cubic {
             .iter()
             .filter(|r| !r.within_range(&self.center, 3 * self.radius as isize))
             .count();
+        assert!(
+            0 < self.radius || self.completely_inside + self.completely_outside == world.num_robots
+        );
     }
     fn is_coherent(&mut self, world: &Puzzle) -> Option<usize> {
-        (world.num_robots == self.completely_inside + self.completely_outside)
-            .then(|| world.count(&self.center))
+        (world.num_robots == self.completely_inside + self.completely_outside).then(
+            || self.completely_inside, // world.count(&self.center
+        )
     }
-    fn divide(&self) -> Vec<Cubic> {
+    fn divide(&self, world: &Puzzle) -> Vec<Cubic> {
         let c = self.center;
-        if self.radius == 1 {
-            return vec![
+        let mut vec = if self.radius == 1 {
+            vec![
+                Cubic {
+                    center: c,
+                    ..Cubic::default()
+                },
                 Cubic {
                     center: (c.0 - 1, c.1 - 1, c.2 - 1),
                     ..Cubic::default()
@@ -263,73 +270,84 @@ impl Cubic {
                     center: (c.0 + 1, c.1 + 1, c.2 + 1),
                     ..Cubic::default()
                 },
-            ];
-        }
-        let r = (self.radius / 2) as isize;
-        let radius = self.radius / 2;
-        assert!(0 < radius);
-        vec![
-            Cubic {
-                center: (c.0 - r, c.1 - r, c.2 - r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 - r, c.1 + r, c.2 - r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 + r, c.1 - r, c.2 - r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 + r, c.1 + r, c.2 - r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 - r, c.1 - r, c.2 + r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 - r, c.1 + r, c.2 + r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 + r, c.1 - r, c.2 + r),
-                radius,
-                ..Cubic::default()
-            },
-            Cubic {
-                center: (c.0 + r, c.1 + r, c.2 + r),
-                radius,
-                ..Cubic::default()
-            },
-        ]
-    }
-    fn closest(&self) -> Dim3 {
-        if self.radius == 0 {
-            self.center
+            ]
         } else {
-            let mut d = usize::MAX;
-            let mut p = (0, 0, 0);
-            for dir in DIRS.iter() {
-                let pos = (
-                    self.center.0 + dir.0,
-                    self.center.1 + dir.1,
-                    self.center.2 + dir.2,
-                );
-                let dist = pos.dist(&(0, 0, 0));
-                if dist < d {
-                    d = dist;
-                    p = pos;
-                }
-            }
-            p
+            let r = (self.radius / 2) as isize;
+            let radius = self.radius / 2;
+            vec![
+                Cubic {
+                    center: (c.0 - r, c.1 - r, c.2 - r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 - r, c.1 + r, c.2 - r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 + r, c.1 - r, c.2 - r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 + r, c.1 + r, c.2 - r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 - r, c.1 - r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 - r, c.1 + r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 + r, c.1 - r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 + r, c.1 + r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+            ]
+        };
+        for c in vec.iter_mut() {
+            c.setup_membership(world);
+        }
+        vec
+    }
+    fn closest(&self) -> (usize, Dim3) {
+        const DIRS: [Dim3; 8] = [
+            (-1, -1, -1),
+            (-1, -1, 1),
+            (-1, 1, -1),
+            (-1, 1, 1),
+            (1, -1, -1),
+            (1, -1, 1),
+            (1, 1, -1),
+            (1, 1, 1),
+        ];
+
+        if self.radius == 0 {
+            (self.center.abs_dist(), self.center)
+        } else {
+            DIRS.iter()
+                .map(|d| {
+                    (
+                        self.center.0 + d.0 * self.radius as isize,
+                        self.center.1 + d.1 * self.radius as isize,
+                        self.center.2 + d.2 * self.radius as isize,
+                    )
+                })
+                .map(|p| (p.abs_dist(), p))
+                .min()
+                .unwrap()
         }
     }
 }
@@ -345,14 +363,14 @@ impl Geometry for Cubic {
 
 impl PartialOrd for Cubic {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.completely_inside.partial_cmp(&other.completely_inside)
+        self.affecting().partial_cmp(&other.affecting())
         // self.abs_dist().partial_cmp(&other.abs_dist())
     }
 }
 
 impl Ord for Cubic {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.completely_inside.cmp(&other.completely_inside)
+        self.affecting().cmp(&other.affecting())
         // self.abs_dist().cmp(&other.abs_dist())
     }
 }
