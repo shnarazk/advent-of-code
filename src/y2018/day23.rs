@@ -123,41 +123,11 @@ impl AdventOfCode for Puzzle {
         let mut rin = 1;
         while let Some(Reverse(mut p)) = to_visit.pop() {
             out += 1;
-            // if 2 <= p.radius
-            //     && 0 < p.center.0
-            //     && 0 < p.center.1
-            //     && 0 < p.center.2
-            //     && 3 <= p.max_bound()
-            // {
-            //     println!("---{:?}({}) {}", p.center, p.radius, p.max_bound());
-            // }
-            // if 1 < p.affecting {
-            //     dbg!(p.affecting);
-            // }
-            // println!(
-            //     "c:{:?}, r:{}, max: {}, inc: {}",
-            //     p.center,
-            //     p.radius,
-            //     p.max_bound(),
-            //     p.affecting
-            // );
             if p.affecting(self) < max_value
-                || (p.affecting(self) == max_value && best_distance < p.closest().abs_dist())
+            // || (p.affecting(self) == max_value && best_distance < p.closest().abs_dist())
             {
                 continue;
             }
-            // if 8192 * 8192 < p.radius && max_value <= p.affecting {
-            //     println!(
-            //         ":::{:?}(d={}, r={}) {}",
-            //         p.center,
-            //         p.closest().abs_dist(),
-            //         p.radius,
-            //         p.affecting
-            //     );
-            // }
-            // if to_visit.len() % 1000 == 0 {
-            //     dbg!(to_visit.len());
-            // }
             if let Some(n) = p.is_coherent(self) {
                 if 0 < p.radius {
                     dbg!(n, p.center);
@@ -213,13 +183,13 @@ impl AdventOfCode for Puzzle {
                 rin += 1;
             }
         }
-        dbg!(&max_position);
+        dbg!(&max_position, best_distance);
         // let mut r = record.iter().collect::<Vec<_>>();
         // r.sort();
         // println!("{:?}", r);
         // println!("{:?}", record_list);
         dbg!(rin, out);
-        max_position.dist(&(0, 0, 0))
+        best_distance
     }
 }
 impl Puzzle {
@@ -245,38 +215,17 @@ impl Cubic {
         self.completely_inside = world
             .line
             .iter()
-            .filter(|r| r.within_range(&self.center, -(self.radius as isize)))
+            .filter(|r| r.within_range(&self.center, -3 * (self.radius as isize)))
             .count();
         self.completely_outside = world
             .line
             .iter()
-            .filter(|r| !r.within_range(&self.center, 0))
+            .filter(|r| !r.within_range(&self.center, 3 * self.radius as isize))
             .count();
     }
     fn is_coherent(&mut self, world: &Puzzle) -> Option<usize> {
         (world.num_robots == self.completely_inside + self.completely_outside)
             .then(|| world.count(&self.center))
-        // if self.radius == 0 {
-        //     return Some(world.count(&self.center));
-        // }
-        // let overestimate = world
-        //     .line
-        //     .iter()
-        //     .map(|r| r.within_range(&self.center))
-        //     .collect::<Vec<_>>();
-        // for (i, robot) in world.line.iter().enumerate() {
-        //     for dir in DIRS.iter() {
-        //         let pos = (
-        //             self.center.0 + dir.0 * self.radius as isize,
-        //             self.center.1 + dir.1 * self.radius as isize,
-        //             self.center.2 + dir.2 * self.radius as isize,
-        //         );
-        //         if overestimate[i] != robot.within_range(&pos) {
-        //             return None;
-        //         }
-        //     }
-        // }
-        // Some(overestimate.iter().filter(|b| **b).count())
     }
     fn divide(&self) -> Vec<Cubic> {
         let c = self.center;
