@@ -60,12 +60,19 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         // 801 units each with 4706 hit points (weak to radiation) with an attack that does 116 bludgeoning damage at initiative 1
         // 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
-        let set_type = regex!("(Immune System|Infection):");
+        let set_type = regex!("^(Immune System:|Infection:|)$");
         if let Some(set_type) = set_type.captures(block) {
-            self.reading_type_is_immune = &set_type[0] == "Immune System";
+            match &set_type[1] {
+                "Immune System:" => {
+                    self.reading_type_is_immune = true;
+                }
+                "Infection:" => {
+                    self.reading_type_is_immune = false;
+                }
+                _ => (),
+            }
             return Ok(());
         }
-        // dbg!(&block);
         let parser = regex!(
             r"^(\d+) units each with (\d+) hit points( \([^)]+\))? with an attack that does (\d+) (\w+) damage at initiative (\d+)$"
         );
@@ -116,7 +123,7 @@ impl AdventOfCode for Puzzle {
     }
     fn after_insert(&mut self) {
         dbg!(&self.immune);
-        dbg!(&self.infection);
+        dbg!(&self.infection.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         0
