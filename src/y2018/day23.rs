@@ -10,8 +10,6 @@ use {
 
 type Dim3 = (isize, isize, isize);
 
-const NUM_ROBOTS: usize = 1000;
-
 trait Geometry {
     fn abs_dist(&self) -> usize;
     fn dist(&self, other: &Dim3) -> usize;
@@ -96,8 +94,9 @@ impl AdventOfCode for Puzzle {
             let p: (&usize, &Dim3) = self.line.iter().map(|(p, r)| (r, p)).max().unwrap();
             (self.count(p.1), (p.1.abs_dist(), *p.1))
         };
+        let mut terminals: BinaryHeap<Reverse<Cubic>> = BinaryHeap::new();
         println!();
-        while let Some(Reverse(mut p)) = to_visit.pop() {
+        while let Some(Reverse(mut p)) = terminals.pop().or_else(|| to_visit.pop()) {
             let (target, a) = (p.closest(), p.affecting(self));
             if a < max_count || a == max_count && best.0 < target.0 {
                 continue;
@@ -108,18 +107,22 @@ impl AdventOfCode for Puzzle {
                 std::cmp::Ordering::Less => {
                     max_count = n;
                     best = target;
-                    println!("{}n = {}, r = {}", color::REVERT, n, best.0);
+                    println!("{}n = {}, d = {}", color::REVERT, n, best.0);
                 }
                 std::cmp::Ordering::Equal if target.0 < best.0 => {
                     best = target;
-                    println!("{}n = {}, r = {}", color::REVERT, n, best.0);
+                    println!("{}n = {}, d = {}", color::REVERT, n, best.0);
                 }
                 _ => (),
             }
             if coherent.is_none() {
                 let mut vec = p.divide(self);
                 while let Some(sub) = vec.pop() {
-                    to_visit.push(Reverse(sub));
+                    if sub.radius == 0 {
+                        terminals.push(Reverse(sub));
+                    } else {
+                        to_visit.push(Reverse(sub));
+                    }
                 }
             }
         }
@@ -161,8 +164,8 @@ impl Cubic {
     fn affecting(&self, world: &Puzzle) -> usize {
         world.num_robots - self.outside
     }
-    fn uncernty(&self) -> usize {
-        NUM_ROBOTS - self.outside - self.inside
+    fn affecting_(&self) -> isize {
+        -(self.outside as isize)
     }
     fn setup_membership(&mut self, world: &Puzzle) {
         self.inside = world
@@ -183,21 +186,20 @@ impl Cubic {
     fn divide(&self, world: &Puzzle) -> Vec<Cubic> {
         let c = self.center;
         let mut vec = if self.radius == 1 {
-            [-1, 0, 1]
+            let dirs = [-1, 0, 1]
                 .iter()
                 .flat_map(|x| {
                     [-1, 0, 1]
                         .iter()
-                        .flat_map(|y| {
-                            [-1, 0, 1]
-                                .iter()
-                                .map(|z| Cubic {
-                                    center: (c.0 + x, c.1 + y, c.2 + z),
-                                    ..Cubic::default()
-                                })
-                                .collect::<Vec<_>>()
-                        })
+                        .flat_map(|y| [-1, 0, 1].iter().map(|z| (*x, *y, *z)).collect::<Vec<_>>())
                         .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>();
+            dirs.iter()
+                .filter(|d| **d != (0, 0, 0))
+                .map(|d| Cubic {
+                    center: (c.0 + d.0, c.1 + d.1, c.2 + d.2),
+                    ..Cubic::default()
                 })
                 .collect::<Vec<_>>()
         } else {
@@ -296,12 +298,12 @@ impl Geometry for Cubic {
 
 impl PartialOrd for Cubic {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.uncernty().partial_cmp(&other.uncernty())
+        self.affecting_().partial_cmp(&other.affecting_())
     }
 }
 
 impl Ord for Cubic {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.uncernty().cmp(&other.uncernty())
+        self.affecting_().cmp(&other.affecting_())
     }
 }
