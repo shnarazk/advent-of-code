@@ -109,32 +109,51 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        let trace = dbg!((15732653, 37370828, 40027284));
         let mut to_visit = BinaryHeap::from([Reverse(Cubic::new(self.radius, self))]);
-        let (mut max_count, mut best) = (970, (0, (0, 0, 0)));
+        let (mut max_count, mut best) = (972, (0, (0, 0, 0)));
         while let Some(Reverse(mut p)) = to_visit.pop() {
+            // if p.includes(&trace) {
+            //     dbg!(p.radius, p.is_coherent(self));
+            // }
             let (target, a) = (p.closest(), p.affecting(self));
-            if max_count == 973 && p.radius == 0 {
-                dbg!(&p);
-            }
+            // if max_count == 973 && p.radius == 0 {
+            //     dbg!(&p);
+            // }
             if a < max_count || a == max_count && best.0 < target.0 {
+                // if p.includes(&trace) && p.radius < 2 {
+                //     dbg!(p.radius, p.is_coherent(self));
+                // }
                 continue;
             }
             let coherent = p.is_coherent(self);
             let n = coherent.unwrap_or_else(|| self.count(&p.center));
             match max_count.cmp(&n) {
                 std::cmp::Ordering::Less => {
-                    dbg!(&coherent, p.radius);
+                    // if p.includes(&trace) {
+                    //     dbg!(p.radius);
+                    // }
+                    // dbg!(&coherent, p.radius);
                     max_count = dbg!(n);
                     best = dbg!(target);
                 }
                 std::cmp::Ordering::Equal if target.0 < best.0 => {
+                    // if p.includes(&trace) {
+                    //     dbg!(p.radius);
+                    // }
                     best = target;
                 }
                 _ => (),
             }
             if coherent.is_none() {
                 let mut vec = p.divide(self);
+                if p.includes(&trace) && p.radius == 1 {
+                    dbg!(&p);
+                }
                 while let Some(sub) = vec.pop() {
+                    if p.includes(&trace) && p.radius == 1 && sub.center == trace {
+                        dbg!(&sub);
+                    }
                     to_visit.push(Reverse(sub));
                 }
             }
@@ -143,7 +162,9 @@ impl AdventOfCode for Puzzle {
             for y in 0..100_isize {
                 for z in 0..100_isize {
                     let p = (best.1 .0 - x, best.1 .1 - y, best.1 .2 - z);
-                    assert!(self.count(&p) < max_count);
+                    if p != best.1 && max_count < self.count(&p) {
+                        dbg!(p);
+                    }
                 }
             }
         }
@@ -165,6 +186,14 @@ struct Cubic {
 }
 
 impl Cubic {
+    fn includes(&self, pos: &Dim3) -> bool {
+        self.center.0 - self.radius as isize <= pos.0
+            && pos.0 <= self.center.0 + self.radius as isize
+            && self.center.1 - self.radius as isize <= pos.1
+            && pos.1 <= self.center.1 + self.radius as isize
+            && self.center.2 - self.radius as isize <= pos.2
+            && pos.2 <= self.center.2 + self.radius as isize
+    }
     fn new(radius: usize, world: &Puzzle) -> Cubic {
         let mut inst = Cubic {
             radius: world.radius,
@@ -198,44 +227,23 @@ impl Cubic {
     fn divide(&self, world: &Puzzle) -> Vec<Cubic> {
         let c = self.center;
         let mut vec = if self.radius == 1 {
-            vec![
-                Cubic {
-                    center: c,
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 - 1, c.1 - 1, c.2 - 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 - 1, c.1 + 1, c.2 - 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + 1, c.1 - 1, c.2 - 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + 1, c.1 + 1, c.2 - 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 - 1, c.1 - 1, c.2 + 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 - 1, c.1 + 1, c.2 + 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + 1, c.1 - 1, c.2 + 1),
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + 1, c.1 + 1, c.2 + 1),
-                    ..Cubic::default()
-                },
-            ]
+            [-1, 0, 1]
+                .iter()
+                .flat_map(|x| {
+                    [-1, 0, 1]
+                        .iter()
+                        .flat_map(|y| {
+                            [-1, 0, 1]
+                                .iter()
+                                .map(|z| Cubic {
+                                    center: (c.0 + x, c.1 + y, c.2 + z),
+                                    ..Cubic::default()
+                                })
+                                .collect::<Vec<_>>()
+                        })
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>()
         } else {
             let r = (self.radius / 2) as isize;
             let radius = self.radius / 2;
@@ -246,22 +254,12 @@ impl Cubic {
                     ..Cubic::default()
                 },
                 Cubic {
-                    center: (c.0 - r, c.1 + r, c.2 - r),
-                    radius,
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + r, c.1 - r, c.2 - r),
-                    radius,
-                    ..Cubic::default()
-                },
-                Cubic {
-                    center: (c.0 + r, c.1 + r, c.2 - r),
-                    radius,
-                    ..Cubic::default()
-                },
-                Cubic {
                     center: (c.0 - r, c.1 - r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 - r, c.1 + r, c.2 - r),
                     radius,
                     ..Cubic::default()
                 },
@@ -271,7 +269,17 @@ impl Cubic {
                     ..Cubic::default()
                 },
                 Cubic {
+                    center: (c.0 + r, c.1 - r, c.2 - r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
                     center: (c.0 + r, c.1 - r, c.2 + r),
+                    radius,
+                    ..Cubic::default()
+                },
+                Cubic {
+                    center: (c.0 + r, c.1 + r, c.2 - r),
                     radius,
                     ..Cubic::default()
                 },
@@ -302,15 +310,19 @@ impl Cubic {
         if self.radius == 0 {
             (self.center.abs_dist(), self.center)
         } else {
+            let r = self.radius as isize;
+            let zero_x = (self.center.0 - r) * (self.center.0 + r) < 0;
+            let zero_y = (self.center.1 - r) * (self.center.1 + r) < 0;
+            let zero_z = (self.center.2 - r) * (self.center.2 + r) < 0;
             DIRS.iter()
                 .map(|d| {
-                    (
-                        self.center.0 + d.0 * self.radius as isize,
-                        self.center.1 + d.1 * self.radius as isize,
-                        self.center.2 + d.2 * self.radius as isize,
-                    )
+                    let p = (
+                        if zero_x { 0 } else { self.center.0 + d.0 * r },
+                        if zero_y { 0 } else { self.center.1 + d.1 * r },
+                        if zero_z { 0 } else { self.center.2 + d.2 * r },
+                    );
+                    (p.abs_dist(), p)
                 })
-                .map(|p| (p.abs_dist(), p))
                 .min()
                 .unwrap()
         }
