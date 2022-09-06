@@ -71,6 +71,7 @@ impl Geometry for Nanobot {
 pub struct Puzzle {
     line: Vec<Nanobot>,
     num_robots: usize,
+    radius: usize,
 }
 
 #[aoc(2018, 23)]
@@ -91,7 +92,14 @@ impl AdventOfCode for Puzzle {
     }
     fn after_insert(&mut self) {
         self.num_robots = self.line.len();
-        dbg!(self.num_robots);
+        self.radius = self
+            .line
+            .iter()
+            .map(|((x, y, z), _)| x.unsigned_abs().max(y.unsigned_abs()).max(z.unsigned_abs()))
+            .max()
+            .unwrap()
+            .next_power_of_two();
+        dbg!(self.num_robots, self.radius);
     }
     fn part1(&mut self) -> Self::Output1 {
         let strongest: (&usize, &Dim3) = self.line.iter().map(|(p, r)| (r, p)).max().unwrap();
@@ -101,94 +109,45 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut start = Cubic {
-            radius: 32,
-            ..Cubic::default()
-        };
-        start.radius = self
-            .line
-            .iter()
-            .map(|r| r.abs_dist())
-            .max()
-            .unwrap()
-            .next_power_of_two();
-        start.setup_membership(self);
-        dbg!(start.radius, start.completely_inside);
-        let mut to_visit: BinaryHeap<Reverse<Cubic>> = BinaryHeap::new();
-        let mut max_value = 200;
-        let mut max_position = (0, 0, 0);
-        let mut best_distance = 0;
-        to_visit.push(Reverse(start));
-        let mut out = 0;
-        let mut rin = 1;
+        let mut to_visit = BinaryHeap::from([Reverse(Cubic::new(self.radius, self))]);
+        let (mut max_count, mut best) = (970, (0, (0, 0, 0)));
         while let Some(Reverse(mut p)) = to_visit.pop() {
-            out += 1;
-            if p.affecting() < max_value
-            // || (p.affecting(self) == max_value && best_distance < p.closest().abs_dist())
-            {
+            let (target, a) = (p.closest(), p.affecting(self));
+            if max_count == 973 && p.radius == 0 {
+                dbg!(&p);
+            }
+            if a < max_count || a == max_count && best.0 < target.0 {
                 continue;
             }
-            if let Some(n) = p.is_coherent(self) {
-                // if 0 < n && 0 < p.radius {
-                //     dbg!(n, p.radius);
-                // }
-                match max_value.cmp(&n) {
-                    std::cmp::Ordering::Less => {
-                        max_value = n;
-                        (best_distance, max_position) = p.closest();
-                        dbg!(max_value, best_distance);
-                    }
-                    std::cmp::Ordering::Equal => {
-                        let (d, p) = p.closest();
-                        if d < max_position.abs_dist() {
-                            max_position = p;
-                            best_distance = d;
-                            dbg!(best_distance);
-                        }
-                    }
-                    _ => (),
+            let coherent = p.is_coherent(self);
+            let n = coherent.unwrap_or_else(|| self.count(&p.center));
+            match max_count.cmp(&n) {
+                std::cmp::Ordering::Less => {
+                    dbg!(&coherent, p.radius);
+                    max_count = dbg!(n);
+                    best = dbg!(target);
                 }
-                continue;
-            } else {
-                let c = self.count(&p.center);
-                match max_value.cmp(&c) {
-                    std::cmp::Ordering::Less => {
-                        max_value = c;
-                        max_position = p.center;
-                        best_distance = p.center.abs_dist();
-                        dbg!(max_value, best_distance);
-                    }
-                    std::cmp::Ordering::Equal => {
-                        if p.center.abs_dist() < max_position.abs_dist() {
-                            max_position = p.center;
-                            best_distance = p.center.abs_dist();
-                            dbg!(best_distance);
-                        }
-                    }
-                    _ => (),
+                std::cmp::Ordering::Equal if target.0 < best.0 => {
+                    best = target;
                 }
+                _ => (),
             }
-            if 0 == p.radius {
-                dbg!(p);
-                panic!();
-            }
-            assert!(0 < p.radius);
-            for sub in p.divide(self).iter() {
-                // if 2 < q.affecting {
-                //     println!("{:?}, {}", q.center, q.max_bound());
-                // }
-                // record_list.push(q.center);
-                to_visit.push(Reverse(sub.clone()));
-                rin += 1;
+            if coherent.is_none() {
+                let mut vec = p.divide(self);
+                while let Some(sub) = vec.pop() {
+                    to_visit.push(Reverse(sub));
+                }
             }
         }
-        dbg!(&max_position, best_distance);
-        // let mut r = record.iter().collect::<Vec<_>>();
-        // r.sort();
-        // println!("{:?}", r);
-        // println!("{:?}", record_list);
-        dbg!(rin, out);
-        best_distance
+        for x in 0..100_isize {
+            for y in 0..100_isize {
+                for z in 0..100_isize {
+                    let p = (best.1 .0 - x, best.1 .1 - y, best.1 .2 - z);
+                    assert!(self.count(&p) < max_count);
+                }
+            }
+        }
+        best.0
     }
 }
 impl Puzzle {
@@ -201,34 +160,40 @@ impl Puzzle {
 struct Cubic {
     center: Dim3,
     radius: usize,
-    completely_inside: usize,
-    completely_outside: usize,
-    not_affect: usize,
+    inside: usize,
+    outside: usize,
 }
 
 impl Cubic {
-    fn affecting(&self) -> usize {
-        1000 - self.completely_outside
+    fn new(radius: usize, world: &Puzzle) -> Cubic {
+        let mut inst = Cubic {
+            radius: world.radius,
+            ..Cubic::default()
+        };
+        inst.setup_membership(world);
+        inst
+    }
+    fn affecting(&self, world: &Puzzle) -> usize {
+        world.num_robots - self.outside
+    }
+    fn uncernty(&self) -> usize {
+        1000 - self.outside - self.inside
     }
     fn setup_membership(&mut self, world: &Puzzle) {
-        self.completely_inside = world
+        self.inside = world
             .line
             .iter()
             .filter(|r| r.within_range(&self.center, -3 * (self.radius as isize)))
             .count();
-        self.completely_outside = world
+        self.outside = world
             .line
             .iter()
             .filter(|r| !r.within_range(&self.center, 3 * self.radius as isize))
             .count();
-        assert!(
-            0 < self.radius || self.completely_inside + self.completely_outside == world.num_robots
-        );
+        assert!(0 < self.radius || self.inside + self.outside == world.num_robots);
     }
     fn is_coherent(&mut self, world: &Puzzle) -> Option<usize> {
-        (world.num_robots == self.completely_inside + self.completely_outside).then(
-            || self.completely_inside, // world.count(&self.center
-        )
+        (world.num_robots == self.inside + self.outside).then(|| self.inside)
     }
     fn divide(&self, world: &Puzzle) -> Vec<Cubic> {
         let c = self.center;
@@ -363,14 +328,14 @@ impl Geometry for Cubic {
 
 impl PartialOrd for Cubic {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.affecting().partial_cmp(&other.affecting())
+        self.uncernty().partial_cmp(&other.uncernty())
         // self.abs_dist().partial_cmp(&other.abs_dist())
     }
 }
 
 impl Ord for Cubic {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.affecting().cmp(&other.affecting())
+        self.uncernty().cmp(&other.uncernty())
         // self.abs_dist().cmp(&other.abs_dist())
     }
 }
