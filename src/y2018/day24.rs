@@ -8,10 +8,10 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
 };
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 enum AttackType {
     Bludgeoning,
     Cold,
@@ -35,9 +35,9 @@ impl TryFrom<&str> for AttackType {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 struct Group {
-    id: usize,
+    id: isize,
     units: usize,
     hitpoints: usize,
     weak_to: HashSet<AttackType>,
@@ -47,11 +47,149 @@ struct Group {
     initiative: usize,
 }
 
+impl Group {
+    fn is_immune(&self) -> bool {
+        0 < self.id
+    }
+    fn killed(&self) -> bool {
+        self.units == 0
+    }
+    fn effective_power(&self) -> usize {
+        self.units * self.damage
+    }
+    fn effective_damage(&self, target: &Group) -> usize {
+        match (
+            target.weak_to.contains(&self.attack),
+            target.immune_to.contains(&self.attack),
+        ) {
+            (true, true) => panic!(),
+            (true, false) => self.damage * 2,
+            (false, true) => 0,
+            _ => self.damage,
+        }
+    }
+}
+
+impl PartialOrd for Group {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match other.effective_power().partial_cmp(&self.effective_power()) {
+            Some(std::cmp::Ordering::Equal) => other.initiative.partial_cmp(&self.initiative),
+            e => e,
+        }
+    }
+}
+
+impl Ord for Group {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match other.effective_power().cmp(&self.effective_power()) {
+            std::cmp::Ordering::Equal => other.initiative.cmp(&self.initiative),
+            e => e,
+        }
+    }
+}
+
+#[test]
+fn y2018day24effective_power() {
+    let g = Group {
+        units: 18,
+        hitpoints: 729,
+        attack: AttackType::Radiation,
+        damage: 8,
+        initiative: 10,
+        ..Group::default()
+    };
+    assert_eq!(g.effective_power(), 144);
+    let h = Group {
+        units: 8,
+        hitpoints: 729,
+        attack: AttackType::Radiation,
+        damage: 2,
+        initiative: 10,
+        ..Group::default()
+    };
+    let i = Group {
+        units: 8,
+        hitpoints: 729,
+        attack: AttackType::Radiation,
+        damage: 2,
+        initiative: 100,
+        ..Group::default()
+    };
+    assert!(g < h);
+    assert!(i < h);
+}
+
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     immune: Vec<Group>,
     infection: Vec<Group>,
     reading_type_is_immune: bool,
+}
+
+type TargetList = HashMap<isize, isize>;
+
+impl Puzzle {
+    fn get(&mut self, id: isize) -> &mut Group {
+        if 0 < id {
+            &mut self.immune[id as usize]
+        } else {
+            &mut self.infection[(-id) as usize]
+        }
+    }
+    fn sort_by_effective_power(&mut self) {
+        self.immune.sort();
+        self.infection.sort();
+    }
+    fn build_targets(&self, attackers: &[Group], targets: &[Group]) -> TargetList {
+        let mut target_list: TargetList = HashMap::new();
+        for attacker in attackers.iter() {
+            let mut best_target: Option<&Group> = None;
+            let mut best_damage = 0;
+            for target in targets
+                .iter()
+                .filter(|t| target_list.values().all(|id| *id != t.id))
+            {
+                let real_damage = attacker.effective_damage(target);
+                if best_damage < real_damage {
+                    best_damage = real_damage;
+                    best_target = Some(target);
+                }
+            }
+            if let Some(t) = best_target {
+                target_list.insert(attacker.id, t.id);
+            }
+        }
+        target_list
+    }
+    fn target_selection(&mut self) -> (TargetList, TargetList) {
+        self.sort_by_effective_power();
+        (
+            self.build_targets(&self.immune, &self.infection),
+            self.build_targets(&self.infection, &self.immune),
+        )
+    }
+    fn attacking(&mut self, matching: (TargetList, TargetList)) {
+        let mut groups = self.immune.clone();
+        groups.append(&mut self.infection.clone());
+        groups.sort_by_key(|g| -(g.initiative as isize));
+        for attacker in groups.iter() {
+            if let Some(target_id) = if 0 < attacker.id {
+                matching.0.get(&attacker.id)
+            } else {
+                matching.1.get(&attacker.id)
+            } {
+                let target = self.get(*target_id);
+                let damage = attacker.effective_damage(target);
+                let n_kill = damage / target.hitpoints;
+                if target.units <= n_kill {
+                    // todo!();
+                    target.units = 0;
+                } else {
+                    target.units -= n_kill;
+                }
+            }
+        }
+    }
 }
 
 #[aoc(2018, 24)]
@@ -98,7 +236,7 @@ impl AdventOfCode for Puzzle {
         }
         if self.reading_type_is_immune {
             self.immune.push(Group {
-                id: self.immune.len(),
+                id: self.immune.len() as isize,
                 units: segment[1].parse::<usize>()?,
                 hitpoints: segment[2].parse::<usize>()?,
                 weak_to,
@@ -109,7 +247,7 @@ impl AdventOfCode for Puzzle {
             });
         } else {
             self.infection.push(Group {
-                id: self.infection.len(),
+                id: -(self.infection.len() as isize),
                 units: segment[1].parse::<usize>()?,
                 hitpoints: segment[2].parse::<usize>()?,
                 weak_to,
@@ -122,7 +260,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.immune);
+        dbg!(&self.immune.len());
         dbg!(&self.infection.len());
     }
     fn part1(&mut self) -> Self::Output1 {
