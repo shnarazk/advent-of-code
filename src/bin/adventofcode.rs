@@ -13,6 +13,8 @@ use adventofcode::y2019;
 use adventofcode::y2020;
 #[cfg(feature = "y2021")]
 use adventofcode::y2021;
+#[cfg(feature = "y2022")]
+use adventofcode::y2022;
 
 use {
     adventofcode::{aoc_arms, framework::AdventOfCode, Description},
@@ -55,7 +57,7 @@ pub fn main() {
         #[cfg(feature = "y2021")]
         2021 => aoc_arms!(2021),
         #[cfg(feature = "y2022")]
-        2022 => aoc_arms!(2022),
+        2022 => aoc_arms!(2022, 1),
         _ => println!("invalid year: {year}"),
     };
 }
