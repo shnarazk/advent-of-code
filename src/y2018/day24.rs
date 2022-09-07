@@ -152,15 +152,27 @@ impl Puzzle {
     }
     fn build_targets(&self, attackers: &[Group], targets: &[Group]) -> TargetList {
         let mut target_list: TargetList = HashMap::new();
-        for attacker in attackers.iter() {
+        let mut a = attackers.to_vec();
+        a.sort();
+        for attacker in a.iter() {
+            if attacker.killed() {
+                continue;
+            }
             let mut best_target: Option<&Group> = None;
             let mut best_damage = 0;
             for target in targets
                 .iter()
                 .filter(|t| target_list.values().all(|id| *id != t.id))
             {
+                if target.killed() {
+                    continue;
+                }
                 let real_damage = attacker.effective_damage(target);
-                if best_damage < real_damage {
+                if best_damage < real_damage
+                    || (best_damage == real_damage
+                        && (best_target == None
+                            || best_target.unwrap().effective_power() < target.effective_power()))
+                {
                     best_damage = real_damage;
                     best_target = Some(target);
                 }
@@ -172,7 +184,7 @@ impl Puzzle {
         target_list
     }
     fn target_selection(&mut self) -> (TargetList, TargetList) {
-        self.sort_by_effective_power();
+        // self.sort_by_effective_power();
         (
             self.build_targets(&self.immune, &self.infection),
             self.build_targets(&self.infection, &self.immune),
@@ -190,20 +202,34 @@ impl Puzzle {
                 matching.1.get(attacker_id)
             } {
                 let attacker = self.get(*attacker_id);
+                assert_eq!(*attacker_id, attacker.id);
+                if attacker.killed() {
+                    continue;
+                }
                 let target = self.get(*target_id);
+                assert_eq!(*target_id, target.id);
+                if target.killed() {
+                    continue;
+                }
                 let damage = attacker.effective_damage(target);
                 let mut n_kill = damage / target.hitpoints;
                 let target = self.get_mut(*target_id);
+                let mut destoried = false;
                 if target.units <= n_kill {
                     n_kill = target.units;
                     target.units = 0;
+                    destoried = true;
                 } else {
                     target.units -= n_kill;
                 }
                 let attacker = self.get(*attacker_id);
                 println!(
-                    "Group {}({} units) attacks deal defending group {}, killing {} units",
-                    attacker.id, attacker.units, target_id, n_kill
+                    "Group {}({} units) attacks deal defending group {}, killing {}{} units",
+                    attacker.id,
+                    attacker.units,
+                    target_id,
+                    if destoried { "all " } else { "" },
+                    n_kill
                 );
             }
         }
@@ -282,11 +308,30 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.infection.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let list = self.target_selection();
-        self.attacking(list);
-        0
+        loop {
+            let list = self.target_selection();
+            self.attacking(list);
+            println!(
+                "### Immute remains {} groups, Infection remains {} groups.",
+                self.immune.iter().filter(|g| !g.killed()).count(),
+                self.infection.iter().filter(|g| !g.killed()).count()
+            );
+            if self.immune.iter().filter(|g| !g.killed()).count() == 0
+                || self.infection.iter().filter(|g| !g.killed()).count() == 0
+            {
+                break;
+            }
+        }
+        dbg!(self.immune.iter().filter(|g| !g.killed()).count());
+        dbg!(self.infection.iter().filter(|g| !g.killed()).count());
+        dbg!(self.immune.iter().map(|g| g.units).sum::<usize>());
+        dbg!(self.infection.iter().map(|g| g.units).sum::<usize>());
+        self.immune.iter().map(|g| g.units).sum::<usize>()
+            + self.infection.iter().map(|g| g.units).sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
+        dbg!(&self.immune);
+        dbg!(&self.infection);
         0
     }
 }
