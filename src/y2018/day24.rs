@@ -58,14 +58,15 @@ impl Group {
         self.units * self.damage
     }
     fn effective_damage(&self, target: &Group) -> usize {
+        let p = self.effective_power();
         match (
             target.weak_to.contains(&self.attack),
             target.immune_to.contains(&self.attack),
         ) {
             (true, true) => panic!(),
-            (true, false) => self.damage * 2,
+            (true, false) => p * 2,
             (false, true) => 0,
-            _ => self.damage,
+            _ => p,
         }
     }
 }
@@ -129,11 +130,20 @@ pub struct Puzzle {
 type TargetList = HashMap<isize, isize>;
 
 impl Puzzle {
-    fn get(&mut self, id: isize) -> &mut Group {
+    fn get(&self, id: isize) -> &Group {
+        // id starts from one (not zero),
         if 0 < id {
-            &mut self.immune[id as usize]
+            &self.immune[id as usize - 1]
         } else {
-            &mut self.infection[(-id) as usize]
+            &self.infection[(-id) as usize - 1]
+        }
+    }
+    fn get_mut(&mut self, id: isize) -> &mut Group {
+        // id starts from one (not zero),
+        if 0 < id {
+            &mut self.immune[id as usize - 1]
+        } else {
+            &mut self.infection[(-id) as usize - 1]
         }
     }
     fn sort_by_effective_power(&mut self) {
@@ -172,21 +182,29 @@ impl Puzzle {
         let mut groups = self.immune.clone();
         groups.append(&mut self.infection.clone());
         groups.sort_by_key(|g| -(g.initiative as isize));
-        for attacker in groups.iter() {
-            if let Some(target_id) = if 0 < attacker.id {
-                matching.0.get(&attacker.id)
+        let ids = groups.iter().map(|g| g.id).collect::<Vec<_>>();
+        for attacker_id in ids.iter() {
+            if let Some(target_id) = if 0 < *attacker_id {
+                matching.0.get(attacker_id)
             } else {
-                matching.1.get(&attacker.id)
+                matching.1.get(attacker_id)
             } {
+                let attacker = self.get(*attacker_id);
                 let target = self.get(*target_id);
                 let damage = attacker.effective_damage(target);
-                let n_kill = damage / target.hitpoints;
+                let mut n_kill = damage / target.hitpoints;
+                let target = self.get_mut(*target_id);
                 if target.units <= n_kill {
-                    // todo!();
+                    n_kill = target.units;
                     target.units = 0;
                 } else {
                     target.units -= n_kill;
                 }
+                let attacker = self.get(*attacker_id);
+                println!(
+                    "Group {}({} units) attacks deal defending group {}, killing {} units",
+                    attacker.id, attacker.units, target_id, n_kill
+                );
             }
         }
     }
@@ -236,7 +254,7 @@ impl AdventOfCode for Puzzle {
         }
         if self.reading_type_is_immune {
             self.immune.push(Group {
-                id: self.immune.len() as isize,
+                id: (self.immune.len() + 1) as isize,
                 units: segment[1].parse::<usize>()?,
                 hitpoints: segment[2].parse::<usize>()?,
                 weak_to,
@@ -247,7 +265,7 @@ impl AdventOfCode for Puzzle {
             });
         } else {
             self.infection.push(Group {
-                id: -(self.infection.len() as isize),
+                id: -((self.infection.len() + 1) as isize),
                 units: segment[1].parse::<usize>()?,
                 hitpoints: segment[2].parse::<usize>()?,
                 weak_to,
@@ -264,6 +282,8 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.infection.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let list = self.target_selection();
+        self.attacking(list);
         0
     }
     fn part2(&mut self) -> Self::Output2 {
