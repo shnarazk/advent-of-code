@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -48,9 +44,6 @@ struct Group {
 }
 
 impl Group {
-    fn is_immune(&self) -> bool {
-        0 < self.id
-    }
     fn killed(&self) -> bool {
         self.units == 0
     }
@@ -160,10 +153,6 @@ impl Puzzle {
         } else {
             &mut self.infection[(-id) as usize - 1]
         }
-    }
-    fn sort_by_effective_power(&mut self) {
-        self.immune.sort();
-        self.infection.sort();
     }
     fn build_targets(&self, attackers: &[Group], targets: &[Group]) -> TargetList {
         let mut target_list: TargetList = HashMap::new();
@@ -389,9 +378,6 @@ impl AdventOfCode for Puzzle {
             for g in w.immune.iter_mut() {
                 g.damage += med;
             }
-            // dbg!(&self.immune);
-            // dbg!(&self.infection);
-            // 0
             let tmp = w.part1();
             if let Some(result) = w.got_happy_end() {
                 if result {
