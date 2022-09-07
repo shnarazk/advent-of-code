@@ -24,9 +24,11 @@
 
 ![](https://user-images.githubusercontent.com/997855/182404533-3f2328ec-a9ad-4b64-8103-3588eb08ea42.png)
 
-## 2018 ongoing
+## 2018 completed
 
 * [calendar](https://adventofcode.com/2018)
+
+![](https://user-images.githubusercontent.com/997855/188858246-f71849de-ea4c-46eb-bb05-c209738f8628.png)
 
 ## 2017 completed
 
