@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2018/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        line_parser,
     },
     std::collections::{HashMap, HashSet},
 };
