@@ -120,7 +120,7 @@ fn y2018day24effective_power() {
     assert!(i < h);
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     immune: Vec<Group>,
     infection: Vec<Group>,
@@ -130,6 +130,21 @@ pub struct Puzzle {
 type TargetList = HashMap<isize, isize>;
 
 impl Puzzle {
+    fn remains(&self) -> usize {
+        self.immune.iter().map(|g| g.units).sum::<usize>()
+            + self.infection.iter().map(|g| g.units).sum::<usize>()
+    }
+    fn got_happy_end(&self) -> Option<bool> {
+        match (
+            0 == self.immune.iter().filter(|g| !g.killed()).count(),
+            0 == self.infection.iter().filter(|g| !g.killed()).count(),
+        ) {
+            (true, true) => panic!(),
+            (true, false) => Some(false),
+            (false, true) => Some(true),
+            (false, false) => None,
+        }
+    }
     fn get(&self, id: isize) -> &Group {
         // id starts from one (not zero),
         if 0 < id {
@@ -168,10 +183,16 @@ impl Puzzle {
                     continue;
                 }
                 let real_damage = attacker.effective_damage(target);
+                if real_damage == 0 {
+                    continue;
+                }
                 if best_damage < real_damage
                     || (best_damage == real_damage
                         && (best_target == None
-                            || best_target.unwrap().effective_power() < target.effective_power()))
+                            || (best_target.unwrap().effective_power() < target.effective_power()
+                                || (best_target.unwrap().effective_power()
+                                    == target.effective_power()
+                                    && best_target.unwrap().initiative < target.initiative))))
                 {
                     best_damage = real_damage;
                     best_target = Some(target);
@@ -190,7 +211,7 @@ impl Puzzle {
             self.build_targets(&self.infection, &self.immune),
         )
     }
-    fn attacking(&mut self, matching: (TargetList, TargetList)) {
+    fn attacking(&mut self, matching: (TargetList, TargetList), log: bool) {
         let mut groups = self.immune.clone();
         groups.append(&mut self.infection.clone());
         groups.sort_by_key(|g| -(g.initiative as isize));
@@ -223,14 +244,16 @@ impl Puzzle {
                     target.units -= n_kill;
                 }
                 let attacker = self.get(*attacker_id);
-                println!(
-                    "Group {}({} units) attacks deal defending group {}, killing {}{} units",
-                    attacker.id,
-                    attacker.units,
-                    target_id,
-                    if destoried { "all " } else { "" },
-                    n_kill
-                );
+                if log {
+                    println!(
+                        "Group {}({} units) attacks deal defending group {}, killing {}{} units",
+                        attacker.id,
+                        attacker.units,
+                        target_id,
+                        if destoried { "all " } else { "" },
+                        n_kill
+                    );
+                }
             }
         }
     }
@@ -308,30 +331,88 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.infection.len());
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut remains = self.remains();
+        let mut stag = 0;
         loop {
             let list = self.target_selection();
-            self.attacking(list);
-            println!(
-                "### Immute remains {} groups, Infection remains {} groups.",
-                self.immune.iter().filter(|g| !g.killed()).count(),
-                self.infection.iter().filter(|g| !g.killed()).count()
-            );
+            self.attacking(list, 97 < stag);
+            if 97 < stag {
+                println!(
+                    "### Immute remains {} groups, Infection remains {} groups.",
+                    self.immune.iter().filter(|g| !g.killed()).count(),
+                    self.infection.iter().filter(|g| !g.killed()).count()
+                );
+            }
             if self.immune.iter().filter(|g| !g.killed()).count() == 0
                 || self.infection.iter().filter(|g| !g.killed()).count() == 0
             {
                 break;
             }
+            let tmp = self.remains();
+            if remains == tmp {
+                stag += 1;
+                if 100 < stag {
+                    // let i1 = self
+                    //     .immune
+                    //     .iter()
+                    //     .filter(|g| 0 < g.units)
+                    //     .collect::<Vec<_>>();
+                    // let i2 = self
+                    //     .infection
+                    //     .iter()
+                    //     .filter(|g| 0 < g.units)
+                    //     .collect::<Vec<_>>();
+                    // dbg!(i1, i2);
+                    return 0;
+                }
+            } else {
+                stag = 0;
+            }
+            remains = tmp;
         }
-        dbg!(self.immune.iter().filter(|g| !g.killed()).count());
-        dbg!(self.infection.iter().filter(|g| !g.killed()).count());
-        dbg!(self.immune.iter().map(|g| g.units).sum::<usize>());
-        dbg!(self.infection.iter().map(|g| g.units).sum::<usize>());
+        // dbg!(self.immune.iter().filter(|g| !g.killed()).count());
+        // dbg!(self.infection.iter().filter(|g| !g.killed()).count());
+        // dbg!(self.immune.iter().map(|g| g.units).sum::<usize>());
+        // dbg!(self.infection.iter().map(|g| g.units).sum::<usize>());
         self.immune.iter().map(|g| g.units).sum::<usize>()
             + self.infection.iter().map(|g| g.units).sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        dbg!(&self.immune);
-        dbg!(&self.infection);
-        0
+        // let mut ng = 70;
+        // let mut ok = 1000;
+        let mut units = 0;
+        // while ng + 1 < ok {
+        // for med in 1568..1574 {
+        for med in 1..80 {
+            let mut w = self.clone();
+            // let med = (ng + ok) / 2;
+            for g in w.immune.iter_mut() {
+                g.damage += med;
+            }
+            // dbg!(&self.immune);
+            // dbg!(&self.infection);
+            // 0
+            let tmp = w.part1();
+            if let Some(result) = w.got_happy_end() {
+                if result {
+                    println!("ok at {med}, {tmp}");
+                    // ok = med;
+                    units = tmp;
+                } else {
+                    println!("no at {med}, {tmp}");
+                    // ng = m, 95 < staged;
+                }
+            } else if tmp == 0 {
+                println!(
+                    "loop at {med}, {}",
+                    w.immune.iter().map(|g| g.units).sum::<usize>()
+                );
+                // ng = med;
+            } else {
+                panic!();
+            }
+            // dbg!(ng, ok, tmp);
+        }
+        units
     }
 }
