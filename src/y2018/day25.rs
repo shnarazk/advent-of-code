@@ -42,32 +42,25 @@ impl AdventOfCode for Puzzle {
             constellation.insert(i, constellation_id);
         }
         dbg!(constellation_id);
-        let mut rebuild = true;
-        'restart: while rebuild {
-            rebuild = false;
-            for (i, p) in self.line.iter().enumerate() {
-                for (j, q) in self.line.iter().enumerate().skip(i) {
-                    let ci = constellation[&i];
-                    let cj = constellation[&j];
-                    if ci == cj {
-                        continue;
-                    }
-                    let dist: usize = (p[0] - q[0]).unsigned_abs()
-                        + (p[1] - q[1]).unsigned_abs()
-                        + (p[2] - q[2]).unsigned_abs()
-                        + (p[3] - q[3]).unsigned_abs();
-                    if dist <= 3 {
-                        rebuild = true;
-                        // renumber cj to ci
-                        for (_, v) in constellation.iter_mut() {
-                            if *v == cj {
-                                *v = ci;
-                            }
+        for (i, p) in self.line.iter().enumerate() {
+            for (j, q) in self.line.iter().enumerate().skip(i) {
+                let ci = constellation[&i];
+                let cj = constellation[&j];
+                if ci == cj {
+                    continue;
+                }
+                let dist: usize = (p[0] - q[0]).unsigned_abs()
+                    + (p[1] - q[1]).unsigned_abs()
+                    + (p[2] - q[2]).unsigned_abs()
+                    + (p[3] - q[3]).unsigned_abs();
+                if dist <= 3 {
+                    // renumber cj to ci
+                    for (_, v) in constellation.iter_mut() {
+                        if *v == cj {
+                            *v = ci;
                         }
-                        constellation_id -= 1;
-                        // dbg!(constellation_id);
-                        continue 'restart;
                     }
+                    constellation_id -= 1;
                 }
             }
         }
