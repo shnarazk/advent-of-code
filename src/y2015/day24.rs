@@ -1,5 +1,8 @@
 //! <https://adventofcode.com/2015/day/24>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use {
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    std::{cmp::Reverse, collections::BinaryHeap},
+};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -14,56 +17,44 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        println!("{:?}", self.line.iter().sum::<usize>() / 3);
+        dbg!(self.line.iter().sum::<usize>() / 3);
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.reverse();
-        let noptions = self.line.len();
-        let mut test = 0;
         let target: usize = self.line.iter().sum::<usize>() / 3;
-        let mut bag: Vec<(usize, usize, [bool; 29], usize)> = vec![(0, 1, [false; 29], 0)];
-        while let Some(smallest) = bag.iter().min() {
-            // smallest.3 = false;
-            let len = smallest.0;
-            let qe = smallest.1;
-            let sum = smallest
-                .2
-                .iter()
-                .enumerate()
-                .filter(|(_, b)| **b)
-                .map(|(i, _)| self.line[i])
-                .sum::<usize>();
-            if test < sum {
-                println!("{}/{} (QE={})", sum, len, qe);
-                test = sum;
-            }
+        // the number of packages in 29.
+        type Item = (usize, usize, usize, usize, [bool; 29]);
+        let mut to_visit: BinaryHeap<Reverse<Item>> = BinaryHeap::new();
+        to_visit.push(Reverse((self.line.len(), 0, 1, 0, [false; 29])));
+        while let Some(Reverse((_, len, qe, sum, bag))) = to_visit.pop() {
             if sum == target {
                 println!(
                     "{:?}(QE = {:>3})",
-                    smallest
-                        .2
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, b)| **b)
-                        .map(|(i, _)| self.line[i])
+                    bag.iter()
+                        .zip(self.line.iter())
+                        .filter(|(u, _)| **u)
+                        .map(|(_, p)| p)
                         .collect::<Vec<_>>(),
                     qe
                 );
                 return qe;
             }
-            // if 5 <= len { continue; }
-            let s = *smallest;
-            bag.retain(|k| *k != s);
-            for k in s.3..noptions {
-                if s.2[k] || target < sum + self.line[k] {
-                    continue;
-                }
-                let mut new = s;
-                new.0 += 1;
-                new.1 *= self.line[k];
-                new.2[k] = true;
-                new.3 = k + 1;
-                bag.push(new);
+            let max_remaining_packet: usize = bag
+                .iter()
+                .zip(self.line.iter())
+                .map(|(u, p)| (!u as usize) * p)
+                .max()
+                .unwrap();
+            let l1 = len + 1;
+            for (j, p) in self
+                .line
+                .iter()
+                .enumerate()
+                .filter(|(i, p)| !bag[*i] && sum + *p <= target)
+            {
+                let mut new_bag = bag;
+                new_bag[j] = true;
+                let estimate: usize = (target - sum - p) / max_remaining_packet;
+                to_visit.push(Reverse((l1 + estimate, l1, qe * p, sum + p, new_bag)));
             }
         }
         0
@@ -120,21 +111,4 @@ impl AdventOfCode for Puzzle {
         }
         0
     }
-}
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    // #[test]
-    // fn test_part1() {
-    //     assert_eq!(
-    //         Puzzle::solve(Description::TestData("".to_string()), 1),
-    //         Answer::Part1(0)
-    //     );
-    // }
 }
