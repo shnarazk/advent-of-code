@@ -1,27 +1,44 @@
 //! <https://adventofcode.com/2016/day/06>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    std::process::Command,
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    std::collections::HashMap,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<u8>>,
 }
 
-#[aoc(2016, 6)]
+#[aoc_at(2016, 6)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        self.line
+            .push(block.chars().map(|c| c as u8).collect::<Vec<_>>());
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        if let Ok(output) = Command::new("bqn/2016/day06.bqn").output() {
-            println!("{}", String::from_utf8_lossy(&output.stdout));
-        }
-        0
+        (0..self.line[0].len())
+            .map(|i| {
+                let mut count: HashMap<u8, usize> = HashMap::new();
+                for l in self.line.iter() {
+                    *count.entry(l[i]).or_insert(0) += 1;
+                }
+                count.iter().map(|(k, v)| (*v, *k)).max().unwrap().1 as char
+            })
+            .collect::<String>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        (0..self.line[0].len())
+            .map(|i| {
+                let mut count: HashMap<u8, usize> = HashMap::new();
+                for l in self.line.iter() {
+                    *count.entry(l[i]).or_insert(0) += 1;
+                }
+                count.iter().map(|(k, v)| (*v, *k)).min().unwrap().1 as char
+            })
+            .collect::<String>()
     }
 }
