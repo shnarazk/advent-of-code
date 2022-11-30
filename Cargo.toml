@@ -8,8 +8,8 @@ rust-version = "1.62"
 
 [dependencies]
 aoc_macro = { version = "^0.2", path = "aoc_macro" }
-once_cell = "^1.10"
-regex = "^1.3"
+once_cell = "^1.16"
+regex = "^1.7"
 itertools = { version = "0.10", optional = true }
 md-5 = { version = "0.10", optional = true }
 nom = { version = "^7.1", optional = true }
