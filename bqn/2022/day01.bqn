@@ -1,8 +1,12 @@
 #!/usr/bin/env cbqn
-lines ← ⥊ •FLines "../../data/2022/input-day01.txt"
+ToNum ← {
+  "": 0;
+  𝕩 : •BQN 𝕩
+}
+# •Show (ToNum "333")
+# •Show (ToNum "")
+lines ← ToNum¨ ⥊ •FLines "../../data/2022/input-day01.txt"
 # •Show lines
-•Show +´(⟨""⟩⍷lines)
-
-chars ← ⥊ •FChars "../../data/2022/input-day01.txt"
-# •Show chars
-•Show ("\n"⍷chars)
+elves ← +´¨ 0(+`∘=⊔⊢) lines
+# •Show elves
+•Show ⊑∨ elves
