@@ -10,3 +10,4 @@ lines ← ToNum¨ ⥊ •FLines "../../data/2022/input-day01.txt"
 elves ← +´¨ 0(+`∘=⊔⊢) lines
 # •Show elves
 •Show ⊑∨ elves
+•Show +´ 3↑∨ elves
