@@ -5,6 +5,10 @@
 * [adventofcode.com](https://adventofcode.com/)
 * [r/adventofcode](https://www.reddit.com/r/adventofcode/)
 
+## 2022 under development NOW
+
+* [calendar](https://adventofcode.com/2022)
+
 
 ## 2021 completed
 
