@@ -16,23 +16,17 @@ inputData ← ⊑2⊑ ar ⊔˜ (¬-˜⊢× oi⊏˜ ↕∘≠⌈`∘×¬)oo
 
 lines ← •FLines inputData
 # •Show lines
-breakpoint ← 2⊸(÷˜)¨ ≠¨ lines
-•Show breakpoint {⟨𝕨↑𝕩,𝕨↓𝕩⟩}¨ lines
  
-Part1 ← {
- 𝕊 ⟨f,l⟩: { 
-    target ← f (⌈´˘)∘(=⌜) l
-    target ⊑∘/ f
-  }
-}
-Point ← {
-  𝕩 < 'a' ? 27+𝕩-'A';
-            1+𝕩-'a'
-}
+Point ← { 𝕩 < 'a' ? 27+𝕩-'A'; 1+𝕩-'a' }
 
-•Show (Part1)¨ (breakpoint {⟨𝕨↑𝕩,𝕨↓𝕩⟩}¨ lines)
-•Show (Point Part1)¨ (breakpoint {⟨𝕨↑𝕩,𝕨↓𝕩⟩}¨ lines)
-•Show +´(Point Part1)¨ (breakpoint {⟨𝕨↑𝕩,𝕨↓𝕩⟩}¨ lines)
+Part1b ← {
+  breakpoint ← 2÷˜≠ 𝕩
+  f ← breakpoint ↑ 𝕩 
+  l ← breakpoint ↓ 𝕩
+  target ← f (⌈´˘)∘(=⌜) l
+  target ⊑∘/ f
+}
+•Show +´(Point Part1b)¨ lines
 
 # Part2 ← { 0 }
 # •Show +´ Part1¨ lines
