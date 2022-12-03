@@ -13,31 +13,47 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(Vec<u8>, Vec<u8>)>,
 }
 
 #[aoc(2022, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        let v = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
+        let len = v.len();
+        self.line
+            .push((v[0..len / 2].to_vec(), v[len / 2..len].to_vec()));
+        // println!(
+        //     "{}({}) => {}, {}",
+        //     block,
+        //     len,
+        //     v[0..len / 2].iter().map(|c| *c as char).collect::<String>(),
+        //     v[len / 2..len]
+        //         .iter()
+        //         .map(|c| *c as char)
+        //         .collect::<String>(),
+        // );
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut count = 0;
+        for l in self.line.iter() {
+            for c in l.0.iter() {
+                if l.1.contains(c) {
+                    count += if *c <= b'Z' {
+                        (*c - b'A') as usize + 27
+                    } else {
+                        (*c - b'a') as usize + 1
+                    };
+                    break;
+                }
+            }
+        }
+        count
     }
     fn part2(&mut self) -> Self::Output2 {
         0
