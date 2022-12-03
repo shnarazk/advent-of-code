@@ -19,15 +19,20 @@ lines ← •FLines inputData
  
 Point ← { 𝕩 < 'a' ? 27+𝕩-'A'; 1+𝕩-'a' }
 
-Part1b ← {
-  breakpoint ← 2÷˜≠ 𝕩
-  f ← breakpoint ↑ 𝕩 
-  l ← breakpoint ↓ 𝕩
+Part1 ← {
+  f‿l ← (2÷˜≠)⊸{⟨𝕨↑𝕩,𝕨↓𝕩⟩} 𝕩
   target ← f (⌈´˘)∘(=⌜) l
-  target ⊑∘/ f
+  f Point∘(⊑∘/)˜ target 
 }
-•Show +´(Point Part1b)¨ lines
+•Show +´ Part1¨ lines
 
-# Part2 ← { 0 }
-# •Show +´ Part1¨ lines
-# •Show +´ Part2¨ lines
+Part2 ← { 
+  ⟨a, b, c⟩:{ 
+    # •Show ⟨a, b, c⟩
+    Common ← { 𝕨(/⟜𝕨)∘(⌈´˘)∘(=⌜)𝕩 }
+    s ←⊑ a Common b Common c
+    # •Show s 
+    Point s
+  }
+}
+•Show +´ Part2˘ ∘‿3 ⥊ lines
