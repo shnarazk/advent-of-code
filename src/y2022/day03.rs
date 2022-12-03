@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2022/day/3>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -56,6 +49,30 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut count = 0;
+        let mut map: HashMap<u8, usize> = HashMap::new();
+        for (i, l) in self.line.iter().enumerate() {
+            for c in l.0.iter() {
+                *map.entry(*c).or_insert(0) |= 1 << (i % 3);
+            }
+            for c in l.1.iter() {
+                *map.entry(*c).or_insert(0) |= 1 << (i % 3);
+            }
+            if i % 3 == 2 {
+                for (c, n) in map.iter() {
+                    if *n == 7 {
+                        // dbg!(*c as usize);
+                        count += if *c <= b'Z' {
+                            (*c - b'A') as usize + 27
+                        } else {
+                            (*c - b'a') as usize + 1
+                        };
+                        break;
+                    }
+                }
+                map.clear();
+            }
+        }
+        count
     }
 }
