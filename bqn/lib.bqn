@@ -2,7 +2,7 @@
   If, IfElse, While, DoWhile, For,
   Match, Select, Switch, Test,
   Tokenize, StartsWith, ParseInts,
-  Max, Min, MaxAt, MinAt,
+  MaxAt, MinAt,
   version
 ⟩ ⇐
 If      ← {𝕏⍟𝕎@}´                 # Also Repeat
@@ -32,4 +32,4 @@ Tokenize ← {
 MaxAt ← {(⌈´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 MinAt ← {(⌊´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 
-version ← "0.1.2"
+version ← "0.1.3"
