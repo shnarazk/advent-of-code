@@ -3,6 +3,7 @@
   Match, Select, Switch, Test,
   Tokenize, StartsWith, ParseInts,
   MaxAt, MinAt,
+  DataFile,
   version
 ⟩ ⇐
 If      ← {𝕏⍟𝕎@}´                 # Also Repeat
@@ -32,4 +33,9 @@ Tokenize ← {
 MaxAt ← {(⌈´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 MinAt ← {(⌊´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 
-version ← "0.1.3"
+# file operations
+DataFile ← {
+  0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩;
+           •wdpath∾ "/"∾ 𝕨
+}
+version ← "0.1.4"
