@@ -1,6 +1,6 @@
 #!/usr/bin/env bqn
 
-lines ← •FLines ⊑•args
+lines ← •FLines •wdpath∾ "/"∾ ⊑•args
 # •Show lines
 Part1 ← {
     "A X": 1 + 3;
