@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2022/day/4>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -31,7 +24,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
@@ -40,6 +33,9 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.line
+            .iter()
+            .filter(|(a, b, x, y)| (x <= b) && (a <= y))
+            .count()
     }
 }
