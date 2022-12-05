@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/5>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -68,14 +64,26 @@ impl AdventOfCode for Puzzle {
                 let Some(x) = stacks.get_mut(from).unwrap().pop() else { panic!();};
                 stacks.get_mut(to).unwrap().push(x);
             }
-            dbg!(&stacks);
+            // dbg!(&stacks);
         }
         (1..=stacks.len())
             .map(|i| stacks.get(&i).unwrap().last().unwrap())
             .collect::<String>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        "".to_string()
+        let Puzzle { line, stacks } = self;
+        for (amount, from, to) in line.iter() {
+            let mut tmp = Vec::new();
+            for _ in 0..*amount {
+                let Some(x) = stacks.get_mut(from).unwrap().pop() else { panic!();};
+                tmp.push(x);
+            }
+            while let Some(x) = tmp.pop() {
+                stacks.get_mut(to).unwrap().push(x);
+            }
+        }
+        (1..=stacks.len())
+            .map(|i| stacks.get(&i).unwrap().last().unwrap())
+            .collect::<String>()
     }
 }
-.to_string()
