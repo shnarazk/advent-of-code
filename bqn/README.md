@@ -2,9 +2,19 @@
 
 ### Usage
 
-Due to the incovenient handling of relative path, we need to use `$PWD` for getting a data file like:
-
 ```
 # at the top of the working tree of this repository
-$ cbqn bqn/2022/dayDD.bqn $PWD/data/2022/input-dayDD.txt
+$ bqn/2022/dayDD.bqn data/2022/input-dayDD.txt
+```
+
+You may be able to omit the date file.
+
+```
+$ bqn/2022/dayDD.bqn
+```
+
+For some program, you need to use `$PWD` to get an absolute path:
+
+```
+$ bqn/2022/dayDD.bqn $PWD/data/2022/input-dayDD.txt
 ```
