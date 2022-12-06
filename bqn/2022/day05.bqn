@@ -31,3 +31,13 @@ Part1 ← {
 	}
 }
 •Show (⊑¨1⊸↓) (init Part1´ ⌽actions)
+Part2 ← {
+	⟨amount, from, to⟩ F state: {
+		stack1 ← from⊑state
+		⟨val, dropped⟩ ← amount (↑⋈↓) stack1
+		stack2 ← to⊑state
+		pushed ← val ∾stack2
+		state ← pushed˙⌾(to⊸⊑) dropped˙⌾(from⊸⊑) state 
+	}
+}
+•Show (⊑¨1⊸↓) (init Part2´ ⌽actions)
