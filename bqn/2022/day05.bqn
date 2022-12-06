@@ -1,14 +1,14 @@
 #!/usr/bin/env cbqn
 ⟨ParseInts, DataFile⟩ ← •Import "../lib.bqn"
 ⟨init, input⟩ ← {
-  0 < ≠•args ? ⟨
-                ⟨⟨⟩, "NZ","DCM", "P"⟩,
-				"data/2022/input-day05-0.txt"
-			⟩;
-			⟨
-				⟨⟨⟩, "GJZ", "CVFWPRLQ", "RGLCMPF", "MHPWBFL", "QVSFCG", "LTQMZJHW", "VBSFH", "SZJF", "TBHFPDCM"⟩,
-				"data/2022/input-day05.txt"
-			⟩
+	0 < ≠•args ? ⟨
+		⟨⟨⟩, "NZ","DCM", "P"⟩,
+		"data/2022/input-day05-0.txt"
+	⟩;
+	⟨
+		⟨⟨⟩, "GJZ", "CVFWPRLQ", "RGLCMPF", "MHPWBFL", "QVSFCG", "LTQMZJHW", "VBSFH", "SZJF", "TBHFPDCM"⟩,
+		"data/2022/input-day05.txt"
+	⟩
 }
 num_stacks ← ¯1+≠init
 header_size ← 2+⌈´≠¨ init
