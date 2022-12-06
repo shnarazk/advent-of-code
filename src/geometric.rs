@@ -5,7 +5,7 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     [
         here.checked_sub(1),
         Some(here),
-        (here + 1 < upto).then(|| here + 1),
+        (here + 1 < upto).then_some(here + 1),
     ]
 }
 
