@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2022/day/6>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -45,6 +38,24 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let size = 14;
+        self.line
+            .iter()
+            .map(|l| {
+                let mut index = 0;
+                'next_chank: for (i, chank) in l.windows(size).enumerate() {
+                    let mut set: HashSet<char> = HashSet::new();
+                    for c in chank.iter() {
+                        if set.contains(c) {
+                            continue 'next_chank;
+                        }
+                        set.insert(*c);
+                    }
+                    index = i + size;
+                    break;
+                }
+                index
+            })
+            .sum()
     }
 }
