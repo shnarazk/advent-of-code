@@ -19,3 +19,20 @@ For some programs, you need to use `$PWD` to get an absolute path:
 ```
 $ bqn/2022/dayDD.bqn $PWD/data/2022/input-dayDD.txt
 ```
+
+## editorial configuration
+
+[helix](https://helix-editor.com)
+
+```
+[[language]]
+name = "bqn"
+# scope = "scope.bqn"
+# injection-regex = "^bqn"
+file-types = ["bqn"]
+comment-token = "#"
+indent = { tab-width = 2, unit = "  " }
+roots = []
+[language.auto-pairs]
+'⟨' = '⟩'
+```
