@@ -34,8 +34,7 @@ Part1 ← {
 Part2 ← {
 	⟨amount, from, to⟩ F state: {
 		⟨val, dropped⟩ ← amount (↑⋈↓) from⊑state
-		pushed ← val ∾to⊑state
-		pushed˙⌾(to⊸⊑) dropped˙⌾(from⊸⊑) state
+		(val⊸∾)⌾(to⊸⊑) dropped˙⌾(from⊸⊑) state
 	}
 }
 •Show (⊑¨1⊸↓) (init Part2´ ⌽actions)
