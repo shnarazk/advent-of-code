@@ -141,8 +141,13 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let unused = 70_000_000 - self.file_system.get(&"/".to_string()).unwrap().total_size;
         let required = 30_000_000;
-        let mut values = self.file_system.values().collect::<Vec<_>>();
-        values.sort();
+        let values = self.file_system.values().collect::<Vec<_>>();
+        #[cfg(feature = "for-bqn")]
+        {
+            for ent in values.iter() {
+                println!("{}", ent.total_size);
+            }
+        }
         values
             .iter()
             .map(|d| d.total_size)
