@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/7>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -66,18 +62,17 @@ impl AdventOfCode for Puzzle {
             return Ok(());
         }
         let up_parser = regex!(r"^ cd \.\.\n$");
-        if let Some(segment) = up_parser.captures(block) {
+        if up_parser.captures(block).is_some() {
             self.line.push(Command::CdUp);
             return Ok(());
         }
         let root_parser = regex!(r"^ cd /\n$");
-        if let Some(segment) = root_parser.captures(block) {
+        if root_parser.captures(block).is_some() {
             self.line.push(Command::CdRoot);
             return Ok(());
         }
         let cd_parser = regex!(r"^ cd ((.|\n)+)\n$");
         if let Some(segment) = cd_parser.captures(block) {
-            let cd_parser = regex!(r"^ cd ((.|\n)+)\n$");
             self.line.push(Command::CdTo(segment[1].to_string()));
         }
         Ok(())
@@ -144,7 +139,16 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let unused = 70_000_000 - self.file_system.get(&"/".to_string()).unwrap().total_size;
+        let required = 30_000_000;
+        let mut values = self.file_system.values().collect::<Vec<_>>();
+        values.sort();
+        values
+            .iter()
+            .map(|d| d.total_size)
+            .filter(|n| required <= unused + *n)
+            .min()
+            .unwrap()
     }
 }
 
