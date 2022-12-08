@@ -1,13 +1,6 @@
 //! <https://adventofcode.com/2022/day/8>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -51,6 +44,52 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.map
+            .iter()
+            .map(|((y, x), _)| self.scenic_score(*y, *x))
+            .max()
+            .unwrap()
+    }
+}
+
+impl Puzzle {
+    fn scenic_score(&self, y: usize, x: usize) -> usize {
+        let h = *self.map.get(&(y, x)).unwrap();
+        let height = self.line.len();
+        let width = self.line[0].len();
+        let mut point = 1;
+        let mut tmp = 0;
+        for yy in (0..y).rev() {
+            tmp += 1;
+            if h <= *self.map.get(&(yy, x)).unwrap() {
+                break;
+            }
+        }
+        point *= tmp;
+        tmp = 0;
+        for yy in y + 1..height {
+            tmp += 1;
+            if h <= *self.map.get(&(yy, x)).unwrap() {
+                break;
+            }
+        }
+        point *= tmp;
+        tmp = 0;
+        for xx in (0..x).rev() {
+            tmp += 1;
+            if h <= *self.map.get(&(y, xx)).unwrap() {
+                break;
+            }
+        }
+        point *= tmp;
+        tmp = 0;
+        for xx in x + 1..width {
+            tmp += 1;
+            if h <= *self.map.get(&(y, xx)).unwrap() {
+                break;
+            }
+        }
+        point *= tmp;
+        point
     }
 }
