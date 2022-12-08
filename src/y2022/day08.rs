@@ -11,33 +11,44 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<usize>>,
+    map: HashMap<(usize, usize), usize>,
 }
 
 #[aoc(2022, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        self.line.push(
+            block
+                .chars()
+                .map(|c| c as usize - '0' as usize)
+                .collect::<Vec<_>>(),
+        );
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (y, l) in self.line.iter().enumerate() {
+            for (x, h) in l.iter().enumerate() {
+                self.map.insert((y, x), *h);
+            }
+        }
+        // dbg!(&self.map);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let height = self.line.len();
+        let width = self.line[0].len();
+        self.map
+            .iter()
+            .filter(|((y, x), h)| {
+                (0..*y).all(|yy| self.map.get(&(yy, *x)).unwrap() < h)
+                    || (*y + 1..height).all(|yy| self.map.get(&(yy, *x)).unwrap() < h)
+                    || (0..*x).all(|xx| self.map.get(&(*y, xx)).unwrap() < h)
+                    || (*x + 1..width).all(|xx| self.map.get(&(*y, xx)).unwrap() < h)
+            })
+            .count()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
