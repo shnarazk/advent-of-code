@@ -130,6 +130,12 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.inject_total_size("/");
+        #[cfg(feature = "for-bqn")]
+        {
+            for dir in self.file_system.values() {
+                println!("{},{}", dir.name, dir.files_size);
+            }
+        }
     }
     fn part1(&mut self) -> Self::Output1 {
         self.file_system
@@ -142,12 +148,6 @@ impl AdventOfCode for Puzzle {
         let unused = 70_000_000 - self.file_system.get(&"/".to_string()).unwrap().total_size;
         let required = 30_000_000;
         let values = self.file_system.values().collect::<Vec<_>>();
-        #[cfg(feature = "for-bqn")]
-        {
-            for ent in values.iter() {
-                println!("{}", ent.total_size);
-            }
-        }
         values
             .iter()
             .map(|d| d.total_size)
