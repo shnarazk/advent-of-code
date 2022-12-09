@@ -36,6 +36,7 @@ pub struct Puzzle {
     head: (isize, isize),
     tail: (isize, isize),
     trail: HashSet<(isize, isize)>,
+    knots: Vec<(isize, isize)>,
 }
 
 #[aoc(2022, 9)]
@@ -65,7 +66,11 @@ impl AdventOfCode for Puzzle {
         self.trail.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.knots = vec![(0, 0); 10];
+        for dir in self.line.clone().iter() {
+            self.move_head_part2(dir);
+        }
+        self.trail.len()
     }
 }
 
@@ -91,6 +96,32 @@ impl Puzzle {
                 self.tail.1 += dx / dx.abs();
             }
             self.trail.insert(self.tail);
+        }
+        dbg!(self.trail.len());
+    }
+    fn move_head_part2(&mut self, dir: &Dir) {
+        for _ in 0..dir.steps() {
+            let v = match dir {
+                Dir::R(_) => (0, 1),
+                Dir::U(_) => (-1, 0),
+                Dir::L(_) => (0, -1),
+                Dir::D(_) => (1, 0),
+            };
+            self.knots[0].0 += v.0 as isize;
+            self.knots[0].1 += v.1 as isize;
+            for i in 1..self.knots.len() {
+                let dy = self.knots[i - 1].0 - self.knots[i].0;
+                let dx = self.knots[i - 1].1 - self.knots[i].1;
+                if 1 < dy.abs() * dx.abs() {
+                    self.knots[i].0 += dy / dy.abs();
+                    self.knots[i].1 += dx / dx.abs();
+                } else if 1 < dy.abs() {
+                    self.knots[i].0 += dy / dy.abs();
+                } else if 1 < dx.abs() {
+                    self.knots[i].1 += dx / dx.abs();
+                }
+            }
+            self.trail.insert(*self.knots.last().unwrap());
         }
         dbg!(self.trail.len());
     }
