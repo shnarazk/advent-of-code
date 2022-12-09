@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/9>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashSet,
 };
@@ -97,7 +93,7 @@ impl Puzzle {
             }
             self.trail.insert(self.tail);
         }
-        dbg!(self.trail.len());
+        // dbg!(self.trail.len());
     }
     fn move_head_part2(&mut self, dir: &Dir) {
         for _ in 0..dir.steps() {
@@ -123,6 +119,5 @@ impl Puzzle {
             }
             self.trail.insert(*self.knots.last().unwrap());
         }
-        dbg!(self.trail.len());
     }
 }
