@@ -1,7 +1,7 @@
 ⟨
   If, IfElse, While, DoWhile, For,
   Match, Select, Switch, Test,
-  Tokenize, StartsWith, ParseInts,
+  Tokenize, StartsWith, ParseInts, ParseInt,
   MaxAt, MinAt,
   DataFile,
   version
@@ -22,13 +22,12 @@ ParseInts ← {
   Ordinal ← { w F 1: { w ≤ 0 ? -w; w }; w F 0: { 0 < w ? ¯1-w; w } }
   •BQN¨ 𝕩 ⊔˜ 1- ˜0⊸<⊸× ¯1 Ordinal` IsNum¨ 𝕩
 }
+ParseInt ← ⊑ParseInts
 Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
 }
 # math functions
-# Max ← ⌈
-# Min ← ⌊
 # what are they? Element-based one?
 MaxAt ← {(⌈´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 MinAt ← {(⌊´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
@@ -38,4 +37,4 @@ DataFile ← {
   0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩;
            •wdpath∾ "/"∾ 𝕨
 }
-version ← "0.1.4"
+version ← "0.1.5"
