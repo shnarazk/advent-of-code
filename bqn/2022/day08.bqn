@@ -1,5 +1,5 @@
 #!/usr/bin/env cbqn
-⟨DataFile, ParseInts⟩ ← •Import "../lib.bqn"
+⟨DataFile⟩ ← •Import "../lib.bqn"
 map ← '0'-˜˜˜ •FLines "data/2022/input-day08.txt" DataFile •args
 map_height ← ≠map
 map_width ← ≠⊑map
