@@ -8,50 +8,48 @@ DirVec ← {
   F ⟨"R", r⟩: ⟨ 1,  0⟩; 
   "error" ! 1
 }
+UpdateTail ← {  
+  ⟨dx, dy⟩ ← 𝕨 -¨ 𝕩
+  𝕩 +¨ {
+    1 < |dx × dy ? ⟨dx ÷ |dx, dy ÷| dy⟩;
+    1 < |dx      ? ⟨dx ÷ |dx, 0⟩;
+    1 < |dy      ? ⟨0, dy ÷| dy⟩;
+                   ⟨0, 0⟩ 
+  }
+}
 Update ← { 
   ⟨dir, 0⟩ F state: state;
   ⟨dir, n⟩ F ⟨head, tail, history⟩:
     new_head ← head +¨ DirVec ⟨dir, n⟩
-    ⟨diff_x, diff_y⟩ ← new_head -¨ tail
-    new_tail ← {
-      1 < |diff_x × diff_y ? new_tail ← tail +¨ ⟨diff_x ÷ |diff_x, diff_y ÷| diff_y⟩;
-      1 < |diff_x ? new_tail ← tail +¨ ⟨diff_x ÷ |diff_x, 0⟩;
-      1 < |diff_y ? new_tail ← tail +¨ ⟨0, diff_y ÷| diff_y⟩;
-      tail
-  }
-  new_history ← {
-    ⟨new_tail⟩ ⊑∘∊ history ? history;
-    ⟨new_tail⟩ ∾ history
-  }
-  # •Show ⟨new_head, new_tail, n-1⟩
-  ⟨dir, n-1⟩ F ⟨new_head, new_tail, new_history⟩
+    new_tail ← new_head UpdateTail tail
+    ⟨dx, dy⟩ ← new_head -¨ tail
+    new_history ← {
+      ⟨new_tail⟩ ⊑∘∊ history ? history;
+      ⟨new_tail⟩ ∾ history
+    }
+    # •Show ⟨new_head, new_tail, n-1⟩
+    ⟨dir, n-1⟩ F ⟨new_head, new_tail, new_history⟩
 }
 •Show ≠2⊑⟨⟨0,0⟩, ⟨0,0⟩, ⟨⟩⟩ Update´ ⌽moves
 Update2 ← { 
   ⟨dir, 0⟩ F state: state;
   ⟨dir, n⟩ F ⟨knots, history⟩:
-  Propagate ← {
-    last F ⟨⟩ : ⟨⟩;
-    head ← ⊑ 𝕩
-    tail ← 1↓ 𝕩
-    ⟨diff_x, diff_y⟩ ← 𝕨 -¨ head
-    new_head ← {
-      1 < |diff_x × diff_y ? head +¨ ⟨diff_x ÷ |diff_x, diff_y ÷| diff_y⟩;
-      1 < |diff_x          ? head +¨ ⟨diff_x ÷ |diff_x, 0⟩;
-      1 < |diff_y          ? head +¨ ⟨0, diff_y ÷| diff_y⟩;
-      head
+    Propagate ← {
+      last F ⟨⟩ : ⟨⟩;
+      head ← ⊑ 𝕩 
+      tail ← 1↓ 𝕩
+      new_head ←𝕨 UpdateTail head
+      ⟨new_head⟩∾ new_head Propagate tail
     }
-    ⟨new_head⟩∾ new_head Propagate tail
-  }
-  head ← ⊑ knots
-  tail ← 1↓ knots
-  new_head ← head +¨ DirVec ⟨dir, n⟩
-  new_tail ← new_head Propagate tail
-  true_tail ← ⊑⌽new_tail
-  new_history ← {
-    ⟨true_tail⟩ ⊑∘∊ history ? history;
-    ⟨true_tail⟩ ∾ history
-  }
-  ⟨dir, n-1⟩ F ⟨⟨new_head⟩∾new_tail, new_history⟩
+    head ← ⊑ knots
+    tail ← 1↓ knots
+    new_head ← head +¨ DirVec ⟨dir, n⟩
+    new_tail ← new_head Propagate tail
+    true_tail ← ⊑⌽new_tail
+    new_history ← {
+      ⟨true_tail⟩ ⊑∘∊ history ? history;
+      ⟨true_tail⟩ ∾ history
+    }
+    ⟨dir, n-1⟩ F ⟨⟨new_head⟩∾new_tail, new_history⟩
 }
 •Show ≠1⊑⟨⟨0, 0⟩˙¨↕10, ⟨⟩⟩ Update2´ ⌽moves
