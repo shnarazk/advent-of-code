@@ -8,38 +8,90 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+enum Dir {
+    R(usize),
+    U(usize),
+    L(usize),
+    D(usize),
+}
+
+impl Dir {
+    fn steps(&self) -> usize {
+        match self {
+            Dir::R(n) => *n,
+            Dir::U(n) => *n,
+            Dir::L(n) => *n,
+            Dir::D(n) => *n,
+        }
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Dir>,
+    head: (isize, isize),
+    tail: (isize, isize),
+    trail: HashSet<(isize, isize)>,
 }
 
 #[aoc(2022, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
+        let parser = regex!(r"^(R|U|L|D) (\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        let n = segment[2].parse::<usize>()?;
+        let d = match &segment[1] {
+            "R" => Dir::R(n),
+            "U" => Dir::U(n),
+            "L" => Dir::L(n),
+            "D" => Dir::D(n),
+            _ => panic!(),
+        };
+        self.line.push(d);
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        for dir in self.line.clone().iter() {
+            self.move_head(dir);
+        }
+        self.trail.len()
     }
     fn part2(&mut self) -> Self::Output2 {
         0
+    }
+}
+
+impl Puzzle {
+    fn move_head(&mut self, dir: &Dir) {
+        for _ in 0..dir.steps() {
+            let v = match dir {
+                Dir::R(_) => (0, 1),
+                Dir::U(_) => (-1, 0),
+                Dir::L(_) => (0, -1),
+                Dir::D(_) => (1, 0),
+            };
+            self.head.0 += v.0 as isize;
+            self.head.1 += v.1 as isize;
+            let dy = self.head.0 - self.tail.0;
+            let dx = self.head.1 - self.tail.1;
+            if 1 < dy.abs() * dx.abs() {
+                self.tail.0 += dy / dy.abs();
+                self.tail.1 += dx / dx.abs();
+            } else if 1 < dy.abs() {
+                self.tail.0 += dy / dy.abs();
+            } else if 1 < dx.abs() {
+                self.tail.1 += dx / dx.abs();
+            }
+            self.trail.insert(self.tail);
+        }
+        dbg!(self.trail.len());
     }
 }
