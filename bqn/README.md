@@ -1,5 +1,7 @@
 ## Solve'em in [BQN](https://github.com/mlochbaum/BQN)!
 
+- https://bqnpad.mechanize.systems/
+
 ### Usage
 
 At the top of the working tree of this repository
