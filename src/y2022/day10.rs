@@ -23,6 +23,7 @@ pub struct Puzzle {
     register: isize,
     cycle: usize,
     auto_sum: isize,
+    state: Option<isize>,
 }
 
 #[aoc_at(2022, 10)]
@@ -51,7 +52,21 @@ impl AdventOfCode for Puzzle {
         self.auto_sum
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut crt: [char; 240] = ['.'; 240];
+        for cycle in 0_isize..240 {
+            if (cycle % 40).abs_diff(self.register) <= 1 {
+                crt[cycle as usize] = '#';
+            }
+            self.cycle_wise_execute();
+            // dbg!(cycle, self.register);
+        }
+        for (i, c) in crt.iter().enumerate() {
+            print!("{}", c);
+            if i % 40 == 39 {
+                println!();
+            }
+        }
+        self.auto_sum
     }
 }
 
@@ -84,5 +99,26 @@ impl Puzzle {
             }
         }
         self.pc += 1;
+    }
+    fn cycle_wise_execute(&mut self) {
+        if let Some(adding) = self.state {
+            self.update_cycle(1);
+            self.register += adding;
+            self.pc += 1;
+            self.state = None;
+        } else {
+            let Some(inst) = &self.line.get(self.pc) else { return; };
+            match inst {
+                Code::Noop => {
+                    self.update_cycle(1);
+                    self.pc += 1;
+                }
+                Code::Addx(n) => {
+                    let k = *n;
+                    self.update_cycle(1);
+                    self.state = Some(k);
+                }
+            }
+        }
     }
 }
