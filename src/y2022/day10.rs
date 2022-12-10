@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2022/day/10>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc_at, AdventOfCode, ParseError},
+    regex,
 };
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -58,7 +51,6 @@ impl AdventOfCode for Puzzle {
                 crt[cycle as usize] = '#';
             }
             self.cycle_wise_execute();
-            // dbg!(cycle, self.register);
         }
         for (i, c) in crt.iter().enumerate() {
             print!("{}", c);
@@ -84,9 +76,6 @@ impl Puzzle {
     }
     fn execute(&mut self) {
         let Some(inst) = &self.line.get(self.pc) else { return; };
-        // if 180 < self.cycle {
-        //     println!("{} {:?}", self.pc, inst);
-        // }
         match inst {
             Code::Noop => {
                 self.update_cycle(1);
