@@ -1,5 +1,7 @@
 #!/usr/bin/env cbqn
 ⟨ParseInts, DataFile⟩ ← •Import "../lib.bqn"
+# to split a string at '\n\n'
+# "\n\n" ⍷ text
 ⟨init, input⟩ ← {
 	0 < ≠•args ? ⟨
 		⟨⟨⟩, "NZ","DCM", "P"⟩,
