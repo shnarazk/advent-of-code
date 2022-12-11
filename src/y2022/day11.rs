@@ -42,6 +42,24 @@ impl Monkey {
         }
         self.items.clear();
     }
+    fn update2(&mut self, thrown: &mut [Vec<usize>], cd: usize) {
+        for i in self.items.iter() {
+            self.num_inspect += 1;
+            let j = match self.operation {
+                (false, None) => i + i,
+                (false, Some(k)) => i + k,
+                (true, None) => i * i,
+                (true, Some(k)) => i * k,
+            };
+            thrown[if j % self.test == 0 {
+                self.test_then
+            } else {
+                self.test_else
+            }]
+            .push(j % cd);
+        }
+        self.items.clear();
+    }
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -101,11 +119,12 @@ impl AdventOfCode for Puzzle {
         v[0] * v[1]
     }
     fn part2(&mut self) -> Self::Output2 {
+        let cd = self.line.iter().map(|m| m.test).product();
         let mut tmp = vec![Vec::new(); self.line.len()];
-        for round in 0..1000 {
+        for round in 0..10000 {
             for i in 0..self.line.len() {
                 let m = &mut self.line[i];
-                m.update(&mut tmp);
+                m.update2(&mut tmp, cd);
                 self.thrown(&mut tmp);
             }
             // println!(
