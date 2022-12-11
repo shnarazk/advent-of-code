@@ -1,14 +1,7 @@
 //! <https://adventofcode.com/2022/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser, regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -75,7 +68,6 @@ impl AdventOfCode for Puzzle {
             r"^Monkey (\d+):\n  Starting items: (.+)\n  Operation: new = old (.) (.+)\n  Test: divisible by (.+)\n    If true: throw to monkey (\d+)\n    If false: throw to monkey (\d+)\n?$"
         );
         if let Some(segment) = parser.captures(block) {
-            dbg!(&segment[2]);
             self.line.push(Monkey {
                 id: segment[1].parse::<usize>()?,
                 items: line_parser::to_usizes(&segment[2], '\t')?,
@@ -93,7 +85,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut tmp = vec![Vec::new(); self.line.len()];
-        for round in 0..20 {
+        for _ in 0..20 {
             for i in 0..self.line.len() {
                 let m = &mut self.line[i];
                 m.update(&mut tmp);
@@ -121,16 +113,12 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let cd = self.line.iter().map(|m| m.test).product();
         let mut tmp = vec![Vec::new(); self.line.len()];
-        for round in 0..10000 {
+        for _ in 0..10000 {
             for i in 0..self.line.len() {
                 let m = &mut self.line[i];
                 m.update2(&mut tmp, cd);
                 self.thrown(&mut tmp);
             }
-            // println!(
-            //     "{:?}",
-            //     self.line.iter().map(|m| &m.items).collect::<Vec<_>>()
-            // );
         }
         dbg!(self
             .line
