@@ -27,6 +27,12 @@ pub struct Puzzle {
     height: usize,
 }
 
+#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+struct State {
+    cost: usize,
+    location: (usize, usize),
+}
+
 #[aoc(2022, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
@@ -61,11 +67,6 @@ impl AdventOfCode for Puzzle {
         dbg!(self.height, self.width);
     }
     fn part1(&mut self) -> Self::Output1 {
-        #[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
-        struct State {
-            cost: usize,
-            location: (usize, usize),
-        }
         let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
         let mut visited: HashSet<(usize, usize)> = HashSet::new();
         to_visit.push(Reverse(State {
@@ -119,6 +120,36 @@ impl AdventOfCode for Puzzle {
         steps
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+        let mut visited: HashSet<(usize, usize)> = HashSet::new();
+        to_visit.push(Reverse(State {
+            cost: 0,
+            location: self.goal,
+        }));
+        visited.insert(self.goal);
+        while let Some(Reverse(state)) = to_visit.pop() {
+            if self.line[state.location.0][state.location.1] == 0 {
+                return state.cost;
+            }
+            let lv = self.line[state.location.0][state.location.1];
+            for next in
+                geometric::neighbors4(state.location.0, state.location.1, self.height, self.width)
+                    .into_iter()
+            {
+                if self.line[next.0][next.1] + 1 < self.line[state.location.0][state.location.1] {
+                    continue;
+                }
+                if visited.contains(&next) {
+                    continue;
+                }
+                let ns = State {
+                    cost: state.cost + 1,
+                    location: next,
+                };
+                to_visit.push(Reverse(ns));
+                visited.insert(next);
+            }
+        }
+        unreachable!()
     }
 }
