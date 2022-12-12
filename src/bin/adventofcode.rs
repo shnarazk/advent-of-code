@@ -35,7 +35,7 @@ pub fn main() {
     let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
     let year = parse(arg.get(0), 2021, "wrong year");
     let day = parse(arg.get(1), 1, "wrong day");
-    let part = parse(arg.get(2), 0, "wrong part");
+    let part = parse(arg.get(2), 3, "wrong part");
     let desc: Description = match arg.get(3) {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
         Some(ext) => Description::FileTag(ext.to_string()),

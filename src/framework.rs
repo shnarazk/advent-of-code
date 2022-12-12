@@ -35,6 +35,7 @@ pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::D
     Answers(Output1, Output2),
     Part1(Output1),
     Part2(Output2),
+    Dump,
     None,
 }
 
@@ -48,6 +49,7 @@ where
             Answer::Answers(o1, o2) => write!(f, "Answers: {:?}, {:?}", o1, o2),
             Answer::Part1(o) => write!(f, "Part1: {:?}", o),
             Answer::Part2(o) => write!(f, "Part2: {:?}", o),
+            Answer::Dump => write!(f, ""),
             Answer::None => write!(f, "No answer"),
         }
     }
@@ -181,6 +183,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// }
     /// ```
     fn part2(&mut self) -> Self::Output2;
+    /// dump the data in another format
+    fn dump(&self) {}
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(
@@ -191,15 +195,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
         let input = desc.name(Self::YEAR, Self::DAY).expect("no input");
         match part {
             0 => {
-                println!(
-                    "# Advent of Code {}: day {} from {}",
-                    Self::YEAR,
-                    Self::DAY,
-                    input
-                );
-                let ans1 = Self::parse(desc).expect("failed to parse").part1();
-                let ans2 = Self::parse(desc).expect("failed to parse").part2();
-                Answer::Answers(ans1, ans2)
+                Self::parse(desc).expect("failed to parse").dump();
+                Answer::Dump
             }
             1 => {
                 println!(
@@ -218,6 +215,17 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input
                 );
                 Answer::Part2(Self::parse(desc).expect("failed to parse").part2())
+            }
+            3 => {
+                println!(
+                    "# Advent of Code {}: day {} from {}",
+                    Self::YEAR,
+                    Self::DAY,
+                    input
+                );
+                let ans1 = Self::parse(desc).expect("failed to parse").part1();
+                let ans2 = Self::parse(desc).expect("failed to parse").part2();
+                Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,
         }

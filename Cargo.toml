@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode"
-version = "0.14.3"
+version = "0.14.4"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
@@ -26,4 +26,3 @@ y2018 = []
 y2017 = []
 y2016 = ["md-5"]
 y2015 = ["itertools", "md-5", "serde_json"]
-for-bqn = []

@@ -81,24 +81,24 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line.len());
-        if cfg!(feature = "for-bqn") {
-            for m in self.line.iter() {
-                println!(
-                    "{},{},{},{},{},{},{}",
-                    m.id,
-                    m.operation.0 as usize,
-                    m.operation.1.unwrap_or(0),
-                    m.test,
-                    m.test_then,
-                    m.test_else,
-                    m.items
-                        .iter()
-                        .map(|i| format!("{i}"))
-                        .collect::<Vec<_>>()
-                        .join(","),
-                );
-            }
+        // dbg!(&self.line.len());
+    }
+    fn dump(&self) {
+        for m in self.line.iter() {
+            println!(
+                "{},{},{},{},{},{},{}",
+                m.id,
+                m.operation.0 as usize,
+                m.operation.1.unwrap_or(0),
+                m.test,
+                m.test_then,
+                m.test_else,
+                m.items
+                    .iter()
+                    .map(|i| format!("{i}"))
+                    .collect::<Vec<_>>()
+                    .join(","),
+            );
         }
     }
     fn part1(&mut self) -> Self::Output1 {

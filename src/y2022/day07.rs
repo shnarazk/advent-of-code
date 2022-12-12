@@ -130,11 +130,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.inject_total_size("/");
-        #[cfg(feature = "for-bqn")]
-        {
-            for dir in self.file_system.values() {
-                println!("{},{}", dir.name, dir.files_size);
-            }
+    }
+    fn dump(&self) {
+        for dir in self.file_system.values() {
+            println!("{},{}", dir.name, dir.files_size);
         }
     }
     fn part1(&mut self) -> Self::Output1 {
