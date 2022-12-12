@@ -1,10 +1,16 @@
 //! misc functions about 2D/3D computation
 
 /// returns `[self - 1, self, self + 1]`
+/// ```
+/// use adventofcode::geometric;
+/// assert_eq!(geometric::neighbors(0, 1), [None, Some(0), None]);
+/// assert_eq!(geometric::neighbors(0, 2), [None, Some(0), Some(1)]);        
+/// assert_eq!(geometric::neighbors(1, 1), [Some(0), None, None]);
+/// assert_eq!(geometric::neighbors(1, 3), [Some(0), Some(1), Some(2)]);
 pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     [
         here.checked_sub(1),
-        Some(here),
+        (here < upto).then_some(here),
         (here + 1 < upto).then_some(here + 1),
     ]
 }
@@ -16,6 +22,8 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
 /// assert_eq!(geometric::neighbors4(1, 1, 3, 3), vec![(0, 1), (1, 0), (1, 2), (2, 1)]);
 /// assert_eq!(geometric::neighbors4(1, 1, 2, 3), vec![(0, 1), (1, 0), (1, 2)]);
 /// assert_eq!(geometric::neighbors4(1, 0, 3, 3), vec![(0, 0), (1, 1), (2, 0)]);
+/// assert_eq!(geometric::neighbors4(1, 0, 3, 2), vec![(0, 0), (1, 1), (2, 0)]);
+/// assert_eq!(geometric::neighbors4(3, 3, 3, 3), vec![]);
 /// ```
 pub fn neighbors4(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
     neighbors(j, height)
