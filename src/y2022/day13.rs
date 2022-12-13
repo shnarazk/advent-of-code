@@ -1,18 +1,11 @@
 //! <https://adventofcode.com/2022/day/13>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     nom::{
         branch::alt, bytes::complete::tag, character::complete::digit1, multi::separated_list0,
         IResult,
     },
-    std::{cmp::Ordering, collections::HashMap},
+    std::cmp::Ordering,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -37,23 +30,30 @@ fn parse_expr(input: &str) -> IResult<&str, Expr> {
     alt((parse_expr_array, parse_expr_num))(input)
 }
 
-fn compare(e1: &Expr, e2: &Expr) -> Ordering {
-    // dbg!(e1, e2);
-    match (e1, e2) {
-        (Expr::Num(a), Expr::Num(b)) => a.cmp(b),
-        (Expr::Array(v1), Expr::Array(v2)) => {
-            for i in 0..v1.len().max(v2.len()) {
-                let Some(i1) = v1.get(i) else { return if i == v2.len() { Ordering::Equal} else { Ordering::Less};};
-                let Some(i2) = v2.get(i) else { return Ordering::Greater;};
-                match compare(i1, i2) {
-                    Ordering::Equal => (),
-                    other => return other,
+impl PartialOrd for Expr {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Expr {
+    fn cmp(&self, other: &Expr) -> Ordering {
+        match (self, other) {
+            (Expr::Num(a), Expr::Num(b)) => a.cmp(b),
+            (Expr::Array(v1), Expr::Array(v2)) => {
+                for i in 0..v1.len().max(v2.len()) {
+                    let Some(i1) = v1.get(i) else { return if i == v2.len() { Ordering::Equal} else { Ordering::Less};};
+                    let Some(i2) = v2.get(i) else { return Ordering::Greater;};
+                    match i1.cmp(i2) {
+                        Ordering::Equal => (),
+                        other => return other,
+                    }
                 }
+                Ordering::Equal
             }
-            Ordering::Equal
+            (Expr::Num(_), Expr::Array(_)) => Expr::Array(vec![self.clone()]).cmp(other),
+            (Expr::Array(_), Expr::Num(_)) => self.cmp(&Expr::Array(vec![other.clone()])),
         }
-        (Expr::Num(a), Expr::Array(b)) => compare(&Expr::Array(vec![e1.clone()]), e2),
-        (Expr::Array(a), Expr::Num(b)) => compare(e1, &Expr::Array(vec![e2.clone()])),
     }
 }
 
@@ -80,7 +80,7 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .enumerate()
-            .filter(|(_, (a, b))| compare(a, b) == Ordering::Less)
+            .filter(|(_, (a, b))| a.cmp(b) == Ordering::Less)
             .map(|(i, _)| i + 1)
             .sum()
     }
@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         bag.push(a.clone());
         bag.push(b.clone());
-        bag.sort_by(compare);
+        bag.sort();
         bag.iter()
             .enumerate()
             .filter(|(_, p)| **p == a || **p == b)
