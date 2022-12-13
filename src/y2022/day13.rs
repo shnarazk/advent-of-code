@@ -85,6 +85,20 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let a = Expr::Array(vec![Expr::Array(vec![Expr::Num(2)])]);
+        let b = Expr::Array(vec![Expr::Array(vec![Expr::Num(6)])]);
+        let mut bag = self
+            .line
+            .iter()
+            .flat_map(|(a, b)| vec![a.clone(), b.clone()])
+            .collect::<Vec<_>>();
+        bag.push(a.clone());
+        bag.push(b.clone());
+        bag.sort_by(compare);
+        bag.iter()
+            .enumerate()
+            .filter(|(_, p)| **p == a || **p == b)
+            .map(|(i, _)| i + 1)
+            .product()
     }
 }
