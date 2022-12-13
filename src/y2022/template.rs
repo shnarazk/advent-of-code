@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2022/day/>
+//! <https://adventofcode.com/2022/day/9>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -16,7 +16,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2022, 0)]
+#[aoc(2022, 9)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Result<String, ParseError> {
@@ -30,16 +30,16 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let parser = regex!(r"^(\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[0].parse::<_>());
+        // self.line.push(segment[1].parse::<_>());
         Ok(())
     }
     fn after_insert(&mut self) {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        1
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        2
     }
 }
