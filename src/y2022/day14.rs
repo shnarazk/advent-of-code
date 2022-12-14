@@ -65,7 +65,6 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(&self.line.len());
         dbg!(&self.map.len());
-        dbg!(&self.map);
         dbg!(self.threshold);
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -99,6 +98,33 @@ impl AdventOfCode for Puzzle {
         self.map.len() - num_wall
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let num_wall = self.map.len();
+        'next_sand: loop {
+            let mut pos: Loc = (500, 0);
+            let mut tmp = pos;
+            'moving: loop {
+                tmp.1 += 1;
+                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
+                    pos = tmp;
+                    continue 'moving;
+                }
+                tmp.0 -= 1;
+                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
+                    pos = tmp;
+                    continue 'moving;
+                }
+                tmp.0 += 2;
+                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
+                    pos = tmp;
+                    continue 'moving;
+                }
+                self.map.insert(pos);
+                if pos == (500, 0) {
+                    break 'next_sand;
+                }
+                continue 'next_sand;
+            }
+        }
+        self.map.len() - num_wall
     }
 }
