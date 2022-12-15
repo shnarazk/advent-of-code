@@ -9,6 +9,10 @@ use {
 
 type Loc = (isize, isize);
 
+fn mdist(base: &Loc, target: &Loc) -> usize {
+    base.0.abs_diff(target.0) + base.1.abs_diff(target.1)
+}
+
 struct BorderIterator {
     now: Option<Loc>,
     points: Vec<Loc>,
@@ -81,8 +85,7 @@ impl AdventOfCode for Puzzle {
         let mut on_target: HashSet<isize> = HashSet::new();
         let mut bands = Vec::new();
         for (i, p) in self.line.iter().enumerate() {
-            let range = p.0 .0.abs_diff(p.1 .0) + p.0 .1.abs_diff(p.1 .1);
-            if let Some(len) = range.checked_sub(p.0 .1.abs_diff(target)) {
+            if let Some(len) = mdist(&p.0, &p.1).checked_sub(p.0 .1.abs_diff(target)) {
                 let range_on_target = (p.0 .0 - len as isize, p.0 .0 + len as isize);
                 println!("{i}-th{:?}:range {:?}", p.0, &range_on_target);
                 bands.push(range_on_target);
@@ -120,11 +123,11 @@ impl AdventOfCode for Puzzle {
             for o in out_of_border(&p.0, &p.1)
                 .filter(|o| 0 <= o.0 && o.0 <= 4000000 && 0 <= o.1 && o.1 <= 4000000)
             {
-                if self.line.iter().all(|c| {
-                    let range = c.0 .0.abs_diff(c.1 .0) + c.0 .1.abs_diff(c.1 .1);
-                    let dist = c.0 .0.abs_diff(o.0) + c.0 .1.abs_diff(o.1);
-                    range < dist
-                }) {
+                if self
+                    .line
+                    .iter()
+                    .all(|c| mdist(&c.0, &c.1) < mdist(&c.0, &o))
+                {
                     return (o.0 * 4000000 + o.1) as usize;
                 }
             }
