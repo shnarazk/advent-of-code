@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::HashSet,
 };
@@ -77,7 +73,7 @@ impl AdventOfCode for Puzzle {
         'next_line: for target in 0..4000000 {
             let mut on_target: HashSet<isize> = HashSet::new();
             let mut bands = Vec::new();
-            for (i, p) in self.line.iter().enumerate() {
+            for p in self.line.iter() {
                 let range = p.0 .0.abs_diff(p.1 .0) + p.0 .1.abs_diff(p.1 .1);
                 if let Some(len) = range.checked_sub(p.0 .1.abs_diff(target)) {
                     let range_on_target = (p.0 .0 - len as isize, p.0 .0 + len as isize);
@@ -109,6 +105,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        0
+        unreachable!()
     }
 }
