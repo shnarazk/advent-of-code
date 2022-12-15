@@ -19,21 +19,19 @@ impl Iterator for BorderIterator {
     type Item = Loc;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(ref mut p) = self.now {
-            if let Some(l) = self.points.last() {
-                if p == l {
-                    self.points.pop();
-                    self.vec = match self.points.len() {
-                        4 => (1, 1),
-                        3 => (-1, 1),
-                        2 => (-1, -1),
-                        1 => (1, -1),
-                        0 => {
-                            self.now = None;
-                            return self.now;
-                        }
-                        _ => unreachable!(),
-                    };
-                }
+            if p == self.points.last().unwrap() {
+                self.points.pop();
+                self.vec = match self.points.len() {
+                    4 => (1, 1),
+                    3 => (-1, 1),
+                    2 => (-1, -1),
+                    1 => (1, -1),
+                    0 => {
+                        self.now = None;
+                        return self.now;
+                    }
+                    _ => unreachable!(),
+                };
             }
             p.0 += self.vec.0;
             p.1 += self.vec.1;
