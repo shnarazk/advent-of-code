@@ -9,6 +9,56 @@ use {
 
 type Loc = (isize, isize);
 
+struct BorderIterator {
+    now: Option<Loc>,
+    points: Vec<Loc>,
+    vec: Loc,
+}
+
+impl Iterator for BorderIterator {
+    type Item = Loc;
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(ref mut p) = self.now {
+            if let Some(l) = self.points.last() {
+                if p == l {
+                    self.points.pop();
+                    if self.points.is_empty() {
+                        self.now = None;
+                        return self.now;
+                    }
+                    self.vec = match self.points.len() {
+                        4 => (1, 1),
+                        3 => (-1, 1),
+                        2 => (-1, -1),
+                        1 => (1, -1),
+                        _ => (0, 0),
+                    };
+                }
+            }
+            p.0 += self.vec.0;
+            p.1 += self.vec.1;
+        } else {
+            self.now = self.points.pop();
+        }
+        self.now
+    }
+}
+
+fn out_of_border(sensor: &Loc, nearest: &Loc) -> BorderIterator {
+    let range = 1 + (sensor.0.abs_diff(nearest.0) + sensor.1.abs_diff(nearest.1)) as isize;
+    BorderIterator {
+        now: Some((sensor.0, sensor.1 - range)),
+        points: vec![
+            (sensor.0, sensor.1 - range),
+            (sensor.0 - range, sensor.1),
+            (sensor.0, sensor.1 + range),
+            (sensor.0 + range, sensor.1),
+            (sensor.0, sensor.1 - range),
+        ],
+        vec: (1, 1),
+    }
+}
+
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<(Loc, Loc)>,
@@ -70,38 +120,16 @@ impl AdventOfCode for Puzzle {
         total - on_target.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        'next_line: for target in 0..4000000 {
-            let mut on_target: HashSet<isize> = HashSet::new();
-            let mut bands = Vec::new();
-            for p in self.line.iter() {
-                let range = p.0 .0.abs_diff(p.1 .0) + p.0 .1.abs_diff(p.1 .1);
-                if let Some(len) = range.checked_sub(p.0 .1.abs_diff(target)) {
-                    let range_on_target = (p.0 .0 - len as isize, p.0 .0 + len as isize);
-                    bands.push(range_on_target);
-                }
-                if p.1 .1 == target {
-                    on_target.insert(p.1 .0);
-                }
-            }
-            bands.sort();
-            let mut in_range = false;
-            let mut end = 0;
-            for b in bands.iter() {
-                if in_range {
-                    if b.0 <= end {
-                        end = end.max(b.1);
-                    } else {
-                        in_range = false;
-                        if b.0 < 4000000 {
-                            return ((end + 1) * 4000000 + target) as usize;
-                        }
-                    }
-                } else {
-                    in_range = true;
-                    end = b.1;
-                }
-                if 4000000 < end {
-                    continue 'next_line;
+        for p in self.line.iter() {
+            for o in out_of_border(&p.0, &p.1)
+                .filter(|o| 0 <= o.0 && o.0 <= 4000000 && 0 <= o.1 && o.1 <= 4000000)
+            {
+                if self.line.iter().all(|c| {
+                    let range = c.0 .0.abs_diff(c.1 .0) + c.0 .1.abs_diff(c.1 .1);
+                    let dist = c.0 .0.abs_diff(o.0) + c.0 .1.abs_diff(o.1);
+                    range < dist
+                }) {
+                    return (o.0 * 4000000 + o.1) as usize;
                 }
             }
         }
