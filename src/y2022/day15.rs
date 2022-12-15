@@ -45,7 +45,7 @@ impl Iterator for BorderIterator {
 }
 
 fn out_of_border(sensor: &Loc, nearest: &Loc) -> BorderIterator {
-    let range = 1 + (sensor.0.abs_diff(nearest.0) + sensor.1.abs_diff(nearest.1)) as isize;
+    let range = 1 + mdist(sensor, nearest) as isize;
     BorderIterator {
         now: Some((sensor.0, sensor.1 - range)),
         points: vec![
