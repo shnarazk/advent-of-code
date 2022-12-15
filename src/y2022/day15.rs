@@ -22,23 +22,21 @@ impl Iterator for BorderIterator {
             if let Some(l) = self.points.last() {
                 if p == l {
                     self.points.pop();
-                    if self.points.is_empty() {
-                        self.now = None;
-                        return self.now;
-                    }
                     self.vec = match self.points.len() {
                         4 => (1, 1),
                         3 => (-1, 1),
                         2 => (-1, -1),
                         1 => (1, -1),
-                        _ => (0, 0),
+                        0 => {
+                            self.now = None;
+                            return self.now;
+                        }
+                        _ => unreachable!(),
                     };
                 }
             }
             p.0 += self.vec.0;
             p.1 += self.vec.1;
-        } else {
-            self.now = self.points.pop();
         }
         self.now
     }
