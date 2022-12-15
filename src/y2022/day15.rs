@@ -119,15 +119,19 @@ impl AdventOfCode for Puzzle {
         total - on_target.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        for p in self.line.iter() {
-            for o in out_of_border(&p.0, &p.1)
-                .filter(|o| 0 <= o.0 && o.0 <= 4000000 && 0 <= o.1 && o.1 <= 4000000)
+        for (sensor, beacon) in self.line.iter() {
+            const BOUNDARY: isize = 4000000; // 20
+            let r = mdist(sensor, beacon);
+            let overlapped = self
+                .line
+                .iter()
+                .filter(|(s, b)| mdist(sensor, s) <= 1 + r + mdist(s, b))
+                .map(|(s, b)| (*s, *b))
+                .collect::<Vec<(Loc, Loc)>>();
+            for o in out_of_border(sensor, beacon)
+                .filter(|o| 0 <= o.0 && o.0 <= BOUNDARY && 0 <= o.1 && o.1 <= BOUNDARY)
             {
-                if self
-                    .line
-                    .iter()
-                    .all(|c| mdist(&c.0, &c.1) < mdist(&c.0, &o))
-                {
+                if overlapped.iter().all(|(s, b)| mdist(s, b) < mdist(s, &o)) {
                     return (o.0 * 4000000 + o.1) as usize;
                 }
             }
