@@ -52,7 +52,6 @@ impl AdventOfCode for Puzzle {
         }
         self.initialize_distacnes();
         dbg!(&self.distance.len());
-        dbg!(&self.distance.get(&("BB".to_string(), "JJ".to_string())));
     }
     fn part1(&mut self) -> Self::Output1 {
         let init = State {
@@ -72,7 +71,7 @@ impl AdventOfCode for Puzzle {
 struct State {
     path: Vec<String>,
     time: usize,
-    flow: usize,
+    total_flow: usize,
     contribution: Vec<(usize, usize)>,
 }
 
@@ -112,9 +111,9 @@ impl Puzzle {
     }
     fn traverse(&self, state: State) -> usize {
         if state.time == 30 {
-            return state.flow;
+            return state.total_flow;
         }
-        let mut best = state.flow;
+        let mut best = state.total_flow;
         let now = state.path.last().unwrap();
         for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| s == now) {
             if state.path.contains(next) {
@@ -124,11 +123,11 @@ impl Puzzle {
             if 30 <= time {
                 continue;
             }
-            let f = self.map.get(next).unwrap().0;
-            if f == 0 {
+            let flow = self.map.get(next).unwrap().0;
+            if flow == 0 {
                 continue;
             }
-            let value = (30 - time) * f;
+            let total_flow = state.total_flow + (30 - time) * flow;
             let mut contribution = state.contribution.clone();
             contribution.push((time, self.map.get(next).unwrap().0));
             let mut path = state.path.clone();
@@ -137,7 +136,7 @@ impl Puzzle {
                 .traverse(State {
                     path,
                     time,
-                    flow: state.flow + value,
+                    total_flow,
                     contribution,
                 })
                 .max(best);
