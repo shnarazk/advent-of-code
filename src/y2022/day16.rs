@@ -56,14 +56,20 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let init = State {
             path: vec!["AA".to_string()],
-            time: 0,
             contribution: vec![(0, 0)],
             ..Default::default()
         };
         self.traverse(init)
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        let mut bound: HashMap<String, usize> = HashMap::new();
+        let init = State2 {
+            path: vec!["AA".to_string()],
+            pos1: "AA".to_string(),
+            pos2: "AA".to_string(),
+            ..Default::default()
+        };
+        self.traverse2_1(init, &mut bound)
     }
 }
 
@@ -71,6 +77,17 @@ impl AdventOfCode for Puzzle {
 struct State {
     path: Vec<String>,
     time: usize,
+    total_flow: usize,
+    contribution: Vec<(usize, usize)>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
+struct State2 {
+    path: Vec<String>,
+    pos1: String,
+    time1: usize,
+    pos2: String,
+    time2: usize,
     total_flow: usize,
     contribution: Vec<(usize, usize)>,
 }
@@ -110,7 +127,8 @@ impl Puzzle {
         }
     }
     fn traverse(&self, state: State) -> usize {
-        if state.time == 30 {
+        const REMAIN: usize = 30;
+        if state.time == REMAIN {
             return state.total_flow;
         }
         let mut best = state.total_flow;
@@ -120,18 +138,18 @@ impl Puzzle {
                 continue;
             }
             let time = state.time + *dist + 1;
-            if 30 <= time {
+            if REMAIN <= time {
                 continue;
             }
             let flow = self.map.get(next).unwrap().0;
             if flow == 0 {
                 continue;
             }
-            let total_flow = state.total_flow + (30 - time) * flow;
-            let mut contribution = state.contribution.clone();
-            contribution.push((time, self.map.get(next).unwrap().0));
+            let total_flow = state.total_flow + (REMAIN - time) * flow;
             let mut path = state.path.clone();
             path.push(next.clone());
+            let mut contribution = state.contribution.clone();
+            contribution.push((time, self.map.get(next).unwrap().0));
             best = self
                 .traverse(State {
                     path,
@@ -140,6 +158,144 @@ impl Puzzle {
                     contribution,
                 })
                 .max(best);
+        }
+        best
+    }
+    fn traverse2_1(&self, state: State2, bound: &mut HashMap<String, usize>) -> usize {
+        // if state.total_flow == 1645 {
+        //     dbg!(&state.path, &state.contribution);
+        // }
+        const REMAIN: usize = 26;
+        if state.time1 == REMAIN {
+            return state.total_flow;
+        }
+        let mut best = state.total_flow;
+        let now = state.pos1;
+        for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| *s == now) {
+            if state.path.contains(next) {
+                continue;
+            }
+            let time1 = state.time1 + *dist + 1;
+            if REMAIN <= time1 {
+                continue;
+            }
+            let flow = self.map.get(next).unwrap().0;
+            if flow == 0 {
+                continue;
+            }
+            let total_flow = state.total_flow + (REMAIN - time1) * flow;
+            let mut path = state.path.clone();
+            path.push(next.clone());
+            {
+                let mut tmp = path.clone();
+                tmp.sort();
+                let key = tmp.join("");
+                let e = bound.entry(key).or_insert(0);
+                if total_flow < *e {
+                    continue;
+                }
+                *e = total_flow;
+            }
+            let mut contribution = state.contribution.clone();
+            contribution.push((time1, self.map.get(next).unwrap().0));
+            best = if time1 < state.time2 {
+                self.traverse2_1(
+                    State2 {
+                        path,
+                        pos1: next.to_string(),
+                        time1,
+                        pos2: state.pos2.clone(),
+                        time2: state.time2,
+                        total_flow,
+                        contribution,
+                    },
+                    bound,
+                )
+                .max(best)
+            } else {
+                self.traverse2_2(
+                    State2 {
+                        path,
+                        pos1: next.to_string(),
+                        time1,
+                        pos2: state.pos2.clone(),
+                        time2: state.time2,
+                        total_flow,
+                        contribution,
+                    },
+                    bound,
+                )
+                .max(best)
+            }
+        }
+        best
+    }
+    fn traverse2_2(&self, state: State2, bound: &mut HashMap<String, usize>) -> usize {
+        // if state.total_flow == 1645 {
+        //     dbg!(&state.path, &state.contribution);
+        // }
+        const REMAIN: usize = 26;
+        if state.time2 == REMAIN {
+            return state.total_flow;
+        }
+        let mut best = state.total_flow;
+        let now = state.pos2;
+        for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| *s == now) {
+            if state.path.contains(next) {
+                continue;
+            }
+            let time2 = state.time2 + *dist + 1;
+            if REMAIN <= time2 {
+                continue;
+            }
+            let flow = self.map.get(next).unwrap().0;
+            if flow == 0 {
+                continue;
+            }
+            let total_flow = state.total_flow + (REMAIN - time2) * flow;
+            let mut path = state.path.clone();
+            path.push(next.clone());
+            {
+                let mut tmp = path.clone();
+                tmp.sort();
+                let key = tmp.join("");
+                let e = bound.entry(key).or_insert(0);
+                if total_flow < *e {
+                    continue;
+                }
+                *e = total_flow;
+            }
+            let mut contribution = state.contribution.clone();
+            contribution.push((time2, self.map.get(next).unwrap().0));
+            best = if time2 < state.time1 {
+                self.traverse2_2(
+                    State2 {
+                        path,
+                        pos1: state.pos1.clone(),
+                        time1: state.time1,
+                        pos2: next.to_string(),
+                        time2,
+                        total_flow,
+                        contribution,
+                    },
+                    bound,
+                )
+                .max(best)
+            } else {
+                self.traverse2_1(
+                    State2 {
+                        path,
+                        pos1: state.pos1.clone(),
+                        time1: state.time1,
+                        pos2: next.to_string(),
+                        time2,
+                        total_flow,
+                        contribution,
+                    },
+                    bound,
+                )
+                .max(best)
+            }
         }
         best
     }
