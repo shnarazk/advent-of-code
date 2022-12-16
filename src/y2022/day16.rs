@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/16>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::{
         cmp::Reverse,
@@ -24,14 +20,6 @@ pub struct Puzzle {
 #[aoc(2022, 16)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let parser =
             regex!(r"^Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? ((\w+, )*\w+)$");
@@ -133,7 +121,7 @@ impl Puzzle {
         }
         let mut best = state.total_flow;
         let now = state.path.last().unwrap();
-        for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| s == now) {
+        for ((_, next), dist) in self.distance.iter().filter(|((s, _), _)| s == now) {
             if state.path.contains(next) {
                 continue;
             }
@@ -162,16 +150,13 @@ impl Puzzle {
         best
     }
     fn traverse2_1(&self, state: State2, bound: &mut HashMap<String, usize>) -> usize {
-        // if state.total_flow == 1645 {
-        //     dbg!(&state.path, &state.contribution);
-        // }
         const REMAIN: usize = 26;
         if state.time1 == REMAIN {
             return state.total_flow;
         }
         let mut best = state.total_flow;
         let now = state.pos1;
-        for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| *s == now) {
+        for ((_, next), dist) in self.distance.iter().filter(|((s, _), _)| *s == now) {
             if state.path.contains(next) {
                 continue;
             }
@@ -187,6 +172,7 @@ impl Puzzle {
             let mut path = state.path.clone();
             path.push(next.clone());
             {
+                // Let's prune bad branches!
                 let mut tmp = path.clone();
                 tmp.sort();
                 let key = tmp.join("");
@@ -231,16 +217,13 @@ impl Puzzle {
         best
     }
     fn traverse2_2(&self, state: State2, bound: &mut HashMap<String, usize>) -> usize {
-        // if state.total_flow == 1645 {
-        //     dbg!(&state.path, &state.contribution);
-        // }
         const REMAIN: usize = 26;
         if state.time2 == REMAIN {
             return state.total_flow;
         }
         let mut best = state.total_flow;
         let now = state.pos2;
-        for ((_, next), dist) in self.distance.iter().filter(|((s, g), d)| *s == now) {
+        for ((_, next), dist) in self.distance.iter().filter(|((s, _), _)| *s == now) {
             if state.path.contains(next) {
                 continue;
             }
