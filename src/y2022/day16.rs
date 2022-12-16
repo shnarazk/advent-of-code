@@ -44,7 +44,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let init = State {
             path: vec!["AA".to_string()],
-            contribution: vec![(0, 0)],
+            // contribution: vec![(0, 0)],
             ..Default::default()
         };
         self.traverse(init)
@@ -66,7 +66,7 @@ struct State {
     path: Vec<String>,
     time: usize,
     total_flow: usize,
-    contribution: Vec<(usize, usize)>,
+    // contribution: Vec<(usize, usize)>,
 }
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -77,7 +77,7 @@ struct State2 {
     pos2: String,
     time2: usize,
     total_flow: usize,
-    contribution: Vec<(usize, usize)>,
+    // contribution: Vec<(usize, usize)>,
 }
 
 impl Puzzle {
@@ -136,14 +136,14 @@ impl Puzzle {
             let total_flow = state.total_flow + (REMAIN - time) * flow;
             let mut path = state.path.clone();
             path.push(next.clone());
-            let mut contribution = state.contribution.clone();
-            contribution.push((time, self.map.get(next).unwrap().0));
+            // let mut contribution = state.contribution.clone();
+            // contribution.push((time, self.map.get(next).unwrap().0));
             best = self
                 .traverse(State {
                     path,
                     time,
                     total_flow,
-                    contribution,
+                    // contribution,
                 })
                 .max(best);
         }
@@ -182,8 +182,8 @@ impl Puzzle {
                 }
                 *e = total_flow;
             }
-            let mut contribution = state.contribution.clone();
-            contribution.push((time1, self.map.get(next).unwrap().0));
+            // let mut contribution = state.contribution.clone();
+            // contribution.push((time1, self.map.get(next).unwrap().0));
             best = if time1 < state.time2 {
                 self.traverse2_1(
                     State2 {
@@ -193,7 +193,7 @@ impl Puzzle {
                         pos2: state.pos2.clone(),
                         time2: state.time2,
                         total_flow,
-                        contribution,
+                        // contribution,
                     },
                     bound,
                 )
@@ -207,7 +207,7 @@ impl Puzzle {
                         pos2: state.pos2.clone(),
                         time2: state.time2,
                         total_flow,
-                        contribution,
+                        // contribution,
                     },
                     bound,
                 )
@@ -248,8 +248,8 @@ impl Puzzle {
                 }
                 *e = total_flow;
             }
-            let mut contribution = state.contribution.clone();
-            contribution.push((time2, self.map.get(next).unwrap().0));
+            // let mut contribution = state.contribution.clone();
+            // contribution.push((time2, self.map.get(next).unwrap().0));
             best = if time2 < state.time1 {
                 self.traverse2_2(
                     State2 {
@@ -259,7 +259,7 @@ impl Puzzle {
                         pos2: next.to_string(),
                         time2,
                         total_flow,
-                        contribution,
+                        // contribution,
                     },
                     bound,
                 )
@@ -273,7 +273,7 @@ impl Puzzle {
                         pos2: next.to_string(),
                         time2,
                         total_flow,
-                        contribution,
+                        // contribution,
                     },
                     bound,
                 )
