@@ -50,6 +50,7 @@ impl AdventOfCode for Puzzle {
         self.traverse(init)
     }
     fn part2(&mut self) -> Self::Output2 {
+        dbg!(self.seek2());
         let mut bound: HashMap<String, usize> = HashMap::new();
         let init = State2 {
             path: vec!["AA".to_string()],
@@ -69,8 +70,9 @@ struct State {
     // contribution: Vec<(usize, usize)>,
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 struct State2 {
+    expected: usize,
     path: Vec<String>,
     state1: (usize, String),
     state2: (usize, String),
@@ -184,6 +186,7 @@ impl Puzzle {
             best = self
                 .traverse2(
                     State2 {
+                        expected: 0,
                         path,
                         state1: states.0,
                         state2: states.1,
@@ -194,5 +197,81 @@ impl Puzzle {
                 .max(best);
         }
         best
+    }
+    fn expected_reward(&self, remain: usize, path: &[String]) -> usize {
+        let mut unvisited = self
+            .map
+            .iter()
+            .filter(|(l, _)| !path.contains(l))
+            .map(|(_, (f, _))| -(*f as isize))
+            .collect::<Vec<_>>();
+        unvisited.sort();
+        unvisited
+            .iter()
+            .zip((1..=remain).rev())
+            .map(|(a, b)| (-a) as usize * b)
+            .sum()
+    }
+    fn seek2(&self) -> usize {
+        const REMAIN: usize = 26;
+        let path_len = 1 + self.map.values().filter(|(f, _)| 0 < *f).count();
+        let mut bound: HashMap<String, usize> = HashMap::new();
+        let init = State2 {
+            expected: self.expected_reward(REMAIN, &["AA".to_string()]),
+            path: vec!["AA".to_string()],
+            state1: (0, "AA".to_string()),
+            state2: (0, "AA".to_string()),
+            ..Default::default()
+        };
+        let mut to_visit: BinaryHeap<State2> = BinaryHeap::new();
+        to_visit.push(init);
+        while let Some(state) = to_visit.pop() {
+            if state.path.len() == path_len {
+                return state.total_flow;
+            }
+            let now = (&state.state1).min(&state.state2);
+            for ((_, next), dist) in self.distance.iter().filter(|((s, _), _)| *s == now.1) {
+                if state.path.contains(next) {
+                    continue;
+                }
+                let time = now.0 + *dist + 1;
+                let flow = self.map.get(next).unwrap().0;
+                if flow == 0 {
+                    continue;
+                }
+                let total_flow = state.total_flow + (REMAIN - time) * flow;
+                let mut path = state.path.clone();
+                path.push(next.clone());
+                {
+                    let mut tmp = path.clone();
+                    tmp.sort();
+                    let key = tmp.join("");
+                    let e = bound.entry(key).or_insert(0);
+                    if total_flow < *e {
+                        continue;
+                    }
+                    *e = total_flow;
+                }
+                let (states, remain) = if state.state1 < state.state2 {
+                    (
+                        ((time, next.to_string()), state.state2.clone()),
+                        time.max(state.state2.0),
+                    )
+                } else {
+                    (
+                        (state.state1.clone(), (time, next.to_string())),
+                        time.max(state.state1.0),
+                    )
+                };
+                to_visit.push(State2 {
+                    expected: total_flow + self.expected_reward(REMAIN - remain, &path),
+                    path,
+                    state1: states.0,
+                    state2: states.1,
+                    total_flow,
+                });
+            }
+        }
+        unreachable!()
     }
 }
