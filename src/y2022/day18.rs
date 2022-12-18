@@ -1,11 +1,8 @@
 //! <https://adventofcode.com/2022/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric, line_parser, regex,
+        geometric, line_parser,
     },
     std::collections::HashSet,
 };
@@ -24,8 +21,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // let parser = regex!(r"^(\d+)$");
-        // let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push(line_parser::to_usizes(block, ',')?);
         Ok(())
     }
@@ -59,15 +54,10 @@ impl AdventOfCode for Puzzle {
         let mut to_visit: Vec<Surface> = Vec::new();
         let c = self.map.iter().min().unwrap();
         let start = (*c, 5);
-        println!("{:?}", &start);
+        // println!("{:?}", &start);
         to_visit.push(start);
         visited_surfaces.insert(start);
-
         while let Some(s) = to_visit.pop() {
-            // if visited_surfaces.contains(&s) {
-            //     continue;
-            // }
-            // visited_surfaces.insert(s);
             let edges = match s.1 {
                 0 => [
                     [
