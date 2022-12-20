@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2022/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
     std::collections::{BinaryHeap, HashMap},
 };
@@ -47,12 +43,12 @@ struct Blueprint {
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct State {
     mining_power: usize,
-    // last_geode_robot_birth: usize,
     time: usize,
     resources: [usize; 4],
     robots: [usize; 4],
 }
 impl State {
+    /// returns the goodness (mining ability) and bottomline value
     fn value(&self, bp: &Blueprint) -> (usize, usize) {
         let k3 = bp.trans[3][3];
         let k2 = bp.trans[2][3];
@@ -75,7 +71,6 @@ impl State {
 impl Blueprint {
     fn profit(&self, limit: usize) -> usize {
         let mut bottom_line: HashMap<usize, usize> = HashMap::new();
-        // let mut geode_robot: HashMap<usize, usize> = HashMap::new();
         let mut num_geodes = 0;
         let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
         let init = State {
@@ -89,11 +84,6 @@ impl Blueprint {
             if state.value(self).0 < *bottom_line.get(&state.time).unwrap_or(&0) {
                 continue;
             }
-            // if *geode_robot.get(&state.robots[0]).unwrap_or(&usize::MAX)
-            //     < state.last_geode_robot_birth
-            // {
-            //     continue;
-            // }
             if 0 < state.robots[0] {
                 let total = state.resources[0] + (limit - state.time) * state.robots[0];
                 if num_geodes < total {
@@ -147,18 +137,6 @@ impl Blueprint {
                     let e = bottom_line.entry(next.time).or_insert(0);
                     *e = *e.max(&mut thr);
                 }
-                // if state.robots[0] < next.robots[0] {
-                //     if *geode_robot.get(&next.robots[0]).unwrap_or(&usize::MAX) < next.time {
-                //         continue;
-                //     } else {
-                //         geode_robot.insert(next.robots[0], next.time);
-                //         next.last_geode_robot_birth = next.time;
-                //     }
-                // }
-                // println!(
-                //     "resource: {:?}, robots: {:?} at time {}",
-                //     next.resources, next.robots, next.time
-                // );
                 to_visit.push(next);
             }
         }
