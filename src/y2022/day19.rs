@@ -46,15 +46,36 @@ struct Blueprint {
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct State {
-    last_geode_robot_birth: usize,
+    mining_power: usize,
+    // last_geode_robot_birth: usize,
     time: usize,
     resources: [usize; 4],
     robots: [usize; 4],
 }
-
+impl State {
+    fn value(&self, bp: &Blueprint) -> (usize, usize) {
+        let k3 = bp.trans[3][3];
+        let k2 = bp.trans[2][3];
+        let k1 = bp.trans[1][3] + bp.trans[1][2] * k2;
+        let k0 = bp.trans[0][3] + bp.trans[0][1] * k1;
+        let d3 = self.robots[3] * k3;
+        let d2 = self.robots[2] * k2;
+        let d1 = self.robots[1] * k1;
+        let d0 = self.robots[0] * k0;
+        (
+            d0 + d1 + d2 + d3,
+            if self.robots[0] == 0 {
+                0
+            } else {
+                (self.robots[0] - 1) * k0
+            },
+        )
+    }
+}
 impl Blueprint {
     fn profit(&self, limit: usize) -> usize {
-        let mut geode_robot: HashMap<usize, usize> = HashMap::new();
+        let mut bottom_line: HashMap<usize, usize> = HashMap::new();
+        // let mut geode_robot: HashMap<usize, usize> = HashMap::new();
         let mut num_geodes = 0;
         let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
         let init = State {
@@ -65,11 +86,14 @@ impl Blueprint {
         };
         to_visit.push(init);
         while let Some(state) = to_visit.pop() {
-            if *geode_robot.get(&state.robots[0]).unwrap_or(&usize::MAX)
-                < state.last_geode_robot_birth
-            {
+            if state.value(self).0 < *bottom_line.get(&state.time).unwrap_or(&0) {
                 continue;
             }
+            // if *geode_robot.get(&state.robots[0]).unwrap_or(&usize::MAX)
+            //     < state.last_geode_robot_birth
+            // {
+            //     continue;
+            // }
             if 0 < state.robots[0] {
                 let total = state.resources[0] + (limit - state.time) * state.robots[0];
                 if num_geodes < total {
@@ -117,14 +141,20 @@ impl Blueprint {
                 let mut produces = [0, 0, 0, 0];
                 produces[i] = 1;
                 next.robots = produces.add(&state.robots);
-                if state.robots[0] < next.robots[0] {
-                    if *geode_robot.get(&next.robots[0]).unwrap_or(&usize::MAX) < next.time {
-                        continue;
-                    } else {
-                        geode_robot.insert(next.robots[0], next.time);
-                        next.last_geode_robot_birth = next.time;
-                    }
+                {
+                    let (v, mut thr) = next.value(self);
+                    next.mining_power = v;
+                    let e = bottom_line.entry(next.time).or_insert(0);
+                    *e = *e.max(&mut thr);
                 }
+                // if state.robots[0] < next.robots[0] {
+                //     if *geode_robot.get(&next.robots[0]).unwrap_or(&usize::MAX) < next.time {
+                //         continue;
+                //     } else {
+                //         geode_robot.insert(next.robots[0], next.time);
+                //         next.last_geode_robot_birth = next.time;
+                //     }
+                // }
                 // println!(
                 //     "resource: {:?}, robots: {:?} at time {}",
                 //     next.resources, next.robots, next.time
