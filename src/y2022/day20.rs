@@ -30,7 +30,7 @@ impl AdventOfCode for Puzzle {
         for n in self.line.iter() {
             *count.entry(*n).or_insert(0) += 1;
         }
-        dbg!(count.get(&0));
+        // dbg!(count.get(&0));
         // assert!(count.values().all(|c| *c == 1));
         dbg!(&self.line.len());
     }
@@ -49,7 +49,7 @@ impl AdventOfCode for Puzzle {
             .map(|(i, _)| (i + len - 1) % len)
             .collect::<Vec<usize>>();
         // self.print(&next);
-        assert!(self.is_sound(&next), "0");
+        // assert!(self.is_sound(&next), "0");
         for n in 0..self.line.len() {
             self.shift(&mut next, &mut prev, n);
             // self.print(&next);
@@ -63,7 +63,29 @@ impl AdventOfCode for Puzzle {
         self.value(&next)
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let key = 811589153;
+        for n in self.line.iter_mut() {
+            *n *= key;
+        }
+        let len = self.line.len();
+        let mut next: Vec<usize> = self
+            .line
+            .iter()
+            .enumerate()
+            .map(|(i, _)| (i + 1) % len)
+            .collect::<Vec<usize>>();
+        let mut prev: Vec<usize> = self
+            .line
+            .iter()
+            .enumerate()
+            .map(|(i, _)| (i + len - 1) % len)
+            .collect::<Vec<usize>>();
+        for _ in 0..10 {
+            for n in 0..self.line.len() {
+                self.shift(&mut next, &mut prev, n);
+            }
+        }
+        self.value(&next)
     }
 }
 
@@ -75,20 +97,40 @@ impl Puzzle {
         match val.signum() {
             0 => (),
             1 => {
-                for _ in 0..val.unsigned_abs() {
+                for _ in 0..(val.unsigned_abs() % (len - 1)) {
                     j = next[j];
                     // To understand the following, I needed to cheak
                     if j == i {
                         j = next[j];
                     }
                 }
+                if i == 4348 {
+                    let mut k = i;
+                    for _ in 0..val.unsigned_abs() {
+                        k = next[k];
+                        if k == i {
+                            k = next[k];
+                        }
+                    }
+                    assert_eq!(k, j);
+                }
             }
             -1 => {
-                for _ in 0..(val.unsigned_abs() + 1) {
+                for _ in 0..((val.unsigned_abs() + 1) % (len - 1)) {
                     j = prev[j];
                     if j == i {
                         j = prev[j];
                     }
+                }
+                if i == 3 {
+                    let mut k = i;
+                    for _ in 0..(val.unsigned_abs() + 1) {
+                        k = next[k];
+                        if k == i {
+                            k = prev[k];
+                        }
+                    }
+                    assert_eq!(k, j);
                 }
             }
             _ => unreachable!(),
@@ -100,8 +142,10 @@ impl Puzzle {
         let prev_i = prev[i];
         let next_i = next[i];
         let next_j = next[j];
-        if j == i || next_j == i {
-            dbg!(i, val);
+        if j == i {
+            return;
+        }
+        if next_j == i {
             return;
         }
 
