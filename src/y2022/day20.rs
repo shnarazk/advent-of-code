@@ -48,21 +48,18 @@ impl AdventOfCode for Puzzle {
             .enumerate()
             .map(|(i, _)| (i + len - 1) % len)
             .collect::<Vec<usize>>();
-        self.print(&next);
+        // self.print(&next);
         assert!(self.is_sound(&next), "0");
         for n in 0..self.line.len() {
             self.shift(&mut next, &mut prev, n);
             // self.print(&next);
-            let mut check = next.clone();
-            check.sort();
-            let cal = (0..len).collect::<Vec<usize>>();
-            assert_eq!(check, cal);
-            assert!(self.is_sound(&next), "{n}");
+            // let mut check = next.clone();
+            // check.sort();
+            // let cal = (0..len).collect::<Vec<usize>>();
+            // assert_eq!(check, cal);
+            // assert!(self.is_sound(&next), "{n}");
         }
-        // for (i, x) in check.iter().enumerate() {
-        //     assert_eq!(*x, cal[i]);
-        // }
-        self.print(&next);
+        // self.print(&next);
         self.value(&next)
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -96,10 +93,10 @@ impl Puzzle {
             }
             _ => unreachable!(),
         }
-        println!(
-            "{} moves between {} and {}:",
-            self.line[i], self.line[j], self.line[next[j]]
-        );
+        // println!(
+        //     "{} moves between {} and {}:",
+        //     self.line[i], self.line[j], self.line[next[j]]
+        // );
         let prev_i = prev[i];
         let next_i = next[i];
         let next_j = next[j];
