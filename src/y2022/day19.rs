@@ -204,6 +204,6 @@ impl AdventOfCode for Puzzle {
         self.line.iter().map(|bp| bp.id * bp.profit(24)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line.iter().map(|bp| bp.profit(32)).product()
+        self.line.iter().take(3).map(|bp| bp.profit(32)).product()
     }
 }
