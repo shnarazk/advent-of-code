@@ -46,6 +46,7 @@ struct Blueprint {
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct State {
+    last_geode_robot_birth: usize,
     time: usize,
     resources: [usize; 4],
     robots: [usize; 4],
@@ -53,21 +54,24 @@ struct State {
 
 impl Blueprint {
     fn profit(&self, limit: usize) -> usize {
+        let mut geode_robot: HashMap<usize, usize> = HashMap::new();
         let mut num_geodes = 0;
         let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
         let init = State {
             time: 1,
-            robots: [1, 0, 0, 0],
-            resources: [1, 0, 0, 0],
+            robots: [0, 0, 0, 1],
+            resources: [0, 0, 0, 1],
+            ..Default::default()
         };
         to_visit.push(init);
         while let Some(state) = to_visit.pop() {
-            if num_geodes < state.resources[3] {
-                num_geodes = state.resources[3];
-                dbg!(num_geodes);
+            if *geode_robot.get(&state.robots[0]).unwrap_or(&usize::MAX)
+                < state.last_geode_robot_birth
+            {
+                continue;
             }
-            if 0 < state.robots[3] {
-                let total = state.resources[3] + (limit - state.time) * state.robots[3];
+            if 0 < state.robots[0] {
+                let total = state.resources[0] + (limit - state.time) * state.robots[0];
                 if num_geodes < total {
                     num_geodes = total;
                     dbg!(num_geodes);
@@ -113,6 +117,14 @@ impl Blueprint {
                 let mut produces = [0, 0, 0, 0];
                 produces[i] = 1;
                 next.robots = produces.add(&state.robots);
+                if state.robots[0] < next.robots[0] {
+                    if *geode_robot.get(&next.robots[0]).unwrap_or(&usize::MAX) < next.time {
+                        continue;
+                    } else {
+                        geode_robot.insert(next.robots[0], next.time);
+                        next.last_geode_robot_birth = next.time;
+                    }
+                }
                 // println!(
                 //     "resource: {:?}, robots: {:?} at time {}",
                 //     next.resources, next.robots, next.time
@@ -120,7 +132,7 @@ impl Blueprint {
                 to_visit.push(next);
             }
         }
-        self.id * num_geodes
+        num_geodes
     }
 }
 
@@ -145,10 +157,10 @@ impl AdventOfCode for Puzzle {
             self.line.push(Blueprint {
                 id: segment[1].parse::<_>()?,
                 trans: [
-                    [nth!(2), 0, 0, 0],
-                    [nth!(3), 0, 0, 0],
-                    [nth!(4), nth!(5), 0, 0],
-                    [nth!(6), 0, nth!(7), 0],
+                    [0, nth!(7), 0, nth!(6)],
+                    [0, 0, nth!(5), nth!(4)],
+                    [0, 0, 0, nth!(3)],
+                    [0, 0, 0, nth!(2)],
                 ],
             });
         }
@@ -159,9 +171,9 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.iter().map(|bp| bp.profit(24)).sum()
+        self.line.iter().map(|bp| bp.id * bp.profit(24)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line.iter().map(|bp| bp.profit(32)).product()
     }
 }
