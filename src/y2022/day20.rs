@@ -14,6 +14,9 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<isize>,
+    len: usize,
+    index_zero: usize,
+    debug: bool,
 }
 
 #[aoc_at(2022, 20)]
@@ -26,6 +29,14 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn after_insert(&mut self) {
+        self.len = self.line.len();
+        self.index_zero = self
+            .line
+            .iter()
+            .enumerate()
+            .find(|(_, i)| **i == 0)
+            .expect("")
+            .0;
         let mut count: HashMap<isize, usize> = HashMap::new();
         for n in self.line.iter() {
             *count.entry(*n).or_insert(0) += 1;
@@ -35,29 +46,21 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let len = self.line.len();
-        let mut next: Vec<usize> = self
-            .line
-            .iter()
-            .enumerate()
-            .map(|(i, _)| (i + 1) % len)
+        let mut next: Vec<usize> = (0..self.len)
+            .map(|i| (i + 1) % self.len)
             .collect::<Vec<usize>>();
-        let mut prev: Vec<usize> = self
-            .line
-            .iter()
-            .enumerate()
-            .map(|(i, _)| (i + len - 1) % len)
+        let mut prev: Vec<usize> = (0..self.len)
+            .map(|i| (i + self.len - 1) % self.len)
             .collect::<Vec<usize>>();
         // self.print(&next);
-        // assert!(self.is_sound(&next), "0");
         for n in 0..self.line.len() {
             self.shift(&mut next, &mut prev, n);
             // self.print(&next);
-            // let mut check = next.clone();
-            // check.sort();
-            // let cal = (0..len).collect::<Vec<usize>>();
-            // assert_eq!(check, cal);
-            // assert!(self.is_sound(&next), "{n}");
+            let mut check = next.clone();
+            check.sort();
+            let cal = (0..self.len).collect::<Vec<usize>>();
+            assert_eq!(check, cal);
+            assert!(self.is_sound(&next), "{n}");
         }
         // self.print(&next);
         self.value(&next)
@@ -67,23 +70,19 @@ impl AdventOfCode for Puzzle {
         for n in self.line.iter_mut() {
             *n *= key;
         }
-        let len = self.line.len();
-        let mut next: Vec<usize> = self
-            .line
-            .iter()
-            .enumerate()
-            .map(|(i, _)| (i + 1) % len)
+        let mut next: Vec<usize> = (0..self.len)
+            .map(|i| (i + 1) % self.len)
             .collect::<Vec<usize>>();
-        let mut prev: Vec<usize> = self
-            .line
-            .iter()
-            .enumerate()
-            .map(|(i, _)| (i + len - 1) % len)
+        let mut prev: Vec<usize> = (0..self.len)
+            .map(|i| (i + self.len - 1) % self.len)
             .collect::<Vec<usize>>();
-        for _ in 0..10 {
+        self.trace(&next);
+        for s in 0..10 {
             for n in 0..self.line.len() {
+                self.debug = s == 5;
                 self.shift(&mut next, &mut prev, n);
             }
+            self.trace(&next);
         }
         self.value(&next)
     }
@@ -91,47 +90,29 @@ impl AdventOfCode for Puzzle {
 
 impl Puzzle {
     fn shift(&self, next: &mut [usize], prev: &mut [usize], i: usize) {
-        let len = self.line.len();
         let val = self.line[i];
         let mut j = i;
         match val.signum() {
-            0 => (),
+            0 => return,
+            1 if val.unsigned_abs() % (self.len - 1) == 0 => return,
             1 => {
-                for _ in 0..(val.unsigned_abs() % (len - 1)) {
+                for _ in 0..(val.unsigned_abs() % (self.len - 1)) {
                     j = next[j];
                     // To understand the following, I needed to cheak
                     if j == i {
                         j = next[j];
                     }
                 }
-                if i == 4348 {
-                    let mut k = i;
-                    for _ in 0..val.unsigned_abs() {
-                        k = next[k];
-                        if k == i {
-                            k = next[k];
-                        }
-                    }
-                    assert_eq!(k, j);
-                }
             }
+            -1 if val.unsigned_abs() % (self.len - 1) == 0 => return,
             -1 => {
-                for _ in 0..((val.unsigned_abs() + 1) % (len - 1)) {
+                for _ in 0..((val.unsigned_abs() + 0) % (self.len - 1)) {
                     j = prev[j];
                     if j == i {
                         j = prev[j];
                     }
                 }
-                if i == 3 {
-                    let mut k = i;
-                    for _ in 0..(val.unsigned_abs() + 1) {
-                        k = next[k];
-                        if k == i {
-                            k = prev[k];
-                        }
-                    }
-                    assert_eq!(k, j);
-                }
+                j = prev[j];
             }
             _ => unreachable!(),
         }
@@ -142,16 +123,18 @@ impl Puzzle {
         let prev_i = prev[i];
         let next_i = next[i];
         let next_j = next[j];
-        if j == i {
-            return;
-        }
         if next_j == i {
+            if self.debug {
+                let m = (self.len - 1) as isize;
+                dbg!(i, val, val % m);
+            }
             return;
         }
 
         assert_ne!(i, j);
         assert_ne!(i, next_i);
         assert_ne!(i, prev_i);
+        assert_ne!(j, next_j);
         next[prev_i] = next_i;
         next[j] = i;
         next[i] = next_j;
@@ -161,40 +144,43 @@ impl Puzzle {
         prev[next_i] = prev_i;
     }
     fn print(&self, next: &[usize]) {
-        let mut i = 0;
-        loop {
-            print!("{}, ", self.line[i]);
+        let mut i = self.index_zero;
+        while next[i] != 0 {
             i = next[i];
-            if i == 0 {
-                break;
-            }
+            print!("{}, ", self.line[i]);
         }
         println!();
     }
     fn value(&self, next: &[usize]) -> isize {
-        let Some((mut i, _)) = self.line.iter().enumerate().find(|(_, i)| **i == 0) else {
-            panic!();
-        };
-        let mut count = 0;
+        let mut i = self.index_zero;
         let mut val = 0;
-        loop {
-            count += 1;
+        for count in 1..=3000 {
             i = next[i];
             if [1000, 2000, 3000].contains(&count) {
                 val += dbg!(self.line[i]);
-                if count == 3000 {
-                    return val;
-                }
             }
         }
+        val
     }
     fn is_sound(&self, next: &[usize]) -> bool {
-        let Some((mut i, _)) = self.line.iter().enumerate().find(|(_, i)| **i == 0) else {
-            panic!();
-        };
-        for _ in 0..self.line.len() {
+        let mut i = self.index_zero;
+        for _ in 0..self.len {
             i = next[i];
         }
         self.line[i] == 0
+    }
+    fn trace(&self, next: &[usize]) {
+        let mut i = self.index_zero;
+        let mut count = 0;
+        while self.line[next[i]] != 0 {
+            if [2248913542963, -146086047540, 2162885092745].contains(&self.line[i]) {
+                println!("{} @ {count}", self.line[i]);
+            }
+            i = next[i];
+            count += 1;
+        }
+        println!("zero @ {i}");
+        assert_eq!(count + 1, self.len);
+        println!();
     }
 }
