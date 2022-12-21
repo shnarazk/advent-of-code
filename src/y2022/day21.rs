@@ -1,12 +1,7 @@
 //! <https://adventofcode.com/2022/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        framework::{aoc_at, AdventOfCode, ParseError}, regex,
     },
     std::collections::HashMap,
 };
@@ -73,7 +68,7 @@ impl Expr {
     }
     fn build(&self, monkeys: &HashMap<String, Expr>, values: &HashMap<String, isize>) {
         match self {
-            Expr::Num(n, val) if n == "humn" => print!("x"),
+            Expr::Num(n, _) if n == "humn" => print!("x"),
             Expr::Num(_, val) => print!("{val}"),
             Expr::Add(l, _, _) | Expr::Sub(l, _, _) | Expr::Mul(l, _, _) | Expr::Div(l, _, _) if values.contains_key(l)=> {
                 print!("{}", values.get(l).unwrap());
@@ -222,8 +217,11 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut monkeys, &mut remain);
         }
         let mut monkeys: HashMap<String, Expr> = HashMap::new();
+        monkeys.insert("humn".to_string(), Expr::Var{});
         for m in self.line.iter() {
-            monkeys.insert(m.label().to_string(), m.clone());
+            if m.label() != "humn" {
+                monkeys.insert(m.label().to_string(), m.clone());
+            }
         }
         let root = monkeys.get("root").unwrap();
         let left = root.arg1();
@@ -235,7 +233,7 @@ impl AdventOfCode for Puzzle {
         let rm = monkeys.get(right).unwrap();
         rm.build(&monkeys, &values);
         println!();
-        let base = 3_757_272_361_000;
+        let base = 3_757_272_361_780;
         for i in 0.. {
             let x = base + i;
             let d = 
