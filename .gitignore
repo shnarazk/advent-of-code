@@ -22,5 +22,5 @@ aoc-swift/DerivedData/
 aoc-swift/.swiftpm/config/registries.json
 aoc-swift/.swiftpm/xcode/package.xcworkspace/
 aoc-swift/.netrc
-# /data
+/data/*/*.txt
 

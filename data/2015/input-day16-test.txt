@@ -1,3 +1,0 @@
-Sue 1: children: 3, samoyeds: 2
-Sue 2: children: 3, samoyeds: 1
-Sue 3: children: 3, perfumes: 1
