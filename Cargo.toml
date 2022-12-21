@@ -4,7 +4,7 @@ version = "0.14.4"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
-rust-version = "1.62"
+rust-version = "1.66"
 
 [dependencies]
 aoc_macro = { version = "^0.2", path = "aoc_macro" }
