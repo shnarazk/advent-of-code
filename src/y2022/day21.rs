@@ -1,7 +1,8 @@
 //! <https://adventofcode.com/2022/day/21>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError}, regex,
+        framework::{aoc_at, AdventOfCode, ParseError},
+        regex,
     },
     std::collections::HashMap,
 };
@@ -23,7 +24,7 @@ impl Expr {
             Expr::Sub(val, _, _) => val,
             Expr::Mul(val, _, _) => val,
             Expr::Div(val, _, _) => val,
-            Expr::Var            => "X",
+            Expr::Var => "X",
         }
     }
     fn arg1(&self) -> &String {
@@ -33,7 +34,7 @@ impl Expr {
             Expr::Sub(_, val, _) => val,
             Expr::Mul(_, val, _) => val,
             Expr::Div(_, val, _) => val,
-            Expr::Var            => unreachable!(),
+            Expr::Var => unreachable!(),
         }
     }
     fn arg2(&self) -> &String {
@@ -43,7 +44,7 @@ impl Expr {
             Expr::Sub(_, _, val) => val,
             Expr::Mul(_, _, val) => val,
             Expr::Div(_, _, val) => val,
-            Expr::Var            => unreachable!(),
+            Expr::Var => unreachable!(),
         }
     }
     fn eval(&self, v1: isize, v2: isize) -> isize {
@@ -53,7 +54,7 @@ impl Expr {
             Expr::Sub(_, _, _) => v1 - v2,
             Expr::Mul(_, _, _) => v1 * v2,
             Expr::Div(_, _, _) => v1 / v2,
-            Expr::Var            => unreachable!(),
+            Expr::Var => unreachable!(),
         }
     }
     fn mnemonic(&self) -> &str {
@@ -63,16 +64,18 @@ impl Expr {
             Expr::Sub(_, _, _) => "-",
             Expr::Mul(_, _, _) => "*",
             Expr::Div(_, _, _) => "/",
-            Expr::Var            => unreachable!(),
+            Expr::Var => unreachable!(),
         }
     }
     fn build(&self, monkeys: &HashMap<String, Expr>, values: &HashMap<String, isize>) {
         match self {
             Expr::Num(n, _) if n == "humn" => print!("x"),
             Expr::Num(_, val) => print!("{val}"),
-            Expr::Add(l, _, _) | Expr::Sub(l, _, _) | Expr::Mul(l, _, _) | Expr::Div(l, _, _) if values.contains_key(l)=> {
+            Expr::Add(l, _, _) | Expr::Sub(l, _, _) | Expr::Mul(l, _, _) | Expr::Div(l, _, _)
+                if values.contains_key(l) =>
+            {
                 print!("{}", values.get(l).unwrap());
-                }
+            }
             Expr::Add(_, l, r) | Expr::Sub(_, l, r) | Expr::Mul(_, l, r) | Expr::Div(_, l, r) => {
                 print!("(");
                 let lm = monkeys.get(l).unwrap();
@@ -127,7 +130,7 @@ impl AdventOfCode for Puzzle {
         let mut values: HashMap<String, isize> = HashMap::new();
         let mut monkeys: Vec<&Expr> = Vec::new();
         for m in self.line.iter() {
-            let Expr::Num(label, value) = m else { 
+            let Expr::Num(label, value) = m else {
                 monkeys.push(m);
                 continue;
             };
@@ -139,11 +142,11 @@ impl AdventOfCode for Puzzle {
                 let a1 = m.arg1();
                 let a2 = m.arg2();
                 let Some(v1) = values.get(a1) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let Some(v2) = values.get(a2) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let result = m.eval(*v1, *v2);
@@ -159,7 +162,7 @@ impl AdventOfCode for Puzzle {
         let mut values: HashMap<String, isize> = HashMap::new();
         let mut monkeys: Vec<&Expr> = Vec::new();
         for m in self.line.iter() {
-            let Expr::Num(label, value) = m else { 
+            let Expr::Num(label, value) = m else {
                 if "root" != m.label() {
                     monkeys.push(m);
                 }
@@ -176,11 +179,11 @@ impl AdventOfCode for Puzzle {
                 let a1 = m.arg1();
                 let a2 = m.arg2();
                 let Some(v1) = values.get(a1) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let Some(v2) = values.get(a2) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let result = m.eval(*v1, *v2);
@@ -200,11 +203,11 @@ impl AdventOfCode for Puzzle {
                 let a1 = m.arg1();
                 let a2 = m.arg2();
                 let Some(v1) = values.get(a1) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let Some(v2) = values.get(a2) else {
-                    remain.push(m);       
+                    remain.push(m);
                     continue;
                 };
                 let result = m.eval(*v1, *v2);
@@ -217,7 +220,7 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut monkeys, &mut remain);
         }
         let mut monkeys: HashMap<String, Expr> = HashMap::new();
-        monkeys.insert("humn".to_string(), Expr::Var{});
+        monkeys.insert("humn".to_string(), Expr::Var {});
         for m in self.line.iter() {
             if m.label() != "humn" {
                 monkeys.insert(m.label().to_string(), m.clone());
@@ -236,14 +239,81 @@ impl AdventOfCode for Puzzle {
         let base = 3_757_272_361_780;
         for i in 0.. {
             let x = base + i;
-            let d = 
- (10*(((131234706858508-((((((((924+((150+(((2*(((905+(((((((((((((2*((((3*(((((((854+(((37*((((((341+(((7*(187+((28+(((((((556+((((x-332)*36)+685)/5))*2)-737)+978)+164)/3)-16))/3)))-849)*2))+748)/7)-349)/4)+793))-61)/7))*8)-983)/7)+974)*2)-531))+181)/2)-548))+750)/2)-657)/11)+85)*28)+877)+709)/3)-430)*2)+839))/2)-60))-635)*2))/4))*2)-478)/2)-818)/3)+39)*7))/5)+553))
-- 46779208742730;
+            let d = (10
+                * (((131234706858508
+                    - ((((((((924
+                        + ((150
+                            + (((2
+                                * (((905
+                                    + (((((((((((((2
+                                        * ((((3
+                                            * (((((((854
+                                                + (((37
+                                                    * ((((((341
+                                                        + (((7
+                                                            * (187
+                                                                + ((28
+                                                                    + (((((((556
+                                                                        + ((((x - 332) * 36)
+                                                                            + 685)
+                                                                            / 5))
+                                                                        * 2)
+                                                                        - 737)
+                                                                        + 978)
+                                                                        + 164)
+                                                                        / 3)
+                                                                        - 16))
+                                                                    / 3)))
+                                                            - 849)
+                                                            * 2))
+                                                        + 748)
+                                                        / 7)
+                                                        - 349)
+                                                        / 4)
+                                                        + 793))
+                                                    - 61)
+                                                    / 7))
+                                                * 8)
+                                                - 983)
+                                                / 7)
+                                                + 974)
+                                                * 2)
+                                                - 531))
+                                            + 181)
+                                            / 2)
+                                            - 548))
+                                        + 750)
+                                        / 2)
+                                        - 657)
+                                        / 11)
+                                        + 85)
+                                        * 28)
+                                        + 877)
+                                        + 709)
+                                        / 3)
+                                        - 430)
+                                        * 2)
+                                        + 839))
+                                    / 2)
+                                    - 60))
+                                - 635)
+                                * 2))
+                            / 4))
+                        * 2)
+                        - 478)
+                        / 2)
+                        - 818)
+                        / 3)
+                        + 39)
+                        * 7))
+                    / 5)
+                    + 553))
+                - 46779208742730;
             dbg!(d, x);
-            if d <= 0 { 
+            if d <= 0 {
                 return x;
             }
         }
-    unreachable!()
+        unreachable!()
     }
 }
