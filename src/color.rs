@@ -5,3 +5,4 @@ pub const MAGENTA: &str = "\x1B[001m\x1B[035m";
 pub const CYAN: &str = "\x1B[001m\x1B[036m";
 pub const RESET: &str = "\x1B[000m";
 pub const REVERT: &str = "\x1B[1A\x1B[1G\x1B[1K";
+pub const REVERSE: &str = "\x1B[001m\x1B[07m";
