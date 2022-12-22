@@ -15,7 +15,11 @@ use {
 type Dim2 = (usize, usize);
 type Dir2 = (isize, isize);
 
-type Map = (HashMap<Dim2, char>, HashMap<Dim2, Dim2>);
+type Map = (
+    HashMap<Dim2, char>,
+    HashMap<Dim2, Dim2>,
+    HashMap<Dim2, Dim2>,
+);
 
 trait GeometricMove {
     fn position_to_move(&self, dir: &Dir2) -> Self;
@@ -74,6 +78,9 @@ impl Seeker {
         self.position = self.position.position_to_move(&self.direction);
         self.trace.insert(self.position);
     }
+    fn horizontal(&self) -> bool {
+        self.direction.1 != 0
+    }
     fn turn_right(&mut self) {
         self.direction = match self.direction {
             (0, 1) => (1, 0),
@@ -106,7 +113,11 @@ impl Seeker {
                             '#' => break,
                             _ => unreachable!(),
                         }
-                    } else if let Some(pos) = map.1.get(&self.position) {
+                    } else if let Some(pos) = if self.horizontal() {
+                        map.1.get(&self.position)
+                    } else {
+                        map.2.get(&self.position)
+                    } {
                         match map.0.get(pos) {
                             Some(&'.') => {
                                 self.jump_to(pos);
@@ -146,7 +157,8 @@ impl Seeker {
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     map: HashMap<Dim2, char>,
-    edge: HashMap<Dim2, Dim2>,
+    ring_h: HashMap<Dim2, Dim2>,
+    ring_v: HashMap<Dim2, Dim2>,
     path: Vec<Direction>,
     line: Vec<Vec<char>>,
 }
@@ -208,8 +220,8 @@ impl AdventOfCode for Puzzle {
             }
             end = end.or(Some(width));
             if let (Some(s), Some(e)) = (start, end) {
-                self.edge.insert((j, s), (j, e - 1));
-                self.edge.insert((j, e - 1), (j, s));
+                self.ring_h.insert((j, s), (j, e - 1));
+                self.ring_h.insert((j, e - 1), (j, s));
             } else {
                 panic!();
             }
@@ -233,15 +245,16 @@ impl AdventOfCode for Puzzle {
             let start = min_y.get(&i);
             let end = max_y.get(&i);
             if let (Some(s), Some(e)) = (start, end) {
-                self.edge.insert((*s, i), (*e, i));
-                self.edge.insert((*e, i), (*s, i));
+                self.ring_v.insert((*s, i), (*e, i));
+                self.ring_v.insert((*e, i), (*s, i));
             } else {
                 panic!();
             }
         }
         dbg!(&self.line.len());
         dbg!(&self.map.len());
-        dbg!(&self.edge.len());
+        dbg!(&self.ring_h.len());
+        dbg!(&self.ring_v.len());
         dbg!(&self.path.len());
     }
     fn dump(&self) {
@@ -250,7 +263,7 @@ impl AdventOfCode for Puzzle {
             position: *start,
             ..Default::default()
         };
-        let map = (self.map.clone(), self.edge.clone());
+        let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
             seeker.step(&map, d);
         }
@@ -265,7 +278,7 @@ impl AdventOfCode for Puzzle {
                         self.map.get(&(j, i)).unwrap_or(&' '),
                         color::RESET
                     );
-                } else if self.edge.contains_key(&(j, i)) {
+                } else if self.ring_h.contains_key(&(j, i)) || self.ring_v.contains_key(&(j, i)) {
                     print!(
                         "{}{}{}",
                         color::RED,
@@ -281,16 +294,16 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let start = self.map.keys().min().unwrap();
-        dbg!(&start);
+        // dbg!(&start);
         let mut seeker = Seeker {
             position: *start,
             ..Default::default()
         };
-        let map = (self.map.clone(), self.edge.clone());
+        let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
             seeker.step(&map, d);
         }
-        dbg!(&seeker);
+        // dbg!(&seeker);
         seeker.to_password()
     }
     fn part2(&mut self) -> Self::Output2 {
