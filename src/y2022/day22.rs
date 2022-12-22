@@ -8,33 +8,39 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::HashSet,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+type Dim2 = (usize, usize);
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    line: Vec<()>,
+    map: HashSet<Dim2>,
+    loaded_map: Vec<Vec<char>>,
+    line: Vec<Vec<char>>,
 }
 
 #[aoc(2022, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+        let v = block.chars().collect::<Vec<_>>();
+        if v.iter().any(|c| [' ', '.', '#'].contains(c)) {
+            self.line.push(v);
+        } else {
+            self.loaded_map.push(v);
+        }
         Ok(())
     }
     fn after_insert(&mut self) {
-        dbg!(&self.line);
+        for (j, l) in self.loaded_map.iter().enumerate() {
+            for (i, c) in l.iter().enumerate() {
+                if *c == '.' {
+                    self.map.insert((j, i));
+                }
+            }
+        }
+        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         1
