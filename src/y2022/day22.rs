@@ -4,29 +4,44 @@
 #![allow(unused_variables)]
 use {
     crate::{
+        color,
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
         line_parser, regex,
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
 type Dim2 = (usize, usize);
+type Dir2 = (isize, isize);
+
 type Map = (HashMap<Dim2, char>, HashMap<Dim2, Dim2>);
 
 trait GeometricMove {
-    fn position_to_move(&self, dir: &Self) -> Self;
+    fn position_to_move(&self, dir: &Dir2) -> Self;
 }
 
 impl GeometricMove for Dim2 {
-    fn position_to_move(&self, dir: &Self) -> Self {
-        (self.0 + dir.0, self.1 + dir.1)
+    fn position_to_move(&self, dir: &Dir2) -> Self {
+        (
+            (self.0 as isize + dir.0) as usize,
+            (self.1 as isize + dir.1) as usize,
+        )
     }
 }
 
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+enum Direction {
+    Go(usize),
+    TurnLeft,
+    TurnRight,
+}
+
+#[derive(Debug, Eq, PartialEq)]
 struct Seeker {
     position: Dim2,
-    direction: Dim2,
+    direction: Dir2,
+    trace: HashSet<Dim2>,
 }
 
 impl Default for Seeker {
@@ -34,27 +49,97 @@ impl Default for Seeker {
         Seeker {
             position: (0, 0),
             direction: (0, 1),
+            trace: HashSet::new(),
         }
     }
 }
 
 impl Seeker {
+    fn to_password(&self) -> usize {
+        (self.position.0 + 1) * 1000
+            + (self.position.1 + 1) * 4
+            + match self.direction {
+                (0, 1) => 0,
+                (1, 0) => 1,
+                (0, -1) => 2,
+                (-1, 0) => 3,
+                _ => unreachable!(),
+            }
+    }
+    fn jump_to(&mut self, pos: &Dim2) {
+        self.position = *pos;
+        self.trace.insert(self.position);
+    }
+    fn go_forward(&mut self) {
+        self.position = self.position.position_to_move(&self.direction);
+        self.trace.insert(self.position);
+    }
+    fn turn_right(&mut self) {
+        self.direction = match self.direction {
+            (0, 1) => (1, 0),
+            (1, 0) => (0, -1),
+            (0, -1) => (-1, 0),
+            (-1, 0) => (0, 1),
+            _ => unreachable!(),
+        }
+    }
+    fn turn_left(&mut self) {
+        self.direction = match self.direction {
+            (0, 1) => (-1, 0),
+            (1, 0) => (0, 1),
+            (0, -1) => (1, 0),
+            (-1, 0) => (0, -1),
+            _ => unreachable!(),
+        }
+    }
     fn next_position(&self) -> Dim2 {
         self.position.position_to_move(&self.direction)
     }
-    fn step(&mut self, map: &Map, direction: (char, usize)) {
-        for _ in 0..direction.1 {
-            let pos = self.next_position();
-            if let Some(land) = map.0.get(&pos) {
-                match land {
-                    '.' => self.position = pos,
-                    '#' => break,
-                    _ => unreachable!(),
+    fn step(&mut self, map: &Map, direction: &Direction) {
+        match direction {
+            Direction::Go(steps) => {
+                for _ in 0..*steps {
+                    let next = self.next_position();
+                    if let Some(land) = map.0.get(&next) {
+                        match land {
+                            '.' => self.go_forward(),
+                            '#' => break,
+                            _ => unreachable!(),
+                        }
+                    } else if let Some(pos) = map.1.get(&self.position) {
+                        match map.0.get(pos) {
+                            Some(&'.') => {
+                                self.jump_to(pos);
+                                // println!("jump to {:?}", self.position);
+                            }
+                            Some(&'#') => {
+                                break;
+                            }
+                            _ => unreachable!(),
+                        }
+                    } else {
+                        for k in map
+                            .1
+                            .keys()
+                            .filter(|(j, i)| *j == self.position.0 || *i == self.position.1)
+                        {
+                            println!("jump table points {k:?}");
+                        }
+                        panic!();
+                    }
+                    assert!(map.0.get(&self.position) == Some(&'.'));
                 }
-            } else if let Some(pos) = map.1.get(&self.position) {
-                self.position = *pos;
+                assert!(map.0.get(&self.position) == Some(&'.'));
+            }
+            Direction::TurnLeft => {
+                self.turn_left();
+            }
+            Direction::TurnRight => {
+                self.turn_right();
             }
         }
+        assert!(map.0.get(&self.position) == Some(&'.'));
+        // println!("{:?}:{:?}", self.position, self.direction);
     }
 }
 
@@ -62,7 +147,7 @@ impl Seeker {
 pub struct Puzzle {
     map: HashMap<Dim2, char>,
     edge: HashMap<Dim2, Dim2>,
-    loaded_map: Vec<Vec<char>>,
+    path: Vec<Direction>,
     line: Vec<Vec<char>>,
 }
 
@@ -74,50 +159,139 @@ impl AdventOfCode for Puzzle {
         if v.iter().any(|c| [' ', '.', '#'].contains(c)) {
             self.line.push(v);
         } else {
-            self.loaded_map.push(v);
+            let mut buffer = block;
+            let num_parser = regex!(r"^(\d+)");
+            let turn_parser = regex!(r"^(L|R)");
+            loop {
+                if let Some(segment) = num_parser.captures(buffer) {
+                    self.path.push(Direction::Go(segment[1].parse::<usize>()?));
+                    buffer = &buffer[segment[1].len()..];
+                    continue;
+                }
+                if let Some(segment) = turn_parser.captures(buffer) {
+                    if &segment[1] == "L" {
+                        self.path.push(Direction::TurnLeft);
+                    } else {
+                        self.path.push(Direction::TurnRight);
+                    }
+                    buffer = &buffer[segment[1].len()..];
+                    continue;
+                }
+                dbg!(buffer);
+                break;
+            }
         }
         Ok(())
     }
     fn after_insert(&mut self) {
-        for (j, l) in self.loaded_map.iter().enumerate() {
+        for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
-                if *c != '.' {
+                if *c != ' ' {
                     self.map.insert((j, i), *c);
                 }
             }
         }
         // build the edge map horizontally
-        for (j, l) in self.loaded_map.iter().enumerate() {
+        for (j, l) in self.line.iter().enumerate() {
+            let width = l.len();
             let mut start = None;
             let mut end = None;
-            for (i, c) in l.iter().enumerate() {
+            for (i, _) in l.iter().enumerate() {
                 if self.map.get(&(j, i)).is_some() {
-                    start = start.or(Some(j));
-                } else {
+                    start = start.or(Some(i));
+                } else if start.is_some() {
                     end = end.or(Some(i));
                 }
                 if end.is_some() {
                     break;
                 }
             }
-            self.edge.insert((j, start.unwrap()), (j, end.unwrap() - 1));
-            self.edge.insert((j, end.unwrap() - 1), (j, start.unwrap()));
+            end = end.or(Some(width));
+            if let (Some(s), Some(e)) = (start, end) {
+                self.edge.insert((j, s), (j, e - 1));
+                self.edge.insert((j, e - 1), (j, s));
+            } else {
+                panic!();
+            }
         }
         // build the edge map vertically
         let mut min_y: HashMap<usize, usize> = HashMap::new();
         let mut max_y: HashMap<usize, usize> = HashMap::new();
-        for (j, l) in self.loaded_map.iter().enumerate() {
+        let mut max_width = 0;
+        for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
-                let e_min = min_y.entry(i).or_insert(0);
-                *e_min = (*e_min).min(j);
-                let e_max = max_y.entry(i).or_insert(0);
-                *e_max = (*e_max).min(j);
+                max_width = max_width.max(i);
+                if self.map.get(&(j, i)).is_some() {
+                    let e_min = min_y.entry(i).or_insert(usize::MAX);
+                    *e_min = (*e_min).min(j);
+                    let e_max = max_y.entry(i).or_insert(0);
+                    *e_max = (*e_max).max(j);
+                }
+            }
+        }
+        for i in 0..=max_width {
+            let start = min_y.get(&i);
+            let end = max_y.get(&i);
+            if let (Some(s), Some(e)) = (start, end) {
+                self.edge.insert((*s, i), (*e, i));
+                self.edge.insert((*e, i), (*s, i));
+            } else {
+                panic!();
             }
         }
         dbg!(&self.line.len());
+        dbg!(&self.map.len());
+        dbg!(&self.edge.len());
+        dbg!(&self.path.len());
+    }
+    fn dump(&self) {
+        let start = self.map.keys().min().unwrap();
+        let mut seeker = Seeker {
+            position: *start,
+            ..Default::default()
+        };
+        let map = (self.map.clone(), self.edge.clone());
+        for d in self.path.iter() {
+            seeker.step(&map, d);
+        }
+        let h = self.line.len();
+        let w = self.line.iter().map(|l| l.len()).max().unwrap_or_default();
+        for j in 0..h {
+            for i in 0..w {
+                if seeker.trace.contains(&(j, i)) {
+                    print!(
+                        "{}{}{}",
+                        color::REVERSE,
+                        self.map.get(&(j, i)).unwrap_or(&' '),
+                        color::RESET
+                    );
+                } else if self.edge.contains_key(&(j, i)) {
+                    print!(
+                        "{}{}{}",
+                        color::RED,
+                        self.map.get(&(j, i)).unwrap_or(&' '),
+                        color::RESET
+                    );
+                } else {
+                    print!("{}", self.map.get(&(j, i)).unwrap_or(&' '));
+                }
+            }
+            println!();
+        }
     }
     fn part1(&mut self) -> Self::Output1 {
-        1
+        let start = self.map.keys().min().unwrap();
+        dbg!(&start);
+        let mut seeker = Seeker {
+            position: *start,
+            ..Default::default()
+        };
+        let map = (self.map.clone(), self.edge.clone());
+        for d in self.path.iter() {
+            seeker.step(&map, d);
+        }
+        dbg!(&seeker);
+        seeker.to_password()
     }
     fn part2(&mut self) -> Self::Output2 {
         2
