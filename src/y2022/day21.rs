@@ -4,9 +4,10 @@ use {
         framework::{aoc_at, AdventOfCode, ParseError},
         regex,
     },
-    std::collections::HashMap,
+    std::{cmp::Ordering, collections::HashMap},
 };
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[allow(dead_code)]
 enum Expr {
     Num(String, isize),
     Add(String, String, String),
@@ -57,6 +58,7 @@ impl Expr {
             Expr::Var => unreachable!(),
         }
     }
+    #[allow(dead_code)]
     fn mnemonic(&self) -> &str {
         match self {
             Expr::Num(_, _) => unreachable!(),
@@ -67,6 +69,7 @@ impl Expr {
             Expr::Var => unreachable!(),
         }
     }
+    #[allow(dead_code)]
     fn build(&self, monkeys: &HashMap<String, Expr>, values: &HashMap<String, isize>) {
         match self {
             Expr::Num(n, _) if n == "humn" => print!("x"),
@@ -130,190 +133,187 @@ impl AdventOfCode for Puzzle {
         let mut values: HashMap<String, isize> = HashMap::new();
         let mut monkeys: Vec<&Expr> = Vec::new();
         for m in self.line.iter() {
-            let Expr::Num(label, value) = m else {
+            if let Expr::Num(label, value) = m {
+                values.insert(label.to_string(), *value);
+            } else {
                 monkeys.push(m);
-                continue;
-            };
-            values.insert(label.to_string(), *value);
-        }
-        loop {
-            let mut remain = Vec::new();
-            while let Some(m) = monkeys.pop() {
-                let a1 = m.arg1();
-                let a2 = m.arg2();
-                let Some(v1) = values.get(a1) else {
-                    remain.push(m);
-                    continue;
-                };
-                let Some(v2) = values.get(a2) else {
-                    remain.push(m);
-                    continue;
-                };
-                let result = m.eval(*v1, *v2);
-                if m.label() == "root" {
-                    return result;
-                }
-                values.insert(m.label().to_string(), result);
             }
-            std::mem::swap(&mut monkeys, &mut remain);
         }
+        reduce(&mut monkeys, &mut values);
+        *values.get("root").expect("!!")
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut values: HashMap<String, isize> = HashMap::new();
         let mut monkeys: Vec<&Expr> = Vec::new();
+        let mut left = "";
+        let mut right = "";
         for m in self.line.iter() {
-            let Expr::Num(label, value) = m else {
-                if "root" != m.label() {
-                    monkeys.push(m);
+            if let Expr::Num(label, value) = m {
+                if "humn" != m.label() {
+                    values.insert(label.to_string(), *value);
                 }
-                continue;
-            };
-            if "humn" != m.label() {
-                values.insert(label.to_string(), *value);
+            } else if "root" == m.label() {
+                left = m.arg1();
+                right = m.arg2();
+            } else {
+                monkeys.push(m);
             }
         }
-        let mut generated = false;
-        while generated {
-            let mut remain = Vec::new();
-            while let Some(m) = monkeys.pop() {
-                let a1 = m.arg1();
-                let a2 = m.arg2();
-                let Some(v1) = values.get(a1) else {
-                    remain.push(m);
-                    continue;
-                };
-                let Some(v2) = values.get(a2) else {
-                    remain.push(m);
-                    continue;
-                };
-                let result = m.eval(*v1, *v2);
-                if m.label() == "root" {
-                    continue;
-                }
-                values.insert(m.label().to_string(), result);
-                generated = true;
-            }
-            std::mem::swap(&mut monkeys, &mut remain);
-        }
-        let mut generated = true;
-        while generated {
-            generated = false;
-            let mut remain = Vec::new();
-            while let Some(m) = monkeys.pop() {
-                let a1 = m.arg1();
-                let a2 = m.arg2();
-                let Some(v1) = values.get(a1) else {
-                    remain.push(m);
-                    continue;
-                };
-                let Some(v2) = values.get(a2) else {
-                    remain.push(m);
-                    continue;
-                };
-                let result = m.eval(*v1, *v2);
-                if m.label() == "root" {
-                    return result;
-                }
-                values.insert(m.label().to_string(), result);
-                generated = true;
-            }
-            std::mem::swap(&mut monkeys, &mut remain);
-        }
-        let mut monkeys: HashMap<String, Expr> = HashMap::new();
-        monkeys.insert("humn".to_string(), Expr::Var {});
-        for m in self.line.iter() {
-            if m.label() != "humn" {
-                monkeys.insert(m.label().to_string(), m.clone());
+        reduce(&mut monkeys, &mut values);
+        let mut upper: isize = isize::MAX / 100;
+        let mut lower: isize = -(isize::MAX / 100);
+        let mut mid = (upper + lower) / 2;
+        let lower_ord = solve(&monkeys, &values, left, right, lower);
+        let upper_ord = solve(&monkeys, &values, left, right, upper);
+        let mut mid_ord = solve(&monkeys, &values, left, right, mid);
+        assert_ne!(lower_ord, upper_ord);
+        while mid_ord.0 != Ordering::Equal {
+            mid = (upper + lower) / 2;
+            mid_ord = solve(&monkeys, &values, left, right, mid);
+            if lower_ord.0 == mid_ord.0 {
+                lower = mid;
+            } else {
+                upper = mid;
             }
         }
-        let root = monkeys.get("root").unwrap();
-        let left = root.arg1();
-        let right = root.arg2();
-        dbg!(left, right);
-        let lm = monkeys.get(left).unwrap();
-        lm.build(&monkeys, &values);
-        println!();
-        let rm = monkeys.get(right).unwrap();
-        rm.build(&monkeys, &values);
-        println!();
-        let base = 3_757_272_361_780;
-        for i in 0.. {
-            let x = base + i;
-            let d = (10
-                * (((131234706858508
-                    - ((((((((924
-                        + ((150
-                            + (((2
-                                * (((905
-                                    + (((((((((((((2
-                                        * ((((3
-                                            * (((((((854
-                                                + (((37
-                                                    * ((((((341
-                                                        + (((7
-                                                            * (187
-                                                                + ((28
-                                                                    + (((((((556
-                                                                        + ((((x - 332) * 36)
-                                                                            + 685)
-                                                                            / 5))
-                                                                        * 2)
-                                                                        - 737)
-                                                                        + 978)
-                                                                        + 164)
-                                                                        / 3)
-                                                                        - 16))
-                                                                    / 3)))
-                                                            - 849)
-                                                            * 2))
-                                                        + 748)
-                                                        / 7)
-                                                        - 349)
-                                                        / 4)
-                                                        + 793))
-                                                    - 61)
-                                                    / 7))
-                                                * 8)
-                                                - 983)
-                                                / 7)
-                                                + 974)
-                                                * 2)
-                                                - 531))
-                                            + 181)
-                                            / 2)
-                                            - 548))
-                                        + 750)
-                                        / 2)
-                                        - 657)
-                                        / 11)
-                                        + 85)
-                                        * 28)
-                                        + 877)
-                                        + 709)
-                                        / 3)
-                                        - 430)
-                                        * 2)
-                                        + 839))
-                                    / 2)
-                                    - 60))
-                                - 635)
-                                * 2))
-                            / 4))
-                        * 2)
-                        - 478)
-                        / 2)
-                        - 818)
-                        / 3)
-                        + 39)
-                        * 7))
-                    / 5)
-                    + 553))
-                - 46779208742730;
-            dbg!(d, x);
-            if d <= 0 {
-                return x;
-            }
-        }
-        unreachable!()
+        mid
+
+        // the first approach
+        // let mut monkeys: HashMap<String, Expr> = HashMap::new();
+        // monkeys.insert("humn".to_string(), Expr::Var {});
+        // for m in self.line.iter() {
+        //     if m.label() != "humn" {
+        //         monkeys.insert(m.label().to_string(), m.clone());
+        //     }
+        // }
+        // let root = monkeys.get("root").unwrap();
+        // let left = root.arg1();
+        // let right = root.arg2();
+        // dbg!(left, right);
+
+        // let lm = monkeys.get(left).unwrap();
+        // lm.build(&monkeys, &values);
+        // println!();
+        // let rm = monkeys.get(right).unwrap();
+        // rm.build(&monkeys, &values);
+        // println!();
+        // let base = 3_757_272_361_780;
+        // for i in 0.. {
+        //     let x = base + i;
+        //     let d = (10
+        //         * (((131234706858508
+        //             - ((((((((924
+        //                 + ((150
+        //                     + (((2
+        //                         * (((905
+        //                             + (((((((((((((2
+        //                                 * ((((3
+        //                                     * (((((((854
+        //                                         + (((37
+        //                                             * ((((((341
+        //                                                 + (((7
+        //                                                     * (187
+        //                                                         + ((28
+        //                                                             + (((((((556
+        //                                                                 + ((((x - 332) * 36)
+        //                                                                     + 685)
+        //                                                                     / 5))
+        //                                                                 * 2)
+        //                                                                 - 737)
+        //                                                                 + 978)
+        //                                                                 + 164)
+        //                                                                 / 3)
+        //                                                                 - 16))
+        //                                                             / 3)))
+        //                                                     - 849)
+        //                                                     * 2))
+        //                                                 + 748)
+        //                                                 / 7)
+        //                                                 - 349)
+        //                                                 / 4)
+        //                                                 + 793))
+        //                                             - 61)
+        //                                             / 7))
+        //                                         * 8)
+        //                                         - 983)
+        //                                         / 7)
+        //                                         + 974)
+        //                                         * 2)
+        //                                         - 531))
+        //                                     + 181)
+        //                                     / 2)
+        //                                     - 548))
+        //                                 + 750)
+        //                                 / 2)
+        //                                 - 657)
+        //                                 / 11)
+        //                                 + 85)
+        //                                 * 28)
+        //                                 + 877)
+        //                                 + 709)
+        //                                 / 3)
+        //                                 - 430)
+        //                                 * 2)
+        //                                 + 839))
+        //                             / 2)
+        //                             - 60))
+        //                         - 635)
+        //                         * 2))
+        //                     / 4))
+        //                 * 2)
+        //                 - 478)
+        //                 / 2)
+        //                 - 818)
+        //                 / 3)
+        //                 + 39)
+        //                 * 7))
+        //             / 5)
+        //             + 553))
+        //         - 46779208742730;
+        //     dbg!(d, x);
+        //     if d <= 0 {
+        //         return x;
+        //     }
+        // }
     }
+}
+
+fn reduce(monkeys: &mut Vec<&Expr>, values: &mut HashMap<String, isize>) {
+    let mut generated = true;
+    while generated {
+        generated = false;
+        let mut remain = Vec::new();
+        while let Some(m) = monkeys.pop() {
+            let a1 = m.arg1();
+            let a2 = m.arg2();
+            let Some(v1) = values.get(a1) else {
+                    remain.push(m);
+                    continue;
+                };
+            let Some(v2) = values.get(a2) else {
+                    remain.push(m);
+                    continue;
+                };
+            let result = m.eval(*v1, *v2);
+            values.insert(m.label().to_string(), result);
+            generated = true;
+        }
+        std::mem::swap(monkeys, &mut remain);
+    }
+}
+
+fn solve(
+    monkeys: &[&Expr],
+    values: &HashMap<String, isize>,
+    left: &str,
+    right: &str,
+    input: isize,
+) -> (Ordering, isize) {
+    let mut m = monkeys.to_owned();
+    let mut v = values.clone();
+    v.insert("humn".to_string(), input);
+    reduce(&mut m, &mut v);
+    let lv = v.get(left).unwrap();
+    let rv = v.get(right).unwrap();
+    (lv.cmp(rv), *lv)
 }
