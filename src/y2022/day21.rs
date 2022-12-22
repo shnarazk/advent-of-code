@@ -167,10 +167,10 @@ impl AdventOfCode for Puzzle {
         let upper_ord = solve(&monkeys, &values, left, right, upper);
         let mut mid_ord = solve(&monkeys, &values, left, right, mid);
         assert_ne!(lower_ord, upper_ord);
-        while mid_ord.0 != Ordering::Equal {
+        while mid_ord != Ordering::Equal {
             mid = (upper + lower) / 2;
             mid_ord = solve(&monkeys, &values, left, right, mid);
-            if lower_ord.0 == mid_ord.0 {
+            if lower_ord == mid_ord {
                 lower = mid;
             } else {
                 upper = mid;
@@ -200,76 +200,7 @@ impl AdventOfCode for Puzzle {
         // let base = 3_757_272_361_780;
         // for i in 0.. {
         //     let x = base + i;
-        //     let d = (10
-        //         * (((131234706858508
-        //             - ((((((((924
-        //                 + ((150
-        //                     + (((2
-        //                         * (((905
-        //                             + (((((((((((((2
-        //                                 * ((((3
-        //                                     * (((((((854
-        //                                         + (((37
-        //                                             * ((((((341
-        //                                                 + (((7
-        //                                                     * (187
-        //                                                         + ((28
-        //                                                             + (((((((556
-        //                                                                 + ((((x - 332) * 36)
-        //                                                                     + 685)
-        //                                                                     / 5))
-        //                                                                 * 2)
-        //                                                                 - 737)
-        //                                                                 + 978)
-        //                                                                 + 164)
-        //                                                                 / 3)
-        //                                                                 - 16))
-        //                                                             / 3)))
-        //                                                     - 849)
-        //                                                     * 2))
-        //                                                 + 748)
-        //                                                 / 7)
-        //                                                 - 349)
-        //                                                 / 4)
-        //                                                 + 793))
-        //                                             - 61)
-        //                                             / 7))
-        //                                         * 8)
-        //                                         - 983)
-        //                                         / 7)
-        //                                         + 974)
-        //                                         * 2)
-        //                                         - 531))
-        //                                     + 181)
-        //                                     / 2)
-        //                                     - 548))
-        //                                 + 750)
-        //                                 / 2)
-        //                                 - 657)
-        //                                 / 11)
-        //                                 + 85)
-        //                                 * 28)
-        //                                 + 877)
-        //                                 + 709)
-        //                                 / 3)
-        //                                 - 430)
-        //                                 * 2)
-        //                                 + 839))
-        //                             / 2)
-        //                             - 60))
-        //                         - 635)
-        //                         * 2))
-        //                     / 4))
-        //                 * 2)
-        //                 - 478)
-        //                 / 2)
-        //                 - 818)
-        //                 / 3)
-        //                 + 39)
-        //                 * 7))
-        //             / 5)
-        //             + 553))
-        //         - 46779208742730;
+        //     let d = f(x) - 46779208742730;
         //     dbg!(d, x);
         //     if d <= 0 {
         //         return x;
@@ -308,12 +239,12 @@ fn solve(
     left: &str,
     right: &str,
     input: isize,
-) -> (Ordering, isize) {
+) -> Ordering {
     let mut m = monkeys.to_owned();
     let mut v = values.clone();
     v.insert("humn".to_string(), input);
     reduce(&mut m, &mut v);
     let lv = v.get(left).unwrap();
     let rv = v.get(right).unwrap();
-    (lv.cmp(rv), *lv)
+    lv.cmp(rv)
 }
