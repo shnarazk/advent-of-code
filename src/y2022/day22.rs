@@ -1,15 +1,11 @@
 //! <https://adventofcode.com/2022/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
+        regex,
     },
-    std::collections::{HashMap, HashSet},
+    std::collections::HashMap,
 };
 
 type Dim2 = (usize, usize);
@@ -148,8 +144,8 @@ impl Seeker {
     #[allow(clippy::collapsible_else_if)]
     fn step(
         &mut self,
-        map: &Map,
         direction: &Direction,
+        map: &Map,
         transform: Option<&HashMap<AffineFrom, AffineTo>>,
     ) {
         match direction {
@@ -318,7 +314,7 @@ impl AdventOfCode for Puzzle {
         let mut max_y: HashMap<usize, usize> = HashMap::new();
         let mut max_width = 0;
         for (j, l) in self.line.iter().enumerate() {
-            for (i, c) in l.iter().enumerate() {
+            for (i, _) in l.iter().enumerate() {
                 max_width = max_width.max(i);
                 if self.map.get(&(j, i)).is_some() {
                     let e_min = min_y.entry(i).or_insert(usize::MAX);
@@ -347,7 +343,6 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.path.len());
     }
     fn dump(&self) {
-        // plane coord, direction, new plane, affix matrix, new direction
         let affine = HashMap::from(FLIP_TABLE);
         let start = self.map.keys().min().unwrap();
         let mut seeker = Seeker {
@@ -357,7 +352,7 @@ impl AdventOfCode for Puzzle {
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d, Some(&affine));
+            seeker.step(d, &map, Some(&affine));
         }
         seeker.trace.resize(70, (0, 0));
         let h = self.line.len();
@@ -396,7 +391,6 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let start = self.map.keys().min().unwrap();
-        // dbg!(&start);
         let mut seeker = Seeker {
             position: *start,
             plane_size: self.plane_size,
@@ -404,16 +398,13 @@ impl AdventOfCode for Puzzle {
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d, None);
+            seeker.step(d, &map, None);
         }
-        // dbg!(&seeker);
         seeker.to_password()
     }
     fn part2(&mut self) -> Self::Output2 {
         let affine = HashMap::from(FLIP_TABLE);
-
         let start = self.map.keys().min().unwrap();
-        // dbg!(&start);
         let mut seeker = Seeker {
             position: *start,
             plane_size: self.plane_size,
@@ -421,9 +412,8 @@ impl AdventOfCode for Puzzle {
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d, Some(&affine));
+            seeker.step(d, &map, Some(&affine));
         }
-        // dbg!(&seeker);
         seeker.to_password()
     }
 }
