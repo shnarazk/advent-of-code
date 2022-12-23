@@ -21,6 +21,9 @@ type Map = (
     HashMap<Dim2, Dim2>,
 );
 
+type AffineFrom = (Dim2, Dir2);
+type AffineTo = (Dim2, Dir2, Dir2);
+
 trait GeometricMove {
     fn position_to_move(&self, dir: &Dir2) -> Self;
 }
@@ -70,6 +73,9 @@ impl Seeker {
                 _ => unreachable!(),
             }
     }
+    fn jump_parameters(&self) -> (Dim2, Dir2) {
+        ((self.position.0 / 50, self.position.1 / 50), self.direction)
+    }
     fn jump_to(&mut self, pos: &Dim2) {
         self.position = *pos;
         self.trace.insert(self.position);
@@ -102,7 +108,13 @@ impl Seeker {
     fn next_position(&self) -> Dim2 {
         self.position.position_to_move(&self.direction)
     }
-    fn step(&mut self, map: &Map, direction: &Direction) {
+    #[allow(clippy::collapsible_else_if)]
+    fn step(
+        &mut self,
+        map: &Map,
+        direction: &Direction,
+        transform: Option<&HashMap<AffineFrom, AffineTo>>,
+    ) {
         match direction {
             Direction::Go(steps) => {
                 for _ in 0..*steps {
@@ -111,6 +123,21 @@ impl Seeker {
                         match land {
                             '.' => self.go_forward(),
                             '#' => break,
+                            _ => unreachable!(),
+                        }
+                    } else if let Some(affine) = transform {
+                        // TODO
+                        let to = affine.get(&self.jump_parameters()).unwrap();
+                        let wp = (0, 0); // TODO
+                        match map.0.get(&wp) {
+                            Some(&'.') => {
+                                self.jump_to(&wp);
+                                // self.set_direction();
+                                // println!("jump to {:?}", self.position);
+                            }
+                            Some(&'#') => {
+                                break;
+                            }
                             _ => unreachable!(),
                         }
                     } else if let Some(pos) = if self.horizontal() {
@@ -265,13 +292,21 @@ impl AdventOfCode for Puzzle {
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d);
+            seeker.step(&map, d, None);
         }
         let h = self.line.len();
         let w = self.line.iter().map(|l| l.len()).max().unwrap_or_default();
         for j in 0..h {
             for i in 0..w {
-                if seeker.trace.contains(&(j, i)) {
+                if self.map.contains_key(&(j, i)) {
+                    let p = (Seeker {
+                        position: (j, i),
+                        ..Default::default()
+                    })
+                    .jump_parameters()
+                    .0;
+                    print!("{}", (b'A' + (p.0 * 3 + p.1) as u8) as char);
+                } else if seeker.trace.contains(&(j, i)) {
                     print!(
                         "{}{}{}",
                         color::REVERSE,
@@ -301,12 +336,42 @@ impl AdventOfCode for Puzzle {
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d);
+            seeker.step(&map, d, None);
         }
         // dbg!(&seeker);
         seeker.to_password()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        // plane coord, direction, new plane, affix matrix, new direction
+        let flip_table: [(AffineFrom, AffineTo); 14] = [
+            (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
+            (((0, 1), (0, -1)), ((2, 0), (-1, 0), (0, 1))),
+            (((0, 2), (-1, 0)), ((3, 0), (1, 0), (-1, 0))),
+            (((0, 2), (0, 1)), ((2, 1), (-1, 0), (0, -1))),
+            (((0, 2), (1, 0)), ((1, 1), (1, 0), (0, -1))),
+            (((1, 1), (0, 1)), ((0, 2), (0, 1), (-1, 0))),
+            (((1, 1), (0, -1)), ((2, 0), (0, -1), (1, 0))),
+            (((2, 0), (0, -1)), ((0, 1), (1, 0), (0, 1))),
+            (((2, 0), (-1, 0)), ((1, 1), (-1, 0), (0, 1))),
+            (((2, 1), (0, 1)), ((0, 2), (0, -1), (0, -1))),
+            (((2, 1), (1, 0)), ((3, 0), (1, 0), (0, -1))),
+            (((3, 0), (0, 1)), ((2, 1), (0, 1), (-1, 0))),
+            (((3, 0), (1, 0)), ((0, 2), (0, 1), (1, 0))),
+            (((3, 0), (0, -1)), ((0, 1), (0, 1), (1, 0))),
+        ];
+        let affine = HashMap::from(flip_table);
+
+        let start = self.map.keys().min().unwrap();
+        // dbg!(&start);
+        let mut seeker = Seeker {
+            position: *start,
+            ..Default::default()
+        };
+        let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
+        for d in self.path.iter() {
+            seeker.step(&map, d, Some(&affine));
+        }
+        // dbg!(&seeker);
+        seeker.to_password()
     }
 }
