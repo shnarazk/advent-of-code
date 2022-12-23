@@ -48,7 +48,8 @@ enum Direction {
 struct Seeker {
     position: Dim2,
     direction: Dir2,
-    trace: HashSet<Dim2>,
+    trace: Vec<Dim2>,
+    plane_size: usize,
 }
 
 impl Default for Seeker {
@@ -56,7 +57,8 @@ impl Default for Seeker {
         Seeker {
             position: (0, 0),
             direction: (0, 1),
-            trace: HashSet::new(),
+            trace: Vec::new(),
+            plane_size: 1,
         }
     }
 }
@@ -73,16 +75,32 @@ impl Seeker {
                 _ => unreachable!(),
             }
     }
+    fn position_in_plane(&self) -> usize {
+        if self.horizontal() {
+            self.position.0 % self.plane_size
+        } else {
+            self.position.1 % self.plane_size
+        }
+    }
     fn jump_parameters(&self) -> (Dim2, Dir2) {
-        ((self.position.0 / 50, self.position.1 / 50), self.direction)
+        (
+            (
+                self.position.0 / self.plane_size,
+                self.position.1 / self.plane_size,
+            ),
+            self.direction,
+        )
     }
     fn jump_to(&mut self, pos: &Dim2) {
         self.position = *pos;
-        self.trace.insert(self.position);
+        self.trace.push(self.position);
+    }
+    fn direction(&mut self, dir: &Dir2) {
+        self.direction = *dir;
     }
     fn go_forward(&mut self) {
         self.position = self.position.position_to_move(&self.direction);
-        self.trace.insert(self.position);
+        self.trace.push(self.position);
     }
     fn horizontal(&self) -> bool {
         self.direction.1 != 0
@@ -126,14 +144,31 @@ impl Seeker {
                             _ => unreachable!(),
                         }
                     } else if let Some(affine) = transform {
-                        // TODO
                         let to = affine.get(&self.jump_parameters()).unwrap();
-                        let wp = (0, 0); // TODO
-                        match map.0.get(&wp) {
+                        let offset = self.position_in_plane();
+                        let new_position = (
+                            to.0 .0 * self.plane_size
+                                + match to.1 .0 {
+                                    -1 => self.plane_size - offset - 1,
+                                    0 => 0,
+                                    1 => offset,
+                                    _ => unreachable!(),
+                                },
+                            to.0 .1 * self.plane_size
+                                + match to.1 .1 {
+                                    -1 => self.plane_size - offset - 1,
+                                    0 => 0,
+                                    1 => offset,
+                                    _ => unreachable!(),
+                                },
+                        );
+                        match map.0.get(&new_position) {
                             Some(&'.') => {
-                                self.jump_to(&wp);
-                                // self.set_direction();
-                                // println!("jump to {:?}", self.position);
+                                if self.trace.len() < 10 {
+                                    println!("jump from {:?} to {:?}", self.position, new_position);
+                                }
+                                self.jump_to(&new_position);
+                                self.direction(&to.2);
                             }
                             Some(&'#') => {
                                 break;
@@ -188,6 +223,7 @@ pub struct Puzzle {
     ring_v: HashMap<Dim2, Dim2>,
     path: Vec<Direction>,
     line: Vec<Vec<char>>,
+    plane_size: usize,
 }
 
 #[aoc(2022, 22)]
@@ -278,6 +314,8 @@ impl AdventOfCode for Puzzle {
                 panic!();
             }
         }
+        self.plane_size = (max_width + 1) / 3;
+        dbg!(self.plane_size);
         dbg!(&self.line.len());
         dbg!(&self.map.len());
         dbg!(&self.ring_h.len());
@@ -285,22 +323,43 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.path.len());
     }
     fn dump(&self) {
+        // plane coord, direction, new plane, affix matrix, new direction
+        let flip_table: [(AffineFrom, AffineTo); 14] = [
+            (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
+            (((0, 1), (0, -1)), ((2, 0), (-1, 0), (0, 1))),
+            (((0, 2), (-1, 0)), ((3, 0), (1, 0), (-1, 0))),
+            (((0, 2), (0, 1)), ((2, 1), (-1, 0), (0, -1))),
+            (((0, 2), (1, 0)), ((1, 1), (1, 0), (0, -1))),
+            (((1, 1), (0, 1)), ((0, 2), (0, 1), (-1, 0))),
+            (((1, 1), (0, -1)), ((2, 0), (0, -1), (1, 0))),
+            (((2, 0), (0, -1)), ((0, 1), (1, 0), (0, 1))),
+            (((2, 0), (-1, 0)), ((1, 1), (-1, 0), (0, 1))),
+            (((2, 1), (0, 1)), ((0, 2), (0, -1), (0, -1))),
+            (((2, 1), (1, 0)), ((3, 0), (1, 0), (0, -1))),
+            (((3, 0), (0, 1)), ((2, 1), (0, 1), (-1, 0))),
+            (((3, 0), (1, 0)), ((0, 2), (0, 1), (1, 0))),
+            (((3, 0), (0, -1)), ((0, 1), (0, 1), (1, 0))),
+        ];
+        let affine = HashMap::from(flip_table);
         let start = self.map.keys().min().unwrap();
         let mut seeker = Seeker {
             position: *start,
+            plane_size: self.plane_size,
             ..Default::default()
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
         for d in self.path.iter() {
-            seeker.step(&map, d, None);
+            seeker.step(&map, d, Some(&affine));
         }
+        seeker.trace.resize(70, (0, 0));
         let h = self.line.len();
         let w = self.line.iter().map(|l| l.len()).max().unwrap_or_default();
         for j in 0..h {
             for i in 0..w {
-                if self.map.contains_key(&(j, i)) {
+                if i == usize::MAX && self.map.contains_key(&(j, i)) {
                     let p = (Seeker {
                         position: (j, i),
+                        plane_size: self.plane_size,
                         ..Default::default()
                     })
                     .jump_parameters()
@@ -332,6 +391,7 @@ impl AdventOfCode for Puzzle {
         // dbg!(&start);
         let mut seeker = Seeker {
             position: *start,
+            plane_size: self.plane_size,
             ..Default::default()
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
@@ -365,6 +425,7 @@ impl AdventOfCode for Puzzle {
         // dbg!(&start);
         let mut seeker = Seeker {
             position: *start,
+            plane_size: self.plane_size,
             ..Default::default()
         };
         let map = (self.map.clone(), self.ring_h.clone(), self.ring_v.clone());
