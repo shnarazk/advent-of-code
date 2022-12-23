@@ -40,6 +40,18 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(&self.map.len());
     }
+    fn dump(&self) {
+        println!("[");
+        let end = self.map.len();
+        for (i, pos) in self.map.iter().enumerate() {
+            print!("{{ \"y\": {}, \"x\": {}}}", pos.0, pos.1);
+            if i + 2 <= end {
+                print!(", ");
+            }
+            println!();
+        }
+        println!("]");
+    }
     fn part1(&mut self) -> Self::Output1 {
         let check_all = [
             (1, -1),
