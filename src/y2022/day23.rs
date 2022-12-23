@@ -109,7 +109,65 @@ impl AdventOfCode for Puzzle {
         self.empties()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let check_all = [
+            (1, -1),
+            (1, 0),
+            (1, 1),
+            (0, -1),
+            (0, 1),
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+        ];
+        let target = [(1, 0), (-1, 0), (0, -1), (0, 1)];
+        let check_list = [
+            [(1, -1), (1, 0), (1, 1)],
+            [(-1, -1), (-1, 0), (-1, 1)],
+            [(1, -1), (0, -1), (-1, -1)],
+            [(1, 1), (0, 1), (-1, 1)],
+        ];
+        let mut target_base = 0;
+        for round in 1.. {
+            let mut targets: HashMap<Dim2, Dim2> = HashMap::new();
+            'next_elf: for pos in self.map.iter() {
+                if check_all.iter().any(|d| self.map.contains(&pos.add(d))) {
+                    for d in 0..4 {
+                        let dir = (target_base + d) % 4;
+                        if check_list[dir]
+                            .iter()
+                            .map(|d| pos.add(d))
+                            .all(|p| !self.map.contains(&p))
+                        {
+                            targets.insert(*pos, pos.add(&target[dir]));
+                            continue 'next_elf;
+                        }
+                    }
+                }
+                targets.insert(*pos, *pos);
+            }
+            let mut counts: HashMap<Dim2, usize> = HashMap::new();
+            for target in targets.values() {
+                *counts.entry(*target).or_insert(0) += 1;
+            }
+            let mut next: HashSet<Dim2> = HashSet::new();
+            let mut moved = false;
+            for from in self.map.iter() {
+                if let Some(to) = targets.get(from) {
+                    if *counts.get(to).unwrap() == 1 {
+                        moved |= from != to;
+                        next.insert(*to);
+                        continue;
+                    }
+                }
+                next.insert(*from);
+            }
+            if !moved {
+                return round;
+            }
+            std::mem::swap(&mut self.map, &mut next);
+            target_base = (target_base + 1) % 4;
+        }
+        unreachable!()
     }
 }
 
