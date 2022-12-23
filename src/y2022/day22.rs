@@ -21,8 +21,27 @@ type Map = (
     HashMap<Dim2, Dim2>,
 );
 
+/// plane coord, direction
 type AffineFrom = (Dim2, Dir2);
+/// new plane, position vector, new direction
 type AffineTo = (Dim2, Dir2, Dir2);
+
+const FLIP_TABLE: [(AffineFrom, AffineTo); 14] = [
+    (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
+    (((0, 1), (0, -1)), ((2, 0), (-1, 0), (0, 1))),
+    (((0, 2), (-1, 0)), ((3, 0), (2, 1), (-1, 0))),
+    (((0, 2), (0, 1)), ((2, 1), (-1, 2), (0, -1))),
+    (((0, 2), (1, 0)), ((1, 1), (1, 2), (0, -1))),
+    (((1, 1), (0, 1)), ((0, 2), (2, 1), (-1, 0))),
+    (((1, 1), (0, -1)), ((2, 0), (0, 1), (1, 0))),
+    (((2, 0), (0, -1)), ((0, 1), (-1, 0), (0, 1))),
+    (((2, 0), (-1, 0)), ((1, 1), (1, 0), (0, 1))),
+    (((2, 1), (0, 1)), ((0, 2), (-1, 2), (0, -1))),
+    (((2, 1), (1, 0)), ((3, 0), (1, 2), (0, -1))),
+    (((3, 0), (0, 1)), ((2, 1), (2, 1), (-1, 0))),
+    (((3, 0), (1, 0)), ((0, 2), (0, 1), (1, 0))),
+    (((3, 0), (0, -1)), ((0, 1), (0, 1), (1, 0))),
+];
 
 trait GeometricMove {
     fn position_to_move(&self, dir: &Dir2) -> Self;
@@ -152,6 +171,7 @@ impl Seeker {
                                     -1 => self.plane_size - offset - 1,
                                     0 => 0,
                                     1 => offset,
+                                    2 => self.plane_size - 1,
                                     _ => unreachable!(),
                                 },
                             to.0 .1 * self.plane_size
@@ -159,13 +179,17 @@ impl Seeker {
                                     -1 => self.plane_size - offset - 1,
                                     0 => 0,
                                     1 => offset,
+                                    2 => self.plane_size - 1,
                                     _ => unreachable!(),
                                 },
                         );
                         match map.0.get(&new_position) {
                             Some(&'.') => {
-                                if self.trace.len() < 10 {
-                                    println!("jump from {:?} to {:?}", self.position, new_position);
+                                if self.trace.len() < 600 {
+                                    println!(
+                                        "jump from {:?} with offset {} to {:?}",
+                                        self.position, offset, new_position
+                                    );
                                 }
                                 self.jump_to(&new_position);
                                 self.direction(&to.2);
@@ -324,23 +348,7 @@ impl AdventOfCode for Puzzle {
     }
     fn dump(&self) {
         // plane coord, direction, new plane, affix matrix, new direction
-        let flip_table: [(AffineFrom, AffineTo); 14] = [
-            (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
-            (((0, 1), (0, -1)), ((2, 0), (-1, 0), (0, 1))),
-            (((0, 2), (-1, 0)), ((3, 0), (1, 0), (-1, 0))),
-            (((0, 2), (0, 1)), ((2, 1), (-1, 0), (0, -1))),
-            (((0, 2), (1, 0)), ((1, 1), (1, 0), (0, -1))),
-            (((1, 1), (0, 1)), ((0, 2), (0, 1), (-1, 0))),
-            (((1, 1), (0, -1)), ((2, 0), (0, -1), (1, 0))),
-            (((2, 0), (0, -1)), ((0, 1), (1, 0), (0, 1))),
-            (((2, 0), (-1, 0)), ((1, 1), (-1, 0), (0, 1))),
-            (((2, 1), (0, 1)), ((0, 2), (0, -1), (0, -1))),
-            (((2, 1), (1, 0)), ((3, 0), (1, 0), (0, -1))),
-            (((3, 0), (0, 1)), ((2, 1), (0, 1), (-1, 0))),
-            (((3, 0), (1, 0)), ((0, 2), (0, 1), (1, 0))),
-            (((3, 0), (0, -1)), ((0, 1), (0, 1), (1, 0))),
-        ];
-        let affine = HashMap::from(flip_table);
+        let affine = HashMap::from(FLIP_TABLE);
         let start = self.map.keys().min().unwrap();
         let mut seeker = Seeker {
             position: *start,
@@ -402,24 +410,7 @@ impl AdventOfCode for Puzzle {
         seeker.to_password()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // plane coord, direction, new plane, affix matrix, new direction
-        let flip_table: [(AffineFrom, AffineTo); 14] = [
-            (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
-            (((0, 1), (0, -1)), ((2, 0), (-1, 0), (0, 1))),
-            (((0, 2), (-1, 0)), ((3, 0), (1, 0), (-1, 0))),
-            (((0, 2), (0, 1)), ((2, 1), (-1, 0), (0, -1))),
-            (((0, 2), (1, 0)), ((1, 1), (1, 0), (0, -1))),
-            (((1, 1), (0, 1)), ((0, 2), (0, 1), (-1, 0))),
-            (((1, 1), (0, -1)), ((2, 0), (0, -1), (1, 0))),
-            (((2, 0), (0, -1)), ((0, 1), (1, 0), (0, 1))),
-            (((2, 0), (-1, 0)), ((1, 1), (-1, 0), (0, 1))),
-            (((2, 1), (0, 1)), ((0, 2), (0, -1), (0, -1))),
-            (((2, 1), (1, 0)), ((3, 0), (1, 0), (0, -1))),
-            (((3, 0), (0, 1)), ((2, 1), (0, 1), (-1, 0))),
-            (((3, 0), (1, 0)), ((0, 2), (0, 1), (1, 0))),
-            (((3, 0), (0, -1)), ((0, 1), (0, 1), (1, 0))),
-        ];
-        let affine = HashMap::from(flip_table);
+        let affine = HashMap::from(FLIP_TABLE);
 
         let start = self.map.keys().min().unwrap();
         // dbg!(&start);
