@@ -22,6 +22,8 @@ path tracing on a surface in 3D space
 ### day23 https://adventofcode.com/2022/day/23
 2D cellar automaton
 
+![スクリーンショット 2022-12-24 1 19 02](https://user-images.githubusercontent.com/997855/209366726-03437e6c-7eef-44dc-947f-7670eecd6129.png)
+
 ### day24 https://adventofcode.com/2022/day/24
 shape-changing path finding problem
 
