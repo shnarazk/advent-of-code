@@ -1,11 +1,8 @@
 //! <https://adventofcode.com/2022/day/24>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric, line_parser, regex,
+        geometric,
     },
     std::{
         cmp::Reverse,
@@ -69,7 +66,7 @@ impl AdventOfCode for Puzzle {
         self.start.1 = self.line[0]
             .iter()
             .enumerate()
-            .find(|(i, c)| **c == '.')
+            .find(|(_, c)| **c == '.')
             .unwrap()
             .0;
         self.goal.0 = self.line.len() - 1;
@@ -79,7 +76,7 @@ impl AdventOfCode for Puzzle {
             .unwrap()
             .iter()
             .enumerate()
-            .find(|(i, c)| **c == '.')
+            .find(|(_, c)| **c == '.')
             .unwrap()
             .0;
         for (j, l) in self.line.iter().enumerate() {
@@ -104,7 +101,7 @@ impl AdventOfCode for Puzzle {
         dbg!(time);
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
-                if self.map.get(&(j, i)) == Some(&'#') {
+                if *c == '#' {
                     print!("#");
                 } else if self.is_open(time, &(j, i)) {
                     print!(".");
@@ -116,64 +113,7 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part1(&mut self) -> Self::Output1 {
-        #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        pub struct State {
-            expected: usize,
-            time: usize,
-            position: Dim2,
-        }
-        let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
-        let init = State {
-            expected: self.goal.0.abs_diff(self.start.0) + self.goal.1.abs_diff(self.start.1),
-            time: 0,
-            position: self.start,
-        };
-        let mut visited: HashSet<State> = HashSet::new();
-        to_visit.push(Reverse(init.clone()));
-        visited.insert(init);
-        while let Some(Reverse(state)) = to_visit.pop() {
-            if state.position == self.goal {
-                return state.time;
-            }
-            let time = state.time + 1;
-            for next_position in geometric::neighbors4(
-                state.position.0,
-                state.position.1,
-                self.height + 2,
-                self.width + 2,
-            )
-            .iter()
-            {
-                if self.map.get(next_position) == Some(&'#') {
-                    continue;
-                }
-                if self.is_open(time, next_position) {
-                    let next = State {
-                        expected: time
-                            + self.goal.0.abs_diff(next_position.0)
-                            + self.goal.1.abs_diff(next_position.1),
-                        time,
-                        position: *next_position,
-                    };
-                    if !visited.contains(&next) {
-                        to_visit.push(Reverse(next.clone()));
-                        visited.insert(next);
-                    }
-                }
-            }
-            if self.is_open(time, &state.position) {
-                let next = State {
-                    expected: state.expected + 1,
-                    time,
-                    position: state.position,
-                };
-                if !visited.contains(&next) {
-                    to_visit.push(Reverse(next.clone()));
-                    visited.insert(next);
-                }
-            }
-        }
-        1
+        self.search(0, &self.start, &self.goal)
     }
     fn part2(&mut self) -> Self::Output2 {
         let part1 = self.search(0, &self.start, &self.goal);
