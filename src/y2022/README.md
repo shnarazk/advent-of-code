@@ -12,3 +12,23 @@ the first path finding problem of this year
 
 ### day17 https://adventofcode.com/2022/day/17
 find a repetition pattern in a long sequence
+
+### day21 https://adventofcode.com/2022/day/21
+graph reduction
+
+### day22 https://adventofcode.com/2022/day/22
+path tracing on a surface in 3D space
+
+### day23 https://adventofcode.com/2022/day/23
+2D cellar automaton
+
+### day24 https://adventofcode.com/2022/day/24
+shape-changing path finding problem
+
+
+
+
+
+
+
+
