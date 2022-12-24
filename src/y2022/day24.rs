@@ -176,6 +176,70 @@ impl AdventOfCode for Puzzle {
         1
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let part1 = self.search(0, &self.start, &self.goal);
+        let part2 = self.search(part1, &self.goal, &self.start);
+        self.search(part2, &self.start, &self.goal)
+    }
+}
+impl Puzzle {
+    fn search(&self, start_time: usize, start: &Dim2, goal: &Dim2) -> usize {
+        #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        pub struct State {
+            expected: usize,
+            time: usize,
+            position: Dim2,
+        }
+        let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+        let init = State {
+            expected: goal.0.abs_diff(start.0) + goal.1.abs_diff(start.1),
+            time: start_time,
+            position: *start,
+        };
+        let mut visited: HashSet<State> = HashSet::new();
+        to_visit.push(Reverse(init.clone()));
+        visited.insert(init);
+        while let Some(Reverse(state)) = to_visit.pop() {
+            if state.position == *goal {
+                return state.time;
+            }
+            let time = state.time + 1;
+            for next_position in geometric::neighbors4(
+                state.position.0,
+                state.position.1,
+                self.height + 2,
+                self.width + 2,
+            )
+            .iter()
+            {
+                if self.map.get(next_position) == Some(&'#') {
+                    continue;
+                }
+                if self.is_open(time, next_position) {
+                    let next = State {
+                        expected: time
+                            + goal.0.abs_diff(next_position.0)
+                            + goal.1.abs_diff(next_position.1),
+                        time,
+                        position: *next_position,
+                    };
+                    if !visited.contains(&next) {
+                        to_visit.push(Reverse(next.clone()));
+                        visited.insert(next);
+                    }
+                }
+            }
+            if self.is_open(time, &state.position) {
+                let next = State {
+                    expected: state.expected + 1,
+                    time,
+                    position: state.position,
+                };
+                if !visited.contains(&next) {
+                    to_visit.push(Reverse(next.clone()));
+                    visited.insert(next);
+                }
+            }
+        }
+        1
     }
 }
