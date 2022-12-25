@@ -18,10 +18,7 @@ impl AdventOfCode for Puzzle {
                 .map(|c| match c {
                     '-' => -1,
                     '=' => -2,
-                    '0' => 0,
-                    '1' => 1,
-                    '2' => 2,
-                    '3' => 3,
+                    '0' | '1' | '2' | '3' => c as isize - '0' as isize,
                     _ => unreachable!(),
                 })
                 .collect::<Vec<isize>>(),
@@ -51,9 +48,7 @@ impl AdventOfCode for Puzzle {
             let digit = sum % 5;
             sum /= 5;
             let ch = match digit {
-                0 => '0',
-                1 => '1',
-                2 => '2',
+                0 | 1 | 2 => (b'0' + digit as u8) as char,
                 3 => {
                     sum += 1;
                     '='
