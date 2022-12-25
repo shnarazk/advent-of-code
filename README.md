@@ -5,10 +5,11 @@
 * [adventofcode.com](https://adventofcode.com/)
 * [r/adventofcode](https://www.reddit.com/r/adventofcode/)
 
-## 2022 under development NOW
+## 2022 completed
 
 * [calendar](https://adventofcode.com/2022)
 
+![スクリーンショット 2022-12-25 14 44 40](https://user-images.githubusercontent.com/997855/209458247-0b73a6db-bacb-45bb-85c2-c853be5c4939.png)
 
 ## 2021 completed
 
