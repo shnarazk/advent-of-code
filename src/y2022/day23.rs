@@ -1,25 +1,18 @@
 //! <https://adventofcode.com/2022/day/23>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::{Dim2, GeometricMath},
+    },
     std::collections::{HashMap, HashSet},
 };
 
-type Dim2 = (isize, isize);
-
-trait GeometricMove {
-    fn add(&self, other: &Self) -> Self;
-}
-
-impl GeometricMove for Dim2 {
-    fn add(&self, other: &Self) -> Self {
-        (self.0 + other.0, self.1 + other.1)
-    }
-}
+type Dim = Dim2<isize>;
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
-    map: HashSet<Dim2>,
+    map: HashSet<Dim>,
 }
 
 #[aoc(2022, 23)]
@@ -73,7 +66,7 @@ impl AdventOfCode for Puzzle {
         let mut target_base = 0;
         self.print();
         for round in 0..10 {
-            let mut targets: HashMap<Dim2, Dim2> = HashMap::new();
+            let mut targets: HashMap<Dim, Dim> = HashMap::new();
             'next_elf: for pos in self.map.iter() {
                 if check_all.iter().any(|d| self.map.contains(&pos.add(d))) {
                     for d in 0..4 {
@@ -90,11 +83,11 @@ impl AdventOfCode for Puzzle {
                 }
                 targets.insert(*pos, *pos);
             }
-            let mut counts: HashMap<Dim2, usize> = HashMap::new();
+            let mut counts: HashMap<Dim, usize> = HashMap::new();
             for target in targets.values() {
                 *counts.entry(*target).or_insert(0) += 1;
             }
-            let mut next: HashSet<Dim2> = HashSet::new();
+            let mut next: HashSet<Dim> = HashSet::new();
             for from in self.map.iter() {
                 if let Some(to) = targets.get(from) {
                     if *counts.get(to).unwrap() == 1 {
@@ -133,7 +126,7 @@ impl AdventOfCode for Puzzle {
         ];
         let mut target_base = 0;
         for round in 1.. {
-            let mut targets: HashMap<Dim2, Dim2> = HashMap::new();
+            let mut targets: HashMap<Dim, Dim> = HashMap::new();
             'next_elf: for pos in self.map.iter() {
                 if check_all.iter().any(|d| self.map.contains(&pos.add(d))) {
                     for d in 0..4 {
@@ -150,11 +143,11 @@ impl AdventOfCode for Puzzle {
                 }
                 targets.insert(*pos, *pos);
             }
-            let mut counts: HashMap<Dim2, usize> = HashMap::new();
+            let mut counts: HashMap<Dim, usize> = HashMap::new();
             for target in targets.values() {
                 *counts.entry(*target).or_insert(0) += 1;
             }
-            let mut next: HashSet<Dim2> = HashSet::new();
+            let mut next: HashSet<Dim> = HashSet::new();
             let mut moved = false;
             for from in self.map.iter() {
                 if let Some(to) = targets.get(from) {
