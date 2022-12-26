@@ -1,5 +1,112 @@
 //! misc functions about 2D/3D computation
 
+pub type Dim2<L> = (L, L);
+pub type Vec2 = (isize, isize);
+const DIR4: [Vec2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+const DIR8: [Vec2; 8] = [
+    (-1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
+    (1, 0),
+    (1, -1),
+    (0, -1),
+    (-1, -1),
+];
+
+pub trait GeometricMath {
+    type BaseType;
+    fn add(&self, other: &Self) -> Self;
+    fn shift(&self, vec: &Vec2) -> Option<Self>
+    where
+        Self: Sized;
+    fn scale(&self, s: Self::BaseType) -> Self;
+    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized;
+    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized;
+}
+
+impl GeometricMath for Dim2<isize> {
+    type BaseType = isize;
+    fn add(&self, other: &Self) -> Self {
+        (self.0 + other.0, self.1 + other.1)
+    }
+    fn shift(&self, vec: &Vec2) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some((self.0 + vec.0, self.1 + vec.1))
+    }
+    fn scale(&self, k: Self::BaseType) -> Self {
+        (self.0 * k, self.1 * k)
+    }
+    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
+        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
+        DIR4.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
+            .collect::<Vec<Self>>()
+    }
+    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
+        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
+        DIR8.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
+            .collect::<Vec<Self>>()
+    }
+}
+
+impl GeometricMath for Dim2<usize> {
+    type BaseType = usize;
+    fn add(&self, other: &Self) -> Self {
+        (self.0 + other.0, self.1 + other.1)
+    }
+    fn shift(&self, vec: &Vec2) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        let t = self.0 as isize + vec.0;
+        let u = self.1 as isize + vec.1;
+        (0 <= t && 0 <= u).then_some((t as usize, u as usize))
+    }
+    fn scale(&self, k: Self::BaseType) -> Self {
+        (self.0 * k, self.1 * k)
+    }
+    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(usize::MAX, |v| v.0);
+        let b1 = boundary.map_or(usize::MAX, |v| v.1);
+        DIR4.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0 < b0 && v.1 < b1)
+            .collect::<Vec<Self>>()
+    }
+    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(usize::MAX, |v| v.0);
+        let b1 = boundary.map_or(usize::MAX, |v| v.1);
+        DIR8.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0 < b0 && v.1 < b1)
+            .collect::<Vec<Self>>()
+    }
+}
+
 /// returns `[self - 1, self, self + 1]`
 /// ```
 /// use adventofcode::geometric;
