@@ -6,7 +6,7 @@ DecodeChar ← {
   F '=': ¯2;
   F ch: ch - '0'
 }
-Decode ← +´(5⊸⋆∘⌽∘↕≠)×DecodeChar¨
+Decode ← +´(⌽5⊸⋆↕∘≠)×DecodeChar¨
 Encode ← {
   c ← 5 | 𝕩
   n ← 5 ÷˜ 𝕩-c
