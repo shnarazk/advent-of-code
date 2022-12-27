@@ -1,8 +1,78 @@
 //! misc functions about 2D/3D computation
 
+pub trait GeometricMath {
+    type BaseType;
+    type Vector;
+    fn add(&self, other: &Self) -> Self;
+    fn shift(&self, vec: &Self::Vector) -> Option<Self>
+    where
+        Self: Sized;
+    fn scale(&self, s: Self::BaseType) -> Self;
+    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized;
+    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized;
+}
+
+pub trait GeometricRotation {
+    fn turn_right(&mut self) -> Self;
+    fn turn_left(&mut self) -> Self;
+}
+
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
+
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub enum Direction {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+}
+
+impl Direction {
+    pub fn as_vec2(&self) -> Vec2 {
+        match self {
+            Direction::NORTH => (-1, 0),
+            Direction::EAST => (0, 1),
+            Direction::SOUTH => (1, 0),
+            Direction::WEST => (0, -1),
+        }
+    }
+    pub fn from_vec2(vec: &Vec2) -> Option<Self> {
+        match vec {
+            (0, -1) => Some(Direction::NORTH),
+            (-1, 0) => Some(Direction::EAST),
+            (0, 1) => Some(Direction::SOUTH),
+            (1, 0) => Some(Direction::WEST),
+            _ => None,
+        }
+    }
+}
+
+impl GeometricRotation for Direction {
+    fn turn_right(&mut self) -> Self {
+        match self {
+            Direction::NORTH => Direction::EAST,
+            Direction::EAST => Direction::SOUTH,
+            Direction::SOUTH => Direction::WEST,
+            Direction::WEST => Direction::NORTH,
+        }
+    }
+    fn turn_left(&mut self) -> Self {
+        match self {
+            Direction::EAST => Direction::NORTH,
+            Direction::SOUTH => Direction::EAST,
+            Direction::WEST => Direction::SOUTH,
+            Direction::NORTH => Direction::WEST,
+        }
+    }
+}
+
 const DIR4: [Vec2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+
 const DIR8: [Vec2; 8] = [
     (-1, 0),
     (-1, 1),
@@ -14,23 +84,30 @@ const DIR8: [Vec2; 8] = [
     (-1, -1),
 ];
 
-pub trait GeometricMath {
-    type BaseType;
-    fn add(&self, other: &Self) -> Self;
-    fn shift(&self, vec: &Vec2) -> Option<Self>
-    where
-        Self: Sized;
-    fn scale(&self, s: Self::BaseType) -> Self;
-    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
-    where
-        Self: Sized;
-    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
-    where
-        Self: Sized;
+impl GeometricRotation for Vec2 {
+    fn turn_right(&mut self) -> Self {
+        match self {
+            (0, 1) => (1, 0),
+            (1, 0) => (0, -1),
+            (0, -1) => (-1, 0),
+            (-1, 0) => (0, 1),
+            _ => unreachable!(),
+        }
+    }
+    fn turn_left(&mut self) -> Self {
+        match self {
+            (0, 1) => (-1, 0),
+            (1, 0) => (0, 1),
+            (0, -1) => (1, 0),
+            (-1, 0) => (0, -1),
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl GeometricMath for Dim2<isize> {
     type BaseType = isize;
+    type Vector = Vec2;
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1)
     }
@@ -43,7 +120,7 @@ impl GeometricMath for Dim2<isize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k)
     }
-    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
+    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized,
     {
@@ -54,7 +131,7 @@ impl GeometricMath for Dim2<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
+    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized,
     {
@@ -69,6 +146,7 @@ impl GeometricMath for Dim2<isize> {
 
 impl GeometricMath for Dim2<usize> {
     type BaseType = usize;
+    type Vector = Vec2;
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1)
     }
@@ -83,7 +161,7 @@ impl GeometricMath for Dim2<usize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k)
     }
-    fn neighbors4(&self, boundary: Option<&Self>) -> Vec<Self>
+    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized,
     {
@@ -94,7 +172,7 @@ impl GeometricMath for Dim2<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors8(&self, boundary: Option<&Self>) -> Vec<Self>
+    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized,
     {
@@ -103,6 +181,135 @@ impl GeometricMath for Dim2<usize> {
         DIR8.iter()
             .filter_map(|d| self.shift(d))
             .filter(|v| v.0 < b0 && v.1 < b1)
+            .collect::<Vec<Self>>()
+    }
+}
+
+pub type Dim3<L> = (L, L, L);
+pub type Vec3 = (isize, isize, isize);
+
+const DIR6: [Vec3; 6] = [
+    (-1, 0, 0),
+    (1, 0, 0),
+    (0, -1, 0),
+    (0, 1, 0),
+    (0, 0, -1),
+    (0, 0, 1),
+];
+
+const DIR26: [Vec3; 26] = [
+    // (0, 0, 0),
+    (0, 0, -1),
+    (0, 0, 1),
+    (0, -1, 0),
+    (0, -1, -1),
+    (0, -1, 1),
+    (0, 1, 0),
+    (0, 1, -1),
+    (0, 1, 1),
+    (-1, 0, 0),
+    (-1, 0, -1),
+    (-1, 0, 1),
+    (-1, -1, 0),
+    (-1, -1, -1),
+    (-1, -1, 1),
+    (-1, 1, 0),
+    (-1, 1, -1),
+    (-1, 1, 1),
+    (1, 0, 0),
+    (1, 0, -1),
+    (1, 0, 1),
+    (1, -1, 0),
+    (1, -1, -1),
+    (1, -1, 1),
+    (1, 1, 0),
+    (1, 1, -1),
+    (1, 1, 1),
+];
+
+impl GeometricMath for Dim3<isize> {
+    type BaseType = isize;
+    type Vector = Vec3;
+    fn add(&self, other: &Self) -> Self {
+        (self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    }
+    fn shift(&self, vec: &Self::Vector) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some((self.0 + vec.0, self.1 + vec.1, self.2 + vec.2))
+    }
+    fn scale(&self, k: Self::BaseType) -> Self {
+        (self.0 * k, self.1 * k, self.2 * k)
+    }
+    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
+        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
+        let b2 = boundary.map_or(isize::MAX, |v| v.2.abs());
+        DIR6.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
+            .collect::<Vec<Self>>()
+    }
+    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
+        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
+        let b2 = boundary.map_or(isize::MAX, |v| v.2.abs());
+        DIR26
+            .iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
+            .collect::<Vec<Self>>()
+    }
+}
+
+impl GeometricMath for Dim3<usize> {
+    type BaseType = usize;
+    type Vector = Vec3;
+    fn add(&self, other: &Self) -> Self {
+        (self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    }
+    fn shift(&self, vec: &Self::Vector) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        let t = self.0 as isize + vec.0;
+        let u = self.1 as isize + vec.1;
+        let v = self.1 as isize + vec.2;
+        (0 <= t && 0 <= u && 0 <= v).then_some((t as usize, u as usize, v as usize))
+    }
+    fn scale(&self, k: Self::BaseType) -> Self {
+        (self.0 * k, self.1 * k, self.2 * k)
+    }
+    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(usize::MAX, |v| v.0);
+        let b1 = boundary.map_or(usize::MAX, |v| v.1);
+        let b2 = boundary.map_or(usize::MAX, |v| v.2);
+        DIR6.iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
+            .collect::<Vec<Self>>()
+    }
+    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        let b0 = boundary.map_or(usize::MAX, |v| v.0);
+        let b1 = boundary.map_or(usize::MAX, |v| v.1);
+        let b2 = boundary.map_or(usize::MAX, |v| v.2);
+        DIR26
+            .iter()
+            .filter_map(|d| self.shift(d))
+            .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
             .collect::<Vec<Self>>()
     }
 }

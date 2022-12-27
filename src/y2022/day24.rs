@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric,
+        geometric::{Dim2, GeometricMath},
     },
     std::{
         cmp::Reverse,
@@ -10,23 +10,24 @@ use {
     },
 };
 
-type Dim2 = (usize, usize);
+type Dim = Dim2<usize>;
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
-    map: HashMap<Dim2, char>,
+    map: HashMap<Dim, char>,
     width: usize,
     height: usize,
-    start: Dim2,
-    goal: Dim2,
-    blizzard_r: Vec<Dim2>,
-    blizzard_d: Vec<Dim2>,
-    blizzard_l: Vec<Dim2>,
-    blizzard_u: Vec<Dim2>,
+    start: Dim,
+    goal: Dim,
+    blizzard_r: Vec<Dim>,
+    blizzard_d: Vec<Dim>,
+    blizzard_l: Vec<Dim>,
+    blizzard_u: Vec<Dim>,
 }
+
 impl Puzzle {
-    fn is_open(&self, time: usize, position: &Dim2) -> bool {
+    fn is_open(&self, time: usize, position: &Dim) -> bool {
         self.blizzard_r
             .iter()
             .filter(|(y, _)| *y == position.0)
@@ -122,12 +123,13 @@ impl AdventOfCode for Puzzle {
     }
 }
 impl Puzzle {
-    fn search(&self, start_time: usize, start: &Dim2, goal: &Dim2) -> usize {
+    fn search(&self, start_time: usize, start: &Dim, goal: &Dim) -> usize {
+        let boundary = Some((self.height + 2, self.width + 2));
         #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub struct State {
             expected: usize,
             time: usize,
-            position: Dim2,
+            position: Dim,
         }
         let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
         let init = State {
@@ -143,14 +145,7 @@ impl Puzzle {
                 return state.time;
             }
             let time = state.time + 1;
-            for next_position in geometric::neighbors4(
-                state.position.0,
-                state.position.1,
-                self.height + 2,
-                self.width + 2,
-            )
-            .iter()
-            {
+            for next_position in state.position.neighbors(boundary).iter() {
                 if self.map.get(next_position) == Some(&'#') {
                     continue;
                 }
