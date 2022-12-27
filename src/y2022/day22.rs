@@ -3,24 +3,19 @@ use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
+        geometric::{Dim2, Vec2},
         regex,
     },
     std::collections::HashMap,
 };
 
-type Dim2 = (usize, usize);
-type Dir2 = (isize, isize);
-
-type Map = (
-    HashMap<Dim2, char>,
-    HashMap<Dim2, Dim2>,
-    HashMap<Dim2, Dim2>,
-);
+type Loc = Dim2<usize>;
+type Map = (HashMap<Loc, char>, HashMap<Loc, Loc>, HashMap<Loc, Loc>);
 
 /// plane coord, direction
-type AffineFrom = (Dim2, Dir2);
+type AffineFrom = (Loc, Vec2);
 /// new plane, position vector, new direction
-type AffineTo = (Dim2, Dir2, Dir2);
+type AffineTo = (Loc, Vec2, Vec2);
 
 const FLIP_TABLE: [(AffineFrom, AffineTo); 14] = [
     (((0, 1), (-1, 0)), ((3, 0), (1, 0), (0, 1))),
@@ -40,11 +35,11 @@ const FLIP_TABLE: [(AffineFrom, AffineTo); 14] = [
 ];
 
 trait GeometricMove {
-    fn position_to_move(&self, dir: &Dir2) -> Self;
+    fn position_to_move(&self, dir: &Vec2) -> Self;
 }
 
-impl GeometricMove for Dim2 {
-    fn position_to_move(&self, dir: &Dir2) -> Self {
+impl GeometricMove for Loc {
+    fn position_to_move(&self, dir: &Vec2) -> Self {
         (
             (self.0 as isize + dir.0) as usize,
             (self.1 as isize + dir.1) as usize,
@@ -61,9 +56,9 @@ enum Direction {
 
 #[derive(Debug, Eq, PartialEq)]
 struct Seeker {
-    position: Dim2,
-    direction: Dir2,
-    trace: Vec<Dim2>,
+    position: Loc,
+    direction: Vec2,
+    trace: Vec<Loc>,
     plane_size: usize,
 }
 
@@ -97,7 +92,7 @@ impl Seeker {
             self.position.1 % self.plane_size
         }
     }
-    fn jump_parameters(&self) -> (Dim2, Dir2) {
+    fn jump_parameters(&self) -> (Loc, Vec2) {
         (
             (
                 self.position.0 / self.plane_size,
@@ -106,11 +101,11 @@ impl Seeker {
             self.direction,
         )
     }
-    fn jump_to(&mut self, pos: &Dim2) {
+    fn jump_to(&mut self, pos: &Loc) {
         self.position = *pos;
         self.trace.push(self.position);
     }
-    fn direction(&mut self, dir: &Dir2) {
+    fn direction(&mut self, dir: &Vec2) {
         self.direction = *dir;
     }
     fn go_forward(&mut self) {
@@ -138,7 +133,7 @@ impl Seeker {
             _ => unreachable!(),
         }
     }
-    fn next_position(&self) -> Dim2 {
+    fn next_position(&self) -> Loc {
         self.position.position_to_move(&self.direction)
     }
     #[allow(clippy::collapsible_else_if)]
@@ -238,9 +233,9 @@ impl Seeker {
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    map: HashMap<Dim2, char>,
-    ring_h: HashMap<Dim2, Dim2>,
-    ring_v: HashMap<Dim2, Dim2>,
+    map: HashMap<Loc, char>,
+    ring_h: HashMap<Loc, Loc>,
+    ring_v: HashMap<Loc, Loc>,
     path: Vec<Direction>,
     line: Vec<Vec<char>>,
     plane_size: usize,
