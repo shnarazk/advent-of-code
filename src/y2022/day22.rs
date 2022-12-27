@@ -335,7 +335,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.plane_size = (max_width + 1) / 3;
-        dbg!(self.plane_size);
+        assert_eq!(
+            self.plane_size, 50,
+            "This problem is configured just for the real problem."
+        );
         dbg!(&self.line.len());
         dbg!(&self.map.len());
         dbg!(&self.ring_h.len());
