@@ -17,4 +17,4 @@ Encode ← {
             (Encode n)∾'0'+c
   }
 }
-•Show Encode+´Decode¨ x
+•Out Encode+´Decode¨ x
