@@ -9,8 +9,8 @@ overlapping diamonds problem
 
 #### 'the intersection' of $(p_x,p_y)$ and $(q_x,q_y)$
 
-- $(x - p_x) + p_y = -(x - q_x) + q_y \longrightarrow x = (p_x + q_x - p_y + q_y)/2$ 
-- $-(x - p_x) + p_y = (x - q_x) + q_y \longrightarrow x = (p_x + q_x + p_y - q_y)/2$
+- $(x - p_x) + p_y = -(x - q_x) + q_y \longrightarrow x = (p_x + q_x - p_y + q_y)/2, y = (-p_x + 2q_x + 2q_y + p_y)/2$ 
+- $-(x - p_x) + p_y = (x - q_x) + q_y \longrightarrow x = (p_x + q_x + p_y - q_y)/2, y = (-3p_x - q_x + q_y + p_y)/2$
 
 ### day16 https://adventofcode.com/2022/day/16
 the first path finding problem of this year
