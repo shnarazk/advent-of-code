@@ -19,12 +19,6 @@ CrossPoint ← {
   ⟨f,g⟩ ← ⟨×by-ay, ×ty-sy⟩
   {
     f=g ? ⟨⟩;
-      # y = f×x-ax + ay
-      # y = g×x-sx + sy
-      # f(x-ax) + ay = g(x-sx) + sy
-      # fx - fax + ay = gx - gsx + sy
-      # (f-g)x = -gsx + sy + fax - ay
-      # x = (fax - gsx + sy - ay)/(f - g)
       x ← ((sy + f×ax)-(ay + g×sx))÷(f - g)
       y ← ay + x - ax
       (ax≤x)∧(x≤bx)∧(ay≤y)∧(y≤bx)?⟨x,y⟩;⟨⟩
@@ -46,7 +40,7 @@ Intersections ← {
       ⟨x2,y2⟩ ← ⟨px+py+qx+(-qy), (¯3×px)+(¯3×py)+(-qx)+qy⟩
       ⟨⟩⊸≢¨⊸/⟨{(2|x1)∨(2|y1) ? ⟨⟩; ⟨2÷˜x1,2÷˜y1⟩},{(2|x2)∨(2|y2) ? ⟨⟩; ⟨2÷˜x2,2÷˜y2⟩}⟩
   }
-  l ← ⟨ 
+  ⟨⟩⊸≢¨⊸/ ⟨ 
     ⟨ax,ay-ad,ax+ad,ay⟩ CP ⟨bx-bd,by,bx,by-bd⟩,
     ⟨ax,ay-ad,ax+ad,ay⟩ CP ⟨bx+bd,by,bx,by+bd⟩,
     ⟨ax,ay+ad,ax-ad,ay⟩ CP ⟨bx-bd,by,bx,by-bd⟩,
@@ -55,9 +49,8 @@ Intersections ← {
     ⟨ax,ay+ad,ax+ad,ay⟩ CP ⟨bx+bd,by,bx,by-bd⟩,
     ⟨ax,ay-ad,ax-ad,ay⟩ CP ⟨bx-bd,by,bx,by+bd⟩,
     ⟨ax,ay-ad,ax-ad,ay⟩ CP ⟨bx+bd,by,bx,by-bd⟩,
-
-  ⟩
-  ⟨⟩⊸≢¨⊸/l
+ ⟩
+  
 }
 cands ← ∧⍷∾⥊∘‿1⥊(Intersections⌜˜) sensors
 # •Show ∘‿1⥊(2727057⊸=⊑)¨⊸/cands
