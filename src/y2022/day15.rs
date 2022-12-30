@@ -2,61 +2,75 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
+        geometric::Dim2,
         regex,
     },
     std::collections::HashSet,
 };
 
-type Loc = (isize, isize);
+type Loc = Dim2<isize>;
 
 fn mdist(base: &Loc, target: &Loc) -> usize {
     base.0.abs_diff(target.0) + base.1.abs_diff(target.1)
 }
 
-struct BorderIterator {
-    now: Option<Loc>,
-    points: Vec<Loc>,
-    vec: Loc,
+fn cross_at((mut a, mut b): (Loc, Loc), (mut s, mut t): (Loc, Loc)) -> Option<Loc> {
+    if b.0 < a.0 {
+        std::mem::swap(&mut a, &mut b);
+    }
+    if t.0 < s.0 {
+        std::mem::swap(&mut s, &mut t);
+    }
+    let f = (b.1 - a.1).signum();
+    let g = (t.1 - s.1).signum();
+    if f == g {
+        return None;
+    }
+    let x = ((s.1 + f * a.0) - (a.1 + g * s.0)) / (f - g);
+    let y = a.1 + x - a.0;
+    ((a.0 <= x) && (x <= b.0) && (a.1 <= y) && (y <= b.1)).then_some((x, y))
 }
 
-impl Iterator for BorderIterator {
-    type Item = Loc;
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(ref mut p) = self.now {
-            if p == self.points.last().unwrap() {
-                self.points.pop();
-                self.vec = match self.points.len() {
-                    4 => (1, 1),
-                    3 => (-1, 1),
-                    2 => (-1, -1),
-                    1 => (1, -1),
-                    0 => {
-                        self.now = None;
-                        return self.now;
-                    }
-                    _ => unreachable!(),
-                };
-            }
-            p.0 += self.vec.0;
-            p.1 += self.vec.1;
-        }
-        self.now
-    }
-}
-
-fn out_of_border(sensor: &Loc, nearest: &Loc) -> BorderIterator {
-    let range = 1 + mdist(sensor, nearest) as isize;
-    BorderIterator {
-        now: Some((sensor.0, sensor.1 - range)),
-        points: vec![
-            (sensor.0, sensor.1 - range),
-            (sensor.0 - range, sensor.1),
-            (sensor.0, sensor.1 + range),
-            (sensor.0 + range, sensor.1),
-            (sensor.0, sensor.1 - range),
-        ],
-        vec: (1, 1),
-    }
+fn intersections(a: &Loc, ab: &Loc, b: &Loc, bb: &Loc) -> Vec<Loc> {
+    let d0 = mdist(a, ab) as isize + 1;
+    let d1 = mdist(b, bb) as isize + 1;
+    [
+        cross_at(
+            ((a.0, a.1 - d0), (a.0 + d0, a.1)),
+            ((b.0 - d1, b.1), (b.0, b.1 - d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 - d0), (a.0 + d0, a.1)),
+            ((b.0 + d1, b.1), (b.0, b.1 + d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 + d0), (a.0 - d0, a.1)),
+            ((b.0 - d1, b.1), (b.0, b.1 - d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 + d0), (a.0 - d0, a.1)),
+            ((b.0 + d1, b.1), (b.0, b.1 + d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 + d0), (a.0 + d0, a.1)),
+            ((b.0 - d1, b.1), (b.0, b.1 + d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 + d0), (a.0 + d0, a.1)),
+            ((b.0 + d1, b.1), (b.0, b.1 - d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 - d0), (a.0 - d0, a.1)),
+            ((b.0 - d1, b.1), (b.0, b.1 + d1)),
+        ),
+        cross_at(
+            ((a.0, a.1 - d0), (a.0 - d0, a.1)),
+            ((b.0 + d1, b.1), (b.0, b.1 - d1)),
+        ),
+    ]
+    .iter()
+    .filter_map(|s| *s)
+    .collect::<Vec<_>>()
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -119,8 +133,8 @@ impl AdventOfCode for Puzzle {
         total - on_target.len()
     }
     fn part2(&mut self) -> Self::Output2 {
+        const BOUNDARY: isize = 4000000; // 20
         for (sensor, beacon) in self.line.iter() {
-            const BOUNDARY: isize = 4000000; // 20
             let r = mdist(sensor, beacon);
             let overlapped = self
                 .line
@@ -128,11 +142,14 @@ impl AdventOfCode for Puzzle {
                 .filter(|(s, b)| mdist(sensor, s) <= 1 + r + mdist(s, b))
                 .map(|(s, b)| (*s, *b))
                 .collect::<Vec<(Loc, Loc)>>();
-            for o in out_of_border(sensor, beacon)
-                .filter(|o| 0 <= o.0 && o.0 <= BOUNDARY && 0 <= o.1 && o.1 <= BOUNDARY)
-            {
-                if overlapped.iter().all(|(s, b)| mdist(s, b) < mdist(s, &o)) {
-                    return (o.0 * 4000000 + o.1) as usize;
+            for (s, b) in overlapped.iter() {
+                for o in intersections(sensor, beacon, s, b)
+                    .iter()
+                    .filter(|o| 0 <= o.0 && o.0 <= BOUNDARY && 0 <= o.1 && o.1 <= BOUNDARY)
+                {
+                    if overlapped.iter().all(|(s, b)| mdist(s, b) < mdist(s, o)) {
+                        return (o.0 * 4000000 + o.1) as usize;
+                    }
                 }
             }
         }
