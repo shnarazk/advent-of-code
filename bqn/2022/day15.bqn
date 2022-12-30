@@ -12,7 +12,7 @@ on_mark ← ≠⍷{⟨2⊑𝕩,3⊑𝕩⟩}¨((p1⊸=)∘(3⊸⊑))¨⊸/ data
 F ← { ⟨s, e⟩ 𝕊 ⟨total, start, end⟩ : {s ≤ end ? ⟨total,start,e⌈end⟩; ⟨total+end-start+1,s,e⟩} }
 •Show on_mark + {0⊑𝕩+2⊑𝕩-1⊑𝕩+1} ⟨0,0⊑¯1⊑b,1⊑¯1⊑b⟩F´b
 p2 ← 4000000
-Intersections ← {
+Intersections_na ← {
   ⟨ax,ay,ad1⟩ ← 𝕨
   ⟨bx,by,bd1⟩ ← 𝕩
   ad ← ad1 + 1
@@ -26,25 +26,71 @@ Intersections ← {
       ⟨⟩⊸≢¨⊸/⟨{(2|x1)∨(2|y1) ? ⟨⟩; ⟨2÷˜x1,2÷˜y1⟩},{(2|x2)∨(2|y2) ? ⟨⟩; ⟨2÷˜x2,2÷˜y2⟩}⟩
   }
 }
+CrossPoint ← {
+  ⟨ax,ay,bx,by⟩ ← 𝕨
+  ⟨sx,sy,tx,ty⟩ ← 𝕩
+  ⟨f,g⟩ ← ⟨×by-ay, ×ty-sy⟩
+  {
+    f=g ? ⟨⟩;
+      # y = f×x-ax + ay
+      # y = g×x-sx + sy
+      # f(x-ax) + ay = g(x-sx) + sy
+      # fx - fax + ay = gx - gsx + sy
+      # (f-g)x = -gsx + sy + fax - ay
+      # x = (fax - gsx + sy - ay)/(f - g)
+      x ← ((sy + f×ax)-(ay + g×sx))÷(f - g)
+      y ← ay + x - ax
+      (ax≤x)∧(x≤bx)∧(ay≤y)∧(y≤bx)?⟨x,y⟩;⟨⟩
+  }
+}
+CP ← { ⟨ax,ay,bx,by⟩ 𝕊 ⟨sx,sy,tx,ty⟩:
+  { ax<bx ? ⟨ax,ay,bx,by⟩; ⟨bx,by,ax,ay⟩} CrossPoint { sx<tx ? ⟨sx,sy,tx,ty⟩; ⟨tx,ty,sx,sy⟩}
+}
+Intersections ← {
+  ⟨ax,ay,ad1⟩ ← 𝕨
+  ⟨bx,by,bd1⟩ ← 𝕩
+  ad ← ad1 + 1
+  bd ← bd1 + 1
+  ⟨_pd,px,py⟩ ← ⊑∧{⟨⟨1⊑𝕩,1⊑𝕩⟩ Mdist ⟨bx,by⟩,0⊑𝕩,1⊑𝕩⟩}¨⟨⟨ax,ay+ad⟩,⟨ax,ay-ad⟩,⟨ax+ad,ay⟩,⟨ax-ad,ay⟩⟩
+  ⟨_qd,qx,qy⟩ ← ⊑∧{⟨⟨0⊑𝕩,1⊑𝕩⟩ Mdist ⟨ax,ay⟩,0⊑𝕩,1⊑𝕩⟩}¨⟨⟨bx,by+bd⟩,⟨bx,by-bd⟩,⟨bx+bd,by⟩,⟨bx-bd,by⟩⟩
+  {
+    (px≡qx)∧(py≡qy) ? ⟨⟩;
+      ⟨x1,y1⟩ ← ⟨px+(-py)+qx+qy, (-px)+(2×py)+(2×qx)+qy⟩
+      ⟨x2,y2⟩ ← ⟨px+py+qx+(-qy), (¯3×px)+(¯3×py)+(-qx)+qy⟩
+      ⟨⟩⊸≢¨⊸/⟨{(2|x1)∨(2|y1) ? ⟨⟩; ⟨2÷˜x1,2÷˜y1⟩},{(2|x2)∨(2|y2) ? ⟨⟩; ⟨2÷˜x2,2÷˜y2⟩}⟩
+  }
+  l ← ⟨ 
+    ⟨ax,ay-ad,ax+ad,ay⟩ CP ⟨bx-bd,by,bx,by-bd⟩,
+    ⟨ax,ay-ad,ax+ad,ay⟩ CP ⟨bx+bd,by,bx,by+bd⟩,
+    ⟨ax,ay+ad,ax-ad,ay⟩ CP ⟨bx-bd,by,bx,by-bd⟩,
+    ⟨ax,ay+ad,ax-ad,ay⟩ CP ⟨bx+bd,by,bx,by+bd⟩, 
+    ⟨ax,ay+ad,ax+ad,ay⟩ CP ⟨bx-bd,by,bx,by+bd⟩,
+    ⟨ax,ay+ad,ax+ad,ay⟩ CP ⟨bx+bd,by,bx,by-bd⟩,
+    ⟨ax,ay-ad,ax-ad,ay⟩ CP ⟨bx-bd,by,bx,by+bd⟩,
+    ⟨ax,ay-ad,ax-ad,ay⟩ CP ⟨bx+bd,by,bx,by-bd⟩,
+
+  ⟩
+  ⟨⟩⊸≢¨⊸/l
+}
 # •Show ∘‿1⥊∧⍷⥊Intersections⌜˜ sensors
 # •Show ⥊Intersections⌜˜ 3↑sensors
 # •Show cands ← ∘‿1⥊∧⍷∾⥊∘‿1⥊(Intersections⌜˜) sensors
 cands ← ∧⍷∾⥊∘‿1⥊(Intersections⌜˜) sensors
 •Show ∘‿1⥊(2727057⊸=⊑)¨⊸/cands
-CheckAround ← {
-  ⟨sx,sy,d⟩ 𝕊 0:
-    ss ← {(⟨sx,sy⟩ Mdist ⟨0⊑𝕩,1⊑𝕩⟩)≤1+2⊑𝕩+d}¨⊸/sensors
-    Sat ← { 𝕊 c: (0≤0⊑c)∧(0⊑c≤p2)∧(0≤1⊑c)∧(1⊑c≤p2) ? ∧´{2⊑𝕩<c Mdist ⟨0⊑𝕩,1⊑𝕩⟩}¨ ss; 0 }
-    p ← d+1
-    l ← ↕p
-    k ← (Sat¨⊸/{⟨sx+𝕩,(sy-p)+𝕩⟩}¨l) ∾(Sat¨⊸/{⟨(sx+p)-𝕩,sy+𝕩⟩}¨l) ∾(Sat¨⊸/{⟨sx-𝕩,(sy+p)-𝕩⟩}¨l) ∾(Sat¨⊸/{⟨(sx-p)+𝕩,sy-𝕩⟩}¨l)
-    { k≢⟨⟩ ? •Show k;@ }
-    { k≡⟨⟩ ? 0; {(1⊑𝕩)+(0⊑𝕩)×p2}⊑k };
-  𝕨 𝕊 n: n  
-}
-•Show 0 CheckAround´ sensors
+# CheckAround ← {
+#   ⟨sx,sy,d⟩ 𝕊 0:
+#     ss ← {(⟨sx,sy⟩ Mdist ⟨0⊑𝕩,1⊑𝕩⟩)≤1+2⊑𝕩+d}¨⊸/sensors
+#     Sat ← { 𝕊 c: (0≤0⊑c)∧(0⊑c≤p2)∧(0≤1⊑c)∧(1⊑c≤p2) ? ∧´{2⊑𝕩<c Mdist ⟨0⊑𝕩,1⊑𝕩⟩}¨ ss; 0 }
+#     p ← d+1
+#     l ← ↕p
+#     k ← (Sat¨⊸/{⟨sx+𝕩,(sy-p)+𝕩⟩}¨l) ∾(Sat¨⊸/{⟨(sx+p)-𝕩,sy+𝕩⟩}¨l) ∾(Sat¨⊸/{⟨sx-𝕩,(sy+p)-𝕩⟩}¨l) ∾(Sat¨⊸/{⟨(sx-p)+𝕩,sy-𝕩⟩}¨l)
+#     { k≢⟨⟩ ? •Show k;@ }
+#     { k≡⟨⟩ ? 0; {(1⊑𝕩)+(0⊑𝕩)×p2}⊑k };
+#   𝕨 𝕊 n: n  
+# }
+# •Show 0 CheckAround´ sensors
 Sat ← { 
-  c 𝕊 0: {(0≤0⊑c)∧(0⊑c≤p2)∧(0≤1⊑c)∧(1⊑c≤p2) ? ∧´{2⊑𝕩<c Mdist ⟨0⊑𝕩,1⊑𝕩⟩}¨ sensors; 0};
+  c 𝕊 0: {(0≤0⊑c)∧(0⊑c≤p2)∧(0≤1⊑c)∧(1⊑c≤p2) ? { ∧´{2⊑𝕩<c Mdist ⟨0⊑𝕩,1⊑𝕩⟩}¨ sensors ? (1⊑c)+(0⊑c)×p2; 0}; 0};
   c 𝕊 n: n
 }
 •Show 0 Sat´ cands
