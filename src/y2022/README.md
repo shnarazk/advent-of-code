@@ -10,8 +10,8 @@ overlapping diamonds problem
 #### 'the intersection' of $(p_x,p_y)$ and $(q_x,q_y)$
 ![geogebra-export-3](https://user-images.githubusercontent.com/997855/210023849-64c6c25b-8d7d-47c7-8f7d-72db4ea0e152.svg)
 
-- $(x - p_x) + p_y = -(x - q_x) + q_y \longrightarrow x = (p_x + q_x - p_y + q_y)/2, y = (-p_x + 2q_x + 2q_y + p_y)/2$ 
-- $-(x - p_x) + p_y = (x - q_x) + q_y \longrightarrow x = (p_x + q_x + p_y - q_y)/2, y = (-3p_x - q_x + q_y + p_y)/2$
+- $(x - p_x) + p_y = -(x - q_x) + q_y \longrightarrow x = (p_x + q_x - p_y + q_y)/2, y = (-p_x + 2q_x + p_y + 2q_y)/2$ 
+- $-(x - p_x) + p_y = (x - q_x) + q_y \longrightarrow x = (p_x + q_x + p_y - q_y)/2, y = (-3p_x - q_x -3p_y + q_y)/2$
 
 ### day16 https://adventofcode.com/2022/day/16
 the first path finding problem of this year
