@@ -1,6 +1,6 @@
 #!/usr/bin/env cbqn
 lib ← •Import "../lib.bqn"
-n ← ≠data ← ∾lib.parseInts¨ •Flines "data/2022/input-day20.txt" lib.DataFile ⟨⟩ # •args
+n ← ≠data ← ∾lib.parseInts¨ •Flines "data/2022/input-day20.txt" lib.DataFile •args
 ⟨next, prev⟩ ← ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+)) ↕n
 Shift ← { 𝕊 i: 
   j ← i
@@ -12,26 +12,13 @@ Shift ← { 𝕊 i:
   }
   {
     0=step ? @;
-    prev_i ← i⊑prev
-    next_i ← i⊑next
-    next_j ← j⊑next
-    next ↩ next_i˙⌾(prev_i⊸⊑) next
-    next ↩ i˙⌾(j⊸⊑) next
-    next ↩ next_j˙⌾(i⊸⊑) next
-    prev ↩ i˙⌾(next_j⊸⊑) prev
-    prev ↩ j˙⌾(i⊸⊑) prev
-    prev ↩ prev_i˙⌾(next_i⊸⊑) prev
+    ⟨prev_i,next_i,next_j⟩ ← ⟨i⊑prev,i⊑next,j⊑next⟩
+    next ↩ next_j˙⌾(i⊸⊑) i˙⌾(j⊸⊑) next_i˙⌾(prev_i⊸⊑) next
+    prev ↩ prev_i˙⌾(next_i⊸⊑) j˙⌾(i⊸⊑) i˙⌾(next_j⊸⊑) prev
   }
 }
-z ← ⊑data ⊐ <0
-Trace ← { data⊑˜{𝕩⊑next}⍟𝕩 z }
-Print ← {
-  •Out "print"
-  {•Show 𝕩⊑data⋄ 𝕩⊑next}⍟n 𝕩
-  @
-}
+Trace ← { data⊑˜{𝕩⊑next}⍟𝕩 ⊑data ⊐ <0 }
 Shift¨ ↕n
-# •Show Print z
 •Show +´Trace¨ 1000‿2000‿3000 
 
 data ↩ 811589153×¨ data
