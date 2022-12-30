@@ -28,9 +28,13 @@ Trace ← { data⊑˜{𝕩⊑next}⍟𝕩 z }
 Print ← {
   •Out "print"
   {•Show 𝕩⊑data⋄ 𝕩⊑next}⍟n 𝕩
-  •Out "end"
   @
 }
 Shift¨ ↕n
 # •Show Print z
+•Show +´Trace¨ 1000‿2000‿3000 
+
+data ↩ 811589153×¨ data
+⟨next, prev⟩ ↩ ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+)) ↕n
+{Shift¨ ↕n⋄ 1+𝕩}⍟10 0
 •Show +´Trace¨ 1000‿2000‿3000 
