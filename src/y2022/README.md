@@ -8,6 +8,7 @@ buckets floading problem similar with [y2018 day17](https://adventofcode.com/201
 overlapping diamonds problem
 
 #### 'the intersection' of $(p_x,p_y)$ and $(q_x,q_y)$
+![geogebra-export](https://user-images.githubusercontent.com/997855/210022794-22069620-601e-486a-a27a-707096ba3b86.svg)
 
 - $(x - p_x) + p_y = -(x - q_x) + q_y \longrightarrow x = (p_x + q_x - p_y + q_y)/2, y = (-p_x + 2q_x + 2q_y + p_y)/2$ 
 - $-(x - p_x) + p_y = (x - q_x) + q_y \longrightarrow x = (p_x + q_x + p_y - q_y)/2, y = (-3p_x - q_x + q_y + p_y)/2$
