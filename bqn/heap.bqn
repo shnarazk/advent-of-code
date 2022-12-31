@@ -23,6 +23,7 @@ Heap ← {𝕤
     }
   }
   Pop ⇐ { 𝕤
+    # TODO: use swapping with the last element approarch
     v ← ⊑l
     l ↩ 1↓l
     Shiftdown 1
@@ -51,4 +52,4 @@ h.Push 20
 h.Push 3
 h.Push 8
 h.Push 2
--•Show h.Dump @
+•Show h.Dump @
