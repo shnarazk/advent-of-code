@@ -52,4 +52,19 @@ but the following does:
 {•Show "run" ⋄ 𝕩}⍟10 0
 ```
 
+So I revised the line like:
+
+```diff
+diff --git a/bqn/2022/day20.bqn b/bqn/2022/day20.bqn
+index 3330959..2b07000 100755
+--- a/bqn/2022/day20.bqn
++++ b/bqn/2022/day20.bqn
+@@ -23,5 +23,5 @@ Shift¨ ↕n
+ data ↩ 811589153×¨ data
+ ⟨next, prev⟩ ↩ ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+)) ↕n
+-{Shift¨ ↕n⋄ 1+𝕩}⍟10 0
++n {Shift¨ ↕𝕨}⍟10 0
+ •Show +´Trace¨ 1000‿2000‿3000
+```
+
 [online REPL](https://bqnpad.mechanize.systems/s?bqn=eyJkb2MiOiLin6h74oCiU2hvdyBcImluY3JlbWVudFwiIOKLhCAxK%2FCdlal94o2fNCAwLCB74oCiU2hvdyBcImNvbnN0YW50XCIg4ouEIDF94o2fNCAwLCB74oCiU2hvdyBcImNvbnN1bWVcIiDii4Qg8J2VqX3ijZ80IDDin6kiLCJwcmV2U2Vzc2lvbnMiOltdLCJjdXJyZW50U2Vzc2lvbiI6eyJjZWxscyI6W10sImNyZWF0ZWRBdCI6MTY3MjE5NjY2MjcxOH0sImN1cnJlbnRDZWxsIjp7ImZyb20iOjAsInRvIjo4OCwicmVzdWx0IjpudWxsfX0%3D)
