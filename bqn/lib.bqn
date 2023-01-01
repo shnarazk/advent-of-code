@@ -1,6 +1,7 @@
 ⟨
   If, IfElse, While, DoWhile, For,
   Match, Select, Switch, Test,
+  Swap,
   Tokenize, StartsWith, ParseInts, ParseInt,
   MaxAt, MinAt,
   DataFile,
@@ -13,9 +14,18 @@ DoWhile ← {𝕏@ ⋄ While 𝕨‿𝕩}´
 For     ← {I‿C‿P‿A: I@ ⋄ While⟨C,P∘A⟩}
 Match   ← {𝕏𝕨}´
 Select  ← {(⊑𝕩)◶(1↓𝕩)@}
-Switch ← {c←⊑𝕩 ⋄ m‿a←<˘⍉∘‿2⥊1↓𝕩 ⋄ (m⊸⊐⌾<C)◶a@}
+Switch  ← {c←⊑𝕩 ⋄ m‿a←<˘⍉∘‿2⥊1↓𝕩 ⋄ (m⊸⊐⌾<C)◶a@}
 Test    ← {fn←{C‿A𝕊e:C◶A‿E}´𝕩⋄Fn@}
+
+#
+# list operations
+#
+# i‿j Swap list: swap the `i`-th element and the `j`-th one in the `list` 
+Swap ← {⟨i,j⟩←⟨⊑𝕨,1⊑𝕨⟩ ⋄ ⟨a,b⟩←⟨i⊑𝕩,j⊑𝕩⟩ ⋄ a˙⌾(j⊸⊑)b˙⌾(i⊸⊑)𝕩}
+
+#
 # string operations
+#
 StartsWith ← { (≠𝕨) < (≠𝕩) ? 0 ; 0 = (<˘(≠𝕩)↕𝕨) ⊑∘⊐⟜< 𝕩 }
 ParseInts ← {
   IsNum ← { (('0' ≤ 𝕩) ∧ (𝕩 ≤ '9')) ∨ ('-' = 𝕩) }
@@ -27,14 +37,19 @@ Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
 }
+
+#
 # math functions
+#
 # what are they? Element-based one?
 MaxAt ← {(⌈´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 MinAt ← {(⌊´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
 
+#
 # file operations
+#
 DataFile ← {
   0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩;
            •wdpath∾ "/"∾ 𝕨
 }
-version ← "0.1.5"
+version ← "0.2.0"
