@@ -20,8 +20,12 @@ Test    ← {fn←{C‿A𝕊e:C◶A‿E}´𝕩⋄Fn@}
 #
 # list operations
 #
+#     Swap list: swap the first element and the second one in the `list` 
 # i‿j Swap list: swap the `i`-th element and the `j`-th one in the `list` 
-Swap ← {⟨i,j⟩←⟨⊑𝕨,1⊑𝕨⟩ ⋄ ⟨a,b⟩←⟨i⊑𝕩,j⊑𝕩⟩ ⋄ a˙⌾(j⊸⊑)b˙⌾(i⊸⊑)𝕩}
+Swap ← {
+        𝕊 l: ⟨a,b⟩←⟨⊑𝕩,1⊑𝕩⟩ ⋄ b˙⌾⊑a˙⌾(1⊸⊑) 𝕩;
+  ⟨i,j⟩ 𝕊 l: ⟨a,b⟩←⟨i⊑𝕩,j⊑𝕩⟩ ⋄ b˙⌾(i⊸⊑)a˙⌾(j⊸⊑)𝕩
+}
 
 #
 # string operations
@@ -52,4 +56,4 @@ DataFile ← {
   0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩;
            •wdpath∾ "/"∾ 𝕨
 }
-version ← "0.2.0"
+version ← "0.2.1"
