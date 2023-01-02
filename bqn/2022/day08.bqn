@@ -1,25 +1,16 @@
 #!/usr/bin/env cbqn
-⟨DataFile⟩ ← •Import "../lib.bqn"
-map ← '0'-˜˜˜ •FLines "data/2022/input-day08.txt" DataFile •args
-map_height ← ≠map
-map_width ← ≠⊑map
-•Show ⟨map_height, map_width⟩ 
-At ← { F ⟨x, y⟩ : y⊑x⊑map }
-Part1 ← { F ⟨x, y⟩ :
-  Sight ← {4‿∘⥊⟨(𝕨⊸⋈¨↕𝕩), (𝕨⊸⋈¨(1+𝕩)↓↕map_height), (⋈⟜𝕩¨↕𝕨), (⋈⟜𝕩¨(1+𝕨)↓↕map_width)⟩}
-  Invisible ← {0⌈´(𝕨≤At)¨𝕩} 
-  ¬∧´⥊ (At ⟨x, y⟩) Invisible¨ x Sight y
+⟨DataFile, _uncurry⟩ ← •Import "../lib.bqn"
+map ← (⋈˜∘√∘≠)⊸⥊∾'0'-˜˜˜ •FLines "data/2022/input-day08.txt" DataFile ⟨⟩ # •args
+Sight ← {⟨⌽(𝕨⊸⋈¨↕𝕩),(𝕨⊸⋈¨(1+𝕩)↓↕⊑≢map),⌽(⋈⟜𝕩¨↕𝕨),(⋈⟜𝕩¨(1+𝕨)↓↕1⊑≢map)⟩}_uncurry
+
+Part1 ← {
+  Visible ← {w F xs: ∧´{w≥○(map˙⊸(⊑˜))𝕩}¨xs}
+  ∨´{w F dirs: {w Visible 𝕩}¨dirs}⟜Sight 𝕩
 }
-•Show +´Part1¨⥊ (↕map_width) ⋈⌜ (↕map_height)
-ScenicScore ← { F ⟨x, y⟩ :
-  Sight ← {4‿∘⥊⟨⌽(𝕨⊸⋈¨↕𝕩), (𝕨⊸⋈¨(1+𝕩)↓↕map_height), ⌽(⋈⟜𝕩¨↕𝕨), (⋈⟜𝕩¨(1+𝕨)↓↕map_width)⟩}
-  h ← At ⟨x, y⟩
-  Blocking ← {
-    0 = ≠𝕩 ? 0;
-    i ← ⊑⟨1⟩⊐˜(h≤At)¨𝕩
-    i<≠𝕩 ? 1+i;
-    ≠𝕩
-  }
-  ×´⥊Blocking¨ x Sight y
+•Show +´Part1¨⥊(⋈⌜○↕)_uncurry ≢map
+
+Part2 ← {
+  Blocking ← {w F xs: {0 = ≠xs ? 0; i ← ⊑⟨1⟩⊐˜{w≤○(map˙⊸(⊑˜))𝕩}¨xs⋄ i<≠xs ? 1+i; ≠xs}}
+  ×´{w F dirs: {w Blocking 𝕩}¨dirs}⟜Sight 𝕩
 }
-•Show ⌈´ScenicScore¨⥊ (↕map_width) ⋈⌜ (↕map_height)
+•Show ⌈´Part2¨⥊(⋈⌜○↕)_uncurry ≢map
