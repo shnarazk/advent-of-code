@@ -5,5 +5,5 @@ Sight ← {𝕊 ⟨w,x⟩: w ((x⊸(⋈˜)¨¨⊣)∾(w⊸⋈¨¨⊢))○{𝕊 p
 _alldirs_ ← {F _𝕣_ G 𝕩: {w H dirs: 4=≠dirs ? G´{w F 𝕩}¨dirs; 0}⟜Sight 𝕩}
 Invisible ← {w F xs: ∨´{w≤○(map˙⊸(⊑˜))𝕩}¨xs}
 •Show +´¬¨(Invisible _alldirs_ ∧)¨⥊(⋈⌜○↕)_uncurry ≢map
-Blocking ← {w F xs: {0=≠xs ? 0; i ← ⊑⟨1⟩⊐˜{w≤○(map˙⊸(⊑˜))𝕩}¨xs⋄ i<≠xs ? 1+i; ≠xs}}
+Blocking ← {w F xs: (≠xs)⌊1+⊑⟨1⟩⊐˜{w≤○(map˙⊸(⊑˜))𝕩}¨xs}
 •Show ⌈´(Blocking _alldirs_ ×)¨⥊(⋈⌜○↕)_uncurry ≢map
