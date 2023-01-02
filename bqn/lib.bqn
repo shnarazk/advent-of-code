@@ -1,5 +1,5 @@
 ⟨
-  _uncurry, If, IfElse, While, DoWhile, For,
+  If, IfElse, While, DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
   Tokenize, StartsWith, ParseInts, ParseInt,
@@ -12,7 +12,6 @@
 #
 # program structure
 #
-_uncurry ← { 𝔽_𝕣 ⟨w,x⟩: w 𝔽 x }
 If      ← {𝕏⍟𝕎@}´                 # Also Repeat
 IfElse  ← {c‿T‿F: c◶F‿T@}
 While   ← {𝕩{𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´  # While 1‿{... to run forever
