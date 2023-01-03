@@ -18,6 +18,9 @@ _to_heap ⇐ {𝔽_𝕣:
       {c Ord p ? l ↩ p˙⌾(n⊸⊑)c˙⌾(m⊸⊑)l ⋄ ShiftUp m; @}
     }
   }
+  Empty ⇐ { 𝕤
+    0=≠l 
+  }
   Pop ⇐ { 𝕤
     n ← ¯1+≠l
     ⟨v,u⟩ ← ⟨⊑l,n⊑l⟩
