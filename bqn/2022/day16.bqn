@@ -1,7 +1,7 @@
 #!/usr/bin/env cbqn
 ⟨DataFile,ParseInts,Swap,While⟩ ← •Import "../lib.bqn"
 ⟨_to_heap⟩ ← •Import "../heap.bqn"
-data ← (Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16-0.txt" DataFile ⟨⟩ # •args
+data ← (Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16.txt" DataFile ⟨⟩ # •args
 nodes ← ∧⍷⊑¨data
 ! 0=⊑nodes⊐<"AA" # Product ← +˝∘×⎉1‿∞
 label_pairs ← ∧∾(⊏(∾○<)¨(2⊸↓))¨data
@@ -27,7 +27,9 @@ Expand ← {limit F ⟨time, flow, pos, states⟩:
       # visited requires a key: ⟨current_location, current_time, visited_map⟩ 
       key_index ← ⊑(⊑˘visited)⊐⟨key ← ⟨next_pos, new_time, new_states⟩⟩
       {key_index<≠visited ?@; visited (∾⟜(∘‿2⥊⟨<key,0⟩))↩} # ensure the key exists
-      so_far ← key_index‿1⊑visited
+      # so_far ← key_index‿1⊑visited
+      so_far ← ⌈´{•Show "??k"⋄•Show ⊑𝕩⋄((⊑𝕩)‿1)⊑visited}¨∾{F x: ∾∘((⟨⊑key,x,2⊑key⟩⊸≡⟜(⊑⊑))¨/((↕≠)(⋈¨)⊢)) ⥊<˘visited}¨↕new_time
+      # so_far ← ⌈´{(⊑𝕩)‿1⊑visited}¨∾{F x:•Show (⟨⊑key,x,2⊑key⟩⊸≡⟜(⊑⊑))¨⥊<˘visited⋄ ∾∘((⟨⊑key,x,2⊑key⟩⊸≡⟜(⊑⊑))¨/((↕≠)(⋈¨)⊢)) ⥊<˘visited}¨↕new_time
       {new_flow ≤ so_far ?@;
         visited ↩ new_flow˙⌾(key_index‿1⊸⊑) visited
         to_visit.Push new
