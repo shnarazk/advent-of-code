@@ -1,46 +1,28 @@
 #!/usr/bin/env cbqn
-⟨DataFile,ParseInts,Swap⟩ ← •Import "../lib.bqn"
+⟨DataFile,ParseInts,Swap,While⟩ ← •Import "../lib.bqn"
 ⟨_to_heap⟩ ← •Import "../heap.bqn"
-data ← (Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16.txt" DataFile ⟨⟩ # •args
+data ← (Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16-0.txt" DataFile ⟨⟩ # •args
 nodes ← ∧⍷⊑¨data
 ! 0=⊑nodes⊐<"AA" # Product ← +˝∘×⎉1‿∞
 label_pairs ← ∧∾(⊏(∾○<)¨(2⊸↓))¨data
 pairs ← {𝕊 ⟨a,b⟩: ⟨⊑nodes⊒<a,⊑nodes⊒<b⟩}¨label_pairs
-# dist ← { 𝕨≡𝕩 ? 0 ; ⊑pairs∊˜⋈⟨𝕨,𝕩⟩ ? 1; ∞}⌜˜↕≠nodes
-Distance ← ⌊˝∘+⎉1‿∞
-dist ← Distance⍟(≠nodes)˜ { 𝕨≡𝕩 ? 0 ; ⊑pairs∊˜⋈⟨𝕨,𝕩⟩ ? 1; ∞}⌜˜↕≠nodes
-# •Show 2⊏dist # ↩ dist Distance⍟(≠nodes) dist
+dist ← (⌊˝∘+⎉1‿∞)⍟(≠nodes)˜ { 𝕨≡𝕩 ? 0 ; ⊑pairs∊˜⋈⟨𝕨,𝕩⟩ ? 1; ∞}⌜˜↕≠nodes
 To_visit ← (⊑∘⊑∘<)_to_heap
-to_visit.Push<initial_state ← ⟨0, 0, 0, 0˙¨↕≠nodes⟩
-visited ← ⟨⟩
-cand ← ⟨⟩
-ExpandState ← { F ⟨time, flow, pos, states⟩:
-  # •Show "time"‿time
-  next_poses ← ((↕≠)⋈¨⊢) pos⊏dist
+to_visit.Push<initial_state ← ⟨0, 0, 0, (0⊸=)¨↕≠nodes⟩
+visited ← ⟨<initial_state⟩
+ExpandState ← { limit F ⟨time, flow, pos, states⟩:
   {F ⟨next_pos,cost⟩:
-    # •Show "next_pos"‿next_pos
-    # •Show "state"‿states
-    {next_pos⊸⊑states ? @;
-      new_states ← 1˙⌾(next_pos⊸⊑)states
-      {⊑(<states)∊visited ? @;
-        # TODO: visited (states⊸∾)↩
-        # •Show time+cost
-        to_visit.Push<⟨time+cost,flow+1⊑next_pos⊑data,next_pos,new_states⟩
-      }
+    {(next_pos=pos)∨(next_pos⊑states)∨(limit<time+cost) ? @;
+      ! 0<time+cost
+      new ← ⟨time+cost,flow+1⊑next_pos⊑data,next_pos,1˙⌾(next_pos⊸⊑)states⟩
+      # •Show visited
+      {visited(⊑∊)˜⟨<new⟩ ? @; visited (⟨<new⟩⊸∾)↩⋄  to_visit.Push<new}
     }
-  }¨ next_poses
-  0
+  }¨ ((↕≠)⋈¨⊢) pos⊏dist
 }
-Traverse ← { F cands: 
-  {to_visit.Empty @ ? cands;
-    # •Show to_visit.Dump @
-    state ← to_visit.Pop @
-    # •Show "state"‿state
-    # •Show 26⊸≤⊑state
-    {26⊸≤⊑state ? cand (1⊑state⊸∾)↩ ;
-      ExpandState state
-    }
-    Traverse cands
-  }
+Traverse ← { limit F cands: 
+  While {𝕤⋄ ¬to_visit.Empty @}‿{𝕤⋄ state ← to_visit.Pop @⋄ ! 0< ≠state⋄ cands ↩ ⍷(1⊑state)∾cands⋄ limit ExpandState state}
+  cands
 }
-•Show ⊑∨Traverse ⟨⟩
+•Show ⊑∨ 26 Traverse ⟨0⟩
+•Out "done"
