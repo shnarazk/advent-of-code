@@ -25,9 +25,9 @@ Expand ← {limit F ⟨flow, time, pos, states⟩:
     }
   }¨ ((↕≠)⋈¨⊢) pos⊏dist
 }
-Serch ← {F limit:
+Search ← {F limit:
   cand ← 0
   While {𝕤⋄ ¬to_visit.Empty @}‿{𝕤⋄ state ← to_visit.Pop @⋄ cand ↩ cand⌈⊑state⋄ limit Expand state}
   cand
 }
-•Show Serch 30
+•Show Search 30
