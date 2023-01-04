@@ -9,14 +9,29 @@ pairs ← {𝕊 ⟨a,b⟩: ⟨⊑nodes⊒<a,⊑nodes⊒<b⟩}¨label_pairs
 dist ← (⌊˝∘+⎉1‿∞)⍟(≠nodes)˜ {𝕨≡𝕩 ? 0; ⊑pairs∊˜⋈⟨𝕨,𝕩⟩ ? 1; ∞}⌜˜↕≠nodes
 To_visit ← (<○⊑)_to_heap
 to_visit.Push initial_state ← <⟨0, 0, 0, (0⊸=)¨↕≠nodes⟩
-visited ← ⟨initial_state⟩
+# initialize   : d ← ∘‿2⥊∾{⟨<⟨𝕩,33⟩,0⟩}¨↕3
+# add an itme  : d ((∘‿2⥊⟨<⟨88,55⟩,1⟩)⊸∾)↩
+# update value : d ↩ 3˙⌾(2‿1⊸⊑) d
+# contain key  : (⊑(⊑˘d)⊐⟨⟨1,¯1⟩⟩)<≠d
+# access by key: (⊑(⊑˘d)⊐⟨⟨1,33⟩⟩)‿1⊑d
+# visited is a map from ⟨current_location, current_time, visited_map⟩ to reward
+visited ← ∘‿2⥊⟨<⟨0, 0, 3⊑⊑initial_state⟩, 0⟩
+•Show visited
 Expand ← {limit F ⟨time, flow, pos, states⟩:
   {F ⟨next_pos,cost⟩:
-    {(next_pos=pos)∨(next_pos⊑states)∨(limit<time+cost) ? @;
+    {(next_pos=pos)∨(next_pos⊑states)∨(limit<time+cost) ?@;
       new_time ← 1+time+cost
-      gain ← (limit-new_time)×1⊑next_pos⊑data
-      new ← <⟨new_time,flow+gain,next_pos,1˙⌾(next_pos⊸⊑)states⟩
-      {visited(⊑∊)˜⟨new⟩ ? @; visited (⟨new⟩⊸∾)↩⋄  to_visit.Push new}
+      new_flow ← flow + (limit-new_time)×1⊑next_pos⊑data
+      new_states ← 1˙⌾(next_pos⊸⊑)states
+      new ← <⟨new_time,new_flow,next_pos,new_states⟩
+      # visited requires a key: ⟨current_location, current_time, visited_map⟩ 
+      key_index ← ⊑(⊑˘visited)⊐⟨key ← ⟨next_pos, new_time, new_states⟩⟩
+      {key_index<≠visited ?@; visited (∾⟜(∘‿2⥊⟨<key,0⟩))↩} # ensure the key exists
+      so_far ← key_index‿1⊑visited
+      {new_flow ≤ so_far ?@;
+        visited ↩ new_flow˙⌾(key_index‿1⊸⊑) visited
+        to_visit.Push new
+      }
     }
   }¨ ((↕≠)⋈¨⊢) pos⊏dist
 }
@@ -25,4 +40,4 @@ Serch ← {F limit:
   While {𝕤⋄ ¬to_visit.Empty @}‿{𝕤⋄ state ← to_visit.Pop @⋄ cands ↩ ⍷(1⊑state)∾cands⋄ limit Expand state}
   cands
 }
-•Show ⊑∨ Serch 8
+•Show ⊑∨ Serch 30
