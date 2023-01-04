@@ -7,7 +7,7 @@
 #
 #  H ← (≤○⊑)_to_heap
 #
-* You can write as follow, but this is more expensive to compare all elements:
+# You can write as follow, but this is more expensive to compare all elements:
 #
 #  H ← (⊑≤)_to_heap
 #
