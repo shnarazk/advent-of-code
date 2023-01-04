@@ -7,7 +7,7 @@ nodes ← ∧⍷⊑¨data
 label_pairs ← ∧∾(⊏(∾○<)¨(2⊸↓))¨data
 pairs ← {𝕊 ⟨a,b⟩: ⟨⊑nodes⊒<a,⊑nodes⊒<b⟩}¨label_pairs
 dist ← (⌊˝∘+⎉1‿∞)⍟(≠nodes)˜ { 𝕨≡𝕩 ? 0 ; ⊑pairs∊˜⋈⟨𝕨,𝕩⟩ ? 1; ∞}⌜˜↕≠nodes
-To_visit ← (⊑∘⊑∘<)_to_heap
+To_visit ← (<○⊑)_to_heap
 to_visit.Push<initial_state ← ⟨0, 0, 0, (0⊸=)¨↕≠nodes⟩
 visited ← ⟨<initial_state⟩
 ExpandState ← { limit F ⟨time, flow, pos, states⟩:
