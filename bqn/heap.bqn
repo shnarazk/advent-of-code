@@ -15,6 +15,9 @@ _to_heap ⇐ {𝔽_𝕣:
     𝕊 n: {
       m ← Parent n
       ⟨p,c⟩ ← ⟨m⊑l,n⊑l⟩
+      # •Show "p"‿p 
+      # •Show "c"‿c 
+      # •Show c Ord p 
       {c Ord p ? l ↩ p˙⌾(n⊸⊑)c˙⌾(m⊸⊑)l ⋄ ShiftUp m; @}
     }
   }
@@ -23,7 +26,7 @@ _to_heap ⇐ {𝔽_𝕣:
   }
   Pop ⇐ { 𝕤
     n ← ¯1+≠l
-    ⟨v,u⟩ ← ⟨⊑l,n⊑l⟩
+    ⟨v,u⟩ ← ⟨⊑⊑l,n⊑l⟩
     l ↩ u˙⌾⊑ l ⋄ Shiftdown 0 ⋄ l ↩ n↑l ⋄ v
   }
   ShiftDown ← { 𝕊 m:
@@ -32,48 +35,51 @@ _to_heap ⇐ {𝔽_𝕣:
       (≠l)≤n1 ? @;
       (≠l)=1+n1 ? ⟨p,c⟩ ← ⟨m⊑l,n1⊑l⟩ ⋄ l ↩ p˙⌾(n1⊸⊑)c˙⌾(m⊸⊑)l;
         ⟨p,c1,c2⟩ ← ⟨m⊑l,n1⊑l,n2⊑l⟩
+        # •Show "c1"‿c1 
+        # •Show "c2"‿c2 
+        # •Show c1 (Ord○⊑) c2 
         {c1 Ord c2 ? l ↩ p˙⌾(n1⊸⊑)c1˙⌾(m⊸⊑)l ⋄ ShiftDown n1; l ↩ p˙⌾(n2⊸⊑)c2˙⌾(m⊸⊑)l ⋄ ShiftDown n2}
     }
   }
 }
 
-H ← ≤ _to_heap 
-h.Push 1
-h.Push 10
-h.Push 50
-h.Push 4
-h.Push 20
-h.Push 3
-h.Push 8
-h.Push 2
-h.Dump @
-•Show h.Dump @
-! 1 = h.Pop @
-! 2 = h.Pop @
-! 3 = h.Pop @
-! 4 = h.Pop @
-! 8 = h.Pop @
-! 10 = h.Pop @
-! 20 = h.Pop @
-! 50 = h.Pop @
-•Show h.Dump @
-G ← ≥ _to_heap 
-g.Push 1
-g.Push 10
-g.Push 50
-g.Push 4
-g.Push 20
-g.Push 3
-g.Push 8
-g.Push 2
-g.Dump @
-•Show g.Dump @
-! 50 = g.Pop @
-! 20 = g.Pop @
-! 10 = g.Pop @
-! 8 = g.Pop @
-! 4 = g.Pop @
-! 3 = g.Pop @
-! 2 = g.Pop @
-! 1 = g.Pop @
-•Show g.Dump @
+# H ← ≤ _to_heap 
+# h.Push<1
+# h.Push<10
+# h.Push<50
+# h.Push<4
+# h.Push<20
+# h.Push<3
+# h.Push<8
+# h.Push<2
+# h.Dump @
+# •Show h.Dump @
+# ! 1 = h.Pop @
+# ! 2 = h.Pop @
+# ! 3 = h.Pop @
+# ! 4 = h.Pop @
+# ! 8 = h.Pop @
+# ! 10 = h.Pop @
+# ! 20 = h.Pop @
+# ! 50 = h.Pop @
+# •Show h.Dump @
+# G ← ≥ _to_heap 
+# g.Push<1
+# g.Push<10
+# g.Push<50
+# g.Push<4
+# g.Push<20
+# g.Push<3
+# g.Push<8
+# g.Push<2
+# g.Dump @
+# •Show g.Dump @
+# ! 50 = g.Pop @
+# ! 20 = g.Pop @
+# ! 10 = g.Pop @
+# ! 8 = g.Pop @
+# ! 4 = g.Pop @
+# ! 3 = g.Pop @
+# ! 2 = g.Pop @
+# ! 1 = g.Pop @
+# •Show g.Dump @
