@@ -41,11 +41,9 @@ Expand2 ← {limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩:
     {(0=cost)∨(p⊑states)∨(limit≤t)∨(0=1⊑p⊑data) ?@;
       f ← flow+(limit-t)×1⊑p⊑data
       s ← 1˙⌾(p⊸⊑)states
-      ⟨a,b⟩ ← { t<t2 ? ⟨⟨p,t⟩,⟨p2,t2⟩⟩; ⟨⟨p2,t2⟩,⟨p,t⟩⟩}
-      # calculation for A*
-      remains ← ∨(¬¨s)/(1⊑¨data)
-      length ← (¯1+limit-1⊑a)⌊≠remains
-      {best≥f++´(length↑remains)×¨length↑⌽↕(limit-t)?@;
+      ⟨a,b⟩ ← {t<t2 ? ⟨⟨p,t⟩,⟨p2,t2⟩⟩; ⟨⟨p2,t2⟩,⟨p,t⟩⟩}
+      length ← (¯1+limit-1⊑a)⌊≠remains ← ∨(¬¨s)/(1⊑¨data) # ditto
+      {best≥f++´remains (×¨○(length⊸↑)) ⌽↕(limit-t) ?@;
         key_index ← ⊑(⊑˘checked)⊐⟨key ← ⟨s,a,b⟩⟩
         {key_index<≠checked ?@; checked (∾⟜(∘‿2⥊⟨key,0⟩))↩}
         {f ≤ ⌈´(({(t≥1⊸⊑1⊸⊑𝕩)∧(t≥1⊸⊑2⊸⊑𝕩)∧(key ≡○(⊑) 𝕩)∧(key ≡○(⊑1⊸⊑) 𝕩)∧(key ≡○(⊑2⊸⊑) 𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘checked ?@;
