@@ -35,19 +35,17 @@ Togo ← (>○(¯1⊸⊑))_to_heap
 togo.Push<⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
 checked ← ∘‿2⥊⟨⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩⟩,0⟩ # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩⟩→flow
 best ← 0
-lower_bound ← 0
 Expand2 ← {limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩:
   {𝕊 ⟨p,cost⟩:
     t ← 1+t1+cost
     {(0=cost)∨(p⊑states)∨(limit≤t)∨(0=1⊑p⊑data) ?@;
-      f ← flow + (limit-t)×1⊑p⊑data
+      f ← flow+(limit-t)×1⊑p⊑data
       s ← 1˙⌾(p⊸⊑)states
-      ⟨a,b⟩ ← { t<t2 ? ⟨⟨p, t⟩, ⟨p2, t2⟩⟩; ⟨⟨p2, t2⟩, ⟨p, t⟩⟩}
+      ⟨a,b⟩ ← { t<t2 ? ⟨⟨p,t⟩,⟨p2,t2⟩⟩; ⟨⟨p2,t2⟩,⟨p,t⟩⟩}
+      # calculation for A*
       remains ← ∨(¬¨s)/(1⊑¨data)
       length ← (¯1+limit-1⊑a)⌊≠remains
-      expect ← f++´(length↑remains)×¨length↑⌽↕(limit-t)
-      # {best≥f+(0⌈¯2+limit-t)×+´(¬¨s)/(1⊑¨data) ?@;
-      {best≥expect ?@;
+      {best≥f++´(length↑remains)×¨length↑⌽↕(limit-t)?@;
         key_index ← ⊑(⊑˘checked)⊐⟨key ← ⟨s,a,b⟩⟩
         {key_index<≠checked ?@; checked (∾⟜(∘‿2⥊⟨key,0⟩))↩}
         {f ≤ ⌈´(({(t≥1⊸⊑1⊸⊑𝕩)∧(t≥1⊸⊑2⊸⊑𝕩)∧(key ≡○(⊑) 𝕩)∧(key ≡○(⊑1⊸⊑) 𝕩)∧(key ≡○(⊑2⊸⊑) 𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘checked ?@;
