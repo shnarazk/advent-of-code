@@ -31,12 +31,27 @@ Search ← {F limit:
 }
 •Show Search 30
 
-To_check ← (>○(¯1⊸⊑))_to_heap
-to_check.Push<⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩   # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
+Togo ← (>○(¯1⊸⊑))_to_heap
+togo.Push<⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
 checked ← ∘‿2⥊⟨⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩⟩,0⟩ # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩⟩→flow
-# Search2 ← {F limit:
-#   cand ← 0
-#   While {𝕤⋄ ¬to_check.Empty @}‿{𝕤⋄ state ← to_check.Pop @⋄ cand ↩ cand⌈⊑state⋄ limit Expand state}
-#   cand
-# }
+Expand2 ← {limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩: 0
+  # {𝕊 ⟨p,cost⟩:
+  #   t ← 1+time+cost
+  #   {(0=cost)∨(p⊑states)∨(limit≤t)∨(0=1⊑p⊑data) ?@;
+  #     f ← flow + (limit-t)×1⊑p⊑data
+  #     s ← 1˙⌾(p⊸⊑)states
+  #     key_index ← ⊑(⊑˘visited)⊐⟨key ← ⟨s,p,t⟩⟩
+  #     {key_index<≠visited ?@; visited (∾⟜(∘‿2⥊⟨key,0⟩))↩} # ensure the key exists
+  #     {f ≤ ⌈´(({(t≥2⊑𝕩)∧(key ≡○(2↑⊑) 𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘visited ?@;
+  #       to_visit.Push<⟨s,p,t,f⟩
+  #       visited ↩ f˙⌾(key_index‿1⊸⊑) visited
+  #     }
+  #   }
+  # }¨ ((↕≠)⋈¨⊢) pos⊏dist
+}
+Search2 ← {F limit:
+  cand ← 0
+  While {𝕤⋄ ¬togo.Empty @}‿{𝕤⋄ state ← togo.Pop @⋄ cand ↩ cand⌈⊑state⋄ limit Expand2 state}
+  cand
+}
 # •Show Search2 26
