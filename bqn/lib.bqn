@@ -72,15 +72,11 @@ color ← {
 #
 # math functions
 #
-# what are they? Element-based one?
-MaxAt ← {(⌈´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
-MinAt ← {(⌊´⊸(⊑⊒˜)𝕨⊸⊑¨𝕩)⊑𝕩}
+MaxAt ← {n F l: {𝕨>○(n⊸⊑)𝕩?𝕨;𝕩}´l}
+MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 
 #
 # file operations
 #
-DataFile ← {
-  0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩;
-           •wdpath∾ "/"∾ 𝕨
-}
+DataFile ← { 0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩; •wdpath∾ "/"∾ 𝕨 }
 version ← "0.3.0"
