@@ -59,6 +59,12 @@ color ← {
   # reverse ⇐ esc∾"[001m"
   reset ⇐ esc∾"[0m"
   # revert ⇐ esc∾"[1A\x1B[1G\x1B[1K"
+  RGB ⇐ {
+      𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
+    0 𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
+    r‿g‿b 𝕊 0: esc∾"[48;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
+    bg 𝕊 fg: (bg 𝕊 0)∾𝕊 fg
+  }
   Out ⇐ { c 𝕊 t: c∾t∾reset }
   Fmt ⇐ { c 𝕊 t: c∾(•Fmt t)∾reset }
 }
