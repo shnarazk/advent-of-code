@@ -2,7 +2,7 @@
   If, IfElse, While, DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
-  Tokenize, StartsWith, ParseInts, ParseInt,
+  Tokenize, StartsWith, ParseInts, ParseInt,color
   MaxAt, MinAt,
   DataFile,
   version
@@ -45,6 +45,22 @@ ParseInt ← ⊑ParseInts
 Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
+}
+color ← {
+  esc ⇐ @ + 27
+  black ⇐ esc∾"[30m"
+  red ⇐ esc∾"[31m"
+  green ⇐ esc∾"[32m"
+  yellow ⇐ esc∾"[33m"
+  blue ⇐ esc∾"[34m"
+  magenta ⇐ esc∾"[35m"
+  cyan ⇐ esc∾"[36m"
+  white ⇐ esc∾"[37m"
+  # reverse ⇐ esc∾"[001m"
+  reset ⇐ esc∾"[0m"
+  # revert ⇐ esc∾"[1A\x1B[1G\x1B[1K"
+  Out ⇐ { c 𝕊 t: c∾t∾reset }
+  Fmt ⇐ { c 𝕊 t: c∾(•Fmt t)∾reset }
 }
 
 #
