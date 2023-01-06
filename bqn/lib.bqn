@@ -35,7 +35,7 @@ Swap ← {
 #
 # string operations
 #
-StartsWith ← {𝕨≡○((≠𝕩)⊸↑)𝕩}
+StartsWith ← (⊢≡↑˜⟜≠)
 ParseInts ← {
   IsNum ← { (('0' ≤ 𝕩) ∧ (𝕩 ≤ '9')) ∨ ('-' = 𝕩) }
   Ordinal ← { w F 1: { w ≤ 0 ? -w; w }; w F 0: { 0 < w ? ¯1-w; w } }
