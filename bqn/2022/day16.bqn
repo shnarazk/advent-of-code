@@ -1,5 +1,5 @@
 #!/usr/bin/env cbqn
-⟨DataFile,ParseInts,Swap,While⟩ ← •Import "../lib.bqn"
+⟨color,DataFile,ParseInts,Swap,While⟩ ← •Import "../lib.bqn"
 ⟨_to_heap⟩ ← •Import "../heap.bqn"
 data ← ∧(Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16.txt" DataFile •args
 nodes ← ⍷⊑¨data
@@ -54,7 +54,7 @@ Expand2 ← {limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩:
 }
 Search2 ← {F limit:
   While {𝕤⋄ ¬togo.Empty @}‿{𝕤⋄ state ← togo.Pop @⋄
-    {best≤3⊸⊑state ? •Show ⟨3⊸⊑state,1⊸⊑1⊸⊑state⟩; @}
+    {best≤3⊸⊑state ? •Out color.green color.Fmt ⟨3⊸⊑state,1⊸⊑1⊸⊑state⟩; @}
     best ↩ best⌈3⊸⊑state⋄ limit Expand2 state}
     best
 }
