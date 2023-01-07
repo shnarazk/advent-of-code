@@ -1,9 +1,9 @@
 ⟨
-  If, IfElse, While, DoWhile, For,
+  If,IfElse,While,DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
-  Tokenize, StartsWith, ParseInts, ParseInt,color
-  MaxAt, MinAt,
+  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloat,ParseFloats,color
+  MaxAt,MinAt,
   DataFile,
   version
 ⟩ ⇐
@@ -38,18 +38,14 @@ Swap ← {
 StartsWith ← (⊢≡↑˜⟜≠)
 ParseFloats ← "0123456789-."⊸(•BQN¨ 1↓(⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
 ParseInts ← "0123456789-"⊸(•BQN¨ 1↓(⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
+ParseFloat ← ⊑ParseFloats
 ParseInt ← ⊑ParseInts
-# ParseInts ← {
-#   IsNum ← { (('0' ≤ 𝕩) ∧ (𝕩 ≤ '9')) ∨ ('-' = 𝕩) }
-#   Ordinal ← { w F 1: { w ≤ 0 ? -w; w }; w F 0: { 0 < w ? ¯1-w; w } }
-#   •BQN¨ 𝕩 ⊔˜ 1- ˜0⊸<⊸× ¯1 Ordinal` IsNum¨ 𝕩
-# }
 Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
 }
-# https://en.wikipedia.org/wiki/ANSI_escape_code
 color ← {
+  # https://en.wikipedia.org/wiki/ANSI_escape_code
   esc ⇐ @ + 27
   csi ⇐ esc∾"["
   black ⇐ csi∾"30m"
@@ -62,8 +58,7 @@ color ← {
   white ⇐ csi∾"37m"
   reverse ⇐ csi∾"001m"
   reset ⇐ csi∾"0m"
-  # revert ⇐ esc∾"[1A\x1B[1G\x1B[1K"
-  Revert ⇐ { n ← (•Fmt 𝕩)⋄ csi∾n∾"A"∾csi∾"1G"∾csi∾"0J" }
+  Revert ⇐ { csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
   RGB ⇐ {
       𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
     0 𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
@@ -84,4 +79,4 @@ MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 # file operations
 #
 DataFile ← { 0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩; •wdpath∾ "/"∾ 𝕨 }
-version ← "0.3.0"
+version ← "0.4.0"
