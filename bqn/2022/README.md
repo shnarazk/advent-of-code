@@ -11,8 +11,9 @@ In `F˘m2`, `F` must return values with the identical shape. So I need something
 
 ```apl
 {
-   a_case: do something with side-effect ⋄ ⟨⟩;
-   another: another task w/ side-effect  ⋄ ⟨⟩
+   a_case ? do something with side-effect ⋄ ⟨⟩;
+   another ? another task w/ side-effect  ⋄ ⟨⟩;
+             and something more           ⋄ ⟨⟩
 }˘m2
 ``` 
 
