@@ -1,5 +1,22 @@
 # Today I learned
 
+## at day07
+
+https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L22
+https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L26
+https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L29
+
+
+In `F˘m2`, `F` must return values with the identical shape. So I need something like:
+
+```apl
+{
+   a_case ? do something with side-effect ⋄ ⟨⟩;
+   another ? another task w/ side-effect  ⋄ ⟨⟩;
+             and something more           ⋄ ⟨⟩
+}˘m2
+``` 
+
 ## at day15
 
 https://mlochbaum.github.io/BQN/doc/logic.html#examples
