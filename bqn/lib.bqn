@@ -38,29 +38,32 @@ Swap ← {
 StartsWith ← (⊢≡↑˜⟜≠)
 ParseFloats ← "0123456789-."⊸(•BQN¨ 1↓(⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
 ParseInts ← "0123456789-"⊸(•BQN¨ 1↓(⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
+ParseInt ← ⊑ParseInts
 # ParseInts ← {
 #   IsNum ← { (('0' ≤ 𝕩) ∧ (𝕩 ≤ '9')) ∨ ('-' = 𝕩) }
 #   Ordinal ← { w F 1: { w ≤ 0 ? -w; w }; w F 0: { 0 < w ? ¯1-w; w } }
 #   •BQN¨ 𝕩 ⊔˜ 1- ˜0⊸<⊸× ¯1 Ordinal` IsNum¨ 𝕩
 # }
-# ParseInt ← ⊑ParseInts
 Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
 }
+# https://en.wikipedia.org/wiki/ANSI_escape_code
 color ← {
   esc ⇐ @ + 27
-  black ⇐ esc∾"[30m"
-  red ⇐ esc∾"[31m"
-  green ⇐ esc∾"[32m"
-  yellow ⇐ esc∾"[33m"
-  blue ⇐ esc∾"[34m"
-  magenta ⇐ esc∾"[35m"
-  cyan ⇐ esc∾"[36m"
-  white ⇐ esc∾"[37m"
-  # reverse ⇐ esc∾"[001m"
-  reset ⇐ esc∾"[0m"
+  csi ⇐ esc∾"["
+  black ⇐ csi∾"30m"
+  red ⇐ csi∾"31m"
+  green ⇐ csi∾"32m"
+  yellow ⇐ csi∾"33m"
+  blue ⇐ csi∾"34m"
+  magenta ⇐ csi∾"35m"
+  cyan ⇐ csi∾"36m"
+  white ⇐ csi∾"37m"
+  reverse ⇐ csi∾"001m"
+  reset ⇐ csi∾"0m"
   # revert ⇐ esc∾"[1A\x1B[1G\x1B[1K"
+  Revert ⇐ { n ← (•Fmt 𝕩)⋄ csi∾n∾"A"∾csi∾"1G"∾csi∾"0J" }
   RGB ⇐ {
       𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
     0 𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";

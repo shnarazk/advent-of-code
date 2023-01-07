@@ -52,10 +52,11 @@ Expand2 ← {limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩:
     }
   }¨(↕≠)⊸(⋈¨) p1⊏dist
 }
-Search2 ← {F limit:
+{
+  limit ← 26
+  •Out "start"
   While {𝕤⋄ ¬togo.Empty @}‿{𝕤⋄ state ← togo.Pop @⋄
-    {best≤3⊸⊑state ? •Out color.green color.Fmt ⟨3⊸⊑state,1⊸⊑1⊸⊑state⟩; @}
+    {best≤3⊸⊑state ? •Out (color.Revert 1)∾color.green color.Fmt ⟨3⊸⊑state,1⊸⊑1⊸⊑state⟩; @}
     best ↩ best⌈3⊸⊑state⋄ limit Expand2 state}
-    best
+  •Out (color.Revert 1) color.Fmt best
 }
-•Show Search2 26
