@@ -47,6 +47,23 @@ In BQN, `∧` isn't a short-circuit operator:
 
 [online REPL](https://bqnpad.mechanize.systems/s?bqn=eyJkb2MiOiJ74oCiU2hvdyBcImRpZG4ndCBleHBlY3RcIuKLhDF9IOKIpyAwIiwicHJldlNlc3Npb25zIjpbXSwiY3VycmVudFNlc3Npb24iOnsiY2VsbHMiOltdLCJjcmVhdGVkQXQiOjE2NzIxOTY2NjI3MTh9LCJjdXJyZW50Q2VsbCI6eyJmcm9tIjowLCJ0byI6MjksInJlc3VsdCI6bnVsbH19)
 
+But due to the BQN's [header system](https://mlochbaum.github.io/BQN/doc/block.html#predicates), there's a way to make it simple:
+
+```apl
+    {{•Show "did expect"⋄0} ? {•Show "didn't expect"⋄1} ? 1 ; 0}
+did expect
+0
+```
+
+So I rewrited like
+
+```apl
+Sat ← { 
+  c 𝕊 0: {(0≤0⊑c)∧(0⊑c≤p2)∧(0≤1⊑c)∧(1⊑c≤p2) ? { ∧´{2⊑𝕩<c Mdist ⟨0⊑𝕩,1⊑𝕩⟩}¨ sensors ? (1⊑c)+(0⊑c)×p2; 0};
+  c 𝕊 n: n
+}
+```
+
 ## at day20
 
 https://mlochbaum.github.io/BQN/doc/repeat.html#array-of-repetition-counts
