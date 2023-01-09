@@ -2,7 +2,7 @@
   If,IfElse,While,DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
-  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloat,ParseFloats,color
+  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloat,ParseFloats,color,term
   MaxAt,MinAt,
   DataFile,
   version
@@ -58,7 +58,6 @@ color ← {
   white ⇐ csi∾"37m"
   reverse ⇐ csi∾"001m"
   reset ⇐ csi∾"0m"
-  Revert ⇐ { csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
   RGB ⇐ {
       𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
     0 𝕊 r‿g‿b: esc∾"[38;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
@@ -67,6 +66,20 @@ color ← {
   }
   Out ⇐ { c 𝕊 t: c∾t∾reset }
   Fmt ⇐ { c 𝕊 t: c∾(•Fmt t)∾reset }
+}
+term ← {
+  # https://en.wikipedia.org/wiki/ANSI_escape_code
+  esc ⇐ @ + 27
+  csi ⇐ esc∾"["
+  reverse ⇐ csi∾"001m"
+  reset ⇐ csi∾"0m"
+  Revert ⇐ { csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
+  Up ⇐ { csi∾(•Fmt 𝕩)∾"A" }
+  clear ⇐ csi∾"1G"∾csi∾"0J"
+  Print ⇐ { •Out (•Fmt 𝕩)∾Up 1; •Out 𝕨∾(•Fmt 𝕩)∾reset∾Up 1 }
+  Println ⇐ { •Out (•Fmt 𝕩); •Out 𝕨∾(•Fmt 𝕩)∾reset }
+  Out ⇐ { •Out 𝕩∾Up 1; •Out 𝕨∾𝕩∾reset∾Up 1 }
+  OutLn ⇐ { •Out 𝕩; •Out 𝕨∾𝕩∾reset }
 }
 
 #
