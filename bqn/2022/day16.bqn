@@ -1,7 +1,7 @@
 #!/usr/bin/env cbqn
 ⟨color,DataFile,ParseInts,Swap,term,While⟩ ← •Import "../lib.bqn"
 ⟨_to_heap⟩ ← •Import "../heap.bqn"
-data ← ∧(Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16.txt" DataFile •args
+data ⇐ ∧(Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ •Flines "data/2022/input-day16.txt" DataFile •args
 nodes ← ⍷⊑¨data
 ! 0=⊑nodes⊐<"AA"
 pairs ← (⋈○(⊑nodes⊒<))´¨∾(⊏(∾○<)¨(2⊸↓))¨data
