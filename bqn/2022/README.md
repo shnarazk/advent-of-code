@@ -2,6 +2,8 @@
 
 ## at day07
 
+> The Cells modifier `˘` applies a function to major cells of its argument, much like Each applies to elements. Each result from 𝔽 becomes a major cell of the result, which means they must all have the same shape.
+
 https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L22
 https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L26
 https://github.com/shnarazk/advent-of-code/blob/faf1a1b0d48ffd02981457211851360389f7d9b9/bqn/2022/day07.bqn#L29
