@@ -17,22 +17,14 @@ Convert ← { 𝕊 no‿items‿update‿test‿then‿else‿end:
 }
 status ← (<·lib.ParseInts 1⊸⊑)˘lines
 inspects ← 0˙¨↕≠ monkeys ← ⥊Convert˘ lines
-Updater ← { no‿op‿arg‿test‿then‿else 𝕊 status‿ins:
-  ⟨s,n⟩ ← ⟨status,≠no⊑status⟩
-  { 𝕊 item:
-    item ↩ ⌊3÷˜op{1 𝕊 ¯1: item×2 ; 1 𝕊 𝕩: item+𝕩 ; 2 𝕊 ¯1: item⋆2; 2 𝕊 𝕩: item×𝕩} arg
-    s ↩ (∾⟜⟨item⟩)⌾({0=test|item ? then ; else}⊸⊑) s
-  }¨no⊑status
-  ⟨⟨⟩˙⌾(no⊸⊑) s,(n⊸+)⌾(no⊸⊑) ins⟩
-}
-•Show ×´2↑∨ 1⊑{𝕩 Updater´⌽monkeys}⍟20⟨status,inspects⟩
 limit ← •math.lcm´(3⊸⊑)¨monkeys
-Updater2 ← { no‿op‿arg‿test‿then‿else 𝕊 status‿ins:
+Updater ← { no‿op‿arg‿test‿then‿else 𝕊 status‿ins‿part:
   ⟨s,n⟩ ← ⟨status,≠no⊑status⟩
   { 𝕊 item:
-    item ↩ limit|op{1 𝕊 ¯1: item×2 ; 1 𝕊 𝕩: item+𝕩 ; 2 𝕊 ¯1: item⋆2; 2 𝕊 𝕩: item×𝕩} arg
-    s ↩ (∾⟜⟨item⟩)⌾({0=test|item ? then ; else}⊸⊑) s
+    item ↩ part˙◶⟨⌊3⊸(÷˜),limit⊸|⟩op{1 𝕊 ¯1: item×2 ; 1 𝕊 𝕩: item+𝕩 ; 2 𝕊 ¯1: item⋆2; 2 𝕊 𝕩: item×𝕩} arg
+    s ↩ (∾⟜⟨item⟩)⌾(((0=test|item)⊑⟨else,then⟩)⊸⊑) s
   }¨no⊑status
-  ⟨⟨⟩˙⌾(no⊸⊑) s,(n⊸+)⌾(no⊸⊑) ins⟩
+  ⟨⟨⟩˙⌾(no⊸⊑) s,(n⊸+)⌾(no⊸⊑) ins, part⟩
 }
-•Show ×´2↑∨ 1⊑{𝕩 Updater2´⌽monkeys}⍟10000⟨status,inspects⟩
+•Show ×´2↑∨ 1⊑{𝕩 Updater´⌽monkeys}⍟20⟨status,inspects,0⟩
+•Show ×´2↑∨ 1⊑{𝕩 Updater´⌽monkeys}⍟10000⟨status,inspects,1⟩
