@@ -1,7 +1,7 @@
 #!/usr/bin/env cbqn
 ⟨DataFile⟩ ← •Import "../lib.bqn"
 Common ← { 𝕨(/⟜𝕨)∘(⌈´˘)∘(=⌜)𝕩 }
-Point ← { 𝕩 < 'a' ? 27+𝕩-'A'; 1+𝕩-'a' }
+Point ← <⟜'a'◶⟨'a'-˜1⊸+,'A'-˜27⊸+⟩
 
 Part1 ← Point∘⊑∘Common´∘((2÷˜≠)⊸(↑⋈↓))
 •Show +´ Part1¨ •FLines "data/2022/input-day03.txt" DataFile •args
