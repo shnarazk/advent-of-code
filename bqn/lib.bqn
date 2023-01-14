@@ -2,7 +2,7 @@
   If,IfElse,While,DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
-  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloat,ParseFloats,color,term
+  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloats,color,term
   MaxAt,MinAt,
   DataFile,
   version
@@ -36,10 +36,9 @@ Swap ← {
 # string operations
 #
 StartsWith ← (⊢≡↑˜⟜≠)
+ParseFloats ←•ParseFloat¨·(∨´"0123456789"⊸∊)¨⊸/"0123456789.-"⊸((⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
 ParseInts ←•BQN¨·(∨´"0123456789"⊸∊)¨⊸/"0123456789-"⊸((⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
-ParseFloats ←•BQN¨·(∨´"0123456789"⊸∊)¨⊸/"0123456789.-"⊸((⊢-˜¬×·+`»⊸<)∘(¬∊)˜⊔⊢)
 ParseInt ← ⊑ParseInts
-ParseFloat ← ⊑ParseFloats
 Tokenize ← {
     F 𝕩: (' '≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩;
   𝕨 F 𝕩: (𝕨≠𝕩) (¬-˜⊢×·+`»⊸>)⊸⊔ 𝕩
