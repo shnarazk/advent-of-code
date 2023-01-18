@@ -2,10 +2,13 @@
 lib ← •Import "../lib.bqn"
 # ⟨lines,status,monkeys⟩ ⇐
 lines ← •FLines "data/2022/input-day12.txt" lib.DataFile ⟨⟩ # •args
-•Show lines ((≠⋈(≠⊑))⥊∾) ↩
+shape ← (≠⋈(≠⊑)) lines
+map ← (shape⊸⥊)∘(¯1000⊸+'a'⊸(-˜))∘∾ lines
 IndexOf ← {⊑(𝕨⊸=⊑⟜𝕩)¨⊸/⥊↕·≢ 𝕩}
-•Show 'S' IndexOf lines
-•Show 'E' IndexOf lines
+lib.color.green lib.term.Println start ← (¯1000+'S'-'a') IndexOf map
+lib.color.green lib.term.Println end ← (¯1000+'E'-'a') IndexOf map
+•Show start⊸⊑ map
+map ¯1˙⌾(end⊸⊑)∘¯1000˙⌾(start⊸⊑) ↩
 
 # {k ← 7-7|≠lines⋄ 0<k ? lines ↩ lines∾⟨⟩˙¨↕k; @}
 # lines ↩ ∘‿7 ⥊lines
