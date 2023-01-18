@@ -3,8 +3,9 @@ lib ← •Import "../lib.bqn"
 # ⟨lines,status,monkeys⟩ ⇐
 lines ← •FLines "data/2022/input-day12.txt" lib.DataFile ⟨⟩ # •args
 •Show lines ((≠⋈(≠⊑))⥊∾) ↩
-•Show start ← ⊑('S'⊸=⊑⟜lines)¨⊸/⥊↕·≢lines
-•Show goal ← ⊑('E'⊸=⊑⟜lines)¨⊸/⥊↕·≢lines
+IndexOf ← {⊑(𝕨⊸=⊑⟜𝕩)¨⊸/⥊↕·≢ 𝕩}
+•Show 'S' IndexOf lines
+•Show 'E' IndexOf lines
 
 # {k ← 7-7|≠lines⋄ 0<k ? lines ↩ lines∾⟨⟩˙¨↕k; @}
 # lines ↩ ∘‿7 ⥊lines
