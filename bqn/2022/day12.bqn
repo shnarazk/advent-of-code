@@ -8,7 +8,17 @@ IndexOf ← {⊑(𝕨⊸=⊑⟜𝕩)¨⊸/⥊↕·≢ 𝕩}
 lib.color.green lib.term.Println start ← (¯1000+'S'-'a') IndexOf map
 lib.color.green lib.term.Println end ← (¯1000+'E'-'a') IndexOf map
 •Show start⊸⊑ map
-map ¯1˙⌾(end⊸⊑)∘¯1000˙⌾(start⊸⊑) ↩
+map ¯1000˙⌾(start⊸⊑) ↩
+map 0˙⌾(end⊸⊑) ↩
+
+MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)(∞⊸»˘)(⌽⍉)⍟𝕩 𝕨} 
+Neighbors ← {(𝕩⊸MakeNeighbor)¨ ↕4}
+•Show 1⊑reachables ← {(≢map)⥊(1+⥊map)≥⥊𝕩}¨ Neighbors map
+
+# Go ← { self 𝕊 dirs:
+#   best ← ⌊´0⊸<¨⊸/dirs
+#   { ∞>best ? best; self }
+# }
 
 # {k ← 7-7|≠lines⋄ 0<k ? lines ↩ lines∾⟨⟩˙¨↕k; @}
 # lines ↩ ∘‿7 ⥊lines
