@@ -72,8 +72,8 @@ term ← {
   csi ⇐ esc∾"["
   reverse ⇐ csi∾"001m"
   reset ⇐ csi∾"0m"
-  Revert ⇐ { csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
-  Up ⇐ { csi∾(•Fmt 𝕩)∾"A" }
+  Revert ⇐ { •Out csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
+  Up ⇐ { •Out csi∾(•Fmt 𝕩)∾"A" }
   clear ⇐ csi∾"1G"∾csi∾"0J"
   Print ⇐ { •Out (•Fmt 𝕩)∾Up 1; •Out 𝕨∾(•Fmt 𝕩)∾reset∾Up 1 }
   Println ⇐ { •Out (•Fmt 𝕩); •Out 𝕨∾(•Fmt 𝕩)∾reset }
