@@ -9,12 +9,16 @@ lib.color.green lib.term.Println start ← (¯1000+'S'-'a') IndexOf map
 lib.color.green lib.term.Println end ← (¯1000+'E'-'a') IndexOf map
 •Show start⊸⊑ map
 map ¯1000˙⌾(start⊸⊑) ↩
-map 0˙⌾(end⊸⊑) ↩
+map ¯1˙⌾(end⊸⊑) ↩
 
-MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)(∞⊸»˘)(⌽⍉)⍟𝕩 𝕨} 
+MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)(∞⊸»˘)(⌽⍉)⍟𝕩 𝕨}
 Neighbors ← {(𝕩⊸MakeNeighbor)¨ ↕4}
 •Show 1⊑reachables ← {(≢map)⥊(1+⥊map)≥⥊𝕩}¨ Neighbors map
 
+m ← 0˙⌾(start⊸⊑) map
+
+Debug ← {{•Out∾{ 𝕊 c: ( {0>c ? 100‿100‿100 ; 80‿200‿150} lib.color.RGB 0) lib.color.Out " "}¨𝕩⋄ ⟨⟩ }˘𝕩}
+Debug m
 # Go ← { self 𝕊 dirs:
 #   best ← ⌊´0⊸<¨⊸/dirs
 #   { ∞>best ? best; self }
