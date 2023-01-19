@@ -10,10 +10,9 @@ lib.color.green lib.term.Println end ← (¯100+'E'-'a') IndexOf map
 •Show start⊸⊑ map
 map ¯100˙⌾(start⊸⊑) ↩
 map (¯100+'z'-'a')⌾(end⊸⊑) ↩
-
 Debug ← {t 𝕊 𝕩:
   lib.term.Up 1+≠𝕩
-  {"" lib.term.Outln∾{ 𝕊 c: ({c≥t ? 80‿200‿150; 100‿100‿100} lib.color.RGB 0) lib.color.Out " "}¨𝕩⋄ ⟨⟩ }˘𝕩
+  {"" lib.term.Outln∾{ 𝕊 c: ({c≥t ? (80)‿(⌊255-255⌊⌊2500÷√c)‿(⌊255⌊30×1.8⋆⁼c); 100‿100‿100} lib.color.RGB 0) lib.color.Out " "}¨𝕩⋄ ⟨⟩ }˘𝕩
  }
 Choose ← { other 𝕊 self :
   {
@@ -22,10 +21,10 @@ Choose ← { other 𝕊 self :
     self
   }
 }
-
 MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)(∞⊸»˘)(⌽⍉)⍟𝕩 𝕨}
 Neighbors ← {(𝕩⊸MakeNeighbor)¨ ↕4}
 reachables ← {(≢map)⥊(¯1+⥊map)≤⥊𝕩}¨ Neighbors map
 MaskedNeighbors ← reachables × {(𝕩⊸MakeNeighbor)¨ ↕4}
 m ← 1˙⌾(start⊸⊑) map
-0_{𝕨 Debug m (Choose¨˘´⟜ MaskedNeighbors) ↩}⍟550 0
+lib.While {𝕤⋄ 0>end⊑m}‿{𝕤⋄ 0 Debug m (Choose¨˘´⟜ MaskedNeighbors) ↩} 
+•Show ¯1+end⊑m # we start the loop with 1.
