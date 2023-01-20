@@ -68,17 +68,33 @@ color ← {
 }
 term ← {
   # https://en.wikipedia.org/wiki/ANSI_escape_code
+  cr ⇐ @ + 13
   esc ⇐ @ + 27
   csi ⇐ esc∾"["
   reverse ⇐ csi∾"001m"
   reset ⇐ csi∾"0m"
   Revert ⇐ { •Out csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
-  Up ⇐ { •Out csi∾(•Fmt 𝕩)∾"A"; csi∾(•Fmt 𝕩)∾"A" }
+  Up ⇐ {
+    •Out csi∾(•Fmt 𝕩)∾"A";
+    csi∾(•Fmt 𝕩)∾"A"
+  }
   clear ⇐ csi∾"1G"∾csi∾"0J"
-  Print ⇐ { •Out (•Fmt 𝕩)∾Up 1; •Out 𝕨∾(•Fmt 𝕩)∾reset∾Up 1 }
-  Println ⇐ { •Out (•Fmt 𝕩); •Out 𝕨∾(•Fmt 𝕩)∾reset }
-  Out ⇐ { •Out 𝕩∾Up 1; •Out 𝕨∾𝕩∾reset∾Up 1 }
-  OutLn ⇐ { •Out 𝕩; •Out 𝕨∾𝕩∾reset }
+  Print ⇐ {
+    •Out (•Fmt 𝕩)∾Up 1;
+    •Out 𝕨∾(•Fmt 𝕩)∾reset∾Up 1
+  }
+  Println ⇐ {
+    •Out (•Fmt 𝕩);
+    •Out 𝕨∾(•Fmt 𝕩)∾reset
+  }
+  Out ⇐ {
+    •Out 𝕩∾Up 1;
+    •Out 𝕨∾𝕩∾reset∾Up 1
+  }
+  OutLn ⇐ {
+    •Out 𝕩;
+    •Out 𝕨∾𝕩∾reset
+  }
 }
 
 #
@@ -91,4 +107,4 @@ MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 # file operations
 #
 DataFile ← { 0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩; •wdpath∾ "/"∾ 𝕨 }
-version ← "0.4.0"
+version ← "0.4.1"
