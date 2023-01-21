@@ -32,9 +32,9 @@ InOrder ← {
 }
 •Show +´((1=InOrder)´˘ problems)/1+↕≠problems
 MergeSort ← {
-     𝕊 ⟨⟩: ⟨⟩;
+     𝕊  ⟨⟩: ⟨⟩;
      𝕊 ⟨x⟩: ⟨x⟩;
-     𝕊  l: MergeSort´(⌊2÷˜≠)⊸(↑⋈○MergeSort↓) l;
+     𝕊   l: MergeSort´(⌊2÷˜≠)⊸(↑⋈○MergeSort↓) l;
    m S ⟨⟩: m;
   ⟨⟩ 𝕊  n: n;
    m 𝕊  n:
