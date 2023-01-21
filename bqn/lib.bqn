@@ -4,7 +4,7 @@
   Swap,
   Tokenize,StartsWith,ParseInt,ParseInts,ParseFloats,color,term,Debug,
   MaxAt,MinAt,
-  DataFile,
+  AbsolutePath,DataFile,
   version
 ⟩ ⇐
 
@@ -110,5 +110,6 @@ MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 #
 # file operations
 #
-DataFile ← { 0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩; •wdpath∾ "/"∾ 𝕨 }
+AbsolutePath ← { '/'=⊑𝕩 ? 𝕩; •wdpath∾ "/"∾ 𝕩 }
+DataFile ← AbsolutePath∘{ 0<≠𝕩 ? ⊑𝕩; 𝕨 }
 version ← "0.4.2"
