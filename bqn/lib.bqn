@@ -97,8 +97,8 @@ term ← {
   }
 }
 Debug ← { 
-  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - debug:  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩;
-  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - "∾𝕨∾":  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩
+  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - debug:  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩⋄ 𝕩;
+  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - "∾𝕨∾":  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩⋄ 𝕩
 }
 
 #
