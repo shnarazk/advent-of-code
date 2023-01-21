@@ -18,7 +18,7 @@ day‿part‿prog‿data ← {
       •BQN day,
       •BQN part,
       lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
-      lib.AbsolutePath "data/2022/input-day"∾day∾"-"∾suf∾".bqn",
+      lib.AbsolutePath "data/2022/input-day"∾day∾"-"∾suf∾".txt",
     ⟩;
   !0
 } •args
