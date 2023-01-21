@@ -2,7 +2,7 @@
   If,IfElse,While,DoWhile, For,
   Match, Select, Switch, Test,
   Swap,
-  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloats,color,term
+  Tokenize,StartsWith,ParseInt,ParseInts,ParseFloats,color,term,Debug,
   MaxAt,MinAt,
   DataFile,
   version
@@ -96,6 +96,10 @@ term ← {
     •Out 𝕨∾𝕩∾reset
   }
 }
+Debug ← { 
+  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - debug:  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩;
+  (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - "∾𝕨∾":  "∾(color.RGB 20‿100‿200) color.Fmt 𝕩
+}
 
 #
 # math functions
@@ -107,4 +111,4 @@ MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 # file operations
 #
 DataFile ← { 0 < ≠𝕩 ? •wdpath∾ "/"∾ ⊑𝕩; •wdpath∾ "/"∾ 𝕨 }
-version ← "0.4.1"
+version ← "0.4.2"
