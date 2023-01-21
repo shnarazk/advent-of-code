@@ -1,10 +1,8 @@
 #!/usr/bin/env cbqn
 lib ← •Import "../lib.bqn"
 Run ⇐ { part 𝕊 data:
-  problems ← lib.ParseInts¨ data
-  xs‿ys ← (¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾problems
-  "area" lib.Debug ⟨xmin,xmax⟩‿⟨ymin,ymax⟩ ← (⌊´⋈⌈´)¨ xs‿ys
+  segments ← lib.ParseInts¨ data
+  ⟨xmin,xmax⟩‿⟨ymin,ymax⟩ ← (⌊´⋈(1⊸+⌈´))¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾segments
+  map ← ymax‿xmax⥊ 0˙↕xmax×ymax
+  "map" lib.Debug ≢map
 }
-# •arsgia
-# a‿b gf 𝕩
-# 𝕩 (g○f˜)˜´ a‿b
