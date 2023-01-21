@@ -26,5 +26,5 @@ day‿part‿prog‿data ← {
 } •args
 (•Fmt day) lib.Debug data
 bqn ← •Import prog
-{ 2|part  ? 1 bqn.Run •FLines data; @ }
-{ 2|»part ? 2 bqn.Run •FLines data; @ }
+{ 2|part    ? 1 bqn.Run •FLines data; @ }
+{ 2|⌊2÷˜part ? 2 bqn.Run •FLines data; @ }
