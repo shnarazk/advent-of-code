@@ -15,6 +15,7 @@ Enlist ← {
 }
 problems { ⊑ ⟨⟩ Enlist´⌽ ⊑(⟨⟩‿⟨⟩) Reform´ ⌽𝕩 }¨˘ ↩
 InOrder ← {
+  ⟨⟩ 𝕊 ⟨⟩:  0;
   ⟨⟩ 𝕊  𝕩:  1;
   𝕨  𝕊 ⟨⟩: ¯1;
   w  𝕊  x:
@@ -24,8 +25,8 @@ InOrder ← {
       (0<≡ww)∧(0<≡xx) ? bool ← ww InOrder xx ⋄ { 1=|bool ? bool; ws InOrder xs };
       ⟨⟩≡ww           ?  1;
       ⟨⟩≡xx           ? ¯1;
-      0<≡ww           ? bool ← (⊑ww) InOrder xx ⋄ { 1=|bool ? bool; 1<=ww ? ¯1 ; ws InOrder xs };
-      0<≡xx           ? bool ← ww InOrder (⊑xx) ⋄ { 1=|bool ? bool; 1<=xx ?  1 ; ws InOrder xs };
+      0<≡ww           ? bool ← ww InOrder ⟨xx⟩ ⋄ { 1=|bool ? bool; ws InOrder xs };
+      0<≡xx           ? bool ← ⟨ww⟩ InOrder xx ⋄ { 1=|bool ? bool; ws InOrder xs };
         ! 0
     }
 }
