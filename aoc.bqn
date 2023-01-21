@@ -1,0 +1,27 @@
+#!/usr/bin/env cbqn
+lib ← •Import "bqn/lib.bqn"
+day‿part‿prog‿data ← {
+  𝕊 ⟨⟩       : lib.Debug "no args" ⋄ !0;
+  𝕊 ⟨day⟩    : ⟨
+      •BQN day,
+      3,
+      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
+      lib.AbsolutePath "data/2022/input-day"∾day∾".txt"
+    ⟩;
+  𝕊 ⟨day,part⟩: ⟨
+      •BQN day,
+      •BQN part,
+      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
+      lib.AbsolutePath "data/2022/input-day"∾day∾".txt"
+    ⟩;
+  𝕊 ⟨day,part,suf⟩: ⟨
+      •BQN day,
+      •BQN part,
+      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
+      lib.AbsolutePath "data/2022/input-day"∾day∾"-"∾suf∾".bqn",
+    ⟩;
+  !0
+} •args
+(•Fmt day) lib.Debug data
+bqn ← •Import prog
+part bqn.Run •FLines data
