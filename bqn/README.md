@@ -10,15 +10,16 @@
 Run [the driver](https://github.com/shnarazk/advent-of-code/blob/main/aoc.bqn) at the top level of the working tree (not here):
 
 ```
-$ ./aoc.bqn DD PP [ALT]
+$ ./aoc.bqn YYYY DD PP [ALT]
 ```
+- `YYYY` for year
 - `DD ∊ 1+↕25` for day of 2022
 - `PP ∊ 1+↕2` for part 
 
 For example run for the part 2 of day 15, 2022:
 
 ```
-$ ./aoc.bqn 15 2
+$ ./aoc.bqn 2022 15 2
 ```
 
 #### For old programs
