@@ -16,10 +16,30 @@ Inject ← {
         (1˙¨seq)⌾(seq⊸⊑) m
     }´⥊⋈˘2↕s
 }
+Drop ← { y‿x 𝕊 map:
+  abyss ← ⊑≢map
+  falling‿hasRoom ← 1‿1
+  lib.While { 𝕤⋄ falling } ‿ { 𝕤 ⋄
+    new_y ← 1+y
+    {
+      abyss=new_y ? falling‿hasRoom ↩ 0‿0;
+      (new_y‿x (¬⊑) map) ? y ↩ new_y ;
+      (new_y‿(¯1+x) (¬⊑) map) ? y‿x ↩ new_y‿(¯1+x) ;
+      (new_y‿( 1+x) (¬⊑) map) ? y‿x ↩ new_y‿( 1+x) ;
+      map 1˙⌾(y‿x⊸⊑) ↩ ⋄ falling‿hasRoom ↩ 0‿(500‿0 ≢ y‿x)
+    }
+  }
+  hasRoom‿map
+}
 Run ⇐ { part 𝕊 data:
   seg ← lib.ParseInts¨ data
-  ⟨xmin,xmax⟩‿⟨ymin,ymax⟩ ← (⌊´⋈(1⊸+⌈´))¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
+  lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
   segments ← {(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈¨○(/⟜𝕩))´ 𝕨} 𝕩}¨ seg
   map ← segments (Inject´)˜ ymax‿xmax⥊ 0˙↕xmax×ymax
-  "map shape" lib.Debug ≢map
+  moreRoom‿sands ← 1‿0
+  lib.While { 𝕤 ⋄ moreRoom }‿{ 𝕤
+    moreRoom‿map ↩ 0‿500 Drop map
+    sands 1⊸+ ↩
+  }
+  •Show ¯1+sands
 }
