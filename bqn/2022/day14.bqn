@@ -16,7 +16,8 @@ Inject ← {
         (1˙¨seq)⌾(seq⊸⊑) m
     }´⥊⋈˘2↕s
 }
-Drop ← { y‿x 𝕊 map:
+Drop ← { start 𝕊 map:
+  y‿x ← start
   abyss ← ⊑≢map
   falling‿hasRoom ← 1‿1
   lib.While { 𝕤⋄ falling } ‿ { 𝕤 ⋄
@@ -26,7 +27,23 @@ Drop ← { y‿x 𝕊 map:
       (new_y‿x (¬⊑) map) ? y ↩ new_y ;
       (new_y‿(¯1+x) (¬⊑) map) ? y‿x ↩ new_y‿(¯1+x) ;
       (new_y‿( 1+x) (¬⊑) map) ? y‿x ↩ new_y‿( 1+x) ;
-      map 1˙⌾(y‿x⊸⊑) ↩ ⋄ falling‿hasRoom ↩ 0‿(500‿0 ≢ y‿x)
+      map 1˙⌾(y‿x⊸⊑) ↩ ⋄ falling‿hasRoom ↩ 0‿(start ≢ y‿x)
+    }
+  }
+  hasRoom‿map
+}
+Drop2 ← { start 𝕊 map:
+  y‿x ← start
+  abyss ← ⊑≢map
+  falling‿hasRoom ← 1‿1
+  lib.While { 𝕤⋄ falling } ‿ { 𝕤 ⋄
+    new_y ← 1+y
+    {
+      abyss=new_y ? map 1˙⌾(y‿x⊸⊑) ↩ ⋄ falling‿hasRoom ↩ 0‿1;
+      (new_y‿x (¬⊑) map) ? y ↩ new_y ;
+      (new_y‿(¯1+x) (¬⊑) map) ? y‿x ↩ new_y‿(¯1+x) ;
+      (new_y‿( 1+x) (¬⊑) map) ? y‿x ↩ new_y‿( 1+x) ;
+      map 1˙⌾(y‿x⊸⊑) ↩ ⋄ falling‿hasRoom ↩ 0‿(start ≢ y‿x)
     }
   }
   hasRoom‿map
@@ -34,12 +51,13 @@ Drop ← { y‿x 𝕊 map:
 Run ⇐ { part 𝕊 data:
   seg ← lib.ParseInts¨ data
   lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
+  { 2=part ? xmax 200⊸+ ↩; @ }
   segments ← {(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈¨○(/⟜𝕩))´ 𝕨} 𝕩}¨ seg
   map ← segments (Inject´)˜ ymax‿xmax⥊ 0˙↕xmax×ymax
-  moreRoom‿sands ← 1‿0
-  lib.While { 𝕤 ⋄ moreRoom }‿{ 𝕤
-    moreRoom‿map ↩ 0‿500 Drop map
+  continue‿sands ← 1‿0
+  lib.While { 𝕤 ⋄ continue }‿{ 𝕤
+    continue‿map ↩ { 1=part ? 0‿500 Drop map; 0‿500 Drop2 map } 
     sands 1⊸+ ↩
   }
-  •Show ¯1+sands
+  •Show { 1=part ? ¯1+sands; sands }
 }
