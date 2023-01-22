@@ -1,5 +1,5 @@
-#!/usr/bin/env cbqn
 lib ← •Import "../lib.bqn"
+
 Inject ← {
  ⟨⟩ 𝕊 m: m;
   s 𝕊 m:
@@ -32,6 +32,7 @@ Drop ← { part 𝕊 map:
   }
   hasRoom‿map
 }
+
 Run ⇐ { part 𝕊 data:
   seg ← lib.ParseInts¨ data
   "geometry" lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
@@ -40,5 +41,5 @@ Run ⇐ { part 𝕊 data:
   map ← segments Inject´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
   continue‿sands ← 1‿0
   lib.While { 𝕤 ⋄ continue }‿{ 𝕤 ⋄ continue‿map ↩ part Drop map ⋄ sands 1⊸+ ↩ }
-  •Show {1=part ? ¯1+sands; sands}
+  {1=part ? ¯1+sands; sands}
 }

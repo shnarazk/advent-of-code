@@ -1,30 +1,44 @@
 #!/usr/bin/env cbqn
 lib ← •Import "bqn/lib.bqn"
-day‿part‿prog‿data ← {
-  𝕊 ⟨day⟩:
+
+Fill ← { template 𝕊 value: value∾˜(template -○≠ value)↑template }
+
+year‿day‿part‿prog‿datafile ← {
+  𝕊 ⟨year,day⟩:
+    y ← "2020" Fill year,
+    d ← "00" Fill day,
     ⟨
-      •BQN day,
+      y,
+      d,
       3,
-      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
-      lib.AbsolutePath "data/2022/input-day"∾day∾".txt"
+      lib.AbsolutePath "bqn/"∾y∾"/day"∾d∾".bqn",
+      lib.AbsolutePath "data/"∾y∾"/input-day"∾d∾".txt"
     ⟩;
-  𝕊 ⟨day,part⟩:
+  𝕊 ⟨year,day,part⟩:
+    y ← "2020" Fill year,
+    d ← "00" Fill day,
     ⟨
-      •BQN day,
+      y,
+      d,
       •BQN part,
-      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
-      lib.AbsolutePath "data/2022/input-day"∾day∾".txt"
+      lib.AbsolutePath "bqn/"∾y∾"/day"∾d∾".bqn",
+      lib.AbsolutePath "data/"∾y∾"/input-day"∾d∾".txt"
     ⟩;
-  𝕊 ⟨day,part,suf⟩:
+  𝕊 ⟨year,day,part,suf⟩:
+    y ← "2020" Fill year,
+    d ← "00" Fill day,
     ⟨
-      •BQN day,
+      y,
+      d,
       •BQN part,
-      lib.AbsolutePath "bqn/2022/day"∾day∾".bqn",
-      lib.AbsolutePath "data/2022/input-day"∾day∾"-"∾suf∾".txt",
-    ⟩;
-  "aoc driver takes day part [alt]" ! 0
+      lib.AbsolutePath "bqn/"∾y∾"/day"∾d∾".bqn",
+      lib.AbsolutePath "data/"∾y∾"/input-day"∾d∾"-"∾suf∾".txt",
+    ⟩
+  ;
+    lib.color.red lib.term.Outln "This aoc driver takes YEAR DAY PART [ALT]"
+    •Exit 1
 } •args
-("input for day"∾•Fmt day) lib.Debug data
+•Out "Year "∾year∾" Day "∾day∾" on: "∾datafile
 bqn ← •Import prog
-{ 2|part    ? 1 bqn.Run •FLines data; @ }
-{ 2|⌊2÷˜part ? 2 bqn.Run •FLines data; @ }
+{ 2|part     ? •Out "Part1: "∾•Fmt 1 bqn.Run •FLines datafile; @ }
+{ 2|⌊2÷˜part ? •Out "Part2: "∾•Fmt 2 bqn.Run •FLines datafile; @ }
