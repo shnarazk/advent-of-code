@@ -24,7 +24,7 @@ day‿part‿prog‿data ← {
     ⟩;
   "aoc driver takes day part [alt]" ! 0
 } •args
-(•Fmt day) lib.Debug data
+("input for day"∾•Fmt day) lib.Debug data
 bqn ← •Import prog
 { 2|part    ? 1 bqn.Run •FLines data; @ }
 { 2|⌊2÷˜part ? 2 bqn.Run •FLines data; @ }
