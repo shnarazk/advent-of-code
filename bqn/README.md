@@ -1,8 +1,27 @@
 ## Solve'em in [BQN](https://github.com/mlochbaum/BQN)!
 
 - https://bqnpad.mechanize.systems/
+- https://github.com/shnarazk/learn-bqn
 
 ### Usage
+
+#### new driver, 2023-01-22
+ 
+Run the following here:
+
+```
+$ ./aoc DD PP
+```
+- `DD ∊ 1+↕25` for day of 2022
+- `PP ∊ 1+↕2` for part 
+
+For example run for both part 2 of day 15, 2022:
+
+```
+$ ./aoc.bqn 15 2
+```
+
+#### for old programs
 
 At the top of the working tree of this repository
 
