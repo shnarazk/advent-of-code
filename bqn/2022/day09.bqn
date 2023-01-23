@@ -1,6 +1,4 @@
-#!/usr/bin/env cbqn
-⟨DataFile, ParseInt⟩ ← •Import "../lib.bqn"
-moves ← (1⊸↑⋈(ParseInt 2⊸↓))¨ •FLines "data/2022/input-day09.txt" DataFile •args
+lib ← •Import "../lib.bqn"
 DirVec ← {
   F ⟨"U", r⟩: ⟨ 0, -1⟩;
   F ⟨"D", r⟩: ⟨ 0,  1⟩;
@@ -25,7 +23,6 @@ Update ← {
     ⟨dx, dy⟩ ← h -¨ tail
     ⟨dir, n-1⟩ F ⟨h, t, { ⟨t⟩ ⊑∘∊ history ? history; ⟨t⟩ ∾ history }⟩
 }
-•Show ≠2⊑⟨⟨0,0⟩, ⟨0,0⟩, ⟨⟩⟩ Update´ ⌽moves
 Update2 ← {
   ⟨dir, 0⟩ F state: state;
   ⟨dir, n⟩ F ⟨knots, history⟩:
@@ -40,4 +37,12 @@ Update2 ← {
     t ← h Propagate tail
     ⟨dir, n-1⟩ F ⟨⟨h⟩∾t, { ⟨𝕩⟩ ⊑∘∊ history ? history; ⟨𝕩⟩ ∾ history } ⊑⌽t⟩
 }
-•Show ≠1⊑⟨⟨0, 0⟩˙¨↕10, ⟨⟩⟩ Update2´ ⌽moves
+
+Solve ⇐ { part 𝕊 data: 
+  moves ← (1⊸↑⋈(lib.ParseInt 2⊸↓))¨ data
+  { 1=part ?
+      ≠2⊑⟨⟨0,0⟩, ⟨0,0⟩, ⟨⟩⟩ Update´ ⌽moves
+    ;
+      ≠1⊑⟨⟨0, 0⟩˙¨↕10, ⟨⟩⟩ Update2´ ⌽moves
+  }
+}
