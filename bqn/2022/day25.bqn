@@ -1,6 +1,3 @@
-#!/usr/bin/env cbqn
-⟨DataFile⟩ ← •Import "../lib.bqn"
-x ← •Flines "data/2022/input-day25.txt" DataFile •args
 DecodeChar ← {
   F '-': ¯1;
   F '=': ¯2;
@@ -17,4 +14,4 @@ Encode ← {
             (Encode n)∾'0'+c
   }
 }
-•Out Encode+´Decode¨ x
+Run ⇐ Encode·+´·Decode¨⊢
