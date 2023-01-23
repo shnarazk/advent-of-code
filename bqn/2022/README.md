@@ -21,11 +21,13 @@ In `F˘m2`, `F` must return values with the identical shape. So I need something
 
 ## at day14
 
-Too slow!
+BQN is too slow!
 
 > A particular problem was that in-place mutation ⌾(i⊸⊑) is only fast for very simple cases. Of course, this problem only arises because BQN's arrays are immutable, highlighting that immutable arrays, despite being perfect in every way, can be a pain.
 
 https://github.com/mlochbaum/BQN/blob/master/community/aoc.md
+
+We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/30).
 
 ## at day15
 
