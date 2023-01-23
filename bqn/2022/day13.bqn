@@ -1,6 +1,6 @@
 #!/usr/bin/env cbqn
 lib ← •Import "../lib.bqn"
-Run ⇐ { part 𝕊 data:
+Solve ⇐ { part 𝕊 data:
   problems ← (2⊸↑˘)∘‿3⥊∾⟜ ⟨⟨⟩⟩ data
   Reform ← { ch 𝕊 out‿digits: {
     ch=',' ? { 0<≠digits ? (out∾(•BQN digits))‿⟨⟩; out‿⟨⟩ };

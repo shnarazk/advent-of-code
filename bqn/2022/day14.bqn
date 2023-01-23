@@ -33,7 +33,7 @@ Drop ← { part 𝕊 map:
   hasRoom‿map
 }
 
-Run ⇐ { part 𝕊 data:
+Solve ⇐ { part 𝕊 data:
   seg ← lib.ParseInts¨ data
   "geometry" lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
   { 2=part ? xmax ymax⊸+ ↩; @ }

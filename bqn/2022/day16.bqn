@@ -1,7 +1,7 @@
 ⟨color,DataFile,ParseInts,Swap,term,While⟩ ← •Import "../lib.bqn"
 ⟨_to_heap⟩ ← •Import "../heap.bqn"
 
-Run ⇐ { part 𝕊 rawdata:
+Solve ⇐ { part 𝕊 rawdata:
   data ← ∧(Swap ParseInts∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨ rawdata
   nodes ← ⍷⊑¨data
   ! 0=⊑nodes⊐<"AA"

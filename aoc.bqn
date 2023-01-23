@@ -40,5 +40,5 @@ year‿day‿part‿prog‿datafile ← {
 } •args
 •Out "Year "∾year∾" Day "∾day∾" on: "∾datafile
 bqn ← •Import prog
-{ 2|part     ? •Out "Part1: "∾•Fmt 1 bqn.Run •FLines datafile; @ }
-{ 2|⌊2÷˜part ? •Out "Part2: "∾•Fmt 2 bqn.Run •FLines datafile; @ }
+{ 2|part     ? •Out "Part1: "∾•Fmt 1 bqn.Solve •FLines datafile; @ }
+{ 2|⌊2÷˜part ? •Out "Part2: "∾•Fmt 2 bqn.Solve •FLines datafile; @ }

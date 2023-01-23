@@ -14,4 +14,4 @@ Encode ← {
             (Encode n)∾'0'+c
   }
 }
-Run ⇐ Encode·+´·Decode¨⊢
+Solve ⇐ Encode·+´·Decode¨⊢

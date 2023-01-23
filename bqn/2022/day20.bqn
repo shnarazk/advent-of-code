@@ -19,7 +19,7 @@ Shift ← { i 𝕊 data‿next‿prev:
   }
 }
 
-Run ⇐ { part 𝕊 rawdata:
+Solve ⇐ { part 𝕊 rawdata:
   n ← ≠ data ← ∾lib.parseInts¨ rawdata
   ⟨next, prev⟩ ← ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+)) ↕n
   data‿next‿· ↩ { 1=part ? data‿next‿prev Shift´⌽↕n ; {𝕩 Shift´⌽↕n}⍟10 (811589153×data)‿next‿prev }

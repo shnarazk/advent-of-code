@@ -28,7 +28,7 @@ Intersections ← { ⟨ax,ay,ad1⟩ 𝕊 ⟨bx,by,bd1⟩:
  ⟩
 }
 
-Run ⇐ { part 𝕊 lines:
+Solve ⇐ { part 𝕊 lines:
   data ← (lib.ParseInts{∊⟜("-,:"∾'0'+¨↕10)}⊸/)¨ lines
   sensors ← {⟨sx,sy,bx,by⟩ ← 𝕩 ⋄ ⟨sx,sy, ⟨sx,sy⟩ Mdist ⟨bx,by⟩⟩}¨ data
   {
