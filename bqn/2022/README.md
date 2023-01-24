@@ -29,6 +29,11 @@ https://github.com/mlochbaum/BQN/blob/master/community/aoc.md
 
 We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/30).
 
+| language | time |
+|----------|------|
+| bqn      | 96.0 |
+| rust     | 0.17 |
+
 ## at day15
 
 https://mlochbaum.github.io/BQN/doc/logic.html#examples
