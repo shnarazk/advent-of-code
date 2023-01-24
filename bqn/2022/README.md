@@ -33,6 +33,9 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 |----------|------|
 | bqn      | 96.0 |
 | rust     | 0.17 |
+| https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn |  0.03 |
+
+?!
 
 ## at day15
 
