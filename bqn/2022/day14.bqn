@@ -52,14 +52,30 @@ DropSand ← { part 𝕊 map‿trace:
 Solve ⇐ { part 𝕊 data:
   seg ← lib.ParseInts¨ data
   "geometry" lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
-  { 2=part ? xmax ymax⊸+ ↩; @ }
   segments ← {(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈¨○(/⟜𝕩))´ 𝕨} 𝕩}¨ seg
-  map ← segments InjectBlock´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
-  sands‿trace ← 0‿⟨0‿500⟩
-  lib.While { 𝕤, 0<≠trace }‿{ 𝕤
-    map‿trace ↩ part DropSand map‿trace
-    sands 1⊸+ ↩
-    # "sand‿trace" lib.Debug sands‿(≠trace)
+  {
+    1=part ?
+      map ← segments InjectBlock´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
+      lib.Debug "starting"
+      sands‿trace ← 0‿⟨0‿500⟩
+      lib.While { 𝕤, 0<≠trace }‿{ 𝕤
+        map‿trace ↩ part DropSand map‿trace
+        sands 1⊸+ ↩
+      }
+      ¯1+sands
+    ;
+      xmax ymax⊸+ ↩
+      map ← segments InjectBlock´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
+      lib.Debug "starting"
+      DropSand ← { y 𝕊 x:
+        0=y‿x⊑map ?
+          map 2˙⌾(y‿x⊸⊑) ↩
+          { yy ← y, lib.While { 𝕤, ymax>yy ? 0=yy‿x⊑map; 0 }‿{ 𝕤, map 2˙⌾(yy‿x⊸⊑) ↩, yy 1⊸+ ↩ } }
+          { ymax>yy ← 1+y ? yy DropSand¨ x+⟨¯1,0,1⟩ ; @ }
+        ;
+          @
+      }
+      0 DropSand 500
+      +´2=⥊map
   }
-  {1=part ? ¯1+sands; sands}
 }
