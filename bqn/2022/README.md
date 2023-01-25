@@ -33,9 +33,9 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 |----------------|------|--------------:|
 | my bqn         | 96.0 |   $O(N^2)$    |
 | in rust        | 0.17 |   $O(N^2)$    |
-| [github.com/dzaima/aoc/2022/BQN/14.bqn](https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn) |  0.03 | $O(N)$ |
+| [github.com/dzaima/aoc/2022/BQN/14.bqn](https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn) |  0.03 | ??? |
 
-?!
+!!
 
 ## at day15
 
