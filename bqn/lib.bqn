@@ -27,7 +27,7 @@ Test    ← {fn←{C‿A𝕊e:C◶A‿E}´𝕩⋄Fn@}
 #
 #     Swap list: swap the first element and the second one in the `list` 
 # i‿j Swap list: swap the `i`-th element and the `j`-th one in the `list` 
-Swap ← { (⋈˜´)⌾(0‿1⊸⊏) 𝕩; (⋈˜´)⌾(𝕨⊸⊏)𝕩 }
+Swap ← { ⋈˜´⌾(0‿1⊸⊏) 𝕩; ⋈˜´⌾(𝕨⊸⊏)𝕩 }
 
 #
 # string operations
