@@ -1,23 +1,23 @@
 lib ← •Import "../lib.bqn"
 
-InjectBlock ← { beg‿end 𝕊 m:
-  dx‿dy ← end-beg
-  seq ← {
-    0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy;
-    0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy;
-    0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx;
-    0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
-  }
-  (1˙¨seq)⌾(seq⊸⊑) m
-}´⟜(⥊⋈˘∘(2⊸↕))˜
-
 Solve ⇐ { part 𝕊 data:
-  seg ← lib.ParseInts¨ data
-  "geometry" lib.Debug xmax‿ymax ← (2⊸+⌈´)¨(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈○(/⟜𝕩))´ 𝕨} ∾seg
-  segments ← {(¬⋈⊢)○(2⊸|¨↕∘≠)⊸{(⋈¨○(/⟜𝕩))´ 𝕨} 𝕩}¨ seg
+  segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/ lib.ParseInts¨ data
+  "geometry" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments
   {
     1=part ?
-      map ← segments InjectBlock´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
+      map ← ymax‿xmax⥊ 0˙↕xmax×ymax
+      InjectBlocks ← { 𝕊 beg‿end:
+        dx‿dy ← end-beg
+        seq ← {
+          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy;
+          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy;
+          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx;
+          0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
+        }
+        map (1˙¨seq)⌾(seq⊸⊑) ↩
+        ⟨⟩
+      }¨<˘∘(2⊸↕)
+      InjectBlocks¨ segments
       lib.Debug "starting"
       sands‿trace ← 0‿⟨0‿500⟩
       DropSand1 ← { 𝕊 trace:
@@ -54,13 +54,25 @@ Solve ⇐ { part 𝕊 data:
       ¯1+sands
     ;
       xmax ymax⊸+ ↩
-      map ← segments InjectBlock´˜ ymax‿xmax⥊ 0˙↕xmax×ymax
+      map ← ymax‿xmax⥊ 0˙↕xmax×ymax
+      InjectBlocks ← { 𝕊 beg‿end:
+        dx‿dy ← end-beg
+        seq ← {
+          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy;
+          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy;
+          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx;
+          0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
+        }
+        map (1˙¨seq)⌾(seq⊸⊑) ↩
+        ⟨⟩
+      }¨<˘∘(2⊸↕)
+      InjectBlocks¨ segments
       lib.Debug "starting"
       DropSand2 ← { y 𝕊 x:
         0=y‿x⊑map ?
           map 2˙⌾(y‿x⊸⊑) ↩
-          { yy ← y, lib.While { 𝕤, ymax>yy ? 0=yy‿x⊑map; 0 }‿{ 𝕤, map 2˙⌾(yy‿x⊸⊑) ↩, yy 1⊸+ ↩ } }
-          { ymax>yy ← 1+y ? yy 𝕊¨ x+⟨¯1,0,1⟩ ; @ }
+          # { yy ← y, lib.While { 𝕤, ymax>yy ? 0=yy‿x⊑map; 0 }‿{ 𝕤, map 2˙⌾(yy‿x⊸⊑) ↩, yy 1⊸+ ↩ } }
+          { ymax>yy ← 1+y ? yy DropSand2¨ x+⟨¯1,0,1⟩ ; @ }
         ;
           @
       }
