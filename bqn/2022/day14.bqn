@@ -1,8 +1,7 @@
 lib ← •Import "../lib.bqn"
 
 Solve ⇐ { part 𝕊 data:
-  segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/ lib.ParseInts¨ data
-  "geometry" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments
+  "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/ lib.ParseInts¨ data
   {
     1=part ?
       map ← ymax‿xmax⥊ 0˙↕xmax×ymax
@@ -20,38 +19,43 @@ Solve ⇐ { part 𝕊 data:
       InjectBlocks¨ segments
       lib.Debug "starting"
       sands‿trace ← 0‿⟨0‿500⟩
-      DropSand1 ← { 𝕊 trace:
-        y‿x ← start ← ¯1⊑trace
+      DropSand1 ← { 𝕊 tr:
+        y‿x ← start ← ¯1⊑tr
         falling ← 1
         lib.While { 𝕤, falling } ‿ { 𝕤,
           new_y ← 1+y
           {
             ymax=new_y ?
               map 1˙⌾(y‿x⊸⊑) ↩
-              trace ↩ ⟨⟩
+              tr ↩ ⟨⟩
               falling ↩ 0
               ;
             (new_y‿x (¬⊑) map) ?
               y ↩ new_y
-              trace ∾⟜⟨y‿x⟩ ↩
+              tr ∾⟜⟨y‿x⟩ ↩
               ;
             (new_y‿(¯1+x) (¬⊑) map) ?
               y‿x ↩ new_y‿(¯1+x)
-              trace ∾⟜⟨y‿x⟩ ↩
+              tr ∾⟜⟨y‿x⟩ ↩
               ;
             (new_y‿( 1+x) (¬⊑) map) ?
               y‿x ↩ new_y‿( 1+x)
-              trace ∾⟜⟨y‿x⟩ ↩
+              tr ∾⟜⟨y‿x⟩ ↩
             ;
               map 1˙⌾(y‿x⊸⊑) ↩,
-              trace ¯1⊸↓ ↩
+              tr ¯1⊸↓ ↩
               falling ↩ 0
           }
         }
-        trace
+        tr
       }
-      lib.While { 𝕤, 0<≠trace }‿{ 𝕤, trace DropSand1 ↩, sands 1⊸+ ↩ }
-      ¯1+sands
+      While ← {𝕨{𝕊∘𝔾⍟𝔽𝕩}𝕩@}´
+      # While ← {𝕩{𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
+      # While ← {𝕩{𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
+      # While ← {𝕩{𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
+      While { 𝕤, trace DropSand1 ↩, ⟨⟩≢trace }‿{ 𝕤, sands 1⊸+ ↩ }
+      # lib.While { 𝕤, 0<≠trace }‿{ 𝕤, trace DropSand1 ↩, sands 1⊸+ ↩ }
+      sands
     ;
       xmax ymax⊸+ ↩
       map ← ymax‿xmax⥊ 0˙↕xmax×ymax
