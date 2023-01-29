@@ -49,13 +49,8 @@ Solve ⇐ { part 𝕊 data:
         }
         tr
       }
-      While ← {𝕨{𝕊∘𝔾⍟𝔽𝕩}𝕩@}´
-      # While ← {𝕩{𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
-      # While ← {𝕩{𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
-      # While ← {𝕩{𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}𝕨@}´
-      While { 𝕤, trace DropSand1 ↩, ⟨⟩≢trace }‿{ 𝕤, sands 1⊸+ ↩ }
-      # lib.While { 𝕤, 0<≠trace }‿{ 𝕤, trace DropSand1 ↩, sands 1⊸+ ↩ }
-      sands
+      lib.While { 𝕤, ⟨⟩≢trace }‿{ 𝕤, trace DropSand1 ↩, sands 1⊸+ ↩ }
+      ¯1+sands
     ;
       xmax ymax⊸+ ↩
       map ← ymax‿xmax⥊ 0˙↕xmax×ymax
