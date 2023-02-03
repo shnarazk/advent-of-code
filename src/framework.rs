@@ -12,7 +12,7 @@ pub enum Description {
 
 impl fmt::Display for Description {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -20,10 +20,8 @@ impl Description {
     /// return file name
     fn name(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match self {
-            Description::FileTag(tag) => {
-                Ok(format!("data/{}/input-day{:>02}-{}.txt", year, day, tag))
-            }
-            Description::None => Ok(format!("data/{}/input-day{:>02}.txt", year, day)),
+            Description::FileTag(tag) => Ok(format!("data/{year}/input-day{day:>02}-{tag}.txt")),
+            Description::None => Ok(format!("data/{year}/input-day{day:>02}.txt")),
             Description::TestData(_) => Ok("A test input".to_string()),
         }
     }
@@ -46,9 +44,9 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Answer::Answers(o1, o2) => write!(f, "Answers: {:?}, {:?}", o1, o2),
-            Answer::Part1(o) => write!(f, "Part1: {:?}", o),
-            Answer::Part2(o) => write!(f, "Part2: {:?}", o),
+            Answer::Answers(o1, o2) => write!(f, "Answers: {o1:?}, {o2:?}"),
+            Answer::Part1(o) => write!(f, "Part1: {o:?}"),
+            Answer::Part2(o) => write!(f, "Part2: {o:?}"),
             Answer::Dump => write!(f, ""),
             Answer::None => write!(f, "No answer"),
         }
@@ -130,12 +128,12 @@ pub trait AdventOfCode: fmt::Debug + Default {
                 Ok(mut file) => {
                     let mut contents = String::new();
                     if let Err(e) = file.read_to_string(&mut contents) {
-                        panic!("Can't read {}: {:?}", file_name, e);
+                        panic!("Can't read {file_name}: {e:?}");
                     }
                     // println!("# loaded {}", &file_name);
                     Ok(contents)
                 }
-                Err(e) => panic!("Can't read {}: {:?}", file_name, e),
+                Err(e) => panic!("Can't read {file_name}: {e:?}"),
             }
         }
         fn load_data(desc: &Description) -> Result<String, ParseError> {

@@ -53,7 +53,7 @@ impl AdventOfCode for Puzzle {
             self.cycle_wise_execute();
         }
         for (i, c) in crt.iter().enumerate() {
-            print!("{}", c);
+            print!("{c}");
             if i % 40 == 39 {
                 println!();
             }
