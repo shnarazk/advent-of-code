@@ -32,6 +32,7 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 | implementation | time | matrix access |
 |----------------|------|--------------:|
 | my bqn         | 96.0 |   $O(N^2)$    |
+| - on cbqn [05c12703](https://github.com/dzaima/CBQN/tree/05c1270344908e98c9f2d06b3671c3646f8634c3) | 92.45 |
 | in rust        | 0.17 |   $O(N^2)$    |
 | [github.com/dzaima/aoc/2022/BQN/14.bqn](https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn) |  0.03 | ??? |
 
