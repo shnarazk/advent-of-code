@@ -1,28 +1,32 @@
 lib‿⟨_to_heap⟩ ← •Import¨ "../lib.bqn"‿"../heap.bqn"
 ore‿clay‿obsidian‿geode ← ↕4
 
-# returns the goodness (mining ability)
-Value ← { blueprint 𝕊 ·‿·‿resources‿robots:
-  k0‿k1‿k2‿k3 ← ⊑⟜blueprint(∾⟜0)¨↕4
-  k2 (k1×2‿1⊑blueprint)⊸+ ↩
-  k3 (k2×3‿2⊑blueprint)⊸+ ↩
-  (geode⊑resources)++´k0‿k1‿k2‿k3×robots
-}
+# returns the goodness
+Value ← { blueprint 𝕊 ·‿·‿resources‿robots: 0 {𝕨+2×𝕩}´ robots }
 
 Solve ⇐ { part 𝕊 line:
   "≢data" lib.Debug ≢data ← >{
     is ← lib.ParseInts 𝕩
-    4‿4⥊⟨0,    0,    0, 1⊑is,
-         0,    0,    0, 2⊑is,
-         0,    0, 3⊑is, 4⊑is,
-         0, 5⊑is,    0, 6⊑is⟩
+    4‿4⥊⟨
+          1⊑is,    0,    0,   0,
+          2⊑is,    0,    0,   0,
+          3⊑is, 4⊑is,    0,   0,
+          5⊑is,    0, 6⊑is,   0,
+        ⟩
   }¨ line
   "data[0‿0]" lib.Debug 0⊏0⊏data
+  To_visit ← (>○(¯1⊸⊑))_to_heap
+  to_visit.Push<state ← 1‿0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩  # heap of ⟨power,time,resources,robots⟩
+  visited ← ⟨state⟩
   {
+    0=part ?
+      state1 ← state ← 1‿0‿⟨5,14,3,0⟩‿⟨1,1,0,1⟩
+      "blueprint" lib.Debug blueprint ← ⊏data
+      "state" lib.Debug state
+      "producible" lib.Debug {(𝕩⊏blueprint) (∧´≤) 2⊑state}¨↕4
+      0
+      ;
     1=part ?
-        To_visit ← (>○(¯1⊸⊑))_to_heap
-        to_visit.Push<state ← 1‿0‿⟨0,0,0,1⟩‿⟨0,0,0,1⟩  # heap of ⟨power,time,resources,robots⟩
-        visited ← ⟨state⟩
         max_so_far ← 0
         Expand ← { bp 𝕊 power‿time‿resources‿robots:
           geodes ← 0
