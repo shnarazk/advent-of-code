@@ -14,7 +14,6 @@ Solve ⇐ { part 𝕊 line:
           5⊑is,    0, 6⊑is,   0,
         ⟩
   }¨ line
-  "data[0‿0]" lib.Debug 0⊏0⊏data
   To_visit ← (>○(¯1⊸⊑))_to_heap
   to_visit.Push<state ← 1‿0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩  # heap of ⟨power,time,resources,robots⟩
   visited ← ⟨state⟩
@@ -32,11 +31,10 @@ Solve ⇐ { part 𝕊 line:
           geodes ← 0
           { max_so_far<geodes  ? max_so_far ↩ geodes ; @ }
           { 𝕊 robot:
-            "bp" lib.Debug ≢bp
-            "robot" lib.Debug robot
             "required" lib.Debug required ← robot⊏bp
             "resources" lib.Debug resources
-            { required ∧´< resources ?
+            { required (∧´≤) resources ?
+                 lib.Debug "passed"
                  new_state ← state
                  to_visit.Push < new_state
               ;@
@@ -45,6 +43,7 @@ Solve ⇐ { part 𝕊 line:
         }
         "bp" lib.Debug bp ← ⊏data
         lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤, state ← to_visit.Pop @, bp Expand state }
+        "_visited" lib.Debug visited
         ⟨⟩
     ;
         ⟨⟩
