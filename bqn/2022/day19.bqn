@@ -30,17 +30,20 @@ Solve ⇐ { part 𝕊 line:
         max_so_far ← 0
         Expand ← { bp 𝕊 power‿time‿resources‿robots:
           geodes ← 0
-          { max_so_far<geodes ? max_so_far ↩ geodes ; @ }
-          {𝕊 robot:
-            required ← robot⊏bp
+          { max_so_far<geodes  ? max_so_far ↩ geodes ; @ }
+          { 𝕊 robot:
+            "bp" lib.Debug ≢bp
+            "robot" lib.Debug robot
+            "required" lib.Debug required ← robot⊏bp
+            "resources" lib.Debug resources
             { required ∧´< resources ?
                  new_state ← state
                  to_visit.Push < new_state
               ;@
             }
-          } ↕3
+          }¨ ↕3
         }
-        bp ← ⊑data
+        "bp" lib.Debug bp ← ⊏data
         lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤, state ← to_visit.Pop @, bp Expand state }
         ⟨⟩
     ;
