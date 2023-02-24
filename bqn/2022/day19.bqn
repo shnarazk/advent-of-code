@@ -3,6 +3,9 @@ ore‿clay‿obsidian‿geode ← ↕4
 
 # returns the goodness
 Value ← { blueprint 𝕊 ·‿·‿resources‿robots: 0 {𝕨+2×𝕩}´ robots }
+Producible ← ∧´{ (0=𝕨)∨(0<𝕩) }¨
+# FIXME: this is incorrect: count the number of robots
+RequiredTime ← ⌈´∘(0⊸⌈-)
 
 Solve ⇐ { part 𝕊 line:
   "≢data" lib.Debug ≢data ← >{
@@ -31,10 +34,16 @@ Solve ⇐ { part 𝕊 line:
           geodes ← 0
           { max_so_far<geodes  ? max_so_far ↩ geodes ; @ }
           { 𝕊 robot:
-            "required" lib.Debug required ← robot⊏bp
+            "required original" lib.Debug required ← robot⊏bp
+            mask ← 0<required
+            available ← 0<robots
+            req ← mask⊸/required
             "resources" lib.Debug resources
-            { required (∧´≤) resources ?
-                 lib.Debug "passed"
+            res ← mask⊸/resources
+            "req & res" lib.Debug req‿res
+            { req Producible res ?
+                 "passed::waiting time" lib.Debug wait ← req RequiredTime res
+                 "after making a robot" lib.Debug generated ← required -˜ resources + wait × mask
                  new_state ← state
                  to_visit.Push < new_state
               ;@
