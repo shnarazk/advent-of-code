@@ -36,18 +36,28 @@ Solve ⇐ { part 𝕊 line:
           max_so_far ← 0
           bp ← n⊏data
           To_visit ← (>○⊑)_to_heap
-          to_visit.Push <⟨⟩ lib.Debug state ← 0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩ # heap of ⟨time,resources,robots⟩
+          to_visit.Push <⟨⟩ lib.Debug state ← 0‿⟨0,0,0,0⟩‿⟨1,0,0,0⟩ # heap of ⟨time,resources,robots⟩
           Expand ← { 𝕊 time‿resources‿robots:
-            { 𝕊 robot: 
+            max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+            { time<3 ?
+                "bp" lib.Debug bp  
+                "state" lib.Debug time‿resources‿robots
+              ; @
+            }  
+            { 𝕊 robot:
               mask ← 0< required ← robot⊏bp
-              { ∧´mask/0<robots ? 
+              { ∧´mask/0<robots ?
                   req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
-                  wait ← ⌈⌈´rob÷˜req(0⊸⌈-)res
-                  ! 0≤wait
-                  t ← time+wait+1
+                  wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
+                  t ← time+wait
                   { t < limit ?
                       generated ← required-˜resources+wait×robots
                       ⟨⟩ lib.Debug new_state ← t‿generated‿((1⊸+)⌾(robot⊸⊑)robots)
+                      { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
+                          # "req‿res‿rob" lib.Debug req‿res‿rob 
+                          "new_state" lib.Debug new_state
+                        ; @
+                      }  
                       to_visit.Push < new_state
                     ;
                       max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
@@ -59,7 +69,7 @@ Solve ⇐ { part 𝕊 line:
           lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤, state ← to_visit.Pop @, Expand state }
           "=" lib.Debug (n+1) × max_so_far
         }
-        ⌈´Examine¨↕≠data
+        +´Examine¨↕≠data
     ;
         ⟨⟩
   }
