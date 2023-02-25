@@ -17,8 +17,9 @@ Solve ⇐ { part 𝕊 line:
           5⊑is,    0, 6⊑is,   0,
         ⟩
   }¨ line
-  To_visit ← (>○(¯1⊸⊑))_to_heap
-  to_visit.Push<state ← 1‿0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩  # heap of ⟨power,time,resources,robots⟩
+  To_visit ← (>○⊑)_to_heap
+  # To_visit ← (>○(¯1⊸⊑))_to_heap
+  to_visit.Push "state" lib.Debug <state ← 1‿0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩  # heap of ⟨power,time,resources,robots⟩
   visited ← ⟨state⟩
   {
     0=part ?
@@ -44,7 +45,7 @@ Solve ⇐ { part 𝕊 line:
             { req Producible res ?
                  "passed::waiting time" lib.Debug wait ← req RequiredTime res
                  "after making a robot" lib.Debug generated ← required -˜ resources + wait × mask
-                 new_state ← state
+                 "new_state" lib.Debug < new_state ← power‿(time+wait)‿generated‿((1⊸+)⌾(robot⊸⊑)robots)
                  to_visit.Push < new_state
               ;@
             }
