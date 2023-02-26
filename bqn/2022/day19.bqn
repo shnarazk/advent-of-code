@@ -40,11 +40,6 @@ Solve ⇐ { part 𝕊 line:
           visited ← ⟨state⟩
           Expand ← { 𝕊 time‿resources‿robots:
             max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
-            { time<3 ?
-                "bp" lib.Debug bp
-                "state" lib.Debug time‿resources‿robots
-              ; @
-            }
             { 𝕊 robot:
               mask ← 0< required ← robot⊏bp
               { ∧´mask/0<robots ?
@@ -55,17 +50,18 @@ Solve ⇐ { part 𝕊 line:
                       generated ← required-˜resources+wait×robots
                       robots_ ← (1⊸+)⌾(robot⊸⊑)robots
                       ⟨⟩ lib.Debug new_state ← t‿generated‿robots_
-                      { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
-                          # "req‿res‿rob" lib.Debug req‿res‿rob
-                          "new_state" lib.Debug new_state
-                        ; @
-                      }
-                      { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(generated≡rs)∧(robots_≡rb) }¨visited? @
-                        ; 
-                          to_visit.Push < new_state
-                          # visited ⟨new_state⟩⊸∾ ↩
-                          # lib.Debug ≠visited
-                      }
+                      to_visit.Push < new_state
+                      # { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
+                      #     # "req‿res‿rob" lib.Debug req‿res‿rob
+                      #     "new_state" lib.Debug new_state
+                      #   ; @
+                      # }
+                      # { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨visited? @
+                      #   ;
+                      #     to_visit.Push < new_state
+                      #     # visited ⟨new_state⟩⊸∾ ↩
+                      #     # lib.Debug ≠visited
+                      # }
                     ;
                       max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
                   }
