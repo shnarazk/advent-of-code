@@ -35,59 +35,48 @@ Solve ⇐ { part 𝕊 line:
         Examine ← { 𝕊 n:
           max_so_far ← 0
           bp ← n⊏data
-          To_visit ← (>○⊑)_to_heap
-          to_visit.Push < state ← 0‿⟨0,0,0,0⟩‿⟨1,0,0,0⟩ # heap of ⟨time,resources,robots⟩
-          visited ← ⟨state⟩
-          # This is very slow because identical states are expanded repeatly.
-          # But storing once-visidted nodes into `visited` also is slow (actually much slower).
-          # I should try width-first-search-and-delete-previous-depth-memory-completely model (layered search).
-          # Because a unit of seach process converts all of N-robot-states into all of N+1-robot-states.
-          # The bag of states is immutable after its building phase.
-          Expand ← { 𝕊 time‿resources‿robots:
+          state ← 0‿⟨0,0,0,0⟩‿⟨1,0,0,0⟩ # ⟨time,resources,robots⟩
+          to_visit ← ⟨⟩
+          to_visit ⟨state⟩⊸∾ ↩
+          Expand ← { 𝕊 to_visit:
             new_states ← ⟨⟩
-            max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
-            { 𝕊 robot:
-              mask ← 0< required ← robot⊏bp
-              { ∧´mask/0<robots ?
-                  req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
-                  wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
-                  t ← time+wait
-                  { t < limit ?
-                      generated ← required-˜resources+wait×robots
-                      robots_ ← (1⊸+)⌾(robot⊸⊑)robots
-                      ⟨⟩ lib.Debug new_state ← t‿generated‿robots_
-                      to_visit.Push < new_state
-                      # { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
-                      #     # "req‿res‿rob" lib.Debug req‿res‿rob
-                      #     "new_state" lib.Debug new_state
-                      #   ; @
-                      # }
-                      # { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨visited? @
-                      #   ;
-                      #     to_visit.Push < new_state
-                      #     # visited ⟨new_state⟩⊸∾ ↩
-                      #     # lib.Debug ≠visited
-                      # }
-                      { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨new_states? @
-                        ;
-                          to_visit.Push < new_state
-                          new_states ⟨new_state⟩⊸∾ ↩
-                          # lib.Debug ≠visited
-                      }
-                    ;
-                      max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
-                  }
-                ;@
-              }
-            }¨ ↕4
+            { 𝕊 time‿resources‿robots:
+              max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+              { 𝕊 robot:
+                mask ← 0< required ← robot⊏bp
+                { ∧´mask/0<robots ?
+                    req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
+                    wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
+                    t ← time+wait
+                    { t < limit ?
+                        generated ← required-˜resources+wait×robots
+                        robots_ ← (1⊸+)⌾(robot⊸⊑)robots
+                        ⟨⟩ lib.Debug new_state ← t‿generated‿robots_
+                        # { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
+                        #     # "req‿res‿rob" lib.Debug req‿res‿rob
+                        #     "new_state" lib.Debug new_state
+                        #   ; @
+                        # }
+                        # { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨visited? @
+                        #   ;
+                        #     to_visit.Push < new_state
+                        #     # visited ⟨new_state⟩⊸∾ ↩
+                        #     # lib.Debug ≠visited
+                        # }
+                        { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨new_states? @
+                          ;
+                            new_states ⟨new_state⟩⊸∾ ↩
+                        }
+                      ;
+                        max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+                    }
+                  ;@
+                }
+              }¨↕4
+            }¨to_visit
             new_states
           }
-          lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤
-            state ← to_visit.Pop @
-            states ← Expand state
-            to_visit.clear @
-            (to_visit.push<)¨states
-          }
+          lib.While { 𝕤, 0<≠to_visit }‿{ 𝕤, to_visit Expand ↩ }
           "=" lib.Debug (n+1) × max_so_far
         }
         +´Examine¨↕≠data
