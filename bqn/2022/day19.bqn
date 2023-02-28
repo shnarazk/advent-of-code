@@ -44,6 +44,7 @@ Solve ⇐ { part 𝕊 line:
           # Because a unit of seach process converts all of N-robot-states into all of N+1-robot-states.
           # The bag of states is immutable after its building phase.
           Expand ← { 𝕊 time‿resources‿robots:
+            new_states ← ⟨⟩
             max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
             { 𝕊 robot:
               mask ← 0< required ← robot⊏bp
@@ -67,14 +68,26 @@ Solve ⇐ { part 𝕊 line:
                       #     # visited ⟨new_state⟩⊸∾ ↩
                       #     # lib.Debug ≠visited
                       # }
+                      { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨new_states? @
+                        ;
+                          to_visit.Push < new_state
+                          new_states ⟨new_state⟩⊸∾ ↩
+                          # lib.Debug ≠visited
+                      }
                     ;
                       max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
                   }
                 ;@
               }
             }¨ ↕4
+            new_states
           }
-          lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤, state ← to_visit.Pop @, Expand state }
+          lib.While { 𝕤, ¬to_visit.Empty @ }‿{ 𝕤
+            state ← to_visit.Pop @
+            states ← Expand state
+            to_visit.clear @
+            (to_visit.push<)¨states
+          }
           "=" lib.Debug (n+1) × max_so_far
         }
         +´Examine¨↕≠data
