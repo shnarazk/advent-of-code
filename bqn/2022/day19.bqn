@@ -38,6 +38,11 @@ Solve ⇐ { part 𝕊 line:
           To_visit ← (>○⊑)_to_heap
           to_visit.Push < state ← 0‿⟨0,0,0,0⟩‿⟨1,0,0,0⟩ # heap of ⟨time,resources,robots⟩
           visited ← ⟨state⟩
+          # This is very slow because identical states are expanded repeatly.
+          # But storing once-visidted nodes into `visited` also is slow (actually much slower).
+          # I should try width-first-search-and-delete-previous-depth-memory-completely model (layered search).
+          # Because a unit of seach process converts all of N-robot-states into all of N+1-robot-states.
+          # The bag of states is immutable after its building phase.
           Expand ← { 𝕊 time‿resources‿robots:
             max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
             { 𝕊 robot:
