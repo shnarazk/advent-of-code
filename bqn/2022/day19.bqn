@@ -21,6 +21,7 @@ Solve ⇐ { part 𝕊 line:
         { 𝕊 state:
           time‿resources‿robots ← ⟨-⊑state,4↑1↓state,5↓state⟩
           max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+          # FIXME: this is not an array oriented approach.
           { 𝕊 robot:
             mask ← 0< required ← robot⊏bp
             { ∧´mask/0<robots ?
