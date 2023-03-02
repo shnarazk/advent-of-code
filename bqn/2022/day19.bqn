@@ -1,13 +1,6 @@
 lib‿⟨_to_heap⟩ ← •Import¨ "../lib.bqn"‿"../heap.bqn"
 ore‿clay‿obsidian‿geode ← ↕4
 
-# returns the goodness
-Value ← { blueprint 𝕊 ·‿·‿resources‿robots: 0 {𝕨+2×𝕩}´ robots }
-Producible ← ∧´{ (0=𝕨)∨(0<𝕩) }¨
-RequiredResources ← (0⊸⌈-)
-# FIXME: this is incorrect: count the number of robots
-RequiredTime ← ⌈´∘(0⊸⌈-)
-
 Solve ⇐ { part 𝕊 line:
   "≢data" lib.Debug ≢data ← >{
     is ← lib.ParseInts 𝕩
@@ -18,10 +11,6 @@ Solve ⇐ { part 𝕊 line:
           5⊑is,    0, 6⊑is,   0,
         ⟩
   }¨ line
-  # To_visit ← (>○(1⊸⊑))_to_heap
-  # To_visit ← (>○(¯1⊸⊑))_to_heap
-  # to_visit.Push "state" lib.Debug <state ← 1‿0‿⟨1,0,0,0⟩‿⟨1,0,0,0⟩  # heap of ⟨power,time,resources,robots⟩
-  # visited ← ⟨state⟩
   {
     0=part ?
       state1 ← state ← 1‿0‿⟨5,14,3,0⟩‿⟨1,1,0,1⟩
@@ -29,46 +18,41 @@ Solve ⇐ { part 𝕊 line:
       "state" lib.Debug state
       "producible" lib.Debug {(𝕩⊏blueprint) (∧´≤) 2⊑state}¨↕4
       0
-      ;
-    1=part ?
+    ; 1=part ?
         limit ← 24
         Examine ← { 𝕊 n:
           max_so_far ← 0
           bp ← n⊏data
-          state ← 0‿⟨0,0,0,0⟩‿⟨1,0,0,0⟩ # ⟨time,resources,robots⟩
-          to_visit ← ⟨⟩
-          to_visit ⟨state⟩⊸∾ ↩
+          state ← ⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩ # ⟨time,resources,robots⟩
+          to_visit ← ⟨state⟩
           Expand ← { 𝕊 to_visit:
             new_states ← ⟨⟩
-            { 𝕊 time‿resources‿robots:
-              max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+            { 𝕊 state:
+              time ← -⊑state
+              resources ← 4↑1↓state
+              robots ← 5↓state
+              max_so_far (geode⊑resources+(limit-time)×robots)⊸⌈ ↩
               { 𝕊 robot:
                 mask ← 0< required ← robot⊏bp
                 { ∧´mask/0<robots ?
                     req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
-                    wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
-                    t ← time+wait
+                    t ← time+ wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
                     { t < limit ?
                         generated ← required-˜resources+wait×robots
-                        robots_ ← (1⊸+)⌾(robot⊸⊑)robots
-                        ⟨⟩ lib.Debug new_state ← t‿generated‿robots_
-                        # { (time<9)∧(1=robot)∧(1≤1⊑robots) ?
-                        #     # "req‿res‿rob" lib.Debug req‿res‿rob
-                        #     "new_state" lib.Debug new_state
+                        robots_   ← (1⊸+)⌾(robot⊸⊑)robots
+                        new_state ← (-t)∾generated∾robots_
+                        # { 0<≠new_states ?
+                        #     "state" lib.Debug new_state
+                        #     "stack" lib.Debug new_states
+                        #     lib.Debug¨ new_states
+                        #     "check" lib.Debug ({𝕊 t‿s‿b: t∧(∧´s)∧(∧´b)}new_state⊸≤)¨new_states
                         #   ; @
                         # }
-                        # { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨visited? @
-                        #   ;
-                        #     to_visit.Push < new_state
-                        #     # visited ⟨new_state⟩⊸∾ ↩
-                        #     # lib.Debug ≠visited
-                        # }
-                        { ∨´{ 𝕊 ti‿rs‿rb: (ti≤t)∧(rs(∧´≤)generated)∧(robots_(∧´≤)rb) }¨new_states? @
+                        { ∨´(∧´new_state⊸≤)¨new_states ? @
                           ;
                             new_states ⟨new_state⟩⊸∾ ↩
                         }
-                      ;
-                        max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
+                      ;@
                     }
                   ;@
                 }
@@ -77,7 +61,7 @@ Solve ⇐ { part 𝕊 line:
             new_states
           }
           lib.While { 𝕤, 0<≠to_visit }‿{ 𝕤, to_visit Expand ↩ }
-          "=" lib.Debug (n+1) × max_so_far
+          "=" lib.Debug (n+1)×max_so_far
         }
         +´Examine¨↕≠data
     ;
