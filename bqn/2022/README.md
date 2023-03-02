@@ -85,6 +85,10 @@ Sat ← {
 }
 ```
 
+## at day19
+
+- https://github.com/shnarazk/advent-of-code/pull/32
+
 ## at day20
 
 https://mlochbaum.github.io/BQN/doc/repeat.html#array-of-repetition-counts
