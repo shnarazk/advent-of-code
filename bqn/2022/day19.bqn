@@ -23,6 +23,7 @@ Solve ⇐ { part 𝕊 line:
         Examine ← { 𝕊 n:
           max_so_far ← 0
           bp ← n⊏data
+          robot_limits ← 3↑⌈´˘⍉bp
           state ← ⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩ # ⟨time,resources,robots⟩
           to_visit ← ⟨state⟩
           Expand ← { 𝕊 to_visit:
@@ -47,8 +48,8 @@ Solve ⇐ { part 𝕊 line:
                         #     lib.Debug¨ new_states
                         #     "check" lib.Debug ({𝕊 t‿s‿b: t∧(∧´s)∧(∧´b)}new_state⊸≤)¨new_states
                         #   ; @
-                        # }
-                        { ∨´(∧´new_state⊸≤)¨new_states ? @
+                        # } 
+                        { (∨´(∧´new_state⊸≤)¨new_states)∨(∨´robot_limits<3↑robots_) ? @
                           ;
                             new_states ⟨new_state⟩⊸∾ ↩
                         }
