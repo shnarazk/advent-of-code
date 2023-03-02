@@ -42,15 +42,7 @@ Solve ⇐ { part 𝕊 line:
                         generated ← required-˜resources+wait×robots
                         robots_   ← (1⊸+)⌾(robot⊸⊑)robots
                         new_state ← (-t)∾generated∾robots_
-                        # { 0<≠new_states ?
-                        #     "state" lib.Debug new_state
-                        #     "stack" lib.Debug new_states
-                        #     lib.Debug¨ new_states
-                        #     "check" lib.Debug ({𝕊 t‿s‿b: t∧(∧´s)∧(∧´b)}new_state⊸≤)¨new_states
-                        #   ; @
-                        # }
-                        { (∨´(∧´new_state⊸≤)¨new_states)∨(∨´robot_limits<3↑robots_) ? @
-                          ;
+                        { (∨´robot_limits<3↑robots_) ? (∨´(∧´new_state⊸≤)¨new_states) ? @ ;
                             new_states ⟨new_state⟩⊸∾ ↩
                         }
                       ;@
