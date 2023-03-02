@@ -1,4 +1,4 @@
-lib‿⟨_to_heap⟩ ← •Import¨ "../lib.bqn"‿"../heap.bqn"
+lib ← •Import "../lib.bqn"
 ore‿clay‿obsidian‿geode ← ↕4
 
 Solve ⇐ { part 𝕊 line:
@@ -12,38 +12,38 @@ Solve ⇐ { part 𝕊 line:
         ⟩
   }¨ line
   Examine ← { limit 𝕊 n:
-    max_so_far ← 0
-    bp ← n⊏data
+    max_so_far   ← 0
+    bp           ← n⊏data
     robot_limits ← 3↑⌈´˘⍉bp
-    to_visit ← ⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩ # ⟨time,resources,robots⟩
-    Expand ← { 𝕊 to_visit:
-      new_states ← ⟨⟩
-      { 𝕊 state:
-        time‿resources‿robots ← ⟨-⊑state,4↑1↓state,5↓state⟩
-        max_so_far (geode⊑resources+(limit-time)×robots)⊸⌈ ↩
-        { 𝕊 robot:
-          mask ← 0< required ← robot⊏bp
-          { ∧´mask/0<robots ?
-              req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
-              t ← time+ wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
-              { t < limit ?
-                  generated ← required-˜resources+wait×robots
-                  robots_   ← (1⊸+)⌾(robot⊸⊑)robots
-                  new_state ← (-t)∾generated∾robots_
-                  { (∧´robot_limits≥3↑robots_) ? ¬∨´(∧´new_state⊸≤)¨new_states ?
-                        new_states ⟨new_state⟩⊸∾ ↩
-                    ;@
-                  }
-                ;@
-              }
-            ;@
-          }
-        }¨↕4
-      }¨to_visit
-      new_states
+    Expand ← {
+      𝕊 ⟨⟩: max_so_far;
+      𝕊 to_visit:
+        new_states ← ⟨⟩
+        { 𝕊 state:
+          time‿resources‿robots ← ⟨-⊑state,4↑1↓state,5↓state⟩
+          max_so_far (geode⊑resources+(limit-time)×robots)⊸⌈ ↩
+          { 𝕊 robot:
+            mask ← 0< required ← robot⊏bp
+            { ∧´mask/0<robots ?
+                req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
+                t ← time+ wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
+                { t < limit ?
+                    generated ← required-˜resources+wait×robots
+                    robots_   ← (1⊸+)⌾(robot⊸⊑)robots
+                    new_state ← (-t)∾generated∾robots_
+                    { (∧´robot_limits≥3↑robots_) ? ¬∨´(∧´new_state⊸≤)¨new_states ?
+                          new_states ⟨new_state⟩⊸∾ ↩
+                      ;@
+                    }
+                  ;@
+                }
+              ;@
+            }
+          }¨↕4
+        }¨to_visit
+        𝕊 new_states
     }
-    lib.While { 𝕤, 0<≠to_visit }‿{ 𝕤, to_visit Expand ↩ }
-    (•Fmt n) lib.Debug max_so_far
+    (•Fmt n) lib.Debug Expand ⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩ # ⟨time,resources,robots⟩
   }
   {
     0=part ?
