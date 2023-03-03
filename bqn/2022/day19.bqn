@@ -10,31 +10,25 @@ Solve ⇐ { part 𝕊 line:
           5⊑is,    0, 6⊑is,   0,
         ⟩
   }¨ line
-  Examine ← { limit 𝕊 n:
-    max_so_far ← 0
-    bp         ← n⊏data
-    masks      ← 0<˘ bp
-    limits     ← 0‿0‿0‿∞⌈⌈´˘⍉bp
+  Examine ← { u 𝕊 n:
+    best‿bp‿upto ← ⟨0,n⊏data,-u⟩
+    masks‿limits ← ⟨0<˘bp,0‿0‿0‿∞⌈⌈´˘⍉bp⟩
     Expand ← {
-      𝕊 ⟨⟩: max_so_far;
+      𝕊 ⟨⟩: best;
       𝕊 to_visit:
         next ← ⟨⟩
         { 𝕊 state:
-          time‿resources‿robots ← ⟨-⊑state,4↑1↓state,5↓state⟩
-          max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
-          # FIXME: this is not an array oriented approach.
-          { 𝕊 i:
-            mask ← i⊏masks
-            { ∧´0<mask/robots ?
-                need ← i⊏bp
-                ti   ← time+ wait ← 1+⌈⌈´(mask⊸/)robots÷˜need(0⊸⌈-)resources
-                { ti < limit ?
-                    res ← need-˜resources+wait×robots
-                    rob ← (1⊸+)⌾(i⊸⊑)robots
-                    s   ← (-ti)∾res∾rob
-                    { (∧´rob≤limits) ? ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
-                  ;@
-                }
+          time‿resources‿robots ← ⟨⊑state,4↑1↓state,5↓state⟩
+          best (¯1⊑resources+(time-upto)×robots)⊸⌈ ↩ 
+          { 𝕊 i:        # FIXME: this is not an array oriented approach.
+          { robots≤○(i⊸⊑)limits ? 
+              need ← i⊏bp
+              masked ← (i⊏masks)/robots÷˜need(0⊸⌈-)resources
+              { upto< ti ← time- wait ← 1+⌈⌈´masked ? 
+                  s ← ti∾(need-˜resources+wait×robots)∾((1⊸+)⌾(i⊸⊑)robots)
+                  { ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
+                ;@
+              }
               ;@
             }
           }¨↕4
