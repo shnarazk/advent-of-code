@@ -11,34 +11,35 @@ Solve ⇐ { part 𝕊 line:
         ⟩
   }¨ line
   Examine ← { limit 𝕊 n:
-    max_so_far   ← 0
-    bp           ← n⊏data
-    robot_limits ← 3↑⌈´˘⍉bp
+    max_so_far ← 0
+    bp         ← n⊏data
+    masks      ← 0<˘ bp
+    limits     ← 0‿0‿0‿∞⌈⌈´˘⍉bp
     Expand ← {
       𝕊 ⟨⟩: max_so_far;
       𝕊 to_visit:
-        new_states ← ⟨⟩
+        next ← ⟨⟩
         { 𝕊 state:
           time‿resources‿robots ← ⟨-⊑state,4↑1↓state,5↓state⟩
           max_so_far (¯1⊑resources+(limit-time)×robots)⊸⌈ ↩
           # FIXME: this is not an array oriented approach.
-          { 𝕊 robot:
-            mask ← 0< required ← robot⊏bp
-            { ∧´mask/0<robots ?
-                req‿res‿rob ← (mask⊸/)¨required‿resources‿robots
-                time_ ← time+ wait ← 1+⌈⌈´rob÷˜req(0⊸⌈-)res
-                { time_ < limit ?
-                    resources_ ← required-˜resources+wait×robots
-                    robots_    ← (1⊸+)⌾(robot⊸⊑)robots
-                    state_     ← (-time_)∾resources_∾robots_
-                    { (∧´robot_limits≥3↑robots_) ? ¬∨´(∧´state_⊸≤)¨new_states ? new_states ⟨state_⟩⊸∾ ↩ ;@ }
+          { 𝕊 i:
+            mask ← i⊏masks
+            { ∧´0<mask/robots ?
+                need ← i⊏bp
+                ti   ← time+ wait ← 1+⌈⌈´(mask⊸/)robots÷˜need(0⊸⌈-)resources
+                { ti < limit ?
+                    res ← need-˜resources+wait×robots
+                    rob ← (1⊸+)⌾(i⊸⊑)robots
+                    s   ← (-ti)∾res∾rob
+                    { (∧´rob≤limits) ? ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
                   ;@
                 }
               ;@
             }
           }¨↕4
         }¨to_visit
-        𝕊 new_states
+        𝕊 next
     }
     (•Fmt n) lib.Debug Expand ⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩ # ⟨time,resources,robots⟩
   }
