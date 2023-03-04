@@ -1,5 +1,4 @@
 lib ← •Import "../lib.bqn"
-
 Solve ⇐ { part 𝕊 line:
   data ← >{
     is ← lib.ParseInts 𝕩
@@ -16,8 +15,7 @@ Solve ⇐ { part 𝕊 line:
     Expand ← {
       𝕊 ⟨⟩: best;
       𝕊 to_visit:
-        𝕊 ⟨⟩ { state 𝕊 next:
-          time‿resources‿robots ← ⟨⊑state,4↑1↓state,5↓state⟩
+        𝕊 ⟨⟩ { time‿resources‿robots 𝕊 next:
           { 𝕊 i:
             upto< t ← time- w ← 1+⌈⌈´(i⊏masks)/robots÷˜(n ← i⊏bp)(0⊸⌈-)resources ?
               { ¬∨´(∧´𝕩⊸≤)¨next ? next ⟨𝕩⟩⊸∾ ↩ ;@ } t∾(n-˜resources+w×robots)∾((1⊸+)⌾(i⊸⊑)robots)
@@ -25,14 +23,13 @@ Solve ⇐ { part 𝕊 line:
               best ((¯1⊑resources)+(time-upto)×¯1⊑robots)⊸⌈ ↩
           }¨{robots<○(𝕩⊸⊑)limits }¨⊸/↕4
           next
-        }´to_visit
+        }´{⟨⊑𝕩,4↑1↓𝕩,5↓𝕩⟩}¨to_visit
     }
     (•Fmt n) lib.Debug Expand ⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩ # ⟨time,resources,robots⟩
   }
   {
-    0=part   ? "≢data" lib.Debug ≢data
-    ; 1=part ? +´ 24 ((1⊸+)×Examine)¨↕≠data
+    1=part ? +´ 24 ((1⊸+)×Examine)¨↕≠data
     ; 2=part ? ×´ 32 Examine¨↕3
-    ; ⟨⟩
+    ; "≢data" lib.Debug ≢data
   }
 }
