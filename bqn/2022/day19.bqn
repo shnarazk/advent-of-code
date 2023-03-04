@@ -16,21 +16,18 @@ Solve ⇐ { part 𝕊 line:
     Expand ← {
       𝕊 ⟨⟩: best;
       𝕊 to_visit:
-        next ← ⟨⟩
-        { 𝕊 state:
+        𝕊 ⟨⟩ { state 𝕊 next:
           time‿resources‿robots ← ⟨⊑state,4↑1↓state,5↓state⟩
           best (¯1⊑resources+(time-upto)×robots)⊸⌈ ↩
           { 𝕊 i:
-            need ← i⊏bp
-            masked ← (i⊏masks)/robots÷˜need(0⊸⌈-)resources
-            { upto< ti ← time- wait ← 1+⌈⌈´masked ?
-                s ← ti∾(need-˜resources+wait×robots)∾((1⊸+)⌾(i⊸⊑)robots)
-                { ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
+            n ← i⊏bp
+            { upto< t ← time- w ← 1+⌈⌈´(i⊏masks)/robots÷˜n(0⊸⌈-)resources ?
+                { ¬∨´(∧´𝕩⊸≤)¨next ? next ⟨𝕩⟩⊸∾ ↩ ;@ } t∾(n-˜resources+w×robots)∾((1⊸+)⌾(i⊸⊑)robots)
               ;@
             }
           }¨{robots<○(𝕩⊸⊑)limits }¨⊸/↕4
-        }¨to_visit
-        𝕊 next
+          next
+        }´to_visit
     }
     (•Fmt n) lib.Debug Expand ⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩ # ⟨time,resources,robots⟩
   }
