@@ -18,12 +18,11 @@ Solve ⇐ { part 𝕊 line:
       𝕊 to_visit:
         𝕊 ⟨⟩ { state 𝕊 next:
           time‿resources‿robots ← ⟨⊑state,4↑1↓state,5↓state⟩
-          best (¯1⊑resources+(time-upto)×robots)⊸⌈ ↩
           { 𝕊 i:
-            n ← i⊏bp
-            { upto< t ← time- w ← 1+⌈⌈´(i⊏masks)/robots÷˜n(0⊸⌈-)resources ?
+            { upto< t ← time- w ← 1+⌈⌈´(i⊏masks)/robots÷˜(n ← i⊏bp)(0⊸⌈-)resources ?
                 { ¬∨´(∧´𝕩⊸≤)¨next ? next ⟨𝕩⟩⊸∾ ↩ ;@ } t∾(n-˜resources+w×robots)∾((1⊸+)⌾(i⊸⊑)robots)
-              ;@
+              ;
+                best ((¯1⊑resources)+(time-upto)×¯1⊑robots)⊸⌈ ↩
             }
           }¨{robots<○(𝕩⊸⊑)limits }¨⊸/↕4
           next
