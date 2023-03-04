@@ -1,14 +1,13 @@
 lib ← •Import "../lib.bqn"
 Solve ⇐ { part 𝕊 line:
   data ← >{
-    is ← lib.ParseInts 𝕩
     4‿4⥊⟨
-          1⊑is,    0,    0,   0,
-          2⊑is,    0,    0,   0,
-          3⊑is, 4⊑is,    0,   0,
-          5⊑is,    0, 6⊑is,   0,
+          1⊑𝕩,   0,   0,  0,
+          2⊑𝕩,   0,   0,  0,
+          3⊑𝕩, 4⊑𝕩,   0,  0,
+          5⊑𝕩,   0, 6⊑𝕩,  0,
         ⟩
-  }¨ line
+  }∘lib.ParseInts¨ line
   Examine ← { u 𝕊 n:
     best‿bp‿upto ← ⟨0,n⊏data,-u⟩
     masks‿limits ← ⟨0<˘bp,0‿0‿0‿∞⌈⌈´˘⍉bp⟩
