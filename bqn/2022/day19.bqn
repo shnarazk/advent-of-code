@@ -20,18 +20,15 @@ Solve ⇐ { part 𝕊 line:
         { 𝕊 state:
           time‿resources‿robots ← ⟨⊑state,4↑1↓state,5↓state⟩
           best (¯1⊑resources+(time-upto)×robots)⊸⌈ ↩
-          { 𝕊 i:        # FIXME: this is not an array oriented approach.
-            { robots≤○(i⊸⊑)limits ?
-                need ← i⊏bp
-                masked ← (i⊏masks)/robots÷˜need(0⊸⌈-)resources
-                { upto< ti ← time- wait ← 1+⌈⌈´masked ?
-                    s ← ti∾(need-˜resources+wait×robots)∾((1⊸+)⌾(i⊸⊑)robots)
-                    { ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
-                  ;@
-                }
-                ;@
-              }
-            }¨↕4
+          { 𝕊 i:
+            need ← i⊏bp
+            masked ← (i⊏masks)/robots÷˜need(0⊸⌈-)resources
+            { upto< ti ← time- wait ← 1+⌈⌈´masked ?
+                s ← ti∾(need-˜resources+wait×robots)∾((1⊸+)⌾(i⊸⊑)robots)
+                { ¬∨´(∧´s⊸≤)¨next ? next ⟨s⟩⊸∾ ↩ ;@ }
+              ;@
+            }
+          }¨{robots<○(𝕩⊸⊑)limits }¨⊸/↕4
         }¨to_visit
         𝕊 next
     }
