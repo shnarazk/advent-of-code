@@ -87,7 +87,14 @@ Sat ← {
 
 ## at day19
 
-- https://github.com/shnarazk/advent-of-code/pull/32
+| description | performance |
+|-------------|-------------|
+| committed one, using 'and' |   1098.02s user 5.32s system 99% cpu 18:25.33 total  |
+| modified version after the merge, using [multiple tests](https://mlochbaum.github.io/BQN/doc/block.html#predicates) |  847.80s user 4.64s system 99% cpu 14:13.30 total |
+| rewrote after 61b51f6 |  793.44s user 6.34s system 99% cpu 13:21.41 total |
+|rewrote after 6f95c23 |  787.28s user 5.05s system 99% cpu 13:13.02 total  | 
+| e687d86 | 545.83s user 0.41s system 99% cpu 9:06.65 total |
+
 
 ## at day20
 
