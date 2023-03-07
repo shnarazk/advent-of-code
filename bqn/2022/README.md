@@ -95,6 +95,7 @@ Sat ← {
 |rewrote after 6f95c23 |  787.28s user 5.05s system 99% cpu 13:13.02 total  | 
 | e687d86 | 545.83s user 0.41s system 99% cpu 9:06.65 total |
 
+- [my memo](https://shnarazk.github.io/2023/2023-03-07-aoc2022-day19/) in Japanese.
 
 ## at day20
 
