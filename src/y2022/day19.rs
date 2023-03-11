@@ -38,6 +38,7 @@ impl Calculation for [usize; 4] {
 struct Blueprint {
     id: usize,
     trans: [[usize; 4]; 4],
+    limits: [usize; 4],
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -92,6 +93,9 @@ impl Blueprint {
                 }
             }
             for (i, requires) in self.trans.iter().enumerate() {
+                if self.limits[i] <= state.robots[i] {
+                    continue;
+                }
                 // check if all the required stuffs can be generated
                 if !requires
                     .iter()
@@ -169,6 +173,12 @@ impl AdventOfCode for Puzzle {
                     [0, 0, nth!(5), nth!(4)],
                     [0, 0, 0, nth!(3)],
                     [0, 0, 0, nth!(2)],
+                ],
+                limits: [
+                    usize::MAX,
+                    nth!(7),
+                    nth!(5),
+                    (nth!(6).max(nth!(4))).max(nth!(3).max(nth!(2))),
                 ],
             });
         }
