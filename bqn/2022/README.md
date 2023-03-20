@@ -33,7 +33,7 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 |----------------|------|--------------:|
 | [my bqn](https://github.com/shnarazk/advent-of-code/blob/main/bqn/2022/day14.bqn)         | 96.0 |   $O(N^2)$    |
 | - on cbqn [05c12703](https://github.com/dzaima/CBQN/tree/05c1270344908e98c9f2d06b3671c3646f8634c3) | 92.45 |
-| - on cbqn [4a6877a8](https://github.com/dzaima/CBQN/tree/4a6877a87a81f181942039ac609dcffd17e80dd0) | 100.87       |
+| - on cbqn [4a6877a8](https://github.com/dzaima/CBQN/tree/4a6877a87a81f181942039ac609dcffd17e80dd0)sengeli | 96.45       |
 | in rust        | 0.17 |   $O(N^2)$    |
 | [github.com/dzaima/aoc/2022/BQN/14.bqn](https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn) |  0.03 | ??? |
 
