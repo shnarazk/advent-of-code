@@ -1,7 +1,6 @@
 'From Cuis 6.0 [latest update: #5213] on 4 June 2022 at 3:06:50 pm'!
 'Description '!
 !provides: 'AdventOfCode2016' 1 29!
-!requires: 'RustBridge' 1 13 nil!
 SystemOrganization addCategory: 'AdventOfCode2016-Day11'!
 SystemOrganization addCategory: 'AdventOfCode2016-Day12'!
 SystemOrganization addCategory: 'AdventOfCode2016-Day13'!
@@ -812,7 +811,7 @@ initialize
 
 !Day17 class methodsFor: 'initialization' stamp: 'shnarazk 6/2/2022 20:06:26'!
 setHasher
-Hasher := RustCaller1 new.! !
+Hasher := Dictionary new.! !
 
 !Day17 class methodsFor: 'accessing' stamp: 'shnarazk 6/3/2022 16:59:17'!
 foundGoal
