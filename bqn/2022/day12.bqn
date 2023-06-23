@@ -28,4 +28,5 @@ Solve ⇐ { part 𝕊 lines:
   lib.While { 𝕤⋄ 0>end⊑n }‿{ 𝕤⋄ 0 Dump n (Choose¨˘´⟜ MaskedNeighbors) ↩ }
   •Out lib.term.reset∾lib.term.clear
   ¯1⊸+end⊸⊑ n
+  •Delay 4
 }

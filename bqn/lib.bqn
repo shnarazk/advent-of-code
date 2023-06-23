@@ -1,13 +1,11 @@
 ⟨
-  If,IfElse,While,DoWhile, For,
-  Match, Select, Switch, Test,
+  If,IfElse,While,DoWhile,For,Match,Select,Switch,Test,
   Swap,
   Tokenize,StartsWith,ParseInt,ParseInts,ParseFloats,color,term,Debug,
   MaxAt,MinAt,
   AbsolutePath,DataFile,
   version
 ⟩ ⇐
-
 
 #
 # program structure
@@ -25,9 +23,9 @@ Test    ← {fn←{C‿A𝕊e:C◶A‿E}´𝕩⋄Fn@}
 #
 # list operations
 #
-#     Swap list: swap the first element and the second one in the `list` 
-# i‿j Swap list: swap the `i`-th element and the `j`-th one in the `list` 
-Swap ← { ⋈˜´⌾(0‿1⊸⊏) 𝕩; ⋈˜´⌾(𝕨⊸⊏)𝕩 }
+#     Swap list: swap the first element and the second one of the `list`
+# i‿j Swap list: swap the `i`-th element and the `j`-th one of the `list`
+Swap ← {⋈˜´⌾(0‿1⊸⊏) 𝕩; ⋈˜´⌾(𝕨⊸⊏)𝕩}
 
 #
 # string operations
@@ -60,8 +58,8 @@ color ← {
     r‿g‿b 𝕊 0: esc∾"[48;2;"∾(•Fmt r)∾";"∾(•Fmt g)∾";"∾(•Fmt b)∾"m";
     bg 𝕊 fg: (bg 𝕊 0)∾𝕊 fg
   }
-  Out ⇐ { c 𝕊 t: c∾t∾reset }
-  Fmt ⇐ { c 𝕊 t: c∾(•Fmt t)∾reset }
+  Out ⇐ {c 𝕊 t: c∾t∾reset}
+  Fmt ⇐ {c 𝕊 t: c∾(•Fmt t)∾reset}
 }
 term ← {
   # https://en.wikipedia.org/wiki/ANSI_escape_code
@@ -70,7 +68,7 @@ term ← {
   csi ⇐ esc∾"["
   reverse ⇐ csi∾"001m"
   reset ⇐ csi∾"0m"
-  Revert ⇐ { •Out csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J" }
+  Revert ⇐ {•Out csi∾(•Fmt 𝕩)∾"A"∾csi∾"1G"∾csi∾"0J"}
   Up ⇐ {
     •Out csi∾(•Fmt 𝕩)∾"A";
     csi∾(•Fmt 𝕩)∾"A"
@@ -93,7 +91,8 @@ term ← {
     •Out 𝕨∾𝕩∾reset
   }
 }
-Debug ← { 
+
+Debug ← {
   ⟨⟩ 𝕊 𝕩: 𝕩;
      𝕊 𝕩: (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - debug:      "∾(color.RGB 20‿100‿200) color.Fmt 𝕩⋄ 𝕩;
    𝕨 𝕊 𝕩: (220‿220‿220 color.RGB 180‿80‿80) term.Outln " - "∾𝕨∾":"∾(' '˙¨↕8-8|5+≠𝕨)∾(color.RGB 20‿100‿200) color.Fmt 𝕩⋄ 𝕩
@@ -108,6 +107,6 @@ MinAt ← {n F l: {𝕨<○(n⊸⊑)𝕩?𝕨;𝕩}´l}
 #
 # file operations
 #
-AbsolutePath ← { '/'=⊑𝕩 ? 𝕩; •wdpath∾ "/"∾ 𝕩 }
-DataFile ← AbsolutePath∘{ 0<≠𝕩 ? ⊑𝕩; 𝕨 }
+AbsolutePath ← {'/'=⊑𝕩 ? 𝕩; •wdpath∾ "/"∾ 𝕩}
+DataFile ← AbsolutePath∘{0<≠𝕩 ? ⊑𝕩; 𝕨}
 version ← "0.4.2"
