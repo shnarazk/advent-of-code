@@ -32,7 +32,7 @@ Solve ⇐ { part Solve data:
         𝕊 𝕩 : surface 𝕊 𝕩;
         set 𝕊 x‿y‿z‿s:
         # {1‿¯1‿0≡b-○(3⊸↑)a ? lib.Debug a‿b; @}
-        cands ← {
+        cands ← ⥊<˘{
           𝕊 2 : [
             ⟨⟨x+1,y+1,z  ,5⟩,⟨x  ,y+1,z  ,2⟩,⟨x  ,y  ,z  ,4⟩⟩
             ⟨⟨x+1,y-1,z  ,4⟩,⟨x  ,y-1,z  ,2⟩,⟨x  ,y  ,z  ,5⟩⟩
@@ -78,31 +78,39 @@ Solve ⇐ { part Solve data:
         # "4 hits" lib.Debug (∊⟜set)˜˘cands
         # "output" lib.Debug ∾(<(∊⟜set)⊸/)˘cands
         # ⥊((0⊸<≠)⊸↑(∊⟜set)⊸/)˘cands
-        ∾(<(∊⟜set)⊸/)˘cands
+
+        # "all neighbor cands" lib.Debug cands
+        # "existing flag" lib.Debug (∊⟜set)¨cands
+        # "filtered" lib.Debug ((∊⟜set)⊸/)¨cands
+        # "first ones" lib.Debug ∾((0⊸<≠)⊸↑(∊⟜set)⊸/)¨cands
+        ∾((0⊸<≠)⊸↑(∊⟜set)⊸/)¨cands
       }
-      {
-        start ← ⟨0,0,0,2⟩
-        set ← ⥊<˘[
-          ⟨0,0,0,4⟩
-          ⟨0,0,0,5⟩
-          ⟨0,0,0,6⟩
-          ⟨0,0,0,7⟩
-          ⟨0,0,1,2⟩
-          ⟨0,0,1,7⟩
-          ⟨0,1,0,2⟩
-        ]
-        "set" lib.Debug set
-        "test1" lib.Debug set Propagate start
-        # !0
-      }
+      # {
+      #   start ← ⟨0,0,0,2⟩
+      #   set ← ⥊<˘[
+      #     ⟨0,0,0,4⟩
+      #     ⟨0,0,0,5⟩
+      #     ⟨0,0,0,6⟩
+      #     ⟨0,0,0,7⟩
+      #     ⟨0,0,1,2⟩
+      #     ⟨0,0,1,7⟩
+      #     ⟨0,1,0,2⟩
+      #   ]
+      #   "set" lib.Debug set
+      #   "test1" lib.Debug set Propagate start
+      #   # !0
+      # }
+      "statrt at" lib.Debug 1↑∧surface
       "outers" lib.Debug ⟨⟩{
         checked Rec ⟨⟩  : ≠⍷checked;
         checked Rec new :
           np ← ≠prop ← ⍷∾Propagate¨new
           # drop surfaces that are stored checked already
-          prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
-          "≠prop" lib.Debug np‿(≠prop)
-          (⍷checked∾new) Rec prop
+          checked (⍷new⊸∾)↩
+          # prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
+          "propagated" lib.Debug ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
+          # "≠prop" lib.Debug np‿(≠prop)
+          checked Rec prop
 
         #   "≠prop" lib.Debug ≠prop ← ⍷∾Propagate⟜remain˜¨new
         #   # "new furfaces" lib.Debug prop ← ⍷ ∾remain Propagate¨ new
