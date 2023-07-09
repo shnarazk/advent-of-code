@@ -63,7 +63,7 @@ Solve ⇐ { part Solve data:
             ] ;
             𝕊 n : !0
           } s
-          ∾((0⊸<≠)⊸↑(∊⟜set)⊸/)¨cands
+          ∾((0<≠)⊸↑(∊⟜set)⊸/)¨cands
       }
       "statrt at" lib.Debug 1↑∧surface
       ⟨⟩{
