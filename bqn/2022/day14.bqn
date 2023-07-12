@@ -1,81 +1,51 @@
 lib ← •Import "../lib.bqn"
 
 Solve ⇐ { part 𝕊 data:
-  "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/ lib.ParseInts¨ data
+  "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/lib.ParseInts¨data
   {
     1=part ?
       map ← ymax‿xmax⥊ 0˙↕xmax×ymax
-      InjectBlocks ← { 𝕊 beg‿end:
+      InjectBlocks ← {𝕊 beg‿end :
         dx‿dy ← end-beg
         seq ← {
-          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy;
-          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy;
-          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx;
+          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy ;
+          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy ;
+          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx ;
           0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
         }
         map (1˙¨seq)⌾(seq⊸⊑) ↩
         ⟨⟩
       }¨<˘∘(2⊸↕)
-      InjectBlocks¨ segments
-      lib.Debug "starting"
-      sands‿trace ← 0‿⟨0‿500⟩
-      DropSand1 ← { 𝕊 tr:
-        y‿x ← start ← ¯1⊑tr
-        falling ← 1
-        lib.While { 𝕤, falling } ‿ { 𝕤,
-          new_y ← 1+y
+      InjectBlocks¨segments
+      DropSand1 ← {𝕊 tr :
+        1⊑{𝕊 falling‿tr :
+          loc ← ¯1⊑tr
           {
-            ymax=new_y ?
-              map 1˙⌾(y‿x⊸⊑) ↩
-              tr ↩ ⟨⟩
-              falling ↩ 0
-              ;
-            (new_y‿x (¬⊑) map) ?
-              y ↩ new_y
-              tr ∾⟜⟨y‿x⟩ ↩
-              ;
-            (new_y‿(¯1+x) (¬⊑) map) ?
-              y‿x ↩ new_y‿(¯1+x)
-              tr ∾⟜⟨y‿x⟩ ↩
-              ;
-            (new_y‿( 1+x) (¬⊑) map) ?
-              y‿x ↩ new_y‿( 1+x)
-              tr ∾⟜⟨y‿x⟩ ↩
-            ;
-              map 1˙⌾(y‿x⊸⊑) ↩,
-              tr ¯1⊸↓ ↩
-              falling ↩ 0
+            ymax=1+⊑loc                  ? map 1˙⌾(loc⊸⊑) ↩ ⋄ 0‿⟨⟩ ;
+            ((loc+offset ← 1‿ 0)(¬⊑)map) ? 1⋈tr∾⟨loc+offset⟩ ;
+            ((loc+offset ← 1‿¯1)(¬⊑)map) ? 1⋈tr∾⟨loc+offset⟩ ;
+            ((loc+offset ← 1‿ 1)(¬⊑)map) ? 1⋈tr∾⟨loc+offset⟩ ;
+                                           map 1˙⌾(loc⊸⊑) ↩ ⋄ ⟨0,¯1↓tr⟩
           }
-        }
-        tr
+        }•_while_⊑1‿tr
       }
-      lib.While { 𝕤, ⟨⟩≢trace }‿{ 𝕤, trace DropSand1 ↩, sands 1⊸+ ↩ }
-      ¯1+sands
+      ¯1+⊑{𝕊 sands‿trace : ⟨1+sands,DropSand1 trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
     ;
       xmax ymax⊸+ ↩
       map ← ymax‿xmax⥊ 0˙↕xmax×ymax
       InjectBlocks ← { 𝕊 beg‿end:
         dx‿dy ← end-beg
         seq ← {
-          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy;
-          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy;
-          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx;
+          0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy ;
+          0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy ;
+          0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx ;
           0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
         }
         map (1˙¨seq)⌾(seq⊸⊑) ↩
         ⟨⟩
       }¨<˘∘(2⊸↕)
-      InjectBlocks¨ segments
-      lib.Debug "starting"
-      DropSand2 ← { y 𝕊 x:
-        0=y‿x⊑map ?
-          map 2˙⌾(y‿x⊸⊑) ↩
-          # { yy ← y, lib.While { 𝕤, ymax>yy ? 0=yy‿x⊑map; 0 }‿{ 𝕤, map 2˙⌾(yy‿x⊸⊑) ↩, yy 1⊸+ ↩ } }
-          { ymax>yy ← 1+y ? yy DropSand2¨ x+⟨¯1,0,1⟩ ; @ }
-        ;
-          @
-      }
-      0 DropSand2 500
+      InjectBlocks¨segments
+      0{y Drop x : 0=y‿x⊑map ? map 2˙⌾(y‿x⊸⊑) ↩ ⋄ {ymax>yy ← 1+y ? yy Drop¨ x+⟨¯1,0,1⟩ ; @} ; @}500
       +´2=⥊map
   }
 }
