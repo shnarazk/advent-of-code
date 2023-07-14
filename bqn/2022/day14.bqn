@@ -1,10 +1,10 @@
-lib ← •Import "../lib.bqn"
+lib ← •Import"../lib.bqn"
 
-Solve ⇐ { part 𝕊 data:
+Solve ⇐ {part 𝕊 data :
   "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/lib.ParseInts¨data
   {
     1=part ?
-      map ← ymax‿xmax⥊ 0˙↕xmax×ymax
+      map ← ymax‿xmax⥊0˙↕xmax×ymax
       InjectBlocks ← {𝕊 beg‿end :
         dx‿dy ← end-beg
         seq ← {
