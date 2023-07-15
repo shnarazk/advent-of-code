@@ -1,5 +1,3 @@
-lib ← •Import"../lib.bqn"
-
 Mdist ← {⟨sx,sy⟩ 𝕊 ⟨bx,by⟩ : (sx-bx)+○|(sy-by)}
 Band ← {target_y 𝕊 ⟨sx,sy,d⟩ : dx ← d-|target_y-sy ⋄ {0≤dx ? ⟨sx-dx,sx+dx⟩ ; ⟨⟩}}
 CrossPoint ← { ⟨ax,ay,bx,by⟩ 𝕊 ⟨sx,sy,tx,ty⟩ :
@@ -28,7 +26,8 @@ Intersections ← {⟨ax,ay,ad1⟩𝕊⟨bx,by,bd1⟩ :
  ⟩
 }
 
-Solve ⇐ {part 𝕊 lines :
+Solve ⇐ {env‿part 𝕊 lines :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   data ← (lib.ParseInts{∊⟜("-,:"∾'0'+¨↕10)}⊸/)¨lines
   sensors ← {⟨sx,sy,bx,by⟩ ← 𝕩 ⋄ ⟨sx,sy,⟨sx,sy⟩Mdist⟨bx,by⟩⟩}¨data
   {

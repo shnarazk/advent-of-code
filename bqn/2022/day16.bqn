@@ -1,7 +1,6 @@
-⟨color,DataFile,Debug,ParseInts,Swap,term⟩ ← •Import"../lib.bqn"
-⟨_to_heap⟩ ← •Import"../heap.bqn"
-
-Solve ⇐ {part 𝕊 rawdata :
+Solve ⇐ {env‿part 𝕊 rawdata :
+  ⟨color,DataFile,Debug,ParseInts,Swap,term⟩ ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  ⟨_to_heap⟩ ← •Import"/heap.bqn"∾˜∾env.Var¨"HOME"‿"BQNLIBDIR"
   data ← ∧(Swap ParseInts ∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨rawdata
   nodes ← ⍷⊑¨data
   ! 0=⊑nodes⊐<"AA"

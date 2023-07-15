@@ -1,5 +1,3 @@
-lib ← •Import"../lib.bqn"
-
 Shift ← {i 𝕊 data‿next‿prev :
   j‿step ← ⟨i,(¯1+≠data)||v ← i⊑data⟩
   j ↩ {
@@ -19,7 +17,8 @@ Shift ← {i 𝕊 data‿next‿prev :
   }
 }
 
-Solve ⇐ {part 𝕊 rawdata :
+Solve ⇐ {env‿part 𝕊 rawdata :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   n ← ≠ data ← ∾lib.parseInts¨rawdata
   ⟨next,prev⟩ ← ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+))↕n
   data‿next‿· ↩ { 1=part ? data‿next‿prev Shift´⌽↕n ; {𝕩 Shift´⌽↕n}⍟10(811589153×data)‿next‿prev}

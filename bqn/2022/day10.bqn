@@ -1,4 +1,4 @@
-Solve ⇐ {part 𝕊 lines :
+Solve ⇐ {env‿part 𝕊 lines :
   states ← ⟨0,0⟩∾1+`∾{F"noop" : ⟨0⟩ ; ⟨0,•BQN 5↓𝕩⟩}¨lines
   {1=part ?
     ss ← ×¨⟜(↕≠)states

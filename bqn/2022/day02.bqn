@@ -1,4 +1,4 @@
-Solve ⇐ {part 𝕊 data :
+Solve ⇐ {env‿part 𝕊 data :
   Part1 ← {
       "A X" : 1 + 3 ;
       "A Y" : 2 + 6 ;

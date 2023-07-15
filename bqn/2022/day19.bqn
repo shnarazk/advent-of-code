@@ -1,5 +1,5 @@
-lib ← •Import"../lib.bqn"
-Solve ⇐ {part 𝕊 line :
+Solve ⇐ {env‿part 𝕊 line :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   data ← >{
     4‿4⥊⟨
           1⊑𝕩,   0,   0,  0,

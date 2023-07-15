@@ -1,5 +1,3 @@
-lib ← •Import"../lib.bqn"
-
 sea_level ← ¯100
 IndexOf ← {⊑(𝕨⊸=⊑⟜𝕩)¨⊸/⥊↕·≢𝕩}
 Choose ← {other 𝕊 self : {
@@ -10,14 +8,15 @@ Choose ← {other 𝕊 self : {
 }
 MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)(∞⊸»˘)(⌽⍉)⍟𝕩 𝕨}
 Neighbors ← {(𝕩⊸MakeNeighbor)¨↕4}
-Dump ← {t 𝕊 𝕩 :
-  lib.term.Up 1+≠𝕩
-  Colorize ← {𝕩≥𝕨 ? 80‿(⌊255-255⌊⌊2500÷√𝕩)‿(⌊255⌊30×1.8⋆⁼𝕩) ; 100‿100‿100}
-  {lib.term.Outln∾{((t Colorize 𝕩) lib.color.RGB 0)∾" "}¨𝕩 ⋄ ⟨⟩}˘𝕩
-  𝕩
-}
 
-Solve ⇐ {part 𝕊 lines :
+Solve ⇐ {env‿part 𝕊 lines :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  Dump ← {t 𝕊 𝕩 :
+    lib.term.Up 1+≠𝕩
+    Colorize ← {𝕩≥𝕨 ? 80‿(⌊255-255⌊⌊2500÷√𝕩)‿(⌊255⌊30×1.8⋆⁼𝕩) ; 100‿100‿100}
+    {lib.term.Outln∾{((t Colorize 𝕩) lib.color.RGB 0)∾" "}¨𝕩 ⋄ ⟨⟩}˘𝕩
+    𝕩
+  }
   shape ← (≠⋈(≠⊑))lines
   map ← (shape⊸⥊)∘(sea_level⊸+'a'⊸(-˜))∘∾lines
   start‿end ← (map⊸(IndexOf˜)sea_level⊸+∘-⟜'a')¨'S'‿'E'

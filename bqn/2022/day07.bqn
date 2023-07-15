@@ -1,6 +1,5 @@
-lib ← •Import"../lib.bqn"
-
-Solve ⇐ {part 𝕊 data :
+ Solve ⇐ {env‿part 𝕊 data :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   session ← (⟨⟩⊸≢)¨⊸/{(⟨⟩⊸≢)¨⊸/" "((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩}¨"$"((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)∾(" "⊸∾˜)¨data
   dirs ← ⟨⟩
   Traverse ← {io 𝕊 pwd :

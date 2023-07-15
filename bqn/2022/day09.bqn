@@ -1,4 +1,3 @@
-lib ← •Import"../lib.bqn"
 DirVec ← {
   F⟨"U",r⟩ : ⟨ 0,-1⟩ ;
   F⟨"D",r⟩ : ⟨ 0, 1⟩ ;
@@ -38,7 +37,8 @@ Update2 ← {
     ⟨dir,n-1⟩F⟨⟨h⟩∾t,{⟨𝕩⟩⊑∘∊history ? history ; ⟨𝕩⟩∾history}⊑⌽t⟩
 }
 
-Solve ⇐ {part 𝕊 data :
+Solve ⇐ {env‿part 𝕊 data :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   moves ← (1⊸↑⋈(lib.ParseInt 2⊸↓))¨data
   {1=part ? ≠2⊑⟨⟨0,0⟩,⟨0,0⟩,⟨⟩⟩Update´⌽moves
           ; ≠1⊑⟨⟨0,0⟩˙¨↕10,⟨⟩⟩Update2´⌽moves

@@ -1,5 +1,6 @@
-#!/usr/bin/env cbqn
-⟨For, ParseInts, StartsWith⟩ ← •Import "../lib.bqn"
+#!/usr/bin/env BQNLIBDIR=/.config/bqn BQNLIB=/lib.bqn cbqn
+env ← {v←(⊑'='⊐˜⊢)⊸(↑⋈(1⊸↓↓))¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env",Var⇐{(@∾˜1⊑¨v)⊏˜⊐⟜𝕩˜⊑¨v}}
+⟨For, ParseInts, StartsWith⟩ ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
 Decode ← {
     𝕩 StartsWith "rect"       ? 'E'∾ParseInts 𝕩;
     𝕩 StartsWith "rotate col" ? 'C'∾ParseInts 𝕩;

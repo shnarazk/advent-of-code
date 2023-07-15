@@ -1,5 +1,3 @@
-⟨color,ParseInts⟩ ← •Import"../lib.bqn"
-
 Part1 ← {amount‿from‿to F state :
   {
     val‿dropped ← (⊑⋈(1⊸↓))from⊑𝕩
@@ -12,7 +10,8 @@ Part2 ← {amount‿from‿to F state :
  (val⊸∾)⌾(to⊸⊑)dropped˙⌾(from⊸⊑)state
 }
 
-Solve ⇐ {part 𝕊 data :
+Solve ⇐ {env‿part 𝕊 data :
+  ⟨color,ParseInts⟩ ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   ⟨header,lines⟩ ← ⟨⟨⟩⟩⊸(⊑⊐˜)⊸(↑⋈↓)data
   •Out color.green color.Fmt init ← ⟨⟨⟩⟩∾¯1⊸↓¨⟨⟩⊸≢¨⊸/(' '⊸≠)¨⊸/¨<˘⍉⟨≠header,∘⟩⥊∾((¬∊⟜" []")(' '⊸+×)-⟜' ')¨header
   •Out color.green color.Fmt 5↑actions ← ParseInts¨1↓lines

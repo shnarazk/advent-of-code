@@ -1,6 +1,5 @@
-lib ← •Import"../lib.bqn"
-
-Solve ⇐ {part Solve data :
+Solve ⇐ {env‿part Solve data :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   Facets ← {x‿y‿z :
     [⟨x-0.5,y,z⟩,⟨x+0.5,y,z⟩,⟨x,y-0.5,z⟩,⟨x,y+0.5,z⟩,⟨x,y,z-0.5⟩,⟨x,y,z+0.5⟩]
   }

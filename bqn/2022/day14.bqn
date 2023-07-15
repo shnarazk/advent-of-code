@@ -1,6 +1,5 @@
-lib ← •Import"../lib.bqn"
-
-Solve ⇐ {part 𝕊 data :
+Solve ⇐ {env‿part 𝕊 data :
+  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/lib.ParseInts¨data
   {
     1=part ?
