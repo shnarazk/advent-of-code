@@ -1,6 +1,4 @@
-#!/usr/bin/env cbqn
-
-example ← "eedadn
+example ← 6↑˘∘‿7⥊"eedadn
 drvtee
 eandsr
 raavrd
@@ -18,43 +16,13 @@ dvrsen
 enarar
 "
 
-example_keys ← ⍉6↑˘∘‿7 ⥊ example
-# •Show example_keys
-
-PickMost ← {
-    i ← (¯1⊸⊏∘⍋∘⊒)˘ 𝕩
-    { (0⊑𝕩)⊑(1⊑𝕩) }˘ ⍉ (i ≍ (<˘ 𝕩))
+Solve ⇐ {env‿part S data :
+  # lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  _pick ← {F _𝕣 x : (⊑1⊸⊑)˘{⊑F((≠⊸⋈)¨)⊐⊸⊔𝕩}˘x}
+  {
+    0=part ? ⟨env‿1 S example,env‿2 S example⟩ ;
+    1=part ? ∨_pick⍉>data ;
+    2=part ? ∧_pick⍉>data ;
+    !0
+  }
 }
-
-# •Show ⊒˘ example_keys
-•Show "Part 1"
-•Show PickMost example_keys
-
-lines ← ⥊ •FLines "../../data/2016/input-day06.txt"
-# •Show 10 ↑ lines
-keys ← ⍉ ∘‿8 ⥊ ∾´ lines
-# •Show keys
-•Show PickMost keys
-
-•Show "Part 2"
-PickLeast ← {
-    bigN ← +´⥊≠⌜ 𝕩
-    letters ← (<)˘ 𝕩
-    •Show "letters"‿letters
-    occurs ← (1+ ⊒)¨ letters
-    •Show "numbers of occurs"
-    •Show ⍉ occurs
-    targets ← (⌽∘∊∘⌽)¨ letters
-    •Show "targets"
-    •Show targets
-    ot ← occurs × targets
-   •Show "ot = occurs × targets"‿ot
-    scores ← ot + bigN × 1 - targets
-   # •Show "scores"‿scores
-    leasts ← ⌊´¨ scores
-    •Show "leasts"‿leasts
-    indices ← >{(𝕩⊑scores) ⊐ (𝕩⊑leasts) }¨ ↕≠ leasts
-    >{(𝕩⊑indices) ⊑ (𝕩⊑letters) }¨ ↕≠ leasts
-}
-•Show PickLeast example_keys
-# •Show PickLeast keys
