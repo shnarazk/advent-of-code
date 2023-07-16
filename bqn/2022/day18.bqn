@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part Solve data :
-  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  lib ← •Import∾env.Var<"BQN_LIB"
   Facets ← {x‿y‿z :
     [⟨x-0.5,y,z⟩,⟨x+0.5,y,z⟩,⟨x,y-0.5,z⟩,⟨x,y+0.5,z⟩,⟨x,y,z-0.5⟩,⟨x,y,z+0.5⟩]
   }

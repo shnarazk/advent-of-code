@@ -1,6 +1,6 @@
-#!/usr/bin/env BQNLIBDIR=/.config/bqn BQNLIB=/lib.bqn cbqn
-env ← {v←(⊑'='⊐˜⊢)⊸(↑⋈(1⊸↓↓))¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env",Var⇐{(@∾˜1⊑¨v)⊏˜⊐⟜𝕩˜⊑¨v}}
-⟨Min, Max, StartsWith, Switch, Tokenize⟩ ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+#!/usr/bin/env cbqn
+env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜@)˝v}}
+⟨Min,Max,StartsWith,Switch,Tokenize⟩ ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
 Decode ← {
     l ← Tokenize 𝕩
     Switch ⟨⊑l

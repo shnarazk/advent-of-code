@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
   problems ← (2⊸↑˘)∘‿3⥊∾⟜ ⟨⟨⟩⟩data
   Reform ← {ch 𝕊 out‿digits : {
     ch=',' ? { 0<≠digits ? (out∾(•BQN digits))‿⟨⟩     ; out‿⟨⟩} ;

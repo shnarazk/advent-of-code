@@ -1,6 +1,6 @@
-#!/usr/bin/env BQNLIBDIR=/.config/bqn BQNLIB=/lib.bqn cbqn
+#!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜@)˝v}}
-lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
 
 Fill ← {template 𝕊 value : value∾˜(template-○≠value)↑template}
 year‿day‿part‿prog‿datafile ← {

@@ -10,7 +10,7 @@ Part2Move ← {
 }
 
 Solve ⇐ {env‿part 𝕊 data :
-    lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+    lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
     Encode ← {
         𝕩 lib.StartsWith "forward" ? 'F'‿(•BQN 7↓𝕩) ;
         𝕩 lib.StartsWith "down"    ? 'D'‿(•BQN 5↓𝕩) ;

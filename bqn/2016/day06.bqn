@@ -17,7 +17,6 @@ enarar
 "
 
 Solve ⇐ {env‿part S data :
-  # lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
   _pick ← {F _𝕣 x : (⊑1⊸⊑)˘{⊑F((≠⊸⋈)¨)⊐⊸⊔𝕩}˘x}
   {
     0=part ? ⟨env‿1 S example,env‿2 S example⟩ ;

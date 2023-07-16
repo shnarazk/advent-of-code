@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 lines :
-  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
   Convert ← {𝕊 no‿items‿update‿test‿then‿else‿end :
     u ← 19↓update
     <⟨

@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
   "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/lib.ParseInts¨data
   {
     1=part ?

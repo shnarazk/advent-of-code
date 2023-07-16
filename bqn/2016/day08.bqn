@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
-    lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+    lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
     Decode ← {
         𝕩 lib.StartsWith "rect"       ? 'E'∾lib.ParseInts 𝕩 ;
         𝕩 lib.StartsWith "rotate col" ? 'C'∾lib.ParseInts 𝕩 ;
