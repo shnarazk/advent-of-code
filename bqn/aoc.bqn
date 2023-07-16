@@ -1,5 +1,5 @@
 #!/usr/bin/env BQNLIBDIR=/.config/bqn BQNLIB=/lib.bqn cbqn
-env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜ @)˝v}}
+env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜@)˝v}}
 lib ← •Import∾env.Var"HOME"‿"BQNLIBDIR"‿"BQNLIB"
 
 Fill ← {template 𝕊 value : value∾˜(template-○≠value)↑template}
@@ -14,14 +14,14 @@ year‿day‿part‿prog‿datafile ← {
   𝕊⟨year,day,part⟩ :
     y‿d ← ⟨"2020","00"⟩Fill¨year‿day
     ⟨
-      y,d,•BQN part
+      y,d,⌊•Parsefloat part
       lib.AbsolutePath y∾"/day"∾d∾".bqn"
       lib.AbsolutePath "../data/"∾y∾"/input-day"∾d∾".txt"
     ⟩ ;
   𝕊⟨year,day,part,suf⟩ :
     y‿d ← ⟨"2020"∾"00"⟩Fill¨year‿day
     ⟨
-      y,d,•BQN part
+      y,d,⌊•Parsefloat part
       lib.AbsolutePath y∾"/day"∾d∾".bqn"
       lib.AbsolutePath "../data/"∾y∾"/input-day"∾d∾"-"∾suf∾".txt"
     ⟩
