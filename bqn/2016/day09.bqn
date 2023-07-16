@@ -1,6 +1,6 @@
 #!/usr/bin/env BQNLIBDIR=/.config/bqn BQNLIB=/lib.bqn cbqn
 env←{v←>(⊑'='⊐˜⊢)⊸(↑⋈(1⊸↓↓))¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env",Var⇐{""𝕊𝕩;1⊸⊑∘⊏(𝕩⊸≡¨(<⊑)˘)⊸/⎊𝕨v}}
-⟨For,ParseInts,StartsWith⟩ ← •Import∾env.Var¨"HOME"‿"BQNLIBDIR"‿"BQNLIB"
+⟨ParseInts,StartsWith⟩ ← •Import∾env.Var¨"HOME"‿"BQNLIBDIR"‿"BQNLIB"
 
 Decode ← {F x :
     lpi‿rpi ← x ⊐ '('‿')'
