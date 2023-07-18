@@ -7,8 +7,8 @@ Decode ← {F x :
     {
         lpi = rpi ? ⟨rpi, ""⟩ ;
         ⟨n, m⟩ ← ParseInts lpi↓rpi↑x
-        post ← ⊑Decode (1+n+rpi)↓x
-        ⟨post+lpi+n×m, (1+n+rpi)↓x⟩
+        post ← ⊑Decode(1+n+rpi)↓x
+        ⟨post+lpi+n×m,(1+n+rpi)↓x⟩
     }
 }
 example ← ⟨
@@ -20,7 +20,7 @@ example ← ⟨
     6‿"(6x1)(1x3)A"
     18‿"X(8x2)(3x3)ABCY"
 ⟩
-•Show ≍⟜((Decode(1⊸⊑))¨)example
+•Show ≍⟜(Decode∘(1⊸⊑)¨)example
 # Part 1: #####################################
 Decode1 ← {F x :
     lpi‿rpi ← x⊐'('‿')'
