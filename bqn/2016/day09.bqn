@@ -27,20 +27,25 @@ Decode1 ← {F x :
     {
         lpi = rpi ? rpi ;
         ⟨n,m⟩ ← ParseInts lpi↓rpi↑x
-        post ← Decode1(1+n+rpi)↓x
+        post ← F(1+n+rpi)↓x
         post+lpi+n×m
     }
 }
-•Show+´Decode1¨⥊•FLines"../../data/2016/input-day09.txt"
 # Part 2: #####################################
-Decode2 ← {k F x :
+Decode2 ← {
+    F x : 1 F x ;
+  k F x :
     lpi‿rpi ← x⊐'('‿')'
     {
         lpi = rpi ? k×rpi ;
         ⟨n, m⟩ ← ParseInts lpi↓rpi↑x
-        target ← (k×m) Decode2 n↑(1+rpi)↓x
-        post ← k Decode2 (1+n+rpi)↓x
+        target ← (k×m) F n↑(1+rpi)↓x
+        post ← k F (1+n+rpi)↓x
         post+target
     }
 }
-•Show+´{1 Decode2 𝕩}¨⥊•FLines"../../data/2016/input-day09.txt"
+Solve ⇐ {env‿part 𝕊 data :
+   {1=part ? +´Decode1¨⥊data ;
+    2=part ? +´Decode2¨⥊data
+   }
+}
