@@ -1,7 +1,7 @@
 #!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜@)˝v}}
 lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
-
+•Show args ← {•name⊑∘∊"2016"‿"2021"‿"2022" ? •name <⊸∾•args ; •args}
 Fill ← {template 𝕊 value : value∾˜(template-○≠value)↑template}
 year‿day‿part‿prog‿datafile ← {
   𝕊⟨year,day⟩ :
@@ -28,7 +28,7 @@ year‿day‿part‿prog‿datafile ← {
   ;
     lib.color.red lib.term.Outln "AoC driver takes YEAR DAY PART [ALT]"
     •Exit 1
-} •args
+} args
 •Out"Year "∾year∾" Day "∾day∾" on: "∾datafile
 bqn ← •Import prog
 {0=part    ? •Out"DEBUG: "∾•Fmt env‿0 bqn.Solve•FLines datafile ; @}
