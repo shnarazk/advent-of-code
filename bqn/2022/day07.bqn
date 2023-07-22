@@ -1,5 +1,5 @@
  Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
   session ← (⟨⟩⊸≢)¨⊸/{(⟨⟩⊸≢)¨⊸/" "((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩}¨"$"((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)∾(" "⊸∾˜)¨data
   dirs ← ⟨⟩
   Traverse ← {io 𝕊 pwd :

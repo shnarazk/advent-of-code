@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 line :
-  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
   data ← >{
     4‿4⥊⟨
           1⊑𝕩,   0,   0,  0,
@@ -29,6 +29,6 @@ Solve ⇐ {env‿part 𝕊 line :
   {
     1=part ? +´24((1⊸+)×Examine)¨↕≠data ;
     2=part ? ×´32 Examine¨ ↕3 ;
-             "≢data"lib.Debug≢data
+             "≢data" lib.Debug ≢data
   }
 }

@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 rawdata :
-  ⟨color,DataFile,Debug,ParseInts,Swap,term⟩ ← •Import"/util.bqn"∾˜∾env.Var<"BQN_DIR"
-  ⟨_to_heap⟩ ← •Import"/heap.bqn"∾˜∾env.Var<"BQN_DIR"
+  ⟨color,DataFile,Debug,ParseInts,Swap,term⟩ ← •Import "/util.bqn"∾˜∾env.Var<"BQN_DIR"
+  ⟨_to_heap⟩ ← •Import "/heap.bqn"∾˜∾env.Var<"BQN_DIR"
   data ← ∧(Swap ParseInts ∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨rawdata
   nodes ← ⍷⊑¨data
   ! 0=⊑nodes⊐<"AA"

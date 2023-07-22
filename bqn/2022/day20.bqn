@@ -18,7 +18,7 @@ Shift ← {i 𝕊 data‿next‿prev :
 }
 
 Solve ⇐ {env‿part 𝕊 rawdata :
-  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
   n ← ≠ data ← ∾lib.parseInts¨rawdata
   ⟨next,prev⟩ ← ((1⊸+)(⋈○(n⊸|n⊸+))(¯1⊸+))↕n
   data‿next‿· ↩ { 1=part ? data‿next‿prev Shift´⌽↕n ; {𝕩 Shift´⌽↕n}⍟10(811589153×data)‿next‿prev}

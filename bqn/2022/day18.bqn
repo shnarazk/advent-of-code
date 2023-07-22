@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part Solve data :
-  lib ← •Import∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
   Facets ← {x‿y‿z :
     [⟨x-0.5,y,z⟩,⟨x+0.5,y,z⟩,⟨x,y-0.5,z⟩,⟨x,y+0.5,z⟩,⟨x,y,z-0.5⟩,⟨x,y,z+0.5⟩]
   }
@@ -19,7 +19,7 @@ Solve ⇐ {env‿part Solve data :
      DirectedFacets ← ∾¨⟜(2+↕6)<
      dir¯all ← ∾DirectedFacets¨lib.ParseInts¨data
      mask ← dir¯all∊∾Lift¨dup
-     "≠surface"lib.Debug≠surface ← (¬mask)/dir¯all
+     "≠surface" lib.Debug≠surface ← (¬mask)/dir¯all
      Propagate ← {
        𝕊 𝕩 : surface 𝕊 𝕩 ;
        set 𝕊 x‿y‿z‿s :
@@ -72,7 +72,7 @@ Solve ⇐ {env‿part Solve data :
          checked (⍷new⊸∾)↩
          "propagated" lib.Debug ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
          checked Rec prop
-     } 1↑∧surface
+     }1↑∧surface
    ;
      !0
   }
