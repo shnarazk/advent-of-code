@@ -14,7 +14,7 @@
                  stdenv.mkDerivation rec {
                    name = "aoc-bqn-driver-${version}";
                    pname = "aoc-bqn-driver";
-                   version = "20230722-1";
+                   version = "20230723-1";
                    src = self;
                    # buildInputs = [];
                    # buildPhase = "";
