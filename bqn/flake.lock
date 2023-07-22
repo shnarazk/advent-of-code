@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1689997397,
-        "narHash": "sha256-tQxM4puBmcVO05m9/tSavS3NBDwONKS59UFGUsyvDEQ=",
+        "lastModified": 1689998028,
+        "narHash": "sha256-WYycHbathwLExC7LXABaZc82x9PCI9zdPcHq1nwmIV0=",
         "owner": "shnarazk",
         "repo": "advent-of-code",
-        "rev": "c2874ab1bafcf225ef1f4ba7d42a1bdee60008c6",
+        "rev": "fcc40a6deb3ac9ca2f2512397d6a88baaa678740",
         "type": "github"
       },
       "original": {

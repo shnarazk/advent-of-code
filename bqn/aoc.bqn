@@ -1,7 +1,7 @@
 #!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜@)˝v}}
 lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
-•Show args ← {•name⊑∘∊"2016"‿"2021"‿"2022" ? •name <⊸∾•args ; •args}
+args ← {•name<⊸(⊑∘∊)"2016"‿"2021"‿"2022"‿"2023" ? •name <⊸∾•args ; •args}
 Fill ← {template 𝕊 value : value∾˜(template-○≠value)↑template}
 year‿day‿part‿prog‿datafile ← {
   𝕊⟨year,day⟩ :
