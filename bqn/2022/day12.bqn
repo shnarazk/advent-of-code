@@ -1,6 +1,7 @@
 sea_level ← ¯100
 IndexOf ← {⊑(𝕨⊸=⊑⟜𝕩)¨⊸/⥊↕·≢𝕩}
-Choose ← {other 𝕊 self : {
+Choose ← {other 𝕊 self :
+  {
     self∧○(0⊸<)other    ? self⌊1+other ;
     (0<other)∧(other<∞) ? 1+other ;
     self
