@@ -11,7 +11,7 @@ year‿day‿part‿prog‿datafile ← {
     y‿d ← ⟨"2020","00"⟩Fill¨year‿day
     ⟨y,d,⌊•Parsefloat part,aoc∾"/bqn/"∾y∾"/day"∾d∾".bqn",aoc∾"/data/"∾y∾"/input-day"∾d∾".txt"⟩ ;
   ⟨year,day,part,alt⟩ :
-    y‿d ← ⟨"2020"∾"00"⟩Fill¨year‿day
+    y‿d ← ⟨"2020","00"⟩Fill¨year‿day
     ⟨y,d,⌊•Parsefloat part,aoc∾"/bqn/"∾y∾"/day"∾d∾".bqn",aoc∾"/data/"∾y∾"/input-day"∾d∾"-"∾alt∾".txt"⟩ ;
   lib.color.red lib.term.Outln "AoC driver takes YEAR DAY PART [ALT]"
   •Exit 1
