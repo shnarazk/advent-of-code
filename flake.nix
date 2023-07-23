@@ -14,16 +14,15 @@
                  stdenv.mkDerivation rec {
                    name = "aoc-bqn-driver-${version}";
                    pname = "aoc-bqn-driver";
-                   version = "20230723-1";
+                   version = "20230723-2";
                    src = self;
-                   # buildInputs = [];
-                   # buildPhase = "";
                    installPhase = ''
-                       mkdir -p $out/bin;
-                       cp bqn/aoc.bqn $out/bin/2023
-                       cp bqn/aoc.bqn $out/bin/2022
-                       cp bqn/aoc.bqn $out/bin/2021
-                       cp bqn/aoc.bqn $out/bin/2016
+                     mkdir -p $out/bin;
+                     cp bqn/aoc.bqn $out/bin/aoc
+                     cp bqn/aoc.bqn $out/bin/2023
+                     cp bqn/aoc.bqn $out/bin/2022
+                     cp bqn/aoc.bqn $out/bin/2021
+                     cp bqn/aoc.bqn $out/bin/2016
                    '';
                  };
            };
