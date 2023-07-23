@@ -15,11 +15,9 @@ Solve ⇐ {env‿part 𝕊 data :
       Seek ← {lower S upper :
         !lower<upper
         "humn" dict.Set mid ← ⌊2÷˜lower+upper
-        vals ← l ⋈○Eval r
-        lib.Debug lower‿mid‿upper∾-´vals ⋄ lib.term.Up 1 ⋄ lib.term.Out lib.term.clear
+        lib.Progress lower‿mid‿upper∾-´vals ← l ⋈○Eval r
         {𝕨>𝕩 ? mid S upper ; 𝕨<𝕩 ? lower S mid ; mid}´vals
       }
-      -⊸Seek 2⋆50 ;
-    !0
+      -⊸Seek 2⋆50
   }
 }
