@@ -10,16 +10,14 @@ Part2Move ← {
 }
 
 Solve ⇐ {env‿part 𝕊 data :
-    lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
+    lib ← •Import"/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
     Encode ← {
         𝕩 lib.StartsWith "forward" ? 'F'‿(•BQN 7↓𝕩) ;
         𝕩 lib.StartsWith "down"    ? 'D'‿(•BQN 5↓𝕩) ;
-        𝕩 lib.StartsWith "up"      ? 'U'‿(•BQN 3↓𝕩) ;
-                                     𝕩!0
+        𝕩 lib.StartsWith "up"      ? 'U'‿(•BQN 3↓𝕩)
     }
     {
         1=part ? ×´     0‿0 Part1Move´⌽Encode¨data ;
-        2=part ? ×´ 2↑0‿0‿0 Part2Move´⌽Encode¨data ;
-                 !0
+        2=part ? ×´ 2↑0‿0‿0 Part2Move´⌽Encode¨data
     }
 }
