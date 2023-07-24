@@ -17,6 +17,10 @@ year‿day‿part‿prog‿datafile ← {
   •Exit 1
 }{•name<⊸(⊑∊)"2016"‿"2021"‿"2022"‿"2023" ? •name<⊸∾•args ; •args}
 •Out "Year "∾year∾" Day "∾day∾" on: "∾datafile
+FileCheck ← {
+  ¬•file.Exists 𝕩 ? lib.color.red lib.term.Outln " doesn't exist."∾˜𝕩 ⋄ •Exit 1 ; @
+}
+FileCheck¨prog‿datafile
 bqn ← •Import prog
 {0=part    ? •Out "DEBUG: "∾•Fmt env‿0 bqn.Solve•FLines datafile ; @}
 {2|part    ? •Out "Part1: "∾•Fmt env‿1 bqn.Solve•FLines datafile ; @}

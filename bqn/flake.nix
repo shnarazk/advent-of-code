@@ -10,7 +10,7 @@
       bqn-driver = aoc.packages.${system}.default;
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive bqn-driver ];
+        packages = [ pkgs.bashInteractive pkgs.entr bqn-driver ];
       };
     });
 }

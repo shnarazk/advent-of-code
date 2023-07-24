@@ -14,7 +14,7 @@
                  stdenv.mkDerivation rec {
                    name = "aoc-bqn-driver-${version}";
                    pname = "aoc-bqn-driver";
-                   version = "20230723-4";
+                   version = "20230725-1";
                    src = self;
                    installPhase = ''
                      mkdir -p $out/bin;
