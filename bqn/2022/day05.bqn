@@ -11,7 +11,7 @@ Part2 ← {amount‿from‿to F state :
 }
 
 Solve ⇐ {env‿part 𝕊 data :
-  ⟨color,ParseInts⟩← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  ⟨color,ParseInts⟩← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   ⟨header,lines⟩ ← ⟨⟨⟩⟩⊸(⊑⊐˜)⊸(↑⋈↓)data
   •Out color.green color.Fmt init ← ⟨⟨⟩⟩∾¯1⊸↓¨⟨⟩⊸≢¨⊸/(' '⊸≠)¨⊸/¨<˘⍉⟨≠header,∘⟩⥊∾((¬∊⟜" []")(' '⊸+×)-⟜' ')¨header
   •Out color.green color.Fmt 5↑actions ← ParseInts¨1↓lines

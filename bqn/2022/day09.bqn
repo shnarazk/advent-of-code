@@ -38,7 +38,7 @@ Update2 ← {
 }
 
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   moves ← (1⊸↑⋈(lib.ParseInt 2⊸↓))¨data
   {1=part ? ≠2⊑⟨⟨0,0⟩,⟨0,0⟩,⟨⟩⟩Update´⌽moves
           ; ≠1⊑⟨⟨0,0⟩˙¨↕10,⟨⟩⟩Update2´⌽moves

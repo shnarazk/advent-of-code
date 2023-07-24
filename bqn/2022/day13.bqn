@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   problems ← (2⊸↑˘)∘‿3⥊∾⟜ ⟨⟨⟩⟩data
   Reform ← {ch 𝕊 out‿digits : {
     ch=',' ? { 0<≠digits ? (out∾(•BQN digits))‿⟨⟩     ; out‿⟨⟩} ;
@@ -40,6 +40,8 @@ Solve ⇐ {env‿part 𝕊 data :
       (ww‿ws)‿(xx‿xs) ← (⊑⋈(1⊸↓))¨m‿n
       {1=ww InOrder xx ? ⟨ww⟩∾ws MergeSort n ; ⟨xx⟩∾m MergeSort xs}
   }
-  {1=part ? •Show +´((1=InOrder)´˘problems)/1+↕≠problems ; @}
-  {2=part ? keys ← ⟨⟨2⟩⟩‿⟨⟨6⟩⟩ ⋄ •Show ×´(1⊸+)¨keys⊒˜MergeSort keys∾⥊problems ; @}
+  {
+    1=part ? +´((1=InOrder)´˘problems)/1+↕≠problems ;
+    2=part ? keys ← ⟨⟨2⟩⟩‿⟨⟨6⟩⟩ ⋄ ×´(1⊸+)¨keys⊒˜MergeSort keys∾⥊problems
+  }
  }

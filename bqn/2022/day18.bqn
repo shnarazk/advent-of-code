@@ -1,5 +1,5 @@
 Solve ⇐ {env‿part Solve data :
-  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   Facets ← {x‿y‿z :
     [⟨x-0.5,y,z⟩,⟨x+0.5,y,z⟩,⟨x,y-0.5,z⟩,⟨x,y+0.5,z⟩,⟨x,y,z-0.5⟩,⟨x,y,z+0.5⟩]
   }
@@ -70,7 +70,7 @@ Solve ⇐ {env‿part Solve data :
        checked Rec new :
          np ← ≠prop ← ⍷∾Propagate¨new
          checked (⍷new⊸∾)↩
-         "propagated" lib.Debug ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
+         "propagated" lib.Progress ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
          checked Rec prop
      }1↑∧surface
    ;

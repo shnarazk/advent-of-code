@@ -27,7 +27,7 @@ Intersections ← {⟨ax,ay,ad1⟩𝕊⟨bx,by,bd1⟩ :
 }
 
 Solve ⇐ {env‿part 𝕊 lines :
-  lib ← •Import "/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   data ← (lib.ParseInts{∊⟜("-,:"∾'0'+¨↕10)}⊸/)¨lines
   sensors ← {⟨sx,sy,bx,by⟩ ← 𝕩 ⋄ ⟨sx,sy,⟨sx,sy⟩Mdist⟨bx,by⟩⟩}¨data
   {

@@ -11,7 +11,7 @@ MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)∞⊸»˘(⌽⍉)⍟𝕩 𝕨}
 Neighbors ← {𝕩⊸MakeNeighbor¨↕4}
 
 Solve ⇐ {env‿part 𝕊 lines :
-  lib ← •Import"/util.bqn"∾˜∾env.Var<"BQN_LIB"
+  lib ← •Import"/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   Dump ← {t 𝕊 𝕩 :
     lib.term.Up ≠𝕩
     Colorize ← {𝕩≥𝕨 ? 80‿(⌊255-255⌊⌊2500÷√𝕩)‿(⌊255⌊30×1.8⋆⁼𝕩) ; 100‿100‿100}
