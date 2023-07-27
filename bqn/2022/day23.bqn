@@ -1,5 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  ⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
   data '#'⊸=∘> ↩
   Moves ← {map‿r 𝕊 𝕩 :
     ToN ← {y‿x : ⟨y-1,  x⟩} # ⋄ !0‿0  ≡ ToN 1‿0
@@ -40,7 +41,6 @@ Solve ⇐ {env‿part 𝕊 data :
         ⟨1+step, remainingElves∨movedElves⟩
       }•_while_(10≥⊑) 1‿data ;
     1=part ?
-      ⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
       set ← HashSet(⥊·↕≢)⊸((⊑¨⟜<)/⊣)data
       Avls ← {map‿r 𝕊 y‿x :
         {
@@ -58,27 +58,24 @@ Solve ⇐ {env‿part 𝕊 data :
         alive ← ∧set.AsList@
         alive≠⊸(-˜)×´(¬´¯1‿0⊏∧)˘⍉>alive
       }
-      CountGround 1⊑{step‿set :
+      CountGround 1⊑{round‿set :
         # build destination that map from Elf to the possible target position
-        destinations ← (¬∘≠⊸↓)¨{set‿(4|step) NextLocation 𝕩}¨set.AsList@
+        destinations ← (¬∘≠⊸↓)¨{set‿(4|round) NextLocation 𝕩}¨set.AsList@
         congestion ← HashMap˜⟨⟩
         congestion.Set⟜(1+0⊸congestion.Get)˜¨⥊>⟨⟩⊸≢¨⊸/destinations
-        movedElves ← HashSet⊏⍉>(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
+        movedElves ← HashSet{⟨⟩: ⟨⟩ ; ⊏𝕩}⍉>(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
         # Erase Elves from data if ¬destination⊑congestion
         Pickup ← {
-          now‿⟨⟩   : now ;
-          now‿nexts :
-            ¬movedElves.Has ⊑nexts ? now ;
-          ⟨⟩
+          now‿⟨⟩    : now ;
+          now‿nexts : ¬movedElves.Has ⊑nexts ? now ; ⟨⟩
         }
         # "now → next" lib.Debug >destinations⋈˜¨set.AsList@
         remainingElves ← (⟨⟩⊸≢)¨⊸/Pickup¨destinations⋈˜¨set.AsList@
         movedElves{𝕩.Set 𝕨}´remainingElves
-        step ! (set.Count@)=movedElves.Count@
-        ⟨1+step, movedElves⟩
+        round ! (set.Count@)=movedElves.Count@
+        ⟨1+round, movedElves⟩
       }•_while_(10≥⊑) 1‿set ;
-    1=part ?
-      ⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
+    2=part ?
       set ← HashSet(⥊·↕≢)⊸((⊑¨⟜<)/⊣)data
       Avls ← {map‿r 𝕊 y‿x :
         {
@@ -92,28 +89,21 @@ Solve ⇐ {env‿part 𝕊 data :
       }
       Locations ← Avls/Moves            # at most 4 cands
       NextLocation ← (¬∘≠⊸↓)∘Locations  # at most 1 location
-      CountGround ← {𝕊 set :            # sum of empty cells
-        alive ← ∧set.AsList@
-        alive≠⊸(-˜)×´(¬´¯1‿0⊏∧)˘⍉>alive
-      }
-      CountGround 1⊑{step‿set :
-        # build destination that map from Elf to the possible target position
-        destinations ← (¬∘≠⊸↓)¨{set‿(4|step) NextLocation 𝕩}¨set.AsList@
+      ¯1+1⊑{moved‿round‿set :
+        destinations ← (¬∘≠⊸↓)¨{set‿(4|round) NextLocation 𝕩}¨set.AsList@
         congestion ← HashMap˜⟨⟩
         congestion.Set⟜(1+0⊸congestion.Get)˜¨⥊>⟨⟩⊸≢¨⊸/destinations
-        movedElves ← HashSet⊏⍉>(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
-        # Erase Elves from data if ¬destination⊑congestion
+        movedElves ← HashSet{⟨⟩: ⟨⟩ ; ⊏⍉>𝕩}(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
+        continue ← 0<movedElves.Count@
+        {continue ? lib.Progress round; ∞ lib.Progress round}
         Pickup ← {
-          now‿⟨⟩   : now ;
-          now‿nexts :
-            ¬movedElves.Has ⊑nexts ? now ;
-          ⟨⟩
+          now‿⟨⟩    : now ;
+          now‿nexts : ¬movedElves.Has ⊑nexts ? now ; ⟨⟩
         }
-        # "now → next" lib.Debug >destinations⋈˜¨set.AsList@
         remainingElves ← (⟨⟩⊸≢)¨⊸/Pickup¨destinations⋈˜¨set.AsList@
+        ! continue = (set.Count@)>≠remainingElves
         movedElves{𝕩.Set 𝕨}´remainingElves
-        step ! (set.Count@)=movedElves.Count@
-        ⟨1+step, movedElves⟩
-      }•_while_(10≥⊑) 1‿set
+        ⟨continue, 1+round, movedElves⟩
+      }•_while_(914>1⊸⊑) 1‿1‿set
   }
 }
