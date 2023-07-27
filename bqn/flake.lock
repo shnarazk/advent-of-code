@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1690080178,
-        "narHash": "sha256-mATsZSnNceUZEopTutj9bMIlXpkKANtFjF1CZsyuW4c=",
+        "lastModified": 1690454388,
+        "narHash": "sha256-J7kj6MIzGEVMwgfMa31kZfnBbznl7iD/OMNWd7jLDO8=",
         "owner": "shnarazk",
         "repo": "advent-of-code",
-        "rev": "ce0c2d0b1f4b656cee2f1fc4ca5fe9f56781c953",
+        "rev": "8a5272bd0f2b4aa16f677f1f9f1c220ea2600332",
         "type": "github"
       },
       "original": {
@@ -53,11 +53,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1690026219,
-        "narHash": "sha256-oOduRk/kzQxOBknZXTLSEYd7tk+GoKvr8wV6Ab+t4AU=",
+        "lastModified": 1690378156,
+        "narHash": "sha256-rWRkHrW/ixoXXDiu5Z6NJ9QodUzufAxT6veTSELEFNA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f465da166263bc0d4b39dfd4ca28b777c92d4b73",
+        "rev": "fb4debd73182c203a69060cb84e63c9e779c3a49",
         "type": "github"
       },
       "original": {

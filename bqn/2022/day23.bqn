@@ -28,7 +28,7 @@ Solve ⇐ {env‿part 𝕊 data :
       NextLocation ← (¬∘≠⊸↓)∘Locations  # at most 1 location
       CountGround ← {𝕊 m :              # sum of empty cells
         "" lib.Debug m
-        area ← ×´(¬´¯1‿0⊏∧)˘⍉>alive ← ⊑⟜m¨⊸/⥊↕≢m
+        "area" lib.Debug area ← ×´(¬´¯1‿0⊏∧)˘⍉>alive ← ⊑⟜m¨⊸/⥊↕≢m
         area-≠alive
       }
       CountGround 1⊑{step‿data :
@@ -41,8 +41,7 @@ Solve ⇐ {env‿part 𝕊 data :
       }•_while_(10≥⊑) 1‿data ;
     2=part ?
       ⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-      data ↩ HashSet(⥊·↕≢)⊸((⊑¨⟜<)/⊣)data
-      "#data" lib.Debug data.Count@
+      set ← HashSet(⥊·↕≢)⊸((⊑¨⟜<)/⊣)data
       Avls ← {map‿r 𝕊 y‿x :
         {
           1≥+´map.Has¨⥊y‿x⊸+¨¯1+↕3‿3 ? 4↑0 ;
@@ -55,23 +54,46 @@ Solve ⇐ {env‿part 𝕊 data :
       }
       Locations ← Avls/Moves            # at most 4 cands
       NextLocation ← (¬∘≠⊸↓)∘Locations  # at most 1 location
-      CountGround ← {𝕊 m :              # sum of empty cells
-        "" lib.Debug m
-        area ← ×´(¬´¯1‿0⊏∧)˘⍉>alive ← ⊑⟜m¨⊸/⥊↕≢m
-        area-≠alive
+      CountGround ← {𝕊 set :            # sum of empty cells
+        "Here comes" lib.Debug alive ← ∧set.AsList@
+        "≠alive" lib.Debug ≠alive
+        "geo" lib.Debug (¯1‿0⊏∧)˘⍉>alive
+        "rect" lib.Debug (¬´¯1‿0⊏∧)˘⍉>alive
+        alive≠⊸(-˜)×´(¬´¯1‿0⊏∧)˘⍉>alive
       }
-      CountGround 1⊑{step‿data :
-        "destination" lib.Debug 10↑destination ← ⥊>⟨⟩⊸≢¨⊸/{data‿(4|step) NextLocation 𝕩}¨data.AsList@
+      {
+        s ← HashSet 2×↕4‿4
+        "Check hashset.Has" lib.Debug s.Has¨↕3‿3
+      }
+      CountGround 1⊑{step‿set :
+        "≠alive" lib.Debug set.Count@
+        # build destination that map from Elf to the possible target position
+        "≠list destination" lib.Debug ≢destinations ← (¬∘≠⊸↓)¨{set‿(4|step) NextLocation 𝕩}¨set.AsList@
+        "real destination" lib.Debug ⟨⟩⊸≢¨⊸/destinations
+        "≠real destination" lib.Debug ≢⟨⟩⊸≢¨⊸/destinations
         congestion ← HashMap˜⟨⟩
-        congestion.Set⟜(1+0⊸congestion.Get)˜¨destination
-        ∞ lib.Progress 10↑100↓⥊<˘⍉congestion.Vaules⁼˜@
-        ∞ lib.Progress 10↑100↓movedElves ← (1=1⊸⊑)¨⊸/⥊<˘⍉congestion.Values⁼˜@
-        !0
-        # 0 lib.Progress movedElves ← 1=congestion ← (data≢⊸↑0){𝕨𝕊𝕩 : (÷0⊸=)⌾(𝕨⊸⊑)𝕩}´destination
-        # 0 lib.Progress movedElves ← 1=congestion ← (data≢⊸↑0){𝕨𝕊𝕩 : (÷0⊸=)⌾(𝕨⊸⊑)𝕩}´⥊>⟨⟩⊸≢¨⊸/⥊destination
+        congestion.Set⟜(1+0⊸congestion.Get)˜¨⥊>⟨⟩⊸≢¨⊸/destinations
+        "unique destination" lib.Debug (1=1⊸⊑)¨⊸/congestion.Values⁼˜@
+        "≠unique destination" lib.Debug ≠(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
+        movedElves ← HashSet⊏⍉>(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
+        "hashset movedElves" lib.Debug movedElves.AsList@
         # Erase Elves from data if ¬destination⊑congestion
-        remainingElves ← {p ← 𝕩⊑destination ⋄  ⟨⟩≢p ? ¬p⊑⊸⊑movedElves ; 𝕩⊑data}¨↕≢data
-        ⟨1+step, remainingElves∨movedElves⟩
-      }•_while_(10≥⊑) 1‿data
+        Pickup ← {
+          now‿⟨⟩   : now ;
+          now‿nexts :
+            ¬movedElves.Has ⊑nexts ? now ;
+          ⟨⟩
+        }
+        "now → next" lib.Debug >destinations⋈˜¨set.AsList@
+        "list remainingElves" lib.Debug 10↑remainingElves ← (⟨⟩⊸≢)¨⊸/Pickup¨destinations⋈˜¨set.AsList@
+        "≠remainingElves" lib.Debug ≠remainingElves
+        # remainingElves ← {p ← 𝕩⊑destination ⋄  ⟨⟩≢p ? ¬p⊑⊸⊑movedElves ; 𝕩⊑data}¨↕≢data
+        # ⟨1+step, remainingElves∨movedElves⟩
+        "numbers before" lib.Debug (≠remainingElves)⋈(movedElves.Count@)
+        movedElves{𝕩.Set 𝕨}´remainingElves
+        "numbers" lib.Debug (set.Count@)⋈(movedElves.Count@)
+        step ! (set.Count@)=movedElves.Count@
+        ⟨1+step, movedElves⟩
+      }•_while_(10≥⊑) 1‿set
   }
 }
