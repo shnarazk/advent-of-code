@@ -21,12 +21,12 @@ Solve ⇐ {env‿part 𝕊 data :
   Locations ← Avls/Moves                    # at most 4 cands
   NextLocation ← (¬∘≠⊸↓)∘Locations          # at most 1 location
   Empties ← {r‿c‿set : alive ← ∧set.Values⁼@ ⋄ alive≠⊸(-˜)×´(¬´¯1‿0⊏∧)˘⍉>alive}
-  Step ← {round‿moved‿set : 
+  Step ← {round‿moved‿set :
     destinations ← (¬∘≠⊸↓)¨{set‿(4|round) NextLocation 𝕩}¨set.Values⁼@
     congestion ← (HashMap˜⟨⟩){𝕨 𝕩.Set 1+0 𝕩.Get 𝕨}´⥊>⟨⟩⊸≢¨⊸/destinations
     elves ← HashSet{⟨⟩: ⟨⟩ ; ⊏𝕩}⍉>(1=1⊸⊑)¨⊸/congestion.Values⁼˜@
     continue ← 0<elves.Count@
-    {continue ? util.Progress round ; ∞ util.Progress round}  
+    util.Progress round
     Move ← {now‿⟨⟩ : elves.Set now ; now‿⟨next⟩ : ¬elves.Has next ? elves.Set now ; ⟨⟩}
     Move¨destinations⋈˜¨set.Values⁼@
     ⟨1+round,continue,elves⟩
