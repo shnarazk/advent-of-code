@@ -2,12 +2,24 @@
   description = "A basic flake with a shell";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.aoc.url = "github:shnarazk/advent-of-code";
 
-  outputs = { self, nixpkgs, flake-utils, aoc }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      bqn-driver = aoc.packages.${system}.default;
+      bqn-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
+         name = "aoc-bqn-driver-${version}";
+         pname = "aoc-bqn-driver";
+         version = "20230729-1";
+         src = self;
+         installPhase = ''
+           mkdir -p $out/bin;
+           cp ./aoc.bqn $out/bin/aoc
+           cp ./aoc.bqn $out/bin/2023
+           cp ./aoc.bqn $out/bin/2022
+           cp ./aoc.bqn $out/bin/2021
+           cp ./aoc.bqn $out/bin/2016
+         '';
+      };
     in {
       devShells.default = pkgs.mkShell {
         packages = [ pkgs.bashInteractive pkgs.entr bqn-driver ];
