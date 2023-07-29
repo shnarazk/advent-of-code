@@ -1,22 +1,14 @@
 Solve ⇐ {env‿part 𝕊 data :
   lib ← "." env.Var⌾⋈ "BQN_LIB"
   util‿⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<lib
-  Moves ← {map‿r 𝕊 y‿x :
-    toN ← {⟨y-1,  x⟩}
-    toS ← {⟨y+1,  x⟩}
-    toW ← {⟨  y,x-1⟩}
-    toE ← {⟨  y,x+1⟩}
-    (r-1)⌽⟨toN,toS,toW,toE⟩
-  }
-  Avls ← {map‿r 𝕊 y‿x :
-    {
-      1≥+´map.Has¨⥊y‿x⊸+¨¯1+↕3‿3 ? 4↑0 ;
-      avN ← {¬map.Has⟨y-1,x-1⟩ ? ¬map.Has⟨y-1,x  ⟩ ? ¬map.Has⟨y-1,x+1⟩ ? map.Has⟨y,x⟩ ; 0}
-      avS ← {¬map.Has⟨y+1,x-1⟩ ? ¬map.Has⟨y+1,x  ⟩ ? ¬map.Has⟨y+1,x+1⟩ ? map.Has⟨y,x⟩ ; 0}
-      avW ← {¬map.Has⟨y-1,x-1⟩ ? ¬map.Has⟨y  ,x-1⟩ ? ¬map.Has⟨y+1,x-1⟩ ? map.Has⟨y,x⟩ ; 0}
-      avE ← {¬map.Has⟨y-1,x+1⟩ ? ¬map.Has⟨y  ,x+1⟩ ? ¬map.Has⟨y+1,x+1⟩ ? map.Has⟨y,x⟩ ; 0}
-      (r-1)⌽⟨avN,avS,avW,avE⟩
-    }
+  Moves ← {map‿r 𝕊 y‿x : (r-1)⌽⟨⟨y-1,x⟩,⟨y+1,x⟩,⟨y,x-1⟩,⟨y,x+1⟩⟩}
+  dirs ← 0‿0⊸≢¨⊸/⥊¯1+↕3‿3
+  Avls ← {
+    ¬(⊑𝕨).Has𝕩 ? 4↑0 ;
+    map‿r ← 𝕨
+    nw‿n‿ne‿w‿e‿sw‿s‿se ← ¬map.Has∘(𝕩⊸+)¨dirs
+    dirs ← ∧´¨⟨⟨nw,n,ne⟩,⟨sw,s,se⟩,⟨nw,w,sw⟩,⟨ne,e,se⟩⟩
+    {∧´dirs ? 4↑0 ; (r-1)⌽dirs}
   }
   Locations ← Avls/Moves                    # at most 4 cands
   NextLocation ← (¬∘≠⊸↓)∘Locations          # at most 1 location
