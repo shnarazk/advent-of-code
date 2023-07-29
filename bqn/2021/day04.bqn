@@ -11,16 +11,20 @@ Solve ⇐ {env‿part 𝕊 data :
   {
     1=part ?
       ogrids ← Occur¨ grids
-      "othr" util.Debug ⥊=⌜˜↕5
-      Segments ← {∾⟨<˘𝕩,<˘⍉𝕩,<(⥊=⌜˜↕5)/⥊𝕩,<(⥊4⊸=∘+⌜˜↕5)/⥊𝕩⟩}
-      "test" util.Debug Segments 5‿5⥊↕25
-      Segments˘grids
-      # "segments" util.Debug 5↑needs ← Segments˘grids
-      # ⊑{winner‿len:
-      #   hands ← len↑seq
-      #   check ← {∨´{∧´𝕩∊seq}¨𝕩}¨needs
-      #   ⟨1⊐check,len+1⟩
-      # }•_while_(n=⊑)n‿5
+      "check occur" util.Debug Occur¨ 12↑seq
+      "oracle" util.Debug Occur¨ 14‿21‿17‿24‿4
+      # Segments ← {∾⟨<˘𝕩,<˘⍉𝕩,<(⥊=⌜˜↕5)/⥊𝕩,<(⥊4⊸=∘+⌜˜↕5)/⥊𝕩⟩}
+      Segments ← {∾⟨<˘𝕩,<˘⍉𝕩⟩}
+      # "test" util.Debug Segments 5‿5⥊↕25
+      "costs" util.Debug costs ← (⌊´·⌈´¨Segments)˘ogrids
+      "player3" util.Debug 2⊏(⌈´¨Segments)˘ogrids
+      "shortest" util.Debug shortest ← 1+⌊´costs
+      "at" util.Debug at ← ⊑⍋costs
+      "calls" util.Debug shortest↑seq
+      "last_call" util.Debug last_call ← (shortest-1)⊑seq
+      "bingo" util.Debug nums ← ⥊at⊏grids
+      "remains" util.Debug remains ← nums/˜¬nums∊shortest↑seq
+      last_call×+´remains
     ;
     2=part ? 0
   }
