@@ -10,9 +10,17 @@ Solve ⇐ {env‿part 𝕊 data :
   Adjacent ← {𝕊 m : >⌈˝{𝕊 y‿x : y Shift⎉2 x Shift⎉1 m}¨⟨0‿0,¯1‿0,0‿1,1‿0,0‿¯1⟩}
   Return ← -·¬⊑
   start‿end ← {𝕩⊸≡¨↕≢data}¨ start_position‿end_position
-  WidthFirstSearch ← {round 𝕊 states:
-    "overflow"!round<1000
-    ⟨1+round,states Adjacent⊸(∧⟜¬)⟜Scene round⟩
+  {
+    1=part ?
+      WidthFirstSearch ← {⟨1+𝕨,𝕩 Adjacent⊸(0⊸<⊸∧⟜¬)⟜Scene 𝕨⟩}
+      Return WidthFirstSearch´•_while_(¬·end_position⊸⊑1⊸⊑)1‿start ;
+    2=part ?
+      WidthFirstSearch ← {𝕊 round‿states‿mode:
+        next ← states Adjacent⊸(0⊸<⊸∧⟜¬)⟜Scene round
+        goal ← mode⊑⟨@,end,start,end⟩
+        {goal≡goal∧next ? next ↩ goal×mode 1⊸+ ↩ ; @}
+        ⟨1+round,next,mode⟩
+      }
+      Return WidthFirstSearch•_while_(4⊸≠2⊸⊑)1‿start‿1
   }
-  Return WidthFirstSearch´•_while_(¬·end_position⊸⊑1⊸⊑)1‿start
 }
