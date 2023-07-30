@@ -1,6 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← "." env.Var⌾⋈ "BQN_LIB"
-  util‿⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<lib
+  util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   data ↩ ⟨≠data,∘⟩⥊∾data
   start_position‿end_position ← 0‿¯1⊏ nowinds ← ('.'⊸≡data⊸(⊑˜))¨⊸/⥊↕≢data
   b ← {(𝕩⊸≡data⊸(⊑˜))¨↕≢data}'#'    # Block‿North‿East‿South‿West
@@ -13,7 +12,7 @@ Solve ⇐ {env‿part 𝕊 data :
   start‿end ← {𝕩⊸≡¨↕≢data}¨ start_position‿end_position
   WidthFirstSearch ← {round 𝕊 states:
     "overflow"!round<1000
-    ⟨1+round,states Adjacent⊸{𝕨∧¬𝕩}⟜Scene round⟩
+    ⟨1+round,states Adjacent⊸(∧⟜¬)⟜Scene round⟩
   }
   Return WidthFirstSearch´•_while_(¬·end_position⊸⊑1⊸⊑)1‿start
 }
