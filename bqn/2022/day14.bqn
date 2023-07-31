@@ -16,19 +16,19 @@ Solve ⇐ {env‿part 𝕊 data :
   InjectBlocks¨segments
   {
     1=part ?
-      DropSand1 ← {𝕊 tr :
-        1⊑{𝕊 falling‿tr :
+      DropSand ← {
+        1⊑{falling‿tr :
           loc ← ¯1⊑tr
           {
-            ymax=1+⊑loc                  ? map 1˙⌾(loc⊸⊑) ↩ ⋄ 0‿⟨⟩ ;
-            (newloc ← loc + 1‿ 0)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
-            (newloc ← loc + 1‿¯1)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
-            (newloc ← loc + 1‿ 1)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
+            ymax=1+⊑loc                ? map 1˙⌾(loc⊸⊑) ↩ ⋄ 0‿⟨⟩ ;
+            (newloc ← loc+1‿ 0)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
+            (newloc ← loc+1‿¯1)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
+            (newloc ← loc+1‿ 1)(¬⊑)map ? 1⋈tr∾⟨newloc⟩ ;
                                          map 1˙⌾(loc⊸⊑) ↩ ⋄ ⟨0,¯1↓tr⟩
           }
-        }•_while_⊑1‿tr
+        }•_while_⊑1‿𝕩
       }
-      ¯1+⊑{sands‿trace : ⟨1+sands,DropSand1 trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
+      ¯1+⊑{sands‿trace : ⟨1+sands,DropSand trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
     ;
       0{y Drop x : 0=y‿x⊑map ? map 2˙⌾(y‿x⊸⊑) ↩ ⋄ {ymax>yy ← 1+y ? yy Drop¨ x+⟨¯1,0,1⟩ ; @} ; @}500
       +´2=⥊map
