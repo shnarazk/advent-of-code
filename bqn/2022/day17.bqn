@@ -16,8 +16,19 @@ Solve ⇐ {env‿part 𝕊 data :
     0‿pos1 𝕊 2‿pos2 : (pos1(0)_in_⟨0,0⟩pos2)∧(pos1(1)_in_⟨¯2,3⟩pos2)∧(pos1(0)_in_⟨¯2,¯2⟩pos2)∧(pos1(1)_in_⟨0,0⟩pos2) ;
     0‿pos1 𝕊 3‿pos2 : (pos1(0)_in_⟨0,3⟩pos2)∧(pos1(1)_in_⟨0,3⟩pos2) ;
     0‿pos1 𝕊 4‿pos2 : (pos1(0)_in_⟨0,1⟩pos2)∧(pos1(1)_in_⟨¯1,3⟩pos2) ;
-    1‿pos1 𝕊 1‿pos2 : @ ;
-    1‿pos1 𝕊 2‿pos2 : @ ;
+    1‿pos1 𝕊 1‿pos2 :
+      ∨´⟨
+        (pos1(0)_in_⟨¯2,2⟩pos2)∧(pos1(1)_in_⟨0,0⟩pos2)      # vertical bars
+        (pos1(0)_in_⟨0,0⟩pos2)∧(pos1(1)_in_⟨¯2,2⟩pos2)      # horizontal bars
+        (pos1(0)_in_⟨¯1,1⟩pos2)∧(pos1(1)_in_⟨¯1,1⟩pos2)
+      ⟩ ;
+    1‿pos1 𝕊 2‿pos2 :
+      ∨´⟨
+        (pos1(0)_in_⟨¯2,2⟩pos2)∧(pos1(1)_in_⟨¯1,¯1⟩pos2)    # vertical bars
+        (pos1(0)_in_⟨1,1⟩pos2)∧(pos1(1)_in_⟨¯2,2⟩pos2)      # horizontal bars
+        (pos1(0)_in_⟨¯2,1⟩pos2)∧(pos1(1)_in_⟨¯1,1⟩pos2)     # vertical-to-horizontal
+        (pos1(0)_in_⟨¯1,1⟩pos2)∧(pos1(1)_in_⟨¯2,0⟩pos2)     # horizontal-to-vertical
+      ⟩ ;
     1‿pos1 𝕊 3‿pos2 : @ ;
     1‿pos1 𝕊 4‿pos2 : @ ;
     2‿pos1 𝕊 2‿pos2 : @ ;
