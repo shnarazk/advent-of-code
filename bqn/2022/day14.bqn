@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
-  lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "region" lib.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/lib.ParseInts¨data
+  util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  "region" util.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/util.ParseInts¨data
   {2=part ? xmax ymax⊸+ ↩ ; @}
   map ← ymax‿xmax⥊0˙↕xmax×ymax
   InjectBlocks ← {beg‿end :
@@ -30,7 +30,22 @@ Solve ⇐ {env‿part 𝕊 data :
       }
       ¯1+⊑{sands‿trace : ⟨1+sands,DropSand trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
     ;
-      0{y Drop x : 0=y‿x⊑map ? map 2˙⌾(y‿x⊸⊑) ↩ ⋄ {ymax>yy ← 1+y ? yy Drop¨ x+⟨¯1,0,1⟩ ; @} ; @}500
+      floor ← 2+⌈´1⊸⊑¨∾segments
+      map ↩ (1+floor)‿(2×xmax)↑map       # Expand region
+      map ↩ 1¨⌾(¯1⊸⊏)map            # Fill the bottom line as sentinel
+      BottomIndices ← {y‿x 𝕊 down: (y+down)∾¨down-˜x+↕1+2×down} # ⋄ ! 8‿¯1≡⊑5‿2 BottomIndices 3
+      # "map" util.Debug ≢map
+      # "indices" util.Debug 0‿500 BottomIndices 5
+      FlatBottom ← ∧´0=(⊑⟜map)¨    # ⋄ ! 0‿500 FlatBottom∘BottomIndices 5
+      {S to_visit :
+        ⟨start⟩‿remain ← 1(↑⋈↓)to_visit
+        {𝕊 𝕩:
+          floor≤𝕩+⊑start ? remain ;
+          l ← start BottomIndices down ← 𝕩
+          {FlatBottom l ? map 2¨⌾(l⊸⊑) ↩ ⋄ 1+down ; 0<down ? remain∾˜(0=⊑⟜map)¨⊸/¯1⌽l ; remain}
+        }•_while_(1=•Type)0
+      }•_while_(⟨⟩⊸≢)⟨0‿500⟩
+      # "map" util.Debug ".#○"⊸(⊑˜)¨(40⊸↑480⊸↓)˘map
       +´2=⥊map
   }
 }
