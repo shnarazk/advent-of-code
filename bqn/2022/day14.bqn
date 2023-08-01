@@ -31,21 +31,8 @@ Solve ⇐ {env‿part 𝕊 data :
       ¯1+⊑{sands‿trace : ⟨1+sands,DropSand trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
     ;
       floor ← 2+⌈´1⊸⊑¨∾segments
-      map ↩ (1+floor)‿(2×xmax)↑map       # Expand region
-      map ↩ 1¨⌾(¯1⊸⊏)map            # Fill the bottom line as sentinel
-      BottomIndices ← {y‿x 𝕊 down: (y+down)∾¨down-˜x+↕1+2×down} # ⋄ ! 8‿¯1≡⊑5‿2 BottomIndices 3
-      # "map" util.Debug ≢map
-      # "indices" util.Debug 0‿500 BottomIndices 5
-      FlatBottom ← ∧´0=(⊑⟜map)¨    # ⋄ ! 0‿500 FlatBottom∘BottomIndices 5
-      {S to_visit :
-        ⟨start⟩‿remain ← 1(↑⋈↓)to_visit
-        {𝕊 𝕩:
-          floor≤𝕩+⊑start ? remain ;
-          l ← start BottomIndices down ← 𝕩
-          {FlatBottom l ? map 2¨⌾(l⊸⊑) ↩ ⋄ 1+down ; 0<down ? remain∾˜(0=⊑⟜map)¨⊸/¯1⌽l ; remain}
-        }•_while_(1=•Type)0
-      }•_while_(⟨⟩⊸≢)⟨0‿500⟩
-      # "map" util.Debug ".#○"⊸(⊑˜)¨(40⊸↑480⊸↓)˘map
-      +´2=⥊map
+      map ↩ floor‿(2×xmax)↑map       # Expand region
+      front ← 500=↕1⊑≢map
+      ⊑1‿front{𝕨 𝕊 sands‿line : (sands++´)⊸⋈𝕨¬⊸∧⌈˝[«line,line,»line]}´⌽1↓⥊<˘map
   }
 }
