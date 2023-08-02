@@ -1,15 +1,15 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "region" util.Debug xmax‿ymax ← ⋈○(2⊸+)´⌈˝>∾segments ← <˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/util.ParseInts¨data
+  "region" util.Debug ymax‿xmax ← ⋈○(2⊸+)´⌈˝>∾segments ← ⌽¨¨<˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/util.ParseInts¨data
   {2=part ? xmax ymax⊸+ ↩ ; @}
   map ← ymax‿xmax⥊0˙↕xmax×ymax
   InjectBlocks ← {beg‿end :
-    dx‿dy ← end-beg
+    dy‿dx ← end-beg
     seq ← {
-      0<dy ? ⋈⟜(0⊑beg)¨(1⊑beg)+↕1+|dy ;
-      0>dy ? ⋈⟜(0⊑end)¨(1⊑end)+↕1+|dy ;
-      0<dx ? (1⊑beg)⊸⋈¨(0⊑beg)+↕1+|dx ;
-      0>dx ? (1⊑end)⊸⋈¨(0⊑end)+↕1+|dx
+      0<dy ? ⋈⟜(1⊑beg)¨(0⊑beg)+↕1+|dy ;
+      0>dy ? ⋈⟜(1⊑end)¨(0⊑end)+↕1+|dy ;
+      0<dx ? (0⊑beg)⊸⋈¨(1⊑beg)+↕1+|dx ;
+      0>dx ? (0⊑end)⊸⋈¨(1⊑end)+↕1+|dx
     }
     map 1¨⌾(seq⊸⊑) ↩
   }¨<˘∘(2⊸↕)
