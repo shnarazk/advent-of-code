@@ -1,6 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   "region" util.Debug ymax‿xmax ← ⋈○(2⊸+)´⌈˝>∾segments ← ⌽¨¨<˘¨∘‿2⊸⥊¨⟨⟩⊸≢¨⊸/util.ParseInts¨data
+  "region" util.Debug ymin‿xmin ← ⋈´⌊˝>∾segments
   {2=part ? xmax ymax⊸+ ↩ ; @}
   map ← ymax‿xmax⥊0˙↕xmax×ymax
   InjectBlocks ← {beg‿end :
@@ -16,6 +17,8 @@ Solve ⇐ {env‿part 𝕊 data :
   InjectBlocks¨segments
   {
     1=part ?
+      shift ← ¯2+ymax
+      map shift⊸↓˘ ↩       # Expand region
       DropSand ← {
         1⊑{falling‿tr :
           loc ← ¯1⊑tr
@@ -28,11 +31,12 @@ Solve ⇐ {env‿part 𝕊 data :
           }
         }•_while_⊑1‿𝕩
       }
-      ¯1+⊑{sands‿trace : ⟨1+sands,DropSand trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨0‿500⟩
+      ¯1+⊑{sands‿trace : ⟨1+sands,DropSand trace⟩}•_while_{⟨⟩⊸≢1⊑𝕩}0‿⟨⟨0,500-shift⟩⟩
     ;
-      floor ← 2+⌈´1⊸⊑¨∾segments
-      map ↩ floor‿(2×xmax)↑map       # Expand region
-      front ← 500=↕1⊑≢map
+      floor ← 2+⌈´⊑¨∾segments
+      shift ← 500-floor
+      map ↩ shift⊸↓˘floor‿(2×xmax)↑map       # Expand region
+      front ← (500-shift)=↕1⊑≢map
       ⊑1‿front{𝕨 𝕊 sands‿line : (sands++´)⊸⋈𝕨¬⊸∧⌈˝[«line,line,»line]}´⌽1↓⥊<˘map
   }
 }
