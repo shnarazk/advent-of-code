@@ -50,6 +50,7 @@ Solve ⇐ {env‿part 𝕊 data :
           (pos1(0)_in_⟨¯1,0⟩pos2)∧(pos1(1)_in_⟨¯1,1⟩pos2)     # horizontal-to-right_bar
         ⟩
        ;
+    1‿pos1 𝕊 0‿pos2 : 0‿pos2 𝕊 1‿pos1 ;
     2‿pos1 𝕊 2‿pos2 :
       ∨´⟨
           (pos1(0)_in_⟨¯2,2⟩pos2)∧(pos1(1)_in_⟨0,0⟩pos2)      # vertical bars
@@ -72,26 +73,46 @@ Solve ⇐ {env‿part 𝕊 data :
           (pos1(0)_in_⟨0,1⟩pos2)∧(pos1(1)_in_⟨¯1,1⟩pos2)      # horizontal-to-right_bar
         ⟩
       ;
+    2‿pos1 𝕊 0‿pos2 : 0‿pos2 𝕊 2‿pos1 ;
+    2‿pos1 𝕊 1‿pos2 : 1‿pos2 𝕊 2‿pos1 ;
     3‿pos1 𝕊 3‿pos2 : (pos1(0)_in_⟨¯3,3⟩pos2)∧(pos1(1)_in_⟨0,0⟩pos2) ;
     3‿pos1 𝕊 4‿pos2 : (pos1(0)_in_⟨¯3,1⟩pos2)∧(pos1(1)_in_⟨¯1,0⟩pos2) ;
+    3‿pos1 𝕊 0‿pos2 : 0‿pos2 𝕊 3‿pos1 ;
+    3‿pos1 𝕊 1‿pos2 : 1‿pos2 𝕊 3‿pos1 ;
+    3‿pos1 𝕊 2‿pos2 : 2‿pos2 𝕊 3‿pos1 ;
     4‿pos1 𝕊 4‿pos2 : (pos1(0)_in_⟨¯1,1⟩pos2)∧(pos1(1)_in_⟨¯1,1⟩pos2) ;
-    𝕨 𝕊 𝕩 : 𝕩 𝕊 𝕨
+    4‿pos1 𝕊 0‿pos2 : 0‿pos2 𝕊 4‿pos1 ;
+    4‿pos1 𝕊 1‿pos2 : 1‿pos2 𝕊 4‿pos1 ;
+    4‿pos1 𝕊 2‿pos2 : 2‿pos2 𝕊 4‿pos1 ;
+    4‿pos1 𝕊 3‿pos2 : 3‿pos2 𝕊 4‿pos1 ;
+    𝕨‿𝕩!0
   }
   jetPattern ← ¯1+2×'<'=⊑data
-  Force ← 0⊸∾jetPattern⊸(⊑˜)(≠jetPattern)⊸|
+  Force ← 0⊸∾·jetPattern⊸(⊑˜)(≠jetPattern)⊸|
   round ← 0
   Simulate ← {nth 𝕊 ground_level‿record :
     "next rock" util.Debug rock ← shapes≠⊸|nth
     pos ← 1⊑{falling‿pos:
-      pos ↩ pos+(¬·∨´·record⊸(Clashes˜¨)·<rock⋈pos⊸+)⊸×Force round    # drifting by wind
+      pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨record}⊸×Force round    # drifting by wind
       round 1⊸+ ↩
       newpos ← ⟨¯1,0⟩+pos
-      {¬∨´(<rock‿newpos)Clashes¨record ? 0<⊑newpos ? 1‿newpos ; 0‿pos}
+      {
+        ¬∨´rock‿newpos⊸Clashes¨record ? 0<⊑newpos ? 1‿newpos ;
+        "ground" util.Debug pos
+        "wind" util.Debug Force round
+        "slided" util.Debug pos+Force round
+        newpos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨record}⊸×Force round    # sliding on surface
+        "after sliding" util.Debug newpos
+        round 1⊸+ ↩
+        0‿newpos
+      }
     }•_while_⊑ 1‿⟨4+ground_level,2⟩
-    ⟨⊑pos,record∾<pos⟩
+    "new ground_level" util.Debug ⊑pos
+    "new record" util.Debug record∾<rock‿pos
+    ⟨⊑pos,record∾<rock‿pos⟩
   }
   last ← 5
   # last ← 2022
-  ⊑0‿⟨⟨⟩⟩Simulate´↕last
+  ⊑0‿⟨⟨⟩⟩Simulate´⌽↕last
   0
 }
