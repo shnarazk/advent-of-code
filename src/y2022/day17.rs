@@ -28,12 +28,12 @@ impl AdventOfCode for Puzzle {
         dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut window = self.line.iter().cycle();
+        let mut wind = self.line.iter().cycle();
         macro_rules! blow {
             ($x: expr, $w: expr) => {
-                // ($x as isize + window.next().unwrap()).clamp(1, 8 - $w) as usize
+                // ($x as isize + wind.next().unwrap()).clamp(1, 8 - $w) as usize
                 {
-                    let w = *window.next().unwrap();
+                    let w = *wind.next().unwrap();
                     // println!("{}", if 0 < w { "right" } else { "left" });
                     ($x as isize + w).clamp(1, 8 - $w) as usize
                 }
@@ -89,11 +89,11 @@ impl Puzzle {
         let mut cycles = 0;
         let mut pre_bottom = 0;
         let mut pre_x: VecDeque<usize> = VecDeque::new();
-        let mut window = self.line.iter().cycle();
-        let window_cycle = self.line.len();
+        let mut wind = self.line.iter().cycle();
+        let wind_cycle = self.line.len();
         macro_rules! blow {
             ($x: expr, $w: expr) => {
-                ($x as isize + window.next().unwrap()).clamp(1, 8 - $w) as usize
+                ($x as isize + wind.next().unwrap()).clamp(1, 8 - $w) as usize
             };
         }
         let mut blocks: HashSet<Loc> = HashSet::new();
@@ -111,7 +111,7 @@ impl Puzzle {
         let mut bottom = 0;
         for i in 0..upto.unwrap_or(usize::MAX) {
             let id = i % 5;
-            if upto.is_none() && 0 < i && i % window_cycle == 0 && id == 0 {
+            if upto.is_none() && 0 < i && i % wind_cycle == 0 && id == 0 {
                 cycles += 1;
                 let key = [
                     bottom - pre_bottom,
