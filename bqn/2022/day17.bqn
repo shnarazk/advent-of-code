@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   lib ← "." env.Var⌾⋈ "BQN_LIB"
   util‿⟨HashMap⟩‿⟨HashSet⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"‿"/hashset.bqn"∾˜¨<lib
-  "shapes" util.Debug shapes ← [
+  "# shapes" util.Debug shapes ← [
     shape0 ← <[1‿1‿1‿1]
     shape1 ← <[0‿1‿0,1‿1‿1,0‿1‿0]
     shape2 ← <[0‿0‿1,0‿0‿1,1‿1‿1]
@@ -106,28 +106,27 @@ Solve ⇐ {env‿part 𝕊 data :
   !2‿(4‿1) Clashes 1‿(2‿2)
   !2‿(3‿0) Clashes 1‿(2‿2)
   !¬2‿(4‿0) Clashes 1‿(2‿2)
-  "raw" util.Debug ⊑data
+  "# raw" util.Debug ⊑data
   "# wind" util.Debug jetPattern ← ¯1+2×'>'=⊑data
+  threshold ← 25
   Force ← 0⊸∾·jetPattern⊸(⊑˜)(≠jetPattern)⊸|
   round ← 0
   Simulate ← {nth 𝕊 ground_level‿record :
-    "# next rock" util.Debug rock ← shapes≠⊸|nth
+    rock ← shapes≠⊸|nth
     pos ← 1⊑{falling‿pos:
-      pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨record}⊸×Force round    # drifting by wind
-      # "falling from" util.Debug pos
+      pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨(⟨⟨⟩⟩∾(-threshold⌊≠)⊸↑record)}⊸×Force round    # drifting by wind
       round 1⊸+ ↩
       newpos ← ⟨¯1,0⟩+pos
       {
-        ¬∨´rock‿newpos⊸Clashes¨record ? 0<⊑newpos ? 1‿newpos ;
-        "# ground at" util.Debug pos
+        ¬∨´rock‿newpos⊸Clashes¨((-threshold⌊≠)⊸↑record) ? 0<⊑newpos ? 1‿newpos ;
         0‿pos
       }
     }•_while_⊑ 1‿⟨4+ground_level,2⟩
     # "new ground_level" util.Debug ⊑pos
     # "new record" util.Debug record∾<rock‿pos
-    ⟨-¬(⊑≢rock⊑shapes)+⊑pos,record∾<rock‿pos⟩
+    ⟨ground_level⌈-¬(⊑≢rock⊑shapes)+⊑pos,record∾<rock‿pos⟩
   }
-  last ← 8
-  # last ← 2022
-  {util.Debug >1↓1⊑𝕩 ⋄ ⊑𝕩}0‿⟨⟨⟩⟩Simulate´⌽↕last
+  # last ← 12
+  last ← 2022
+  ⊑0‿⟨⟩Simulate´⌽↕last
 }
