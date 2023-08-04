@@ -108,17 +108,17 @@ Solve ⇐ {env‿part 𝕊 data :
   !¬2‿(4‿0) Clashes 1‿(2‿2)
   "# raw" util.Debug ⊑data
   "# wind" util.Debug jetPattern ← ¯1+2×'>'=⊑data
-  threshold ← 25
+  memory_length ← 25
   Force ← 0⊸∾·jetPattern⊸(⊑˜)(≠jetPattern)⊸|
   round ← 0
   Simulate ← {nth 𝕊 ground_level‿record :
     rock ← shapes≠⊸|nth
     pos ← 1⊑{falling‿pos:
-      pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨(⟨⟨⟩⟩∾(-threshold⌊≠)⊸↑record)}⊸×Force round    # drifting by wind
+      pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨(⟨⟨⟩⟩∾(-memory_length⌊≠)⊸↑record)}⊸×Force round    # drifting by wind
       round 1⊸+ ↩
       newpos ← ⟨¯1,0⟩+pos
       {
-        ¬∨´rock‿newpos⊸Clashes¨((-threshold⌊≠)⊸↑record) ? 0<⊑newpos ? 1‿newpos ;
+        ¬∨´rock‿newpos⊸Clashes¨((-memory_length⌊≠)⊸↑record) ? 0<⊑newpos ? 1‿newpos ;
         0‿pos
       }
     }•_while_⊑ 1‿⟨4+ground_level,2⟩
@@ -126,7 +126,8 @@ Solve ⇐ {env‿part 𝕊 data :
     # "new record" util.Debug record∾<rock‿pos
     ⟨ground_level⌈-¬(⊑≢rock⊑shapes)+⊑pos,record∾<rock‿pos⟩
   }
-  # last ← 12
-  last ← 2022
-  ⊑0‿⟨⟩Simulate´⌽↕last
+  {
+    1=part ? ⊑0‿⟨⟩Simulate´⌽↕2202 ;
+    @
+  }
 }
