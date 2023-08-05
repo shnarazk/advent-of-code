@@ -110,8 +110,7 @@ Solve ⇐ {env‿part 𝕊 data :
   "# wind" util.Debug jetPattern ← ¯1+2×'>'=⊑data
   memory_length ← 25
   Force ← 0⊸∾·jetPattern⊸(⊑˜)(≠jetPattern)⊸|
-  round ← 0
-  Simulate ← {nth 𝕊 ground_level‿record :
+  Simulate ← {nth 𝕊 ground_level‿round‿record :
     rock ← shapes≠⊸|nth
     pos ← 1⊑{falling‿pos:
       pos ↩ pos+{¬∨´(rock⋈pos+𝕩)⊸Clashes¨(⟨⟨⟩⟩∾(-memory_length⌊≠)⊸↑record)}⊸×Force round    # drifting by wind
@@ -124,10 +123,27 @@ Solve ⇐ {env‿part 𝕊 data :
     }•_while_⊑ 1‿⟨4+ground_level,2⟩
     # "new ground_level" util.Debug ⊑pos
     # "new record" util.Debug record∾<rock‿pos
-    ⟨ground_level⌈-¬(⊑≢rock⊑shapes)+⊑pos,record∾<rock‿pos⟩
+    ⟨ground_level⌈-¬(⊑≢rock⊑shapes)+⊑pos,round,record∾<rock‿pos⟩
+  }
+  MetaSearch ← {@ :
+    "≠jet" util.Debug ll ← ≠jetPattern
+    "# ≠shapes" util.Debug ls ← ≠shapes
+    ground_level‿round‿record ← 0‿0‿⟨⟩Simulate´⌽↕2×ll
+    "occurs" util.Debug ¯40↑occur ← ⊒><∘((<·⋈⟜0·⊑⊑)-˜⊢)∘(1⊸⊑¨)˘⌊‿memory_length⥊record
+    "not enough length holds in record"!∨´2=occur
+    "cycle length" util.Debug len ← memory_length×+´1=occur
+    "start at" util.Debug start ← 1+memory_length×+´0=occur
+    "cycle tower base height" util.Debug cycle_base_height ← ⊑1⊑start⊑record
+    "cycle tower height" util.Debug cycle_height ← ⊑-○(1⊸⊑⊑⟜record)´start+len‿0
+    "unrational height"!(2-○{⊑⊑(start+𝕩×len)⊑record}1)=(3-○{⊑⊑(start+𝕩×len)⊑record}2)
+    target ← 1000000000000-1
+    util.Debug repeat ← len⌊∘÷˜target-start
+    offset ← len|target-start
+    "rock_type" util.Debug rock_type ← ⊑(start+offset)⊑record
+    offset_height ← ⊑-○(1⊸⊑⊑⟜record)´start+offset‿0
+    -¬(≠rock_type⊑shapes)+offset_height+cycle_base_height+repeat×cycle_height
   }
   {
-    1=part ? ⊑0‿⟨⟩Simulate´⌽↕2202 ;
-    @
+    1=part ? ⊑0‿0‿⟨⟩Simulate´⌽↕2022 ; MetaSearch@
   }
 }
