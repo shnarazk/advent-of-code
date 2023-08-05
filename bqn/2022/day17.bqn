@@ -126,20 +126,17 @@ Solve ⇐ {env‿part 𝕊 data :
     ⟨ground_level⌈-¬(⊑≢rock⊑shapes)+⊑pos,round,record∾<rock‿pos⟩
   }
   MetaSearch ← {@ :
-    "≠jet" util.Debug ll ← ≠jetPattern
-    "# ≠shapes" util.Debug ls ← ≠shapes
-    ground_level‿round‿record ← 0‿0‿⟨⟩Simulate´⌽↕2×ll
-    "occurs" util.Debug ¯40↑occur ← ⊒><∘((<·⋈⟜0·⊑⊑)-˜⊢)∘(1⊸⊑¨)˘⌊‿memory_length⥊record
+    record ← 2⊑0‿0‿⟨⟩Simulate´⌽↕2×≠jetPattern
+    "occurs" util.Debug ¯20↑occur ← ⊒><∘((<·⋈⟜0·⊑⊑)-˜⊢)∘(1⊸⊑¨)˘⌊‿memory_length⥊record
     "not enough length holds in record"!∨´2=occur
     "cycle length" util.Debug len ← memory_length×+´1=occur
     "start at" util.Debug start ← 1+memory_length×+´0=occur
     "cycle tower base height" util.Debug cycle_base_height ← ⊑1⊑start⊑record
     "cycle tower height" util.Debug cycle_height ← ⊑-○(1⊸⊑⊑⟜record)´start+len‿0
-    "unrational height"!(2-○{⊑⊑(start+𝕩×len)⊑record}1)=(3-○{⊑⊑(start+𝕩×len)⊑record}2)
-    target ← 1000000000000-1
-    util.Debug repeat ← len⌊∘÷˜target-start
-    offset ← len|target-start
-    "rock_type" util.Debug rock_type ← ⊑(start+offset)⊑record
+    "rational height"!(2-○{⊑⊑(start+𝕩×len)⊑record}1)=(3-○{⊑⊑(start+𝕩×len)⊑record}2)
+    target ← 1000000000000-1    # due to zero-based index
+    repeat‿offset ← len(⌊∘÷˜⋈|)target-start
+    rock_type ← ⊑(start+offset)⊑record
     offset_height ← ⊑-○(1⊸⊑⊑⟜record)´start+offset‿0
     -¬(≠rock_type⊑shapes)+offset_height+cycle_base_height+repeat×cycle_height
   }
