@@ -52,3 +52,4 @@ $ 2022/dayDD.bqn $PWD/data/2022/input-dayDD.txt
 ## About editorial configuration
 
 - [my settings](https://github.com/shnarazk/learn-bqn/blob/main/helix.md) on [helix](https://helix-editor.com)
+

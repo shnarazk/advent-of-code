@@ -27,8 +27,56 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 | committed one, using 'and' |   1098.02s user 5.32s system 99% cpu 18:25.33 total  |
 | modified version after the merge, using [multiple tests](https://mlochbaum.github.io/BQN/doc/block.html#predicates) |  847.80s user 4.64s system 99% cpu 14:13.30 total |
 | rewrote after 61b51f6 |  793.44s user 6.34s system 99% cpu 13:21.41 total |
-|rewrote after 6f95c23 |  787.28s user 5.05s system 99% cpu 13:13.02 total  | 
+|rewrote after 6f95c23 |  787.28s user 5.05s system 99% cpu 13:13.02 total  |
 | e687d86 | 545.83s user 0.41s system 99% cpu 9:06.65 total |
 
 - [my memo](https://shnarazk.github.io/2023/2023-03-07-aoc2022-day19/) in Japanese.
 
+-----
+
+## day22
+
+| y⋈x| ·‿0 | ·‿1 | ·‿0 |
+|---:|:---:|:---:|:---:|
+| 0‿·|     |  A  |B    |
+| 1‿·|     |  C  |     |
+| 2‿·|  D  |  E  |     |
+| 3‿·|  F  |     |     |
+
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | F   |     |
+| 0‿· | D   | A   | B   |
+| 1‿· |     | C   |     |
+
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | F   |     |
+| 0‿· | A   | B   | E   |
+| 1‿· |     | C   |     |
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | A   |     |
+| 0‿· | D   | C   | B   |
+| 1‿· |     | E   |     |
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | C   |     |
+| 0‿· | A   | D   | E   |
+| 1‿· |     | F   |     |
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | C   |     |
+| 0‿· | D   | E   | C   |
+| 1‿· |     | F   |     |
+
+| y⋈x | ·‿¯1| ·‿0 | ·‿1 |
+|----:|:---:|:---:|:---:|
+|¯1‿· |     | D   |     |
+| 0‿· | D   | F   | E   |
+| 1‿· |     | B   |     |
