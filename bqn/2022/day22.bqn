@@ -3,6 +3,7 @@ Solve ⇐ {env‿part 𝕊 data :
   width ← ⌈´≠¨¯1↓data
   "map size" util.Debug ≢map ← >width⊸↑¨¯1↓data
   "map" util.Debug map
+  map ↩ ¯1⌽⎉2 ¯1⌽⎉1(2+≢map)↑map
   "horizontal slice 0" util.Debug ⊏⎉2 map
   "horizontal slice 1" util.Debug 1⊏⎉2 map
   "vertical slice 0" util.Debug ⊏⎉1 map
@@ -19,19 +20,20 @@ Solve ⇐ {env‿part 𝕊 data :
   "# group" util.Debug (0∾·<´¨·⥊·<˘2⊸↕)⊸(-˜)"# scan sum" util.Debug+`path∊"LR→"
   "route" util.Debug ¯1⊸(util.ParseInt∘↓⋈⊑)¨((0∾·<´¨·⥊·<˘2⊸↕)⊸(-˜)+`path∊"LR→")⊔path
   route ← ¯1⊸(util.ParseInt∘↓⋈{-¬⊑"L→R"⊸⊐𝕩}∘⊑)¨((0∾·<´¨·⥊·<˘2⊸↕)⊸(-˜)+`path∊"LR→")⊔path
-  "start" util.Debug start ← 0∾⊑"."⊒˜1⊏map
+  "start" util.Debug start ← 1∾⊑"."⊒˜1⊏map
   "check" util.Debug start⊑map
   Move ← {dist‿turn 𝕊 loc‿dir :
+    util.Debug dir
     vec ← dir⊑⟨¯1‿0,0‿1,1‿0,0‿¯1⟩
     {
       '.'≡(n ← vec+loc)⊑map ? loc ↩ n⋄ -¬𝕩 ;
       '#'≡(n ← vec+loc)⊑map ? "blocked at" util.Debug loc ⋄ 0 ;
-      loc ↩ loc Warp vec
-      '.'≡loc⊑map ? -¬𝕩 ;
-      '#'≡loc⊑map ? 0
+      newloc ← loc Warp vec
+      count ← 𝕩
+      {'.'≡newloc⊑map ? loc ↩ newloc ⋄ -¬count ; '#'≡newloc⊑map ? 0 ; !0}
     }•_while_(0⊸<)dist
     "move to" util.Debug loc
-    ⟨loc, 4⌊dir+turn⟩
+    ⟨loc, 4|4+dir+turn⟩
   }
-  start‿1 Move´⌽route
+  {(y‿x)‿dir : util.Debug 𝕩 ⋄ (4|3+dir)+(4×x)+1000×y}start‿1 Move´⌽route
 }
