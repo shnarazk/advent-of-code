@@ -79,5 +79,5 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 | y⋈x | ·‿¯1| ·‿0 | ·‿1 |
 |----:|:---:|:---:|:---:|
 |¯1‿· |     | D   |     |
-| 0‿· | D   | F   | E   |
+| 0‿· | A   | F   | E   |
 | 1‿· |     | B   |     |
