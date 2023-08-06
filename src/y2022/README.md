@@ -4,6 +4,8 @@
 ### day14 https://adventofcode.com/2022/day/14
 buckets floading problem similar with [y2018 day17](https://adventofcode.com/2018/day/17)
 
+BQN version uses much better idea.
+
 ### day15 https://adventofcode.com/2022/day/15
 overlapping diamonds problem
 
