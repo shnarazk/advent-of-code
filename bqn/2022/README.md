@@ -43,6 +43,7 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 | 2‿·|  D  |  E  |     |
 | 3‿·|  F  |     |     |
 
+![](https://user-images.githubusercontent.com/997855/258643960-ab58710f-5a0a-435c-a04c-16a7e592bde9.png)
 
 | y⋈x | ·‿¯1| ·‿0 | ·‿1 |
 |----:|:---:|:---:|:---:|
