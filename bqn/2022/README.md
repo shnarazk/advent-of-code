@@ -36,7 +36,7 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 
 ## day22
 
-| y⋈x| ·‿0 | ·‿1 | ·‿0 |
+| y⋈x| ·‿0 | ·‿1 | ·‿2 |
 |---:|:---:|:---:|:---:|
 | 0‿·|     |  A  |B    |
 | 1‿·|     |  C  |     |
