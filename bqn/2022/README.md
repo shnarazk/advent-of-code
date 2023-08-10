@@ -16,9 +16,11 @@ We need to use matrix [less](https://github.com/shnarazk/advent-of-code/issues/3
 | - on cbqn [05c12703](https://github.com/dzaima/CBQN/tree/05c1270344908e98c9f2d06b3671c3646f8634c3) | 92.45 |
 | - on cbqn [4a6877a8](https://github.com/dzaima/CBQN/tree/4a6877a87a81f181942039ac609dcffd17e80dd0)sengeli | 96.45       |
 | line-based propagation | 5.66 | $O(N)$  |
+| - on cbqn a175c4 | 0.04 | |
 | in rust        | 0.17 |   $O(N^2)$    |
 | [dzaima/aoc/2022/BQN/14.bqn](https://github.com/dzaima/aoc/blob/master/2022/BQN/14.bqn) |  0.03 | ??? |
 
+!!!
 
 ## at day19
 
