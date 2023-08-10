@@ -1,10 +1,12 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜ "," env.Var⌾⋈ "BQN_LIB"
-  map ← (1⊸⌽∞⊸»⍟2)⎉1{𝔽 _𝕣 𝕩 : 𝔽⌾⍉𝔽 𝕩}(2+≢)⊸↑util.ParseInt∘⋈¨>data
+  Ext ← {𝕊 x : (1⊸⌽∞⊸»⍟2)⎉1{𝔽 _𝕣 𝕩 : 𝔽⌾⍉𝔽 𝕩}(2+≢)⊸↑x ; 𝕊⁼𝕩 : (¯2+≢)⊸↑1⌽⎉1 1⌽𝕩}
   Shift ← (1+×∘⊣)◶⟨∞⊸«,⊢,∞⊸»⟩
-  stencil ← (¯2+≢)⊸↑1⌽⎉1 1⌽∾¨´⟨0‿0,1‿0,¯1‿0,0‿1,0‿¯1⟩Shift{y‿x 𝔽 _𝕣 𝕩 : y⊸𝔽⎉1⌾⍉x⊸𝔽⎉1 𝕩}¨<map
+  map ← util.ParseInt∘⋈¨>data
+  mask ← {∾¨´⟨0‿0,1‿0,¯1‿0,0‿1,0‿¯1⟩Shift{y‿x 𝔽 _𝕣 𝕩 : y⊸𝔽⎉1⌾⍉x⊸𝔽⎉1 𝕩}¨<𝕩}⌾Ext map
+  low ← {∧´<´1⊸(⊑∘↑⋈↓)𝕩}¨mask
   {
-    1=part ? +´⥊{∧´<´1(⊑∘↑⋈↓)𝕩 ? 1+⊑𝕩 ; 0}¨stencil ;
+    1=part ? +´low×○⥊1+map ;
     0
   }
 }
