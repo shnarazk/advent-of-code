@@ -1,11 +1,10 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜ "," env.Var⌾⋈ "BQN_LIB"
-"data" util.Debug ⊑data
-"data" util.Debug ⊑⍉≍data (¯4+">}]) ([{<"⊸⊐¨) ↩
+  data (¯4+">}]) ([{<"⊸⊐¨) ↩
   {
     1=part ?
       +´⊑¨{notfound‿stack‿l :
-        ⟨c⟩‿r ← 1(↑⋈↓) l
+        ⟨c⟩‿r ← 1(↑⋈↓)l
         {
           0<c ? ⟨0,c∾stack,r⟩ ;
           c=-⊑stack ? ⟨0,1↓stack,r⟩ ;
