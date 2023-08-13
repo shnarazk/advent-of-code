@@ -15,7 +15,7 @@ Solve ⇐ {env‿part 𝕊 line :
         {
           upto<time ? upto<t ← time-w ← 1+⌈⌈´(𝕩⊏masks)/robots÷˜(n ← 𝕩⊏bp)(0⊸⌈-)resources ?
           tt ← t∾(n-˜resources+w×robots)∾((1⊸+)⌾(𝕩⊸⊑)robots)
-          ¬∨´∧´∘tt⊸≤¨next ? next ⟨tt⟩⊸∾ ↩ ⋄ best ((4⊑tt)+(t-upto)×¯1⊑tt)⊸⌈ ↩ ; @
+          ¬∨´(∧´tt⊸≤)¨next ? next ⟨tt⟩⊸∾ ↩ ⋄ best ((4⊑tt)+(t-upto)×¯1⊑tt)⊸⌈ ↩ ; @
         }¨{robots<○(𝕩⊸⊑)limits}¨⊸/↕4
         next
       }´{⟨⊑𝕩,4↑1↓𝕩,5↓𝕩⟩}¨cands
