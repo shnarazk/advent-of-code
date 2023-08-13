@@ -10,12 +10,12 @@ Solve ⇐ {env‿part 𝕊 line :
     best‿bp‿upto ← ⟨0,n⊏data,-u⟩
     masks‿limits ← ⟨0<˘bp,0‿0‿0‿∞⌈⌈´˘⍉bp⟩
     Expand ← {𝕊 cands :
-      lib.Progress n⋈best
+      lib.Progress⟨n,best,≠cands⟩
       ∧⟨⟩{time‿resources‿robots 𝕊 next :
         {
-          upto<time ? upto<t ← time-w ← 1+⌈⌈´(𝕩⊏masks)/robots÷˜(n ← 𝕩⊏bp)(0⊸⌈-)resources ?
-          tt ← t∾(n-˜resources+w×robots)∾((1⊸+)⌾(𝕩⊸⊑)robots)
-          ¬∨´(∧´tt⊸≤)¨next ? next ⟨tt⟩⊸∾ ↩ ⋄ best ((4⊑tt)+(t-upto)×¯1⊑tt)⊸⌈ ↩ ; @
+          upto< t ← time- w ← 1+⌈⌈´(𝕩⊏masks)/robots÷˜(no ← 𝕩⊏bp)(0⌈-)resources ?
+          new ← t∾(no-˜resources+w×robots)∾((1⊸+)⌾(𝕩⊸⊑)robots)
+          ¬∨´(∧´new⊸≤)¨next ? next ⟨new⟩⊸∾ ↩ ⋄ best ((4⊑new)+(t-upto)×¯1⊑new)⊸⌈ ↩ ; @
         }¨{robots<○(𝕩⊸⊑)limits}¨⊸/↕4
         next
       }´{⟨⊑𝕩,4↑1↓𝕩,5↓𝕩⟩}¨cands
