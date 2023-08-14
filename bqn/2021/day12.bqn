@@ -1,8 +1,10 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "token" util.Debug nodes ← ∧⍷∾⥊adj ← ⍉≍"-"⊸util.Tokenize¨data
-  start‿end ← nodes⊐"start"‿"end"
-  "# " util.Debug map ← nodes⊸⊐¨adj
-  util.Debug type ← 'Z'⊸≥∘⊑¨nodes
+  "token" util.Debug nodes ← ∧⍷∾⥊adj ← ⍉≍ ⌽¨⊸∾"-"⊸util.Tokenize¨data
+  start‿end ← -nodes⊐"start"‿"end"
+  bignodes ← +´'Z'⊸≥∘⊑¨nodes
+  map ← bignodes⊸≤◶⟨⊢,-⟩¨∘∧¨1⊸⊑¨¨⊑¨⊸⊔nodes⊸⊐¨adj
   count ← 0
+  ∾∘({end≢⊑𝕩 ? ∾⟜𝕩˜¨0⊸>◶⟨1,¬∘⊑∊⟜𝕩˜⟩¨⊸/map⊑˜|⊑𝕩 ; count 1⊸+ ↩ ⋄ ⟨⟩}¨)•_while_(⟨⟩⊸≢)⋈⋈start
+  count
 }
