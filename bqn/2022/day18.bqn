@@ -70,7 +70,7 @@ Solve ⇐ {env‿part Solve data :
        checked Rec new :
          np ← ≠prop ← ⍷∾Propagate¨new
          checked (⍷new⊸∾)↩
-         "propagated" lib.Progress ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
+         lib.Progress ≠prop ↩ ⍷(¬∊⟜checked˜)⊸/prop
          checked Rec prop
      }1↑∧surface
    ;
