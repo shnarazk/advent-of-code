@@ -1,5 +1,5 @@
 #!/usr/bin/env cbqn
-env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1⊸↓∘↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
+env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 util‿aoc ← (•Import∾⟜"/util.bqn")⊸⋈´ "."‿".." env.Var "BQN_LIB"‿"AOC_REPO_DIR"
 ⟨year⟩‿blacklist ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
 y ← "2020" util.LeftFill year
