@@ -3,6 +3,11 @@ env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔
 util‿aoc ← (•Import∾⟜"/util.bqn")⊸⋈´ "."‿".." env.Var "BQN_LIB"‿"AOC_REPO_DIR"
 Fill ← "       "⊸util.LeftFill
 ⟨year⟩‿blacklist ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
+blacklist ↩ {
+  ⟨⟩≡blacklist ? ⟨⟩ ;
+  !(⟨⟩≡blacklist)∨(⌊´=⌈´)×¨blacklist
+  (0>⊑blacklist)◶⟨⊢,{(¬∊⟜𝕩)⊸/⌾- 1+↕25}⟩blacklist
+}
 y ← "2020" util.LeftFill year
 result ← {
   ∊⟜blacklist⌾⋈ 𝕩 ? 𝕩‿"skipped"‿"skipped" ;

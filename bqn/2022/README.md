@@ -1,5 +1,10 @@
 # Implementation memo
 
+```
+CBQN on commit 86c570a65310fbb882f677c5123c8deeaf9fc2b1
+built with FFI, singeli native aarch64, replxx
+```
+
 | y2022  |  part 1 |  part 2 |
 |--------|--------:|--------:|
 | day 01 |   0.185 |   0.164 |
@@ -20,7 +25,7 @@
 | day 16 |   0.045 |  71.858 |
 | day 17 |   0.992 |  10.414 |
 | day 18 |   0.007 |   1.182 |
-| day 19 |   2.506 | 293.505 |
+| day 19 |   2.556 |  79.559 |
 | day 20 |   0.616 |   6.135 |
 | day 21 |   0.169 |   4.301 |
 | day 22 |   0.003 |   0.004 |
