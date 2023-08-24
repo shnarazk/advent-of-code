@@ -1,8 +1,13 @@
 # Implementation memo
 
+```
+CBQN on commit 86c570a65310fbb882f677c5123c8deeaf9fc2b1
+built with FFI, singeli native aarch64, replxx
+```
+
 | y2020  |  part 1 |  part 2 |
 |--------|--------:|--------:|
-| day 01 |   0.005 |    0.47 |
+| day 01 |   0.005 |   0.454 |
 | day 02 |   0.001 |   0.001 |
 | day 03 |       0 |       0 |
 | day 04 |   0.001 |   0.005 |
@@ -11,20 +16,19 @@
 | day 07 |   0.056 |   0.004 |
 | day 08 |   0.001 |   0.012 |
 | day 09 |   0.007 |    0.01 |
-| day 10 | skipped | skipped |
-| day 11 | skipped | skipped |
-| day 12 | skipped | skipped |
-| day 13 | skipped | skipped |
-| day 14 | skipped | skipped |
-| day 15 | skipped | skipped |
-| day 16 | skipped | skipped |
-| day 17 | skipped | skipped |
-| day 18 | skipped | skipped |
-| day 19 | skipped | skipped |
-| day 20 | skipped | skipped |
-| day 21 | skipped | skipped |
-| day 22 | skipped | skipped |
-| day 23 | skipped | skipped |
-| day 24 | skipped | skipped |
-| day 25 | skipped | skipped |
- 
+| day 10 |     N/A |     N/A |
+| day 11 |     N/A |     N/A |
+| day 12 |     N/A |     N/A |
+| day 13 |     N/A |     N/A |
+| day 14 |     N/A |     N/A |
+| day 15 |     N/A |     N/A |
+| day 16 |     N/A |     N/A |
+| day 17 |     N/A |     N/A |
+| day 18 |     N/A |     N/A |
+| day 19 |     N/A |     N/A |
+| day 20 |     N/A |     N/A |
+| day 21 |     N/A |     N/A |
+| day 22 |     N/A |     N/A |
+| day 23 |     N/A |     N/A |
+| day 24 |     N/A |     N/A |
+| day 25 |     N/A |     N/A |

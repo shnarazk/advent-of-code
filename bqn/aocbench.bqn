@@ -17,6 +17,10 @@ result ← {
   𝕩∾(Fill∘•Fmt)¨(⌊0.5⊸+)⌾(1000⊸×)¨part1‿part2 ;
   𝕩‿"N/A"‿"N/A"
 }¨1+↕25
+
+•Out "```"
+•Out ¯1↓1⊑•SH "cbqn"‿"--version"
+•Out "```"
 •Out "| y"∾y∾"  |  part 1 |  part 2 |"
 •Out "|--------|--------:|--------:|"
 {day‿part1‿part2 : •Out "| day "∾("00" util.LeftFill •Fmt day)∾" | "∾(Fill part1)∾" | "∾(Fill part2)∾" |"}¨result
