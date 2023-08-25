@@ -1,24 +1,25 @@
 Solve ⇐ {env‿part 𝕊 line :
-  util‿⟨hashset⟩ ← •Import¨ "/util.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
+  util‿⟨hashmap⟩ ← •Import¨ "/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
   data ← >{[⟨1⊑𝕩,0,0,0⟩,⟨2⊑𝕩,0,0,0⟩,⟨3⊑𝕩,4⊑𝕩,0,0⟩,⟨5⊑𝕩,0,6⊑𝕩,0⟩]}∘util.ParseInts¨line
   Examine ← {u 𝕊 n :
-    best‿bp‿upto ← ⟨0,n⊏data,-u⟩
+    round‿best‿bp‿upto ← ⟨0,0,n⊏data,-u⟩
     masks‿limits ← ⟨0<˘bp,0‿0‿0‿∞⌈⌈´˘⍉bp⟩
-    Expand ← {𝕊 cands :
-      # Minimize ← {e 𝕊 list : bad ← (∧´e⊸≥)¨list ⋄ ⟨e⟩∾(¬bad)/list}
-      util.Progress⟨n,best,≠cands⟩
-      ∧{𝕩.Values⁼@}(Hashset⟨⟩){time‿resources‿robots 𝕊 hash :
-          {
-            upto< t ← time- w ← 1+⌈⌈´(𝕩⊏masks)/robots÷˜(no ← 𝕩⊏bp)(0⌈-)resources ?
-            new ← t∾(no-˜resources+w×robots)∾((1⊸+)⌾(𝕩⊸⊑)robots)
-            ¬hash.Has new ? hash.Set new ⋄ best ((4⊑new)+(t-upto)×¯1⊑new)⊸⌈ ↩ ; @
-            # ¬∨´(∧´new⊸≤)¨next ? next ⟨new⟩⊸∾ ↩ ⋄ best ((4⊑new)+(t-upto)×¯1⊑new)⊸⌈ ↩ ; @
-          }¨{robots<○(𝕩⊸⊑)limits}¨⊸/↕4
-          # util.Debug hash.
-          hash
-      }´{⟨⊑𝕩,4↑1↓𝕩,5↓𝕩⟩}¨cands
+    Expand ← {𝕊 prev :
+      util.Progress⟨n,round,best,+´≠¨prev.Values@⟩
+      round 1⊸+ ↩
+      (Hashmap˜⟨⟩){robots‿value 𝕊 hash :
+        {
+          upto< t ← (⊑value)- w ← 1+⌈⌈´(𝕩⊏masks)/robots÷˜(no ← 𝕩⊏bp)(0⌈-)resources ← 1↓value?
+          rb‿v ← ⟨(1⊸+)⌾(𝕩⊸⊑)robots,⟨t⟩∾no-˜resources+w×robots⟩
+          ¬∨´(∧´v⊸≤)¨vals ← ⟨⟩ hash.Get rb ?
+          rb hash.Set ⟨v⟩∾(¬·∧´v⊸≥)¨⊸/vals
+          best ((4⊑v)+(t-upto)×3⊑rb)⊸⌈ ↩
+          ; @
+        }¨{robots<○(𝕩⊸⊑)limits}¨⊸/↕4
+        hash
+      }´∾{𝕨⊸⋈¨𝕩}´¨{prev.Values⁼˜@}
     }
-    Expand•_while_(⟨⟩⊸≢)⟨⟨0⟩∾⟨0,0,0,0⟩∾⟨1,0,0,0⟩⟩
+    Expand•_while_{0<𝕩.Count@}⟨⟨1,0,0,0⟩⟩Hashmap⟨⟨⟨0,0,0,0,0⟩⟩⟩
     best
   }
   {1=part ? +´24((1⊸+)×Examine)¨↕≠data ; ×´32 Examine¨↕3}
