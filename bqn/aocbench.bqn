@@ -1,12 +1,13 @@
 #!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 util‿aoc ← (•Import∾⟜"/util.bqn")⊸⋈´ "."‿".." env.Var "BQN_LIB"‿"AOC_REPO_DIR"
-Fill ← "       "⊸util.LeftFill
+cw ← 8
+Fill ← (cw↑' ')⊸util.LeftFill
 ⟨year⟩‿blacklist ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
 blacklist ↩ {
   ⟨⟩≡blacklist ? ⟨⟩ ;
-  !(⟨⟩≡blacklist)∨(⌊´=⌈´)×¨blacklist
-  (0>⊑blacklist)◶⟨⊢,{(¬∊⟜𝕩)⊸/⌾- 1+↕25}⟩blacklist
+  !(⌊´=⌈´)×¨blacklist
+  (0>⊑blacklist)◶⟨⊢,{(¬∊⟜𝕩)⊸/⌾-1+↕25}⟩blacklist
 }
 y ← "2020" util.LeftFill year
 result ← {
@@ -26,6 +27,6 @@ result ← {
 •Out "```"
 •Out ¯1↓1⊑•SH "cbqn"‿"--version"
 •Out "```"
-•Out "| y"∾y∾"  |  part 1 |  part 2 |"
-•Out "|--------|--------:|--------:|"
+•Out "| y"∾y∾"  | "∾(Fill "p1 (sec)")∾" | "∾(Fill "p2 (sec)")∾" |"
+•Out "|--------|"∾(('-'+(2+cw)↑0)util.LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)util.LeftFill ":")∾"|"
 {day‿part1‿part2 : •Out "| day "∾("00" util.LeftFill •Fmt day)∾" | "∾(Fill part1)∾" | "∾(Fill part2)∾" |"}¨result
