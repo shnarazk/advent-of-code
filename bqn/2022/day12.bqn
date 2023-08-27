@@ -11,12 +11,17 @@ MakeNeighbor ← {(⌽⍉)⍟(4-𝕩)∞⊸»˘(⌽⍉)⍟𝕩 𝕨}
 Neighbors ← {𝕩⊸MakeNeighbor¨↕4}
 
 Solve ⇐ {env‿part 𝕊 lines :
-  lib ← •Import"/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  Dump ← {t 𝕊 𝕩 :
-    lib.term.Up ≠𝕩
-    Colorize ← {𝕩≥𝕨 ? 80‿(⌊255-255⌊⌊2500÷√𝕩)‿(⌊255⌊30×1.8⋆⁼𝕩) ; 100‿100‿100}
-    {lib.term.Outln∾{((t Colorize 𝕩) lib.color.RGB 0)∾" "}¨𝕩 ⋄ ⟨⟩}˘𝕩
-    𝕩
+  util ← •Import"/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  visualize ← util.ParseInt "1" env.Var⌾⋈ "AOC_VISUALIZE"
+  dump ← {
+     visualize ?
+      {t 𝕊 𝕩 :
+        util.term.Up ≠𝕩
+        Colorize ← {𝕩≥𝕨 ? 80‿(⌊255-255⌊⌊2500÷√𝕩)‿(⌊255⌊30×1.8⋆⁼𝕩) ; 100‿100‿100}
+        {util.term.Outln∾{((t Colorize 𝕩) util.color.RGB 0)∾" "}¨𝕩 ⋄ ⟨⟩}˘𝕩
+        𝕩
+      } ;
+    {𝕩}
   }
   shape ← (≠⋈(≠⊑))lines
   map ← (shape⊸⥊)∘(sea_level⊸+'a'⊸(-˜))∘∾lines
@@ -26,9 +31,8 @@ Solve ⇐ {env‿part 𝕊 lines :
   MaskedNeighbors ← reachables×{(𝕩⊸MakeNeighbor)¨↕4}
 
   n ← {1=part ? m ← 1˙⌾(start⊸⊑) map ; {sea_level=𝕩 ? 1 ; 𝕩}¨˘map}
-  {𝕤⋄ •Show ""}⍟(≠map)@
+  {visualize ? {𝕤⋄ •Show ""}⍟(≠map)@ ; @}
   n {0 Dump (Choose¨˘´⟜ MaskedNeighbors)𝕩}•_while_{0>end⊑𝕩} ↩
-  •Delay 3
-  •Out lib.term.reset∾lib.term.clear
+  {visualize ? •Out util.term.reset∾util.term.clear ; @}
   ¯1⊸+end⊸⊑n
 }
