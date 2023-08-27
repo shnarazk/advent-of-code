@@ -7,6 +7,35 @@ Solve ⇐ {env‿part 𝕊 data :
     1=part ?
       (+´·⥊2⊸=)⊑{now‿pre :
         ⟨{1 𝕊 0 : 2 ; 2 𝕊 m : 4≤m ? 1 ; w 𝕊 m : w}¨⟜((+´2⊸=)¨(around⊸/¨geometry.Neighbor9))now,now⟩
-      }•_while_(≢´)⋈⟜(0¨)data
+      }•_while_(≢´)⋈⟜(0¨)data ;
+    grid ← ↕size ← "size" util.Debug ≢data
+    w ← 1⊑size
+    tran ← ∾⌜{×∘≠◶⟨⟨⟩,1⊸↑⟩(1=⊑⟜data)¨⊸/𝕩}¨⌜{y‿x :
+      ⟨
+        ⌽y↑x⊏⎉1 grid,
+        (1+y)↓x⊏⎉1 grid,
+        ⌽x↑y⊏⎉2 grid,
+        (1+x)↓y⊏⎉2 grid,
+        ⌽(0‿0⊸≤∧○(∧´)y‿x⊸>)¨⊸/⟨0,x-y⟩<⊸+0‿0⍉grid
+        (y‿x⊸<∧○(∧´)size⊸>)¨⊸/⟨0,x-y⟩<⊸+0‿0⍉grid
+        ⌽(y‿¯1⊸<∧○(∧´)size⊸>)¨⊸/⟨0,(x+y)-(w-1)⟩<⊸+0‿0⍉⌽grid
+        (0‿0⊸≤∧○(∧´)y‿w⊸>)¨⊸/⟨0,(x+y)-(w-1)⟩<⊸+0‿0⍉⌽grid
+      ⟩
+    }¨grid
+    {
+      y‿x ← 0‿0
+      "n" util.Debug ×∘≠◶⟨⟨⟩,1⊸↑⟩⌽y↑x⊏⎉1 grid,
+      "s" util.Debug ×∘≠◶⟨⟨⟩,1⊸↑⟩(1+y)↓x⊏⎉1 grid,
+      "w" util.Debug ×∘≠◶⟨⟨⟩,1⊸↑⟩⌽x↑y⊏⎉2 grid,
+      "e" util.Debug ×∘≠◶⟨⟨⟩,1⊸↑⟩(1+x)↓y⊏⎉2 grid,
+      "nw" util.Debug ⌽(0‿0⊸≤∧○(∧´)y‿x⊸>)¨⊸/⟨0,x-y⟩<⊸+0‿0⍉grid
+      "se" util.Debug (y‿x⊸<∧○(∧´)size⊸>)¨⊸/⟨0,x-y⟩<⊸+0‿0⍉grid
+      "sw" util.Debug ⌽(y‿¯1⊸<∧○(∧´)size⊸>)¨⊸/⟨0,(x+y)-(w-1)⟩<⊸+0‿0⍉⌽grid
+      "ne" util.Debug (0‿0⊸≤∧○(∧´)y‿w⊸>)¨⊸/⟨0,(x+y)-(w-1)⟩<⊸+0‿0⍉⌽grid
+      (•Fmt y‿x) util.Debug y‿x⊑tran
+    }
+    (+´·⥊2⊸=)⊑{now‿pre :
+      ⟨{1 𝕊 0 : 2 ; 2 𝕊 m : 5≤m ? 1 ; w 𝕊 m : w}¨⟜((+´2⊸=)¨(⊑⟜now)¨tran)now,now⟩
+    }•_while_(≢´)⋈⟜(0¨)data
   }
 }
