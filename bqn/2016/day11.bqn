@@ -1,11 +1,8 @@
 Solve ⇐ {env‿part 𝕊 data :
-  util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "goal" util.Debug goalIndex ← ¯1+ shape ← 4+{1=part ? 11 ; 15}↑0
+  util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨"." env.Var○< "BQN_LIB"
+  "goal" util.Debug goalIndex ← ¯1+ shape ← 4+(1+2×numKinds ← {1=part ? 5 ; 7})↑0
   initIndex ← {1=part ? ⟨0,0,0,0,0,1,2,1,1,1,1⟩ ; ⟨0,0,0,0,0,1,2,1,1,1,1,0,0,0,0⟩}
-  "v" util.Debug ≢v ← ∞¨↕shape
-  numKinds ← {1=part ? 2 ; 4}
-  v 0⌾(initIndex⊸⊑) ↩
-  !∞=goalIndex⊑v
+  !goalIndex≡○≢initIndex
   IsSafe ← {
          F state : ∧´state⊸(F˜)¨↕numKinds ;
     kind F state :
@@ -13,16 +10,19 @@ Solve ⇐ {env‿part 𝕊 data :
       otherGenerators ← (1+2×kind⊸≠⊸/↕numKinds)⊏state
       (generator=chip)∨(¬<⁼chip∊otherGenerators)
   }
-  ValidMove ← {a 𝕊 b : (a≢b)∧2≥+´a≠b }
+  ValidMove ← {(𝕨≢𝕩)∧2≥+´𝕨≠𝕩}
   NextStates ← {F state :
     ⟨elevator⟩‿objects ← 1(↑⋈↓)state
     nextFloors ← (0⊸≤∧4⊸>)¨⊸/¯1‿1+elevator
-    IsSafe¨⊸/⍷∾{floors ← elevator‿𝕩 ⋄ ⟨𝕩⟩<⊸(∾¨)objects⊸ValidMove¨⊸/⟨⟨⟩⟩{elevator=𝕨 ? ⥊floors∾⌜𝕩 ; ⥊⟨𝕨⟩∾⌜𝕩}´objects}¨nextFloors
+    IsSafe¨⊸/⍷∾{
+      floors ← elevator‿𝕩
+      ⟨𝕩⟩<⊸(∾¨)objects⊸ValidMove¨⊸/⟨⟨⟩⟩{elevator=𝕨 ? ⥊floors∾⌜𝕩 ; ⥊⟨𝕨⟩∾⌜𝕩}´objects
+    }¨nextFloors
   }
-  {𝕊 n:
-    util.Progress n
-    s ← ∾NextStates¨(n=⊑⟜v)¨⊸/⥊↕≢v
-    !0<≠s
-    {v (n+1)⊸⌊⌾(𝕩⊸⊑) ↩}¨s
-    1+n}•_while_{𝕤⋄ ∞=goalIndex⊑v}0
+  (initIndex HashMap○⋈ 0){h 𝕊 n:
+    !0<≠s ← ∾NextStates∘⊑¨(n=1⊸⊑)¨⊸/h.Values⁼˜@
+    util.Progress ⟨1+n, ≠s⟩
+    (1+n){𝕨 < ∞ h.Get 𝕩 ? 𝕩 h.Set 𝕨 ; @}¨s
+    1+n
+  }•_while_{¬𝕨.Has goalIndex}0
 }
