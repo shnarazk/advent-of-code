@@ -7,6 +7,6 @@ Solve ⇐ {env‿part 𝕊 data :
     (newshape↑0){𝕩⌈(𝕨×baseshape) geometry.Shift newshape↑1+9|(+´𝕨)+¯1+data}´⥊↕5‿5
   }
   map ← 0⌾(0‿0⊸⊑)∞⌜↕≢data
-  Expand ← data{(⊑𝕩)⌊𝕨+⌊´1↓𝕩}¨∞⊸geometry.Neighbor5
+  Expand ← {𝕩⌊data+⌊´¨∞ geometry.Neighbor4 𝕩}
   (¯1+≢)⊸⊑⊑(Expand⊸⋈⊣)´•_while_(≢´)⋈⟜¬map
 }
