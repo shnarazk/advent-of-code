@@ -9,7 +9,7 @@
       bqn-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
          name = "aoc-bqn-driver-${version}";
          pname = "aoc-bqn-driver";
-         version = "20230825-2";
+         version = "20230829-1";
          src = self;
          installPhase = ''
            mkdir -p $out/bin;
@@ -18,7 +18,11 @@
            cp ./aoc.bqn $out/bin/2022
            cp ./aoc.bqn $out/bin/2021
            cp ./aoc.bqn $out/bin/2020
+           cp ./aoc.bqn $out/bin/2019
+           cp ./aoc.bqn $out/bin/2018
+           cp ./aoc.bqn $out/bin/2017
            cp ./aoc.bqn $out/bin/2016
+           cp ./aoc.bqn $out/bin/2015
            cp ./aocbench.bqn $out/bin/aocbench
          '';
       };
