@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 rawdata :
   lib ← "." env.Var⌾⋈ "BQN_LIB"
   ⟨color,DataFile,Debug,ParseInts,Swap,term⟩ ← •Import lib∾"/util.bqn"
-  ⟨_to_heap⟩ ← •Import lib∾"/heap.bqn"
+  ⟨_to_heap⟩‿⟨hashmap⟩ ← •Import¨(<lib)∾¨"/heap.bqn"‿"/hashmap.bqn"
   data ← ∧(Swap ParseInts ∾{((<1⊸⊑)∾9⊸↓)(','⊸≠¨⊸/)¨" "⊸((⊢-˜¬×·+`»⊸<)∘∊˜⊔⊢)𝕩})¨rawdata
   nodes ← ⍷⊑¨data
   ! 0=⊑nodes⊐<"AA"
@@ -26,15 +26,13 @@ Solve ⇐ {env‿part 𝕊 rawdata :
           }
         }¨(↕≠)⊸(⋈¨) pos⊏dist
       }
-      Search ← {heap F lim :
-        heap{state ← 𝕨.Pop@ ⋄ x ← 𝕩⌈¯1⊑state ⋄ lim Expand state ⋄ x}•_while_{¬𝕨.Empty@}0
-      }
+      Search ← {heap F lim : heap{state ← 𝕨.Pop@ ⋄ x ← 𝕩⌈¯1⊑state ⋄ lim Expand state ⋄ x}•_while_{¬𝕨.Empty@}0}
       to_visit Search 30
     ;
       limit ← 26
       Togo ← (>○(¯1⊸⊑))_to_heap
-      togo.Push⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
-      checked ← ∘‿2⥊⟨⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩⟩,0⟩ # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩⟩→flow
+      togo.Push⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨position2,time2⟩,flow⟩
+      checked ← ⟨⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩⟩⟩ HashMap ⟨0⟩
       Expand2 ← { best‿limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩ :
         {𝕊 ⟨p,cost⟩ :
           t ← 1+t1+cost
@@ -42,20 +40,12 @@ Solve ⇐ {env‿part 𝕊 rawdata :
             ⟨f,s⟩ ← ⟨flow+(limit-t)×1⊑p⊑data,1˙⌾(p⊸⊑)states⟩
             ⟨a,b⟩ ← {t<t2 ? ⟨⟨p,t⟩,⟨p2,t2⟩⟩ ; ⟨⟨p2,t2⟩,⟨p,t⟩⟩}
             length ← (¯1+limit-1⊑a)⌊≠remains ← ∨(¬¨s)/(1⊑¨data) # A* calculation
-            {best≥f++´remains(×¨○(length⊸↑))⌽↕(limit-t) ? @ ;
-              key_index ← ⊑(⊑˘checked)⊐⟨key ← ⟨s,a,b⟩⟩
-              {key_index<≠checked ?@; checked(∾⟜(∘‿2⥊⟨key,0⟩))↩}
-              {f≤⌈´(({(t≥1⊑1⊑𝕩)∧(t≥1⊑2⊑𝕩)∧(key≡○(⊑)𝕩)∧(key≡○(⊑1⊸⊑)𝕩)∧(key≡○(⊑2⊸⊑)𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘checked ? @ ;
-                togo.Push⟨s,a,b,f⟩
-                checked f˙⌾(key_index‿1⊸⊑) ↩
-              }
-            }
+            {best<f++´remains×¨○(length⊸↑)⌽↕limit-t ? f>0 checked.Get key ← s‿a‿b ? togo.Push key∾⟨f⟩ ⋄ key checked.Set f ; @}
           }
         }¨(↕≠)⊸(⋈¨) p1⊏dist
       }
       togo{𝕨 𝕊 b :
         best ← 𝕩⌈3⊑state ← 𝕨.Pop@
-        {b<best ? (term.clear∾color.green)term.Print⟨3⊑state,1⊑1⊑state⟩ ; @}
         best‿limit Expand2 state
         best
       }•_while_{¬𝕨.Empty@}0
