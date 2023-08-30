@@ -6,7 +6,7 @@ cw ← 8
 Fill ← (cw↑' ')⊸util.LeftFill
 ⟨year⟩‿targets ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
 blacklist ← ∧{
-  ⟨⟩≡targets ? 1+↕25 ;
+  ⟨⟩≡targets ? ⟨⟩ ;
   !(⌊´=⌈´)×¨targets
   (0>⊑targets)◶⟨(¬∘∊⟜targets)⊸/,-targets⟩1+↕25
 }
