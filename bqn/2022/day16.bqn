@@ -10,7 +10,7 @@ Solve ⇐ {env‿part 𝕊 rawdata :
   {
     1=part ?
       To_visit ← (>○(¯1⊸⊑))_to_heap
-      to_visit.Push<⟨(0⊸=)¨↕≠nodes,0,0,0⟩   # heap of ⟨bitmap,position,time,flow⟩
+      to_visit.Push⟨(0⊸=)¨↕≠nodes,0,0,0⟩   # heap of ⟨bitmap,position,time,flow⟩
       visited ← ∘‿2⥊⟨⟨(0⊸=)¨↕≠nodes,0,0⟩,0⟩ # map  of ⟨bitmap,position,time⟩→flow
       Expand ← { limit 𝕊 ⟨states,pos,time,flow⟩:
         {𝕊 ⟨p,cost⟩ :
@@ -20,7 +20,7 @@ Solve ⇐ {env‿part 𝕊 rawdata :
             key_index ← ⊑(⊑˘visited)⊐⟨key ← ⟨s,p,t⟩⟩
             {key_index<≠visited ? @ ; visited (∾⟜(∘‿2⥊⟨key,0⟩)) ↩} # ensure the key exists
             {f≤⌈´(({(t≥2⊑𝕩)∧(key≡○(2↑⊑)𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘visited ? @ ;
-              to_visit.Push<⟨s,p,t,f⟩
+              to_visit.Push⟨s,p,t,f⟩
               visited f˙⌾(key_index‿1⊸⊑) ↩
             }
           }
@@ -33,7 +33,7 @@ Solve ⇐ {env‿part 𝕊 rawdata :
     ;
       limit ← 26
       Togo ← (>○(¯1⊸⊑))_to_heap
-      togo.Push<⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
+      togo.Push⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩,0⟩       # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩,flow⟩
       checked ← ∘‿2⥊⟨⟨(0⊸=)¨↕≠nodes,⟨0,0⟩,⟨0,0⟩⟩,0⟩ # ⟨bitmap,⟨position1,time1⟩,⟨pisition2,time2⟩⟩→flow
       Expand2 ← { best‿limit 𝕊 ⟨states,⟨p1,t1⟩,⟨p2,t2⟩,flow⟩ :
         {𝕊 ⟨p,cost⟩ :
@@ -46,7 +46,7 @@ Solve ⇐ {env‿part 𝕊 rawdata :
               key_index ← ⊑(⊑˘checked)⊐⟨key ← ⟨s,a,b⟩⟩
               {key_index<≠checked ?@; checked(∾⟜(∘‿2⥊⟨key,0⟩))↩}
               {f≤⌈´(({(t≥1⊑1⊑𝕩)∧(t≥1⊑2⊑𝕩)∧(key≡○(⊑)𝕩)∧(key≡○(⊑1⊸⊑)𝕩)∧(key≡○(⊑2⊸⊑)𝕩)}∘⊑)¨)⊸/⟜((1⊸⊑)¨)⥊<˘checked ? @ ;
-                togo.Push<⟨s,a,b,f⟩
+                togo.Push⟨s,a,b,f⟩
                 checked f˙⌾(key_index‿1⊸⊑) ↩
               }
             }
