@@ -1,19 +1,25 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "# data" util.Debug ⍉≍data (util.ParseInts⊸{⟨⟩≡𝕨 ? 𝕩 ; ⊑𝕨}¨" "⊸util.Tokenize)¨ ↩
-  util.Debug end ← ≠data
-  {
-    1=part ?
-      {
-        pc ← ⊑𝕩
-        (pc⊑data){
-          "cpy"‿x‿y 𝕊 a‿b‿c‿d : (1+pc)‿a‿b‿c‿d ;
-          "inc"‿x 𝕊 a‿b‿c‿d : (1+pc)‿a‿b‿c‿d ;
-          "dec"‿x 𝕊 a‿b‿c‿d : (1+pc)‿a‿b‿c‿d ;
-          "jnz"‿x‿y 𝕊 a‿b‿c‿d : (1+pc)‿a‿b‿c‿d ;
-          (𝕨⋈𝕩)!0
-        }1↓𝕩
-      }•_while_(end>⊑)0‿0‿0‿0‿0 ;
-    0
-  }
+  end ← ≠data (util.ParseInts⊸{⟨⟩≡𝕨 ? ⊑𝕩 ; ⊑𝕨}¨" "⊸util.Tokenize)¨ ↩
+  1⊑{pc‿a‿b‿c‿d :
+    Val ← {
+      𝕊 'a' : a ;
+      𝕊 'b' : b ;
+      𝕊 'c' : c ;
+      𝕊 'd' : d ;
+      𝕊  n  : n
+    }
+    Set ← {
+     'a' 𝕊 𝕩 : a ↩ 𝕩 ;
+     'b' 𝕊 𝕩 : b ↩ 𝕩 ;
+     'c' 𝕊 𝕩 : c ↩ 𝕩 ;
+     'd' 𝕊 𝕩 : d ↩ 𝕩
+    }
+    {
+      'c'‿x‿y : y Set    Val x ⋄ (1+pc)‿a‿b‿c‿d ;
+      'i'‿x   : x Set 1 +Val x ⋄ (1+pc)‿a‿b‿c‿d ;
+      'd'‿x   : x Set ¯1+Val x ⋄ (1+pc)‿a‿b‿c‿d ;
+      'j'‿x‿y : pc (0≠Val x)◶⟨1⊸+,(Val y)⊸+⟩ ↩ ⋄ pc‿a‿b‿c‿d
+    }pc⊑data
+  }•_while_(end>⊑)0‿0‿0‿(2=part)‿0
 }
