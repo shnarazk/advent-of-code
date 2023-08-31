@@ -1,32 +1,35 @@
 # AoC 2016
-
-| y2016  |  part 1 |  part 2 |
-|--------|--------:|--------:|
-| day 01 |   0.001 |   0.002 |
-| day 02 |   0.002 |   0.002 |
-| day 03 |   0.003 |   0.003 |
-| day 04 |   0.004 |   0.105 |
-| day 05 | skipped | skipped |
-| day 06 |       0 |       0 |
-| day 07 |   0.061 |   0.058 |
-| day 08 |   0.007 |   0.007 |
-| day 09 |   0.001 |   0.003 |
-| day 10 |   0.058 |   0.062 |
-| day 11 | skipped | skipped |
-| day 12 | skipped | skipped |
-| day 13 | skipped | skipped |
-| day 14 | skipped | skipped |
-| day 15 | skipped | skipped |
-| day 16 | skipped | skipped |
-| day 17 | skipped | skipped |
-| day 18 | skipped | skipped |
-| day 19 | skipped | skipped |
-| day 20 | skipped | skipped |
-| day 21 | skipped | skipped |
-| day 22 | skipped | skipped |
-| day 23 | skipped | skipped |
-| day 24 | skipped | skipped |
-| day 25 | skipped | skipped |
+```
+CBQN on commit 86c570a65310fbb882f677c5123c8deeaf9fc2b1
+built with FFI, singeli native aarch64, replxx
+```
+| y2016  |      LoC | p1 (sec) | p2 (sec) |
+|--------|---------:|---------:|---------:|
+| day 01 |       15 |    0.001 |    0.001 |
+| day 02 |        7 |    0.002 |    0.002 |
+| day 03 |        4 |    0.002 |    0.003 |
+| day 04 |        9 |    0.004 |    0.103 |
+| day 05 |       23 |  290.557 |  879.267 |
+| day 06 |       26 |        0 |        0 |
+| day 07 |       33 |    0.062 |    0.058 |
+| day 08 |       22 |    0.007 |    0.007 |
+| day 09 |       47 |    0.001 |    0.003 |
+| day 10 |       57 |    0.059 |    0.064 |
+| day 11 |       37 |    0.111 |    0.855 |
+| day 12 |      N/A |      N/A |      N/A |
+| day 13 |      N/A |      N/A |      N/A |
+| day 14 |      N/A |      N/A |      N/A |
+| day 15 |      N/A |      N/A |      N/A |
+| day 16 |      N/A |      N/A |      N/A |
+| day 17 |      N/A |      N/A |      N/A |
+| day 18 |      N/A |      N/A |      N/A |
+| day 19 |      N/A |      N/A |      N/A |
+| day 20 |      N/A |      N/A |      N/A |
+| day 21 |      N/A |      N/A |      N/A |
+| day 22 |      N/A |      N/A |      N/A |
+| day 23 |      N/A |      N/A |      N/A |
+| day 24 |      N/A |      N/A |      N/A |
+| day 25 |      N/A |      N/A |      N/A |
 
 ## day 8
 
