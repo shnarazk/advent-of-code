@@ -5,6 +5,6 @@ Solve ⇐ {env‿part 𝕊 data :
   valids ← ⟨⟩⊸≢¨⊸/ids
   {
     1=part ? ((valids⊸(⊑˜)·⊑⍋)×((⊑⍋)⊸⊑))time-˜×⟜(time⊸(⌈∘÷))valids ;
-    1⊑math.Chinese´∧⥊{𝕨>𝕩 ? <⟨𝕨,𝕨-𝕩⟩ ; <⟨𝕨,𝕨|𝕩-˜𝕨×𝕩⟩}´˘⍉valids≍remains ← (⟨⟩⊸≢¨ids)/↕≠ids
+    1⊑math.CRT´∧⥊{𝕨>𝕩 ? <⟨𝕨,𝕨-𝕩⟩ ; <⟨𝕨,𝕨|𝕩-˜𝕨×𝕩⟩}´˘⍉valids≍remains ← (⟨⟩⊸≢¨ids)/↕≠ids
   }
 }
