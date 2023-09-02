@@ -8,7 +8,7 @@ built with FFI, singeli native aarch64, replxx
 | y2015  | LoC | p1 (sec) | p2 (sec) |
 |--------|----:|---------:|---------:|
 | day 01 |   3 |        0 |        0 |
-| day 02 |   - |      N/A |      N/A |
+| day 02 |   4 |    0.002 |    0.001 |
 | day 03 |   - |      N/A |      N/A |
 | day 04 |   7 |    8.359 |    35.09 |
 | day 05 |   - |      N/A |      N/A |
