@@ -9,7 +9,7 @@
       bqn-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
          name = "aoc-bqn-driver-${version}";
          pname = "aoc-bqn-driver";
-         version = "20230831-1";
+         version = "20230902-1";
          src = self;
          installPhase = ''
            mkdir -p $out/bin;
