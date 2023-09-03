@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿geo ← •Import¨"/util.bqn"‿"/geometry.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  "# data" util.Debug 54↑⍉≍data ((⟨"turn of","turn on", "toggle "⟩⊸⊐⌾<(7⊸↑))⋈util.ParseInts)¨ ↩
+  ⍉≍data ((⟨"turn of","turn on", "toggle "⟩⊸⊐⌾<(7⊸↑))⋈util.ParseInts)¨ ↩
   shape ← 1000‿1000
   {
     1=part ?
@@ -14,18 +14,14 @@ Solve ⇐ {env‿part 𝕊 data :
         2‿⟨y0,x0,y1,x1⟩ 𝕊 v :
           mask ← (-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩
           (mask ∧⟜¬ 𝕩)∨(mask¬⊸∧ 𝕩)
-      }´⌽data
-      ;
+      }´⌽data ;
     +´⥊(0¨↕shape){
       0‿⟨y0,x0,y1,x1⟩ 𝕊 v :
-        mask ← (-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩
-        0⌈mask-˜𝕩 ;
+        0⌈𝕩-(-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩ ;
       1‿⟨y0,x0,y1,x1⟩ 𝕊 v :
-        mask ← (-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩
-        mask+𝕩 ;
+        𝕩+(-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩ ;
       2‿⟨y0,x0,y1,x1⟩ 𝕊 v :
-        mask ← (-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩
-        (2×mask)+𝕩
+        𝕩+2×(-y0‿x0) geo.Rotate shape↑1¨↕⟨y1¬y0,x1¬x0⟩
     }´⌽data
   }
 }
