@@ -1,6 +1,6 @@
 #!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
-util‿loc ← •Import¨ "/util.bqn"‿"/loc.bqn"∾˜¨ "." env.Var< "BQN_LIB"
+util‿loc ← •Import¨"/util.bqn"‿"/loc.bqn"∾˜¨"." env.Var< "BQN_LIB"
 aoc ← ".." env.Var⌾⋈ "AOC_REPO_DIR"
 cw ← 8
 cwloc ← 3
@@ -27,7 +27,7 @@ result ← {𝕊 day :
     bqn ← •Import progfile
     part1 ← (env‿1⊸bqn.Solve)•_timed •FLines datafile
     part2 ← (env‿2⊸bqn.Solve)•_timed •FLines datafile
-    day∾nl∾(Fill∘•Fmt)¨(⌊0.5⊸+)⌾(1000⊸×)¨part1‿part2 ;
+    day∾nl∾Fill¨(⌊0.5⊸+)⌾(1000⊸×)¨part1‿part2 ;
     day‿nl‿"N/A"‿"N/A"
   }
 }¨1+↕25
