@@ -5,6 +5,14 @@ aoc ← ".." env.Var⌾⋈ "AOC_REPO_DIR"
 cw ← 8
 cwloc ← 3
 Fill ← {(cw↑' ')⊸LeftFill 𝕩 ; ( 𝕨↑' ')⊸LeftFill 𝕩}
+Add000 ← {
+  z ← (¯1+≠s)-(s ← •Repr(⌊0.5⊸+)⌾(1000⊸×)𝕩)⊸⊐⌾⋈'.'
+  {
+    ¯1=z ? s∾".000" ;
+    3>z ? s∾(3-z)↑"000" ;
+    s
+  }
+}
 ⟨year⟩‿targets ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
 blacklist ← ∧{
   ⟨⟩≡targets ? ⟨⟩ ;
@@ -24,7 +32,7 @@ result ← {𝕊 day :
     bqn ← •Import progfile
     part1 ← (env‿1⊸bqn.Solve)•_timed •FLines datafile
     part2 ← (env‿2⊸bqn.Solve)•_timed •FLines datafile
-    day∾nl∾Fill¨(⌊0.5⊸+)⌾(1000⊸×)¨part1‿part2 ;
+    day∾nl∾Fill∘Add000¨part1‿part2 ;
     day‿nl‿"N/A"‿"N/A"
   }
 }¨1+↕25
@@ -37,5 +45,5 @@ result ← {𝕊 day :
 •Out "| y"∾y∾"  | "∾(cwloc Fill "LoC")∾" | "∾(Fill "p1 (sec)")∾" | "∾(Fill "p2 (sec)")∾" |"
 •Out "|--------|"∾(('-'+(2+cwloc)↑0)LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)LeftFill ":")∾"|"
 {day‿lines‿part1‿part2 :
-  •Out "| day "∾(2 Fill day)∾" | "∾(cwloc Fill lines)∾" | "∾(Fill part1)∾" | "∾(Fill part2)∾" |"}¨result
+  •Out "| day "∾("00" LeftFill day)∾" | "∾(cwloc Fill lines)∾" | "∾(Fill part1)∾" | "∾(Fill part2)∾" |"}¨result
 •Out ""
