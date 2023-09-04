@@ -1,22 +1,19 @@
 #!/usr/bin/env cbqn
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
-util‿loc ← •Import¨"/util.bqn"‿"/loc.bqn"∾˜¨"." env.Var< "BQN_LIB"
+util‿loc‿⟨LeftFill⟩← •Import¨"/util.bqn"‿"/loc.bqn"‿"/string.bqn"∾˜¨"." env.Var< "BQN_LIB"
 aoc ← ".." env.Var⌾⋈ "AOC_REPO_DIR"
 cw ← 8
 cwloc ← 3
-Fill ← {
-  (cw↑' ')⊸util.LeftFill(1=•Type)◶⟨⊢,•Repr⟩𝕩 ;
-  ( 𝕨↑' ')⊸util.LeftFill(1=•Type)◶⟨⊢,•Repr⟩𝕩
-}
+Fill ← {(cw↑' ')⊸LeftFill 𝕩 ; ( 𝕨↑' ')⊸LeftFill 𝕩}
 ⟨year⟩‿targets ← util.ParseInt¨⌾(1⊸⊑)1(↑⋈↓)•args
 blacklist ← ∧{
   ⟨⟩≡targets ? ⟨⟩ ;
   !(⌊´=⌈´)×¨targets
   (0>⊑targets)◶⟨(¬∘∊⟜targets)⊸/,-targets⟩1+↕25
 }
-y ← "2020" util.LeftFill year
+y ← "2020" LeftFill year
 result ← {𝕊 day :
-  d ← "00" util.LeftFill •Fmt day
+  d ← "00" LeftFill •Fmt day
   progfile ← aoc∾"/bqn/"∾y∾"/day"∾d∾".bqn"
   nl ← •file.Exists◶⟨"-",loc.LinesOfCode⟩ progfile
   {
@@ -38,7 +35,7 @@ result ← {𝕊 day :
 •Out "```"
 •Out ""
 •Out "| y"∾y∾"  | "∾(cwloc Fill "LoC")∾" | "∾(Fill "p1 (sec)")∾" | "∾(Fill "p2 (sec)")∾" |"
-•Out "|--------|"∾(('-'+(2+cwloc)↑0)util.LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)util.LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)util.LeftFill ":")∾"|"
+•Out "|--------|"∾(('-'+(2+cwloc)↑0)LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)LeftFill ":")∾"|"∾(('-'+(2+cw)↑0)LeftFill ":")∾"|"
 {day‿lines‿part1‿part2 :
   •Out "| day "∾(2 Fill day)∾" | "∾(cwloc Fill lines)∾" | "∾(Fill part1)∾" | "∾(Fill part2)∾" |"}¨result
 •Out ""
