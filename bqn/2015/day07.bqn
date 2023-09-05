@@ -13,22 +13,23 @@ Solve ⇐ {env‿part 𝕊 data :
     o1‿"RSHIFT"‿o2‿arr‿d : d h.Set rsf‿o1‿o2 ;
     𝕩 ! 0
   }
-  ToBits ← {𝕊 x : 32‿1•bit._cast⋈𝕩 ; 𝕊⁼ x : (2⋆16)|(2⋆16)+⊑⟨1,16⟩•bit._cast 32↑16↑𝕩}
+  ToBits ← {𝕊 x : 32‿1•bit._cast⋈𝕩 ; 𝕊⁼ x : ⊑⟨1,32⟩•bit._cast 32↑16↑𝕩}
+  # ToBits ← {𝕊 x : 32‿1•bit._cast⋈𝕩 ; 𝕊⁼ x : (2⋆16)|(2⋆16)+⊑⟨1,32⟩•bit._cast 32↑16↑𝕩}
   Eval ← {
-    0‿a   : "not" util.Debug 1↓𝕩 ⋄ 1‿1•bit._not⌾ToBits 𝕊 a ;
-    1‿a‿b : "and" util.Debug 1↓𝕩 ⋄ ToBits⁼a(1‿1•bit._and○(ToBits∘𝕊))b ;
-    2‿a‿b : "or " util.Debug 1↓𝕩 ⋄ ToBits⁼a(1‿1•bit._or○(ToBits∘𝕊))b ;
-    3‿a‿b : "lft" util.Debug 1↓𝕩 ⋄ »⍟2⌾ToBits 𝕊 a ;
-    4‿a‿b : "rft" util.Debug 1↓𝕩 ⋄ «⍟2⌾ToBits 𝕊 a ;
+    0‿a   : "not" util.Debug 𝕩 ⋄ 1‿1•bit._not⌾ToBits 𝕊 a ;
+    1‿a‿b : "and" util.Debug 𝕩 ⋄ ToBits⁼a(1‿1•bit._and○(ToBits∘𝕊))b ;
+    2‿a‿b : "or " util.Debug 𝕩 ⋄ ToBits⁼a(1‿1•bit._or○(ToBits∘𝕊))b ;
+    3‿a‿b : "lft" util.Debug 𝕩 ⋄ »⍟b⌾ToBits 𝕊 a ;
+    4‿a‿b : "rft" util.Debug 𝕩 ⋄ «⍟b⌾ToBits 𝕊 a ;
       𝕊 a : cached.Has a ? cached.Get a ;
-      𝕊 a : 1=•Type a ? a cached.Set "int" util.Debug a ⋄ "int" util.Debug a ;
-      𝕊 a : a cached.Set x ← 𝕊 h.Get "ref" util.Debug a ⋄ ("ref "∾a) util.Debug x
+      𝕊 a : 1=•Type a ? a ;
+      𝕊 a : a cached.Set x ← 𝕊 h.Get a ⋄ ("ref "∾a) util.Debug x
   }
   {
     1=part ?
-       Inject¨data
-       {h.Has 𝕩 ? Eval 𝕩 ; @}¨"a"‿"f"‿"g"‿"h"‿"i"‿"d"‿"e"
-       cached.Values⁼˜@
+      Inject¨data
+      {h.Has 𝕩 ? Eval 𝕩 ; @}¨"a"‿"f"‿"g"‿"h"‿"i"‿"d"‿"e"
+      cached.Get "a"
       ;
     0
   }
