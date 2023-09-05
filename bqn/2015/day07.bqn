@@ -14,7 +14,6 @@ Solve ⇐ {env‿part 𝕊 data :
     𝕩 ! 0
   }
   ToBits ← {𝕊 x : 32‿1•bit._cast⋈𝕩 ; 𝕊⁼ x : ⊑⟨1,32⟩•bit._cast 32↑16↑𝕩}
-  # ToBits ← {𝕊 x : 32‿1•bit._cast⋈𝕩 ; 𝕊⁼ x : (2⋆16)|(2⋆16)+⊑⟨1,32⟩•bit._cast 32↑16↑𝕩}
   Eval ← {
     0‿a   : "not" util.Debug 𝕩 ⋄ 1‿1•bit._not⌾ToBits 𝕊 a ;
     1‿a‿b : "and" util.Debug 𝕩 ⋄ ToBits⁼a(1‿1•bit._and○(ToBits∘𝕊))b ;
@@ -31,6 +30,12 @@ Solve ⇐ {env‿part 𝕊 data :
       {h.Has 𝕩 ? Eval 𝕩 ; @}¨"a"‿"f"‿"g"‿"h"‿"i"‿"d"‿"e"
       cached.Get "a"
       ;
-    0
+    Inject¨data
+    b ← Eval "a"
+    h ↩ Hashmap˜⟨⟩
+    Inject¨data
+    "b" h.Set b
+    cached ↩ Hashmap˜⟨⟩
+    Eval "a"
   }
 }
