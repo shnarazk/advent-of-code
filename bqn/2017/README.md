@@ -8,7 +8,7 @@ built with FFI, singeli native x86-64 avx2 bmi2, replxx
 | y2017  | LoC | p1 (sec) | p2 (sec) |
 |--------|----:|---------:|---------:|
 | day 01 |   4 |    0.001 |    0.001 |
-| day 02 |   - |      N/A |      N/A |
+| day 02 |   4 |    0.000 |    0.000 |
 | day 03 |   - |      N/A |      N/A |
 | day 04 |   - |      N/A |      N/A |
 | day 05 |   - |      N/A |      N/A |
