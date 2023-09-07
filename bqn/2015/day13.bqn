@@ -7,10 +7,9 @@ Solve ⇐ {env‿part 𝕊 data :
   data Parser¨ ↩
   names ← ∧⍷∾⊑¨data
   data {p‿c : ⟨names⊐p,c⟩}¨ ↩
-  h ← Hashmap´util.Debug<˘⍉>data
-  "contents" util.Debug ∧h.Values⁼˜@
+  h ← Hashmap´<˘⍉>data
   {
     1=part ? ⌈´{+´(h.Get+h.Get∘⌽)˘2↕𝕩∾⟨⊑𝕩⟩}¨math.Permutations≠names ;
-    0
+    ⌈´{+´(0⊸h.Get+0⊸h.Get∘⌽)˘2↕𝕩∾⟨⊑𝕩⟩}¨math.Permutations 1+≠names
   }
 }
