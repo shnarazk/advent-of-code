@@ -3,7 +3,7 @@ Solve ⇐ {env‿part 𝕊 data :
   data util.ParseInts∘⊑ ↩
   h ← Hashmap˜⟨⟩
   Distribute ← {𝕊 state :
-    state h.Set 1+h.Count@
+    state h.Set h.Count@
     t ← (target ← ⊑⍒state)⊑state
     state 0⌾(target⊸⊑) ↩
     state (d ← t⌊∘÷16)⊸+ ↩
@@ -11,5 +11,5 @@ Solve ⇐ {env‿part 𝕊 data :
     state
   }
   loop ← Distribute•_while_(¬h.Has)data
-  {1=part ? h.Count@ ; (h.Count@)¬h.Get loop}
+  {1=part ? h.Count@ ; (h.Count@)-h.Get loop}
 }
