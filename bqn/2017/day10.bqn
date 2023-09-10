@@ -1,5 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  ⟨knothash⟩← •Import "/2017/knot-hash.bqn"∾˜"." env.Var⌾⋈ "AOC_BQN_DIR"
   Trans ← {𝕨 𝕊 𝕩 :
     𝕩{r 𝕊 pos‿skip‿ring :
       ring (⌽⌾(r⊸↑))⌾((pos)⊸⌽) ↩
@@ -8,9 +9,6 @@ Solve ⇐ {env‿part 𝕊 data :
   }
   {
     1=part ? data util.ParseInts∘⊑ ↩ ⋄ ×´2↑2⊑data Trans⟨0,0,↕256⟩ ;
-    data ∾⟜17‿31‿73‿47‿23∘-⟜@∘⊑ ↩
-    As16 ← {⊑⟜"0123456789abcdef"¨(⌽2↑⟨⟩{l 𝕊 0 : l ; (𝕨∾16|𝕩) 𝕊 𝕩⌊∘÷16}𝕩)}
-    Xor ← {1‿16•bit._cast 1‿1•bit._xor´ ⟨16‿'u',1⟩•bit._cast∘⋈¨𝕩}
-    ∾⥊As16¨Xor˘16‿16⥊2⊑data Trans⍟64⟨0,0,↕256⟩
+    KnotHash data
   }
 }
