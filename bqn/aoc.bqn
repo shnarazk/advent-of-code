@@ -14,7 +14,11 @@ year‿day‿part‿prog‿datafile ← {
   util.color.red util.term.Outln "AoC driver takes YEAR DAY PART [ALT]"
   •Exit 1
 }{util.ValidYear •name ? •name<⊸∾•args ; •args}
-•Out "Year "∾year∾" Day "∾day∾" on: "∾datafile
+{
+  common ← +´×`=´(•wdpath⌊○≠datafile)⊸↑¨•wdpath‿datafile
+  color ← util.color.RGB 100‿140‿180
+  color util.term.OutLn " ⍟ Year "∾year∾" Day "∾day∾" → "∾common↓datafile
+}
 bqn ← •Import⊑util.ExistsOrExit¨prog‿datafile
 {0=part    ? •Out "DEBUG: "∾•Fmt env‿0 bqn.Solve•FLines datafile ; @}
 {2|part    ? •Out "Part1: "∾•Fmt env‿1 bqn.Solve•FLines datafile ; @}
