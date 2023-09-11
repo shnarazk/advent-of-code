@@ -9,6 +9,6 @@ Solve ⇐ {env‿part 𝕊 data :
   }
   {
     1=part ? data util.ParseInts∘⊑ ↩ ⋄ ×´2↑2⊑data Trans⟨0,0,↕256⟩ ;
-    KnotHash data
+    2 KnotHash ⊑data
   }
 }
