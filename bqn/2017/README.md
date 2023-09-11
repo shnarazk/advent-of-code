@@ -1,8 +1,8 @@
 ## Implementation memo
 
 ```
-CBQN on commit 585b1aab333914757a7c8756c99f5892c5cbc3ed
-built with FFI, singeli native x86-64 avx2 bmi2, replxx
+CBQN on commit 86c570a65310fbb882f677c5123c8deeaf9fc2b1
+built with FFI, singeli native aarch64, replxx
 ```
 
 | y2017  | LoC | p1 (sec) | p2 (sec) |
@@ -21,7 +21,7 @@ built with FFI, singeli native x86-64 avx2 bmi2, replxx
 | day 12 |  19 |    0.430 |    2.770 |
 | day 13 |   8 |    0.000 |   13.683 |
 | day 14 |  17 |    0.034 |   10.793 |
-| day 15 |   - |      N/A |      N/A |
+| day 15 |  12 |    9.403 |   11.509 |
 | day 16 |   - |      N/A |      N/A |
 | day 17 |   - |      N/A |      N/A |
 | day 18 |   - |      N/A |      N/A |
