@@ -11,7 +11,7 @@ built with FFI, singeli native x86-64 avx2 bmi2, replxx
 | day 02 |   8 |    0.000 |    0.010 |
 | day 03 |  11 |    1.239 |    2.339 |
 | day 04 |  14 |    0.007 |    0.006 |
-| day 05 |   - |      N/A |      N/A |
+| day 05 |   8 |    0.090 |    1.968 |
 | day 06 |   - |      N/A |      N/A |
 | day 07 |   - |      N/A |      N/A |
 | day 08 |   - |      N/A |      N/A |
