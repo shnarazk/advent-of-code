@@ -8,7 +8,7 @@ built with FFI, singeli native aarch64, replxx
 | y2019  | LoC | p1 (sec) | p2 (sec) |
 |--------|----:|---------:|---------:|
 | day 01 |   4 |    0.000 |    0.000 |
-| day 02 |   - |      N/A |      N/A |
+| day 02 |  25 |    0.001 |    1.408 |
 | day 03 |   - |      N/A |      N/A |
 | day 04 |   - |      N/A |      N/A |
 | day 05 |   - |      N/A |      N/A |
