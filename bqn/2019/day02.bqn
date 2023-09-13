@@ -1,24 +1,10 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
+  intcode ← •Import "/2019/intcode.bqn"∾˜"." env.Var⌾⋈ "AOC_BQN_DIR"
+
   data util.ParseInts∘⊑ ↩
-  Run ← {𝕊 m :
-    {𝕊 ip :
-      {
-        1=𝕩 ? ops ← m.Get¨m.Get¨ip+1‿2 ⋄ (m.Get 3+ip)m.Set +´ops ⋄ ip 4⊸+ ↩ ;
-        2=𝕩 ? ops ← m.Get¨m.Get¨ip+1‿2 ⋄ (m.Get 3+ip)m.Set ×´ops ⋄ ip 4⊸+ ↩ ;
-        (ip⋈𝕩)!0
-      }m.Get ip
-      ip
-    }•_while_(99≠m.Get)0
-    m
-  }
-  Machine ← { noun‿verb :
-    h ← (↕≠)⊸Hashmap data
-    1‿2 h.Set¨ 𝕩
-    h
-  }
   {
-    1=part ? (Run Machine 12‿2).Get 0 ;
-    ⊑⊑{19690720=((1⊑𝕩).Get 0)}¨⊸/⋈⟜Run´¨{(𝕩+100×𝕨)⋈Machine 𝕨‿𝕩}´¨⥊↕100‿100
+    1=part ? (intcode.Run 12‿2 intcode.Configure data).Get 0 ;
+    ⊑⊑{19690720=((1⊑𝕩).Get 0)}¨⊸/⋈⟜intcode.Run´¨{(𝕩+100×𝕨)⋈𝕨‿𝕩 intcode.Config data}´¨⥊↕100‿100
   }
 }
