@@ -1,6 +1,4 @@
-# corresponds to day02
-# ⟨config,run⟩ ⇐
-
+# corresponds to day02, 05
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 ⟨hashmap⟩ ← •Import "/hashmap.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
 
@@ -42,6 +40,16 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
         4=op ?
           outputs ∾⟜(self.GetParam 1) ↩
           ip 2⊸+ ↩ ;
+        5=op ?
+          ip (0≠self.GetParam 1)◶⟨3⊸+,self.GetParam 2⟩ ↩ ;
+        6=op ?
+          ip (0=self.GetParam 1)◶⟨3⊸+,self.GetParam 2⟩ ↩ ;
+        7=op ?
+          3 self.SetParam <´self.GetParam¨1‿2
+          ip 4⊸+ ↩ ;
+        8=op ?
+          3 self.SetParam =´self.GetParam¨1‿2
+          ip 4⊸+ ↩ ;
         ⟨ip,op⟩!0
       }
       @
