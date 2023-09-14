@@ -1,5 +1,7 @@
 ## Solve'em in [BQN](https://github.com/mlochbaum/BQN)!
 
+- https://github.com/shnarazk/Bup
+- https://github.com/shnarazk/bqn-libs/tree/add-keys-and-values-to-hashmap (hashmap.bqn has been extended)
 - https://bqnpad.mechanize.systems/
 - https://github.com/shnarazk/learn-bqn
 
