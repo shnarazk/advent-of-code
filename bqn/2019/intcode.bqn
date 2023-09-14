@@ -11,28 +11,38 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
   outputs ⇐ ⟨⟩
   memory ⇐ (↕≠)⊸Hashmap 𝕩
   Config ⇐ {noun‿verb : 1‿2 memory.Set¨ noun‿verb ⋄ self}
-  Get ⇐ memory.Get
+  Get ⇐ {S 𝕩 : 1 𝕊 𝕩 ; 0 𝕊 𝕩 : memory.Get memory.Get 𝕩 ; 1 𝕊 𝕩 : memory.Get 𝕩}
   Set ⇐ memory.Set
+  GetParam ⇐ {𝕊 n : 
+    mode ← 10|(10⋆2+n)⌊∘(÷˜)memory.Get ip
+    mode self.Get n+ip
+  }
+  SetParam ⇐ {n 𝕊 𝕩 : 
+    (self.Get n+ip)self.Set 𝕩
+  }
   Input ⇐ {𝕊 𝕩 : inputs ; 𝕊⁼ 𝕩 : inputs ↩ 𝕩}
   Output ⇐ {𝕊 𝕩 : outputs ; 𝕊⁼ 𝕩 : outputs ↩ 𝕩}
   Run ⇐ {𝕊:
     {𝕊 𝕩 :
+      op ← 100|memory.Get ip 
       {
-        1=𝕩 ?
-          ops ← memory.Get¨memory.Get¨ip+1‿2
-          (memory.Get 3+ip)memory.Set +´ops
+        1=op ? 
+          3 self.SetParam+´self.GetParam¨1‿2
           ip 4⊸+ ↩ ;
-        2=𝕩 ?
-          ops ← memory.Get¨memory.Get¨ip+1‿2
-          (memory.Get 3+ip)memory.Set ×´ops
+        2=op ? 
+          3 self.SetParam×´self.GetParam¨1‿2
           ip 4⊸+ ↩ ;
-        3=𝕩 ?
-          ops ← memory.Get¨memory.Get¨ip+1‿2
-          (memory.Get 3+ip)memory.Set ×´ops
-          ip 4⊸+ ↩
+        3=op ?
+          !⟨⟩≢inputs
+          1 self.SetParam⊑inputs
+          inputs 1⊸↓ ↩
+          ip 2⊸+ ↩
+        4=op ?
+          outputs ∾⟜(self.GetParam 1) ↩
+          ip 1⊸+ ↩
         ;
-        (ip⋈𝕩)!0
-      }memory.Get ip
+        ⟨ip,op⟩!0
+      }
       @
     }•_while_{𝕤 ⋄ 99≠memory.Get ip}@
     self
