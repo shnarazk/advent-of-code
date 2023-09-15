@@ -1,13 +1,13 @@
-# corresponds to day02, 05
+# corresponds to day02, 05, 07
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 ⟨hashmap⟩ ← •Import "/hashmap.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
 util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-
+⟨running‿halt‿stop_by_input‿stop_by_output⟩ ⇐
 # bit vector operations
 statebits ← 8
 TurnOn ← {𝕨 1‿1•bit._or 𝕩⌽statebits↑1}
 TurnOff ← {𝕨 1‿1•bit._and 1‿1•bit._not 𝕩⌽statebits↑1}
-Is ← (⊑˜)⟜(7⊸-)
+Is ← (⊑˜)⟜(-¬)
 running‿halt‿stop_by_input‿stop_by_output ⇐ ↕4
 
 Intcode ⇐ {𝕩.Self𝕩}∘{
@@ -24,10 +24,10 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
     0 𝕊 𝕩 : memory.Get memory.Get 𝕩 ;
     1 𝕊 𝕩 : memory.Get 𝕩}
   Set ⇐ memory.Set
-  Mode ⇐ {𝕊 𝕩 : run_mode ↩ 1‿8•bit._cast 𝕩 ; 𝕊⁼ 𝕩 : run_mode}
+  Mode ⇐ {𝕊 𝕩 : run_mode ↩ 8‿1•bit._cast⋈𝕩 ; 𝕊⁼ 𝕩 : run_mode}
   GetParam ← {𝕊 n :
-    mode ← 10|(10⋆1+n)⌊∘(÷˜)memory.Get ip
-    mode self.Get n+ip
+    addrmode ← 10|(10⋆1+n)⌊∘(÷˜)memory.Get ip
+    addrmode self.Get n+ip
   }
   SetParam ← {n 𝕊 𝕩 :
     (self.Get n+ip)self.Set 𝕩
@@ -43,7 +43,7 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
       running=status ? @ ;
       (⟨⟩≢inputs)∧(run_mode Is stop_by_input) ?
         status ↩ running
-        1 self.SetParam⊑inputs
+        1 SetParam⊑inputs
         inputs 1⊸↓ ↩
         ip 2⊸+ ↩ ;
       (⟨⟩≡outputs)∧(run_mode Is stop_by_output) ?
