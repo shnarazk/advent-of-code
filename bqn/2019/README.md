@@ -1,6 +1,4 @@
-# 2019
-
-The year of **Intcode**
+# 2019, the year of **Intcode**
 
 ## Implementation memo
 
