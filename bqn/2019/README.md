@@ -18,7 +18,7 @@ built with FFI, singeli native aarch64, replxx
 | day 05 |   6 |    0.001 |    0.001 |
 | day 06 |  15 |    0.213 |    0.216 |
 | day 07 |  21 |    0.144 |    0.199 |
-| day 08 |   - |      N/A |      N/A |
+| day 08 |   4 |    0.000 |    0.001 |
 | day 09 |   - |      N/A |      N/A |
 | day 10 |   - |      N/A |      N/A |
 | day 11 |   - |      N/A |      N/A |
