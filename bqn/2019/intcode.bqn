@@ -1,4 +1,4 @@
-# corresponds to day02, 05, 07
+# corresponds to day02, 05, 07, 09
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 ⟨hashmap⟩ ← •Import "/hashmap.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
 util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
@@ -13,6 +13,7 @@ running‿halt‿stop_by_input‿stop_by_output ⇐ ↕4
 Intcode ⇐ {𝕩.Self𝕩}∘{
   Self⇐{self↩𝕩}
   ip ⇐ 0
+  relative_base ← 0
   inputs ⇐ ⟨⟩
   outputs ⇐ ⟨⟩
   memory ⇐ (↕≠)⊸Hashmap 𝕩
@@ -21,16 +22,22 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
   Config ⇐ {noun‿verb : 1‿2 memory.Set¨ noun‿verb ⋄ self}
   Get ⇐ {
     S 𝕩 : 1 𝕊 𝕩 ;
-    0 𝕊 𝕩 : memory.Get memory.Get 𝕩 ;
-    1 𝕊 𝕩 : memory.Get 𝕩}
-  Set ⇐ memory.Set
+    0 𝕊 𝕩 : 0 memory.Get memory.Get 𝕩 ;
+    1 𝕊 𝕩 : 0 memory.Get 𝕩 ;
+    2 𝕊 𝕩 : !0≤a ← relative_base+memory.Get 𝕩 ⋄ 0 memory.Get a
+  }
+  Set ⇐ {
+    0 𝕊 a‿x : a memory.Set x ;
+    2 𝕊 a‿x : (relative_base+a) memory.Set x
+  }
   Mode ⇐ {𝕊 𝕩 : run_mode ↩ 8‿1•bit._cast⋈𝕩 ; 𝕊⁼ 𝕩 : run_mode}
   GetParam ← {𝕊 n :
     addrmode ← 10|(10⋆1+n)⌊∘(÷˜)memory.Get ip
     addrmode self.Get n+ip
   }
   SetParam ← {n 𝕊 𝕩 :
-    (self.Get n+ip)self.Set 𝕩
+    addrmode ← 10|(10⋆1+n)⌊∘(÷˜)memory.Get ip
+    addrmode self.Set (self.Get n+ip)‿𝕩
   }
   Input ⇐ {𝕊⁼ 𝕩 : inputs ; 𝕊 𝕩 : inputs ↩ 𝕩 ⋄ self}
   Output ⇐ {
@@ -79,6 +86,9 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
         8=op ?
           3 SetParam =´GetParam¨1‿2
           ip 4⊸+ ↩ ;
+        9=op ?
+          relative_base +⟜(GetParam 1) ↩
+          ip 2⊸+ ↩ ;
         99=op ?
           status ↩ halt ;
         ⟨ip,op⟩!0
