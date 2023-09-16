@@ -1,4 +1,4 @@
-# corresponds to day02, 05, 07, 09
+# corresponds to day02, 05, 07, 09, 11
 env←{v⇐⍉>⊑∘⊐⟜'='⊸(↑⋈1↓↓)¨{-¬(¬×1++`)𝕩=@+10}⊸⊔1⊑•SH<"env"⋄Var⇐{⊐⟜𝕩⊸⊏⟜(∾⟜𝕨)˝v}}
 ⟨hashmap⟩ ← •Import "/hashmap.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
 util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
