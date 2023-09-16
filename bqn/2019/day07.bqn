@@ -10,7 +10,6 @@ Solve ⇐ {env‿part 𝕊 data :
       }¨math.Permutations 5 ;
     ⌈´{
       (amp ← {𝕤 ⋄ intcode.Intcode data}¨↕5){𝕨.Input 𝕩}¨𝕩
-      {𝕩.Mode intcode.stop_by_input}¨amp
       1⊑{index‿input :
         node ← index⊑amp
         ∾⟜input⌾(node.Input⁼)@
