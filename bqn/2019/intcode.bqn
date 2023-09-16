@@ -21,7 +21,8 @@ Intcode ⇐ {𝕩.Self𝕩}∘{
   }
   Set ⇐ {
     0 𝕊 a‿x : a memory.Set x ;
-    2 𝕊 a‿x : (relative_base+a) memory.Set x
+    2 𝕊 a‿x : (relative_base+a) memory.Set x ;
+    𝕨 𝕊 𝕩   : 𝕨 memory.Set 𝕩 ⋄ self
   }
   GetParam ← {𝕊 n :
     addrmode ← 10|(10⋆1+n)⌊∘(÷˜)memory.Get ip
