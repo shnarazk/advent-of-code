@@ -23,9 +23,6 @@ Solve ⇐ {env‿part 𝕊 data :
   {
     1=part ? Need 1 ;
     resource ← 1000000000000
-    ⊑{good‿bad :
-      mid ← 2⌊∘÷˜good+bad
-      (resource<Need mid)◶⟨⟨mid,bad⟩,⟨good,mid⟩⟩@
-    }•_while_(1<-˜´)0‿resource
+    ⊑{(resource<Need)◶⟨∾⟜𝕩,𝕨⊸∾⟩2⌊∘÷˜𝕨+𝕩}´•_while_(1<-˜´)0‿resource
   }
 }
