@@ -3,7 +3,7 @@
 ## Implementation memo
 
 ```
-CBQN on commit 86c570a65310fbb882f677c5123c8deeaf9fc2b1
+CBQN on commit 0869835deb1db52320293023cd4781854d8ec8b6
 built with FFI, singeli native aarch64, replxx
 ```
 
@@ -22,7 +22,7 @@ built with FFI, singeli native aarch64, replxx
 | day 11 |  22 |    0.241 |    0.023 |
 | day 12 |  25 |    0.003 |    6.348 |
 | day 13 |  24 |    0.135 |    4.463 |
-| day 14 |   - |      N/A |      N/A |
+| day 14 |  31 |    0.004 |    0.013 |
 | day 15 |   - |      N/A |      N/A |
 | day 16 |   - |      N/A |      N/A |
 | day 17 |   - |      N/A |      N/A |
