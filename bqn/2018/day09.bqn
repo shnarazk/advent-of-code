@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   players‿points ← util.ParseInts∘⊑ data
-  Trace ← {n 𝕊 v : 2⊑{c‿h‿l : ⟨c+1,h⊑v,l∾⟨h⟩⟩}•_while_(n≥⊑)0‿0‿⟨⟩}
+  # Trace ← {n 𝕊 v : 2⊑{c‿h‿l : ⟨c+1,h⊑v,l∾⟨h⟩⟩}•_while_(n≥⊑)0‿0‿⟨⟩}
   Simulate ← {players‿points :
     limit ← points(⌊∘÷×⊢)23
     ⌈´⊑{scores‿followed‿i‿current :
@@ -32,8 +32,5 @@ Solve ⇐ {env‿part 𝕊 data :
       scores‿followed‿i‿current
     }•_while_(limit>2⊸⊑)⟨players↑0,↕1+points,0,0⟩
   }
-  {
-    1=part ? Simulate players‿points ;
-    Simulate ⋈⟜(100⊸×)´players‿points
-  }
+  Simulate(2=part)◶⟨⊢,⋈⟜(100⊸×)´⟩players‿points
 }
