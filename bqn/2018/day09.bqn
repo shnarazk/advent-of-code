@@ -1,26 +1,38 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  "data" util.Debug players‿points ← util.ParseInts∘⊑ data
+  util.Debug players‿points ← util.ParseInts∘⊑ data
+  Trace ← {n 𝕊 v :
+    2⊑{c‿h‿l : ⟨c+1,h⊑v,l∾⟨h⟩⟩}•_while_(n≥⊑)0‿0‿⟨⟩
+  }
   {
     1=part ?
-      ⌈´{scores‿followed‿i‿current :
+      ⊑{scores‿followed‿i‿current :
+        v19 ← 0
+        "# score" util.Debug score ← i+23
         {𝕊 k :
+          i 1⊸+ ↩
+          n1 ← current⊑followed
+          n2 ← n1⊑followed
           {
             19 :
-              followed ∾⟜⟨i⟩ ↩
+              "# bump score" util.Debug score n1⊸+ ↩
+              "# v19" util.Debug v19 ↩ i
+              followed (i⌾(current⊸⊑)n2⌾(i⊸⊑)) ↩
+              current ↩ i
               ;
             23 :
-              @
+              current ↩ v19
               ;
             𝕩  :
-              p ← current⊑followed
-              n ← p⊑followed
-              followed i⊸↑ ↩
-              followed (i⌾(p⊸⊑)n⌾(i⊸⊑)) ↩
+              followed (i⌾(n1⊸⊑)n2⌾(i⊸⊑)) ↩
+              current ↩ i
           }i
-           i+1}•_while_(23⊸≥)1
-        𝕩
-      }•_while_(6>⌈´∘⊑)⟨players↑0,⟨0⟩,0,0⟩;
-    0
+          # i‿current util.Debug i Trace followed
+          i
+        }•_while_(23⊸≥)1
+        "# update" util.Debug scores score⊸+⌾((players|i)⊸⊑) ↩
+        scores‿followed‿i‿current
+      }•_while_((23(⊣×⌊∘(÷˜))points)>2⊸⊑)⟨players↑0,↕30+points,0,0⟩;
+   23(⊣×⌊∘(÷˜))points # "not yet"
   }
 }
