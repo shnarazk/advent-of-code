@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
-  ⟨ParseInt,Tokenize⟩ ← •Import "/util.bqn"∾˜ "," env.Var⌾⋈ "BQN_LIB"
-  seq ← ParseInt¨"," Tokenize ⊑data
-  grids ← ∘‿5‿5⥊ParseInt¨" " Tokenize ∾" "⊸∾˜¨2↓data
+  ⟨ParseInt,Split⟩ ← •Import "/util.bqn"∾˜ "," env.Var⌾⋈ "BQN_LIB"
+  seq ← ParseInt¨"," Split ⊑data
+  grids ← ∘‿5‿5⥊ParseInt¨" " Split ∾" "⊸∾˜¨2↓data
   !(⥊grids)≡○(∧⍷)seq
   !0=⌊´seq
   occurs ← ⍋seq

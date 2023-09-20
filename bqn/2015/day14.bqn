@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  data ↩ (util.ParseInt¨∘(3‿6‿13⊸⊏))¨" ,."⊸util.Tokenize¨data
+  data ↩ (util.ParseInt¨∘(3‿6‿13⊸⊏))¨" ,."⊸util.Split¨data
   Reaches ← {
     seconds 𝕊 speed‿duration‿respite :
     phases ← seconds⌊∘÷duration+respite

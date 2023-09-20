@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashset⟩ ← •Import¨ "/util.bqn"‿"/hashset.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  data ↩ ((1-2×'L'⊸=)∘⊑⋈util.ParseInt)¨ ", " util.Tokenize⊑data
+  data ↩ ((1-2×'L'⊸=)∘⊑⋈util.ParseInt)¨ ", " util.Split⊑data
   {
     1=part ? +○|´1⊑0‿⟨0,0⟩{d‿l 𝕊 dir‿pos : ⟨dir 4⊸|∘(d⊸+) ↩ ,pos+l×dir⊑⟨¯1‿0,0‿1,1‿0,0‿¯1⟩⟩}´⌽data ;
     +○|´2⊑{flag‿dir‿pos‿route‿set :

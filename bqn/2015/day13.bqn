@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩‿math ← •Import¨"/util.bqn"‿"/hashmap.bqn"‿"/math.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
   Parser ← {
-    l ← " ." util.Tokenize 𝕩
+    l ← " ." util.Split 𝕩
     ⟨⟨⊑l,10⊑l⟩,("gain"≡2⊑l)◶⟨-,⊢⟩util.ParseInt 3⊑l⟩
   }
   names ← ∧⍷∾⊑¨data Parser¨ ↩

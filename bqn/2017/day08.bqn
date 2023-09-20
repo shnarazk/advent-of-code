@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   Parse ← {s‿o‿x‿if‿t‿c‿y : ⟨s,"inc"≡o,util.ParseInt x,t,c,util.ParseInt y⟩}
-  data (Parse" "⊸util.Tokenize)¨ ↩
+  data (Parse" "⊸util.Split)¨ ↩
   vars ← ∧⍷⥊0‿3⊏⍉>data
   ops ← ∧⍷4⊸⊑¨data
   l ← ≠ data {ops⊸⊐⌾(4⊸⊏) 𝕩}∘{vars⊸⊐⌾(0‿3⊸⊏) 𝕩}¨ ↩

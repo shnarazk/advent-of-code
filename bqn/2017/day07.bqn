@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  data (" ->,"⊸util.Tokenize)¨ ↩
+  data (" ->,"⊸util.Split)¨ ↩
   parent ← Hashmap˜⟨⟩
   {⟨node,weight⟩‿nodes ← 2(↑⋈↓)𝕩 ⋄ parent.Set⟜node¨nodes}¨data
   root ← parent.Get•_while_(parent.Has)¯1⊑parent.Values⁼@

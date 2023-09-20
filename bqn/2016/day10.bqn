@@ -17,8 +17,8 @@ Unpropagated ← (1=⊑)⊑˜ # ∧ (1⊑record ≠ ¯∞) ∧ (2⊑record ≠ �
 # •Show ≍⟜(Decode¨) example
 
 Solve ⇐ {env‿part S data :
-  ⟨StartsWith,Tokenize⟩ ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  Decode ← {"value"≡⊑𝕩 ? 'v'⋈1↓𝕩 ; "bot"≡⊑𝕩 ? 'b'⋈1↓𝕩 ; !0}Tokenize
+  ⟨StartsWith,Split⟩ ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  Decode ← {"value"≡⊑𝕩 ? 'v'⋈1↓𝕩 ; "bot"≡⊑𝕩 ? 'b'⋈1↓𝕩 ; !0}Split
   Link ← {
     ⟨'b',l⟩ F n :
       min‿max ← ⟨•BQN 5⊑l,•BQN 10⊑l⟩

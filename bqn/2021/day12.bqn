@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  nodes ← ∧⍷∾⥊ adj ← ⍉≍⌽¨⊸∾"-"⊸util.Tokenize¨data
+  nodes ← ∧⍷∾⥊ adj ← ⍉≍⌽¨⊸∾"-"⊸util.Split¨data
   ends ← s‿e ← -nodes⊐"start"‿"end"
   map ← (+´'Z'⊸≥∘⊑¨nodes)⊸≤◶⟨⊢,-⟩¨∘∧¨1⊸⊑¨¨⊑¨⊸⊔nodes⊸⊐¨adj
   check ← {1=part ? {¬∘⊑𝕩∊𝕨} ; {((1≥(+´1⊸=))∧(∧´1⊸≥))∘⊒·0⊸>⊸/𝕩∾𝕨}}

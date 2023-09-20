@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  data ((∧´∊⟜"0123456789")◶⟨⊢,util.ParseInt⟩¨ " "⊸util.Tokenize)¨ ↩
+  data ((∧´∊⟜"0123456789")◶⟨⊢,util.ParseInt⟩¨ " "⊸util.Split)¨ ↩
   h ← Hashmap˜⟨⟩
   cached ← Hashmap˜⟨⟩
   not‿and‿or‿lsf‿rsf ← ↕5

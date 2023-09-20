@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  data (¯2⊸((↓⋈↑))·(util.ParseInts⊸{⟨⟩≡𝕨 ? 𝕩 ; ⊑𝕨}¨)(" ,=>"⊸util.Tokenize))¨ ↩
+  data (¯2⊸((↓⋈↑))·(util.ParseInts⊸{⟨⟩≡𝕨 ? 𝕩 ; ⊑𝕨}¨)(" ,=>"⊸util.Split))¨ ↩
   h ← Hashmap˜⟨⟩
   3↑{list 𝕊 amount‿target : target h.Set amount⋈list}´¨data
   ht ← Hashmap˜⟨⟩

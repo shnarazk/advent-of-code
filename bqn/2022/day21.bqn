@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   lib ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   dict ← {
-    table ⇐ ⍉>{2=≠𝕩 ? ⟨⊑𝕩,•BQN 1⊑𝕩⟩ ; ⟨⊑𝕩,1↓𝕩⟩}¨" :"⊸lib.Tokenize¨data
+    table ⇐ ⍉>{2=≠𝕩 ? ⟨⊑𝕩,•BQN 1⊑𝕩⟩ ; ⟨⊑𝕩,1↓𝕩⟩}¨" :"⊸lib.Split¨data
     Search ⇐ {((⊏table)⊐⋈𝕩)⊑1⊏table}
     Set ⇐ {table ↩ 𝕩⌾(((⊏table)⊐⋈𝕨)⊸⊑1⊸⊏)table}
   }

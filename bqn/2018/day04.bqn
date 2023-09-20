@@ -1,7 +1,7 @@
 Solve ⇐ {env‿part 𝕊 data :
   util‿⟨hashmap⟩ ← •Import¨"/util.bqn"‿"/hashmap.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
   h ← Hashmap˜⟨⟩
-  data (∧(⋈⟜(2⊸↑util.Tokenize)´·"[]"⊸util.Tokenize '-'⊸=◶⟨⊢,' '⟩¨)¨) ↩
+  data (∧(⋈⟜(2⊸↑util.Split)´·"[]"⊸util.Split '-'⊸=◶⟨⊢,' '⟩¨)¨) ↩
   record ← 1↓(+`("Guard"≡(⊑1⊸⊑))¨)⊸⊔ data
   r ← {⟨{(0=𝕨)◶⟨⊢,60⊸+⟩𝕩}´3↓util.ParseInts 𝕨,⟨⊑𝕩⟩∾util.ParseInts 1⊑𝕩⟩}´¨¨record
   {

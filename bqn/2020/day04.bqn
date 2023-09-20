@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  data ↩ ⍉≍⥊∘(":"⊸util.Tokenize)¨∘(" "⊸util.Tokenize)∘(∾´)∘(∾⟜' '¨)¨(+`⟨⟩⊸≡¨)⊸⊔ data
+  data ↩ ⍉≍⥊∘(":"⊸util.Split)¨∘(" "⊸util.Split)∘(∾´)∘(∾⟜' '¨)¨(+`⟨⟩⊸≡¨)⊸⊔ data
   {
     1=part ? ≠(7=≠)¨⊸/("cid"≢⊑)¨⊸/¨⥊data ;
     Satisfy ← {

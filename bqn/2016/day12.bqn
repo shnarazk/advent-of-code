@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  end ← ≠data (util.ParseInts⊸{⟨⟩≡𝕨 ? ⊑𝕩 ; ⊑𝕨}¨" "⊸util.Tokenize)¨ ↩
+  end ← ≠data (util.ParseInts⊸{⟨⟩≡𝕨 ? ⊑𝕩 ; ⊑𝕨}¨" "⊸util.Split)¨ ↩
   1⊑{pc‿a‿b‿c‿d :
     Val ← {
       𝕊 'a' : a ;

@@ -1,6 +1,6 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜ "," env.Var⌾⋈ "BQN_LIB"
-  lines ← >(¯5⊸↓⋈¯4⊸↑)¨(" "⊸util.Tokenize)¨data
+  lines ← >(¯5⊸↓⋈¯4⊸↑)¨(" "⊸util.Split)¨data
   Common ← {((¯1+≠𝕩)=⊒)⊸/∾𝕩}
   "Common abe‿ace‿bce"!'e'≡⊑Common "abe"‿"ace"‿"bce"
   Diff ← {common ← Common 𝕩 ⋄ (¬∘⊑∊⟜common˜)¨⊸/⍷∾𝕩}
