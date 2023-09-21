@@ -22,7 +22,7 @@ Note: some were run on x86_64 four year old model.
 | day 10 |  12 |    0.310 |    0.316 |
 | day 11 |  20 |   10.749 |  243.925 |
 | day 12 |  18 |    0.000 |    0.001 |
-| day 13 |   - |      N/A |      N/A |
+| day 13 |  56 |    0.069 |    3.160 |
 | day 14 |   - |      N/A |      N/A |
 | day 15 |   - |      N/A |      N/A |
 | day 16 |   - |      N/A |      N/A |
