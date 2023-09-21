@@ -5,16 +5,19 @@ Solve ⇐ {env‿part 𝕊 data :
   rules (⊑¨(⟨1⟩≡1⊸⊑)¨⊸/) ↩ # pick up only generators
   initial '#'⊸=∘(15⊸↓)∘⊑ ↩
   grow ← 4
-  Extend ← (grow↑0)⊸{𝕨∾𝕩∾𝕨}
+  Extend ← {
+    𝕊 c‿o‿v  :  ⟨c,o-4,(grow↑0){𝕨∾𝕩∾𝕨}v⟩ ;
+    𝕊⁼ c‿o‿v : span ← (+´·×`0⊸=)v ⋄ ⟨c,o+span,(-·+´·×`·0⊸=⌽)⊸↓span↓v⟩
+    }
+  # !⟜(0‿6‿⟨0,0,0,0,1,0,0,0,0,0⟩⊸≡)Extend 0‿10‿⟨1,0⟩
+  # !⟜(0‿9‿⟨1,0,0,1⟩⊸≡)Extend⁼ 0‿5‿⟨0,0,0,0,1,0,0,1,0⟩
+  # !⟜(0‿9‿⟨1,0,0,1⟩⊸≡)Extend⁼Extend 0‿9‿⟨1,0,0,1,0⟩
+  # !⟜(0‿10‿⟨1⟩⊸≡)Extend⁼Extend 0‿10‿⟨1,0⟩
+  Next ← {c‿o‿v : ⟨c+1,o+2,rules∊˜<˘5⊸↕v⟩}
   {
     1=part ?
-      generation ← 20
-      +´×⟜(-⟜(generation×grow÷2)∘↕≠)(rules∊˜(<˘5⊸↕∘Extend))⍟generation initial
+      {c‿o‿v : +´v×o+↕≠v}Next⌾Extend⍟20 ⟨0,0,initial⟩
     ;
-      # 1. encode state into offset‿bitmap
-      # 2. if the next bitmap is identical to the currest one, it changed into a glider. Stop iteration.
-      generation ← 100
-      ({•Show ⊑⟜" ⍟"˜¨(-·+´·×`·0⊸=⌽)⊸↓(+´·×`0⊸=)⊸↓𝕩 ⋄ 𝕩}rules∊˜(<˘5⊸↕∘Extend))⍟generation initial
- 0
+      {c‿o‿v : +´v×(o+50000000000-c)+↕≠v}⊑(((Next⌾Extend)⊸⋈)⊣´)•_while_(≢○(2⊸⊑)´)⟨0,0,initial⟩‿⟨0,0,⟨⟩⟩
   }
 }
