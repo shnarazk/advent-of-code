@@ -10,7 +10,11 @@ Solve ⇐ {env‿part 𝕊 data :
     1=part ?
       generation ← 20
       +´×⟜(-⟜(generation×grow÷2)∘↕≠)(rules∊˜(<˘5⊸↕∘Extend))⍟generation initial
-      ;
-    0
+    ;
+      # 1. encode state into offset‿bitmap
+      # 2. if the next bitmap is identical to the currest one, it changed into a glider. Stop iteration.
+      generation ← 100
+      ({•Show ⊑⟜" ⍟"˜¨(-·+´·×`·0⊸=⌽)⊸↓(+´·×`0⊸=)⊸↓𝕩 ⋄ 𝕩}rules∊˜(<˘5⊸↕∘Extend))⍟generation initial
+ 0
   }
 }
