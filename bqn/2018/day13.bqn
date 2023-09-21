@@ -2,22 +2,31 @@ Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   dir ← ⟨¯1‿0,0‿¯1,0‿1,1‿0⟩
   symbol ← " /-\|+^<>v"
-  data > ↩
+  # util.Debug >⟨⟩⊸≢¨⊸/data
+  data (>⟨⟩⊸≢¨⊸/) ↩
   data symbol⊸⊐⌾⋈¨ ↩
-  Clash ← ≠○≠⟜⍷1⊸⊑¨
+  Clash ← ≠○≠⟜⍷⊑¨
+  Display ← {𝕨 util.Debug ⊑⟜symbol¨data{pos‿or‿n 𝕊 map : or⌾(pos⊸⊑)map}´𝕩 ⋄ 𝕩}
   Next ← {
-    d ← ⊏⟜dir-⟜6 os ← ⊑¨𝕩
-    newpos ← d⊸+⌾(1⊸⊑¨)𝕩
-    # FIXME
-    >⍉d≍newpos
-    𝕩∾𝕩
+    x ← (0=𝕨)◶⟨⊢,∧⟩𝕩 # x ≢ pos‿orientation‿number_of_turns
+    "# 𝕨" util.Debug pos‿orientation‿turns ← 𝕨⊑x
+    "# newpos" util.Debug newpos ← pos+ d ← ⊑⟜dir os ← orientation-6
+    os ↩ {
+       0 : os ;
+       1 : "# turn"⊸util.Debug⊑⟜⟨2,3,0,1⟩os ; # / ⟨¯1‿0,0‿¯1,0‿1,1‿0⟩
+       2 : os ;
+       3 : "# turn"⊸util.Debug⊑⟜⟨1,0,3,2⟩os ; # \ ⟨¯1‿0,0‿¯1,0‿1,1‿0⟩
+       4 : os ;
+       5 : "# cross"⊸util.Debug (turns (3|1⊸+) ↩)⊸⊑⊑⟜⟨⟨2,1,0⟩,⟨0,3,1⟩,⟨3,0,2⟩,⟨1,2,3⟩⟩os ;      # up,left,right,down≍left,straight,right
+       𝕩 : os
+    }newpos⊑data
+    "# next" util.Debug ⟨newpos,6+os,turns⟩⌾(𝕨⊸⊑)x
+    # 𝕨 Display ⟨newpos,6+os,turns⟩⌾(𝕨⊸⊑)x
   }
   {
     1=part ?
-      orientation ← ⊑dir
-      locations ← ∾{𝕩⊸⋈¨(𝕩=⊑⟜data)¨⊸/⥊↕≢data}¨6+↕4
-      ∧1⊸⊑¨locations
-      3↑terminal ← Next•_while_(¬Clash)locations
+      n ← ≠ carts ← ∧∾{(⋈∾⟨𝕩,0⟩˙)¨(𝕩=⊑⟜data)¨⊸/⥊↕≢data}¨6+↕4
+      ⌽⊑⊑≡´¨⊸/<˘2↕∧⊑¨⊑{c‿i : ⟨i Next c,n|i+1⟩}•_while_(¬∘Clash ⊑)carts‿0
     ;
     0
   }
