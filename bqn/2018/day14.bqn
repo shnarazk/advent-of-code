@@ -4,23 +4,57 @@ Solve ⇐ {env‿part 𝕊 data :
   Digits ← {𝕊 𝕩 : ⟨⟩ 𝕊 𝕩 ; ⟨⟩ 𝕊 0 : ⟨0⟩ ; l 𝕊 0 : l ; (𝕨∾˜10|𝕩)𝕊 𝕩⌊∘÷10}
   !⟜(⟨0⟩⊸≡)Digits 0
   !⟜(⟨1,2,0⟩⊸≡)Digits 120
+  Process ← {indexes‿seq :
+    {0=1000|≠seq ? util.Progress ≠seq ; @}
+    seq ∾⟜(Digits+´ current ← indexes⊏seq) ↩
+    ⟨(≠seq)|indexes+1+current,seq⟩
+  }
   {
     1=part ?
-      10↑data↓2⊑{ia‿ib‿seq :
-        {0=1000|≠seq ? util.Progress (≠seq)÷10+data ; @}
-        rs ← ⟨⟩Digits+´ current ← ia‿ib⊏seq
-        seq ∾⟜rs ↩
-        ⟨(≠seq)|ia+1+⊑current,(≠seq)|ib+1+1⊑current,seq⟩
-      }•_while_((10+data)>(≠2⊸⊑))⟨0,1,3‿7⟩
+      10↑data↓1⊑Process•_while_((10+data)>(≠1⊸⊑))⟨0‿1,3‿7⟩
     ;
-      data Digits ↩
-      l ← ¯1+-≠data
-      (data≢(-≠data)⊸↑)◶⟨data⊸(-˜○≠), -¬data⊸(-˜○≠)⟩3⊑{ia‿ib‿seq :
-        {0=1000|≠seq ? util.Progress ≠seq ; @}
-        rs ← Digits+´ current ← ia‿ib⊏seq
-        seq ∾⟜rs ↩
-        ⟨(≠seq)|ia+1+⊑current,(≠seq)|ib+1+1⊑current,seq⟩
-      }•_while_{end ← l↑2⊑𝕩 ⋄ (data≢¯1↓end)∧data≢1↓end}⟨0,1,3‿7⟩
+      LongList ← {
+        # {
+          chunk ← 𝕩
+          vec ⇐ ⟨⟨⟩⟩
+          Get ⇐ {𝕊 𝕩 : c ← 𝕩⌊∘÷chunk ⋄ (chunk|𝕩)⊑c⊑vec}
+          Add ⇐ { chunk=≠¯1⊑vec ? vec ∾⟜⟨𝕩⟩ ↩ ; vec ∾⟜𝕩⌾(¯1⊸⊑) ↩ }
+          Size ⇐ {𝕤 ⋄ +´≠¨vec}
+          Tail ⇐ {
+            𝕊 n : n≤Size@ ? (-n){ (-𝕨)≤≠𝕩 ? 𝕨↑𝕩 ; 𝕨↑∾⟜𝕩 ¯2⊑vec}¯1⊑vec ;
+            𝕊 n : ∾vec
+          }
+        # }𝕩
+      }
+      storage ← LongList 100000
+      # storage.Add¨ 1‿3‿5
+      # "dump" util.Debug storage.vec
+      # "get" util.Debug storage.Get¨ 0‿2‿1
+      # "tail" util.Debug storage.Tail 2
+      # "size" util.Debug storage.Size@
+      l ← 1+ k ← ≠ data Digits ↩
+      d ← ⋈¯1⊑data
+      !(⊑d)≠¯2⊑data
+      Process ← {indexes‿storage‿to_check :
+        {0=10000|len ← storage.Size@ ? util.Progress len ; @}
+        dd ← Digits+´ current ← storage.Get¨indexes
+        storage.Add¨dd
+        ⟨(storage.Size@)|indexes+1+current,storage,dd∊d⟩
+      }
+      Shape ← {((1⊑𝕩).Size@)-((1‿0⊸≢∨1‿1⊸≢)2⊑𝕩)◶⟨⊢,1⊸+⟩k}
+      Check ← {
+        storage ← 1⊑𝕩
+        {
+         0‿0: 1;
+         0‿1: data≢storage.Tail k;
+         1‿n: data≢¯1↓storage.Tail l;
+         ⟨0⟩: 1;
+         ⟨1⟩: data≢storage.Tail k;
+          𝕩!0
+        }2⊑𝕩
+      }
+      storage.Add¨3‿7
+      Shape Process•_while_ Check ⟨0‿1,storage,⟨0⟩⟩
 
   }
 }
