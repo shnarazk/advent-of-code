@@ -1,3 +1,5 @@
+# AoC 2018, the one of hard years, or the hardest year
+
 ## Implementation memo
 
 ```
