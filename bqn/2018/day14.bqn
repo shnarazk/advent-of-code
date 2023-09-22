@@ -22,14 +22,14 @@ Solve ⇐ {env‿part 𝕊 data :
   # "size" util.Debug storage.Size@
   storage ← LongList 100000
   storage.Add¨3‿7
-  Process ← {indexes‿storage:
-    {0=1000|len ← storage.Size@ ? util.Progress len ; @}
-    dd ← Digits+´ current ← storage.Get¨indexes
-    storage.Add¨dd
-    ⟨(storage.Size@)|indexes+1+current,storage⟩
-  }
   {
     1=part ?
+      Process ← {indexes‿storage:
+        {0=1000|len ← storage.Size@ ? util.Progress len ; @}
+        dd ← Digits+´ current ← storage.Get¨indexes
+        storage.Add¨dd
+        ⟨(storage.Size@)|indexes+1+current,storage⟩
+      }
       {10↑data↓∾𝕩.vec}1⊑Process•_while_{(10+data)>(1⊑𝕩).Size@}⟨0‿1,storage⟩
     ;
       l ← 1+ k ← ≠ data Digits ↩
