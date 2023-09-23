@@ -8,7 +8,7 @@ Solve ⇐ {env‿part 𝕊 data :
     #  ⍟ Year 2018 Day 14 → data/2018/input-day14.txt
     # Part1: ⟨ 1 1 5 0 5 1 1 3 8 2 ⟩
     # 2018 14 1  198.73s user 0.28s system 99% cpu 3:19.20 total
-  # pass_as_arg ← 1
+  # pass_as_arg ← 0
     # nix$ time 2018 14 1
     #  ⍟ Year 2018 Day 14 → data/2018/input-day14.txt
     # Part1: ⟨ 1 1 5 0 5 1 1 3 8 2 ⟩
