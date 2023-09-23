@@ -1,35 +1,79 @@
 Solve ⇐ {env‿part 𝕊 data :
-  util‿⟨longlist⟩ ← •Import¨"/util.bqn"‿"/longlist.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
+  util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
   data util.ParseInt∘⊑ ↩
-  storage ← LongList 120000
-  storage.Add¨3‿7
+  record ← 3‿7
+  pass_as_arg ← 0
+  # pass_as_arg ← 1
+    # nix$ time 2018 14 1
+    #  ⍟ Year 2018 Day 14 → data/2018/input-day14.txt
+    # Part1: ⟨ 1 1 5 0 5 1 1 3 8 2 ⟩
+    # 2018 14 1  198.73s user 0.28s system 99% cpu 3:19.20 total
+  # pass_as_arg ← 0
+    # nix$ time 2018 14 1
+    #  ⍟ Year 2018 Day 14 → data/2018/input-day14.txt
+    # Part1: ⟨ 1 1 5 0 5 1 1 3 8 2 ⟩
+    # 2018 14 1  0.47s user 0.02s system 98% cpu 0.492 total
   {
-    1=part ?
-      Process ← {indexes‿storage :
-        {0=1000|len ← storage.Size@ ? util.Progress len ; @}
-        storage.Add¨util.Digits+´ current ← storage.Get¨indexes
-        ⟨(storage.Size@)|indexes+1+current,storage⟩
+    pass_as_arg∧1=part ?
+      Process ← {indexes‿record :
+        {0=1000|len ← ≠record ? util.Progress len ; @}
+        dd ← util.Digits+´ current ← indexes⊏record
+        record ∾⟜dd ↩
+        ⟨(≠record)|indexes+1+current,record⟩
       }
-      {10↑data↓∾𝕩.vec}1⊑Process•_while_{(10+data)>(1⊑𝕩).Size@}⟨0‿1,storage⟩
+      10↑data↓1⊑Process•_while_{𝕤 ⋄ (10+data)>≠1⊑𝕩}⟨0‿1,3‿7⟩
+      ;
+    pass_as_arg ?
+      l ← 1+ k ← ≠ data util.Digits ↩
+      d ← ⋈¯1⊑data
+      !(⊑d)≠¯2⊑data
+      Process ← {indexes‿to_check :
+        {0=10000|len ← ≠record ? util.Progress len ; @}
+        dd ← util.Digits+´ current ← indexes⊏record
+        record ∾⟜dd ↩
+        ⟨(≠record)|indexes+1+current,dd∊d⟩
+      }
+      Shape ← {(≠record)-((1‿0⊸≢∨1‿1⊸≢)1⊑𝕩)◶⟨⊢,1⊸+⟩k}
+      Check ← {n‿check :
+        {
+           0‿0 : 1 ;
+           0‿1 : data≢(-k)↑record ;
+           1‿x : data≢¯1↓(-l)↑record ;
+           ⟨0⟩ : 1 ;
+           ⟨1⟩ : data≢(-k)↑record
+        }check
+      }
+      Shape Process•_while_ Check ⟨0‿1,⟨0⟩⟩
+      ;
+    1=part ?
+      Process ← {𝕊 indexes :
+        {0=1000|len ← ≠record ? util.Progress len ; @}
+        dd ← util.Digits+´ current ← indexes⊏record
+        record ∾⟜dd ↩
+        (≠record)|indexes+1+current
+      }
+      Process•_while_{𝕤 ⋄ (10+data)>≠record}0‿1
+      10↑data↓record
     ;
       l ← 1+ k ← ≠ data util.Digits ↩
       d ← ⋈¯1⊑data
       !(⊑d)≠¯2⊑data
-      Process ← {indexes‿storage‿to_check :
-        {0=10000|len ← storage.Size@ ? util.Progress len ; @}
-        storage.Add¨ dd ← util.Digits+´ current ← storage.Get¨indexes
-        ⟨(storage.Size@)|indexes+1+current,storage,dd∊d⟩
+      Process ← {indexes‿to_check :
+        {0=10000|len ← ≠record ? util.Progress len ; @}
+        dd ← util.Digits+´ current ← indexes⊏record
+        record ∾⟜dd ↩
+        ⟨(≠record)|indexes+1+current,dd∊d⟩
       }
-      Shape ← {((1⊑𝕩).Size@)-((1‿0⊸≢∨1‿1⊸≢)2⊑𝕩)◶⟨⊢,1⊸+⟩k}
-      Check ← {n‿storage‿check :
+      Shape ← {(≠record)-((1‿0⊸≢∨1‿1⊸≢)1⊑𝕩)◶⟨⊢,1⊸+⟩k}
+      Check ← {n‿check :
         {
            0‿0 : 1 ;
-           0‿1 : data≢storage.Tail k ;
-           1‿x : data≢¯1↓storage.Tail l ;
+           0‿1 : data≢(-k)↑record ;
+           1‿x : data≢¯1↓(-l)↑record ;
            ⟨0⟩ : 1 ;
-           ⟨1⟩ : data≢storage.Tail k
+           ⟨1⟩ : data≢(-k)↑record
         }check
       }
-      Shape Process•_while_ Check ⟨0‿1,storage,⟨0⟩⟩
+      Shape Process•_while_ Check ⟨0‿1,⟨0⟩⟩
   }
 }
