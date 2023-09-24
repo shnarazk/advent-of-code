@@ -11,7 +11,8 @@ Solve ⇐ {env‿part 𝕊 data :
   blocks ← (1=⊑⟜data)¨↕≢data
   elf_hitpoint ← 200
   goblin_hitpoint ← 200
-  attack¯power ← 3
+  elf_attack_power ← 152
+  goblin_attack_power ← 3
   chars ← ↕∘≠⊸(⋈⊸∾¨){
     "# ≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
     "# ≠goblins" util.Debug ≠goblins ← {⟨𝕩,3,goblin_hitpoint⟩}¨(3=⊑⟜data)¨⊸/⥊↕≢data
@@ -33,18 +34,18 @@ Solve ⇐ {env‿part 𝕊 data :
   ended ← 0
   Act ← {
     i 𝕊 chars  :
-      "turn" Show id‿pos‿species‿hitpoint ← i⊑chars
+      "# turn" Show id‿pos‿species‿hitpoint ← i⊑chars
       0<hitpoint ?
-      "enemytype" Show enemytype ← ¬⌾(-⟜2)species
+      "# enemytype" Show enemytype ← ¬⌾(-⟜2)species
       livings ← (0<3⊸⊑)¨⊸/chars
       pol ← 1⊸⊑¨livings
       current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
       targets ← (enemytype=2⊸⊑)¨⊸/livings
       {⟨⟩≢targets ? ended ↩ 1 ; @}
       ⟨⟩≢targets ?
-      "targets" Show targets
+      "# targets" Show targets
       "# enemymap" Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
-      "RoT" Show rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
+      "# RoT" Show rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
       # (∨´(0=⊑⟜data)¨rangeoftargets) ?
       "# already in attack position?" Show ∊⟜rangeoftargets⌾⋈pos
       {
@@ -54,14 +55,14 @@ Solve ⇐ {env‿part 𝕊 data :
           {
             ¬∊⟜rangeoftargets⌾⋈pos ?
             d ← current_open Distance pos
-            "destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
+            "# destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
             ; @
           }
           ⟨⟩≢destination ?
           path ← current_open Distance destination
-          "check" Show pos⊑∞ geo.Neighbor4 ↕shape
-          newpos ← 1⊑⊑∧(⊑⟜path)⊸⋈¨"xx"Show(⊑⟜current_open)¨⊸/∞⊸≢¨⊸/pos⊑∞ geo.Neighbor4 ↕shape
-          "move to" Show pos ↩ newpos
+          "# check" Show pos⊑∞ geo.Neighbor4 ↕shape
+          newpos ← 1⊑⊑∧(⊑⟜path)⊸⋈¨(⊑⟜current_open)¨⊸/∞⊸≢¨⊸/pos⊑∞ geo.Neighbor4 ↕shape
+          "# move to" Show pos ↩ newpos
           chars pos⌾(1⊸⊑id⊸⊑) ↩
           ;
           @
@@ -69,8 +70,9 @@ Solve ⇐ {env‿part 𝕊 data :
       adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
       {
         ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
-        "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(3‿1⊸⊏)¨attackabletargets
-        "reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars (0⌈-⟜attack¯power)⌾(3⊸⊑(⊑target)⊸⊑) ↩
+        "# weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(3‿1⊸⊏)¨attackabletargets
+        p ← (2⊸=)◶⟨goblin_attack_power,elf_attack_power⟩species
+        "# reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars (0⌈-⟜p)⌾(3⊸⊑(⊑target)⊸⊑) ↩
         ;
         @
       }
@@ -82,13 +84,26 @@ Solve ⇐ {env‿part 𝕊 data :
     1=part ?
       (-⟜ended)⊸×⟜(⌈´)´util.Debug{𝕊 turn‿points:
         order ← ⍋(1⊸⊑)¨chars
-        order util.Debug ⍉≍chars ↩ chars Act´⌽order
-        (0.1+2×6>+´(0<3⊸⊑)¨chars) util.Progress ⊑⟜symbols¨CurrentMap chars
-        "elves points" Show ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
-        "goblin points" Show gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
-        ⟨turn+1,ep⋈gp⟩
+        "# order" util.Debug ⍉≍chars ↩ chars Act´⌽order
+        # (0.1+2×6>+´(0<3⊸⊑)¨chars) util.Progress ⊑⟜symbols¨CurrentMap chars
+        "# elves points" Show ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
+        "# goblin points" Show gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
+        ⟨turn+1,util.Progress ep⋈gp⟩
       }•_while_(0<⌊´∘(1⊸⊑))⟨0,1‿1⟩
-      ;
-    0
+    ;
+      initial_chars ← chars
+      2⊑{min‿max‿outcome :
+        util.Progress 𝕩
+        mid ← ⌊2÷˜min+max
+        chars‿elf_attack_power‿ended ↩ initial_chars‿mid‿0
+        result ← {𝕊 turn‿points :
+          order ← ⍋(1⊸⊑)¨chars
+          chars ↩ chars Act´⌽order
+          ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
+          gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
+          ⟨turn+1,(ep×∧´(0<3⊸⊑)¨(2=2⊸⊑)¨⊸/chars)⋈gp⟩
+        }•_while_(0<⌊´∘(1⊸⊑))⟨0,1‿1⟩
+        {∧´(0<3⊸⊑)¨(2=2⊸⊑)¨⊸/chars ? ⟨min,mid,(-⟜ended)⊸×⟜(⌈´)´result⟩ ; ⟨mid,max,outcome⟩}
+      }•_while_(1<(-˜´2⊸↑))4‿300‿0
   }
 }
