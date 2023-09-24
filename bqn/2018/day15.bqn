@@ -4,12 +4,13 @@ _under_ ← {
 }
 Solve ⇐ {env‿part 𝕊 data :
   util‿geo ← •Import¨"/util.bqn"‿"/geometry.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
-  Distance ← {(⊢⌊𝕨{𝕨◶⟨∞,⊢⟩𝕩}¨(1+⌊´¨∘(∞⊸geo.Neighbor4)))⍟(2×(≠𝕨))𝕩 geo.Rotate 0⌾(0‿0⊸⊑)∞¨𝕨}
+  Distance ← {(⊢⌊𝕨{𝕨◶⟨∞,⊢⟩𝕩}¨(1+⌊´¨∘(∞⊸geo.Neighbor4)))⍟(2×(≠𝕨))(-𝕩) geo.Rotate 0⌾(0‿0⊸⊑)∞¨𝕨}
   symbols ← ".#EG"
+  data (⟨⟩⊸≢¨⊸/)∘(' '⊸≠¨⊸/¨) ↩
   data symbols⊸⊐∘> ↩
   blocks ← (1=⊑⟜data)¨↕≢data
-  elf_hitpoint ← 3
-  goblin_hitpoint ← 3
+  elf_hitpoint ← 200
+  goblin_hitpoint ← 200
   attack¯power ← 3
   chars ← ↕∘≠⊸(⋈⊸∾¨){
     "≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
@@ -17,6 +18,7 @@ Solve ⇐ {env‿part 𝕊 data :
     elves∾goblins
   }
   shape ← ≢data
+  CurrentMap ← {blocks{i‿pos‿s‿hp 𝕊 𝕩: (0<hp)◶⟨⊢,s⌾(pos⊸⊑)⟩𝕩}´𝕩}
   Show ← {
     𝕊 𝕩 : 2==𝕩 ? ∧´⥊((3⊸≥)∧1=•Type)¨𝕩 ? util.Debug ⊑⟜symbols¨𝕩 ⋄ 𝕩  ;
     𝕊 𝕩 : 2==𝕩 ? •Show 𝕩 ⋄ 𝕩  ;
@@ -28,46 +30,55 @@ Solve ⇐ {env‿part 𝕊 data :
       1==𝕩 ? 8<≠𝕩 ? ∧´≡○≠´˘2↕𝕩 ? 𝕨 util.Debug ⍉≍𝕩 ⋄ 𝕩 ;
       1    ? 𝕨 util.Debug 𝕩
   }
-  Act ← {chars 𝕊 i :
-    Show i
-    id‿pos‿species‿hitpoint ← i⊑chars
-    0<hitpoint ?
-    "enemytype" Show enemytype ← ¬⌾(-⟜2)species
-    ⟨⟩≢targets ← (enemytype=2⊸⊑)¨⊸/chars ?
-    Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
-    "RoT" Show 4⊸↑ rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
-    (need_to_move ← ∨´(0=⊑⟜data)¨rangeoftargets)∨(∊⟜rangeoftargets⌾⋈pos) ?
-    destination ← pos
-    {
-      need_to_move ?
-        Show pol ← 1⊸⊑¨(0<3⊸⊑)¨⊸/chars # positions of lives
-        d ← pos Distance˜Show¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
+  Act ← {
+    i 𝕊 chars  :
+      "turn" Show id‿pos‿species‿hitpoint ← i⊑chars
+      0<hitpoint ?
+      "enemytype" Show enemytype ← ¬⌾(-⟜2)species
+      livings ← (0<3⊸⊑)¨⊸/chars
+      pol ← 1⊸⊑¨livings
+      current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
+      ⟨⟩≢targets ← (enemytype=2⊸⊑)¨⊸/livings ?
+      "targets" Show targets
+      "enemymap" Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
+      "RoT" Show rangeoftargets ← ∧⍷∾(⥊current_open)/⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
+      (∨´(0=⊑⟜data)¨rangeoftargets) ?
+      destination ← pos
+      {
+        ¬∊⟜rangeoftargets⌾⋈pos ?
+        d ← current_open Distance pos
         "destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
-      ; @
-    }
-    ⟨⟩≢destination ?
-    "move to" Show pos ↩ destination
-    adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
-    ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
-    "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(2‿0⊸⊏)¨attackabletargets
-    "reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars -⟜attack¯power⌾(3⊸⊑(⊑target)⊸⊑) ↩
-    ;
-      @
+        ; @
+      }
+      ⟨⟩≢destination ?
+      path ← current_open Distance destination
+      "check" Show pos⊑∞ geo.Neighbor4 ↕shape
+      newpos ← ⊑∧∞⊸≢¨⊸/pos⊑∞ geo.Neighbor4 ↕shape
+      "move to" Show pos ↩ newpos
+      chars pos⌾(1⊸⊑id⊸⊑) ↩
+      adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
+      {
+        ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
+        "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(2‿0⊸⊏)¨attackabletargets
+        "reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars (0⌈-⟜attack¯power)⌾(3⊸⊑(⊑target)⊸⊑) ↩
+        ;
+        @
+      }
+      chars
+      ;
+    𝕨 𝕊 𝕩 : 𝕩
   }
-  "test: Act" Show chars Act 0
   {
     1=part ?
-      {𝕊 turn:
-        order ← ⍋chars
-        {𝕊 nth :
-           {
-            ∞ : @ ;
-            𝕩 : @
-          }nth⊑chars
-        }¨order
-        0
-      }•_while_(⊢)1
-      0 ;
+      ×⟜(⌈´)´{𝕊 turn‿points:
+        order ← ⍋(1⊸⊑)¨(0<3⊸⊑)¨⊸/chars
+        "Act" Show ∧chars ↩ chars Act´⌽order
+        5 util.Progress ⊑⟜symbols¨CurrentMap chars
+        "elves points" Show ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
+        "goblin points" Show gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
+        ⟨turn+1,ep⋈gp⟩
+      }•_while_(0<⌊´∘(1⊸⊑))⟨0,1‿1⟩
+      ;
     0
   }
 }
