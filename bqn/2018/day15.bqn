@@ -10,9 +10,12 @@ Solve ⇐ {env‿part 𝕊 data :
   blocks ← (1=⊑⟜data)¨↕≢data
   elf_hitpoint ← 3
   goblin_hitpoint ← 3
-  "≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
-  "≠goblins" util.Debug ≠goblins ← {⟨𝕩,3,goblin_hitpoint⟩}¨(3=⊑⟜data)¨⊸/⥊↕≢data
-  chars ← elves∾goblins
+  attack¯power ← 3
+  chars ← ↕∘≠⊸(⋈⊸∾¨){
+    "≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
+    "≠goblins" util.Debug ≠goblins ← {⟨𝕩,3,goblin_hitpoint⟩}¨(3=⊑⟜data)¨⊸/⥊↕≢data
+    elves∾goblins
+  }
   shape ← ≢data
   Show ← {
     𝕊 𝕩 : 2==𝕩 ? ∧´⥊((3⊸≥)∧1=•Type)¨𝕩 ? util.Debug ⊑⟜symbols¨𝕩 ⋄ 𝕩  ;
@@ -25,36 +28,33 @@ Solve ⇐ {env‿part 𝕊 data :
       1==𝕩 ? 8<≠𝕩 ? ∧´≡○≠´˘2↕𝕩 ? 𝕨 util.Debug ⍉≍𝕩 ⋄ 𝕩 ;
       1    ? 𝕨 util.Debug 𝕩
   }
-  Act ← {chars 𝕊 i‿map :
-    pos‿species‿hitpoint ← i⊑chars
+  Act ← {chars 𝕊 i :
+    Show i
+    id‿pos‿species‿hitpoint ← i⊑chars
+    0<hitpoint ?
     "enemytype" Show enemytype ← ¬⌾(-⟜2)species
-    ⟨⟩≢targets ← (enemytype=1⊸⊑)¨⊸/chars ?
-    enemymap ← ∊⟜(⊑¨targets)↕shape
-    "rot" Show 4⊸↑ rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor8 ↕shape
+    ⟨⟩≢targets ← (enemytype=2⊸⊑)¨⊸/chars ?
+    Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
+    "RoT" Show 4⊸↑ rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
     (need_to_move ← ∨´(0=⊑⟜data)¨rangeoftargets)∨(∊⟜rangeoftargets⌾⋈pos) ?
     destination ← pos
     {
       need_to_move ?
-        d ← pos Distance˜0=map
+        Show pol ← 1⊸⊑¨(0<3⊸⊑)¨⊸/chars # positions of lives
+        d ← pos Distance˜Show¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
         "destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
       ; @
     }
     ⟨⟩≢destination ?
-    # attack
-      # To attack, the unit first determines all of the targets that
-      # are in range of it by being immediately adjacent to it.
-      # If there are no such targets, the unit ends its turn.
-      # Otherwise, the adjacent target with the fewest hit points is
-      # selected; in a tie, the adjacent target with the fewest hit
-      # points which is first in reading order is selected.
-    adjacent ← geo.Neighbor8 pos
-    ⟨⟩≢attackabletargets ← ∊⟜adjacent⊸/targets ?
-    order ← ⍋(2‿0‿1⊸⊏)attackabletargets
-    target ← attackabletargets⊑˜⊑order
+    "move to" Show pos ↩ destination
+    adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
+    ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
+    "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(2‿0⊸⊏)¨attackabletargets
+    "reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars -⟜attack¯power⌾(3⊸⊑(⊑target)⊸⊑) ↩
     ;
       @
   }
-  "test act" Show chars Act 0⋈data
+  "test: Act" Show chars Act 0
   {
     1=part ?
       {𝕊 turn:
