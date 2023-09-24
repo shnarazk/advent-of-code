@@ -13,8 +13,8 @@ Solve ⇐ {env‿part 𝕊 data :
   goblin_hitpoint ← 200
   attack¯power ← 3
   chars ← ↕∘≠⊸(⋈⊸∾¨){
-    "≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
-    "≠goblins" util.Debug ≠goblins ← {⟨𝕩,3,goblin_hitpoint⟩}¨(3=⊑⟜data)¨⊸/⥊↕≢data
+    "# ≠elves" util.Debug ≠elves ← {⟨𝕩,2,elf_hitpoint⟩}¨(2=⊑⟜data)¨⊸/⥊↕≢data
+    "# ≠goblins" util.Debug ≠goblins ← {⟨𝕩,3,goblin_hitpoint⟩}¨(3=⊑⟜data)¨⊸/⥊↕≢data
     elves∾goblins
   }
   shape ← ≢data
@@ -30,6 +30,7 @@ Solve ⇐ {env‿part 𝕊 data :
       1==𝕩 ? 8<≠𝕩 ? ∧´≡○≠´˘2↕𝕩 ? 𝕨 util.Debug ⍉≍𝕩 ⋄ 𝕩 ;
       1    ? 𝕨 util.Debug 𝕩
   }
+  ended ← 0
   Act ← {
     i 𝕊 chars  :
       "turn" Show id‿pos‿species‿hitpoint ← i⊑chars
@@ -37,13 +38,15 @@ Solve ⇐ {env‿part 𝕊 data :
       "enemytype" Show enemytype ← ¬⌾(-⟜2)species
       livings ← (0<3⊸⊑)¨⊸/chars
       pol ← 1⊸⊑¨livings
-      "current_open" Show current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
-      ⟨⟩≢targets ← (enemytype=2⊸⊑)¨⊸/livings ?
+      current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
+      targets ← (enemytype=2⊸⊑)¨⊸/livings
+      {⟨⟩≢targets ? ended ↩ 1 ; @}
+      ⟨⟩≢targets ?
       "targets" Show targets
-      "enemymap" Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
+      "# enemymap" Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
       "RoT" Show rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
       # (∨´(0=⊑⟜data)¨rangeoftargets) ?
-      "already in attack position?" Show ∊⟜rangeoftargets⌾⋈pos
+      "# already in attack position?" Show ∊⟜rangeoftargets⌾⋈pos
       {
         ∊⟜rangeoftargets⌾⋈pos ? @
         ;
@@ -66,7 +69,7 @@ Solve ⇐ {env‿part 𝕊 data :
       adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
       {
         ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
-        "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(2‿0⊸⊏)¨attackabletargets
+        "weakest target to attack" Show target ← attackabletargets⊑˜⊑⍋(3‿1⊸⊏)¨attackabletargets
         "reduced to" Show _under_(3⊸⊑(⊑target)⊸⊑) chars (0⌈-⟜attack¯power)⌾(3⊸⊑(⊑target)⊸⊑) ↩
         ;
         @
@@ -77,10 +80,10 @@ Solve ⇐ {env‿part 𝕊 data :
   }
   {
     1=part ?
-      ×⟜(⌈´)´{𝕊 turn‿points:
-        order ← ⍋(1⊸⊑)¨(0<3⊸⊑)¨⊸/chars
-        "Act" Show ∧chars ↩ chars Act´⌽order
-        1 util.Progress ⊑⟜symbols¨CurrentMap chars
+      (-⟜ended)⊸×⟜(⌈´)´util.Debug{𝕊 turn‿points:
+        order ← ⍋(1⊸⊑)¨chars
+        order util.Debug ⍉≍chars ↩ chars Act´⌽order
+        (0.1+2×6>+´(0<3⊸⊑)¨chars) util.Progress ⊑⟜symbols¨CurrentMap chars
         "elves points" Show ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
         "goblin points" Show gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
         ⟨turn+1,ep⋈gp⟩
