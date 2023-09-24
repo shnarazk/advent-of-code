@@ -37,25 +37,32 @@ Solve ⇐ {env‿part 𝕊 data :
       "enemytype" Show enemytype ← ¬⌾(-⟜2)species
       livings ← (0<3⊸⊑)¨⊸/chars
       pol ← 1⊸⊑¨livings
-      current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
+      "current_open" Show current_open ← 1⌾(pos⊸⊑)¬((∊⟜pol⌾⋈)∨(⊑⟜blocks))¨↕shape
       ⟨⟩≢targets ← (enemytype=2⊸⊑)¨⊸/livings ?
       "targets" Show targets
       "enemymap" Show enemymap ← ∊⟜(1⊸⊑¨targets)↕shape
-      "RoT" Show rangeoftargets ← ∧⍷∾(⥊current_open)/⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
-      (∨´(0=⊑⟜data)¨rangeoftargets) ?
-      destination ← pos
+      "RoT" Show rangeoftargets ← ∧⍷∾⥊enemymap{𝕨◶⟨⟨⟩,⊢⟩𝕩}¨∞⊸≢¨⊸/¨∞ geo.Neighbor4 ↕shape
+      # (∨´(0=⊑⟜data)¨rangeoftargets) ?
+      "already in attack position?" Show ∊⟜rangeoftargets⌾⋈pos
       {
-        ¬∊⟜rangeoftargets⌾⋈pos ?
-        d ← current_open Distance pos
-        "destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
-        ; @
+        ∊⟜rangeoftargets⌾⋈pos ? @
+        ;
+          destination ← pos
+          {
+            ¬∊⟜rangeoftargets⌾⋈pos ?
+            d ← current_open Distance pos
+            "destination" Show destination ↩ ⟨⟩⊸≢◶⟨⊢,1⊸⊑⊑⟩∧(∞≠⊑)¨⊸/{𝕩⋈˜𝕩⊑d}¨rangeoftargets
+            ; @
+          }
+          ⟨⟩≢destination ?
+          path ← current_open Distance destination
+          "check" Show pos⊑∞ geo.Neighbor4 ↕shape
+          newpos ← 1⊑⊑∧(⊑⟜path)⊸⋈¨"xx"Show(⊑⟜current_open)¨⊸/∞⊸≢¨⊸/pos⊑∞ geo.Neighbor4 ↕shape
+          "move to" Show pos ↩ newpos
+          chars pos⌾(1⊸⊑id⊸⊑) ↩
+          ;
+          @
       }
-      ⟨⟩≢destination ?
-      path ← current_open Distance destination
-      "check" Show pos⊑∞ geo.Neighbor4 ↕shape
-      newpos ← ⊑∧∞⊸≢¨⊸/pos⊑∞ geo.Neighbor4 ↕shape
-      "move to" Show pos ↩ newpos
-      chars pos⌾(1⊸⊑id⊸⊑) ↩
       adjacents ← ∞⊸≢⊸/pos ⊑∞ geo.Neighbor4 ↕shape
       {
         ⟨⟩≢attackabletargets ← ((∊⟜adjacents)⌾⋈1⊸⊑)¨⊸/targets ?
@@ -73,7 +80,7 @@ Solve ⇐ {env‿part 𝕊 data :
       ×⟜(⌈´)´{𝕊 turn‿points:
         order ← ⍋(1⊸⊑)¨(0<3⊸⊑)¨⊸/chars
         "Act" Show ∧chars ↩ chars Act´⌽order
-        5 util.Progress ⊑⟜symbols¨CurrentMap chars
+        1 util.Progress ⊑⟜symbols¨CurrentMap chars
         "elves points" Show ep ← +´(3⊸⊑)¨(2=2⊸⊑)¨⊸/chars
         "goblin points" Show gp ← +´(3⊸⊑)¨(3=2⊸⊑)¨⊸/chars
         ⟨turn+1,ep⋈gp⟩
