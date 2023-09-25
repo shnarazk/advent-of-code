@@ -1,8 +1,8 @@
 Solve ⇐ {env‿part 𝕊 data :
-  util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
+  util‿⟨ref⟩ ← •Import¨"/util.bqn"‿"/ref.bqn"∾˜¨<"." env.Var⌾⋈ "BQN_LIB"
   data util.ParseInt∘⊑ ↩
   record ← 3‿7
-  pass_as_arg ← 0
+  pass_as_arg ← 1
   # pass_as_arg ← 1
     # nix$ time 2018 14 1
     #  ⍟ Year 2018 Day 14 → data/2018/input-day14.txt
@@ -15,20 +15,35 @@ Solve ⇐ {env‿part 𝕊 data :
     # 2018 14 1  0.47s user 0.02s system 98% cpu 0.492 total
   {
     pass_as_arg∧1=part ?
+      util.Debug data
+      # record ← Ref 3‿7
+      # Process ← {𝕊 indexes :
+      #   (0=1000⊸|)◶⟨⊢,util.Progress⟩≠record.ref
+      #   ∾ record._apply util.Digits+´ current ← indexes⊏record.ref
+      #   (≠record.ref)|indexes+1+current
+      # }
+      # Process•_while_{𝕤 ⋄ (10+data)>≠record.ref}0‿1
+      # 10↑data↓record.ref
       Process ← {indexes‿record :
-        {0=1000|len ← ≠record ? util.Progress len ; @}
-        dd ← util.Digits+´ current ← indexes⊏record
-        record ∾⟜dd ↩
-        ⟨(≠record)|indexes+1+current,record⟩
+        (0=1000⊸|)◶⟨⊢,util.Progress⟩≠record.ref
+        ∾record._apply util.Digits+´ current ← indexes⊏record.ref
+        ⟨(≠record.ref)|indexes+1+current,record⟩
       }
-      10↑data↓1⊑Process•_while_{𝕤 ⋄ (10+data)>≠1⊑𝕩}⟨0‿1,3‿7⟩
+      10↑data↓{(1⊑𝕩).ref}Process•_while_{(10+data)>≠(1⊑𝕩).ref}⟨0‿1,Ref 3‿7⟩
+      # Process ← {indexes‿record :
+      #   (0=1000⊸|)◶⟨⊢,util.Progress⟩≠record
+      #   dd ← util.Digits+´ current ← indexes⊏record
+      #   record ∾⟜dd ↩
+      #   ⟨(≠record)|indexes+1+current,record⟩
+      # }
+      # 10↑data↓1⊑Process•_while_{(10+data)>≠1⊑𝕩}⟨0‿1,3‿7⟩
       ;
     pass_as_arg ?
       l ← 1+ k ← ≠ data util.Digits ↩
       d ← ⋈¯1⊑data
       !(⊑d)≠¯2⊑data
       Process ← {indexes‿to_check :
-        {0=10000|len ← ≠record ? util.Progress len ; @}
+        (0=10000⊸|)◶⟨⊢,util.Progress⟩≠record
         dd ← util.Digits+´ current ← indexes⊏record
         record ∾⟜dd ↩
         ⟨(≠record)|indexes+1+current,dd∊d⟩
@@ -47,7 +62,7 @@ Solve ⇐ {env‿part 𝕊 data :
       ;
     1=part ?
       Process ← {𝕊 indexes :
-        {0=1000|len ← ≠record ? util.Progress len ; @}
+        (0=1000⊸|)◶⟨⊢,util.Progress⟩≠record
         dd ← util.Digits+´ current ← indexes⊏record
         record ∾⟜dd ↩
         (≠record)|indexes+1+current
@@ -59,7 +74,7 @@ Solve ⇐ {env‿part 𝕊 data :
       d ← ⋈¯1⊑data
       !(⊑d)≠¯2⊑data
       Process ← {indexes‿to_check :
-        {0=10000|len ← ≠record ? util.Progress len ; @}
+        (0=10000⊸|)◶⟨⊢,util.Progress⟩≠record
         dd ← util.Digits+´ current ← indexes⊏record
         record ∾⟜dd ↩
         ⟨(≠record)|indexes+1+current,dd∊d⟩
