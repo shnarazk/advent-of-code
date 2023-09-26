@@ -17,20 +17,20 @@ Solve ⇐ {env‿part 𝕊 data :
     # | day 14 |  60 |    0.320 |   11.996 |
   {
     1=part ?
-      Process ← {indexes‿start :
-        (0=1000⊸|)◶⟨⊢,util.Progress⟩≠start.ref
-        ∾start._apply util.Digits+´ current ← indexes⊏start.ref
-        ⟨(≠start.ref)|indexes+1+current,start⟩
+      Process ← {indexes‿seq :
+        (0=1000⊸|)◶⟨⊢,util.Progress⟩≠seq.ref
+        ∾seq._modify util.Digits+´ current ← indexes⊏seq.ref
+        ⟨(≠seq.ref)|indexes+1+current,seq⟩
       }
       10↑data↓{(1⊑𝕩).ref}Process•_while_{(10+data)>≠(1⊑𝕩).ref}⟨0‿1,Ref start⟩
       ;
     2=part ?
       l ← 1+ k ← ≠ data util.Digits ↩
       !(¯2⊑data)≠⊑ d ← ⋈¯1⊑data
-      Process ← {indexes‿ref‿check :
-        (0=10000⊸|)◶⟨⊢,util.Progress⟩≠ref.ref
-        ∾ref._apply dd ← util.Digits+´ current ← indexes⊏ref.ref
-        ⟨(≠ref.ref)|indexes+1+current,ref,dd∊d⟩
+      Process ← {indexes‿seq‿check :
+        (0=10000⊸|)◶⟨⊢,util.Progress⟩≠seq.ref
+        ∾seq._modify dd ← util.Digits+´ current ← indexes⊏seq.ref
+        ⟨(≠seq.ref)|indexes+1+current,seq,dd∊d⟩
       }
       Shape ← {(≠(1⊑𝕩).ref)-((1‿0⊸≢∨1‿1⊸≢)2⊑𝕩)◶⟨⊢,1⊸+⟩k}
       Check ← {
