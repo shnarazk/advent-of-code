@@ -17,7 +17,7 @@ Solve ⇐ {env‿part 𝕊 line :
           ; @
         }¨{robots<○(𝕩⊸⊑)limits}¨⊸/↕4
         hash
-      }´∾{𝕨⊸⋈¨𝕩}´¨{prev.Values⁼˜@}
+      }´∾{𝕨⊸⋈¨𝕩}´¨prev.Values⁼˜@
     }•_while_{0<𝕩.Count@}⟨4↑1⟩Hashmap⟨⟨5↑0⟩⟩
     best
   }
