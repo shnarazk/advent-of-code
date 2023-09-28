@@ -3,7 +3,8 @@ Solve ⇐ {env‿part 𝕊 data :
   "data" util.Debug data
   {
     1=part ?
-      0 ;
-    0
+      0
+    ;
+      0
   }
 }
