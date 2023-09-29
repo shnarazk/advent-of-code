@@ -10,7 +10,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive pkgs.entr uiua.packages.${system}.default ];
+        packages = [ pkgs.bashInteractive uiua.packages.${system}.default ];
       };
     });
 }
