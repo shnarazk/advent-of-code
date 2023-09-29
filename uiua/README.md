@@ -1,5 +1,8 @@
 # Try UIUA!
 
+- https://www.uiua.org
+- https://github.com/uiua-lang/uiua
+
 ## Helix configuration
 
 Sure, I'll copy it to the wiki.
