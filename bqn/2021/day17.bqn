@@ -1,23 +1,23 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import "/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  xmin‿xmax‿ymin‿ymax ← util.ParseInts⊑data
-  Xrange ← {⟨2×𝕨,𝕩⟩}
-  Reaches ← {
-    y‿x ← ⊑{pos 𝕊 vec :
-      pos vec⊸+ ↩
-      ⟨pos, ⋈⟜(0⊸⌈)´¯1+vec⟩
-    }´•_while_(ymax≥⊑)⟨0‿0,𝕩⟩
-    {
-      (xmin≤x)∧(xmax≥x)∧ymin≤y ? 1‿1 ;
-      (xmin≤x)∧(xmax≥x) ? 1‿0 ;
-      xmin>x ? 0‿¯1 ;
-      xmax<x ? 0‿ 1
-
-     }
+  util.Debug xmin‿xmax‿ymin‿ymax ← util.ParseInts⊑data
+  Quad ← {a‿b‿c : (2×a)÷˜b-˜√(b⋆2)-4×a×c}
+  XSpeedRange ← {(⌈Quad⟨1,1,𝕨×¯2⟩)⊸≤¨⊸/↕𝕩}´
+  YSpeedRange ← {min‿max : ⍷{⟨⟩≢((max≥-)∧(min≤-))¨⊸/+`𝕩+↕-min}¨⊸/↕-min}
+  Highest ← {
+     y ← 0
+     {pos‿vec :
+       pos vec⊸+ ↩
+       y (⊑pos)⊸⌈ ↩
+       ⟨pos, ⋈⟜(0⟜⌈)´¯1+vec⟩
+    }•_while_(ymin≤⊑∘⊑)0‿0⋈𝕨‿𝕩
+    y
   }
   {
     1=part ?
-      0
+      "# Xspeed ∊" util.Debug xs ← XSpeedRange xmin‿xmax
+      "# Yspeed ∊" util.Debug ys← YSpeedRange ymin‿ymax
+      ⌈´⥊ys Highest⌜ xs
     ;
       0
   }
