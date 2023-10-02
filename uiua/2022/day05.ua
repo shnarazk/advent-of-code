@@ -3,10 +3,44 @@ ParseInts ← (|1 ⊜parse∊∶"0123456789-".!)
 ⍘⊟⊜□¬⊂∶0⌕"\n\n".data
 ⊜□≠@\n.!
 head ← 
-≡ParseInts⊜□≠@\n.!
+♭≡(□+0_¯1_¯1 ParseInts)⊜□≠@\n.!
+
 moves ← 
 ≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡!↘¯1 head
 towers ← 
-↙ 10moves
-# &p$"Part1: _"ParseInts ⊡10 data
-# ↙ 20 data
+
+Unfold ← |1 ;⍥(↘¯1∶⊡¯1.)⧻.
+~~~
+Unfold [2 4 6]
+⍤ "top" = 2
+⍤ "then" = 4
+⍤ "then" = 6
+~~~
+
+Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
+
+# I gave up the Under-based array modification. Instead use `rotate⁼ join drop rotate`
+Move ← (|2
+    Unfold!∶
+    ⇵ [1 3 0 2 3 3 1 2]
+    ∶∷!Split∶!⊡
+    →→'!⊡
+    →(⊂⇌)
+    □→∶
+    ⇵ [3 1 0 3 4 2 4]
+    ↻¯∶⊂∶↘1↻
+    ↻¯∶⊂□∶↘1↻∶
+)
+MoveSnd ← (|2
+    Unfold!∶
+    ⇵ [1 3 0 2 3 3 1 2]
+    ∶∷!Split∶!⊡
+    →→'!⊡
+    →⊂
+    □→∶
+    ⇵ [3 1 0 3 4 2 4]
+    ↻¯∶⊂∶↘1↻
+    ↻¯∶⊂□∶↘1↻∶
+)
+&p$"Part1: _"≡(|1 ⊢!) ∧Move towers moves
+&p$"Part2: _"≡(|1 ⊢!) ∧MoveSnd towers moves
