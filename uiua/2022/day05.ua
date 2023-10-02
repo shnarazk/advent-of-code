@@ -4,18 +4,12 @@ ParseInts ← (|1 ⊜parse∊∶"0123456789-".!)
 ⊜□≠@\n.!
 head ← 
 ♭≡(□+0_¯1_¯1 ParseInts)⊜□≠@\n.!
-
 moves ← 
+
 ≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡!↘¯1 head
 towers ← 
 
-Unfold ← |1 ;⍥(↘¯1∶⊡¯1.)⧻.
-~~~
-Unfold [2 4 6]
-⍤ "top" = 2
-⍤ "then" = 4
-⍤ "then" = 6
-~~~
+Unfold ← (|1 /·⇌)
 
 Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 
