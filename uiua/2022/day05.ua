@@ -11,7 +11,7 @@ Unfold ← (|1 /·⇌)
 Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 # I gave up the Under-based array modification. Instead use `rotate⁼ join drop rotate`
 # Reshape was deprecated!!
-# The best approach to adopt this compilexity may be packing all arguments
+# The best approach to handle this complexity may be packing all arguments
 # into a list, say, arsenal.
 # Now you can pick any number of arguments for each step from the arsenal
 # by calling `select` once. 
