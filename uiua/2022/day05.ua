@@ -10,17 +10,30 @@ towers ←
 Unfold ← (|1 /·⇌)
 Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 # I gave up the Under-based array modification. Instead use `rotate⁼ join drop rotate`
+# Reshape was deprecated!!
+# The best approach to adopt this compilexity may be packing all arguments
+# into a list, say, arsenal.
+# Now you can pick any number of arguments for each step from the arsenal
+# by calling `select` once. 
+
 Move ← (|3
-    # as modifier instruction towers
-    ⇵[2 1 0]
-    Unfold!
-    ⇵[1 3 0 2 3 4 3 1 2]
-    ∶∷!Split∶!⊡
-    →→'!⊡
-    ⇵ [0 3 1 2]
-    →(|3 ∶⊂!)
-    ⇵[1 3 0 3 4 2 4]
-    ⍥(↻¯∶⊂□∶↘1↻∶)2
+  # STACK: modifier towers move
+  /!⍥'⊂→□ 2□
+  Unfold!
+  # STACK: pickup from to towers modifiers
+  ⇵[1 3 0 2 3 4 3 1 2]
+  # STACK: from towers pickup to towers modifiers towers from to
+  ∶∷!Split∶!⊡
+  # STACK: leftover moving to towers modifiers towers from to
+  →→'!⊡
+  # STACK: leftover moving target modifiers towers from to
+  ⇵ [0 3 1 2]
+  # STACK: leftover modifiers moving target towers from to
+  →(|3 ∶⊂!)
+  # STACK: leftover towers target' from to
+  ⇵[1 3 0 3 4 2 4]
+  # STACK: towers from leftover from to target' to
+  ⍥(↻¯∶⊂□∶↘1↻∶)2
 )
 &p$"Part1: _"≡(|1 ⊢!)∧(Move(⇌)) towers moves
 &p$"Part2: _"≡(|1 ⊢!)∧(Move(·)) towers moves
