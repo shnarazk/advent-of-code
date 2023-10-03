@@ -10,25 +10,17 @@ towers ←
 Unfold ← (|1 /·⇌)
 Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 # I gave up the Under-based array modification. Instead use `rotate⁼ join drop rotate`
-MoveOne ← (|2
-    Unfold!∶
-    ⇵[1 3 0 2 3 3 1 2]
+Move ← (|3
+    # as modifier instruction towers
+    ⇵[2 1 0]
+    Unfold!
+    ⇵[1 3 0 2 3 4 3 1 2]
     ∶∷!Split∶!⊡
     →→'!⊡
-    →(⊂⇌)
-    →∶
+    ⇵ [0 3 1 2]
+    →(|3 ∶⊂!)
     ⇵[1 3 0 3 4 2 4]
     ⍥(↻¯∶⊂□∶↘1↻∶)2
 )
-MoveSnd ← (|2
-    Unfold!∶
-    ⇵[1 3 0 2 3 3 1 2]
-    ∶∷!Split∶!⊡
-    →→'!⊡
-    →⊂
-    →∶
-    ⇵[1 3 0 3 4 2 4]
-    ⍥(↻¯∶⊂□∶↘1↻∶)2
-)
-&p$"Part1: _"≡(|1 ⊢!) ∧MoveOne towers moves
-&p$"Part2: _"≡(|1 ⊢!) ∧MoveSnd towers moves
+&p$"Part1: _"≡(|1 ⊢!)∧(Move(⇌)) towers moves
+&p$"Part2: _"≡(|1 ⊢!)∧(Move(·)) towers moves
