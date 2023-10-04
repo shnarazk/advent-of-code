@@ -14,18 +14,18 @@ Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 # The best approach to handle this complexity may be packing all arguments
 # into a list, say, arsenal.
 # Now you can pick any number of arguments for each step from the arsenal
-# by calling `select` once. 
+# by calling `select` once.
 
-# 2 0_2 {"abce" "" "xy"}
-# →→→(∵⧻.⊏)∶→∶.→.→→.
-# →→(+× ¯1_0)
-# →→(\+∧(⊂→!)[]∵(□=0⇡))
-# →(⊂⍛2↙∶[])
-# →→/⊂
-# →→(/(⊂∷!))
-# →(↘1⊕□)
-# ⍜⊏^ ∶
-# →;
+# # on stack (⇌)2_0_2 {"abce" "" "xy"}
+# (⇌)2_0_2 {"abce" "" "xy"}
+# →→→(∵⧻.⊏)→(.⇉⊢(↘1))→→∶→∷.
+# →→(\+∧(⊂→!)[]∵(□=0⇡)+× ¯1_0)
+# →(⊂⍛3↙∶[])
+# →→(/'⊂∷!)
+# ∶⇉'⊡0'↘1⍜(⊡0)^→⊜□
+# →'↘1□⍜(⊡1)(□⊂∷!∶)
+# →;⍜⊏
+# # returns ["ce", "", "baxy"]
 
 Move ← (|3
   # STACK: modifier towers move
