@@ -16,6 +16,17 @@ Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
 # Now you can pick any number of arguments for each step from the arsenal
 # by calling `select` once. 
 
+# 2 0_2 {"abce" "" "xy"}
+# →→→(∵⧻.⊏)∶→∶.→.→→.
+# →→(+× ¯1_0)
+# →→(\+∧(⊂→!)[]∵(□=0⇡))
+# →(⊂⍛2↙∶[])
+# →→/⊂
+# →→(/(⊂∷!))
+# →(↘1⊕□)
+# ⍜⊏^ ∶
+# →;
+
 Move ← (|3
   # STACK: modifier towers move
   /!⍥'⊂→□ 2□
