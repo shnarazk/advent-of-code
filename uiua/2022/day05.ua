@@ -7,44 +7,18 @@ moves ←
 ≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡!↘¯1 head
 towers ← 
 
-Unfold ← (|1 /·⇌)
-Split ← ⍘⊟↙2⊂∶[□""]⊜□+1≥∶⇡∶→(⧻.)
-# I gave up the Under-based array modification. Instead use `rotate⁼ join drop rotate`
-# Reshape was deprecated!!
-# The best approach to handle this complexity may be packing all arguments
-# into a list, say, arsenal.
-# Now you can pick any number of arguments for each step from the arsenal
-# by calling `select` once.
-
 # # on stack (⇌)2_0_2 {"abce" "" "xy"}
 # (⇌)2_0_2 {"abce" "" "xy"}
-# →→→(∵⧻.⊏)→(.⇉⊢(↘1))→→∶→∷.
-# →→(\+∧(⊂→!)[]∵(□=0⇡)+× ¯1_0)
-# →(⊂⍛3↙∶[])
-# →→(/'⊂∷!)
-# ∶⇉'⊡0'↘1⍜(⊡0)^→⊜□
-# →'↘1□⍜(⊡1)(□⊂∷!∶)
-# →;⍜⊏
-# # returns ["ce", "", "baxy"]
-
-Move ← (|3
-  # STACK: modifier towers move
-  /!⍥'⊂→□ 2□
-  Unfold!
-  # STACK: pickup from to towers modifiers
-  ⇵[1 3 0 2 3 4 3 1 2]
-  # STACK: from towers pickup to towers modifiers towers from to
-  ∶∷!Split∶!⊡
-  # STACK: leftover moving to towers modifiers towers from to
-  →→'!⊡
-  # STACK: leftover moving target modifiers towers from to
-  ⇵ [0 3 1 2]
-  # STACK: leftover modifiers moving target towers from to
-  →(|3 ∶⊂!)
-  # STACK: leftover towers target' from to
-  ⇵[1 3 0 3 4 2 4]
-  # STACK: towers from leftover from to target' to
-  ⍥(↻¯∶⊂□∶↘1↻∶)2
+Move ← (
+  →!→∶
+  →→→(∵⧻.⊏)→(.⊃⊢(↘1)) →→∶→∷.
+  →→(∧(⊂→!)[]⊂⊓(□⍛1↙∶[])(□⍛2↙∶[])⍘⊟+× ¯1_0)
+  →(⊂⍛0↙∶[])
+  →→(/'⊂∷!)
+  →(↙3⊂∶□""⊂∶□"" ⊕□)
+  →;⍜⊏^→'↘1□⍜(⊡1)(□⊂∷!∶)∶⊃'⊡0'↘1 ?(⍜(⊡0)·)(⍜(⊡0)⇌)
 )
-&p$"Part1: _"≡(|1 ⊢!)∧(Move(⇌)) towers moves
-&p$"Part2: _"≡(|1 ⊢!)∧(Move(·)) towers moves
+# returns ["ce", "", "baxy"]
+
+&p$"Part1: _"≡(|1 ⊢!)∧(Move 0) towers moves
+&p$"Part2: _"≡(|1 ⊢!)∧(Move 1) towers moves
