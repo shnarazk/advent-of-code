@@ -1,23 +1,23 @@
 Data ← &fras⊂&var"AOC_REPO_DIR" "/data/2022/input-day05.txt"
-ParseInts ← (|1 ⊜parse∊∶"0123456789-".!)
-dump⊜□≠@\n.!⍘⊟⊜□¬⊂∶0⌕"\n\n".Data
-Head ← 
-♭≡(□+0_¯1_¯1 ParseInts)⊜□≠@\n.!
-Moves ← 
-dump≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉dump ≡'↘¯1 dump Head
-Towers ← 
-# transform 0 {"abce" "" "xy"} 2_0_2 → ["ce", "", "baxy"]
+ParseInts ← (⊜parse∊∶"0123456789-".⊔)
+≡⊔⊜□≠@\n.⊔⍘⊟⊜□¬⊂∶0⌕"\n\n".Data
+Head ←
+≡(+0_¯1_¯1ParseInts)⊜□≠@\n.⊔
+Moves ←
+≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡'↘¯1 ↘¯1Head
+Towers ←
 
 FromArsenal ← (|3
-  # build arsenal for under update
-  [⊃⊃⊃(!⊡0)(⊡0!⊡2)(□↘1!⊡2)(⊡1)dump ⊂⊂⊙□]
-  dump⊃⊃⊃(?((∘))((⇌))!⊡0)(!!⊡1)(⊏⊙(!⊡3)!⊡2.)∘
-  dump⊙⊙(|1.2 ⊡0.)
-  dump⊙(⊃(↙dump!⊙'!!⍘⊟)(↘!⊙'!!⍘⊟)⊟∩□)
-  dump⊂∩□ !
-  dump⊂[⊃(⊡1)(□ ∧(|2 ⊂⊙!)""⊏0_2)]dump⊂⊙'↘1
-  ;
+  # build the arsenal → [mode towers move]
+  ⊂⊙(⊂∩□)
+  # index calculation → [indexs mode towers move]
+  ⊂□⊂⊂⊃⊃(⊡0⊔⊡2)(-∶⧻⊡∶⊃⊃(⊔⊡0)(⊔⊡1⊔⊡1)(⊔⊡0⊔⊡1)⊏1_2)(⧻⊔⊡∶⊃(⊔⊡0)(⊡2⊔⊡1)⊏1_2).
+  # partitioning → [segments mode towers move]
+  ⊂⊙'↘1□⬚("")↙3∘⊕□⊃(∧(⊂⊙⊔)[]∵(|2 □⬚|⊙((↙))⊙⊙[])⇡3⊔⊡0)(/(⊂∩⊔)⊏⊃(↘1⊔⊡0)(⊔⊡1)⊔⊏3_2).
+  # mode-specific task → [replaces towers move]
+  ⊂⊙'↘2□⊂⊃(⊡1)(□/'⊂∩⊔⊏0_2)⍜'⊡0;∶?∘⇌⊃⊃(⊔⊡0)(⊡0⊔⊡1)(⊔⊡1)⊏1_0 .
+  ⍜⊏;⊙∶⊃⊃(↘1⊔⊡2)(⊔⊡0)(⊔⊡1)
 )
 
-∧'FromArsenal0 Towers ↙1Moves
-# /'FromArsenal2 [] # ↙2Moves
+∵⊢∧'FromArsenal0 Towers Moves
+∵⊢∧'FromArsenal1 Towers Moves
