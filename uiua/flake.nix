@@ -1,5 +1,5 @@
 {
-  description            = "A basic flake with a shell";
+  description       = "Uiua AoC Dev shell";
   inputs = { 
     nixpkgs.url     = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -8,9 +8,20 @@
   outputs = { self, nixpkgs, flake-utils, uiua }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
+      uiua-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
+         name = "aoc-uiua-driver-${version}";
+         pname = "aoc-uiua-driver";
+         version = "20231009-1";
+         src = self;
+         installPhase = ''
+           mkdir -p $out/bin;
+           cp ./loc.ua $out/bin/loc
+           # cp ./aocbench.ua $out/bin/aocbench
+         '';
+      };
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive uiua.packages.${system}.default ];
+        packages = [ pkgs.bashInteractive uiua.packages.${system}.default uiua-driver ];
       };
     });
 }
