@@ -1,7 +1,14 @@
-# TODO: handle '#' in character literal and string
-Year ← $"_/"2022
+#!/usr/bin/env uiua run
+# Note: this program is only for AoC, tailoring for AoC filename convension
+Year ← ?(⊂∶"/"⊔⊡0)("./";)⧻.↘1&args
 FileList ← ∵(□⊂∶".ua"⊂"day"↙¯2⊂"00"$"_")+1⇡25
-LoC ← |1 ⧻▽∵(/<⊂⊃(⊗@#⊔)(⊗0=@ ⊔)).▽∵(≠0⧻).⊜□¬=@\n.&fras
+# FIXME: handle '#' in string
+IgnoreSharpInString ← ∘
+# FIXME: handle '@#'
+IgnoreSharpAsCharactor ← ∘
+NotBlankLine ← ▽∵(≠0⧻).
+NotStartsWithComment ← ▽∵(/<⊂⊃(⊗@#⊔)(⊗0=@ ⊔)).
+LoC ← |1 ⧻NotStartsWithComment NotBlankLine IgnoreSharpAsCharactor IgnoreSharpInString⊜□¬=@\n.&fras
 ≡(&fe⊔)..∵(⊂Year ⊔)FileList
 ≡(|2 ?(LoC)(□"N/A";))
 ≡(|2 □$"| _ | _ |"∶∩⊔)
