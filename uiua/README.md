@@ -1,11 +1,11 @@
-# Try UIUA!
+# Try Uiua!
 
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
 ```
 nix$ cat pi.ua
-×4;⍥(|2.2 +1∶+↶÷∶2×+2.+1×4.)/× 50_1000_1000 0 0
+×4;⍥(|2.2 +1∶+⊙∶÷∶2×+2.+1×4.)/× 50_1000_1000 0 0
 nix$ time uiua run pi.ua
 3.141592644576
 uiua run pi.ua  39.31s user 0.02s system 99% cpu 39.438 total
@@ -17,7 +17,9 @@ nix$ time cbqn pi.bqn
 cbqn pi.bqn  4.46s user 0.01s system 99% cpu 4.484 total
 ```
 
-about 10 times slower than CBQN.
+So the implementation is about 10 times slower than CBQN.
+
+Slow and too young but with Rust-y environment + nix-y execution/development environment. That's nice!
 
 ## Helix configuration
 
@@ -37,5 +39,5 @@ roots = []
 auto-format = true
 comment-token = "#"
 language-servers = [ "uiua-lsp" ]
-indent = { tab-width = 4, unit = "    " }
+indent = { tab-width = 2, unit = "  " }
 ```
