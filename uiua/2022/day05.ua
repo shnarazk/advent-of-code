@@ -7,7 +7,7 @@ Moves ←
 ≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡'↘¯1 ↘¯1Head
 Towers ←
 
-FromArsenal ← (|3
+Transform ← (|3
   # build the arsenal → [mode towers move]
   ⊂⊙(⊂∩□)
   # index calculation → [indexs mode towers move]
@@ -19,5 +19,5 @@ FromArsenal ← (|3
   ⍜⊏;⊙∶⊃⊃(↘1⊔⊡2)(⊔⊡0)(⊔⊡1)
 )
 
-∵⊢∧'FromArsenal0 Towers Moves
-∵⊢∧'FromArsenal1 Towers Moves
+∵⊢∧'Transform0 Towers Moves
+∵⊢∧'Transform1 Towers Moves
