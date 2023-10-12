@@ -68,4 +68,6 @@ SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(Start
 # SizeOf "/a"
 # ↯ ¯1_1 Dirs
 DirSizes ← ≡(⊂∶SizeOf⊔.) Dirs
-/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
+&p$"Part1: _"/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
+Threshold ← - - 30000000 70000000 SizeOf "/"
+&p$"Part2: _"/↧≡(⊔⊡1)▽≡(≥Threshold⊔⊡1).DirSizes
