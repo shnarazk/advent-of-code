@@ -21,15 +21,21 @@ ChangeDirectory ← |2 ?(|2 ⍜'⊡0(|1 ⍜(⇌⊔)(|1 ⊂@/↘+1⊗1=@/.↘1));
 ~~~
 HandleCd ← |3 ChangeDirectory ⊔⊡1;∶
 # dir "size file" --- {"dir/file" size}
-Merger ← (|2 □⊂∩□⊃(⊂∩⊔⊙'⊡1)⋅(parse⊔⊡0)⊙(Split@ ⊔))
+Merger ← (|2 ⊂∩□⊃(⊂∩⊔⊙'⊡1)⋅(parse⊔⊡0)⊙(Split@ ⊔))
 ~~~
-⍤ "Broken Merger"≅□{"/var/tmp/c.txt" 10} Merger □"/var/tmp/" □"10 c.txt"
+⍤ "Broken Merger"≅[□"/var/tmp/c.txt" □10] Merger □"/var/tmp/" □"10 c.txt"
 ~~~
-HandleLs ← |3 ⍜'⊡1⍜⊔⊂dump∘∶≡Merger ⊏ ⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≅"dir"⊔⊡0Split@ ⊔).↘1;
+Join ← ?(⋅⋅∘)(?(∘⊙;)(⊂))⊃∩(=0⧻)⊙∘ # `?` require two identical signature functions
+~~~
+⍤ "polymorphic join"≅[1_2 5_6]dump∘ Join [] [1_2 5_6]
+⍤ "polymorphic join"≅[1_2 5_6]dump∘ Join [1_2 5_6][]
+⍤ "polymorphic join"≅dump∘ [1_2 5_6 2_3]Join [1_2 5_6][2_3]
+~~~
+HandleLs ← |3 ⍜'⊡1(□Join⊔⊙⊔)∶≡Merger ⊏ ⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≅"dir"⊔⊡0Split@ ⊔).↘1;
 # HandleLs ← |3 ⍜'⊡1'∘; ∶□≡Merger ⊏ ⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≅"dir"⊔⊡0Split@ ⊔).↘1;
 HandleCommand ← |2 ?HandleCd HandleLs ⊗0[⊃(≅"cd"⊔⊡0)(≅"ls"⊔⊡0)].↘1 Split @ ⊔⊢.⊔∶
 ~~~
 ⍤ "Broken HandleCommand cd"≅{"/tmp/" []}HandleCommand [∩□"/"[]]{"$ cd tmp"}
-⍤ "Broken HandleCommand ls"≅dump∘{"/" [□{"/a.txt" 344} □{"/b.ua" 120}]}HandleCommand[∩□"/"[]]{"$ ls" "344 a.txt" "120 b.ua"}
+⍤ "Broken HandleCommand ls"≅dump∘{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"[]]{"$ ls" "344 a.txt" "120 b.ua"}
 ~~~
-∧HandleCommand[□"" □[]]Data
+⊔⊡1∧HandleCommand[∩□"/"[]]Data
