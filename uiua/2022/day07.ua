@@ -45,11 +45,17 @@ Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≅1/+=@/.
 ⍤ "!" ≅ "/" Dirname "/"
 ⍤ "!" ≅ "/" Dirname "/aa"
 ~~~
-Dirs ← ⊝≡(⍜⊔ Dirname ⊢) fs
-StartsWith ← |2 ≅⬚@\n↙∶⊙(⧻.)
+SubSeqs ← (⊂⊙□≡'□↙ ↥1∶↯⧻,∶⊚=@/..)
+~~~
+⍤ "!" ≅ {"/" "/abc" "/abc/def" "/abc/def/xyz"} SubSeqs "/abc/def/xyz"
+~~~
+Dirs ← ⊏⍏.⊝∧(|2 ⊂⊙(SubSeqs ⊔))[] ⊝≡(⍜⊔ Dirname ⊢) fs
+StartsWith ← |2 ↧↥⊃⊃(=@/⬚@ ⊏)(=1)(≅⬚@\n↙)∶⊙(⧻.)
 ~~~
 ⍤ "!" StartsWith "/abc/def/g.ua" "/abc/def"
 ⍤ "!" StartsWith "/abc/eaf" "/abc"
+⍤ "!" ¬StartsWith "/abcde/eaf" "/abc"
+⍤ "!" StartsWith "/abc/def/g.ua" "/"
 ~~~
 DepthFrom ← |2 /+=@/↘⊃⧻(⋅∘)
 ~~~
@@ -58,7 +64,8 @@ DepthFrom ← |2 /+=@/↘⊃⧻(⋅∘)
 ~~~
 SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(StartsWith⊃(⊔⊡1)(⊔⊡0)).≡(⊂□∶) fs ↯⧻ fs)
 # SizeOf ← (|1 ; dump∘ ≡(⊂⊃(DepthFrom "/a" ⊔⊡0)(⊔⊡1))dump∘.▽∶fs≡(StartsWith⊔⊡0)dumpid ↯⧻ fs)
-SizeOf "/a/e"
-SizeOf "/a"
+# SizeOf "/a/e"
+# SizeOf "/a"
+# ↯ ¯1_1 Dirs
 DirSizes ← ≡(⊂∶SizeOf⊔.) Dirs
-/+≡(⊔⊡1)dump∘⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
+/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
