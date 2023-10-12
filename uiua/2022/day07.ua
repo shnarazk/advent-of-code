@@ -39,9 +39,26 @@ HandleCommand ← |2 ?HandleCd HandleLs ⊗0[⊃(≅"cd"⊔⊡0)(≅"ls"⊔⊡0)
 ⍤ "Broken HandleCommand ls"≅{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"[]]{"$ ls" "344 a.txt" "120 b.ua"}
 ~~~
 fs ← ⊔⊡1∧HandleCommand[∩□"/"[]]Data
-Dirname ← ?(∘)(↙ ⊏¯1⊚=@/.)≅"/".
+Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≅1/+=@/.
 ~~~
-⍤ "!" ≅ dump∘"/abc/def" Dirname "/abc/def/g.ua"
-⍤ "!" ≅ dump∘"/" Dirname "/"
+⍤ "!" ≅ "/abc/def" Dirname "/abc/def/g.ua"
+⍤ "!" ≅ "/" Dirname "/"
+⍤ "!" ≅ "/" Dirname "/aa"
 ~~~
-dirs ← ⊝≡(⍜⊔ Dirname ⊢) fs
+Dirs ← ⊝≡(⍜⊔ Dirname ⊢) fs
+StartsWith ← |2 ≅⬚@\n↙∶⊙(⧻.)
+~~~
+⍤ "!" StartsWith "/abc/def/g.ua" "/abc/def"
+⍤ "!" StartsWith "/abc/eaf" "/abc"
+~~~
+DepthFrom ← |2 /+=@/↘⊃⧻(⋅∘)
+~~~
+⍤ "!" ≅ 1 DepthFrom "/abc/def" "/abc/def/g.ua"
+⍤ "!" ≅ 3 DepthFrom "/abc/def" "/abc/def/abc/x/txt.txt"
+~~~
+SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(StartsWith⊃(⊔⊡1)(⊔⊡0)).≡(⊂□∶) fs ↯⧻ fs)
+# SizeOf ← (|1 ; dump∘ ≡(⊂⊃(DepthFrom "/a" ⊔⊡0)(⊔⊡1))dump∘.▽∶fs≡(StartsWith⊔⊡0)dumpid ↯⧻ fs)
+SizeOf "/a/e"
+SizeOf "/a"
+DirSizes ← ≡(⊂∶SizeOf⊔.) Dirs
+/+≡(⊔⊡1)dump∘⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
