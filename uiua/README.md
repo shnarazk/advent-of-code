@@ -3,7 +3,9 @@
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
-### pre 0.0.19 (53578133c1dcc4281f8f26772b1eef5799491c66)
+## Performance against BQN
+
+#### pre 0.0.19 (53578133c1dcc4281f8f26772b1eef5799491c66)
 
 ```
 nix$ cat pi.ua
@@ -14,6 +16,15 @@ uiua run pi.ua  28.03s user 0.05s system 96% cpu 29.129 total
 ```
 
 So the implementation is about 6.28 times slower than CBQN.
+Better one is slightly slower.
+
+```
+nix$ cat pi.ua
+×4;⍥(|2.2 ⊃'+1(+÷∶2/×+1_3×4))/× 50_1000_1000 0 0
+nix$ time uiua run pi.ua
+3.1415926445762157
+uiua run pi.ua  29.80s user 0.03s system 96% cpu 30.771 total
+```
 
 #### pre0.0.18
 
@@ -37,21 +48,5 @@ Slow and premature but with Rust-y environment + nix-y execution/development env
 
 ## Helix configuration
 
-Sure, I'll copy it to the wiki.
-
-```toml
-[language-server.uiua-lsp]
-command = "uiua"
-args = ["lsp"]
-
-[[language]]
-name = "uiua"
-scope = "source.uiua"
-injection-regex = "uiua"
-file-types = ["ua"]
-roots = []
-auto-format = true
-comment-token = "#"
-language-servers = [ "uiua-lsp" ]
-indent = { tab-width = 2, unit = "  " }
-```
+- https://github.com/helix-editor/helix/wiki/How-to-install-the-default-language-servers#uiua
+- https://github.com/shnarazk/tree-sitter-uiua
