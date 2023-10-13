@@ -3,6 +3,20 @@
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
+### pre 0.0.19 (53578133c1dcc4281f8f26772b1eef5799491c66)
+
+```
+nix$ cat pi.ua
+×4;⍥(|2.2 +1⊙(+÷∶2/×+1_3×4).)/× 50_1000_1000 0 0
+nix$ time uiua run pi.ua
+3.141592644576
+uiua run pi.ua  28.03s user 0.05s system 96% cpu 29.129 total
+```
+
+So the implementation is about 6.28 times slower than CBQN.
+
+#### pre0.0.18
+
 ```
 nix$ cat pi.ua
 ×4;⍥(|2.2 +1∶+⊙∶÷∶2/×+1_3×4.)/× 50_1000_1000 0 0
