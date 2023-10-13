@@ -8,10 +8,18 @@ Split ← □⊂∩□⊃(|2 ⇌↙)(|2 ↘+1)
 # ⍉∩≡(∺'Split∶ ∶⇡⧻.)⍉.Data
 v ← ∵⍜∩⊔⊂ ⍉∩≡(∺'Split∶ ∶⇡⧻.)⍉.Data
 
+# baseHeight listOfTree -- VisibleOrNot
+VisibleFrom ← ±/↧<⊙⊔
+
+# base dirs --- totalTree
+Visible ← /↥∺VisibleFrom ⊙⊔
+
+&p$"Part1:_"/+♭∵Visible Data v
+
 # baseHeight listOfTree -- numberOfTrees
 CheckSight ← ↧⊙⧻+1⊗1≥⊙⊔⊙'.⊔
 
 # base dirs --- totalTree
 CheckSights ← /×∺CheckSight ⊙⊔
 
-/↥♭∵CheckSights Data v
+&p$"Part2:_"/↥♭∵CheckSights Data v
