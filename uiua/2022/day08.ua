@@ -5,10 +5,10 @@ Split ← □⊂∩□⊃(|2 ⇌↙)(|2 ↘+1)
 ~~~
 ⍤ "Split"≅□[□[2 1 0] □[4 5]] Split 3 ⇡6
 ~~~
-# ⍉∩≡(∺'Split∶ ∶⇡⧻.)⍉.Data
+
 v ← ∵⍜∩⊔⊂ ⍉∩≡(∺'Split∶ ∶⇡⧻.)⍉.Data
 
-# baseHeight listOfTree -- VisibleOrNot
+# baseHeight listOfTree --- VisibleOrNot
 VisibleFrom ← ±/↧<⊙⊔
 
 # base dirs --- totalTree
@@ -16,7 +16,7 @@ Visible ← /↥∺VisibleFrom ⊙⊔
 
 &p$"Part1:_"/+♭∵Visible Data v
 
-# baseHeight listOfTree -- numberOfTrees
+# baseHeight listOfTree --- numberOfTrees
 CheckSight ← ↧⊙⧻+1⊗1≥⊙⊔⊙'.⊔
 
 # base dirs --- totalTree
