@@ -26,11 +26,14 @@ TheCase ← (|2 ↥×2↧⊃⊃(/↥>1)(/↥=0)(/↥>1)⌵-)
 ⍤ "Case" =1TheCase 1_1 3_3
 ~~~
 
-# (vec head tail --- vec head  newpos)
+# (vec head tail --- vec head newpos)
 MoveTail ← (|3.3 ⊃⊃(∘)(⋅∘)(|3 ⊏ ⊙⊂⊙⊟⊃⊃⊃(TheCase)(⋅∘)(+±-,)(+±-,)⋅⊙∘))
-# (code head tail --- iteration vec head tail)
+# (code --- iteration vec)
 Decode ← (⊃(⋅∘)(⊏∶[1_0 ¯1_0 0_¯1 0_1])⍘⊟)
 
 # (vec head tail history --- vec head tail history')
 StoreTail ← (|4.4 ⊙⊙⊙(□⊂□⊙⊔)⊙⊙.)
-⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail MoveTail MoveHead)⊃Decode(⋅⍘⊟)⊙'⊔⍘⊟∶) [□[0_0 0_0] □[]] Data
+&p$"Part1:_"⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail MoveTail MoveHead)⊃Decode(⋅⍘⊟)⊙'⊔⍘⊟∶) [□[0_0 0_0] □[]] Data
+
+MoveTails ← (?⊙⊙∘(⊙(⍜⊏| dump∘ MoveTail) ⊃(↘1)(⊡0)) =0⧻.)
+&p$"Part2:_"⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail ;⍥MoveTails9 ◫2⇡10 ⍜'↙2 MoveHead)dump∘⊃Decode(⊙∘) ⊙'⊔⍘⊟∶) [□↯10[0_0] □[]] Data
