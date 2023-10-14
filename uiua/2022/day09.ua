@@ -1,4 +1,4 @@
-Data ← ⊜□≠@\n.&fras⊂&var"AOC_REPO_DIR" "/data/2022/input-day09-0.txt"
+Data ← ⊜□≠@\n.&fras⊂&var"AOC_REPO_DIR" "/data/2022/input-day09.txt"
 Data ← ≡(|1 ⊂⊃(⊗∶"UDLR"⊡0⊔⊡0)(parse⊔⊡1) ⊜□≠@ .⊔)Data
 # &p$"Part1: _"↙ 10 Data
 
@@ -31,4 +31,6 @@ MoveTail ← (|3.3 ⊃⊃(∘)(⋅∘)(|3 ⊏ ⊙⊂⊙⊟⊃⊃⊃(TheCase)(⋅
 # (code head tail --- iteration vec head tail)
 Decode ← (⊃(⋅∘)(⊏∶[1_0 ¯1_0 0_¯1 0_1])⍘⊟)
 
-∧(⊟;⍥(dump∘ MoveTail MoveHead)⊃Decode(⋅⍘⊟)∶) [0_0 0_0] Data
+# (vec head tail history --- vec head tail history')
+StoreTail ← (|4.4 ⊙⊙⊙(□⊂□⊙⊔)⊙⊙.)
+⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail MoveTail MoveHead)⊃Decode(⋅⍘⊟)⊙'⊔⍘⊟∶) [□[0_0 0_0] □[]] Data
