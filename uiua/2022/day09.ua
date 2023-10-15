@@ -17,23 +17,37 @@ DontGive ← ;
 # &p $"# f signature: _" sig (!⊙∶(|2 +))
 # &p $"# g signature: _" sig (!(|2 +)∶)
 
-# (vec head tail --- vec newpos tail)
-MoveHead ← (⊃⊃∘(+∶⊙∘)(⋅⋅∘))
+# (vec head_tail --- vec newpos_tail)
+MoveHead ← (⊙(⍜'⊡0+∶).)
+~~~
+⍤ "movehead"≅1_1 ⊙; MoveHead 1_1 [1_0 ∞_∞]
+⍤ "movehead"≅[2_1 ∞_∞] ;MoveHead 1_1 [1_0 ∞_∞]
+~~~
 
+# (head tail --- number)
 TheCase ← (|2 ↥×2↧⊃⊃(/↥>1)(/↥=0)(/↥>1)⌵-)
 ~~~
-⍤ "Case" =2TheCase 1_1 4_1
-⍤ "Case" =1TheCase 1_1 3_3
+⍤ "Case" =2 TheCase 1_1 4_1
+⍤ "Case" =1 TheCase 1_1 3_3
 ~~~
 
-# (vec head tail --- vec head newpos)
-MoveTail ← (|3.3 ⊃⊃(∘)(⋅∘)(|3 ⊏ ⊙⊂⊙⊟⊃⊃⊃(TheCase)(⋅∘)(+±-,)(+±-,)⋅⊙∘))
+# (head_tail --- head_newpos)
+MoveTail ← (|1 ⊟⊙⊏∶⊙⊙⊂⊙⊙⊟⊃⊃⊃(TheCase)(⊙∘)(+±-,)(+±-,)⊃(⊡0)(⊡1))
+~~~
+⍤ "movetail" ≅ [2_2 2_1] MoveTail [2_2 1_0]
+~~~
+
 # (code --- iteration vec)
 Decode ← (⊃(⋅∘)(⊏∶[1_0 ¯1_0 0_¯1 0_1])⍘⊟)
 
-# (vec head tail history --- vec head tail history')
-StoreTail ← (|4.4 ⊙⊙⊙(□⊂□⊙⊔)⊙⊙.)
-&p$"Part1:_"⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail MoveTail MoveHead)⊃Decode(⋅⍘⊟)⊙'⊔⍘⊟∶) [□[0_0 0_0] □[]] Data
+# (head_tail history --- head_tail history')
+StoreTail ← (|2.2 ⊙(□⊂□⊡1).⊙⊔)
+~~~
+⍤ "storetail" ≅ □[□1_1] ; StoreTail [∞_∞ 1_1] □[]
+⍤ "storetail" ≅ □[□1_1 □0_0] ; StoreTail [∞_∞ 1_1] □[□0_0]
+~~~
 
-MoveTails ← (?⊙⊙∘(⊙(⍜⊏| dump∘ MoveTail) ⊃(↘1)(⊡0)) =0⧻.)
-&p$"Part2:_"⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail ;⍥MoveTails9 ◫2⇡10 ⍜'↙2 MoveHead)dump∘⊃Decode(⊙∘) ⊙'⊔⍘⊟∶) [□↯10[0_0] □[]] Data
+&p$"Part1:_"⧻⊝⊡1∧(|2 ⊟□;⍥(|3.3 ⊙StoreTail ⊙MoveTail MoveHead)∘⊃Decode(⋅∘)⊙'⊔⍘⊟∶) [□[0_0 0_0] □[]] Data
+
+# MoveTails ← (?⊙⊙∘(⊙(⍜⊏| dump∘ MoveTail) ⊃(↘1)(⊡0)) =0⧻.)
+# &p$"Part2:_"⧻⊝⊡1∧(⊟□⊟;⍥(StoreTail ;⍥MoveTails9 ◫2⇡10 ⍜'↙2 MoveHead)dump∘⊃Decode(⊙∘) ⊙'⊔⍘⊟∶) [□↯10[0_0] □[]] Data
