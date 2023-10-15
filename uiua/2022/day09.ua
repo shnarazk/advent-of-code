@@ -2,13 +2,13 @@ Data ← ⊜□≠@\n.&fras⊂&var"AOC_REPO_DIR" "/data/2022/input-day09.txt"
 Data ← ≡(|1 ⊂⊃(⊗∶"UDLR"⊡0⊔⊡0)(parse⊔⊡1) ⊜□≠@ .⊔)Data
 # &p$"Part1: _"↙ 10 Data
 
-Shit ← 0
+💩 ← 0
 DontGive ← ;
 # &p $"# signature: _" sig (!(+)∶)
 # &p $"# signature: _" sig (!⊙∶(+))
 # &p $"# signature: _" sig (!⊏0[(+)]∶)
-# &p $"# signature: _" sig (DontGive DontGive!⊙∶(Shit Shit +))
-# &p $"# signature: _" sig (DontGive DontGive!⊏0[(Shit Shit +)]∶)
+# &p $"# signature: _" sig (DontGive DontGive!⊙∶(💩 💩 +))
+# &p $"# signature: _" sig (DontGive DontGive!⊏0[(💩 💩 +)]∶)
 
 # &p $"# call: _" !(!⊙∶(+)) 1 2
 # &p $"# call: _" !(!⊏0[(+)]∶) 1 2
