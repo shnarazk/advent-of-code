@@ -4,12 +4,12 @@
 FirstColumn ← 16
 SecondColumn ← 6
 
-LoC ← ⧻▽∵'<⊃(⊗@#⊔)(⊗0=@ ⊔).⊜□≠@\n.&fras
+LoC ← ⧻▽∵'<⊃(⊗@#⊔)(⊗0=@\s⊔).⊜□≠@\n.&fras
 
 FileList ← ▽∵(|1 ≅ ".ua" ↙¯3⊔).&fld ?"."(⊔⊡1⊔)=1⧻.&args
 
+&p$"| File_ | LoC_ |" ∩(⬚@\s↙∶"") - 4 FirstColumn - 3 SecondColumn
+&p$"|-_-|-_-:|" ∩(⬚@-↙∶"") FirstColumn - 1 SecondColumn
 ≡'LoC⊔ .FileList
-≡(|2 □$"| _ | _ |" ∩(⬚@ (↙))⊓(FirstColumn $"_")(SecondColumn $"_")∶)
-⊂□$"|-_-|-_-:|" ∩(⬚@-↙∶"") FirstColumn - 1 SecondColumn
-⊂□$"| File_ | LoC_ |" ∩(⬚@ ↙∶"") - 4 FirstColumn - 3 SecondColumn
+≡(|2 □$"| _ | _ |" ∩(⬚@\s↙)⊓(FirstColumn $"_")(SecondColumn $"_")∶)
 ∵&p
