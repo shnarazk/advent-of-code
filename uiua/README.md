@@ -5,6 +5,18 @@
 
 ## Performance against BQN
 
+#### pre 0.0.20 (a14db387302f97eff7373286df541cc3f60169d0)
+
+```
+nix$ cat pi.ua
+×4;⍥(|2.2 +1⊙(+÷∶2/×+1_3×4).)/× 50_1000_1000 0 0
+nix$ time uiua run --no-format pi.ua
+3.1415926445762157
+uiua run --no-format pi.ua  23.85s user 0.10s system 96% cpu 24.714 total
+```
+
+So the implementation is about 5.34 times slower than CBQN.
+
 #### pre 0.0.19 (53578133c1dcc4281f8f26772b1eef5799491c66)
 
 ```
