@@ -6,7 +6,7 @@ DirVec ← {
   "error" ! 1
 }
 UpdateTail ← {
-  ⟨dx,dy⟩ ← 𝕨 -¨𝕩
+  ⟨dx,dy⟩ ← 𝕨 -𝕩
   𝕩 +¨ {
     1<|dx×dy ? ⟨dx÷|dx,dy÷|dy⟩ ;
     1<|dx    ? ⟨dx÷|dx,     0⟩ ;
@@ -17,9 +17,9 @@ UpdateTail ← {
 Update ← {
   ⟨dir,0⟩ F state : state ;
   ⟨dir,n⟩ F ⟨head,tail,history⟩ :
-    h ← head+¨DirVec 𝕨
+    h ← head+DirVec 𝕨
     t ← h UpdateTail tail
-    ⟨dx,dy⟩ ← h -¨tail
+    ⟨dx,dy⟩ ← h -tail
     ⟨dir,n-1⟩ F ⟨h,t,{⟨t⟩⊑∘∊history ? history ; ⟨t⟩∾history}⟩
 }
 Update2 ← {
@@ -27,12 +27,12 @@ Update2 ← {
   ⟨dir,n⟩ F ⟨knots,history⟩ :
     Propagate ← {
       last F ⟨⟩ : ⟨⟩ ;
-      ⟨head,tail⟩ ← (⊑⋈1⊸↓)𝕩
+      ⟨head⟩‿tail ← 1(↑⋈↓)𝕩
       h ← 𝕨 UpdateTail head
       ⟨h⟩∾h Propagate tail
     }
     ⟨head,tail⟩ ← (⊑⋈1⊸↓)knots
-    h ← head+¨DirVec 𝕨
+    h ← head+DirVec 𝕨
     t ← h Propagate tail
     ⟨dir,n-1⟩F⟨⟨h⟩∾t,{⟨𝕩⟩⊑∘∊history ? history ; ⟨𝕩⟩∾history}⊑⌽t⟩
 }
