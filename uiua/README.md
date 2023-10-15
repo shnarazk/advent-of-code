@@ -8,14 +8,21 @@
 #### pre 0.0.20 (a14db387302f97eff7373286df541cc3f60169d0)
 
 ```
-nix$ cat pi.ua
-×4;⍥(|2.2 +1⊙(+÷∶2/×+1_3×4).)/× 50_1000_1000 0 0
-nix$ time uiua run --no-format pi.ua
+nix$ cat misc/pi.ua
+×4;⍥(|2.2 +4⊙(+÷∶2/×).)/× 50_1000_1000 1_3 0
+# ×4;⍥(|2.2 ⊃'+4(+÷∶2/×))/× 50_1000_1000 1_3 0
+nix$ time uiua run --no-format misc/pi.ua
 3.1415926445762157
-uiua run --no-format pi.ua  23.85s user 0.10s system 96% cpu 24.714 total
+uiua run --no-format misc/pi.ua  17.12s user 0.03s system 95% cpu 17.907 total
+
+nix$ cat misc/pi.bqn
+•Show 4×1⊑{⟨4+𝕨,𝕩+2÷×´𝕨⟩}´⍟(×´50‿1000‿1000) ⟨1‿3,0⟩
+nix$ time cbqn misc/pi.bqn
+3.1415926445762157
+cbqn misc/pi.bqn  3.00s user 0.01s system 99% cpu 3.027 total
 ```
 
-So the implementation is about 5.34 times slower than CBQN.
+So the implementation is about 5.71 times slower than CBQN.
 
 #### pre 0.0.19 (53578133c1dcc4281f8f26772b1eef5799491c66)
 
