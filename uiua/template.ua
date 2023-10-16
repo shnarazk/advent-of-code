@@ -1,2 +1,2 @@
-Data ← ⊜□≠@\n.&fras⊂&var"AOC_REPO_DIR" "/data/2022/input-day04.txt"
+Data ← ⊜□≠@\n.&fras $"__data_2023_input-day01.txt" &var"AOC_REPO_DIR" ..Sep
 &p$"Part1: _"Data
