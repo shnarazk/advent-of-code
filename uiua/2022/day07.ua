@@ -30,22 +30,14 @@ Merger ← (|2 ⊂∩□⊃(⊂∩⊔⊙'⊡1)⋅(parse⊔⊡0)⊙(Split@ ⊔))
 ⍤ "Broken Merger"≅[□"/var/tmp/c.txt" □10] Merger □"/var/tmp/" □"10 c.txt"
 ~~~
 
-# join with identity element
-JoinIE ← ?(⋅⋅∘)(?(∘⊙;)(⊂))⊃∩(=0⧻)⊙∘ # `?` require two identical signature functions
-~~~
-⍤ "JoinIE"≅[1_2 5_6]JoinIE [] [1_2 5_6]
-⍤ "JoinIE"≅[1_2 5_6]JoinIE [1_2 5_6][]
-⍤ "JoinIE"≅[1_2 5_6 2_3]JoinIE [1_2 5_6][2_3]
-~~~
-
-HandleLs ← |3 ⍜'⊡1(□JoinIE⊔⊙⊔)∶≡Merger ⊏ ⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≅"dir"⊔⊡0Split@ ⊔).↘1;
+HandleLs ← |3 ⍜'⊡1(□⊂⊔⊙(?(↯ 0_2)∘=0⧻.⊔))∶≡Merger⊏⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≅"dir"⊔⊡0Split@\s⊔).↘1;
 HandleCommand ← |2 ?HandleCd HandleLs ⊗0[⊃(≅"cd"⊔⊡0)(≅"ls"⊔⊡0)].↘1 Split @ ⊔⊢.⊔∶
 ~~~
-⍤ "Broken HandleCommand cd"≅{"/tmp/" []}HandleCommand [∩□"/"[]]{"$ cd tmp"}
-⍤ "Broken HandleCommand ls"≅{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"[]]{"$ ls" "344 a.txt" "120 b.ua"}
+⍤ "Broken HandleCommand cd"≅{"/tmp/" ↯0_2[]}HandleCommand [∩□"/"↯0_2[]]{"$ cd tmp"}
+⍤ "Broken HandleCommand ls"≅{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"↯0_2[]]{"$ ls" "344 a.txt" "120 b.ua"}
 ~~~
 
-fs ← ⊔⊡1∧HandleCommand[∩□"/"[]]Data
+fs ← ⊔⊡1∧HandleCommand[∩□"/"↯0_2[]]Data
 
 Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≅1/+=@/.
 ~~~
