@@ -3,7 +3,52 @@
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
-## Performance against BQN
+## Performance against BQN on M1
+
+#### pre 0.0.21 (3df882b2c3b5a8cdf38f406d71e7a4613a395c68)
+
+- Parallelized Uiua
+
+```
+NumThreads ← 1
+Step ← ×NumThreads 4
+x ← now
+⍤ "pi" <0.01⌵-3.1415/+wait≡spawn(|1 ⊙;⍥(|2.2 ⊙'+Step+÷∶8/×,)⌈÷NumThreads/× 50_1000_1000 0) ∵'+1_3×4⇡NumThreads
+&p ⊂ NumThreads - x now
+```
+
+|NumThreads | wall-clock time (sec)|
+|----------:|------:|
+|1          | 26.202|
+|2          | 18.669|
+|3          | 14.022|
+|4          | 10.429|
+|5          | 13.450|
+|6          | 14.841|
+|7          | 15.834|
+
+- SIMD BQN
+
+```
+n‿chunk ← ⟨50×1000×1000,1000⟩
+seed‿span ← ⟨3+4×↕chunk,4×chunk⟩
+sum ← 0
+Term ← {
+  diff ← +´÷×⟜(¯2⊸+)𝕩+seed
+  sum diff⊸+↩
+  𝕩+span
+}
+Term⍟(n÷chunk)0
+•Show pi ← 8×sum
+```
+
+```
+nix$ time cbqn misc/ppi.bqn
+3.1415926435898
+cbqn misc/ppi.bqn  0.13s user 0.01s system 97% cpu 0.138 total
+```
+
+So the implementation is about 80.22 times slower than CBQN o3n.
 
 #### pre 0.0.20 (a14db387302f97eff7373286df541cc3f60169d0)
 
