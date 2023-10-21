@@ -17,24 +17,15 @@ Solve ⇐ {env‿part 𝕊 data :
         ⟨⟩    𝕊  ⟨⟩   : @ ;
         specs 𝕊 fields:
           Cands ← {𝕊 name‿range:
-             r1b‿r1e‿r2b‿r2e ← range
-             mask ← 1¨⌾((r2b MakeMask r2e)⊸⊏)1¨⌾((r1b MakeMask r1e)⊸⊏)maskZ
+             mask ← 1¨⌾((MakeMask´2↑range)⊸⊏)1¨⌾((MakeMask´¯2↑range)⊸⊏)maskZ
              {∧´𝕩⊏mask}˘fields
           }
           m ← >Cands¨specs
           map ← Hashmap˜⟨⟩
-          D ← { 𝕊 m:
-            uni ← (1=+´∘⊏⟜m)¨⊸/↕≠m
-            ⟨⟩≢uni ?
-              {j ← <⁼(𝕩⊏m)⊐1 ⋄ 𝕩 map.Set j ⋄ m ↩ (0¨⌾(j⊸⊏))⌾⍉m}¨uni
-              D m
-            ; @
-          }
-          D m
+          {⟨⟩≢uni ← (1=+´∘⊏⟜𝕩)¨⊸/↕≠𝕩? 𝕊 𝕩{j ← <⁼(𝕨⊏𝕩)⊐1 ⋄ 𝕨 map.Set j ⋄ (0¨⌾(j⊸⊏))⌾⍉𝕩}´uni ; @}m
           map
       }
       map ← specs Determine fields
-      targets ← map.Get¨("departure"≡(9⊸↑∘⊑⊑⟜specs))¨⊸/↕≠specs
-      ×´targets⊏mine
+      ×´mine⊏˜map.Get¨("departure"≡(9⊸↑∘⊑⊑⟜specs))¨⊸/↕≠specs
   }
 }
