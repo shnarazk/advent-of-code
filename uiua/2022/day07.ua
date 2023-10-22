@@ -37,7 +37,7 @@ HandleCommand ← |2 ?HandleCd HandleLs ⊗0[⊃(≍"cd"⊔⊡0)(≍"ls"⊔⊡0)
 ⍤ "Broken HandleCommand ls"≍{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"↯0_2[]]{"$ ls" "344 a.txt" "120 b.ua"}
 ---
 
-fs ← ⊔⊡1dump∘∧1_1 HandleCommand[∩□"/"↯0_2[]]Data
+fs ← ⊔⊡1∧1_0 HandleCommand⊐["/" ↯0_2[]]Data
 
 Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≍1/+=@/.
 ---
@@ -51,7 +51,7 @@ SubSeqs ← (⊂⊙□≡'□↙ ↥1∶↯⧻,∶⊚=@/..)
 ⍤ "!" ≍ {"/" "/abc" "/abc/def" "/abc/def/xyz"} SubSeqs "/abc/def/xyz"
 ---
 
-Dirs ← ⊏⍏.⊝∧(|2 ⊂⊙(SubSeqs ⊔))[] ⊝≡(⍜⊔ Dirname ⊢) fs
+Dirs ← ⊏⍏.⊝∧0_1 (|2 ⊂⊙(SubSeqs ⊔))[] ⊝≡(⍜⊔ Dirname ⊢)dump∘ fs
 
 StartsWith ← |2 ↧↥⊃⊃(=@/⬚@ ⊏)(=1)(≍⬚@\n↙)∶⊙(⧻.)
 ---
@@ -68,9 +68,7 @@ DepthFrom ← |2 /+=@/↘⊃⧻(⋅∘)
 ---
 
 SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(StartsWith⊃(⊔⊡1)(⊔⊡0)).≡(⊂□∶) fs ↯⧻ fs)
-# ↯ ¯1_1 Dirs
 DirSizes ← ≡(⊂∶SizeOf⊔.) Dirs
-
-&p$"Part1: _"/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
+&p$"Part1: _"/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).dump∘▽≡(≤100000⊔⊡1).dump∘DirSizes
 Threshold ← - - 30000000 70000000 SizeOf "/"
 &p$"Part2: _"/↧≡(⊔⊡1)▽≡(≥Threshold⊔⊡1).DirSizes
