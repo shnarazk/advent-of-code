@@ -9,11 +9,10 @@ Towers ←
 
 Trans ← (|3.2
   ⊙∶
-  ⊂⊃⊃(⊡⊡1⋅⊙∘)(⊡⊡2⋅⊙∘)(⊂⊙⊙∘)                       # pick swapping targets
-  ⊂⊙'↘1⊂∩□⊃(⊓↙↘,,∶⊔⊢⊙'⊡1)(⊙⊙∘)                    # divide 3 parts
-  ⊂∩□⊙⊂⊃⊃(⊔⊡1)(⊔⊡0)(⊔⊡2)⊃(⊂(⇌|∘)∶⊡0⊙⊙'↘1,⊢∶)(⋅⊙∘) # move head after reverse if needed
-  ⊃(⊃⊃(↘2 ⋅∘)(⋅⋅∘)(∘))(⊡0⋅∘)                      # prepare for substitution
-  ∶⍜⊏(|2 ⋅∘)                                      # wrap up
+  ⊂⊃⊃(⊡⊡1⋅⊙∘)(⊡⊡2⋅⊙∘)(⊂⊙⊙∘)                      # pick swapping targets
+  ⊂⊙'↘1⊂∩□⊃(⊓↙↘,,∶⊔⊢⊙'⊡1)(⊙⊙∘)                   # divide 3 parts
+  ⊂∩□⊙⊐⊂⊃⊃(⊔⊡1)(⊡0)(⊡2)⊃(⊂(⇌|∘)∶⊡0⊙⊙'↘1,⊢∶)(⋅⊙∘) # move head after reverse if needed
+  ∶⍜⊏(|2 ⋅∘)⊃(⊃⊃(↘2 ⋅∘)(⋅⋅∘)(∘))(⊡0⋅∘)           # substitution
 )
 &p $"Part1: _"∵⊢;∧0_1_1 Trans 0 Towers Moves
 &p $"Part1: _"∵⊢;∧0_1_1 Trans 1 Towers Moves
