@@ -5,6 +5,27 @@
 
 ## Performance against BQN on M1
 
+#### pre 0.0.22
+
+```
+# ~/Repositories/advent-of-code/uiua@10-22T21:06:42 51a0ec8@main
+nix$ time uiua run --no-format misc/ppi.ua
+[1 19.916038990020752]
+[2 14.302474975585938]
+[3 10.891690015792847]
+[4 8.103046894073486]
+[5 11.043781995773315]
+[6 11.781757116317749]
+[7 12.483501195907593]
+uiua run --no-format misc/ppi.ua  323.38s user 0.14s system 359% cpu 1:29.88 total
+
+nix$ time uiua run --no-format misc/pi.ua
+3.1415926445762157
+uiua run --no-format misc/pi.ua  17.49s user 0.03s system 95% cpu 18.281 total
+```
+
+So the implementation is about 62.33 times slower than CBQN o3n.
+
 #### pre 0.0.21 (3df882b2c3b5a8cdf38f406d71e7a4613a395c68)
 
 - Parallelized Uiua
