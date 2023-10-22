@@ -7,18 +7,13 @@ Moves ←
 ≡(|1 □▽\↥≠@  .)▽=1◿4⇡⧻.⍉≡'↘¯1 ↘¯1Head
 Towers ←
 
-# Transform ← (|3
-#   # build the arsenal → [mode towers move]
-#   ⊂⊙(⊂∩□)
-#   # index calculation → [indexs mode towers move]
-#   ⊂□⊂⊂⊃⊃(⊡0⊔⊡2)(-∶⧻⊡∶⊃⊃(⊔⊡0)(⊔⊡1⊔⊡1)(⊔⊡0⊔⊡1)⊏1_2)(⧻⊔⊡∶⊃(⊔⊡0)(⊡2⊔⊡1)⊏1_2).
-#   # partitioning → [segments mode towers move]
-#   ⊂⊙'↘1□⬚("")↙3∘⊕□⊃(∧(⊂⊙⊔)[]∵(|2 □⬚|⊙((↙))⊙⊙[])⇡3⊔⊡0)(/(⊂∩⊔)⊏⊃(↘1⊔⊡0)(⊔⊡1)⊔⊏3_2).
-#   # mode-specific task → [replaces towers move]
-#   ⊂⊙'↘2□⊂⊃(⊡1)(□/'⊂∩⊔⊏0_2)⍜'⊡0;∶?∘⇌⊃⊃(⊔⊡0)(⊡0⊔⊡1)(⊔⊡1)⊏1_0 .
-#   ⍜⊏;⊙∶⊃⊃(↘1⊔⊡2)(⊔⊡0)(⊔⊡1)
-# )
-
-Tra ← (|3 ⊙';;dump∘)
-∵⊢∧0_2_1 Tra 0 Towers Moves
-# ∵⊢∧'Transform1 Towers Moves
+Trans ← (|3.2
+  ⊙∶
+  ⊂⊃⊃(⊡⊡1⋅⊙∘)(⊡⊡2⋅⊙∘)(⊂⊙⊙∘)                       # pick swapping targets
+  ⊂⊙'↘1⊂∩□⊃(⊓↙↘,,∶⊔⊢⊙'⊡1)(⊙⊙∘)                    # divide 3 parts
+  ⊂∩□⊙⊂⊃⊃(⊔⊡1)(⊔⊡0)(⊔⊡2)⊃(⊂(⇌|∘)∶⊡0⊙⊙'↘1,⊢∶)(⋅⊙∘) # move head after reverse if needed
+  ⊃(⊃⊃(↘2 ⋅∘)(⋅⋅∘)(∘))(⊡0⋅∘)                      # prepare for substitution
+  ∶⍜⊏(|2 ⋅∘)                                      # wrap up
+)
+&p $"Part1: _"∵⊢;∧0_1_1 Trans 0 Towers Moves
+&p $"Part1: _"∵⊢;∧0_1_1 Trans 1 Towers Moves
