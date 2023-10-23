@@ -5,7 +5,7 @@
 
 ## Performance against BQN on M1
 
-#### pre 0.0.22
+#### 0.0.22
 
 ```
 # ~/Repositories/advent-of-code/uiua@10-22T21:06:42 51a0ec8@main
