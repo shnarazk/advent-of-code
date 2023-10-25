@@ -20,4 +20,7 @@ Upstream ← ([];|[⊡1⊡0])(∘|0;)≍[¯∞ ¯∞]./↥≐(=⊡1)↘1,∶⊔
 ---
 
 Parents ← ⊐/⊂ ≐'□Upstream Data
-&p $"Part1: _" -1⧻⍥(⎋≍,∶⊏⍏.⊝⊐⊂,⊔⊐/⊂∵'□Parents.)∞[ShinyGold]
+# &p $"Part1: _" -1⧻⍥(⎋≍,∶⊏⍏.⊝⊐⊂,⊔⊐/⊂∵'□Parents.)∞[ShinyGold]
+
+NumSiblings ← (/+≡(recur ↙1⊔)dump∘↘1⊔⊏∶Data⊢⊚=∶≡(⊡1⊡0⊔)⊔Data)
+&p $"Part2: _" NumSiblings ShinyGold
