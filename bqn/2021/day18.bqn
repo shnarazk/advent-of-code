@@ -1,7 +1,5 @@
 Solve ⇐ {env‿part 𝕊 data :
   util ← •Import"/util.bqn"∾˜"." env.Var⌾⋈ "BQN_LIB"
-  util.Debug (××1+|) 4
-  util.Debug (××1+|) ¯4
   Parse ← {
     digits ← ⟨⟩
     levels ← ⟨⟩
@@ -19,8 +17,10 @@ Solve ⇐ {env‿part 𝕊 data :
   }
   Add ← {wd‿wl 𝕊 xd‿xl : ⟨wd∾xd,(××1+|)¨wl∾xl⟩}
   Explode ← {𝕊 d‿l :
-    ∧´ables ← ((=´∧(∧´4⊸≤))1‿¯1⊸×)˘2↕l ?
+    ∨´ables ← ((=´∧(∧´4⊸≤))1‿¯1⊸×)˘2↕l ?
+      "Explode" util.Debug ables
       target ← ables⊸⊐⌾⋈1
+      "target" util.Debug target
       {0<target ? d (⊢+target⊑d)⌾((target-1)⊸⊑) ↩ ; @}
       {(≠l)>2+target ? d (⊢+(target+1)⊑d)⌾((target+2)⊸⊑) ↩ ; @}
       # substitude the pair
@@ -36,7 +36,9 @@ Solve ⇐ {env‿part 𝕊 data :
   }
   {
     1=part ?
-    ≢Parse¨data
+    l ← Parse¨data
+    f ← ⊑l
+    Explode "try explode" util.Debug f
     ;
       0
   }
