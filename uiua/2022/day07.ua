@@ -12,7 +12,7 @@ Shaper ← ↘↥0-1⊗0=@/.
 ⍤ "3"≍"/a" Shaper "///a"
 ---
 
-ChangeDirectory ← (|2 ?(|2 ⍜'⊡0(|1 ⍜(⇌⊔)(|1 ⊂@/↘+1⊗1=@/.↘1));)(⍜'⊡0; ∶□Shaper⊃(|2 ⊂∶⊂∶"/"⊙(⊔⊡0))(|2 ⋅∘))≍"..".)
+ChangeDirectory ← (|2 ?(|2 ⍜(⊡0)(|1 ⍜(⇌⊔)(|1 ⊂@/↘+1⊗1=@/.↘1));)(⍜(⊡0); ∶□Shaper⊃(|2 ⊂∶⊂∶"/"⊙(⊔⊡0))(|2 ⋅∘))≍"..".)
 ---
 ⍤ "Wrong CD"≍{"/var/tmp/" []} ChangeDirectory "tmp" {"/var/" []}
 ⍤ "Wrong CD"≍{"/var/abc/tmp/" []} ChangeDirectory "tmp" {"/var/abc/" []}
@@ -25,19 +25,19 @@ ChangeDirectory ← (|2 ?(|2 ⍜'⊡0(|1 ⍜(⇌⊔)(|1 ⊂@/↘+1⊗1=@/.↘1))
 HandleCd ← |3 ChangeDirectory ⊔⊡1;∶
 
 # dir "size file" --- {"dir/file" size}
-Merger ← (|2 ⊂∩□⊃(⊂∩⊔⊙'⊡1)⋅(parse⊔⊡0)⊙(Split@ ⊔))
+Merger ← (|2 ⊂∩□⊃(⊂∩⊔⊙(⊡1))⋅(parse⊔⊡0)⊙(Split@ ⊔))
 ---
 ⍤ "Broken Merger"≍[□"/var/tmp/c.txt" □10] Merger □"/var/tmp/" □"10 c.txt"
 ---
 
-HandleLs ← |3 ⍜'⊡1(□⊂⊔⊙(?(↯ 0_2)∘=0⧻.⊔))∶≡Merger⊏⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≍"dir"⊔⊡0Split@\s⊔).↘1;
+HandleLs ← |3 ⍜(⊡1)(□⊂⊔⊙(?(↯ 0_2)∘=0⧻.⊔))∶≡Merger⊏⊙∶⊃(⬚0↙∶[]⧻∘)⊙(⊡0.)⊔▽∵(¬≍"dir"⊔⊡0Split@\s⊔).↘1;
 HandleCommand ← |2 ?HandleCd HandleLs ⊗0[⊃(≍"cd"⊔⊡0)(≍"ls"⊔⊡0)].↘1 Split @ ⊔⊢.⊔∶
 ---
 ⍤ "Broken HandleCommand cd"≍{"/tmp/" ↯0_2[]}HandleCommand [∩□"/"↯0_2[]]{"$ cd tmp"}
 ⍤ "Broken HandleCommand ls"≍{"/"[{"/a.txt" 344}{"/b.ua" 120}]}HandleCommand[∩□"/"↯0_2[]]{"$ ls" "344 a.txt" "120 b.ua"}
 ---
 
-fs ← ⊔⊡1∧1_0 HandleCommand[∩□"/" ↯0_2[]]Data
+Fs ← ⊔⊡1∧1_0 HandleCommand[∩□"/" ↯0_2[]]Data
 
 Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≍1/+=@/.
 ---
@@ -46,12 +46,12 @@ Dirname ← ?("/";)(↙ ⊏¯1⊚=@/.)≍1/+=@/.
 ⍤ "!" ≍ "/" Dirname "/aa"
 ---
 
-SubSeqs ← (⊂⊙□≡'□↙ ↥1∶↯⧻,∶⊚=@/..)
+SubSeqs ← (⊂⊙□≡(□↙) ↥1∶↯⧻,∶⊚=@/..)
 ---
 ⍤ "!" ≍ {"/" "/abc" "/abc/def" "/abc/def/xyz"} SubSeqs "/abc/def/xyz"
 ---
 
-Dirs ← ⊏⍏.⊝∧1_0 (|2 ⊂⊙(SubSeqs ⊔)) [] ⊝≡(⍜⊔ Dirname ⊢) ⊏⍏.fs
+Dirs ← ⊏⍏.⊝∧1_0 (|2 ⊂⊙(SubSeqs ⊔)) [] ⊝≡(⍜⊔ Dirname ⊢) ⊏⍏.Fs
 
 StartsWith ← |2 ↧↥⊃⊃(=@/⬚@ ⊏)(=1)(≍⬚@\n↙)∶⊙(⧻.)
 ---
@@ -67,7 +67,7 @@ DepthFrom ← |2 /+=@/↘⊃⧻(⋅∘)
 ⍤ "!" ≍ 3 DepthFrom "/abc/def" "/abc/def/abc/x/txt.txt"
 ---
 
-SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(StartsWith⊃(⊔⊡1)(⊔⊡0)).≡(⊂□∶)fs↯⧻fs)
+SizeOf ← (|1 /+≡(|1 ;DepthFrom⊃⊃(⊔⊡0)(⊔⊡1)(⊔⊡2))▽≡(StartsWith⊃(⊔⊡1)(⊔⊡0)).≡(⊂□∶)Fs↯⧻Fs)
 DirSizes ← ≡(⊂∶SizeOf⊔.) Dirs
 &p$"Part1: _"/+≡(⊔⊡1)⊏⍏≡(⊔⊡1).▽≡(≤100000⊔⊡1).DirSizes
 Threshold ← - - 30000000 70000000 SizeOf "/"

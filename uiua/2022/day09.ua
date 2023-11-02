@@ -11,7 +11,7 @@ DontGive ← ;
 # &p $"# signature: _" sig (DontGive DontGive!⊏0[(💩 💩 +)]∶)
 
 # (vec head_tail --- vec newpos_tail)
-MoveHead ← (⊙(⍜'⊡0+∶).)
+MoveHead ← (⊙(⍜(⊡0)+∶).)
 ---
 ⍤ "movehead"≍1_1 ⊙; MoveHead 1_1 [1_0 ∞_∞]
 ⍤ "movehead"≍[2_1 ∞_∞] ;MoveHead 1_1 [1_0 ∞_∞]
@@ -40,9 +40,9 @@ StoreTail ← (|2.2 ⊙(□⊂□⊡¯1).⊙⊔)
 ⍤ "storetail" ≍ □[□1_1 □0_0] ; StoreTail [∞_∞ 1_1] □[□0_0]
 ---
 
-&p$"Part1:_"⧻⊝⊡1∧1_1(|2 ⊟□;⍥(|3.3 ⊙(StoreTail MoveTail) MoveHead)⊃Decode(⋅∘)⊙'⊔⍘⊟∶) [□↯2 0_0 □[]] Data
+&p$"Part1:_"⧻⊝⊡1∧1_1(|2 ⊟□;⍥(|3.3 ⊙(StoreTail MoveTail) MoveHead)⊃Decode(⋅∘)⊙(⊔⍘⊟)∶) [□↯2 0_0 □[]] Data
 
 # (windows body --- windows' body')
 MoveTails ← (?⊙∘(⊙(⍜⊏MoveTail⊔)⊃(↘1)(⊡0))=0⧻.)
 
-&p$"Part2:_"⧻⊝⊡1∧1_1(|2 ⊟□;⍥(|3.3 ⊙(StoreTail;⍥MoveTails9 ◫2⇡10)MoveHead)⊃Decode(⋅∘)⊙'⊔⍘⊟∶) [□↯10 0_0 □[]] Data
+&p$"Part2:_"⧻⊝⊡1∧1_1(|2 ⊟□;⍥(|3.3 ⊙(StoreTail;⍥MoveTails9 ◫2⇡10)MoveHead)⊃Decode(⋅∘)⊙(⊔⍘⊟)∶) [□↯10 0_0 □[]] Data
