@@ -21,7 +21,7 @@ Ord ← ?⊙∘∶≥,,
 
 GCDrecur ← |2.2 ?⊙∘(|2.2 ⊃(◿)(∘)) =0.Ord
 
-GCD ← |2 ;⍥(|2.2 ⎋=0.GCDrecur)∞
+GCD ← |2 ;⍢(|2.2 GCDrecur)(>0)
 ---
 ⍤ "gcd" ≍5 GCD 10 5
 ⍤ "gcd" ≍5 GCD 5 10
