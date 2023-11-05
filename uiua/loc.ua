@@ -15,5 +15,5 @@ FileList ← ∵(□⊂∶".ua"⊂"day"↙¯2⊂"00"$"_")+1⇡25
 &p$"| File_ | LoC_ |" ∩(⬚@ ↙∶"") - 4 FirstColumn - 3 SecondColumn
 &p$"|-_-|-_-:|" ∩(⬚@-↙∶"") FirstColumn - 1 SecondColumn
 
-≡(|2 ?(LoC)(□"N/A";)) ≡(&fe⊔)..∵(⊂Year ⊔)FileList
-∵&p≡(|2 □$"| _ | _ |" ∩(⬚@ (↙))⊓(FirstColumn $"_")(SecondColumn $"_")∶)
+⊐≡(|2 ?(LoC)("N/A";)) ≡(&fe⊔)..∵(⊂Year ⊔)FileList
+≡(|2.0 &p$"| _ | _ |" ∩(⬚@\s↙)⊐⊓(FirstColumn $"_")(SecondColumn $"_")∶)
