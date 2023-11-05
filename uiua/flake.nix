@@ -11,12 +11,12 @@
       uiua-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
          name = "aoc-uiua-driver-${version}";
          pname = "aoc-uiua-driver";
-         version = "20231014-1";
+         version = "20231105-2";
          src = self;
          installPhase = ''
            mkdir -p $out/bin;
            cp ./loc.ua $out/bin/loc
-           # cp ./aocbench.ua $out/bin/aocbench
+           cp ./bench.ua $out/bin/bench
          '';
       };
     in {
