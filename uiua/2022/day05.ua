@@ -1,6 +1,6 @@
 Data ← &fras $"__data_2022_input-day05.txt" &var"AOC_REPO_DIR" ..Sep
 ParseInts ← (⊜parse∊∶"0123456789-".⊔)
-≡⊔⊜□≠@\n.⊔⍘⊟⊜□¬⊂∶0⌕"\n\n".Data
+≡⊔⊜□≠@\n.⊔⍘⊟⊜□¬⌕"\n\n".Data
 Head ←
 ≡(+0_¯1_¯1ParseInts)⊜□≠@\n.⊔
 Moves ←

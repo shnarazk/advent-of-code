@@ -1,4 +1,4 @@
-Data ← ⊜□⊂∶0¬⌕"\n\n".&fras $"__data_2020_input-day04.txt" &var"AOC_REPO_DIR" ..Sep
+Data ← ⊜□¬⌕"\n\n".&fras $"__data_2020_input-day04.txt" &var"AOC_REPO_DIR" ..Sep
 Data ← ≡(|1 □≡(⊂∩□⊃(↙3)(↘4)⊔)⊜□¬∊∶" \n".⊔)Data
 &p $"Part1: _" /+≡(=7/+≡(¬≍"cid"⊔⊡0)⊔)Data
 Byr ← ((0;|↧⊃(≥1920)(≤2002) parse)=4⧻.∘)
