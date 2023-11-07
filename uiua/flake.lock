@@ -182,11 +182,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1699307425,
-        "narHash": "sha256-iwMlDHQFUyoQfbsxG90I7/g8EjA97KemE/Kz236AAww=",
+        "lastModified": 1699330759,
+        "narHash": "sha256-fZomZVynst5ZU9Q9yj/MTLzFT+AjDQIrsPn9DWQFzI4=",
         "owner": "uiua-lang",
         "repo": "uiua",
-        "rev": "936f12c55c3ee27cdb75d9f3ce53f67872e3e388",
+        "rev": "3aa029ffe681d629beabfe78b6c91b9278cd5aa1",
         "type": "github"
       },
       "original": {
