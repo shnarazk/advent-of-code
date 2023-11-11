@@ -12,7 +12,7 @@
 |      day06.ua    | 4      |
 |      day07.ua    | 21     |
 |      day08.ua    | 8      |
-|      day09.ua    | N/A    |
+|      day09.ua    | 7      |
 |      day10.ua    | N/A    |
 |      day11.ua    | N/A    |
 |      day12.ua    | N/A    |
