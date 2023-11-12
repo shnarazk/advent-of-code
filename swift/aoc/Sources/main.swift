@@ -27,11 +27,14 @@ struct Aoc: ParsableCommand, Decodable {
 func f(_ data: String) {
   let c = data.split(separator: "\n", omittingEmptySubsequences: false).split(separator: [])
   let d = c.map { $0.map { Int(String($0))! } }
-  let e = d.map {
+  var e = d.map {
     $0.reduce(0) { (sum, cal) in
       return
         sum + cal
     }
   }
-  print(e.max()!)
+  print("Part1: \(e.max()!)")
+  e.sort()
+  e.reverse()
+  print("Part2: \(e.prefix(3).reduce(0, +))")
 }
