@@ -1,5 +1,8 @@
 # Try Uiua!
 
+Uiua lacks recursion. We can't code Ackermann function nor Takeuchi function.
+So it isn't a great, general purpose language.
+
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
