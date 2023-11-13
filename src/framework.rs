@@ -1,4 +1,5 @@
 //! data handling frmework
+use crate::color;
 pub use aoc_macro::{aoc, aoc_at};
 use std::{borrow::Borrow, fmt, fs::File, io::prelude::*};
 
@@ -198,28 +199,34 @@ pub trait AdventOfCode: fmt::Debug + Default {
             }
             1 => {
                 println!(
-                    "# Advent of Code {}: day {}, part 1 from {}",
+                    "{}# Advent of Code {}: day {}, part 1 from {}{}",
+                    color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input
+                    input,
+                    color::RESET,
                 );
                 Answer::Part1(Self::parse(desc).expect("failed to parse").part1())
             }
             2 => {
                 println!(
-                    "# Advent of Code {}: day {}, part 2 from {}",
+                    "{}# Advent of Code {}: day {}, part 2 from {}{}",
+                    color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input
+                    input,
+                    color::RESET,
                 );
                 Answer::Part2(Self::parse(desc).expect("failed to parse").part2())
             }
             3 => {
                 println!(
-                    "# Advent of Code {}: day {} from {}",
+                    "{}# Advent of Code {}: day {} from {}{}",
+                    color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input
+                    input,
+                    color::RESET,
                 );
                 let ans1 = Self::parse(desc).expect("failed to parse").part1();
                 let ans2 = Self::parse(desc).expect("failed to parse").part2();
