@@ -192,9 +192,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     ) -> Answer<Self::Output1, Self::Output2> {
         let desc = description.borrow();
         let input = desc.name(Self::YEAR, Self::DAY).expect("no input");
+        let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match part {
             0 => {
-                Self::parse(desc).expect("failed to parse").dump();
+                Self::parse(desc).expect(&parse_error).dump();
                 Answer::Dump
             }
             1 => {
@@ -206,7 +207,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::parse(desc).expect("failed to parse").part1())
+                Answer::Part1(Self::parse(desc).expect(&parse_error).part1())
             }
             2 => {
                 println!(
@@ -217,7 +218,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::parse(desc).expect("failed to parse").part2())
+                Answer::Part2(Self::parse(desc).expect(&parse_error).part2())
             }
             3 => {
                 println!(
@@ -228,8 +229,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                let ans1 = Self::parse(desc).expect("failed to parse").part1();
-                let ans2 = Self::parse(desc).expect("failed to parse").part2();
+                let ans1 = Self::parse(desc).expect(&parse_error).part1();
+                let ans2 = Self::parse(desc).expect(&parse_error).part2();
                 Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,

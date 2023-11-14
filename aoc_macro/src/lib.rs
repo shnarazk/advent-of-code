@@ -4,6 +4,7 @@ use {
     std::str::FromStr,
     syn::{parse::*, parse_macro_input, ImplItem, ItemImpl},
 };
+mod color;
 
 struct Args {
     items: Vec<syn::ExprLit>,
@@ -91,14 +92,19 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     let day_from: usize = 1;
     let day_to: usize = vars.items.get(1).map_or(25, to_usize);
     let match_body: String = format!(
-        "match day {{ {} _=> panic!(\"an invalid day\"), }}\n",
+        "match day {{ {} _=> panic!(\"{}an invalid day{}\"), }}\n",
         (day_from..=day_to)
             .map(|d| format!(
-                "{} => {{ println!(\"{{}}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",
-                d, year, d,
+                "{} => {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",
+                d,
+                color::BLUE,
+                color::RESET,
+                year, d,
             ))
             .collect::<Vec<String>>()
             .join("\n"),
+        color::RED,
+        color::RESET,
     );
     TokenStream::from_str(&match_body).unwrap()
 }
