@@ -61,7 +61,7 @@ pub fn main() {
         #[cfg(feature = "y2022")]
         2022 => aoc_arms!(2022),
         #[cfg(feature = "y2023")]
-        2023 => aoc_arms!(2023, 1),
+        2023 => aoc_arms!(2023, 5),
         _ => println!("invalid year: {year}"),
     };
 }
