@@ -19,19 +19,19 @@ use adventofcode::y2022;
 use adventofcode::y2023;
 
 use {
-    adventofcode::{aoc_arms, framework::AdventOfCode, Description},
+    adventofcode::{aoc_arms, color, framework::AdventOfCode, Description},
     std::env::args,
 };
 
 pub fn main() {
     let arg = args().skip(1).collect::<Vec<String>>();
     if arg.is_empty() {
-        println!("USAGE:");
+        println!("{}USAGE:", color::RED);
         println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/YYYY/input-dayDD.txtを入力として実行");
         println!(
             " $0 YYYY DD P\t\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD.txtを入力として実行"
         );
-        println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD-TTT.txtを入力として実行");
+        println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD-TTT.txtを入力として実行{}", color::RESET);
         panic!();
     }
     let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
