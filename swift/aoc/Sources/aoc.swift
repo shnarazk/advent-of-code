@@ -11,9 +11,16 @@ struct Aoc: ParsableCommand, Decodable {
   @Argument(help: "part [0-3]")
   public var part: Int = 0
 
+  @Argument(help: "surfix part of file name for tests")
+  public var test: String = ""
+
   public var dataFile: String {
     let d = String(format: "%02d", day)
-    return "../../data/2022/input-day\(d).txt"
+    if test.isEmpty {
+      return "../../data/2022/input-day\(d).txt"
+    } else {
+      return "../../data/2022/input-day\(d)-\(test).txt"
+    }
   }
 
   public func run() throws {
