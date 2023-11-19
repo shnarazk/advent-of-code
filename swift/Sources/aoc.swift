@@ -17,9 +17,9 @@ struct Aoc: ParsableCommand, Decodable {
   public var dataFile: String {
     let d = String(format: "%02d", day)
     if test.isEmpty {
-      return "../../data/2022/input-day\(d).txt"
+      return "../data/2022/input-day\(d).txt"
     } else {
-      return "../../data/2022/input-day\(d)-\(test).txt"
+      return "../data/2022/input-day\(d)-\(test).txt"
     }
   }
 
