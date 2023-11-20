@@ -14,11 +14,10 @@ let package = Package(
       dependencies: [
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "Y2022",
+        "Y2016",
       ]
     ),
-    .target(
-      name: "Y2022",
-      dependencies: []
-    ),
+    .target(name: "Y2022", dependencies: []),
+    .target(name: "Y2016", dependencies: []),
   ]
 )

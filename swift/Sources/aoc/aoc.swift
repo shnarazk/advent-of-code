@@ -2,6 +2,7 @@
 // https://docs.swift.org/swift-book
 import ArgumentParser
 import Foundation
+import Y2016
 import Y2022
 
 @main
@@ -41,6 +42,12 @@ struct Aoc: ParsableCommand, Decodable {
       switch day {
       case 1: Y2022.day01(data)
       case 2: Y2022.day02(data)
+      default: fatalError()
+      }
+    case 2016:
+      switch day {
+      case 18: Y2016.day18(data)
+      // case 2: Y2016.day02(data)
       default: fatalError()
       }
     default: fatalError()
