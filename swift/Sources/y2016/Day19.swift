@@ -5,21 +5,11 @@
 //  Created by 楢崎修二 on 2022/06/14.
 //
 
-import Foundation
-
-class Day19 {
+public func day19(_ data: String) {
   let input = 3_014_603
-  var line: [Bool] = []
-  var inputFile: String = "../data/2016/input-day18.txt"
-  var delimiter: String = "\n"
-  func insert() {}
-  init() {}
-
   func part1() {
     var next = [input]
-    for i in 1...input {
-      next.append(i + 1)
-    }
+    next.append(contentsOf: Array(2...input + 1))
     next[input] = 1
     var index = 1
     while next[index] != index {
@@ -27,13 +17,11 @@ class Day19 {
       next[index] = i
       index = i
     }
-    print("\(index)")
+    print("Part 2: \(index)")
   }
   func part2() {
     var next = [input]
-    for i in 1...input {
-      next.append(i + 1)
-    }
+    next.append(contentsOf: Array(2...input + 1))
     next[input] = 1
     var remain = input
     var index = input / 2
@@ -48,6 +36,8 @@ class Day19 {
         dist -= 1
       }
     }
-    print("\(index)")
+    print("Part 2: \(index)")
   }
+  part1()
+  part2()
 }
