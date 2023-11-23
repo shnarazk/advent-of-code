@@ -13,7 +13,7 @@ struct Aoc: ParsableCommand, Decodable {
   @Argument(help: "day [1-25]")
   public var day: Int = 0
 
-  @Argument(help: "part [0-3]")
+  @Option(help: "part [0-3]")
   public var part: Int = 0
 
   @Argument(help: "surfix part of file name for tests")
@@ -29,7 +29,7 @@ struct Aoc: ParsableCommand, Decodable {
   }
 
   public func run() throws {
-    print("\u{001B}[34mAoC: \(year)-\(day), part: \(part), file: \(dataFile)\u{001B}[0m")
+    print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
     let data: String = try String(contentsOf: URL(fileURLWithPath: dataFile))
     switch year {
     case 2023:
@@ -42,6 +42,7 @@ struct Aoc: ParsableCommand, Decodable {
       switch day {
       case 1: Y2022.day01(data)
       case 2: Y2022.day02(data)
+      case 3: Y2022.day03(data)
       default: fatalError()
       }
     case 2016:
