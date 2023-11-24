@@ -17,7 +17,7 @@ public func day03(_ data: String) {
       let setA = Set(l.prefix(through: half - 1))
       let setB = Set(l.suffix(from: half))
       let ch = setA.intersection(setB).first!.asciiValue!
-      if Z < ch { sum += Int(ch - a) } else { sum += Int(ch - A + 26) }
+      sum += Int(Z < ch ? ch - a : ch - A + 26)
     }
     print("Part1: \(sum)")
   }
