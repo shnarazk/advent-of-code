@@ -35,19 +35,10 @@ public func day05(_ data: String) {
   for i in (Int(0)...width).map({ 1 + 4 * $0 }).filter({ $0 < width }) {
     state.append(s.map({ $0[i] }).filter({ $0 != " " }))
   }
-  // print("state: \(state)")
-  // print("move: \(moves)")
   func part(state: [Tower], moves: [Move], part: Int) {
     let s = Towers(state)
-    for m in moves {
-      s.move(m, flip: part == 1)
-    }
+    moves.forEach { s.move($0, flip: part == 1) }
     print("Part1: \(s.tops())")
-  }
-
-  func part2(state: [Tower], moves: [Move]) {
-    // var state = state
-    print("Part1: \(state.count)")
   }
   part(state: state, moves: moves, part: 1)
   part(state: state, moves: moves, part: 2)
