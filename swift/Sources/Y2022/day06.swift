@@ -1,14 +1,15 @@
 public func day06(_ data: String) {
-  let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
-  func part1(_ lines: [String.SubSequence]) {
-    // var lines = lines
-    print("Part1: \(1)")
+  func part(_ line: String, windows: Int) {
+    let l = Array(line)
+    for i in 0...l.count - windows {
+      var bag: Set<Character> = Set()
+      for j in 0..<windows { bag.insert(l[i + j]) }
+      if bag.count == windows {
+        print("Part1: \(i + windows)")
+        return
+      }
+    }
   }
-
-  func part2(_ lines: [String.SubSequence]) {
-    // var lines = lines
-    print("Part2: \(2)")
-  }
-  part1(lines)
-  part2(lines)
+  part(data, windows: 4)
+  part(data, windows: 14)
 }
