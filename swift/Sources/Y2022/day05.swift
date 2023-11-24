@@ -6,13 +6,20 @@ class Towers {
   init(_ t: [Tower]) {
     tower = t
   }
-  func move(_ m: Move) {
-    let (n, from, to) = m
+  func move(_ m: Move, flip: Bool) {
+    var (n, from, to) = m
+    from -= 1
+    to -= 1
     var x = Array(tower[from].prefix(upTo: n))
     tower[from] = Array(tower[from].dropFirst(n))
+    if flip {
+      x.reverse()
+    }
     x.append(contentsOf: tower[to])
     tower[to] = x
-    return
+  }
+  func tops() -> String {
+    return String(tower.map({ $0.first! }))
   }
 }
 
@@ -28,20 +35,20 @@ public func day05(_ data: String) {
   for i in (Int(0)...width).map({ 1 + 4 * $0 }).filter({ $0 < width }) {
     state.append(s.map({ $0[i] }).filter({ $0 != " " }))
   }
-  print(state)
-  print(moves)
-  func part1(state: [Tower], moves: [Move]) {
+  // print("state: \(state)")
+  // print("move: \(moves)")
+  func part(state: [Tower], moves: [Move], part: Int) {
     let s = Towers(state)
     for m in moves {
-      s.move(m)
+      s.move(m, flip: part == 1)
     }
-    print("Part1: \(state.count)")
+    print("Part1: \(s.tops())")
   }
 
   func part2(state: [Tower], moves: [Move]) {
     // var state = state
     print("Part1: \(state.count)")
   }
-  part1(state: state, moves: moves)
-  part2(state: state, moves: moves)
+  part(state: state, moves: moves, part: 1)
+  part(state: state, moves: moves, part: 2)
 }
