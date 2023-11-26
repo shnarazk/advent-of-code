@@ -139,7 +139,6 @@ pub trait AdventOfCode: fmt::Debug + Default {
         }
         fn load_data(desc: &Description) -> Result<String, ParseError> {
             match desc {
-                Description::TestData(s) if s.is_empty() => Err(ParseError),
                 Description::TestData(s) => Ok(s.to_string()),
                 _ => Err(ParseError),
             }
