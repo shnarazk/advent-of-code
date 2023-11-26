@@ -20,30 +20,37 @@ use adventofcode::y2023;
 
 use {
     adventofcode::{aoc_arms, color, framework::AdventOfCode, Description},
-    std::env::args,
+    clap::Parser,
+    std::time::Instant,
 };
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Arguments {
+    /// Target year like 2023
+    #[arg(short, long, default_value_t = 2023)]
+    year: usize,
+    #[arg(short, long, default_value_t = 3)]
+    part: usize,
+    /// Target day like 1
+    day: usize,
+    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
+    alt: Option<String>,
+}
+
 pub fn main() {
-    let arg = args().skip(1).collect::<Vec<String>>();
-    if arg.is_empty() {
-        println!("{}USAGE:", color::RED);
-        println!(" $0 YYYY DD\t\tYYYY年DD日目のパート{{1, 2}}をdata/YYYY/input-dayDD.txtを入力として実行");
-        println!(
-            " $0 YYYY DD P\t\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD.txtを入力として実行"
-        );
-        println!(" $0 YYYY DD P TTT\tYYYY年DD日目のパートPをdata/YYYY/input-dayDD-TTT.txtを入力として実行{}", color::RESET);
-        panic!();
-    }
-    let parse = |s: Option<&String>, d, e| s.map_or_else(|| d, |s| s.parse().expect(e));
-    let year = parse(arg.get(0), 2021, "wrong year");
-    let day = parse(arg.get(1), 1, "wrong day");
-    let part = parse(arg.get(2), 3, "wrong part");
-    let desc: Description = match arg.get(3) {
+    let argument = Arguments::parse();
+    assert!(0 < argument.day && argument.day <= 25);
+    let day = argument.day;
+    assert!(argument.part <= 3);
+    let part = argument.part;
+    let desc = match argument.alt {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
         Some(ext) => Description::FileTag(ext.to_string()),
         None => Description::None,
     };
-    match year {
+    let beg = Instant::now();
+    match argument.year {
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
         #[cfg(feature = "y2016")]
@@ -62,6 +69,13 @@ pub fn main() {
         2022 => aoc_arms!(2022),
         #[cfg(feature = "y2023")]
         2023 => aoc_arms!(2023, 5),
-        _ => println!("invalid year: {year}"),
+        _ => println!("invalid year: {}", argument.year),
     };
+    let end = Instant::now();
+    println!(
+        "{}Eexecution time: {} sec.{}",
+        color::RED,
+        (end - beg).as_secs_f32(),
+        color::RESET
+    );
 }
