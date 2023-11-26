@@ -73,9 +73,9 @@ pub fn main() {
     };
     let end = Instant::now();
     println!(
-        "{}Eexecution time: {} sec.{}",
+        "{}# Execution time: {:.1} msec.{}",
         color::RED,
-        (end - beg).as_secs_f32(),
+        (end - beg).as_secs_f64() * 1000.0,
         color::RESET
     );
 }
