@@ -199,7 +199,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
             }
             1 => {
                 println!(
-                    "{}# year: {}, day: {}, part: 1, data: {}{}",
+                    "{}# year: {}, day: {}, part: 1, input: {}{}",
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
@@ -210,7 +210,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
             }
             2 => {
                 println!(
-                    "{}# year: {}, day: {}, part: 2, data: {}{}",
+                    "{}# year: {}, day: {}, part: 2, input: {}{}",
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
@@ -221,7 +221,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
             }
             3 => {
                 println!(
-                    "{}# year: {}, day: {}, data: {}{}",
+                    "{}# year: {}, day: {}, input: {}{}",
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
