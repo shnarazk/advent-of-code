@@ -17,7 +17,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         dbg!(self.to_u32());
     }
     fn part1(&mut self) -> Self::Output1 {

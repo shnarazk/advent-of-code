@@ -62,7 +62,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| Field::try_from(c).unwrap()).collect());
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 self.map.insert((j as isize, i as isize), *c);

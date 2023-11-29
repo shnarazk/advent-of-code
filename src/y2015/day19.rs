@@ -72,7 +72,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.dic.insert("e".to_string(), self.num_atom);
         self.num_atom += 1;
         // dbg!(&self.rule);

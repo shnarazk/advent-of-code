@@ -54,7 +54,7 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {

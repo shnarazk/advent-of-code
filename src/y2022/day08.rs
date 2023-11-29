@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
         );
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (y, l) in self.line.iter().enumerate() {
             for (x, h) in l.iter().enumerate() {
                 self.map.insert((y, x), *h);

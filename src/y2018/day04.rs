@@ -102,7 +102,7 @@ impl AdventOfCode for Puzzle {
         }
         Err(ParseError)
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.line.sort_by_key(|e| e.timestamp());
         dbg!(&self.line.len());
     }

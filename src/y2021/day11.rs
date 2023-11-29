@@ -103,7 +103,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(line_parser::to_digits(block)?);
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
     }

@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
         self.line.push((chars[0], chars[2]));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {

@@ -25,7 +25,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // Begin in state A.
         // Perform a diagnostic checksum after 12172063 steps.
         self.step = 12172063;

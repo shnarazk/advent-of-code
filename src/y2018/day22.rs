@@ -64,7 +64,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.depth = 3066;
         self.target = (726, 13);
         // self.depth = 510;

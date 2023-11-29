@@ -50,7 +50,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for st in self.stacks.values_mut() {
             st.reverse();
         }

@@ -216,7 +216,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(Block { id: n, pos: v });
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // self.build();
     }
     fn part1(&mut self) -> Self::Output1 {

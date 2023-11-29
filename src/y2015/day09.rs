@@ -73,7 +73,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (c0, c1, d) in self.line.iter() {
             self.path.insert((c0.to_string(), c1.to_string()), *d);
             self.path.insert((c1.to_string(), c0.to_string()), *d);

@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
         self.line = block.to_string();
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {

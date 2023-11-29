@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(block.parse::<usize>()?);
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         dbg!(self.line.iter().sum::<usize>() / 3);
     }
     fn part1(&mut self) -> Self::Output1 {

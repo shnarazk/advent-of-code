@@ -35,7 +35,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(i);
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.max_x = self
             .line
             .iter()

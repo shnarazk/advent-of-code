@@ -39,7 +39,7 @@ impl AdventOfCode for Puzzle {
         );
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for line in self.line.iter() {
             for start_end in line.windows(2) {
                 let dx: isize = (start_end[1].0 as isize - start_end[0].0 as isize).signum();

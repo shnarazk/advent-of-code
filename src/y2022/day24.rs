@@ -61,7 +61,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(block.chars().collect::<Vec<char>>());
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.height = self.line.len() - 2;
         self.width = self.line[0].len() - 2;
         self.start.1 = self.line[0]

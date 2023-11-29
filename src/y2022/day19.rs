@@ -184,7 +184,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line);
         dbg!(&self.line.len());
     }

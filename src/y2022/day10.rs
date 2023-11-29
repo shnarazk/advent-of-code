@@ -34,7 +34,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.register = 1;
         dbg!(&self.line.len());
     }

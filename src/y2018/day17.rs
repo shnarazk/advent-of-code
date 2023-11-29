@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line.len());
         for (horizontal, base, from, to) in self.line.iter() {
             for i in *from..=*to {

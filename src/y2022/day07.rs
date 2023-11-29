@@ -77,7 +77,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         let mut pwd = "/".to_string();
         for line in self.line.iter() {
             match line {

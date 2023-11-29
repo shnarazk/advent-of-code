@@ -120,7 +120,7 @@ impl AdventOfCode for Puzzle {
         dbg!(block);
         Err(ParseError)
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {

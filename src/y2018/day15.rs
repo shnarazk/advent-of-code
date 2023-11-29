@@ -305,7 +305,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         let mut count = 1;
         for (j, l) in self.line.iter_mut().enumerate() {
             for (i, c) in l.iter_mut().enumerate() {

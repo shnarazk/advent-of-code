@@ -42,7 +42,7 @@ impl AdventOfCode for Puzzle {
         );
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, h) in l.iter().enumerate() {
                 match h {

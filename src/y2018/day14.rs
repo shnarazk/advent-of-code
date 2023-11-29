@@ -12,7 +12,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.line = 635041;
     }
     fn part1(&mut self) -> Self::Output1 {

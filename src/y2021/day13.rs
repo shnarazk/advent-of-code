@@ -73,7 +73,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         let height = self.line.iter().map(|(y, _)| y).max().unwrap() + 1;
         let width = self.line.iter().map(|(_, x)| x).max().unwrap() + 1;
         self.grid = Vec::new();

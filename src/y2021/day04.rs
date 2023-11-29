@@ -67,7 +67,7 @@ impl AdventOfCode for Puzzle {
         self.board.push(vec);
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.num_col = self.board[0][0].len();
         self.num_row = self.board[0].len();
         self.order = self.hands.clone();

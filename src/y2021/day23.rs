@@ -171,7 +171,7 @@ impl AdventOfCode for Puzzle {
         self.line.append(&mut line_parser::to_chars(block)?);
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         self.line.retain(|c| *c != '#' && *c != '.');
         dbg!(&self.line.len());
     }

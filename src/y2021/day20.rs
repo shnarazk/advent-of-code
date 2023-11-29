@@ -27,7 +27,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // println!("{}", self.enhancer.iter().collect::<String>());
         // println!("{:?}", &self.image);
         // for v in self.image.iter() {

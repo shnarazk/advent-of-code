@@ -34,7 +34,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (label, flow, linked) in self.line.iter() {
             self.map.insert(label.clone(), (*flow, linked.clone()));
         }

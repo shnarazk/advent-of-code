@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
             .push((segment[1].to_string(), segment[2].to_string()));
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         // dbg!(&self.line);
         for (a, b) in self.line.iter() {
             self.orbit.insert((a.clone(), b.clone()));

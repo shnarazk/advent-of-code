@@ -117,11 +117,11 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// An optional function to wrap up initialization.
     /// ## A typical implementation example
     /// ```ignore
-    /// fn after_insert(&mut self) {
+    /// fn wrap_up(&mut self) {
     ///     self.num_data = self.data.len();
     /// }
     /// ```
-    fn after_insert(&mut self) {}
+    fn wrap_up(&mut self) {}
     /// # UNDER THE HOOD
     fn load(description: impl Borrow<Description>) -> Result<String, ParseError> {
         fn load_file(file_name: String) -> Result<String, ParseError> {
@@ -162,7 +162,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                 instance.insert(block)?;
             }
         }
-        instance.after_insert();
+        instance.wrap_up();
         Ok(instance)
     }
     /// the solver for part1

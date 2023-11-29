@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         for (i, v) in self.line.iter().enumerate() {
             self.memory.insert(i, *v);
         }

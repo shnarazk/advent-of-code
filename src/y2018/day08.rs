@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_usizes(block, ' ')?;
         Ok(())
     }
-    fn after_insert(&mut self) {
+    fn wrap_up(&mut self) {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
