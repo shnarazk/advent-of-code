@@ -6,6 +6,10 @@ So it isn't a great, general purpose language.
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
+#### update: 2023-11-30
+
+Upcoming 0.4 may introduce `recur` again. A right step toward a general-purpose language!
+
 ## Performance against BQN on M1
 
 #### 0.0.22
