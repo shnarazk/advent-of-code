@@ -5,8 +5,7 @@
 * [adventofcode.com](https://adventofcode.com/)
 * [r/adventofcode](https://www.reddit.com/r/adventofcode/)
 
-I solve all the problems in Rust and sometimes use BQN and Pharo too.
-There are programs in Cuis-Smalltalk and Swift. But I don't feel great. They will be removed.
+I solve all the problems in Rust and sometimes use some other interesting languages.
 
 ## 2023
 
