@@ -1,7 +1,7 @@
-typealias Tower = [Character]
-typealias Move = (Int, Int, Int)
+private typealias Tower = [Character]
+private typealias Move = (Int, Int, Int)
 
-class Towers {
+private class Towers {
   var tower: [Tower] = []
   init(_ t: [Tower]) {
     tower = t
