@@ -4,6 +4,7 @@ import ArgumentParser
 import Foundation
 import Y2016
 import Y2022
+import Y2023
 
 @main
 struct Aoc: ParsableCommand, Decodable {
@@ -34,7 +35,7 @@ struct Aoc: ParsableCommand, Decodable {
     switch year {
     case 2023:
       switch day {
-      // case 1: Y2022.day01(data)
+      case 1: Y2023.day01(data)
       // case 2: Y2022.day02(data)
       default: fatalError()
       }
