@@ -1,14 +1,18 @@
 # Try Uiua!
 
-Uiua lacks recursion. We can't code Ackermann function nor Takeuchi function.
-So it isn't a great, general purpose language.
-
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
 #### update: 2023-11-30
 
 Upcoming 0.4 may introduce `recur` again. A right step toward a general-purpose language!
+
+Behold Ackermann in the upcomming Uiua-0.4!
+
+```
+# Experimental!
+Ackermann ← ↬(|2 (1;|+1;||2 ↫ ⊃(-1∘)(1;;)||2 ↫ ⊃(-1)(|2 ↫ ⊙(-1))) +×2∩(≠0),,)
+```
 
 ## Performance against BQN on M1
 
