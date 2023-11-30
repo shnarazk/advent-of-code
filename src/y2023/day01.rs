@@ -2,11 +2,12 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
+        line_parser, progress, regex,
     },
     std::collections::HashMap,
 };
@@ -34,6 +35,10 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn wrap_up(&mut self) {
+        for i in 0..100 {
+            progress!(i);
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
