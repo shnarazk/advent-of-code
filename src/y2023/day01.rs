@@ -3,41 +3,41 @@ use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<Vec<char>>,
-    line2: Vec<Vec<char>>,
+    line: Vec<Vec<u8>>,
+    line2: Vec<Vec<u8>>,
 }
 
 #[aoc(2023, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.chars().collect::<Vec<_>>());
-        let mut b = block.to_owned();
-        let subst = [
-            ("one", '1'),
-            ("two", '2'),
-            ("three", '3'),
-            ("four", '4'),
-            ("five", '5'),
-            ("six", '6'),
-            ("seven", '7'),
-            ("eight", '8'),
-            ("nine", '9'),
-        ];
-        let mut acc: Vec<char> = Vec::new();
-        while !b.is_empty() {
-            let mut bs = b.chars();
-            let mut c = bs.next().unwrap();
-            for (r, s) in subst {
-                if b.starts_with(r) {
-                    c = s;
-                    break;
+        static SUBST: once_cell::sync::OnceCell<Vec<(Vec<u8>, u8)>> =
+            once_cell::sync::OnceCell::new();
+        SUBST.get_or_init(|| {
+            vec![
+                (b"one".to_vec(), b'1'),
+                (b"two".to_vec(), b'2'),
+                (b"three".to_vec(), b'3'),
+                (b"four".to_vec(), b'4'),
+                (b"five".to_vec(), b'5'),
+                (b"six".to_vec(), b'6'),
+                (b"seven".to_vec(), b'7'),
+                (b"eight".to_vec(), b'8'),
+                (b"nine".to_vec(), b'9'),
+            ]
+        });
+        let b = block.bytes().collect::<Vec<_>>();
+        self.line.push(b.clone());
+        let acc: Vec<u8> = (0..b.len())
+            .map(|i| {
+                for (r, s) in SUBST.get().unwrap() {
+                    if b[i..].starts_with(&r) {
+                        return *s;
+                    }
                 }
-            }
-            acc.push(c);
-            // Wow, letters can be overlapped!
-            b = bs.collect::<String>();
-        }
+                b[i]
+            })
+            .collect::<Vec<_>>();
         self.line2.push(acc);
         Ok(())
     }
@@ -49,13 +49,15 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn sum(l: &[Vec<char>]) -> usize {
+fn sum(l: &[Vec<u8>]) -> usize {
     l.iter()
         .map(|v| {
-            let d = v.iter().filter(|c| c.is_digit(10)).collect::<Vec<_>>();
-            vec![d[0], d[d.len() - 1]]
-                .into_iter()
-                .collect::<String>()
+            let d = v
+                .iter()
+                .filter(|c| (**c as char).is_digit(10))
+                .collect::<Vec<_>>();
+            String::from_utf8(vec![*d[0], *d[d.len() - 1]])
+                .unwrap()
                 .parse::<usize>()
                 .unwrap()
         })
