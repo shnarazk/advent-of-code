@@ -32,6 +32,7 @@ struct Aoc: ParsableCommand, Decodable {
   public func run() throws {
     print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
     let data: String = try String(contentsOf: URL(fileURLWithPath: dataFile))
+    let beg = Date()
     switch year {
     case 2023:
       switch day {
@@ -60,5 +61,8 @@ struct Aoc: ParsableCommand, Decodable {
       }
     default: fatalError()
     }
+    let end = Date()
+    let t = String(format: "%.2f", end.timeIntervalSince(beg) * 1000)
+    print("\u{001B}[34m# Elapsed time: \(t) msec\u{001B}[0m")
   }
 }
