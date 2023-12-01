@@ -19,3 +19,11 @@ Evaluate ← |1 parse⊂⊃(⊡0)(⊡¯1)Digits ⊔
 ---
 
 &p$"Part1: _" /+≡(Evaluate)Data
+
+Mnemonic ← {"零" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"}
+Convert ← |1 ≡(|2 (⋅∘|+@0)>0.)/+×⇡10≡(⌕⊔) Mnemonic ¤.
+---
+⍤ :≍,"a9ine89in8ight0" Convert "anine8nineight0"
+---
+
+&p$"Part2: _" /+≡(Evaluate Convert ⊔)Data
