@@ -26,6 +26,7 @@ impl AdventOfCode for Puzzle {
                 b"nine".to_vec(),
             ]
         });
+        let firsts = [b'e', b'f', b'n', b'o', b's', b't'];
         let b = block.bytes().collect::<Vec<_>>();
         let mut not_found = true;
         for i in 0..b.len() {
@@ -38,7 +39,7 @@ impl AdventOfCode for Puzzle {
                 self.sum1 += n;
                 break;
             }
-            if not_found {
+            if not_found && firsts.contains(&b[i]) {
                 for (j, r) in subst.iter().enumerate() {
                     if b[i..].starts_with(&r) {
                         self.sum2 += 10 * (j + 1);
@@ -59,7 +60,7 @@ impl AdventOfCode for Puzzle {
                 self.sum1 += n;
                 break;
             }
-            if not_found {
+            if not_found && firsts.contains(&b[i]) {
                 for (j, r) in subst.iter().enumerate() {
                     if b[i..].starts_with(&r) {
                         self.sum2 += j + 1;
