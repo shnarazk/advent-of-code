@@ -7,13 +7,13 @@ pub struct Puzzle {
     line2: Vec<Vec<u8>>,
 }
 
+static SUBST: once_cell::sync::OnceCell<Vec<(Vec<u8>, u8)>> = once_cell::sync::OnceCell::new();
+
 #[aoc(2023, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        static SUBST: once_cell::sync::OnceCell<Vec<(Vec<u8>, u8)>> =
-            once_cell::sync::OnceCell::new();
-        SUBST.get_or_init(|| {
+        let subst = SUBST.get_or_init(|| {
             vec![
                 (b"one".to_vec(), b'1'),
                 (b"two".to_vec(), b'2'),
@@ -26,19 +26,17 @@ impl AdventOfCode for Puzzle {
                 (b"nine".to_vec(), b'9'),
             ]
         });
-        let b = block.bytes().collect::<Vec<_>>();
+        let mut b = block.bytes().collect::<Vec<_>>();
         self.line.push(b.clone());
-        let acc: Vec<u8> = (0..b.len())
-            .map(|i| {
-                for (r, s) in SUBST.get().unwrap() {
-                    if b[i..].starts_with(&r) {
-                        return *s;
-                    }
+        (0..b.len()).for_each(|i| {
+            for (r, s) in subst {
+                if b[i..].starts_with(&r) {
+                    b[i] = *s;
+                    break;
                 }
-                b[i]
-            })
-            .collect::<Vec<_>>();
-        self.line2.push(acc);
+            }
+        });
+        self.line2.push(b);
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -56,10 +54,7 @@ fn sum(l: &[Vec<u8>]) -> usize {
                 .iter()
                 .filter(|c| (**c as char).is_digit(10))
                 .collect::<Vec<_>>();
-            String::from_utf8(vec![*d[0], *d[d.len() - 1]])
-                .unwrap()
-                .parse::<usize>()
-                .unwrap()
+            10 * (*d[0] - ('0' as u8)) as usize + (*d[d.len() - 1] - ('0' as u8)) as usize
         })
         .sum()
 }
