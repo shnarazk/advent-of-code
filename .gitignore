@@ -12,5 +12,6 @@ Cargo.lock
 .DS_Store
 *~
 
-/data/*/*.txt
+/data/*/
+# /data/*/*.txt
 
