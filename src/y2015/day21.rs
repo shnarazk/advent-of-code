@@ -106,7 +106,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (weapon, w) in WEAPONS.iter().enumerate() {
             for (armor, a) in ARMOR.iter().enumerate() {
                 for (ring, r) in RINGS.iter().enumerate() {

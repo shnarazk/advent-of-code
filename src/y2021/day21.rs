@@ -21,7 +21,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(segment[2].parse::<usize>()?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {

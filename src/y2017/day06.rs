@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_usizes(block, '\n')?;
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.len = self.line.len();
         dbg!(self.len);
     }

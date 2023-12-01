@@ -40,7 +40,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.line.sort_unstable();
         let mut w = 0;
         for cell in self.line.iter() {

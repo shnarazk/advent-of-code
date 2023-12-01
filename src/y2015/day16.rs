@@ -58,7 +58,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(sue);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(&self.line);
         // assert_eq!(self.line.len(), 500);
     }

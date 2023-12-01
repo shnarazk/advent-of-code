@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(self
             .line
             .iter()

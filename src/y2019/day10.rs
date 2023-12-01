@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c == '#').collect::<Vec<bool>>());
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         let height = self.line.len();
         let width = self.line[0].len();
         dbg!(height, width);

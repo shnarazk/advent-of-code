@@ -156,7 +156,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(DataSegment { pattern, target });
         Ok(())
     }
-    fn wrap_up(&mut self) {}
+    fn end_of_data(&mut self) {}
     fn part1(&mut self) -> usize {
         self.line
             .iter()

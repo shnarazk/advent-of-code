@@ -193,7 +193,7 @@ impl AdventOfCode for Puzzle {
         self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {

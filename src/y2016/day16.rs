@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.line = "10001110011110000"
             .chars()
             .map(|c| c == '1')

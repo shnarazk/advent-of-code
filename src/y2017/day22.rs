@@ -73,7 +73,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(self.line.len());
         for (j, line) in self.line.iter().enumerate() {
             for (i, b) in line.iter().enumerate() {

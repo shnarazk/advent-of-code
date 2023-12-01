@@ -21,7 +21,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(block.parse::<isize>()?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.len = self.line.len();
         self.index_zero = self
             .line

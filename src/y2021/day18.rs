@@ -211,7 +211,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (i, l) in self.line.iter().enumerate() {
             println!("{:>2} {:?}", i, &l);
         }

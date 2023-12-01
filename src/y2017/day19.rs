@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c as u8).collect::<Vec<_>>());
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 if *c != b' ' {

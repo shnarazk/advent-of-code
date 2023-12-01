@@ -106,7 +106,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (j, v) in self.line.iter().enumerate() {
             for (i, c) in v.iter().enumerate() {
                 self.map.insert((j, i), *c);

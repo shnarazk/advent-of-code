@@ -17,7 +17,7 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c as u8).collect::<Vec<_>>());
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {

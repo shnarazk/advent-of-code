@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.line = String::from("gdjjyniy");
     }
     fn part1(&mut self) -> Self::Output1 {

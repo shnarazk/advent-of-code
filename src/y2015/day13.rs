@@ -35,7 +35,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (p1, p2, _) in self.line.iter() {
             self.person.insert(p1.to_string());
             self.person.insert(p2.to_string());

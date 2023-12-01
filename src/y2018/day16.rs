@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
             .push(line_parser::to_usizes_spliting_with(block, &[' ', ','])?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(&self.rules.len());
         dbg!(&self.line.len());
     }

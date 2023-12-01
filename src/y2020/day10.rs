@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
         self.vec.push(block.parse::<usize>()?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.vec.insert(0, 0);
     }
     fn part1(&mut self) -> usize {

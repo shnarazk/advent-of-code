@@ -68,7 +68,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(line_parser::to_digits(block)?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         // for l in self.line.iter() {
         //     println!{"{:?}", &l};
         // }

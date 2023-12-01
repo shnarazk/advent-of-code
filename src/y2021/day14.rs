@@ -32,7 +32,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         // dbg!(&self.line);
         for (l, r, m) in self.line.iter() {
             self.rule.insert((*l, *r), *m);

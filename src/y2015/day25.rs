@@ -25,7 +25,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for j in 1..=6 {
             for i in 1..=6 {
                 print!("{:>4}", at(j, i));

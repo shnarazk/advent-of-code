@@ -102,7 +102,7 @@ impl AdventOfCode for Puzzle {
         }
         Err(ParseError)
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.line.sort_by_key(|e| e.timestamp());
         dbg!(&self.line.len());
     }

@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(segment[2].parse::<usize>()?);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.factor = (16807, 48271);
         dbg!(&self.line);
     }

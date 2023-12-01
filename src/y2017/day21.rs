@@ -234,7 +234,7 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for l in self.line.iter() {
             // println!("{:?} => {:?}", l.0, l.1,);
             if l.0.len() == 4 {

@@ -57,7 +57,7 @@ impl AdventOfCode for Puzzle {
         }
         Err(ParseError)
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {

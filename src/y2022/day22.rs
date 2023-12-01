@@ -273,7 +273,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 if *c != ' ' {

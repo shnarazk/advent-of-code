@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(line);
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
         self.targets.sort_unstable();

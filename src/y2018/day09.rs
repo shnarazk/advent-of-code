@@ -13,7 +13,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn wrap_up(&mut self) {
+    fn end_of_data(&mut self) {
         // 410 players; last marble is worth 72059 points
         self.players = 410;
         self.points = 72059;
