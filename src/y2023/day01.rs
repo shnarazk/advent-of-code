@@ -1,16 +1,5 @@
 //! <https://adventofcode.com/2023/day/1>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, progress, regex,
-    },
-    std::collections::HashMap,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -36,51 +25,39 @@ impl AdventOfCode for Puzzle {
             ("nine", '9'),
         ];
         let mut acc: Vec<char> = Vec::new();
-        'next_char: while !b.is_empty() {
+        while !b.is_empty() {
+            let mut bs = b.chars();
+            let mut c = bs.next().unwrap();
             for (r, s) in subst {
                 if b.starts_with(r) {
-                    acc.push(s);
-                    // b = b.strip_prefix(r).unwrap().to_string();
-                    // Wow! letters can be overwapped!
-                    let mut bs = b.chars();
-                    let c = bs.next().unwrap();
-                    b = bs.collect::<String>();
-                    continue 'next_char;
+                    c = s;
+                    break;
                 }
             }
-            let mut bs = b.chars();
-            let c = bs.next().unwrap();
             acc.push(c);
+            // Wow, letters can be overlapped!
             b = bs.collect::<String>();
         }
         self.line2.push(acc);
         Ok(())
     }
-    fn wrap_up(&mut self) {}
     fn part1(&mut self) -> Self::Output1 {
-        self.line
-            .iter()
-            .map(|v| {
-                let d = v.iter().filter(|c| c.is_digit(10)).collect::<Vec<_>>();
-                vec![d[0], d[d.len() - 1]]
-                    .into_iter()
-                    .collect::<String>()
-                    .parse::<usize>()
-                    .unwrap()
-            })
-            .sum()
+        sum(&self.line)
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line2
-            .iter()
-            .map(|v| {
-                let d = v.iter().filter(|c| c.is_digit(10)).collect::<Vec<_>>();
-                vec![d[0], d[d.len() - 1]]
-                    .into_iter()
-                    .collect::<String>()
-                    .parse::<usize>()
-                    .unwrap()
-            })
-            .sum()
+        sum(&self.line2)
     }
+}
+
+fn sum(l: &[Vec<char>]) -> usize {
+    l.iter()
+        .map(|v| {
+            let d = v.iter().filter(|c| c.is_digit(10)).collect::<Vec<_>>();
+            vec![d[0], d[d.len() - 1]]
+                .into_iter()
+                .collect::<String>()
+                .parse::<usize>()
+                .unwrap()
+        })
+        .sum()
 }
