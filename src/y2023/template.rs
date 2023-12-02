@@ -16,6 +16,12 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
+// impl Default for Puzzle {
+//     fn default() -> Self {
+//         Puzzle { }
+//     }
+// }
+
 #[aoc(2023, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
