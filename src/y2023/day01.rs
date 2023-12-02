@@ -1,71 +1,73 @@
 //! <https://adventofcode.com/2023/day/1>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
+    table: [usize; 256],
+    subst: Vec<Vec<u8>>,
     sum1: usize,
     sum2: usize,
 }
 
-static SUBST: once_cell::sync::OnceCell<Vec<Vec<u8>>> = once_cell::sync::OnceCell::new();
+impl Default for Puzzle {
+    fn default() -> Self {
+        let mut table = [0usize; 256];
+        for i in 1..=9 {
+            table[b'0' as usize + i] = i;
+        }
+        for c in [b'e', b'f', b'n', b'o', b's', b't'] {
+            table[c as usize] = 10;
+        }
+        let subst = vec![
+            b"one".to_vec(),
+            b"two".to_vec(),
+            b"three".to_vec(),
+            b"four".to_vec(),
+            b"five".to_vec(),
+            b"six".to_vec(),
+            b"seven".to_vec(),
+            b"eight".to_vec(),
+            b"nine".to_vec(),
+        ];
+        Puzzle {
+            table,
+            subst,
+            sum1: 0,
+            sum2: 0,
+        }
+    }
+}
 
 #[aoc(2023, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let subst = SUBST.get_or_init(|| {
-            vec![
-                b"one".to_vec(),
-                b"two".to_vec(),
-                b"three".to_vec(),
-                b"four".to_vec(),
-                b"five".to_vec(),
-                b"six".to_vec(),
-                b"seven".to_vec(),
-                b"eight".to_vec(),
-                b"nine".to_vec(),
-            ]
-        });
-        let firsts = [b'e', b'f', b'n', b'o', b's', b't'];
         let b = block.bytes().collect::<Vec<_>>();
-        let mut not_found = true;
-        for i in 0..b.len() {
-            let x = b[i] - ('0' as u8);
-            if 1 <= x && x <= 9 {
-                let n = 10 * (x as usize);
-                if not_found {
-                    self.sum2 += n;
+        let len = b.len();
+        for dir in [0, 1] {
+            let scale = 10 - dir * 9;
+            let mut not_found = true;
+            for ii in 0..len {
+                let i = if dir == 1 { len - ii - 1 } else { ii };
+                let mut value = self.table[b[i] as usize];
+                if value == 0 {
+                    continue;
                 }
-                self.sum1 += n;
-                break;
-            }
-            if not_found && firsts.contains(&b[i]) {
-                for (j, r) in subst.iter().enumerate() {
-                    if b[i..].starts_with(&r) {
-                        self.sum2 += 10 * (j + 1);
-                        not_found = false;
-                        break;
+                if value < 10 {
+                    value *= scale;
+                    if not_found {
+                        self.sum2 += value;
                     }
+                    self.sum1 += value;
+                    break;
                 }
-            }
-        }
-        not_found = true;
-        for i in (0..b.len()).rev() {
-            let x = b[i] - ('0' as u8);
-            if 1 <= x && x <= 9 {
-                let n = x as usize;
                 if not_found {
-                    self.sum2 += n;
-                }
-                self.sum1 += n;
-                break;
-            }
-            if not_found && firsts.contains(&b[i]) {
-                for (j, r) in subst.iter().enumerate() {
-                    if b[i..].starts_with(&r) {
-                        self.sum2 += j + 1;
-                        not_found = false;
-                        break;
+                    for (j, r) in self.subst.iter().enumerate() {
+                        if b[i..].starts_with(&r) {
+                            self.sum2 += scale * (j + 1);
+                            not_found = false;
+                            break;
+                        }
                     }
                 }
             }
