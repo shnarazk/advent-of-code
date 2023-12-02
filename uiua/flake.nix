@@ -11,7 +11,7 @@
       uiua-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
          name = "aoc-uiua-driver-${version}";
          pname = "aoc-uiua-driver";
-         version = "20231105-2";
+         version = "20231202-1";
          src = self;
          installPhase = ''
            mkdir -p $out/bin;
