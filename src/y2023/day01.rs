@@ -63,7 +63,7 @@ impl AdventOfCode for Puzzle {
                 }
                 if not_found {
                     for (j, r) in self.subst.iter().enumerate() {
-                        if b[i..].starts_with(&r) {
+                        if b[i..].starts_with(r) {
                             self.sum2 += scale * (j + 1);
                             not_found = false;
                             break;
