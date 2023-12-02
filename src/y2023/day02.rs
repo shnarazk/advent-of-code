@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2023/day/2>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -16,20 +13,20 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.index += 1;
-        let parser = regex!(r"Game \d+: (.*)$");
-        let parser2 = regex!(r"(\d+) (red|green|blue)");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let x = segment[1]
+        let x = block
+            .split(": ")
+            .nth(1)
+            .unwrap()
             .split(';')
             .map(|set| {
                 let s = set
                     .split(", ")
                     .map(|b| {
-                        let c = parser2.captures(b).unwrap();
-                        match &c[2] {
-                            "red" => (c[1].to_owned().parse::<usize>().unwrap(), 0, 0),
-                            "green" => (0, c[1].to_owned().parse::<usize>().unwrap(), 0),
-                            "blue" => (0, 0, c[1].to_owned().parse::<usize>().unwrap()),
+                        let c = b.trim().split(' ').collect::<Vec<_>>();
+                        match c[1] {
+                            "red" => (c[0].to_owned().parse::<usize>().unwrap(), 0, 0),
+                            "green" => (0, c[0].to_owned().parse::<usize>().unwrap(), 0),
+                            "blue" => (0, 0, c[0].to_owned().parse::<usize>().unwrap()),
                             _ => panic!("cant"),
                         }
                     })
