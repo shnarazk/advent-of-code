@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
         let mut acc: Option<usize> = None;
         let mut pos_start = 0;
         for (j, c) in cs.iter().enumerate() {
-            if c.is_digit(10) {
+            if c.is_ascii_digit() {
                 let n = (*c as u8 - b'0') as usize;
                 if let Some(a) = acc {
                     acc = Some(a * 10 + n);
