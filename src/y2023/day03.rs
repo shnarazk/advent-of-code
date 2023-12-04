@@ -45,33 +45,32 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut sum = 0;
-        for ((y, x1, x2), val) in self.number.iter() {
-            if self
-                .symbol
-                .iter()
-                .any(|(sy, sx, _)| y.abs_diff(*sy) <= 1 && *x1 <= *sx + 1 && *sx <= *x2 + 1)
-            {
-                sum += val;
-            }
-        }
-        sum
+        self.number
+            .iter()
+            .map(|((y, x1, x2), val)| {
+                self.symbol
+                    .iter()
+                    .any(|(sy, sx, _)| y.abs_diff(*sy) <= 1 && *x1 <= *sx + 1 && *sx <= *x2 + 1)
+                    as usize
+                    * val
+            })
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut sum = 0;
-        for (y, x, _) in self.symbol.iter().filter(|d| d.2 == '*') {
-            let mut count = 0;
-            let mut s = 1;
-            for ((ny, x1, x2), val) in self.number.iter() {
-                if y.abs_diff(*ny) <= 1 && *x1 <= *x + 1 && *x <= *x2 + 1 {
-                    count += 1;
-                    s *= val;
-                }
-            }
-            if count == 2 {
-                sum += s;
-            }
-        }
-        sum
+        self.symbol
+            .iter()
+            .filter(|d| d.2 == '*')
+            .map(|(y, x, _)| -> usize {
+                let s = self
+                    .number
+                    .iter()
+                    .filter(|((ny, x1, x2), _)| {
+                        y.abs_diff(*ny) <= 1 && *x1 <= *x + 1 && *x <= *x2 + 1
+                    })
+                    .map(|(_, val)| *val)
+                    .collect::<Vec<_>>();
+                (s.len() == 2) as usize * s.iter().product::<usize>()
+            })
+            .sum::<usize>()
     }
 }
