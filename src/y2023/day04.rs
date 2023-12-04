@@ -1,45 +1,55 @@
 //! <https://adventofcode.com/2023/day/4>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    line_parser,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    card: Vec<[Vec<usize>; 2]>,
+    amount: Vec<usize>,
 }
 
 #[aoc(2023, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+        let mut vecs: [Vec<usize>; 2] = [Vec::new(), Vec::new()];
+        for (i, segment) in block.split(':').nth(1).unwrap().split(" | ").enumerate() {
+            vecs[i] = line_parser::to_usizes(segment, ' ').unwrap();
+        }
+        self.card.push(vecs);
+        self.amount.push(1);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
-        1
+        self.card
+            .iter()
+            .map(|[winning, numbers]| {
+                let is = winning
+                    .iter()
+                    .cloned()
+                    .filter(|e| numbers.contains(e))
+                    .collect::<Vec<_>>();
+                match is.len() {
+                    0 => 0,
+                    1 => 1,
+                    n => 2usize.pow(n as u32 - 1),
+                }
+            })
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        for (i, [winning, numbers]) in self.card.iter().enumerate() {
+            let n = winning
+                .iter()
+                .cloned()
+                .filter(|e| numbers.contains(e))
+                .count();
+            for j in (i + 1)..(i + 1 + n).min(self.card.len()) {
+                self.amount[j] += self.amount[i];
+            }
+        }
+        self.amount.iter().sum()
     }
 }
