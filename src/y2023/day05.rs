@@ -62,6 +62,7 @@ impl AdventOfCode for Puzzle {
             for (d, s, t) in trans.iter() {
                 let mapb = |pos: usize| (*s <= pos && pos < *t).then(|| *d + pos - *s);
                 let mape = |pos: usize| (*s <= pos && pos <= *t).then(|| *d + pos - *s);
+                let map = |b, e| (mapb(b).unwrap(), mape(e).unwrap());
                 let mut unhandled: Vec<Range> = Vec::new();
                 for r in ranges.iter() {
                     if (r.0 < *s) && (r.1 < *s) {
@@ -72,7 +73,7 @@ impl AdventOfCode for Puzzle {
                         // divide two segments
                         let div: usize = *s;
                         let r1: Range = (r.0, div);
-                        let r2: Range = (mapb(div).unwrap(), mape(r.1).unwrap());
+                        let r2: Range = map(div, r.1);
                         unhandled.push(r1);
                         handled.push(r2);
                         continue;
@@ -82,30 +83,28 @@ impl AdventOfCode for Puzzle {
                         let div1: usize = *s;
                         let div2: usize = *t;
                         let r1: Range = (r.0, div1);
-                        let r2: Range = (mapb(div1).unwrap(), mape(div2).unwrap());
+                        let r2: Range = map(div1, div2);
                         let r3: Range = (div2, r.1);
                         unhandled.push(r1);
                         handled.push(r2);
                         unhandled.push(r3);
                         continue;
                     }
-                    assert!(*s <= r.0);
                     if (r.0 <= *t) && (r.1 <= *t) {
                         // shifted the entire range
-                        let r0 = (mapb(r.0).unwrap(), mape(r.1).unwrap());
+                        let r0 = map(r.0, r.1);
                         handled.push(r0);
                         continue;
                     }
                     if (r.0 <= *t) && (*t < r.1) {
                         // divide two segments
                         let div: usize = *t;
-                        let r1: Range = (mapb(r.0).unwrap(), mape(div).unwrap());
+                        let r1: Range = map(r.0, div);
                         let r2: Range = (div, r.1);
                         handled.push(r1);
                         unhandled.push(r2);
                         continue;
                     }
-                    assert!(*t < r.0);
                     unhandled.push(*r);
                 }
                 ranges = unhandled;
