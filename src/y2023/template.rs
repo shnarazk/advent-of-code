@@ -34,8 +34,9 @@ impl AdventOfCode for Puzzle {
     //     Ok(segment[2].to_string())
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
+        dbg!(block);
+        // let parser = regex!(r"^(\d+)$");
+        // let segment = parser.captures(block).ok_or(ParseError)?;
         // self.line.push(segment[1].parse::<_>());
         Ok(())
     }
