@@ -39,7 +39,7 @@ impl AdventOfCode for Puzzle {
         for trans in self.line.iter() {
             for p in locs.iter_mut() {
                 for (d, s, t) in trans.iter() {
-                    let map = |pos: usize| (*s <= pos && pos < *t).then_some(*d + pos - *s);
+                    let map = |pos: usize| (*s <= pos && pos < *t).then(|| *d + pos - *s);
                     if let Some(d) = map(*p) {
                         *p = d;
                         break;
@@ -60,8 +60,8 @@ impl AdventOfCode for Puzzle {
         for trans in self.line.iter() {
             let mut handled: Vec<Range> = Vec::new();
             for (d, s, t) in trans.iter() {
-                let mapb = |pos: usize| (*s <= pos && pos < *t).then_some(*d + pos - *s);
-                let mape = |pos: usize| (*s <= pos && pos <= *t).then_some(*d + pos - *s);
+                let mapb = |pos: usize| (*s <= pos && pos < *t).then(|| *d + pos - *s);
+                let mape = |pos: usize| (*s <= pos && pos <= *t).then(|| *d + pos - *s);
                 let mut unhandled: Vec<Range> = Vec::new();
                 for r in ranges.iter() {
                     if (r.0 < *s) && (r.1 < *s) {
