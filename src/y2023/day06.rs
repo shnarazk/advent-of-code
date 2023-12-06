@@ -45,6 +45,20 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let (t, d) = self.setting2;
-        (1..t - 1).filter(|x| *x * (t - *x) > d).count()
+        let a = seek(t, d, (0, t / 2), 1);
+        let b = seek(t, d, (a.1, t), -1);
+        b.0 - a.1 + 1
     }
+}
+
+fn seek(a: usize, b: usize, mut range: (usize, usize), d: isize) -> (usize, usize) {
+    while range.1 - range.0 > 1 {
+        let mid = (range.0 + range.1) / 2;
+        if (mid * (a - mid)) as isize * d < b as isize * d {
+            range.0 = mid;
+        } else {
+            range.1 = mid;
+        }
+    }
+    range
 }
