@@ -20,7 +20,7 @@ splr = { version = "^0.17", optional = true }
 
 [features]
 default = ["y2023"]
-y2023 = []
+y2023 = ["itertools"]
 y2022 = ["nom"]
 y2021 = []
 y2020 = ["nom", "splr"]

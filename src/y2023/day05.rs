@@ -1,11 +1,14 @@
 //! <https://adventofcode.com/2023/day/5>
 
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        line_parser,
+    },
+    itertools::*,
 };
 
-// Range(1,3) means an integer set that contains {1, 2} not containing 3.
+// A half-open range implementation
 type Range = (usize, usize);
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -52,10 +55,9 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let mut ranges: Vec<Range> = self
             .seeds
-            .windows(2)
-            .enumerate()
-            .filter(|i| i.0 % 2 == 0)
-            .map(|(_, v)| (v[0], v[0] + v[1])) // store as half-close range
+            .iter()
+            .tuples()
+            .map(|(a, b)| (*a, *a + *b)) // store as half-close range
             .collect::<Vec<Range>>();
         for trans in self.line.iter() {
             let mut handled: Vec<Range> = Vec::new();
