@@ -37,6 +37,7 @@ impl AdventOfCode for Puzzle {
         self.line.push(v);
         Ok(())
     }
+    #[allow(clippy::unnecessary_lazy_evaluations)]
     fn part1(&mut self) -> Self::Output1 {
         let mut locs = self.seeds.clone();
         for trans in self.line.iter() {
@@ -52,6 +53,7 @@ impl AdventOfCode for Puzzle {
         }
         *locs.iter().min().unwrap()
     }
+    #[allow(clippy::unnecessary_lazy_evaluations)]
     fn part2(&mut self) -> Self::Output2 {
         let mut ranges: Vec<Range> = self
             .seeds

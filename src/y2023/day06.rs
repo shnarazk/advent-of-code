@@ -6,7 +6,6 @@ use crate::{
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    index: usize,
     line: Vec<Vec<usize>>,
     setting1: Vec<(usize, usize)>,
     setting2: (usize, usize),
