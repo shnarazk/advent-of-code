@@ -5,7 +5,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         line_parser,
     },
-    itertools::*,
+    itertools::Itertools,
 };
 
 // A half-open range implementation
