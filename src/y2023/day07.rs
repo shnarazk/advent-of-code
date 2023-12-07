@@ -5,49 +5,11 @@ use {
 };
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
-struct Hand1 {
+struct Hand {
     card: Vec<u8>,
     bid: usize,
 }
-impl Hand1 {
-    fn kind(&self) -> usize {
-        let mut set: HashMap<u8, u8> = HashMap::new();
-        for c in self.card.iter() {
-            *set.entry(*c).or_insert(0) += 1;
-        }
-        match set.len() {
-            1 => 7,
-            2 if *set.values().max().unwrap() == 4 => 6,
-            2 => 5,
-            3 if *set.values().max().unwrap() == 3 => 4,
-            3 => 3,
-            4 => 2,
-            _ => 1,
-        }
-    }
-}
-
-impl Ord for Hand1 {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.kind().cmp(&other.kind()) {
-            Ordering::Equal => self.card.cmp(&other.card),
-            otherwise => otherwise,
-        }
-    }
-}
-
-impl PartialOrd for Hand1 {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
-    }
-}
-
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
-struct Hand2 {
-    card: Vec<u8>,
-    bid: usize,
-}
-impl Hand2 {
+impl Hand {
     fn kind(&self) -> usize {
         let mut set: HashMap<u8, u8> = HashMap::new();
         let mut numj = 0;
@@ -72,7 +34,7 @@ impl Hand2 {
     }
 }
 
-impl Ord for Hand2 {
+impl Ord for Hand {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match self.kind().cmp(&other.kind()) {
             Ordering::Equal => self.card.cmp(&other.card),
@@ -81,7 +43,7 @@ impl Ord for Hand2 {
     }
 }
 
-impl PartialOrd for Hand2 {
+impl PartialOrd for Hand {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(&other))
     }
@@ -89,8 +51,8 @@ impl PartialOrd for Hand2 {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line1: Vec<Hand1>,
-    line2: Vec<Hand2>,
+    line1: Vec<Hand>,
+    line2: Vec<Hand>,
 }
 
 #[aoc(2023, 7)]
@@ -137,8 +99,8 @@ impl AdventOfCode for Puzzle {
                 _ => unreachable!(),
             })
             .collect::<Vec<u8>>();
-        self.line1.push(Hand1 { card: card1, bid });
-        self.line2.push(Hand2 { card: card2, bid });
+        self.line1.push(Hand { card: card1, bid });
+        self.line2.push(Hand { card: card2, bid });
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
