@@ -1,6 +1,8 @@
 //! <https://adventofcode.com/2023/day/7>
+
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
+    itertools::Itertools,
     std::{cmp::Ordering, collections::HashMap},
 };
 
@@ -91,15 +93,17 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line1.sort();
         evaluate(&self.line1)
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line2.sort();
         evaluate(&self.line2)
     }
 }
 
 fn evaluate(v: &[Hand]) -> usize {
-    v.iter().enumerate().map(|(i, p)| (i + 1) * p.bid).sum()
+    v.iter()
+        .sorted()
+        .enumerate()
+        .map(|(i, p)| (i + 1) * p.bid)
+        .sum()
 }
