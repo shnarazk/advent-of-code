@@ -5,16 +5,15 @@ use {
 };
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
-struct Hand {
+struct Hand1 {
     card: Vec<u8>,
     bid: usize,
 }
-impl Hand {
+impl Hand1 {
     fn kind(&self) -> usize {
         let mut set: HashMap<u8, u8> = HashMap::new();
         for c in self.card.iter() {
-            let e = set.entry(*c).or_insert(0);
-            *e += 1;
+            *set.entry(*c).or_insert(0) += 1;
         }
         match set.len() {
             1 => 7,
@@ -28,7 +27,7 @@ impl Hand {
     }
 }
 
-impl Ord for Hand {
+impl Ord for Hand1 {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match self.kind().cmp(&other.kind()) {
             Ordering::Equal => self.card.cmp(&other.card),
@@ -37,7 +36,7 @@ impl Ord for Hand {
     }
 }
 
-impl PartialOrd for Hand {
+impl PartialOrd for Hand1 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(&other))
     }
@@ -57,8 +56,7 @@ impl Hand2 {
                 numj += 1;
                 continue;
             }
-            let e = set.entry(*c).or_insert(0);
-            *e += 1;
+            *set.entry(*c).or_insert(0) += 1;
         }
         match set.len() {
             0 if numj == 5 => 7,
@@ -91,7 +89,7 @@ impl PartialOrd for Hand2 {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line1: Vec<Hand>,
+    line1: Vec<Hand1>,
     line2: Vec<Hand2>,
 }
 
@@ -139,7 +137,7 @@ impl AdventOfCode for Puzzle {
                 _ => unreachable!(),
             })
             .collect::<Vec<u8>>();
-        self.line1.push(Hand { card: card1, bid });
+        self.line1.push(Hand1 { card: card1, bid });
         self.line2.push(Hand2 { card: card2, bid });
         Ok(())
     }
