@@ -65,38 +65,22 @@ impl AdventOfCode for Puzzle {
         let card1 = cs
             .clone()
             .map(|c| match c {
-                '2' => 2,
-                '3' => 3,
-                '4' => 4,
-                '5' => 5,
-                '6' => 6,
-                '7' => 7,
-                '8' => 8,
-                '9' => 9,
                 'T' => 10,
                 'J' => 11,
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
-                _ => unreachable!(),
+                _ => c as u8 - '0' as u8,
             })
             .collect::<Vec<u8>>();
         let card2 = cs
             .map(|c| match c {
                 'J' => 0,
-                '2' => 2,
-                '3' => 3,
-                '4' => 4,
-                '5' => 5,
-                '6' => 6,
-                '7' => 7,
-                '8' => 8,
-                '9' => 9,
                 'T' => 10,
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
-                _ => unreachable!(),
+                _ => c as u8 - '0' as u8,
             })
             .collect::<Vec<u8>>();
         self.line1.push(Hand { card: card1, bid });
