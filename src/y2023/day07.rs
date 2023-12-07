@@ -20,13 +20,16 @@ impl Hand {
             }
             *set.entry(*c).or_insert(0) += 1;
         }
+        if numj == 5 {
+            return 7;
+        }
+        let m = *set.values().max().unwrap() + numj;
         match set.len() {
-            0 if numj == 5 => 7,
             1 => 7,
-            2 if *set.values().max().unwrap() + numj == 4 => 6,
-            2 if *set.values().max().unwrap() + numj == 3 => 5,
-            3 if *set.values().max().unwrap() + numj == 3 => 4,
-            3 if *set.values().max().unwrap() + numj == 2 => 3,
+            2 if m == 4 => 6,
+            2 if m == 3 => 5,
+            3 if m == 3 => 4,
+            3 if m == 2 => 3,
             4 => 2,
             5 => 1,
             _ => unreachable!(),
@@ -89,18 +92,14 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line1.sort();
-        self.line1
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (i + 1) * p.bid)
-            .sum()
+        evaluate(&self.line1)
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line2.sort();
-        self.line2
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (i + 1) * p.bid)
-            .sum()
+        evaluate(&self.line2)
     }
+}
+
+fn evaluate(v: &[Hand]) -> usize {
+    v.iter().enumerate().map(|(i, p)| (i + 1) * p.bid).sum()
 }
