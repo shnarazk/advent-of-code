@@ -23,10 +23,36 @@ public func day08(_ data: String) {
     }
     print("Part1: \(steps)")
   }
-
   func part2() {
-    print("Part2: \(tree.count)")
+    let starts = tree.keys.filter({ $0.last == "A"})
+    var ans = 1
+    for start in starts {
+      var pos = start
+      var i = 0
+      var steps = 0
+      while pos.last != "Z" {
+        pos = if select[i] == "L" { tree[pos]!.0 } else { tree[pos]!.1 }
+        steps += 1
+        i += 1
+        if i == select.count {
+          i = 0
+        }
+      }
+      ans = lcm(ans, steps)
+    }
+    print("Part2: \(ans)")
   }
   part1()
   part2()
+}
+
+func gcd(_ a: Int, _ b: Int) -> Int {
+    return b == 0 ? a : gcd(b, a % b)
+}
+
+func lcm(_ a: Int, _ b: Int) -> Int {
+    if a == 0 || b == 0 {
+        return 0
+    }
+    return abs(a * b) / gcd(a, b)
 }
