@@ -50,7 +50,7 @@ impl Ord for Hand {
 
 impl PartialOrd for Hand {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 
@@ -75,7 +75,7 @@ impl AdventOfCode for Puzzle {
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
-                _ => c as u8 - '0' as u8,
+                _ => c as u8 - b'0',
             })
             .collect::<Vec<u8>>();
         let card2 = cs
@@ -85,7 +85,7 @@ impl AdventOfCode for Puzzle {
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
-                _ => c as u8 - '0' as u8,
+                _ => c as u8 - b'0',
             })
             .collect::<Vec<u8>>();
         self.line1.push(Hand { card: card1, bid });

@@ -17,14 +17,17 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.iter().map(extrapolate).sum::<isize>() as usize
+        self.line.iter().map(|v| extrapolate(v)).sum::<isize>() as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line.iter().map(extrapolate_backword).sum::<isize>() as usize
+        self.line
+            .iter()
+            .map(|v| extrapolate_backword(v))
+            .sum::<isize>() as usize
     }
 }
 
-fn extrapolate(vec: &Vec<isize>) -> isize {
+fn extrapolate(vec: &[isize]) -> isize {
     if vec.iter().all(|n| *n == 0) {
         return 0;
     }
@@ -33,7 +36,7 @@ fn extrapolate(vec: &Vec<isize>) -> isize {
     *last + extrapolate(&v)
 }
 
-fn extrapolate_backword(vec: &Vec<isize>) -> isize {
+fn extrapolate_backword(vec: &[isize]) -> isize {
     if vec.iter().all(|n| *n == 0) {
         return 0;
     }

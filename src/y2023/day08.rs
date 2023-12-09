@@ -37,7 +37,7 @@ impl AdventOfCode for Puzzle {
         self.line
             .keys()
             .filter(|s| s.ends_with('A'))
-            .map(|p| self.traverse(&p))
+            .map(|p| self.traverse(p))
             .fold(1, math::lcm)
     }
 }
