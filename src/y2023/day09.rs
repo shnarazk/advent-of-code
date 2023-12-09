@@ -17,30 +17,44 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.iter().map(|v| extrapolate(v)).sum::<isize>() as usize
+        self.line.iter_mut().map(|v| extrapolate(v)).sum::<isize>() as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .iter()
+            .iter_mut()
             .map(|v| extrapolate_backword(v))
             .sum::<isize>() as usize
     }
 }
 
-fn extrapolate(vec: &[isize]) -> isize {
-    if vec.iter().all(|n| *n == 0) {
-        return 0;
+fn extrapolate(vec: &mut [isize]) -> isize {
+    let mut level = 0;
+    let len = vec.len();
+    while !vec.iter().skip(level).all(|n| *n == 0) {
+        level += 1;
+        let l = vec[len - 1];
+        for i in (level..len).rev() {
+            vec[i] -= vec[i - 1];
+        }
+        if level == 1 {
+            vec[0] = 0;
+        }
+        vec[0] += l;
     }
-    let last = vec.last().unwrap();
-    let v = vec.windows(2).map(|p| p[1] - p[0]).collect::<Vec<isize>>();
-    *last + extrapolate(&v)
+    vec[0]
 }
 
-fn extrapolate_backword(vec: &[isize]) -> isize {
-    if vec.iter().all(|n| *n == 0) {
-        return 0;
+fn extrapolate_backword(vec: &mut [isize]) -> isize {
+    let mut level = 0;
+    let len = vec.len();
+    while !vec.iter().skip(level).all(|n| *n == 0) {
+        level += 1;
+        for i in (level..len).rev() {
+            vec[i] -= vec[i - 1];
+        }
     }
-    let base = vec.first().unwrap();
-    let v = vec.windows(2).map(|p| p[1] - p[0]).collect::<Vec<isize>>();
-    base - extrapolate_backword(&v)
+    for i in (1..level).rev() {
+        vec[i - 1] -= vec[i];
+    }
+    vec[0]
 }
