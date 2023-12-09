@@ -31,45 +31,36 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut i = 0;
-        let mut cnt = 0;
         let mut pos = "AAA";
-        while pos != "ZZZ" {
-            let Some((left, right)) = self.line.get(pos) else {
-                unreachable!();
-            };
-            pos = if self.head[i] == 'L' { left } else { right };
-            i += 1;
-            cnt += 1;
-            if i == self.head.len() {
-                i = 0;
+        for (i, s) in self.head.iter().cycle().enumerate() {
+            if pos == "ZZZ" {
+                return i;
             }
+            let (left, right) = self.line.get(pos).unwrap();
+            pos = if *s == 'L' { left } else { right };
         }
-        cnt
+        unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let pos = self
+        let starts = self
             .line
             .keys()
             .filter(|s| s.ends_with('A'))
             .cloned()
             .collect::<Vec<_>>();
-        let mut ans: usize = 1;
-        for p in pos.iter() {
-            let mut pos = p;
-            let mut i = 0;
-            let mut cnt = 0;
-            while !pos.ends_with('Z') {
-                let (left, right) = self.line.get(pos).unwrap();
-                pos = if self.head[i] == 'L' { left } else { right };
-                i += 1;
-                cnt += 1;
-                if i == self.head.len() {
-                    i = 0;
+        starts
+            .iter()
+            .map(|p| {
+                let mut pos = p;
+                for (i, s) in self.head.iter().cycle().enumerate() {
+                    if pos.ends_with('Z') {
+                        return i;
+                    }
+                    let (left, right) = self.line.get(pos).unwrap();
+                    pos = if *s == 'L' { left } else { right };
                 }
-            }
-            ans = math::lcm(ans, cnt);
-        }
-        ans
+                1
+            })
+            .fold(1, |ans, val| math::lcm(ans, val))
     }
 }
