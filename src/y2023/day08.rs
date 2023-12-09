@@ -31,36 +31,26 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut pos = "AAA";
+        self.traverse("AAA")
+    }
+    fn part2(&mut self) -> Self::Output2 {
+        self.line
+            .keys()
+            .filter(|s| s.ends_with('A'))
+            .map(|p| self.traverse(&p))
+            .fold(1, math::lcm)
+    }
+}
+
+impl Puzzle {
+    fn traverse<'a>(&'a self, mut pos: &'a str) -> usize {
         for (i, s) in self.head.iter().cycle().enumerate() {
-            if pos == "ZZZ" {
+            if pos.ends_with('Z') {
                 return i;
             }
             let (left, right) = self.line.get(pos).unwrap();
             pos = if *s == 'L' { left } else { right };
         }
         unreachable!()
-    }
-    fn part2(&mut self) -> Self::Output2 {
-        let starts = self
-            .line
-            .keys()
-            .filter(|s| s.ends_with('A'))
-            .cloned()
-            .collect::<Vec<_>>();
-        starts
-            .iter()
-            .map(|p| {
-                let mut pos = p;
-                for (i, s) in self.head.iter().cycle().enumerate() {
-                    if pos.ends_with('Z') {
-                        return i;
-                    }
-                    let (left, right) = self.line.get(pos).unwrap();
-                    pos = if *s == 'L' { left } else { right };
-                }
-                1
-            })
-            .fold(1, |ans, val| math::lcm(ans, val))
     }
 }
