@@ -199,50 +199,55 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-// fn colorize(height: usize, width: usize, map: &HashSet<(usize, usize)>) -> (usize, usize, usize) {
-//     // 0: outer
-//     // 1: unknown => inner
-//     // 2: border
-//     let mut m = (0..height)
-//         .map(|_| (0..width).map(|_| 1usize).collect::<Vec<_>>())
-//         .collect::<Vec<_>>();
-//     // assert!(map.iter().all(|(y, x)| *y * *x != 0));
-//     let mut to_visit: Vec<(usize, usize)> = Vec::new();
-//     for (y, l) in m.iter_mut().enumerate() {
-//         for (x, p) in l.iter_mut().enumerate() {
-//             if map.contains(&(y, x)) {
-//                 *p = 2;
-//             } else if y * x == 0 || y == height - 1 || x == width - 1 {
-//                 *p = 0;
-//                 to_visit.push((y, x));
-//             }
-//         }
-//     }
-//     for l in m.iter() {
-//         for c in l.iter() {
-//             print!("{c}");
-//         }
-//         println!();
-//     }
-//     while let Some(p) = to_visit.pop() {
-//         m[p.0][p.1] = 0;
-//         for l in geometric::neighbors8(p.0, p.1, height, width) {
-//             if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
-//                 to_visit.push(l);
-//             }
-//         }
-//     }
-//     let mut ans = [0, 0, 0];
-//     for l in m.iter() {
-//         for p in l.iter() {
-//             ans[*p] += 1;
-//         }
-//     }
-//     for l in m.iter() {
-//         for c in l.iter() {
-//             print!("{c}");
-//         }
-//         println!();
-//     }
-//     (ans[0], ans[1], ans[2])
-// }
+// By scaling up,  we can hed hidden corrridors
+fn colorize(
+    height: usize,
+    width: usize,
+    map: &HashMap<(usize, usize), char>,
+) -> (usize, usize, usize) {
+    // 0: outer
+    // 1: unknown => inner
+    // 2: border
+    let mut m = (0..height)
+        .map(|_| (0..width).map(|_| 1usize).collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    // assert!(map.iter().all(|(y, x)| *y * *x != 0));
+    let mut to_visit: Vec<(usize, usize)> = Vec::new();
+    for (y, l) in m.iter_mut().enumerate() {
+        for (x, p) in l.iter_mut().enumerate() {
+            if map.contains(&(y, x)) {
+                *p = 2;
+            } else if y * x == 0 || y == height - 1 || x == width - 1 {
+                *p = 0;
+                to_visit.push((y, x));
+            }
+        }
+    }
+    for l in m.iter() {
+        for c in l.iter() {
+            print!("{c}");
+        }
+        println!();
+    }
+    while let Some(p) = to_visit.pop() {
+        m[p.0][p.1] = 0;
+        for l in geometric::neighbors8(p.0, p.1, height, width) {
+            if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
+                to_visit.push(l);
+            }
+        }
+    }
+    let mut ans = [0, 0, 0];
+    for l in m.iter() {
+        for p in l.iter() {
+            ans[*p] += 1;
+        }
+    }
+    for l in m.iter() {
+        for c in l.iter() {
+            print!("{c}");
+        }
+        println!();
+    }
+    (ans[0], ans[1], ans[2])
+}
