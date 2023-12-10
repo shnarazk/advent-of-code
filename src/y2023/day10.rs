@@ -1,7 +1,11 @@
 //! <https://adventofcode.com/2023/day/10>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    std::collections::HashSet,
+    crate::{
+        color,
+        framework::{aoc, AdventOfCode, ParseError},
+    },
+    itertools::Itertools,
+    std::collections::{HashMap, HashSet},
 };
 
 type Pos2 = (isize, isize);
@@ -86,56 +90,159 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
+        dbg!(height, width);
+        let mut insides: HashSet<(usize, usize)> = HashSet::new();
+        let mut walls: HashSet<(usize, usize)> = HashSet::new();
         let loops = [(1, 0), (-1, 0), (0, -1), (0, 1)]
             .iter()
             .flat_map(|dir: &Pos2| {
                 let mut pre: Pos2 = self.start;
                 let mut pos = Some(add(&self.start, dir));
-                let mut map: HashSet<(usize, usize)> = HashSet::new();
-                map.insert((self.start.0 as usize, self.start.1 as usize));
+                let mut mapping: HashSet<((usize, usize), (usize, usize))> = HashSet::new();
+                let mut route: HashMap<(usize, usize), char> = HashMap::new();
+                // map.insert((self.start.0 as usize, self.start.1 as usize));
                 while let Some(p) = pos {
                     if p.0 < 0 || height as isize <= p.0 || p.1 < 0 || width as isize <= p.1 {
                         return None;
                     }
-                    map.insert((p.0 as usize, p.1 as usize));
+                    assert_ne!(pre, p);
+                    mapping.insert((
+                        (pre.0 as usize, pre.1 as usize),
+                        (p.0 as usize, p.1 as usize),
+                    ));
+                    let ch = match (p.0 - pre.0, p.1 - pre.1) {
+                        (-1, 0) => '↑',
+                        (1, 0) => '↓',
+                        (0, -1) => '←',
+                        (0, 1) => '→',
+                        _ => unreachable!(),
+                    };
+                    route.insert((pre.0 as usize, pre.1 as usize), ch);
                     let next = self.line[p.0 as usize][p.1 as usize].go_through(&p, &pre);
                     pre = p;
                     pos = next;
                 }
-                Some(map)
+                Some((mapping, route))
             })
             .collect::<Vec<_>>();
-        let longest = loops.iter().map(|m| m.len()).max().unwrap();
-        let l = loops
+        let longest = loops.iter().map(|m| m.1.len()).max().unwrap();
+        let (map, route) = loops
             .iter()
-            .filter(|m| m.len() == longest)
+            .filter(|m| m.0.len() == longest)
             .collect::<Vec<_>>()[0];
-        dbg!(l.iter().filter(|(y, x)| *y * *x == 0).count());
-        let x = color(height, width, l);
-        x.2
+        let res = (0..height)
+            .map(|y| {
+                let mut span = 0;
+                let mut inside = true;
+                let xs = map
+                    .iter()
+                    .filter(|(p, _)| p.0 == y)
+                    .map(|(p, _)| p.1)
+                    .sorted()
+                    .collect::<Vec<_>>();
+                if xs.is_empty() {
+                    return 0;
+                }
+                // if y == 3 {
+                //     println!("{:?}", &xs);
+                //     println!(
+                //         "{:?}",
+                //         map.iter()
+                //             .filter(|(p, q)| p.0 == y && q.0 == y)
+                //             .map(|(p, q)| (p.1, q.1))
+                //             .sorted()
+                //             .collect::<Vec<_>>()
+                //     );
+                // }
+                // dbg!(y, &xs);
+                let mut pre = xs[0];
+                for x in xs.iter().skip(1) {
+                    // if y == 3 {
+                    //     println!(
+                    //         "{} => {} :: check ({},{}) <-> ({},{})",
+                    //         pre, x, y, pre, y, *x
+                    //     );
+                    // }
+                    if inside {
+                        // dbg!(x, pre);
+                        span += *x - pre - 1;
+                        for t in pre..*x {
+                            insides.insert((y, t));
+                        }
+                    }
+                    if !map.contains(&((y, *x), (y, *x + 1)))
+                        && !map.contains(&((y, *x + 1), (y, *x)))
+                    {
+                        inside = !inside;
+                        // if y == 3 {
+                        //     println!("{} => {:?}", x, inside);
+                        // }
+                    }
+                    pre = *x;
+                }
+                span
+            })
+            .sum();
+        for y in 0..height {
+            for x in 0..width {
+                if let Some(ch) = route.get(&(y, x)) {
+                    print!("{}{}{}", color::RED, ch, color::RESET);
+                } else if insides.contains(&(y, x)) {
+                    print!("{}⌾{}", color::GREEN, color::RESET);
+                } else {
+                    print!(" ");
+                }
+            }
+            println!();
+        }
+        res
     }
 }
 
-fn color(height: usize, width: usize, map: &HashSet<(usize, usize)>) -> (usize, usize, usize) {
-    let mut m = (0..height)
-        .map(|_| (0..width).map(|_| 0).collect::<Vec<_>>())
-        .collect::<Vec<_>>();
-    assert!(map.iter().all(|(y, x)| *y * *x != 0));
-    let mut to_check: Vec<(usize, usize)> = Vec::new();
-    for (y, l) in m.iter_mut().enumerate() {
-        for (x, p) in l.iter_mut().enumerate() {
-            if map.contains(&(y, x)) {
-                *p = 1;
-            } else if y * x == 0 {
-                *p = 2;
-                to_check.push((y, x));
-            }
-        }
-    }
-    while let Some(p) = to_check.pop() {
-        if m[p.0][p.1] != 0 {
-            continue;
-        }
-    }
-    (0, 0, 0)
-}
+// fn colorize(height: usize, width: usize, map: &HashSet<(usize, usize)>) -> (usize, usize, usize) {
+//     // 0: outer
+//     // 1: unknown => inner
+//     // 2: border
+//     let mut m = (0..height)
+//         .map(|_| (0..width).map(|_| 1usize).collect::<Vec<_>>())
+//         .collect::<Vec<_>>();
+//     // assert!(map.iter().all(|(y, x)| *y * *x != 0));
+//     let mut to_visit: Vec<(usize, usize)> = Vec::new();
+//     for (y, l) in m.iter_mut().enumerate() {
+//         for (x, p) in l.iter_mut().enumerate() {
+//             if map.contains(&(y, x)) {
+//                 *p = 2;
+//             } else if y * x == 0 || y == height - 1 || x == width - 1 {
+//                 *p = 0;
+//                 to_visit.push((y, x));
+//             }
+//         }
+//     }
+//     for l in m.iter() {
+//         for c in l.iter() {
+//             print!("{c}");
+//         }
+//         println!();
+//     }
+//     while let Some(p) = to_visit.pop() {
+//         m[p.0][p.1] = 0;
+//         for l in geometric::neighbors8(p.0, p.1, height, width) {
+//             if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
+//                 to_visit.push(l);
+//             }
+//         }
+//     }
+//     let mut ans = [0, 0, 0];
+//     for l in m.iter() {
+//         for p in l.iter() {
+//             ans[*p] += 1;
+//         }
+//     }
+//     for l in m.iter() {
+//         for c in l.iter() {
+//             print!("{c}");
+//         }
+//         println!();
+//     }
+//     (ans[0], ans[1], ans[2])
+// }
