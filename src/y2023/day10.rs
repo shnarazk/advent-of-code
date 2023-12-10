@@ -3,6 +3,7 @@ use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
+        geometric,
     },
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
@@ -205,19 +206,34 @@ fn colorize(
     width: usize,
     map: &HashMap<(usize, usize), char>,
 ) -> (usize, usize, usize) {
+    let h2 = 2 * height;
+    let w2 = 2 * width;
     // 0: outer
     // 1: unknown => inner
     // 2: border
-    let mut m = (0..height)
-        .map(|_| (0..width).map(|_| 1usize).collect::<Vec<_>>())
+    let mut m = (0..h2)
+        .map(|_| (0..w2).map(|_| 1usize).collect::<Vec<_>>())
         .collect::<Vec<_>>();
     // assert!(map.iter().all(|(y, x)| *y * *x != 0));
     let mut to_visit: Vec<(usize, usize)> = Vec::new();
+    for y in 0..height {
+        for x in 0..width {
+            if let Some(ch) = map.get(&(2 * y, 2 * x)) {
+                m[2 * y][2 * x] = 2;
+                let q: (isize, isize) = match ch {
+                    '↑' => (-1, 0),
+                    '↓' => (1, 0),
+                    '←' => (0, -1),
+                    '→' => (0, 1),
+                    _ => unreachable!(),
+                };
+                m[(y as isize + q.0) as usize][(x as isize + q.1) as usize] = 2;
+            }
+        }
+    }
     for (y, l) in m.iter_mut().enumerate() {
         for (x, p) in l.iter_mut().enumerate() {
-            if map.contains(&(y, x)) {
-                *p = 2;
-            } else if y * x == 0 || y == height - 1 || x == width - 1 {
+            if *p != 2 && y * x == 0 || y == h2 - 1 || x == w2 - 1 {
                 *p = 0;
                 to_visit.push((y, x));
             }
