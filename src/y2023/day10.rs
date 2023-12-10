@@ -1,11 +1,11 @@
 //! <https://adventofcode.com/2023/day/10>
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc, AdventOfCode, ParseError},
         geometric,
     },
-    std::collections::{HashMap, HashSet},
+    std::collections::HashMap,
 };
 
 type Pos2 = (isize, isize);
@@ -75,10 +75,8 @@ impl AdventOfCode for Puzzle {
                     if p.0 < 0 || height <= p.0 || p.1 < 0 || width <= p.1 {
                         break;
                     }
-                    // dbg!(p);
                     let next = self.line[p.0 as usize][p.1 as usize].go_through(&p, &pre);
                     pre = p;
-                    // dbg!(next);
                     pos = next;
                     step += 1;
                 }
@@ -90,146 +88,53 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
-        dbg!(height, width);
-        let mut insides: HashSet<(usize, usize)> = HashSet::new();
-        let mut walls: HashSet<(usize, usize)> = HashSet::new();
         let loops = [(1, 0), (-1, 0), (0, -1), (0, 1)]
             .iter()
             .flat_map(|dir: &Pos2| {
                 let mut pre: Pos2 = self.start;
                 let mut pos = Some(add(&self.start, dir));
-                let mut mapping: HashSet<((usize, usize), (usize, usize))> = HashSet::new();
-                let mut route: HashMap<(usize, usize), char> = HashMap::new();
-                // map.insert((self.start.0 as usize, self.start.1 as usize));
+                let mut route: HashMap<(usize, usize), (isize, isize)> = HashMap::new();
                 while let Some(p) = pos {
                     if p.0 < 0 || height as isize <= p.0 || p.1 < 0 || width as isize <= p.1 {
                         return None;
                     }
-                    assert_ne!(pre, p);
-                    mapping.insert((
-                        (pre.0 as usize, pre.1 as usize),
-                        (p.0 as usize, p.1 as usize),
-                    ));
-                    let ch = match (p.0 - pre.0, p.1 - pre.1) {
-                        (-1, 0) => '↑',
-                        (1, 0) => '↓',
-                        (0, -1) => '←',
-                        (0, 1) => '→',
-                        _ => unreachable!(),
-                    };
-                    route.insert((pre.0 as usize, pre.1 as usize), ch);
+                    route.insert((pre.0 as usize, pre.1 as usize), (p.0 - pre.0, p.1 - pre.1));
                     let next = self.line[p.0 as usize][p.1 as usize].go_through(&p, &pre);
                     pre = p;
                     pos = next;
                 }
-                Some((mapping, route))
+                Some(route)
             })
             .collect::<Vec<_>>();
-        let longest = loops.iter().map(|m| m.1.len()).max().unwrap();
-        let (_map, route) = loops
+        let longest = loops.iter().map(|r| r.len()).max().unwrap();
+        let route = loops
             .iter()
-            .filter(|m| m.0.len() == longest)
+            .filter(|r| r.len() == longest)
             .collect::<Vec<_>>()[0];
-        /*
-        let res = (0..height)
-            .map(|y| {
-                let mut span = 0;
-                let mut inside = true;
-                let xs = map
-                    .iter()
-                    .filter(|(p, _)| p.0 == y)
-                    .map(|(p, _)| p.1)
-                    .sorted()
-                    .collect::<Vec<_>>();
-                if xs.is_empty() {
-                    return 0;
-                }
-                // if y == 3 {
-                //     println!("{:?}", &xs);
-                //     println!(
-                //         "{:?}",
-                //         map.iter()
-                //             .filter(|(p, q)| p.0 == y && q.0 == y)
-                //             .map(|(p, q)| (p.1, q.1))
-                //             .sorted()
-                //             .collect::<Vec<_>>()
-                //     );
-                // }
-                // dbg!(y, &xs);
-                let mut pre = xs[0];
-                for x in xs.iter().skip(1) {
-                    // if y == 3 {
-                    //     println!(
-                    //         "{} => {} :: check ({},{}) <-> ({},{})",
-                    //         pre, x, y, pre, y, *x
-                    //     );
-                    // }
-                    if inside {
-                        // dbg!(x, pre);
-                        span += *x - pre - 1;
-                        for t in pre..*x {
-                            insides.insert((y, t));
-                        }
-                    }
-                    if !map.contains(&((y, *x), (y, *x + 1)))
-                        && !map.contains(&((y, *x + 1), (y, *x)))
-                    {
-                        inside = !inside;
-                        // if y == 3 {
-                        //     println!("{} => {:?}", x, inside);
-                        // }
-                    }
-                    pre = *x;
-                }
-                span
-            })
-            .sum();
-        for y in 0..height {
-            for x in 0..width {
-                if let Some(ch) = route.get(&(y, x)) {
-                    print!("{}{}{}", color::RED, ch, color::RESET);
-                } else if insides.contains(&(y, x)) {
-                    print!("{}⌾{}", color::GREEN, color::RESET);
-                } else {
-                    print!(" ");
-                }
-            }
-            println!();
-        }
-        */
-        let res = colorize(height, width, route);
-        res.1
+        colorize(height, width, route).1
     }
 }
 
-// By scaling up,  we can hed hidden corrridors
+// By scaling up, we can shed hidden corrridors
 fn colorize(
     height: usize,
     width: usize,
-    map: &HashMap<(usize, usize), char>,
+    map: &HashMap<(usize, usize), (isize, isize)>,
 ) -> (usize, usize, usize) {
-    let h2 = 2 * height;
-    let w2 = 2 * width;
     // 0: outer
     // 1: unknown => inner
     // 2: border
+    let h2 = 2 * height;
+    let w2 = 2 * width;
     let mut m = (0..h2)
         .map(|_| (0..w2).map(|_| 1usize).collect::<Vec<_>>())
         .collect::<Vec<_>>();
-    // assert!(map.iter().all(|(y, x)| *y * *x != 0));
     let mut to_visit: Vec<(usize, usize)> = Vec::new();
     for y in 0..height {
         for x in 0..width {
-            if let Some(ch) = map.get(&(y, x)) {
+            if let Some(dir) = map.get(&(y, x)) {
                 m[2 * y][2 * x] = 2;
-                let q: (isize, isize) = match ch {
-                    '↑' => (-1, 0),
-                    '↓' => (1, 0),
-                    '←' => (0, -1),
-                    '→' => (0, 1),
-                    _ => unreachable!(),
-                };
-                m[(2 * y as isize + q.0) as usize][(2 * x as isize + q.1) as usize] = 2;
+                m[(2 * y as isize + dir.0) as usize][(2 * x as isize + dir.1) as usize] = 2;
             }
         }
     }
@@ -241,12 +146,6 @@ fn colorize(
             }
         }
     }
-    // for l in m.iter() {
-    //     for c in l.iter() {
-    //         print!("{c}");
-    //     }
-    //     println!();
-    // }
     while let Some(p) = to_visit.pop() {
         m[p.0][p.1] = 0;
         for l in geometric::neighbors8(p.0, p.1, h2, w2) {
@@ -255,17 +154,17 @@ fn colorize(
             }
         }
     }
-    for y in 0..height {
-        for x in 0..width {
-            match m[2 * y][2 * x] {
-                0 => print!("_"),
-                1 => print!("{}⌾{}", color::GREEN, color::RESET),
-                2 => print!("{}#{}", color::RED, color::RESET),
-                _ => unreachable!(),
-            }
-        }
-        println!();
-    }
+    // for y in 0..height {
+    //     for x in 0..width {
+    //         match m[2 * y][2 * x] {
+    //             0 => print!("_"),
+    //             1 => print!("{}⌾{}", color::GREEN, color::RESET),
+    //             2 => print!("{}#{}", color::RED, color::RESET),
+    //             _ => unreachable!(),
+    //         }
+    //     }
+    //     println!();
+    // }
     let mut ans = [0, 0, 0];
     for y in 0..height {
         for x in 0..width {
