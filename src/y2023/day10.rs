@@ -5,7 +5,6 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric,
     },
-    itertools::Itertools,
     std::collections::{HashMap, HashSet},
 };
 
@@ -127,10 +126,11 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         let longest = loops.iter().map(|m| m.1.len()).max().unwrap();
-        let (map, route) = loops
+        let (_map, route) = loops
             .iter()
             .filter(|m| m.0.len() == longest)
             .collect::<Vec<_>>()[0];
+        /*
         let res = (0..height)
             .map(|y| {
                 let mut span = 0;
@@ -196,7 +196,9 @@ impl AdventOfCode for Puzzle {
             }
             println!();
         }
-        res
+        */
+        let res = colorize(height, width, route);
+        res.1
     }
 }
 
@@ -218,7 +220,7 @@ fn colorize(
     let mut to_visit: Vec<(usize, usize)> = Vec::new();
     for y in 0..height {
         for x in 0..width {
-            if let Some(ch) = map.get(&(2 * y, 2 * x)) {
+            if let Some(ch) = map.get(&(y, x)) {
                 m[2 * y][2 * x] = 2;
                 let q: (isize, isize) = match ch {
                     '↑' => (-1, 0),
@@ -227,7 +229,7 @@ fn colorize(
                     '→' => (0, 1),
                     _ => unreachable!(),
                 };
-                m[(y as isize + q.0) as usize][(x as isize + q.1) as usize] = 2;
+                m[(2 * y as isize + q.0) as usize][(2 * x as isize + q.1) as usize] = 2;
             }
         }
     }
@@ -239,31 +241,36 @@ fn colorize(
             }
         }
     }
-    for l in m.iter() {
-        for c in l.iter() {
-            print!("{c}");
-        }
-        println!();
-    }
+    // for l in m.iter() {
+    //     for c in l.iter() {
+    //         print!("{c}");
+    //     }
+    //     println!();
+    // }
     while let Some(p) = to_visit.pop() {
         m[p.0][p.1] = 0;
-        for l in geometric::neighbors8(p.0, p.1, height, width) {
+        for l in geometric::neighbors8(p.0, p.1, h2, w2) {
             if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
                 to_visit.push(l);
             }
         }
     }
-    let mut ans = [0, 0, 0];
-    for l in m.iter() {
-        for p in l.iter() {
-            ans[*p] += 1;
-        }
-    }
-    for l in m.iter() {
-        for c in l.iter() {
-            print!("{c}");
+    for y in 0..height {
+        for x in 0..width {
+            match m[2 * y][2 * x] {
+                0 => print!("_"),
+                1 => print!("{}⌾{}", color::GREEN, color::RESET),
+                2 => print!("{}#{}", color::RED, color::RESET),
+                _ => unreachable!(),
+            }
         }
         println!();
+    }
+    let mut ans = [0, 0, 0];
+    for y in 0..height {
+        for x in 0..width {
+            ans[m[2 * y][2 * x]] += 1;
+        }
     }
     (ans[0], ans[1], ans[2])
 }
