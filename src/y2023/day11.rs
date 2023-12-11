@@ -1,12 +1,8 @@
 //! <https://adventofcode.com/2023/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors, Dim2},
-        line_parser, regex,
+        geometric::Dim2,
     },
     std::collections::HashSet,
 };
@@ -29,7 +25,7 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.trans_x = self.line[0].iter().map(|_| 1).collect::<Vec<usize>>();
-        for (y, l) in self.line.iter().enumerate() {
+        for l in self.line.iter() {
             let mut found = false;
             for (x, g) in l.iter().enumerate() {
                 if *g {
@@ -39,8 +35,6 @@ impl AdventOfCode for Puzzle {
             }
             self.trans_y.push(!found as usize);
         }
-        // println!("trans y:{:?}, x:{:?}", &self.trans_y1, &self.trans_x1);
-        // println!("extended map: {:?}", &self.map);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.scale_up(2);
@@ -73,7 +67,7 @@ impl Puzzle {
             }
         }
         index = 0;
-        for (i, p) in self.trans_x.iter_mut().enumerate() {
+        for p in self.trans_x.iter_mut() {
             if *p == 0 {
                 *p = index;
                 index += 1;
