@@ -45,7 +45,25 @@ impl AdventOfCode for Puzzle {
         self.line.iter().map(count_possibles).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .take(0)
+            .map(|(k, s)| {
+                let k5 = k
+                    .iter()
+                    .cycle()
+                    .take(k.len() * 5)
+                    .copied()
+                    .collect::<Vec<_>>();
+                let s5 = s
+                    .iter()
+                    .cycle()
+                    .take(s.len() * 5)
+                    .copied()
+                    .collect::<Vec<_>>();
+                count_possibles(&(k5, s5))
+            })
+            .sum()
     }
 }
 
@@ -94,5 +112,31 @@ fn count_possibles((kind, seq): &(Vec<u8>, Vec<usize>)) -> usize {
             }
             matches(&target, &seq) as usize
         })
-        .sum()
+        .sum::<usize>()
 }
+
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Range {
+    unc: usize,
+    len: usize,
+}
+
+fn trim(mut a: Vec<Range>, mut b: Vec<Range>) -> (Vec<Range>, Vec<Range>) {
+    //
+    if a[0].unc == 0 && b[0].unc == 0 && a[0].len == 0 && b[0].len == 0 {
+        a.remove(0);
+        b.remove(0);
+    }
+    let a_lst = a.len() - 1;
+    let b_lst = b.len() - 1;
+    if a[a_lst].unc == 0 && b[b_lst].unc == 0 && a[a_lst].len == 0 && b[b_lst].len == 0 {
+        a.remove(a_lst);
+        b.remove(b_lst);
+    }
+    (a, b)
+}
+
+fn match_seq(a: Vec<Range>, b: Vec<Range>) -> Option<usize> {
+    None
+}
+
