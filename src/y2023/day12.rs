@@ -1,8 +1,4 @@
 //! <https://adventofcode.com/2023/day/12>
-// #![allow(dead_code)]
-// #![allow(unused_imports)]
-// #![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -46,18 +42,16 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|(k, s)| {
                 let mut hash: HashMap<(Vec<usize>, usize), usize> = HashMap::new();
-                dbg!(match_sequences(&mut hash, k, s))
+                match_sequences(&mut hash, k, s)
             })
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            // .take(0)
             .map(|(k, s)| {
                 let mut hash: HashMap<(Vec<usize>, usize), usize> = HashMap::new();
                 let k5 = (0..5).map(|_| k.clone()).collect::<Vec<_>>().join(&2);
-                // println!("{:?}", &k5);
                 let s5 = s
                     .iter()
                     .cycle()
@@ -79,29 +73,16 @@ fn match_sequences(
     if let Some(c) = hash.get(&k) {
         return *c;
     }
-    let x = match_sequences_rec(hash, a, b);
+    let x = match_sequences_aux(hash, a, b);
     hash.insert(k, x);
     x
-    // println!(
-    //     "{:?}/{:?} => {}",
-    //     a.iter()
-    //         .map(|c| match c {
-    //             0 => '.',
-    //             1 => '#',
-    //             _ => '?',
-    //         })
-    //         .collect::<String>(),
-    //     b,
-    //     x
-    // );
 }
 
-fn match_sequences_rec(
+fn match_sequences_aux(
     hash: &mut HashMap<(Vec<usize>, usize), usize>,
     a: &[usize],
     b: &[usize],
 ) -> usize {
-    // println!(" => {:?}", &a);
     match (a.is_empty(), b.is_empty()) {
         (true, true) => return 1,
         (false, true) => return a.iter().all(|c| *c != 1) as usize,
@@ -132,7 +113,6 @@ fn match_sequences_rec(
                         (b.len() == 1) as usize
                     } else {
                         match_sequences(hash, &a[b[0] + 1..], &b[1..])
-                        // match_sequences(&a[(a.len() - 1).min(b[0] + 1)..], &b[1..])
                     }
                 } else {
                     0
@@ -140,7 +120,6 @@ fn match_sequences_rec(
             }
         },
         2 => match b[0].cmp(&ends_at) {
-            // Ordering::Less => match_sequences(&a[b[0]..], &b[1..]),
             _ => {
                 let mut v = a.to_vec();
                 v[0] = 0;
