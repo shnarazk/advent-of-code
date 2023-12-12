@@ -1,16 +1,14 @@
 //! <https://adventofcode.com/2023/day/12>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
+// #![allow(dead_code)]
+// #![allow(unused_imports)]
+// #![allow(unused_variables)]
 
-use std::cmp::Ordering;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         line_parser,
     },
-    std::collections::HashMap,
+    std::{cmp::Ordering, collections::HashMap},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -44,19 +42,20 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        // self.line.iter().map(count_possibles).sum()
         self.line
             .iter()
-            .skip(5)
-            .take(1)
-            .map(|(k, s)| dbg!(match_sequences(k, s)))
+            .map(|(k, s)| {
+                let mut hash: HashMap<(Vec<usize>, usize), usize> = HashMap::new();
+                dbg!(match_sequences(&mut hash, k, s))
+            })
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            .take(0)
+            // .take(0)
             .map(|(k, s)| {
+                let mut hash: HashMap<(Vec<usize>, usize), usize> = HashMap::new();
                 let k5 = (0..5).map(|_| k.clone()).collect::<Vec<_>>().join(&2);
                 // println!("{:?}", &k5);
                 let s5 = s
@@ -65,83 +64,48 @@ impl AdventOfCode for Puzzle {
                     .take(s.len() * 5)
                     .copied()
                     .collect::<Vec<_>>();
-                match_sequences(&k5, &s5)
+                match_sequences(&mut hash, &k5, &s5)
             })
             .sum()
     }
 }
 
-fn matches(kind: &[usize], seq: &[usize]) -> bool {
-    let mut len = 0;
-    let mut i = 0;
-    for p in kind.iter() {
-        if *p == 0 {
-            if 0 < len {
-                if seq.len() <= i {
-                    return false;
-                }
-                if len != seq[i] {
-                    return false;
-                }
-                i += 1;
-                len = 0;
-            }
-        } else {
-            len += 1;
-        }
+fn match_sequences(
+    hash: &mut HashMap<(Vec<usize>, usize), usize>,
+    a: &[usize],
+    b: &[usize],
+) -> usize {
+    let k = (a.to_vec(), b.len());
+    if let Some(c) = hash.get(&k) {
+        return *c;
     }
-    if 0 < len {
-        if seq.len() <= i {
-            return false;
-        }
-        if len != seq[i] {
-            return false;
-        }
-        i += 1;
-    }
-    i == seq.len()
-}
-
-fn count_possibles((kind, seq): &(Vec<usize>, Vec<usize>)) -> usize {
-    let num_holes = kind.iter().filter(|n| **n == 2).count();
-    (0..2usize.pow(num_holes as u32))
-        .map(|nth| {
-            let mut target = kind.clone();
-            let mut index = 0;
-            for p in target.iter_mut() {
-                if *p == 2 {
-                    *p = (((1 << index) & nth) != 0) as usize;
-                    index += 1;
-                }
-            }
-            matches(&target, &seq) as usize
-        })
-        .sum::<usize>()
-}
-
-fn match_sequences(a: &[usize], b: &[usize]) -> usize {
-    let x = match_sequences_rec(a, b);
-    println!(
-        "{:?}/{} => {}",
-        a.iter()
-            .map(|c| match c {
-                0 => '.',
-                1 => '#',
-                _ => '?',
-            })
-            .collect::<String>(),
-        b.len(),
-        x
-    );
+    let x = match_sequences_rec(hash, a, b);
+    hash.insert(k, x);
     x
+    // println!(
+    //     "{:?}/{:?} => {}",
+    //     a.iter()
+    //         .map(|c| match c {
+    //             0 => '.',
+    //             1 => '#',
+    //             _ => '?',
+    //         })
+    //         .collect::<String>(),
+    //     b,
+    //     x
+    // );
 }
 
-fn match_sequences_rec(a: &[usize], b: &[usize]) -> usize {
+fn match_sequences_rec(
+    hash: &mut HashMap<(Vec<usize>, usize), usize>,
+    a: &[usize],
+    b: &[usize],
+) -> usize {
     // println!(" => {:?}", &a);
     match (a.is_empty(), b.is_empty()) {
-        (true, true) => return dbg!(1),
-        (false, true) => return dbg!(a.iter().all(|c| *c == 0) as usize),
-        (true, false) => return dbg!(0),
+        (true, true) => return 1,
+        (false, true) => return a.iter().all(|c| *c != 1) as usize,
+        (true, false) => return 0,
         _ => (),
     }
     if a.len() < b.iter().sum() {
@@ -154,23 +118,22 @@ fn match_sequences_rec(a: &[usize], b: &[usize]) -> usize {
         .find(|(_, c)| **c != beg)
         .map_or(a.len(), |(i, _)| i);
     match beg {
-        0 => match_sequences(&a[1..], b),
+        0 => match_sequences(hash, &a[1..], b),
         1 => match b[0].cmp(&ends_at) {
-            Ordering::Less => dbg!(0),
+            Ordering::Less => 0,
             Ordering::Equal if b[0] == a.len() => 1,
             Ordering::Equal => match a[b[0]] {
-                0 => match_sequences(&a[b[0]..], &b[1..]),
-                1 => unreachable!(),
-                2 => {
-                    let mut v = a[b[0]..].to_vec();
-                    v[0] = 0;
-                    match_sequences(&v, &b[1..])
-                }
+                0 | 2 => match_sequences(hash, &a[b[0] + 1..], &b[1..]),
                 _ => unreachable!(),
             },
             Ordering::Greater => {
-                if (ends_at..b[0]).all(|i| a[i] != 0) {
-                    dbg!(match_sequences(&a[b[0]..], &b[1..]))
+                if (ends_at..b[0]).all(|i| a[i] != 0) && (b[0] == a.len() || a[b[0]] != 1) {
+                    if a.len() < b[0] + 1 {
+                        (b.len() == 1) as usize
+                    } else {
+                        match_sequences(hash, &a[b[0] + 1..], &b[1..])
+                        // match_sequences(&a[(a.len() - 1).min(b[0] + 1)..], &b[1..])
+                    }
                 } else {
                     0
                 }
@@ -181,25 +144,12 @@ fn match_sequences_rec(a: &[usize], b: &[usize]) -> usize {
             _ => {
                 let mut v = a.to_vec();
                 v[0] = 0;
-                let c0 = match_sequences(&v, b);
+                let c0 = match_sequences(hash, &v, b);
                 v[0] = 1;
-                let c1 = match_sequences(&v, b);
+                let c1 = match_sequences(hash, &v, b);
                 c0 + c1
             }
         },
         _ => unreachable!(),
     }
-}
-
-fn printer(v: &[usize]) {
-    println!(
-        "{}",
-        v.iter()
-            .map(|c| match c {
-                0 => '.',
-                1 => '#',
-                _ => '?',
-            })
-            .collect::<String>()
-    )
 }
