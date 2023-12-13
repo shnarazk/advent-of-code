@@ -119,16 +119,14 @@ fn match_sequences_aux(
                 }
             }
         },
-        2 => match b[0].cmp(&ends_at) {
-            _ => {
-                let mut v = a.to_vec();
-                v[0] = 0;
-                let c0 = match_sequences(hash, &v, b);
-                v[0] = 1;
-                let c1 = match_sequences(hash, &v, b);
-                c0 + c1
-            }
-        },
+        2 => {
+            let mut v = a.to_vec();
+            v[0] = 0;
+            let c0 = match_sequences(hash, &v, b);
+            v[0] = 1;
+            let c1 = match_sequences(hash, &v, b);
+            c0 + c1
+        }
         _ => unreachable!(),
     }
 }

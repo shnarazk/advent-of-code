@@ -31,26 +31,26 @@ fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
     let width = m[0].len();
     let height = m.len();
     for mir in 0..width - 1 {
-        let ed = (0_..(mir + 1).min(width - mir - 1))
+        if 1 == (0..(mir + 1).min(width - mir - 1))
             .map(|offset| {
                 (0..height)
                     .map(|y| (m[y][mir - offset] != m[y][mir + 1 + offset]) as usize)
                     .sum::<usize>()
             })
-            .sum::<usize>();
-        if ed == 1 {
+            .sum::<usize>()
+        {
             return mir + 1;
         }
     }
     for mir in 0..height - 1 {
-        let ed = (0_..(mir + 1).min(height - mir - 1))
+        if 1 == (0..(mir + 1).min(height - mir - 1))
             .map(|offset| {
                 (0..width)
                     .map(|x| (m[mir - offset][x] != m[mir + 1 + offset][x]) as usize)
                     .sum::<usize>()
             })
-            .sum::<usize>();
-        if ed == 1 {
+            .sum::<usize>()
+        {
             return 100 * (mir + 1);
         }
     }
@@ -74,15 +74,15 @@ fn evaluate(m: &Vec<Vec<bool>>) -> usize {
         return 100 * (mir + 1);
     }
     'next_column: for x in 0..width - 1 {
-        for y in 0..height {
-            if m[y][x] != m[y][x + 1] {
+        for l in m.iter() {
+            if l[x] != l[x + 1] {
                 continue 'next_column;
             }
         }
         let mir = x;
         for offset in 1..(mir + 1).min(width - mir - 1) {
-            for y in 0..height {
-                if m[y][mir - offset] != m[y][mir + 1 + offset] {
+            for l in m.iter() {
+                if l[mir - offset] != l[mir + 1 + offset] {
                     continue 'next_column;
                 }
             }
