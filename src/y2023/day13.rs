@@ -30,24 +30,15 @@ impl AdventOfCode for Puzzle {
 fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
     let width = m[0].len();
     let height = m.len();
-    // let mut smudge = (0, 0);
     for mir in 0..width - 1 {
         let ed = (0_..(mir + 1).min(width - mir - 1))
             .map(|offset| {
                 (0..height)
-                    .map(|y| {
-                        if m[y][mir - offset] != m[y][mir + 1 + offset] {
-                            // smudge = (y, mir - offset);
-                            1
-                        } else {
-                            0
-                        }
-                    })
+                    .map(|y| (m[y][mir - offset] != m[y][mir + 1 + offset]) as usize)
                     .sum::<usize>()
             })
             .sum::<usize>();
         if ed == 1 {
-            // m[smudge.0][smudge.1] = !m[smudge.0][smudge.1];
             return mir + 1;
         }
     }
@@ -55,19 +46,11 @@ fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
         let ed = (0_..(mir + 1).min(height - mir - 1))
             .map(|offset| {
                 (0..width)
-                    .map(|x| {
-                        if m[mir - offset][x] != m[mir + 1 + offset][x] {
-                            // smudge = (mir - offset, x);
-                            1
-                        } else {
-                            0
-                        }
-                    })
+                    .map(|x| (m[mir - offset][x] != m[mir + 1 + offset][x]) as usize)
                     .sum::<usize>()
             })
             .sum::<usize>();
         if ed == 1 {
-            // m[smudge.0][smudge.1] = !m[smudge.0][smudge.1];
             return 100 * (mir + 1);
         }
     }
