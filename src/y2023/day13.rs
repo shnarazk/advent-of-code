@@ -60,19 +60,6 @@ fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
 fn evaluate(m: &Vec<Vec<bool>>) -> usize {
     let width = m[0].len();
     let height = m.len();
-    // check horizontal mirror
-    'next_line: for y in 0..height - 1 {
-        if m[y] != m[y + 1] {
-            continue 'next_line;
-        }
-        let mir = y;
-        for offset in 1..(mir + 1).min(height - mir - 1) {
-            if m[mir - offset] != m[mir + 1 + offset] {
-                continue 'next_line;
-            }
-        }
-        return 100 * (mir + 1);
-    }
     'next_column: for x in 0..width - 1 {
         for l in m.iter() {
             if l[x] != l[x + 1] {
@@ -88,6 +75,19 @@ fn evaluate(m: &Vec<Vec<bool>>) -> usize {
             }
         }
         return mir + 1;
+    }
+    // check horizontal mirror
+    'next_line: for y in 0..height - 1 {
+        if m[y] != m[y + 1] {
+            continue 'next_line;
+        }
+        let mir = y;
+        for offset in 1..(mir + 1).min(height - mir - 1) {
+            if m[mir - offset] != m[mir + 1 + offset] {
+                continue 'next_line;
+            }
+        }
+        return 100 * (mir + 1);
     }
     unreachable!()
 }
