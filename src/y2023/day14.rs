@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
+use itertools::assert_equal;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -33,31 +35,43 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        dbg!(self.line.len(), self.line[0].len());
-        let depth = self.line.len();
-        let m = transpose(&self.line);
-        m.iter()
-            .map(|line| {
-                let mut res = Vec::new();
-                let mut base = 0;
-                for (i, k) in line.iter().enumerate() {
-                    match *k {
-                        1 => {
-                            res.push(base);
-                            base += 1;
-                        }
-                        2 => base = i + 1,
-                        _ => (),
-                    }
-                }
-                res.iter().map(|val| depth - val).sum::<usize>()
-            })
-            .sum::<usize>()
+        // dbg!(self.line.len(), self.line[0].len());
+        count(&add_force(self.line.clone()))
     }
     fn part2(&mut self) -> Self::Output2 {
-        // print(&add_force(self.line.clone()));
-        print(&cycle(cycle(self.line.clone())));
-        2
+        let mut map: HashMap<Vec<Vec<usize>>, usize> = HashMap::new();
+        // dbg!(count(&add_force(self.line.clone())));
+        let mut m = self.line.clone();
+        map.insert(m.clone(), 0);
+        // let mut val = 100000;
+        // for _ in 0..50 {
+        //     m = cycle(m);
+        //     val = val.min(count(&m));
+        //     // print(&m.clone());
+        //     // print(&add_force(m.clone()));
+        //     // println!();
+        // }
+        // dbg!(val);
+        for i in 1.. {
+            m = cycle(m);
+            if let Some(j) = map.get(&m) {
+                dbg!(i, j);
+                let c = i - j;
+                let remain1 = (1000000000 - i) - c * ((1000000000 - i) / c);
+                let remain = (1000000000 - i) % c;
+                assert_eq!(remain1, remain);
+                dbg!(remain);
+                for _ in 0..remain {
+                    m = cycle(m);
+                }
+                return count(&m);
+                // return i - j;
+            }
+            map.insert(m.clone(), i);
+        }
+        0
+        // print(&cycle(cycle(cycle(self.line.clone()))));
+        // 2
     }
 }
 
@@ -142,4 +156,23 @@ fn cycle(m: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
     // print(&m);
     // println!();
     // rotate_clockwise(m)
+}
+
+fn count(mat: &Vec<Vec<usize>>) -> usize {
+    let depth = mat.len();
+    let m = transpose(mat);
+    m.iter()
+        .map(|line| {
+            let mut res = Vec::new();
+            for (i, k) in line.iter().enumerate() {
+                match *k {
+                    1 => {
+                        res.push(i);
+                    }
+                    _ => (),
+                }
+            }
+            res.iter().map(|val| depth - val).sum::<usize>()
+        })
+        .sum::<usize>()
 }
