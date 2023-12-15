@@ -1,12 +1,5 @@
 //! <https://adventofcode.com/2023/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    geometric::neighbors,
-    line_parser, regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -48,12 +41,10 @@ impl AdventOfCode for Puzzle {
                 .map(|t| t.0);
             if remove {
                 if let Some(i) = found {
-                    // dbg!(k[0], &boxes[n], found);
                     boxes[n].remove(i);
                 }
             } else {
                 if let Some(i) = found {
-                    // dbg!(k[0], &boxes[n], found);
                     boxes[n][i].1 = k[1].parse::<usize>().unwrap();
                 } else {
                     boxes[n].push((k[0].to_string(), k[1].parse::<usize>().unwrap()));
@@ -66,7 +57,7 @@ impl AdventOfCode for Puzzle {
             .map(|(n, v)| {
                 v.iter()
                     .enumerate()
-                    .map(|(i, (label, value))| (n + 1) * (i + 1) * dbg!(value))
+                    .map(|(i, (_, value))| (n + 1) * (i + 1) * value)
                     .sum::<usize>()
             })
             .sum::<usize>()
