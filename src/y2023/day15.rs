@@ -2,25 +2,16 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    geometric::neighbors,
+    line_parser, regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<String>,
 }
-
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
 
 #[aoc(2023, 15)]
 impl AdventOfCode for Puzzle {
@@ -33,9 +24,6 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
@@ -46,6 +34,41 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut boxes: Vec<Vec<(String, usize)>> = (0..256).map(|_| Vec::new()).collect::<Vec<_>>();
+        for s in &self.line {
+            let remove = s.contains('-');
+            let k = (if remove { s.split('-') } else { s.split('=') }).collect::<Vec<_>>();
+            let n = k[0]
+                .bytes()
+                .fold(0usize, |ac, x| (17 * (ac + x as usize)) % 256);
+            let found = boxes[n]
+                .iter()
+                .enumerate()
+                .find(|t| *t.1 .0.as_str() == *k[0])
+                .map(|t| t.0);
+            if remove {
+                if let Some(i) = found {
+                    // dbg!(k[0], &boxes[n], found);
+                    boxes[n].remove(i);
+                }
+            } else {
+                if let Some(i) = found {
+                    // dbg!(k[0], &boxes[n], found);
+                    boxes[n][i].1 = k[1].parse::<usize>().unwrap();
+                } else {
+                    boxes[n].push((k[0].to_string(), k[1].parse::<usize>().unwrap()));
+                }
+            }
+        }
+        boxes
+            .iter()
+            .enumerate()
+            .map(|(n, v)| {
+                v.iter()
+                    .enumerate()
+                    .map(|(i, (label, value))| (n + 1) * (i + 1) * dbg!(value))
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
     }
 }
