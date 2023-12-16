@@ -27,7 +27,7 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut boxes: Vec<Vec<(String, usize)>> = (0..256).map(|_| Vec::new()).collect::<Vec<_>>();
+        let mut boxes: Vec<Vec<(&str, usize)>> = (0..256).map(|_| Vec::new()).collect::<Vec<_>>();
         for s in &self.line {
             let remove = s.contains('-');
             let k = (if remove { s.split('-') } else { s.split('=') }).collect::<Vec<_>>();
@@ -37,7 +37,7 @@ impl AdventOfCode for Puzzle {
             let found = boxes[n]
                 .iter()
                 .enumerate()
-                .find(|t| *t.1 .0.as_str() == *k[0])
+                .find(|t| *t.1 .0 == *k[0])
                 .map(|t| t.0);
             if remove {
                 if let Some(i) = found {
@@ -47,7 +47,7 @@ impl AdventOfCode for Puzzle {
                 if let Some(i) = found {
                     boxes[n][i].1 = k[1].parse::<usize>().unwrap();
                 } else {
-                    boxes[n].push((k[0].to_string(), k[1].parse::<usize>().unwrap()));
+                    boxes[n].push((&k[0], k[1].parse::<usize>().unwrap()));
                 }
             }
         }
