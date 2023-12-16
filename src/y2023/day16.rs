@@ -10,6 +10,7 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
+    size: Dim2<isize>,
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -35,7 +36,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
+        self.size = (self.line.len() as isize, self.line[0].len() as isize);
     }
     fn part1(&mut self) -> Self::Output1 {
         let start = Beam {
@@ -45,8 +46,8 @@ impl AdventOfCode for Puzzle {
         self.count(start)
     }
     fn part2(&mut self) -> Self::Output2 {
-        let height = self.line.len() as isize;
-        let width = self.line[0].len() as isize;
+        let height = self.size.1;
+        let width = self.size.1;
         (-1..=height)
             .map(|y| {
                 (-1..=width)
@@ -87,14 +88,14 @@ fn move_to(p: Dim2<isize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<is
 
 impl Puzzle {
     fn count(&mut self, start: Beam) -> usize {
-        let height = self.line.len();
-        let width = self.line[0].len();
+        let height = self.size.0 as usize;
+        let width = self.size.1 as usize;
         let mut energized: HashSet<Dim2<isize>> = HashSet::new();
         let mut checked: HashSet<Beam> = HashSet::new();
         energized.insert(start.pos);
         let mut to_check: Vec<Beam> = Vec::new();
         to_check.push(start);
-        while let Some(b) = to_check.pop() {
+        while let Some(mut b) = to_check.pop() {
             if checked.contains(&b) {
                 continue;
             }
@@ -103,23 +104,24 @@ impl Puzzle {
             let Some(pos) = b.go_forward(height, width) else {
                 continue;
             };
+            b.pos = pos;
             match self.line[pos.0 as usize][pos.1 as usize] {
-                '/' if b.is_vert() => to_check.push(Beam {
-                    pos,
-                    dir: (0, -b.dir.0),
-                }),
-                '/' => to_check.push(Beam {
-                    pos,
-                    dir: (-b.dir.1, 0),
-                }),
-                '\\' if b.is_vert() => to_check.push(Beam {
-                    pos,
-                    dir: (0, b.dir.0),
-                }),
-                '\\' => to_check.push(Beam {
-                    pos,
-                    dir: (b.dir.1, 0),
-                }),
+                '/' if b.is_vert() => {
+                    b.dir = (0, -b.dir.0);
+                    to_check.push(b);
+                }
+                '/' => {
+                    b.dir = (-b.dir.1, 0);
+                    to_check.push(b);
+                }
+                '\\' if b.is_vert() => {
+                    b.dir = (0, b.dir.0);
+                    to_check.push(b);
+                }
+                '\\' => {
+                    b.dir = (b.dir.1, 0);
+                    to_check.push(b);
+                }
                 '|' if !b.is_vert() => {
                     to_check.push(Beam { pos, dir: (-1, 0) });
                     to_check.push(Beam { pos, dir: (1, 0) });
@@ -128,7 +130,7 @@ impl Puzzle {
                     to_check.push(Beam { pos, dir: (0, -1) });
                     to_check.push(Beam { pos, dir: (0, 1) });
                 }
-                _ => to_check.push(Beam { pos, dir: b.dir }),
+                _ => to_check.push(b),
             }
         }
         energized.len() - 1 // the light came from out of the region.
