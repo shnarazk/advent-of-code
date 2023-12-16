@@ -1,8 +1,8 @@
 //! <https://adventofcode.com/2023/day/14>
 use {
     crate::{
+        array::{rotate_clockwise, transpose},
         framework::{aoc, AdventOfCode, ParseError},
-        math::transpose,
     },
     std::collections::HashMap,
 };
@@ -83,17 +83,6 @@ fn add_force(mut mat: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
         }
     }
     mat
-}
-
-fn rotate_clockwise(m: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
-    let h = m.len();
-    let mut n = m.clone();
-    for (y, l) in n.iter_mut().enumerate() {
-        for (x, p) in l.iter_mut().enumerate() {
-            *p = m[h - x - 1][y];
-        }
-    }
-    n
 }
 
 fn cycle(m: Vec<Vec<usize>>) -> Vec<Vec<usize>> {

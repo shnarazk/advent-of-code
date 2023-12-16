@@ -32,11 +32,3 @@ pub fn permutations(from: usize, to: usize) -> Vec<Vec<usize>> {
     let cands = (from..=to).collect::<Vec<usize>>();
     perm(&cands)
 }
-
-pub fn transpose<I: Clone>(v: &Vec<Vec<I>>) -> Vec<Vec<I>> {
-    let h = v.len();
-    let w = v[0].len();
-    (0..w)
-        .map(|x| (0..h).map(|y| v[y][x].clone()).collect::<Vec<_>>())
-        .collect::<Vec<_>>()
-}

@@ -1,3 +1,4 @@
+pub mod array;
 pub mod color;
 pub mod framework;
 pub mod geometric;
