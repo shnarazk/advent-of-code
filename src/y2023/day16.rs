@@ -23,10 +23,9 @@ struct Beam {
 
 impl Beam {
     fn go_forward(&self, h: usize, w: usize) -> Option<Dim2<isize>> {
-        <Dim2<isize> as GeometricAddition<isize>>::move_to(self.pos, self.dir, h, w)
+        self.pos.move_to(self.dir, h, w).map(|b| *b)
     }
     fn is_vert(&self) -> bool {
-        // self.dir.0.abs() == 1 && self.dir.1 == 0
         self.dir.1 == 0
     }
 }
@@ -59,7 +58,7 @@ impl AdventOfCode for Puzzle {
                             || ((*y == -1 || *y == height) && (0 <= *x && *x < width))
                     })
                     .map(|(y, x)| {
-                        let start = Beam {
+                        self.count(Beam {
                             pos: (y, x),
                             dir: if y == -1 {
                                 (1, 0)
@@ -70,8 +69,7 @@ impl AdventOfCode for Puzzle {
                             } else {
                                 (0, -1)
                             },
-                        };
-                        self.count(start)
+                        })
                     })
                     .max()
                     .unwrap()

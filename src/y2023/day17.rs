@@ -35,14 +35,9 @@ impl Crucible {
         let mut res: Vec<Crucible> = Vec::new();
         // go straight
         if self.dist < threshold1 {
-            if let Some(p) = <Dim2<usize> as GeometricAddition<usize>>::move_to(
-                self.pos,
-                self.dir.as_vec2(),
-                height,
-                width,
-            ) {
+            if let Some(p) = self.pos.move_to(self.dir.as_vec2(), height, width) {
                 let mut c = self.clone();
-                c.pos = p;
+                c.pos = *p;
                 c.dist += 1;
                 res.push(c);
             }
@@ -52,28 +47,18 @@ impl Crucible {
         }
         // turn right
         let dir = GeometricRotation::turn_right(&self.dir);
-        if let Some(p) = <Dim2<usize> as GeometricAddition<usize>>::move_to(
-            self.pos,
-            dir.as_vec2(),
-            height,
-            width,
-        ) {
+        if let Some(p) = self.pos.move_to(dir.as_vec2(), height, width) {
             let mut c = self.clone();
-            c.pos = p;
+            c.pos = *p;
             c.dir = dir;
             c.dist = 1;
             res.push(c);
         }
         // turn left
         let dir = GeometricRotation::turn_left(&self.dir);
-        if let Some(p) = <Dim2<usize> as GeometricAddition<usize>>::move_to(
-            self.pos,
-            dir.as_vec2(),
-            height,
-            width,
-        ) {
+        if let Some(p) = self.pos.move_to(dir.as_vec2(), height, width) {
             let mut c = self.clone();
-            c.pos = p;
+            c.pos = *p;
             c.dir = dir;
             c.dist = 1;
             res.push(c);

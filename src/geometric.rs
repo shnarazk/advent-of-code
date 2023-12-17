@@ -470,22 +470,23 @@ pub fn cubic_neighbors26(
         .collect::<Vec<_>>()
 }
 
-pub trait GeometricAddition<T> {
-    fn move_to(p: Dim2<T>, q: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<T>>;
+pub trait GeometricAddition {
+    fn move_to(&self, q: Dim2<isize>, h: usize, w: usize) -> Option<Box<Self>>;
 }
 
-impl GeometricAddition<usize> for Dim2<usize> {
-    fn move_to(p: Dim2<usize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<usize>> {
-        let y = p.0 as isize + d.0;
-        let x = p.1 as isize + d.1;
-        (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| (y as usize, x as usize))
+impl GeometricAddition for Dim2<usize> {
+    fn move_to(&self, d: Dim2<isize>, h: usize, w: usize) -> Option<Box<Dim2<usize>>> {
+        let y = self.0 as isize + d.0;
+        let x = self.1 as isize + d.1;
+        (0 <= y && y < h as isize && 0 <= x && x < w as isize)
+            .then(|| Box::new((y as usize, x as usize)))
     }
 }
 
-impl GeometricAddition<isize> for Dim2<isize> {
-    fn move_to(p: Dim2<isize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<isize>> {
-        let y = p.0 + d.0;
-        let x = p.1 + d.1;
-        (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| (y, x))
+impl GeometricAddition for Dim2<isize> {
+    fn move_to(&self, d: Dim2<isize>, h: usize, w: usize) -> Option<Box<Dim2<isize>>> {
+        let y = self.0 + d.0;
+        let x = self.1 + d.1;
+        (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| Box::new((y, x)))
     }
 }
