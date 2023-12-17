@@ -90,7 +90,7 @@ impl AdventOfCode for Puzzle {
             block
                 .trim()
                 .bytes()
-                .map(|c| (c as u8 - b'0') as usize)
+                .map(|c| (c - b'0') as usize)
                 .collect::<Vec<_>>(),
         );
         Ok(())

@@ -43,12 +43,10 @@ impl AdventOfCode for Puzzle {
                 if let Some(i) = found {
                     boxes[n].remove(i);
                 }
+            } else if let Some(i) = found {
+                boxes[n][i].1 = k[1].parse::<usize>().unwrap();
             } else {
-                if let Some(i) = found {
-                    boxes[n][i].1 = k[1].parse::<usize>().unwrap();
-                } else {
-                    boxes[n].push((&k[0], k[1].parse::<usize>().unwrap()));
-                }
+                boxes[n].push((&k[0], k[1].parse::<usize>().unwrap()));
             }
         }
         boxes
