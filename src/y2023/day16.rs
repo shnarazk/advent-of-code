@@ -1,8 +1,10 @@
 //! <https://adventofcode.com/2023/day/16>
+//! Improvement:
+//    Map mirrors to bitmaps of energized positions, then merorize it.
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::Dim2,
+        geometric::{Dim2, GeometricAddition},
     },
     std::collections::HashSet,
 };
@@ -21,10 +23,11 @@ struct Beam {
 
 impl Beam {
     fn go_forward(&self, h: usize, w: usize) -> Option<Dim2<isize>> {
-        move_to(self.pos, self.dir, h, w)
+        <Dim2<isize> as GeometricAddition<isize>>::move_to(self.pos, self.dir, h, w)
     }
     fn is_vert(&self) -> bool {
-        self.dir.0.abs() == 1 && self.dir.1 == 0
+        // self.dir.0.abs() == 1 && self.dir.1 == 0
+        self.dir.1 == 0
     }
 }
 
@@ -39,11 +42,10 @@ impl AdventOfCode for Puzzle {
         self.size = (self.line.len() as isize, self.line[0].len() as isize);
     }
     fn part1(&mut self) -> Self::Output1 {
-        let start = Beam {
+        self.count(Beam {
             pos: (0, -1),
-            dir: (0, 1), // (0, _) has a mirror!
-        };
-        self.count(start)
+            dir: (0, 1),
+        })
     }
     fn part2(&mut self) -> Self::Output2 {
         let height = self.size.1;
@@ -70,7 +72,6 @@ impl AdventOfCode for Puzzle {
                             },
                         };
                         self.count(start)
-                        // 0
                     })
                     .max()
                     .unwrap()
@@ -80,19 +81,12 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn move_to(p: Dim2<isize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<isize>> {
-    let y = p.0 + d.0;
-    let x = p.1 + d.1;
-    (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| (y, x))
-}
-
 impl Puzzle {
     fn count(&mut self, start: Beam) -> usize {
         let height = self.size.0 as usize;
         let width = self.size.1 as usize;
         let mut energized: HashSet<Dim2<isize>> = HashSet::new();
         let mut checked: HashSet<Beam> = HashSet::new();
-        energized.insert(start.pos);
         let mut to_check: Vec<Beam> = Vec::new();
         to_check.push(start);
         while let Some(mut b) = to_check.pop() {
@@ -105,33 +99,20 @@ impl Puzzle {
                 continue;
             };
             b.pos = pos;
-            match self.line[pos.0 as usize][pos.1 as usize] {
-                '/' if b.is_vert() => {
-                    b.dir = (0, -b.dir.0);
-                    to_check.push(b);
-                }
-                '/' => {
-                    b.dir = (-b.dir.1, 0);
-                    to_check.push(b);
-                }
-                '\\' if b.is_vert() => {
-                    b.dir = (0, b.dir.0);
-                    to_check.push(b);
-                }
-                '\\' => {
-                    b.dir = (b.dir.1, 0);
-                    to_check.push(b);
-                }
-                '|' if !b.is_vert() => {
+            match (self.line[pos.0 as usize][pos.1 as usize], b.is_vert()) {
+                ('/', true) | ('/', false) => b.dir = (-b.dir.1, -b.dir.0),
+                ('\\', true) | ('\\', false) => b.dir = (b.dir.1, b.dir.0),
+                ('|', false) => {
                     to_check.push(Beam { pos, dir: (-1, 0) });
-                    to_check.push(Beam { pos, dir: (1, 0) });
+                    b.dir = (1, 0);
                 }
-                '-' if b.is_vert() => {
+                ('-', true) => {
                     to_check.push(Beam { pos, dir: (0, -1) });
-                    to_check.push(Beam { pos, dir: (0, 1) });
+                    b.dir = (0, 1);
                 }
-                _ => to_check.push(b),
+                _ => (),
             }
+            to_check.push(b);
         }
         energized.len() - 1 // the light came from out of the region.
     }
