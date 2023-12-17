@@ -17,15 +17,16 @@ pub trait GeometricMath {
 }
 
 pub trait GeometricRotation {
-    fn turn_right(&mut self) -> Self;
-    fn turn_left(&mut self) -> Self;
+    fn turn_right(&self) -> Self;
+    fn turn_left(&self) -> Self;
 }
 
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
 
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Direction {
+    #[default]
     NORTH,
     EAST,
     SOUTH,
@@ -53,7 +54,7 @@ impl Direction {
 }
 
 impl GeometricRotation for Direction {
-    fn turn_right(&mut self) -> Self {
+    fn turn_right(&self) -> Self {
         match self {
             Direction::NORTH => Direction::EAST,
             Direction::EAST => Direction::SOUTH,
@@ -61,7 +62,7 @@ impl GeometricRotation for Direction {
             Direction::WEST => Direction::NORTH,
         }
     }
-    fn turn_left(&mut self) -> Self {
+    fn turn_left(&self) -> Self {
         match self {
             Direction::EAST => Direction::NORTH,
             Direction::SOUTH => Direction::EAST,
@@ -85,7 +86,7 @@ const DIR8: [Vec2; 8] = [
 ];
 
 impl GeometricRotation for Vec2 {
-    fn turn_right(&mut self) -> Self {
+    fn turn_right(&self) -> Self {
         match self {
             (0, 1) => (1, 0),
             (1, 0) => (0, -1),
@@ -94,7 +95,7 @@ impl GeometricRotation for Vec2 {
             _ => unreachable!(),
         }
     }
-    fn turn_left(&mut self) -> Self {
+    fn turn_left(&self) -> Self {
         match self {
             (0, 1) => (-1, 0),
             (1, 0) => (0, 1),
@@ -467,4 +468,24 @@ pub fn cubic_neighbors26(
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>()
+}
+
+pub trait GeometricAddition<T> {
+    fn move_to(p: Dim2<T>, q: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<T>>;
+}
+
+impl GeometricAddition<usize> for Dim2<usize> {
+    fn move_to(p: Dim2<usize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<usize>> {
+        let y = p.0 as isize + d.0;
+        let x = p.1 as isize + d.1;
+        (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| (y as usize, x as usize))
+    }
+}
+
+impl GeometricAddition<isize> for Dim2<isize> {
+    fn move_to(p: Dim2<isize>, d: Dim2<isize>, h: usize, w: usize) -> Option<Dim2<isize>> {
+        let y = p.0 + d.0;
+        let x = p.1 + d.1;
+        (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| (y, x))
+    }
 }
