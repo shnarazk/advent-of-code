@@ -48,7 +48,7 @@ impl AdventOfCode for Puzzle {
                         '3' => (-1, 0),
                         _ => unreachable!(),
                     };
-                    self.line2.push((dir, dbg!(dist)));
+                    self.line2.push((dir, dist));
                 }
                 _ => unreachable!(),
             }
@@ -156,34 +156,33 @@ impl AdventOfCode for Puzzle {
             pos.0 += dir.0 * (*dist as isize);
             pos.1 += dir.1 * (*dist as isize);
             let p = (
-                *converty.get(&pos.0).unwrap(),
-                *convertx.get(&pos.1).unwrap(),
+                2 * *converty.get(&pos.0).unwrap(),
+                2 * *convertx.get(&pos.1).unwrap(),
             );
-            match (dir.0.signum(), dir.1.signum()) {
+            match dir {
                 (1, 0) => {
-                    for y in pre.0..p.0 {
+                    for y in pre.0..=p.0 {
                         map.insert((y, p.1), 1);
                     }
                 }
                 (-1, 0) => {
-                    for y in p.0..pre.0 {
+                    for y in p.0..=pre.0 {
                         map.insert((y, p.1), 1);
                     }
                 }
                 (0, 1) => {
-                    for x in pre.0..p.0 {
+                    for x in pre.1..=p.1 {
                         map.insert((p.0, x), 1);
                     }
                 }
                 (0, -1) => {
-                    for x in p.0..pre.0 {
+                    for x in p.1..=pre.1 {
                         map.insert((p.0, x), 1);
                     }
                 }
                 _ => unreachable!(),
             }
 
-            map.insert(p, 1);
             corner0.0 = p.0.min(corner0.0);
             corner0.1 = p.1.min(corner0.1);
             corner1.0 = p.0.max(corner1.0);
@@ -194,7 +193,6 @@ impl AdventOfCode for Puzzle {
         corner0.1 -= 1;
         corner1.0 += 2;
         corner1.1 += 2;
-        dbg!(corner0, corner1);
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
                 print!(
@@ -235,26 +233,26 @@ impl AdventOfCode for Puzzle {
             }
             println!();
         }
-        let mut amount = 0;
         for (y, _) in revertyl.iter() {
             for (x, _) in revertxl.iter() {
                 if map.get(&(*y, *x)).is_none() {
                     map.insert((*y, *x), 2);
-                } else if let Some(0) = map.get(&(*y, *x)) {
-                    map.remove(&(*y, *x));
                 }
             }
         }
-        for patterny in revertyl.windows(2) {
+        let mut amount = 0;
+        for (i, patterny) in revertyl.windows(2).enumerate() {
             let [(y, ry0), (_, ry1)] = patterny else {
                 panic!();
             };
-            for patternx in revertxl.windows(2) {
+            for (j, patternx) in revertxl.windows(2).enumerate() {
                 let [(x, rx0), (_, rx1)] = patternx else {
                     panic!();
                 };
-                if map.contains_key(&(*y, *x)) && map.contains_key(&(y + 1, x + 1)) {
-                    amount += ((ry1 - ry0) * (rx1 - rx0)) as usize;
+                if let Some(2) = map.get(&(*y, *x)) {
+                    if i % 2 == 1 && j % 2 == 1 {
+                        amount += ((ry1 - ry0 - 1) * (rx1 - rx0 - 1)) as usize;
+                    }
                 }
             }
         }
