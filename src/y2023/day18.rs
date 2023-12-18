@@ -9,12 +9,14 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{neighbors, Dim2, Direction, GeometricMath},
     },
-    std::collections::{BinaryHeap, HashMap},
+    itertools::Itertools,
+    std::collections::{BinaryHeap, HashMap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<(Dim2<isize>, usize)>,
+    line2: Vec<(Dim2<isize>, usize)>,
 }
 
 #[aoc(2023, 18)]
@@ -35,15 +37,29 @@ impl AdventOfCode for Puzzle {
                     }
                 }
                 1 => dist = b.parse::<usize>().unwrap(),
-                _ => (),
+                2 => {
+                    let str = b.trim().chars().collect::<Vec<char>>();
+                    let dists = str.iter().skip(2).take(5).collect::<String>();
+                    let dist = usize::from_str_radix(&dists, 16)?;
+                    let dir = match str[7] {
+                        '0' => (0, 1),
+                        '1' => (1, 0),
+                        '2' => (0, -1),
+                        '3' => (-1, 0),
+                        _ => unreachable!(),
+                    };
+                    self.line2.push((dir, dist));
+                }
+                _ => unreachable!(),
             }
         }
         self.line.push((dir, dist));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
+    // fn end_of_data(&mut self) {
+    //     dbg!(&self.line.len());
+    //     dbg!(&self.line2.len());
+    // }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();
         let mut pos = (1, 1);
@@ -64,7 +80,6 @@ impl AdventOfCode for Puzzle {
         corner0.1 -= 1;
         corner1.0 += 2;
         corner1.1 += 2;
-        dbg!(corner0, corner1);
         let mut to_visit: BinaryHeap<Dim2<isize>> = BinaryHeap::new();
         to_visit.push(corner0);
         while let Some(p) = to_visit.pop() {
@@ -76,6 +91,97 @@ impl AdventOfCode for Puzzle {
                 to_visit.push(*q);
             }
         }
+        ((corner1.0 - corner0.0) * (corner1.1 - corner0.1)) as usize
+            - map.values().filter(|v| **v == 0).count()
+    }
+    fn part2(&mut self) -> Self::Output2 {
+        let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();
+        let mut pos = (0, 0);
+        let mut pre: Dim2<isize>;
+        let mut corner0: Dim2<isize> = (0, 0);
+        let mut corner1: Dim2<isize> = (0, 0);
+        let mut dicy: HashSet<isize> = HashSet::new();
+        let mut dicx: HashSet<isize> = HashSet::new();
+        for (dir, dist) in self.line2.iter() {
+            pos.0 += dir.0;
+            pos.1 += dir.1;
+            dicy.insert(pos.0);
+            dicx.insert(pos.1);
+            // corner0.0 = pos.0.min(corner0.0);
+            // corner0.1 = pos.1.min(corner0.1);
+            // corner1.0 = pos.0.max(corner1.0);
+            // corner1.1 = pos.1.max(corner1.1);
+        }
+        let converty: HashMap<isize, isize> = dicy
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (*v, i as isize))
+            .collect::<HashMap<isize, isize>>();
+        let convertx: HashMap<isize, isize> = dicx
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (*v, i as isize))
+            .collect::<HashMap<isize, isize>>();
+        let reverty: HashMap<isize, isize> = dicy
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (i as isize, *v))
+            .collect::<HashMap<isize, isize>>();
+        let revertx: HashMap<isize, isize> = dicx
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (i as isize, *v))
+            .collect::<HashMap<isize, isize>>();
+        dbg!(converty.len());
+        pos = (0, 0);
+        pre = (0, 0);
+        for (dir, dist) in self.line2.iter() {
+            pos.0 += dir.0;
+            pos.1 += dir.1;
+            let p = (
+                *converty.get(&pos.0).unwrap(),
+                *convertx.get(&pos.1).unwrap(),
+            );
+            match (dir.0.signum(), dir.1.signum()) {
+                (1, 0) => {
+                    for y in pre.0..p.0 {
+                        map.insert((y, p.1), 1);
+                    }
+                }
+                (-1, 0) => {
+                    for y in p.0..pre.0 {
+                        map.insert((y, p.1), 1);
+                    }
+                }
+                (0, 1) => {
+                    for x in pre.0..p.0 {
+                        map.insert((p.0, x), 1);
+                    }
+                }
+                (0, -1) => {
+                    for x in p.0..pre.0 {
+                        map.insert((p.0, x), 1);
+                    }
+                }
+                _ => unreachable!(),
+            }
+
+            map.insert(p, 1);
+            corner0.0 = p.0.min(corner0.0);
+            corner0.1 = p.1.min(corner0.1);
+            corner1.0 = p.0.max(corner1.0);
+            corner1.1 = p.1.max(corner1.1);
+            pre = p;
+        }
+        corner0.0 -= 1;
+        corner0.1 -= 1;
+        corner1.0 += 2;
+        corner1.1 += 2;
+        dbg!(corner0, corner1);
         /*
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
@@ -92,11 +198,6 @@ impl AdventOfCode for Puzzle {
             println!();
         }
         */
-        // 8 * 11
-        dbg!(((corner1.0 - corner0.0) * (corner1.1 - corner0.1)) as usize)
-            - map.values().filter(|v| **v == 0).count()
-    }
-    fn part2(&mut self) -> Self::Output2 {
         2
     }
 }
