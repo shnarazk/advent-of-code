@@ -236,6 +236,15 @@ impl AdventOfCode for Puzzle {
             println!();
         }
         let mut amount = 0;
+        for (y, _) in revertyl.iter() {
+            for (x, _) in revertxl.iter() {
+                if map.get(&(*y, *x)).is_none() {
+                    map.insert((*y, *x), 2);
+                } else if let Some(0) = map.get(&(*y, *x)) {
+                    map.remove(&(*y, *x));
+                }
+            }
+        }
         for patterny in revertyl.windows(2) {
             let [(y, ry0), (_, ry1)] = patterny else {
                 panic!();
@@ -244,11 +253,9 @@ impl AdventOfCode for Puzzle {
                 let [(x, rx0), (_, rx1)] = patternx else {
                     panic!();
                 };
-                dbg!(rx1);
-                amount += match map.get(&(*y, *x)) {
-                    Some(1) | None => ((ry1 - ry0 + 1) * (rx1 - rx0 + 1)) as usize,
-                    _ => 0,
-                };
+                if map.contains_key(&(*y, *x)) && map.contains_key(&(y + 1, x + 1)) {
+                    amount += ((ry1 - ry0) * (rx1 - rx0)) as usize;
+                }
             }
         }
         amount
