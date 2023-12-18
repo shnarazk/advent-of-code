@@ -14,6 +14,9 @@ pub trait GeometricMath {
     fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized;
+    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self>
+    where
+        Self: Sized;
 }
 
 pub trait GeometricRotation {
@@ -143,6 +146,19 @@ impl GeometricMath for Dim2<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
             .collect::<Vec<Self>>()
     }
+    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+        [self.0 - 1, self.0, self.0 + 1]
+            .iter()
+            .filter(|s| boundary0.0 <= **s && **s < boundary1.0)
+            .flat_map(|y| {
+                [self.1 - 1, self.1, self.1 + 1]
+                    .iter()
+                    .filter(|t| boundary0.1 <= **t && **t < boundary1.1)
+                    .map(|x| (*y, *x))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
+    }
 }
 
 impl GeometricMath for Dim2<usize> {
@@ -183,6 +199,19 @@ impl GeometricMath for Dim2<usize> {
             .filter_map(|d| self.shift(d))
             .filter(|v| v.0 < b0 && v.1 < b1)
             .collect::<Vec<Self>>()
+    }
+    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+        [self.0 - 1, self.0, self.0 + 1]
+            .iter()
+            .filter(|s| boundary0.0 <= **s && **s < boundary1.0)
+            .flat_map(|y| {
+                [self.1 - 1, self.1, self.1 + 1]
+                    .iter()
+                    .filter(|t| boundary0.1 <= **t && **t < boundary1.1)
+                    .map(|x| (*y, *x))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
     }
 }
 
@@ -268,6 +297,9 @@ impl GeometricMath for Dim3<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
             .collect::<Vec<Self>>()
     }
+    fn neighbors8(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+        unimplemented!()
+    }
 }
 
 impl GeometricMath for Dim3<usize> {
@@ -312,6 +344,9 @@ impl GeometricMath for Dim3<usize> {
             .filter_map(|d| self.shift(d))
             .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
             .collect::<Vec<Self>>()
+    }
+    fn neighbors8(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+        unimplemented!()
     }
 }
 
