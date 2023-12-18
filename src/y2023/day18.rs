@@ -48,7 +48,7 @@ impl AdventOfCode for Puzzle {
                         '3' => (-1, 0),
                         _ => unreachable!(),
                     };
-                    self.line2.push((dir, dist));
+                    self.line2.push((dir, dbg!(dist)));
                 }
                 _ => unreachable!(),
             }
@@ -103,8 +103,8 @@ impl AdventOfCode for Puzzle {
         let mut dicy: HashSet<isize> = HashSet::new();
         let mut dicx: HashSet<isize> = HashSet::new();
         for (dir, dist) in self.line2.iter() {
-            pos.0 += dir.0;
-            pos.1 += dir.1;
+            pos.0 += dir.0 * (*dist as isize);
+            pos.1 += dir.1 * (*dist as isize);
             dicy.insert(pos.0);
             dicx.insert(pos.1);
             // corner0.0 = pos.0.min(corner0.0);
@@ -112,12 +112,14 @@ impl AdventOfCode for Puzzle {
             // corner1.0 = pos.0.max(corner1.0);
             // corner1.1 = pos.1.max(corner1.1);
         }
+        println!("dicy: {:?}", dicy);
         let converty: HashMap<isize, isize> = dicy
             .iter()
             .sorted()
             .enumerate()
             .map(|(i, v)| (*v, i as isize))
             .collect::<HashMap<isize, isize>>();
+        println!("converty: {:?}", converty);
         let convertx: HashMap<isize, isize> = dicx
             .iter()
             .sorted()
@@ -130,18 +132,29 @@ impl AdventOfCode for Puzzle {
             .enumerate()
             .map(|(i, v)| (i as isize, *v))
             .collect::<HashMap<isize, isize>>();
+        let revertyl: Vec<(isize, isize)> = dicy
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (i as isize, *v))
+            .collect::<Vec<(isize, isize)>>();
         let revertx: HashMap<isize, isize> = dicx
             .iter()
             .sorted()
             .enumerate()
             .map(|(i, v)| (i as isize, *v))
             .collect::<HashMap<isize, isize>>();
-        dbg!(converty.len());
+        let revertxl: Vec<(isize, isize)> = dicx
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (i as isize, *v))
+            .collect::<Vec<(isize, isize)>>();
         pos = (0, 0);
         pre = (0, 0);
         for (dir, dist) in self.line2.iter() {
-            pos.0 += dir.0;
-            pos.1 += dir.1;
+            pos.0 += dir.0 * (*dist as isize);
+            pos.1 += dir.1 * (*dist as isize);
             let p = (
                 *converty.get(&pos.0).unwrap(),
                 *convertx.get(&pos.1).unwrap(),
@@ -182,7 +195,6 @@ impl AdventOfCode for Puzzle {
         corner1.0 += 2;
         corner1.1 += 2;
         dbg!(corner0, corner1);
-        /*
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
                 print!(
@@ -197,7 +209,48 @@ impl AdventOfCode for Puzzle {
             }
             println!();
         }
-        */
-        2
+        println!("{:?}", &revertx);
+        let mut to_visit: BinaryHeap<Dim2<isize>> = BinaryHeap::new();
+        to_visit.push(corner0);
+        while let Some(p) = to_visit.pop() {
+            if map.contains_key(&p) {
+                continue;
+            }
+            map.insert(p, 0);
+            for q in p.neighbors8(corner0, corner1).iter() {
+                to_visit.push(*q);
+            }
+        }
+        for y in corner0.0..corner1.0 {
+            for x in corner0.1..corner1.1 {
+                print!(
+                    "{}",
+                    match map.get(&(y, x)) {
+                        Some(1) => "#",
+                        Some(0) => "_",
+                        None => "?",
+                        _ => "x",
+                    }
+                );
+            }
+            println!();
+        }
+        let mut amount = 0;
+        for patterny in revertyl.windows(2) {
+            let [(y, ry0), (_, ry1)] = patterny else {
+                panic!();
+            };
+            for patternx in revertxl.windows(2) {
+                let [(x, rx0), (_, rx1)] = patternx else {
+                    panic!();
+                };
+                dbg!(rx1);
+                amount += match map.get(&(*y, *x)) {
+                    Some(1) | None => ((ry1 - ry0 + 1) * (rx1 - rx0 + 1)) as usize,
+                    _ => 0,
+                };
+            }
+        }
+        amount
     }
 }
