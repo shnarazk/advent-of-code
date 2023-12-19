@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -11,37 +12,64 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Puzzle {
-    line: Vec<()>,
+type Label = String;
+type Var = String;
+type Val = isize;
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+enum Op {
+    Less,
+    Greater,
 }
 
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
+#[derive(Debug, Default, Eq, PartialEq)]
+pub struct Puzzle {
+    rules: HashMap<Label, Vec<(Var, Op, Val, Label)>>,
+    settings: Vec<HashMap<Var, Val>>,
+    reading_settings: bool,
+}
+
+impl Puzzle {
+    fn execute(&self, label: &Label) -> bool {
+        let Some(rules) = self.rules.get(label) else {
+            panic!();
+        };
+        rules
+            .iter()
+            .any(|(var, op, val, label)| match op {_ => false } && self.execute(label))
+    }
+    fn check(&self) -> bool {
+        self.execute(&"in".to_string())
+    }
+}
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
-    // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         dbg!(block);
-        // let parser = regex!(r"^(\d+)$");
-        // let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
+        let rule_parser = regex!(r"^([A-Za-z]+)\{(.+)\}$");
+        let assign_parser = regex!(r"^\{(.+)\}$");
+        if let Some(segment) = rule_parser.captures(block) {
+            let name = segment[1].to_string();
+            for pat in segment[2].split(',') {
+                let conds_and_label = pat.split(':').collect::<Vec<_>>();
+                for i in 0..conds_and_label.len() - 1 {
+                    let parser2 = regex!(r"^([A-Za-z]+)(>|<)(\d+)$");
+                    dbg!(conds_and_label[0]);
+                    let cov = parser2.captures(conds_and_label[0]).ok_or(ParseError)?;
+                    dbg!(&cov[2]);
+                    dbg!(conds_and_label[i]);
+                }
+                let label = dbg!(conds_and_label.last().unwrap());
+            }
+        } else if let Some(segment) = assign_parser.captures(block) {
+        } else {
+            panic!();
+        }
         Ok(())
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.rules);
     }
     fn part1(&mut self) -> Self::Output1 {
         1
