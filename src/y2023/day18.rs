@@ -39,6 +39,7 @@ impl AdventOfCode for Puzzle {
                 1 => dist = b.parse::<usize>().unwrap(),
                 2 => {
                     let str = b.trim().chars().collect::<Vec<char>>();
+                    assert_eq!(str.len(), 9);
                     let dists = str.iter().skip(2).take(5).collect::<String>();
                     let dist = usize::from_str_radix(&dists, 16)?;
                     let dir = match str[7] {
@@ -48,6 +49,9 @@ impl AdventOfCode for Puzzle {
                         '3' => (-1, 0),
                         _ => unreachable!(),
                     };
+                    // if self.line2.len() < 20 {
+                    //     println!("{:?} {:?}", dir, dist);
+                    // }
                     self.line2.push((dir, dist));
                 }
                 _ => unreachable!(),
@@ -95,20 +99,19 @@ impl AdventOfCode for Puzzle {
         let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();
         let mut pos = (0, 0);
         let mut pre: Dim2<isize>;
-        let mut corner0: Dim2<isize> = (0, 0);
-        let mut corner1: Dim2<isize> = (0, 0);
+        let mut corner0: Dim2<isize> = pos;
+        let mut corner1: Dim2<isize> = pos;
         let mut dicy: HashSet<isize> = HashSet::new();
         let mut dicx: HashSet<isize> = HashSet::new();
+        dicy.insert(0);
+        dicx.insert(0);
+        dbg!(self.line2.len());
         for (dir, dist) in self.line2.iter() {
             pos.0 += dir.0 * (*dist as isize);
             pos.1 += dir.1 * (*dist as isize);
             dicy.insert(pos.0);
             dicx.insert(pos.1);
             amount += dist;
-            // corner0.0 = pos.0.min(corner0.0);
-            // corner0.1 = pos.1.min(corner0.1);
-            // corner1.0 = pos.0.max(corner1.0);
-            // corner1.1 = pos.1.max(corner1.1);
         }
         // println!("dicy: {:?}", dicy);
         let converty: HashMap<isize, isize> = dicy
@@ -149,7 +152,12 @@ impl AdventOfCode for Puzzle {
             .map(|(i, v)| (i as isize, *v))
             .collect::<Vec<(isize, isize)>>();
         pos = (0, 0);
-        pre = (0, 0);
+        dbg!(converty.get(&0).unwrap(), convertx.get(&0).unwrap());
+        pre = (
+            2 * *converty.get(&0).unwrap(),
+            2 * *convertx.get(&0).unwrap(),
+        );
+        // pre = (0, 0);
         for (dir, dist) in self.line2.iter() {
             pos.0 += dir.0 * (*dist as isize);
             pos.1 += dir.1 * (*dist as isize);
@@ -160,24 +168,28 @@ impl AdventOfCode for Puzzle {
             assert!(0 <= p.0 && 0 <= p.1, "{:?}", p);
             match dir {
                 (1, 0) => {
+                    assert!(pre.0 <= p.0);
                     for y in pre.0..=p.0 {
                         map.insert((y, p.1), 1);
                         assert!(0 <= y, "{:?}", y);
                     }
                 }
                 (-1, 0) => {
+                    assert!(p.0 <= pre.0);
                     for y in p.0..=pre.0 {
                         map.insert((y, p.1), 1);
                         assert!(0 <= y, "{:?}", y);
                     }
                 }
                 (0, 1) => {
+                    assert!(pre.1 <= p.1);
                     for x in pre.1..=p.1 {
                         map.insert((p.0, x), 1);
                         assert!(0 <= x, "{:?}", x);
                     }
                 }
                 (0, -1) => {
+                    assert!(p.1 <= pre.1);
                     for x in p.1..=pre.1 {
                         map.insert((p.0, x), 1);
                         assert!(0 <= x, "{:?}", x);
@@ -196,20 +208,20 @@ impl AdventOfCode for Puzzle {
         corner0.1 -= 2;
         corner1.0 += 2;
         corner1.1 += 2;
-        // for y in corner0.0..corner1.0 {
-        //     for x in corner0.1..corner1.1 {
-        //         print!(
-        //             "{}",
-        //             match map.get(&(y, x)) {
-        //                 Some(1) => "#",
-        //                 Some(0) => "_",
-        //                 None => "?",
-        //                 _ => "x",
-        //             }
-        //         );
-        //     }
-        //     println!();
-        // }
+        for y in corner0.0..corner1.0 {
+            for x in corner0.1..corner1.1 {
+                print!(
+                    "{}",
+                    match map.get(&(y, x)) {
+                        Some(1) => "#",
+                        Some(0) => "x",
+                        None => "_",
+                        _ => "x",
+                    }
+                );
+            }
+            println!();
+        }
         // println!("revertxl: {:?}", &revertxl);
         let mut to_visit: BinaryHeap<Dim2<isize>> = BinaryHeap::new();
         to_visit.push(corner0);
@@ -222,14 +234,21 @@ impl AdventOfCode for Puzzle {
                 to_visit.push(*q);
             }
         }
+        let mut fill = 0;
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
                 if map.get(&(y, x)).is_none() {
                     map.insert((y, x), 2);
+                    fill += 1;
                 }
             }
             // println!();
         }
+        dbg!(fill);
+        dbg!(map.len());
+        dbg!(map.values().filter(|v| **v == 0).count());
+        dbg!(map.values().filter(|v| **v == 1).count());
+        dbg!(map.values().filter(|v| **v == 2).count());
         // dbg!(map.keys().map(|c| c.0).min());
         // dbg!(map.keys().map(|c| c.1).min());
         // dbg!(&revertyl[0..3]);
@@ -261,34 +280,38 @@ impl AdventOfCode for Puzzle {
         //     }
         //     println!();
         // }
-        for (i, patterny) in revertyl.windows(2).enumerate() {
+        dbg!(amount);
+        for patterny in revertyl.windows(2) {
             let [(y, ry0), (_, ry1)] = patterny else {
                 panic!();
             };
-            for (j, patternx) in revertxl.windows(2).enumerate() {
+            for patternx in revertxl.windows(2) {
                 let [(x, rx0), (_, rx1)] = patternx else {
                     panic!();
                 };
+                // println!("{:?}", map.get(&(2 * *y, 2 * *x)));
                 if let Some(2) = map.get(&(2 * *y, 2 * *x)) {
+                    dbg!();
                     amount += 1;
                 }
                 if let Some(2) = map.get(&(2 * *y + 1, 2 * *x)) {
+                    dbg!();
                     amount += (ry1 - ry0 - 1) as usize;
                 }
                 if let Some(2) = map.get(&(2 * *y, 2 * *x + 1)) {
+                    dbg!();
                     amount += (rx1 - rx0 - 1) as usize;
                 }
                 if let Some(2) = map.get(&(2 * *y + 1, 2 * *x + 1)) {
+                    println!(
+                        " -> {}x{}={}",
+                        ry1 - ry0 - 1,
+                        rx1 - rx0 - 1,
+                        (ry1 - ry0 - 1) * (rx1 - rx0 - 1)
+                    );
                     amount += ((ry1 - ry0 - 1) * (rx1 - rx0 - 1)) as usize;
                 }
             }
-            // let last_x = revertxl.len() as isize - 1;
-            // if let Some(2) = map.get(&(2 * *y, 2 * last_x)) {
-            //     amount += dbg!(1 as usize);
-            // }
-            // if let Some(2) = map.get(&(2 * *y + 1, 2 * last_x)) {
-            //     amount += dbg!((ry1 - ry0 - 1) as usize);
-            // }
         }
         amount
     }
