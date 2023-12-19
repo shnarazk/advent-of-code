@@ -1,13 +1,8 @@
 //! <https://adventofcode.com/2023/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use crate::geometric::neighbors8;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors, Dim2, Direction, GeometricMath},
+        geometric::{Dim2, GeometricMath},
     },
     itertools::Itertools,
     std::collections::{BinaryHeap, HashMap, HashSet},
@@ -49,9 +44,6 @@ impl AdventOfCode for Puzzle {
                         '3' => (-1, 0),
                         _ => unreachable!(),
                     };
-                    // if self.line2.len() < 20 {
-                    //     println!("{:?} {:?}", dir, dist);
-                    // }
                     self.line2.push((dir, dist));
                 }
                 _ => unreachable!(),
@@ -66,7 +58,7 @@ impl AdventOfCode for Puzzle {
         let mut corner0: Dim2<isize> = (0, 0);
         let mut corner1: Dim2<isize> = (0, 0);
         for (dir, dist) in self.line.iter() {
-            for n in 0..*dist {
+            for _ in 0..*dist {
                 pos.0 += dir.0;
                 pos.1 += dir.1;
                 map.insert(pos, 1);
@@ -113,25 +105,17 @@ impl AdventOfCode for Puzzle {
             dicx.insert(pos.1);
             amount += dist;
         }
-        // println!("dicy: {:?}", dicy);
         let converty: HashMap<isize, isize> = dicy
             .iter()
             .sorted()
             .enumerate()
             .map(|(i, v)| (*v, i as isize))
             .collect::<HashMap<isize, isize>>();
-        // println!("converty: {:?}", converty);
         let convertx: HashMap<isize, isize> = dicx
             .iter()
             .sorted()
             .enumerate()
             .map(|(i, v)| (*v, i as isize))
-            .collect::<HashMap<isize, isize>>();
-        let reverty: HashMap<isize, isize> = dicy
-            .iter()
-            .sorted()
-            .enumerate()
-            .map(|(i, v)| (i as isize, *v))
             .collect::<HashMap<isize, isize>>();
         let revertyl: Vec<(isize, isize)> = dicy
             .iter()
@@ -139,12 +123,6 @@ impl AdventOfCode for Puzzle {
             .enumerate()
             .map(|(i, v)| (i as isize, *v))
             .collect::<Vec<(isize, isize)>>();
-        let revertx: HashMap<isize, isize> = dicx
-            .iter()
-            .sorted()
-            .enumerate()
-            .map(|(i, v)| (i as isize, *v))
-            .collect::<HashMap<isize, isize>>();
         let revertxl: Vec<(isize, isize)> = dicx
             .iter()
             .sorted()
@@ -152,12 +130,10 @@ impl AdventOfCode for Puzzle {
             .map(|(i, v)| (i as isize, *v))
             .collect::<Vec<(isize, isize)>>();
         pos = (0, 0);
-        dbg!(converty.get(&0).unwrap(), convertx.get(&0).unwrap());
         pre = (
             2 * *converty.get(&0).unwrap(),
             2 * *convertx.get(&0).unwrap(),
         );
-        // pre = (0, 0);
         for (dir, dist) in self.line2.iter() {
             pos.0 += dir.0 * (*dist as isize);
             pos.1 += dir.1 * (*dist as isize);
@@ -165,34 +141,25 @@ impl AdventOfCode for Puzzle {
                 2 * *converty.get(&pos.0).unwrap(),
                 2 * *convertx.get(&pos.1).unwrap(),
             );
-            assert!(0 <= p.0 && 0 <= p.1, "{:?}", p);
             match dir {
                 (1, 0) => {
-                    assert!(pre.0 <= p.0);
                     for y in pre.0..=p.0 {
                         map.insert((y, p.1), 1);
-                        assert!(0 <= y, "{:?}", y);
                     }
                 }
                 (-1, 0) => {
-                    assert!(p.0 <= pre.0);
                     for y in p.0..=pre.0 {
                         map.insert((y, p.1), 1);
-                        assert!(0 <= y, "{:?}", y);
                     }
                 }
                 (0, 1) => {
-                    assert!(pre.1 <= p.1);
                     for x in pre.1..=p.1 {
                         map.insert((p.0, x), 1);
-                        assert!(0 <= x, "{:?}", x);
                     }
                 }
                 (0, -1) => {
-                    assert!(p.1 <= pre.1);
                     for x in p.1..=pre.1 {
                         map.insert((p.0, x), 1);
-                        assert!(0 <= x, "{:?}", x);
                     }
                 }
                 _ => unreachable!(),
@@ -208,21 +175,6 @@ impl AdventOfCode for Puzzle {
         corner0.1 -= 2;
         corner1.0 += 2;
         corner1.1 += 2;
-        for y in corner0.0..corner1.0 {
-            for x in corner0.1..corner1.1 {
-                print!(
-                    "{}",
-                    match map.get(&(y, x)) {
-                        Some(1) => "#",
-                        Some(0) => "x",
-                        None => "_",
-                        _ => "x",
-                    }
-                );
-            }
-            println!();
-        }
-        // println!("revertxl: {:?}", &revertxl);
         let mut to_visit: BinaryHeap<Dim2<isize>> = BinaryHeap::new();
         to_visit.push(corner0);
         while let Some(p) = to_visit.pop() {
@@ -234,53 +186,13 @@ impl AdventOfCode for Puzzle {
                 to_visit.push(*q);
             }
         }
-        let mut fill = 0;
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
                 if map.get(&(y, x)).is_none() {
                     map.insert((y, x), 2);
-                    fill += 1;
                 }
             }
-            // println!();
         }
-        dbg!(fill);
-        dbg!(map.len());
-        dbg!(map.values().filter(|v| **v == 0).count());
-        dbg!(map.values().filter(|v| **v == 1).count());
-        dbg!(map.values().filter(|v| **v == 2).count());
-        // dbg!(map.keys().map(|c| c.0).min());
-        // dbg!(map.keys().map(|c| c.1).min());
-        // dbg!(&revertyl[0..3]);
-        // for y in corner0.0..corner1.0 {
-        //     for x in corner0.1..corner1.1 {
-        //         print!(
-        //             "{}",
-        //             match map.get(&(y, x)) {
-        //                 Some(1) => "#",
-        //                 Some(0) => "_",
-        //                 None => "?",
-        //                 _ => "x",
-        //             }
-        //         );
-        //     }
-        //     println!();
-        // }
-        // for y in -1..revertyl.len() as isize * 2 {
-        //     for x in -1..revertxl.len() as isize * 2 {
-        //         print!(
-        //             "{}",
-        //             match map.get(&(y, x)) {
-        //                 Some(1) => "#",
-        //                 Some(0) => "_",
-        //                 None => "?",
-        //                 _ => "x",
-        //             }
-        //         );
-        //     }
-        //     println!();
-        // }
-        dbg!(amount);
         for patterny in revertyl.windows(2) {
             let [(y, ry0), (_, ry1)] = patterny else {
                 panic!();
@@ -289,26 +201,16 @@ impl AdventOfCode for Puzzle {
                 let [(x, rx0), (_, rx1)] = patternx else {
                     panic!();
                 };
-                // println!("{:?}", map.get(&(2 * *y, 2 * *x)));
                 if let Some(2) = map.get(&(2 * *y, 2 * *x)) {
-                    dbg!();
                     amount += 1;
                 }
                 if let Some(2) = map.get(&(2 * *y + 1, 2 * *x)) {
-                    dbg!();
                     amount += (ry1 - ry0 - 1) as usize;
                 }
                 if let Some(2) = map.get(&(2 * *y, 2 * *x + 1)) {
-                    dbg!();
                     amount += (rx1 - rx0 - 1) as usize;
                 }
                 if let Some(2) = map.get(&(2 * *y + 1, 2 * *x + 1)) {
-                    println!(
-                        " -> {}x{}={}",
-                        ry1 - ry0 - 1,
-                        rx1 - rx0 - 1,
-                        (ry1 - ry0 - 1) * (rx1 - rx0 - 1)
-                    );
                     amount += ((ry1 - ry0 - 1) * (rx1 - rx0 - 1)) as usize;
                 }
             }
