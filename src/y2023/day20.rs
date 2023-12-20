@@ -75,7 +75,7 @@ impl AdventOfCode for Puzzle {
         let mut map: HashMap<String, Vec<String>> = HashMap::new();
         for (from, m) in self.modules.iter() {
             for to in m.dests.iter() {
-                let entry = map.entry(to.clone()).or_insert(Vec::new());
+                let entry = map.entry(to.clone()).or_default();
                 entry.push(from.to_string());
             }
         }
@@ -130,7 +130,7 @@ impl AdventOfCode for Puzzle {
                 (seq[1] - seq[0], seq[0])
             })
             .collect::<Vec<_>>();
-        bag.iter().copied().reduce(|p, q| crt(p, q)).unwrap().1
+        bag.iter().copied().reduce(crt).unwrap().1
     }
 }
 
@@ -158,7 +158,7 @@ impl Puzzle {
                 } else {
                     self.pulse_counts.0 += target.dests.len();
                 }
-                let entry = self.history.entry(to).or_insert(Vec::new());
+                let entry = self.history.entry(to).or_default();
                 entry.push((stage, output));
             }
         }

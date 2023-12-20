@@ -17,9 +17,11 @@ enum Op {
     Greater,
 }
 
+type Rule = (Option<(Var, Op, Val)>, Label);
+
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
-    rules: HashMap<Label, Vec<(Option<(Var, Op, Val)>, Label)>>,
+    rules: HashMap<Label, Vec<Rule>>,
     settings: Vec<HashMap<Var, Val>>,
     reading_settings: bool,
     rating_settings: [HashSet<usize>; 4],
@@ -134,7 +136,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .filter(|setting| self.check(setting))
             .map(|setting| setting.values().sum::<usize>())
-            .sum::<usize>() as usize
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
         let s0 = self.rating_settings[0]
