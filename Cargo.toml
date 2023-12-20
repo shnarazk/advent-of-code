@@ -15,6 +15,7 @@ regex = "^1.9"
 itertools = { version = "0.12", optional = true }
 md-5 = { version = "0.10", optional = true }
 nom = { version = "^7.1", optional = true, features = ["alloc"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 splr = { version = "^0.17", optional = true }
 

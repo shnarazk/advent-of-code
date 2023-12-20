@@ -4,6 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         math::crt,
     },
+    serde::Serialize,
     std::collections::{HashMap, VecDeque},
 };
 
@@ -15,7 +16,7 @@ pub struct Puzzle {
     history: HashMap<String, Vec<(usize, bool)>>,
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 enum ModuleType {
     #[default]
     Broadcast,
@@ -23,7 +24,7 @@ enum ModuleType {
     Conjunction,
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Default, Eq, PartialEq, Serialize)]
 struct Module {
     module_type: ModuleType,
     bool_state: bool,
@@ -87,6 +88,10 @@ impl AdventOfCode for Puzzle {
                     .collect::<HashMap<String, bool>>();
             }
         }
+    }
+    fn serialize(&self) {
+        let v = serde_json::to_string(self.modules.values().next().unwrap()).unwrap();
+        println!("{}", v);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.start(1000);
