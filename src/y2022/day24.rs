@@ -97,7 +97,7 @@ impl AdventOfCode for Puzzle {
         dbg!(self.blizzard_l.len());
         dbg!(self.blizzard_u.len());
     }
-    fn dump(&self) {
+    fn serialize(&self) {
         let time = 13;
         dbg!(time);
         for (j, l) in self.line.iter().enumerate() {

@@ -181,8 +181,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// }
     /// ```
     fn part2(&mut self) -> Self::Output2;
-    /// dump the data in another format
-    fn dump(&self) {}
+    /// dump the data in JSON format
+    fn serialize(&self) {}
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(
@@ -194,7 +194,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match part {
             0 => {
-                Self::parse(desc).expect(&parse_error).dump();
+                Self::parse(desc).expect(&parse_error).serialize();
                 Answer::Dump
             }
             1 => {
