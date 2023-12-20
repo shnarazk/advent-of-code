@@ -6,7 +6,9 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
+        line_parser,
+        math::crt,
+        regex,
     },
     itertools::Itertools,
     std::collections::{HashMap, HashSet, VecDeque},
@@ -17,7 +19,8 @@ pub struct Puzzle {
     modules: HashMap<String, Module>,
     pulses: VecDeque<(String, String, bool)>,
     pulse_counts: (usize, usize),
-    final_machine_activated: bool,
+    // low-pulse modulo and high-pulse modulo
+    chinese: Option<((usize, usize), (usize, usize))>,
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -27,12 +30,30 @@ enum ModuleType {
     FlipFlop,
     Conjunction,
 }
+
+#[derive(Debug, Default, Eq, PartialEq)]
+struct Node {
+    depth: usize,
+    hash: Vec<usize>,
+    dests: Vec<usize>,
+}
+
+impl Node {
+    fn output(&self, n: usize) -> Option<bool> {
+        (n % 2_usize.pow((self.depth - 1) as u32) == 0)
+            .then_some(n % 2usize.pow(self.depth as u32) == 0)
+    }
+}
+
 #[derive(Debug, Default, Eq, PartialEq)]
 struct Module {
+    chinese: Option<(usize, usize)>,
     module_type: ModuleType,
     bool_state: bool,
     hash: HashMap<String, bool>,
     dests: Vec<String>,
+    sources: Vec<String>,
+    bits: Vec<bool>,
 }
 
 impl<'a> Module {
@@ -111,6 +132,27 @@ impl AdventOfCode for Puzzle {
         }
         dbg!(self.modules.len());
         dbg!(subset.len());
+        let n1 = Node {
+            depth: 1,
+            ..Node::default()
+        };
+        let n2 = Node {
+            depth: 2,
+            ..Node::default()
+        };
+        let n3 = Node {
+            depth: 3,
+            ..Node::default()
+        };
+        for n in 0..8 {
+            println!("{}: {:?}", n, n1.output(n));
+        }
+        for n in 0..8 {
+            println!("{}: {:?}", n, n2.output(n));
+        }
+        for n in 0..8 {
+            println!("{}: {:?}", n, n3.output(n));
+        }
         self.pulses_to_activete()
     }
 }
@@ -127,14 +169,11 @@ impl Puzzle {
     }
     fn pulses_to_activete(&mut self) -> usize {
         let mut _history = HashSet::from([self.dump()]);
-        for n in 0.. {
-            self.pulses
-                .push_back(("".to_string(), "broadcaster".to_string(), false));
-            self.pulse_counts.0 += 1;
-            self.dispatch();
-            if self.final_machine_activated {
-                return n;
-            }
+        self.propagate();
+        dbg!();
+        if self.chinese.is_some() {
+            dbg!(&self.chinese);
+            return 1;
         }
         unreachable!()
     }
@@ -154,9 +193,6 @@ impl Puzzle {
                     self.pulse_counts.0 += target.dests.len();
                 }
             }
-            if to == "rx" && !pulse {
-                self.final_machine_activated = true;
-            }
         }
     }
     fn dump(&self) -> Vec<(bool, Vec<(&String, &bool)>)> {
@@ -171,5 +207,54 @@ impl Puzzle {
             .sorted()
             .map(|(_, m)| m)
             .collect::<Vec<_>>()
+    }
+    fn propagate(&mut self) {
+        self.pulses
+            .push_back(("".to_string(), "broadcaster".to_string(), false));
+        while let Some((from, to, pulse)) = self.pulses.pop_front() {
+            dbg!(&to);
+            let Some(target) = self.modules.get(&to) else {
+                continue;
+            };
+            if target.chinese.is_some() {
+                continue;
+            }
+            let mut chinese: Option<(usize, usize)> = None;
+            match target.module_type {
+                ModuleType::Broadcast => chinese = Some((2, 0)),
+                ModuleType::FlipFlop => {
+                    if let Some(f) = self.modules.get(&from) {
+                        chinese = f.chinese.map(|(p, q)| (2 * p, 2 * q));
+                    }
+                }
+                ModuleType::Conjunction
+                    if target
+                        .hash
+                        .keys()
+                        .all(|name| self.modules.get(name).unwrap().chinese.is_some()) =>
+                {
+                    let seeds = target
+                        .hash
+                        .keys()
+                        .map(|name| self.modules.get(name).unwrap().chinese.unwrap())
+                        .collect::<Vec<_>>();
+                    chinese = seeds.iter().copied().reduce(|p, q| crt(p, q));
+                }
+                _ => (),
+            }
+            let target = self.modules.get_mut(&to).unwrap();
+            if chinese.is_some() {
+                target
+                    .dests
+                    .iter()
+                    .for_each(|d| self.pulses.push_back((to.clone(), d.clone(), false)));
+                target.chinese = chinese;
+                if chinese.is_some() && target.dests.contains(&"rx".to_string()) {
+                    self.chinese = chinese;
+                }
+            } else {
+                self.pulses.push_back((to.clone(), from.clone(), false));
+            }
+        }
     }
 }
