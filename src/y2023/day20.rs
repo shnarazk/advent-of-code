@@ -1,14 +1,10 @@
 //! <https://adventofcode.com/2023/day/20>
-// #![allow(dead_code)]
-// #![allow(unused_imports)]
-// #![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         math::crt,
     },
-    itertools::Itertools,
-    std::collections::{HashMap, HashSet, VecDeque},
+    std::collections::{HashMap, VecDeque},
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -33,8 +29,6 @@ struct Module {
     bool_state: bool,
     hash: HashMap<String, bool>,
     dests: Vec<String>,
-    sources: Vec<String>,
-    bits: Vec<bool>,
 }
 
 impl<'a> Module {
@@ -95,11 +89,11 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.start();
+        self.start(1000);
         self.pulse_counts.0 * self.pulse_counts.1
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.trace();
+        self.start(80000);
         let mut target = &"rx".to_string();
         let mut upstreams: Vec<&String>;
         loop {
@@ -114,7 +108,6 @@ impl AdventOfCode for Puzzle {
             }
             target = upstreams[0];
         }
-        dbg!(&upstreams);
         let bag = upstreams
             .iter()
             .map(|upstream| {
@@ -126,7 +119,7 @@ impl AdventOfCode for Puzzle {
                     .filter(|(_, b)| *b)
                     .map(|(t, _)| *t)
                     .collect::<Vec<_>>();
-                println!("{}{:?}", upstream, seq);
+                // println!("{}{:?}", upstream, seq);
                 assert!(seq
                     .windows(2)
                     .map(|v| v[1] - v[0])
@@ -137,25 +130,17 @@ impl AdventOfCode for Puzzle {
                 (seq[1] - seq[0], seq[0])
             })
             .collect::<Vec<_>>();
-        let ans = bag.iter().copied().reduce(|p, q| crt(p, q)).unwrap().1;
-        ans
+        bag.iter().copied().reduce(|p, q| crt(p, q)).unwrap().1
     }
 }
 
 impl Puzzle {
-    fn start(&mut self) {
-        for t in 0..1000 {
+    fn start(&mut self, upto: usize) {
+        for t in 1..=upto {
             self.pulses
                 .push_back(("".to_string(), "broadcaster".to_string(), false));
             self.pulse_counts.0 += 1;
             self.dispatch(t);
-        }
-    }
-    fn trace(&mut self) {
-        for n in 1..80000 {
-            self.pulses
-                .push_back(("".to_string(), "broadcaster".to_string(), false));
-            self.dispatch(n);
         }
     }
     fn dispatch(&mut self, stage: usize) {
