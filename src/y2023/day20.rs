@@ -17,6 +17,7 @@ pub struct Puzzle {
     modules: HashMap<String, Module>,
     pulses: VecDeque<(String, String, bool)>,
     pulse_counts: (usize, usize),
+    final_machine_activated: bool,
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -74,8 +75,12 @@ impl AdventOfCode for Puzzle {
         self.modules.insert(module_name, module);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // build hashes
+    fn end_of_data(&mut self) {}
+    fn part1(&mut self) -> Self::Output1 {
+        // self.start();
+        self.pulse_counts.0 * self.pulse_counts.1
+    }
+    fn part2(&mut self) -> Self::Output2 {
         let mut map: HashMap<String, Vec<String>> = HashMap::new();
         for (from, m) in self.modules.iter() {
             for to in m.dests.iter() {
@@ -91,16 +96,22 @@ impl AdventOfCode for Puzzle {
                     .collect::<HashMap<String, bool>>();
             }
         }
-
-        // dbg!(&self.modules);
-    }
-    fn part1(&mut self) -> Self::Output1 {
-        self.start();
-        dbg!(self.pulse_counts);
-        self.pulse_counts.0 * self.pulse_counts.1
-    }
-    fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut subset: HashSet<String> = HashSet::new();
+        let mut to_visit: Vec<&str> = vec!["dh"];
+        while let Some(n) = to_visit.pop() {
+            if subset.contains(n) {
+                continue;
+            }
+            subset.insert(n.to_string());
+            if let Some(inputs) = map.get(n) {
+                for input in inputs.iter() {
+                    to_visit.push(input);
+                }
+            }
+        }
+        dbg!(self.modules.len());
+        dbg!(subset.len());
+        self.pulses_to_activete()
     }
 }
 
@@ -113,6 +124,19 @@ impl Puzzle {
             self.pulse_counts.0 += 1;
             self.dispatch();
         }
+    }
+    fn pulses_to_activete(&mut self) -> usize {
+        let mut _history = HashSet::from([self.dump()]);
+        for n in 0.. {
+            self.pulses
+                .push_back(("".to_string(), "broadcaster".to_string(), false));
+            self.pulse_counts.0 += 1;
+            self.dispatch();
+            if self.final_machine_activated {
+                return n;
+            }
+        }
+        unreachable!()
     }
     fn dispatch(&mut self) {
         while let Some((from, to, pulse)) = self.pulses.pop_front() {
@@ -129,6 +153,9 @@ impl Puzzle {
                 } else {
                     self.pulse_counts.0 += target.dests.len();
                 }
+            }
+            if to == "rx" && !pulse {
+                self.final_machine_activated = true;
             }
         }
     }
