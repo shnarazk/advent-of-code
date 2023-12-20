@@ -1,13 +1,8 @@
 //! <https://adventofcode.com/2023/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, progress, regex,
+        progress, regex,
     },
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
@@ -133,10 +128,6 @@ impl AdventOfCode for Puzzle {
                 self.rating_settings[i].insert(4001);
             }
         }
-        // println!(
-        //     "{:?}",
-        //     &self.rating_settings[0].iter().sorted().collect::<Vec<_>>()
-        // );
     }
     fn part1(&mut self) -> Self::Output1 {
         self.settings
@@ -166,7 +157,6 @@ impl AdventOfCode for Puzzle {
             .sorted()
             .copied()
             .collect::<Vec<_>>();
-        dbg!(s0.len() * s1.len() * s2.len() * s3.len());
         s0.windows(2)
             .map(|w0| {
                 let [x, xe] = *w0 else {
