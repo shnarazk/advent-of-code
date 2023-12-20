@@ -32,3 +32,40 @@ pub fn permutations(from: usize, to: usize) -> Vec<Vec<usize>> {
     let cands = (from..=to).collect::<Vec<usize>>();
     perm(&cands)
 }
+
+/// Chinese Remainder Theorem
+/// Return `x` such that:
+/// * x `mod` aq = ar
+/// * x `mod` bq = br
+///
+/// ```
+/// use crate::adventofcode::math::*;
+/// let a = chinese((5, 4), (2, 0));
+/// assert_eq!(a.1, 5);
+/// ```
+pub fn crt((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize) {
+    if ar == 0 && br == 0 {
+        return (lcm(aq, bq), 0);
+    }
+    let n = solve1(aq, bq);
+    let nar = (n * ar) % bq;
+    let nbr = (n * br) % bq;
+    let m = if nar < nbr {
+        nbr - nar
+    } else {
+        (bq + nbr) - nar
+    };
+    (aq * bq, aq * m + ar)
+}
+
+/// Return `X` such that:
+/// (X * a) `mod` m = ((X * b) `mod` m) + 1
+///
+fn solve1(a: usize, m: usize) -> usize {
+    for i in 0.. {
+        if (i * a) % m == 1 {
+            return i;
+        }
+    }
+    panic!("can't");
+}
