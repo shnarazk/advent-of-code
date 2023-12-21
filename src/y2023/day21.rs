@@ -76,6 +76,7 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
+        // TODO: for simplicity, shift start to (0,0).
         dbg!(self
             .line
             .iter()
