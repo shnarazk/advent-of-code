@@ -19,41 +19,31 @@ use adventofcode::y2022;
 use adventofcode::y2023;
 
 use {
-    adventofcode::{aoc_arms, color, framework::AdventOfCode, Description},
+    adventofcode::{
+        aoc_arms, color,
+        framework::{AdventOfCode, ConfigAoC},
+        Description,
+    },
     clap::Parser,
     std::time::Instant,
 };
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Arguments {
-    /// Target year like 2023
-    #[arg(short, long, default_value_t = 2023)]
-    year: usize,
-    #[arg(short, long, default_value_t = 3)]
-    part: usize,
-    /// Target day like 1
-    day: usize,
-    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
-    alt: Option<String>,
-    /// serialize as JSON format
-    #[arg(long)]
-    serialize: bool,
-}
-
 pub fn main() {
-    let argument = Arguments::parse();
-    assert!(0 < argument.day && argument.day <= 25);
-    let day = argument.day;
-    assert!(argument.part <= 3);
-    let part = argument.part;
-    let desc = match argument.alt {
+    let config = ConfigAoC::parse();
+    assert!(0 < config.day && config.day <= 25);
+    let day = config.day;
+    assert!(config.part <= 3);
+    let mut part = config.part;
+    if config.serialize {
+        part = 0;
+    }
+    let desc = match config.clone().alt {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
         Some(ext) => Description::FileTag(ext.to_string()),
         None => Description::None,
     };
     let beg = Instant::now();
-    match argument.year {
+    match config.year {
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
         #[cfg(feature = "y2016")]
@@ -72,7 +62,7 @@ pub fn main() {
         2022 => aoc_arms!(2022),
         #[cfg(feature = "y2023")]
         2023 => aoc_arms!(2023),
-        _ => println!("invalid year: {}", argument.year),
+        _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
     println!(

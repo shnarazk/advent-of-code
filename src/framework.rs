@@ -1,7 +1,10 @@
 //! data handling frmework
-use crate::color;
 pub use aoc_macro::{aoc, aoc_at};
-use std::{borrow::Borrow, fmt, fs::File, io::prelude::*};
+use {
+    crate::color,
+    clap::Parser,
+    std::{borrow::Borrow, fmt, fs::File, io::prelude::*},
+};
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Clone, fmt::Debug, Eq, PartialEq)]
@@ -71,6 +74,23 @@ impl std::fmt::Display for ParseError {
 }
 
 impl std::error::Error for ParseError {}
+
+#[derive(Clone, Debug, Parser)]
+#[command(author, version, about, long_about = None)]
+pub struct ConfigAoC {
+    /// Target year like 2023
+    #[arg(short, long, default_value_t = 2023)]
+    pub year: usize,
+    #[arg(short, long, default_value_t = 3)]
+    pub part: usize,
+    /// Target day like 1
+    pub day: usize,
+    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
+    pub alt: Option<String>,
+    /// serialize as JSON format
+    #[arg(long)]
+    pub serialize: bool,
+}
 
 /// The standard interface for a problem description with solving methods
 pub trait AdventOfCode: fmt::Debug + Default {
@@ -153,7 +173,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
+    fn parse(_config: ConfigAoC, desc: impl Borrow<Description>) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(desc.borrow())?;
         let remains = instance.header(contents)?;
@@ -186,6 +206,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(
+        config: ConfigAoC,
         description: impl Borrow<Description>,
         part: usize,
     ) -> Answer<Self::Output1, Self::Output2> {
@@ -194,7 +215,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match part {
             0 => {
-                Self::parse(desc).expect(&parse_error).serialize();
+                Self::parse(config, desc).expect(&parse_error).serialize();
                 Answer::Dump
             }
             1 => {
@@ -206,7 +227,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::parse(desc).expect(&parse_error).part1())
+                Answer::Part1(Self::parse(config, desc).expect(&parse_error).part1())
             }
             2 => {
                 println!(
@@ -217,7 +238,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::parse(desc).expect(&parse_error).part2())
+                Answer::Part2(Self::parse(config, desc).expect(&parse_error).part2())
             }
             3 => {
                 println!(
@@ -228,8 +249,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                let ans1 = Self::parse(desc).expect(&parse_error).part1();
-                let ans2 = Self::parse(desc).expect(&parse_error).part2();
+                let ans1 = Self::parse(config.clone(), desc)
+                    .expect(&parse_error)
+                    .part1();
+                let ans2 = Self::parse(config, desc).expect(&parse_error).part2();
                 Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,
