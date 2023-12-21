@@ -32,8 +32,8 @@ pub fn aoc(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let vars = parse_macro_input!(attrs as Args);
     let year = &vars.items[0];
     let day = &vars.items[1];
-    let assign_year = TokenStream::from(quote! { const YEAR: usize =#year; });
-    let assign_day = TokenStream::from(quote! { const DAY: usize =#day; });
+    let assign_year = TokenStream::from(quote! { const YEAR: usize = #year; });
+    let assign_day = TokenStream::from(quote! { const DAY: usize = #day; });
     let output_type1 = TokenStream::from(quote! { type Output1 = usize; });
     let output_type2 = TokenStream::from(quote! { type Output2 = usize; });
     let mut implementation: ItemImpl = syn::parse(input).expect("only be applied to impl");
@@ -63,8 +63,8 @@ pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let vars = parse_macro_input!(attrs as Args);
     let year = &vars.items[0];
     let day = &vars.items[1];
-    let assign_year = TokenStream::from(quote! { const YEAR: usize =#year; });
-    let assign_day = TokenStream::from(quote! { const DAY: usize =#day; });
+    let assign_year = TokenStream::from(quote! { const YEAR: usize = #year; });
+    let assign_day = TokenStream::from(quote! { const DAY: usize = #day; });
     let mut implementation: ItemImpl = syn::parse(input).expect("only be applied to impl");
     implementation
         .items
@@ -95,7 +95,7 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
         "match day {{ {} _=> panic!(\"{}an invalid day{}\"), }}\n",
         (day_from..=day_to)
             .map(|d| format!(
-                "{} => {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(desc, part)); }}",
+                "{} => {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(config, desc, part)); }}",
                 d,
                 color::BLUE,
                 color::RESET,
