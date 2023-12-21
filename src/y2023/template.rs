@@ -8,10 +8,11 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
+    serde::Serialize,
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<()>,
 }
