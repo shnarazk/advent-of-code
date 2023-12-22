@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2023/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors, Dim3},
-        line_parser, regex,
+        geometric::Dim3,
+        line_parser,
     },
-    std::{cmp::Ordering, collections::HashMap},
+    std::{
+        cmp::Ordering,
+        collections::{HashMap, HashSet},
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
@@ -31,12 +31,7 @@ impl PartialOrd for Block {
             !(my_range_x.1 < other_range_x.0)
         } else {
             !(other_range_x.1 < my_range_x.0)
-        })
-        // if ((my_range_y.0 <= other_range_y.0 && other_range_y.0 <= my_range_y.1)
-        //     || dbg!(my_range_y.0 <= other_range_y.1 && other_range_y.1 <= my_range_y.1))
-        //     && (dbg!(my_range_x.0 <= other_range_x.0 && other_range_x.0 <= my_range_x.1)
-        //         || dbg!(my_range_x.0 <= other_range_x.1 && other_range_x.1 <= my_range_x.1))
-        {
+        }) {
             if self.pos.2 + self.shape.2 < other.pos.2 {
                 return Some(Ordering::Less);
             } else if other.pos.2 + other.shape.2 < self.pos.2 {
@@ -87,7 +82,7 @@ impl AdventOfCode for Puzzle {
                     return Vec::new();
                 };
                 v.iter()
-                    .filter(|(level, j)| *level == *l)
+                    .filter(|(level, _)| *level == *l)
                     .map(|(_, j)| *j)
                     .collect::<Vec<_>>()
             })
@@ -97,8 +92,38 @@ impl AdventOfCode for Puzzle {
             .filter(|i| supports.iter().all(|v| !v.contains(i) || 1 < v.len()))
             .count()
     }
-    fn part2(&mut self) -> Self::Output2 {
-        2
+    fn part2(&mut self) -> Self::Output1 {
+        stabilize(&mut self.blocks);
+        let supports = (0..self.blocks.len())
+            .map(|i| {
+                let mut v = (0..self.blocks.len())
+                    .filter(|j| {
+                        self.blocks[*j].partial_cmp(&self.blocks[i]) == Some(Ordering::Less)
+                    })
+                    .map(|j| (self.blocks[j].pos.2 + self.blocks[j].shape.2, j))
+                    .collect::<Vec<_>>();
+                v.sort();
+                v.reverse();
+                let Some((l, _)) = v.first() else {
+                    return Vec::new();
+                };
+                v.iter()
+                    .filter(|(level, _)| *level == *l)
+                    .map(|(_, j)| *j)
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let mut propagating: HashMap<usize, Vec<usize>> = HashMap::new();
+        for (i, v) in supports.iter().enumerate() {
+            for j in v.iter() {
+                propagating.entry(*j).or_default().push(i);
+            }
+        }
+
+        (0..self.blocks.len())
+            .filter(|i| !supports.iter().all(|v| !v.contains(i) || 1 < v.len()))
+            .map(|i| chain_len(&propagating, &supports, i))
+            .sum()
     }
 }
 
@@ -110,15 +135,37 @@ fn move_down(blocks: &mut [Block], i: usize) -> bool {
     let level = blocks
         .iter()
         .enumerate()
-        // .filter(|(j, _)| *j != i)
         .filter(|(_, other)| Some(Ordering::Less) == (*other).partial_cmp(&blocks[i]))
         .map(|(_, other)| other.pos.2 + other.shape.2 + 1)
         .max()
         .unwrap_or(1);
     if level < blocks[i].pos.2 {
-        // println!("{} falled to {}.", (b'A' + i as u8) as char, level);
         blocks[i].pos.2 = level;
         return true;
     }
     false
+}
+
+fn chain_len(
+    propagating: &HashMap<usize, Vec<usize>>,
+    supports: &[Vec<usize>],
+    start: usize,
+) -> usize {
+    let mut blacklist: HashSet<usize> = HashSet::new();
+    blacklist.insert(start);
+    let mut to_visit: Vec<usize> = vec![start];
+    while let Some(i) = to_visit.pop() {
+        for to in propagating.get(&i).unwrap_or(&vec![]) {
+            if supports[*to]
+                .iter()
+                .filter(|s| !blacklist.contains(*s))
+                .count()
+                == 0
+            {
+                blacklist.insert(*to);
+                to_visit.push(*to);
+            }
+        }
+    }
+    blacklist.len() - 1
 }
