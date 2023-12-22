@@ -24,13 +24,13 @@ impl PartialOrd for Block {
         let other_range_x = (other.pos.0, other.pos.0 + other.shape.0);
         let other_range_y = (other.pos.1, other.pos.1 + other.shape.1);
         if (if my_range_y.0 <= other_range_y.0 {
-            !(my_range_y.1 < other_range_y.0)
+            my_range_y.1 >= other_range_y.0
         } else {
-            !(other_range_y.1 < my_range_y.0)
+            other_range_y.1 >= my_range_y.0
         }) && (if my_range_x.0 <= other_range_x.0 {
-            !(my_range_x.1 < other_range_x.0)
+            my_range_x.1 >= other_range_x.0
         } else {
-            !(other_range_x.1 < my_range_x.0)
+            other_range_x.1 >= my_range_x.0
         }) {
             if self.pos.2 + self.shape.2 < other.pos.2 {
                 return Some(Ordering::Less);
@@ -56,7 +56,7 @@ impl AdventOfCode for Puzzle {
             .map(|s| line_parser::to_usizes(s, ',').unwrap())
             .map(|v| (v[0], v[1], v[2]))
             .collect::<Vec<_>>();
-        assert!(v[0].0 <= v[1].0 && v[0].1 <= v[1].1 && v[0].2 <= v[1].2);
+        debug_assert!(v[0].0 <= v[1].0 && v[0].1 <= v[1].1 && v[0].2 <= v[1].2);
         let blk = Block {
             pos: v[0],
             shape: (v[1].0 - v[0].0, v[1].1 - v[0].1, v[1].2 - v[0].2),
@@ -78,7 +78,6 @@ impl AdventOfCode for Puzzle {
                 v.sort();
                 v.reverse();
                 let Some((l, _)) = v.first() else {
-                    dbg!(i);
                     return Vec::new();
                 };
                 v.iter()
@@ -87,7 +86,6 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
-        println!("{:?}", supports);
         (0..self.blocks.len())
             .filter(|i| supports.iter().all(|v| !v.contains(i) || 1 < v.len()))
             .count()
