@@ -2,19 +2,25 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+
+use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{neighbors, Dim2, GeometricMath},
         line_parser, progress, regex,
     },
+    serde::Serialize,
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+const OBSERV: usize = 2;
+
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     start: Dim2<usize>,
+    history: HashMap<Dim2<usize>, Vec<usize>>,
 }
 
 #[aoc(2023, 21)]
@@ -29,6 +35,26 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {}
+    fn serialize(&self) {
+        // add 1 for the firt element holding start time
+        // sub 2 for the last element which is 2 blocks apart from the next base
+        let estimated_time = 131 + 131 + 1 - 2;
+        let v = (0..OBSERV)
+            .map(|y| {
+                (0..OBSERV)
+                    .map(|x| {
+                        let v = self.history.get(&(y, x)).map_or(Vec::new(), |r| r.clone());
+                        if 262 < v.len() {
+                            vec![v[..estimated_time].to_vec(), v[estimated_time..].to_vec()]
+                        } else {
+                            vec![v]
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        println!("{}", serde_json::to_string(&v).unwrap());
+    }
     fn part1(&mut self) -> Self::Output1 {
         let steps = 64;
         let height = self.line.len();
@@ -55,119 +81,67 @@ impl AdventOfCode for Puzzle {
             }
             std::mem::swap(&mut to_visit, &mut next);
         }
-        // println!("{:?}", map);
-        // for (y, l) in map.iter().enumerate() {
-        //     for (x, c) in l.iter().enumerate() {
-        //         print!(
-        //             "{}",
-        //             if self.line[y][x] {
-        //                 '#'
-        //             } else if *c == usize::MAX {
-        //                 ' '
-        //             } else {
-        //                 (b'0' + *c as u8) as char
-        //             }
-        //         );
-        //     }
-        //     println!();
-        // }
         map.iter()
             .map(|l| l.iter().filter(|c| **c == steps).count())
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
-        // TODO: for simplicity, shift start to (0,0).
-        dbg!(self
-            .line
-            .iter()
-            .map(|v| v.iter().filter(|p| !*p).count())
-            .sum::<usize>());
-        let height = self.line.len() as isize;
-        let width = self.line[0].len() as isize;
-        let steps = 500; // 2650u365;
-        let mut to_visit: Vec<Dim2<isize>> = Vec::new();
-        let mut next: Vec<Dim2<isize>> = Vec::new();
-        let mut history: HashMap<Dim2<isize>, Vec<(usize, usize)>> = HashMap::new();
-        to_visit.push((self.start.0 as isize, self.start.1 as isize));
+        let limit = 26501365;
+        let steps = 500;
+        let height = self.line.len();
+        let width = self.line[0].len();
+        {
+            // to upper right, the first quadrant
+            let s = self.start;
+            self.line[0..s.0].reverse();
+            self.line[s.0..].reverse();
+            self.line.reverse();
+            for each in self.line.iter_mut() {
+                each[0..s.1].reverse();
+                each[s.1..].reverse();
+                each.reverse();
+            }
+            self.start = (0, 0);
+            assert!(self.line[0].iter().all(|n| !*n));
+            assert!(self.line.iter().all(|v| !v[0]));
+        }
+        // dbg!(self.line.iter().map(|v| v.iter().filter(|p| !*p).count()).sum::<usize>());
+        let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
+        let mut next: HashSet<Dim2<usize>> = HashSet::new();
+        to_visit.insert((self.start.0, self.start.1));
+        self.history.insert((0, 0), vec![0, 1]);
         for n in 0..steps {
             progress!(n);
-            let mut memo = [[0; 7]; 7];
-            while let Some(p) = to_visit.pop() {
-                for q in p
-                    .neighbors4((isize::MIN, isize::MIN), (isize::MAX, isize::MAX))
-                    .iter()
-                {
-                    let mod_y = abs_mod(q.0, height);
-                    let mod_x = abs_mod(q.1, width);
-                    if !self.line[mod_y][mod_x] && !next.contains(q) {
-                        next.push(*q);
-                        let i = if 0 <= q.0 {
-                            q.0 / height
-                        } else {
-                            q.0 / height - 1
-                        };
-                        let j = if 0 <= q.1 {
-                            q.1 / width
-                        } else {
-                            q.1 / width - 1
-                        };
-                        if -3 <= i && i < 4 && -3 <= j && j < 4 {
-                            memo[(i + 3) as usize][(j + 3) as usize] += 1;
+            let mut memo = [[0; 2 * OBSERV]; 2 * OBSERV];
+            for p in to_visit.iter() {
+                for q in p.neighbors4((0, 0), (limit, limit)).iter() {
+                    if !self.line[q.0 % height][q.1 % width] && !next.contains(q) {
+                        next.insert(*q);
+                        let i = q.0 / height;
+                        let j = q.1 / width;
+                        if i < OBSERV && j < OBSERV {
+                            memo[i][j] += 1;
                         }
                     }
                 }
             }
+            to_visit.clear();
             std::mem::swap(&mut to_visit, &mut next);
-            assert!(next.is_empty());
-            for y in -3..=3 {
-                for x in -3..=3 {
-                    let reach = memo[(y + 3) as usize][(x + 3) as usize];
+            for y in 0..OBSERV {
+                for x in 0..OBSERV {
+                    let reach = memo[y][x];
                     if 0 < reach {
-                        let entry = history.entry((y, x)).or_default();
-                        entry.push((n, reach));
+                        self.history.entry((y, x)).or_insert(vec![n]).push(reach);
                     }
                 }
             }
         }
-        for y in -3..=3 {
-            for x in -3..=3 {
-                let base = (y * height, x * width);
-                let reach = to_visit
-                    .iter()
-                    .filter(|(yy, xx)| {
-                        base.0 <= *yy
-                            && *yy < base.0 + height
-                            && base.1 <= *xx
-                            && *xx < base.1 + width
-                    })
-                    .count();
-                print!("{:10}", reach);
-            }
-            println!();
-        }
-        for y in -3..=3 {
-            for x in -3..=3 {
-                if let Some(v) = history.get(&(y, x)) {
-                    let start = v[0].0;
-                    let series = v.iter().map(|(t, n)| *n).collect::<Vec<_>>();
-                    println!("({y},{x}) {start} | {:?}", series);
-                } else {
-                    println!("({y},{x}) -");
-                }
-            }
-            println!();
-        }
-
+        assert_eq!(
+            to_visit.contains(&(0, 0)),
+            to_visit.contains(&(131 + 1, 131 + 1))
+        );
+        self.serialize();
         let count = 0;
         count
-    }
-}
-
-fn abs_mod(a: isize, b: isize) -> usize {
-    let tmp = a % b;
-    if 0 <= tmp {
-        tmp as usize
-    } else {
-        (b + tmp) as usize
     }
 }
