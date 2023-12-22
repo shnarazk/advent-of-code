@@ -1,59 +1,35 @@
 //! <https://adventofcode.com/2023/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-use std::collections::HashSet;
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors, Dim2, GeometricMath},
-        line_parser, progress, regex,
-    },
-    serde::Serialize,
-    std::collections::HashMap,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    geometric::{Dim2, GeometricMath},
+    progress,
 };
+use std::collections::HashSet;
 
-const OBSERV: usize = 2;
-
+const LIMIT: usize = 1; // 26501365;
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     start: Dim2<usize>,
-    history: HashMap<Dim2<usize>, Vec<usize>>,
+    cycle_len: usize,
 }
 
 #[aoc(2023, 21)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        if let Some(i) = block.chars().enumerate().find(|(i, c)| *c == 'S') {
+        if let Some(i) = block.chars().enumerate().find(|(_, c)| *c == 'S') {
             self.start = (self.line.len(), i.0);
         }
         self.line
             .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
         Ok(())
     }
-    fn end_of_data(&mut self) {}
-    fn serialize(&self) {
-        // add 1 for the firt element holding start time
-        // sub 2 for the last element which is 2 blocks apart from the next base
-        let estimated_time = 131 + 131 + 1 - 2;
-        let v = (0..OBSERV)
-            .map(|y| {
-                (0..OBSERV)
-                    .map(|x| {
-                        let v = self.history.get(&(y, x)).map_or(Vec::new(), |r| r.clone());
-                        if 262 < v.len() {
-                            vec![v[..estimated_time].to_vec(), v[estimated_time..].to_vec()]
-                        } else {
-                            vec![v]
-                        }
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        println!("{}", serde_json::to_string(&v).unwrap());
+    fn end_of_data(&mut self) {
+        let height = self.line.len();
+        let width = self.line[0].len();
+        // to cancel parity difference, handle 2x2 blocks as a unit.
+        self.cycle_len = 2 * (height + width);
     }
     fn part1(&mut self) -> Self::Output1 {
         let steps = 64;
@@ -86,62 +62,62 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
-        let limit = 26501365;
-        let steps = 500;
-        let height = self.line.len();
-        let width = self.line[0].len();
-        {
-            // to upper right, the first quadrant
-            let s = self.start;
-            self.line[0..s.0].reverse();
-            self.line[s.0..].reverse();
-            self.line.reverse();
-            for each in self.line.iter_mut() {
-                each[0..s.1].reverse();
-                each[s.1..].reverse();
+        let nrepeat = LIMIT / self.cycle_len;
+        let remaining_time = LIMIT % self.cycle_len;
+        dbg!(nrepeat, remaining_time);
+        let fullfilled = (nrepeat * (nrepeat + 1)) / 2;
+        let map_height = self.line.len();
+        let map_width = self.line[0].len();
+        let mirrors = {
+            let mut m = self.line.clone();
+            m[0..self.start.0].reverse();
+            m[self.start.0..].reverse();
+            m.reverse();
+            for each in m.iter_mut() {
+                each[0..self.start.1].reverse();
+                each[self.start.1..].reverse();
                 each.reverse();
             }
-            self.start = (0, 0);
-            assert!(self.line[0].iter().all(|n| !*n));
-            assert!(self.line.iter().all(|v| !v[0]));
-        }
-        // dbg!(self.line.iter().map(|v| v.iter().filter(|p| !*p).count()).sum::<usize>());
-        let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
-        let mut next: HashSet<Dim2<usize>> = HashSet::new();
-        to_visit.insert((self.start.0, self.start.1));
-        self.history.insert((0, 0), vec![0, 1]);
-        for n in 0..steps {
-            progress!(n);
-            let mut memo = [[0; 2 * OBSERV]; 2 * OBSERV];
-            for p in to_visit.iter() {
-                for q in p.neighbors4((0, 0), (limit, limit)).iter() {
-                    if !self.line[q.0 % height][q.1 % width] && !next.contains(q) {
-                        next.insert(*q);
-                        let i = q.0 / height;
-                        let j = q.1 / width;
-                        if i < OBSERV && j < OBSERV {
-                            memo[i][j] += 1;
+            [
+                m.clone(),
+                m.iter().rev().cloned().collect::<Vec<_>>(),
+                m.iter()
+                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
+                    .collect::<Vec<_>>(),
+                m.iter()
+                    .rev()
+                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
+                    .collect::<Vec<_>>(),
+            ]
+        };
+        mirrors
+            .iter()
+            .map(|m| {
+                let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
+                let mut next: HashSet<Dim2<usize>> = HashSet::new();
+                let mut incomp = 0;
+                to_visit.insert((0, 0));
+                for n in 1..=self.cycle_len {
+                    progress!(n);
+                    for p in to_visit.iter() {
+                        for q in p
+                            .neighbors4((0, 0), (self.cycle_len / 2, self.cycle_len / 2))
+                            .iter()
+                        {
+                            if !m[q.0 % map_height][q.1 % map_width] && !next.contains(q) {
+                                next.insert(*q);
+                            }
                         }
                     }
-                }
-            }
-            to_visit.clear();
-            std::mem::swap(&mut to_visit, &mut next);
-            for y in 0..OBSERV {
-                for x in 0..OBSERV {
-                    let reach = memo[y][x];
-                    if 0 < reach {
-                        self.history.entry((y, x)).or_insert(vec![n]).push(reach);
+                    to_visit.clear();
+                    std::mem::swap(&mut to_visit, &mut next);
+                    if n == remaining_time {
+                        incomp = to_visit.len();
                     }
                 }
-            }
-        }
-        assert_eq!(
-            to_visit.contains(&(0, 0)),
-            to_visit.contains(&(131 + 1, 131 + 1))
-        );
-        self.serialize();
-        let count = 0;
-        count
+                // FIXME: we have to consider bits on borders, they are double counted now.
+                dbg!(to_visit.len() * fullfilled + incomp * (nrepeat + 1))
+            })
+            .sum::<usize>()
     }
 }
