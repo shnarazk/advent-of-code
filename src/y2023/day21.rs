@@ -30,6 +30,7 @@ impl AdventOfCode for Puzzle {
         let height = self.line.len();
         let width = self.line[0].len();
         self.cycle_len = height + width;
+        // for l in self.line.iter_mut() { for p in l.iter_mut() { *p = false; } }
     }
     fn part1(&mut self) -> Self::Output1 {
         let steps = 64;
@@ -61,9 +62,42 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
+        let mirrors = {
+            let mut m = self.line.clone();
+            m[0..self.start.0].reverse();
+            m[self.start.0..].reverse();
+            m.reverse();
+            for each in m.iter_mut() {
+                each[0..self.start.1].reverse();
+                each[self.start.1..].reverse();
+                each.reverse();
+            }
+            [
+                m.clone(),
+                {
+                    let mut r = m.clone();
+                    r.reverse();
+                    r.rotate_right(1);
+                    r
+                },
+                {
+                    m.iter()
+                        .map(|v| {
+                            let mut w = v.clone();
+                            w.reverse();
+                            w.rotate_right(1);
+                            w
+                        })
+                        .collect::<Vec<_>>()
+                },
+                m.iter()
+                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
+                    .collect::<Vec<_>>(),
+            ]
+        };
         let nrepeat = dbg!(LIMIT) / dbg!(self.cycle_len);
         let remaining_time = if 1 < nrepeat {
-            LIMIT - (nrepeat - 1) * self.cycle_len
+            LIMIT - nrepeat * self.cycle_len
         } else {
             LIMIT
         };
@@ -81,38 +115,28 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|v| v.iter().filter(|b| !*b).count())
             .sum::<usize>();
-        dbg!(nrepeat, remaining_time, fullfilled, comp_fill);
-        let mirrors = {
-            let mut m = self.line.clone();
-            m[0..self.start.0].reverse();
-            m[self.start.0..].reverse();
-            m.reverse();
-            for each in m.iter_mut() {
-                each[0..self.start.1].reverse();
-                each[self.start.1..].reverse();
-                each.reverse();
-            }
-            [
-                m.clone(),
-                m.iter().rev().cloned().collect::<Vec<_>>(),
-                m.iter()
-                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-                m.iter()
-                    .rev()
-                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            ]
+        dbg!(nrepeat, fullfilled, remaining_time, comp_fill);
+        let maxfil = (LIMIT + 1).pow(2)
+            - fullfilled
+                * 2
+                * self
+                    .line
+                    .iter()
+                    .map(|v| v.iter().filter(|b| **b).count())
+                    .sum::<usize>();
+        println!("MxFil: {}", maxfil);
+        let n_simulate = if 1 < nrepeat {
+            self.cycle_len + remaining_time
+        } else {
+            remaining_time
         };
-
-        dbg!((LIMIT + 1).pow(2));
         mirrors
             .iter()
             .map(|m| {
                 let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
                 let mut next: HashSet<Dim2<usize>> = HashSet::new();
                 to_visit.insert((0, 0));
-                for n in 1..=remaining_time {
+                for n in 1..=n_simulate {
                     progress!(n);
                     for p in to_visit.iter() {
                         for q in p
@@ -135,20 +159,18 @@ impl AdventOfCode for Puzzle {
                     .count();
                 let incomp2 = (incomp - incomp1) / 2;
                 let incomp = to_visit.len();
+                dbg!(comp_fill * fullfilled);
+                dbg!(incomp, incomp1);
                 assert!(to_visit
                     .iter()
                     .all(|(x, y)| !(self.cycle_len <= *x && self.cycle_len <= *y)));
                 // let incomp_on_border = to_visit.iter().filter(|(y, x)| *y == 0 || *x == 0).count();
                 // FIXME: we have to consider bits on borders, they are double counted now.
-                dbg!(
-                    fullfilled * comp_fill
-                    + match nrepeat {
-                        0|1 => incomp,
-                        m => incomp1 * m + incomp2 * (m + 1)
-                    }
-                        // + dbg!(incomp) * if 1 < nrepeat { nrepeat } else { 1 }
-                        - (LIMIT + 1)
-                )
+                let result = match nrepeat {
+                    0 | 1 => incomp,
+                    m => fullfilled * comp_fill + incomp1 * m + incomp2 * (m + 1),
+                } - (LIMIT + 1);
+                dbg!(result)
             })
             .sum::<usize>()
             + 2 * (LIMIT + 1)
