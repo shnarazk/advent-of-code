@@ -64,60 +64,17 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
-        let mirrors = {
-            let mut m = self.line.clone();
-            m.rotate_left(self.start.0);
-            for each in m.iter_mut() {
-                each.rotate_left(self.start.1);
-            }
-            [
-                m.clone(),
-                {
-                    let mut r = m.clone();
-                    r.reverse();
-                    r.rotate_right(1);
-                    r
-                },
-                {
-                    m.iter()
-                        .map(|v| {
-                            let mut w = v.clone();
-                            w.reverse();
-                            w.rotate_right(1);
-                            w
-                        })
-                        .collect::<Vec<_>>()
-                },
-                {
-                    let mut n = m
-                        .iter()
-                        .map(|v| {
-                            let mut w = v.clone();
-                            w.reverse();
-                            w.rotate_right(1);
-                            w
-                        })
-                        .collect::<Vec<_>>();
-                    n.reverse();
-                    n.rotate_right(1);
-                    n
-                },
-            ]
-        };
         let nrepeat = dbg!(LIMIT) / dbg!(self.cycle_len);
         let remaining_time = if 1 < nrepeat {
             LIMIT - nrepeat * self.cycle_len
         } else {
             LIMIT
         };
-        // repeat for x > 0 and repeat for y > 0 == nrepeat
         let fullfilled = if 1 < nrepeat {
             (nrepeat * (nrepeat - 1)) / 2
         } else {
             0
         };
-        let map_height = self.line.len();
-        let map_width = self.line[0].len();
         let comp_fill: usize = 2 * self
             .line
             .iter()
@@ -133,50 +90,96 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .map(|v| v.iter().filter(|b| **b).count())
                     .sum::<usize>();
-        println!("MxFil: {}", maxfil);
+        println!("Maxmum:  {}", maxfil);
         let n_simulate = if 1 < nrepeat {
             self.cycle_len + remaining_time
         } else {
             remaining_time
         };
-        mirrors
+        let mut m = self.line.clone();
+        m.rotate_left(self.start.0);
+        for each in m.iter_mut() {
+            each.rotate_left(self.start.1);
+        }
+        build_mirrors(&m)
             .iter()
             .map(|m| {
-                let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
-                let mut next: HashSet<Dim2<usize>> = HashSet::new();
-                to_visit.insert((0, 0));
-                for n in 1..=n_simulate {
-                    progress!(n);
-                    for p in to_visit.iter() {
-                        for q in p
-                            .neighbors4((0, 0), (2 * self.cycle_len, 2 * self.cycle_len))
-                            .iter()
-                        {
-                            if (!m[q.0 % map_height][q.1 % map_width]) && !next.contains(q) {
-                                next.insert(*q);
-                            }
-                        }
-                    }
-                    to_visit.clear();
-                    std::mem::swap(&mut to_visit, &mut next);
-                }
-                let incomp = to_visit.len();
-                let incomp1 = to_visit
+                let state = self.propagete_on(m, n_simulate);
+                let incomp = state.len();
+                let incomp1 = state
                     .iter()
                     .filter(|(x, y)| *x < self.cycle_len && *y < self.cycle_len)
                     .count();
                 let incomp2 = (incomp - incomp1) / 2;
-                dbg!(incomp, incomp1);
-                assert!(to_visit
-                    .iter()
-                    .all(|(x, y)| !(self.cycle_len <= *x && self.cycle_len <= *y)));
+                dbg!(incomp1, incomp2);
                 let result = match nrepeat {
                     0 | 1 => incomp,
                     m => fullfilled * comp_fill + incomp1 * m + incomp2 * (m + 1),
                 } - (LIMIT + 1);
-                dbg!(result)
+                result
             })
             .sum::<usize>()
             + 2 * (LIMIT + 1)
+    }
+}
+fn build_mirrors(v: &[Vec<bool>]) -> [Vec<Vec<bool>>; 4] {
+    let m = v.to_vec();
+    [
+        m.clone(),
+        {
+            let mut r = m.clone();
+            r.reverse();
+            r.rotate_right(1);
+            r
+        },
+        {
+            m.iter()
+                .map(|v| {
+                    let mut w = v.clone();
+                    w.reverse();
+                    w.rotate_right(1);
+                    w
+                })
+                .collect::<Vec<_>>()
+        },
+        {
+            let mut n = m
+                .iter()
+                .map(|v| {
+                    let mut w = v.clone();
+                    w.reverse();
+                    w.rotate_right(1);
+                    w
+                })
+                .collect::<Vec<_>>();
+            n.reverse();
+            n.rotate_right(1);
+            n
+        },
+    ]
+}
+impl Puzzle {
+    fn propagete_on(&self, map: &[Vec<bool>], upto: usize) -> HashSet<Dim2<usize>> {
+        let height = map.len();
+        let width = map[0].len();
+        let mut to_visit: HashSet<Dim2<usize>> = HashSet::new();
+        let mut next: HashSet<Dim2<usize>> = HashSet::new();
+        to_visit.insert((0, 0));
+        for n in 1..=upto {
+            progress!(n);
+            for p in to_visit.iter() {
+                for q in p
+                    .neighbors4((0, 0), (2 * self.cycle_len, 2 * self.cycle_len))
+                    .iter()
+                {
+                    if (!map[q.0 % height][q.1 % width]) && !next.contains(q) {
+                        next.insert(*q);
+                    }
+                }
+            }
+            to_visit.clear();
+            std::mem::swap(&mut to_visit, &mut next);
+        }
+        to_visit
     }
 }
