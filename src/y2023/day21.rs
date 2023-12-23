@@ -1,10 +1,12 @@
 //! <https://adventofcode.com/2023/day/21>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    geometric::{Dim2, GeometricMath},
-    progress,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::{Dim2, GeometricMath},
+        progress,
+    },
+    std::collections::HashSet,
 };
-use std::collections::HashSet;
 
 const LIMIT: usize = 26501365;
 
@@ -64,13 +66,9 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output1 {
         let mirrors = {
             let mut m = self.line.clone();
-            m[0..self.start.0].reverse();
-            m[self.start.0..].reverse();
-            m.reverse();
+            m.rotate_left(self.start.0);
             for each in m.iter_mut() {
-                each[0..self.start.1].reverse();
-                each[self.start.1..].reverse();
-                each.reverse();
+                each.rotate_left(self.start.1);
             }
             [
                 m.clone(),
@@ -90,9 +88,20 @@ impl AdventOfCode for Puzzle {
                         })
                         .collect::<Vec<_>>()
                 },
-                m.iter()
-                    .map(|v| v.iter().rev().copied().collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
+                {
+                    let mut n = m
+                        .iter()
+                        .map(|v| {
+                            let mut w = v.clone();
+                            w.reverse();
+                            w.rotate_right(1);
+                            w
+                        })
+                        .collect::<Vec<_>>();
+                    n.reverse();
+                    n.rotate_right(1);
+                    n
+                },
             ]
         };
         let nrepeat = dbg!(LIMIT) / dbg!(self.cycle_len);
@@ -107,7 +116,6 @@ impl AdventOfCode for Puzzle {
         } else {
             0
         };
-        // let fullfilled = (nrepeat * (nrepeat + 1)) / 2;
         let map_height = self.line.len();
         let map_width = self.line[0].len();
         let comp_fill: usize = 2 * self
@@ -116,6 +124,7 @@ impl AdventOfCode for Puzzle {
             .map(|v| v.iter().filter(|b| !*b).count())
             .sum::<usize>();
         dbg!(nrepeat, fullfilled, remaining_time, comp_fill);
+        dbg!(comp_fill * fullfilled);
         let maxfil = (LIMIT + 1).pow(2)
             - fullfilled
                 * 2
@@ -143,8 +152,7 @@ impl AdventOfCode for Puzzle {
                             .neighbors4((0, 0), (2 * self.cycle_len, 2 * self.cycle_len))
                             .iter()
                         {
-                            if (!m[q.0 % map_height][q.1 % map_width] || true) && !next.contains(q)
-                            {
+                            if (!m[q.0 % map_height][q.1 % map_width]) && !next.contains(q) {
                                 next.insert(*q);
                             }
                         }
@@ -158,14 +166,10 @@ impl AdventOfCode for Puzzle {
                     .filter(|(x, y)| *x < self.cycle_len && *y < self.cycle_len)
                     .count();
                 let incomp2 = (incomp - incomp1) / 2;
-                let incomp = to_visit.len();
-                dbg!(comp_fill * fullfilled);
                 dbg!(incomp, incomp1);
                 assert!(to_visit
                     .iter()
                     .all(|(x, y)| !(self.cycle_len <= *x && self.cycle_len <= *y)));
-                // let incomp_on_border = to_visit.iter().filter(|(y, x)| *y == 0 || *x == 0).count();
-                // FIXME: we have to consider bits on borders, they are double counted now.
                 let result = match nrepeat {
                     0 | 1 => incomp,
                     m => fullfilled * comp_fill + incomp1 * m + incomp2 * (m + 1),
