@@ -32,7 +32,6 @@ impl AdventOfCode for Puzzle {
         let height = self.line.len();
         let width = self.line[0].len();
         self.cycle_len = height + width;
-        // for l in self.line.iter_mut() { for p in l.iter_mut() { *p = false; } }
     }
     fn part1(&mut self) -> Self::Output1 {
         let steps = 64;
@@ -65,15 +64,14 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output1 {
         let nrepeat = dbg!(LIMIT) / dbg!(self.cycle_len);
-        let remaining_time = if 1 < nrepeat {
-            LIMIT - nrepeat * self.cycle_len
+        let (remaining_time, fullfilled, n_simulate) = if 1 < nrepeat {
+            (
+                LIMIT % self.cycle_len,
+                (nrepeat * (nrepeat - 1)) / 2,
+                self.cycle_len + LIMIT % self.cycle_len,
+            )
         } else {
-            LIMIT
-        };
-        let fullfilled = if 1 < nrepeat {
-            (nrepeat * (nrepeat - 1)) / 2
-        } else {
-            0
+            (LIMIT, 0, LIMIT)
         };
         let comp_fill: usize = 2 * self
             .line
@@ -81,48 +79,33 @@ impl AdventOfCode for Puzzle {
             .map(|v| v.iter().filter(|b| !*b).count())
             .sum::<usize>();
         dbg!(nrepeat, fullfilled, remaining_time, comp_fill);
-        dbg!(comp_fill * fullfilled);
-        let maxfil = (LIMIT + 1).pow(2)
-            - fullfilled
-                * 2
-                * self
-                    .line
-                    .iter()
-                    .map(|v| v.iter().filter(|b| **b).count())
-                    .sum::<usize>();
-        println!("Maxmum:  {}", maxfil);
-        let n_simulate = if 1 < nrepeat {
-            self.cycle_len + remaining_time
-        } else {
-            remaining_time
-        };
-        let mut m = self.line.clone();
-        m.rotate_left(self.start.0);
-        for each in m.iter_mut() {
-            each.rotate_left(self.start.1);
-        }
-        build_mirrors(&m)
-            .iter()
-            .map(|m| {
-                let state = self.propagete_on(m, n_simulate);
-                let incomp = state.len();
-                let incomp1 = state
-                    .iter()
-                    .filter(|(x, y)| *x < self.cycle_len && *y < self.cycle_len)
-                    .count();
-                let incomp2 = (incomp - incomp1) / 2;
-                dbg!(incomp1, incomp2);
-                let result = match nrepeat {
-                    0 | 1 => incomp,
-                    m => fullfilled * comp_fill + incomp1 * m + incomp2 * (m + 1),
-                } - (LIMIT + 1);
-                result
-            })
-            .sum::<usize>()
+        println!("Maxmum:  {}", self.max_fill(fullfilled));
+        build_mirrors(shift(
+            &self.line,
+            (self.start.0 as isize, self.start.1 as isize),
+        ))
+        .iter()
+        .map(|m| {
+            let state = self.propagete_on(m, n_simulate);
+            let incomp = state.len();
+            let incomp1 = state
+                .iter()
+                .filter(|(x, y)| *x < self.cycle_len && *y < self.cycle_len)
+                .count();
+            let incomp2 = (incomp - incomp1) / 2;
+            // dbg!(incomp1, incomp2);
+            let result = if 1 < nrepeat {
+                fullfilled * comp_fill + incomp1 * nrepeat + incomp2 * (nrepeat + 1)
+            } else {
+                incomp
+            } - (LIMIT + 1);
+            result
+        })
+        .sum::<usize>()
             + 2 * (LIMIT + 1)
     }
 }
-fn build_mirrors(v: &[Vec<bool>]) -> [Vec<Vec<bool>>; 4] {
+fn build_mirrors(v: Vec<Vec<bool>>) -> [Vec<Vec<bool>>; 4] {
     let m = v.to_vec();
     [
         m.clone(),
@@ -182,4 +165,31 @@ impl Puzzle {
         }
         to_visit
     }
+    fn max_fill(&self, fullfilled: usize) -> usize {
+        (LIMIT + 1).pow(2)
+            - fullfilled
+                * 2
+                * self
+                    .line
+                    .iter()
+                    .map(|v| v.iter().filter(|b| **b).count())
+                    .sum::<usize>()
+    }
+}
+
+fn shift(matrix: &Vec<Vec<bool>>, p: Dim2<isize>) -> Vec<Vec<bool>> {
+    let mut m = matrix.to_vec();
+    if p.0 < 0 {
+        m.rotate_left(-p.0 as usize);
+    } else {
+        m.rotate_left(p.0 as usize);
+    }
+    for each in m.iter_mut() {
+        if p.0 < 0 {
+            each.rotate_left(-p.1 as usize);
+        } else {
+            each.rotate_left(p.1 as usize);
+        }
+    }
+    m
 }
