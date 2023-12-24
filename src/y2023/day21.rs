@@ -73,12 +73,9 @@ impl AdventOfCode for Puzzle {
         } else {
             (LIMIT, 0, LIMIT)
         };
-        let comp_fill: usize = 2 * self
-            .line
-            .iter()
-            .map(|v| v.iter().filter(|b| !*b).count())
-            .sum::<usize>();
+        let comp_fill = 2 * self.reachable(&self.line);
         dbg!(nrepeat, fullfilled, remaining_time, comp_fill);
+        #[cfg(debug)]
         println!("Maxmum:  {}", self.max_fill(fullfilled));
         build_mirrors(shift(
             &self.line,
@@ -98,11 +95,11 @@ impl AdventOfCode for Puzzle {
                 fullfilled * comp_fill + incomp1 * nrepeat + incomp2 * (nrepeat + 1)
             } else {
                 incomp
-            } - (LIMIT + 1);
+            };
             result
         })
         .sum::<usize>()
-            + 2 * (LIMIT + 1)
+            - 2 * (LIMIT + 1)
     }
 }
 fn build_mirrors(v: Vec<Vec<bool>>) -> [Vec<Vec<bool>>; 4] {
@@ -165,6 +162,38 @@ impl Puzzle {
         }
         to_visit
     }
+    fn reachable(&self, map: &[Vec<bool>]) -> usize {
+        let height = map.len();
+        let width = map[0].len();
+        let mut to_visit: Vec<Dim2<usize>> = Vec::new();
+        let mut m = map
+            .iter()
+            .map(|v| v.iter().map(|b| *b as usize).collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        to_visit.push((0, 0));
+        while let Some(p) = to_visit.pop() {
+            if m[p.0][p.1] == 0 {
+                m[p.0][p.1] = 2;
+            }
+            for q in p.neighbors4((0, 0), (height, width)).iter() {
+                if (m[q.0][q.1] == 0) && !to_visit.contains(q) {
+                    to_visit.push(*q);
+                }
+            }
+        }
+        // dbg!(
+        //     &(0..height)
+        //         .flat_map(|y| (0..width)
+        //             .filter(|x| m[y][*x] == 0)
+        //             .map(|x| (y, x))
+        //             .collect::<Vec<_>>())
+        //         .collect::<Vec<_>>()[0..5]
+        // );
+        m.iter()
+            .map(|v| v.iter().filter(|n| **n == 2).count())
+            .sum()
+    }
+    #[cfg(debug)]
     fn max_fill(&self, fullfilled: usize) -> usize {
         (LIMIT + 1).pow(2)
             - fullfilled
