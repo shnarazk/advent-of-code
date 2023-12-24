@@ -90,13 +90,11 @@ impl AdventOfCode for Puzzle {
                 .filter(|(x, y)| *x < self.cycle_len && *y < self.cycle_len)
                 .count();
             let incomp2 = (incomp - incomp1) / 2;
-            // dbg!(incomp1, incomp2);
-            let result = if 1 < nrepeat {
+            if 1 < nrepeat {
                 fullfilled * comp_fill + incomp1 * nrepeat + incomp2 * (nrepeat + 1)
             } else {
                 incomp
-            };
-            result
+            }
         })
         .sum::<usize>()
             - 2 * (LIMIT + 1)
@@ -181,14 +179,6 @@ impl Puzzle {
                 }
             }
         }
-        // dbg!(
-        //     &(0..height)
-        //         .flat_map(|y| (0..width)
-        //             .filter(|x| m[y][*x] == 0)
-        //             .map(|x| (y, x))
-        //             .collect::<Vec<_>>())
-        //         .collect::<Vec<_>>()[0..5]
-        // );
         m.iter()
             .map(|v| v.iter().filter(|n| **n == 2).count())
             .sum()
@@ -206,7 +196,7 @@ impl Puzzle {
     }
 }
 
-fn shift(matrix: &Vec<Vec<bool>>, p: Dim2<isize>) -> Vec<Vec<bool>> {
+fn shift(matrix: &[Vec<bool>], p: Dim2<isize>) -> Vec<Vec<bool>> {
     let mut m = matrix.to_vec();
     if p.0 < 0 {
         m.rotate_left(-p.0 as usize);
