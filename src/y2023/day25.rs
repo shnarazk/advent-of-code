@@ -61,49 +61,57 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let num_node = self.names.len();
+        let num_edge = self.link.len();
+        dbg!(self.hash.values().map(|v| v.len()).max().unwrap());
+        dbg!(self.hash.values().filter(|v| v.len() == 3).count());
         dbg!(self.hash.values().filter(|v| v.len() == 4).count());
-        let total = num_node.pow(2) as f64 / 2 as f64;
-        let mut count = 1;
+        dbg!(self.hash.values().filter(|v| v.len() == 5).count());
+        dbg!(self.hash.values().filter(|v| v.len() == 6).count());
+        dbg!(self.hash.values().filter(|v| v.len() == 7).count());
+        dbg!(self.hash.values().filter(|v| v.len() == 8).count());
+        dbg!(self.hash.values().filter(|v| v.len() == 9).count());
+        dbg!(self.hash.values().filter(|v| v.len() == 10).count());
+        let total: f64 = num_node.pow(2) as f64 / 2 as f64;
         for i in 0..num_node {
-            for j in i + 1..num_node {
-                progress!(count as f64 / total);
-                let v = self.node_connectivity(vec![i, j]);
-                if 1 < v.len() {
-                    return v.iter().product();
-                }
-                count += 1;
-            }
-        }
-        for i in 0..num_node {
-            if self.hash.get(&i).map_or(true, |v| 4 < v.len()) {
+            if self.hash.get(&i).map_or(true, |v| 5 > v.len()) {
                 continue;
             }
             for j in i + 1..num_node {
-                if self.hash.get(&j).map_or(true, |v| 4 < v.len()) {
+                if self.hash.get(&j).map_or(true, |v| 5 > v.len()) {
                     continue;
                 }
                 progress!((i * num_node + j) as f64 / total);
                 for k in j + 1..num_node {
-                    if self.hash.get(&k).map_or(true, |v| 4 < v.len()) {
+                    if self.hash.get(&k).map_or(true, |v| 5 > v.len()) {
                         continue;
                     }
                     let v = self.node_connectivity(vec![i, j, k]);
                     if 1 < v.len() {
-                        return v.iter().product();
-                    }
-                }
-            }
-        }
-        unreachable!();
-        let num_edge = self.link.len();
-        for i in 0..num_edge {
-            // progress!(i as f64 / num_edge as f64);
-            for j in i + 1..num_edge {
-                progress!((i * num_edge + j) as f64 / (num_edge as f64).powf(2.0));
-                for k in j + 1..num_edge {
-                    let v = self.edge_connectivity(vec![i, j, k]);
-                    if v.len() == 2 {
-                        return v.iter().product();
+                        let cand_rule_set = vec![i, j, k]
+                            .iter()
+                            .flat_map(|i| self.hash.get(i).unwrap())
+                            .collect::<HashSet<_>>();
+                        let cand_rules = cand_rule_set
+                            .iter()
+                            .map(|(i, _)| *i)
+                            .collect::<Vec<usize>>();
+                        let n_cands = cand_rules.len();
+
+                        for i in 0..n_cands {
+                            for j in i + 1..n_cands {
+                                progress!((i * num_edge + j));
+                                for k in j + 1..n_cands {
+                                    let v = self.edge_connectivity(&vec![
+                                        cand_rules[i],
+                                        cand_rules[j],
+                                        cand_rules[k],
+                                    ]);
+                                    if v.len() == 2 {
+                                        return v.iter().product();
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -150,7 +158,7 @@ impl Puzzle {
         }
         result
     }
-    fn edge_connectivity(&self, forbidden: Vec<usize>) -> Vec<usize> {
+    fn edge_connectivity(&self, forbidden: &[usize]) -> Vec<usize> {
         let len = self.names.len();
         let mut result: Vec<usize> = vec![];
         let mut used: HashSet<usize> = HashSet::new();
