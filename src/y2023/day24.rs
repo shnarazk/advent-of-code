@@ -2,10 +2,13 @@
 // #![allow(dead_code)]
 // #![allow(unused_imports)]
 #![allow(unused_variables)]
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    geometric::{Dim2, Dim3},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::{Dim2, Dim3},
+        line_parser,
+    },
+    itertools::Itertools,
 };
 
 // std::collections::HashMap,
@@ -59,6 +62,15 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
+        println!(
+            "{:?}",
+            self.line
+                .iter()
+                .map(|(p, v)| (p.0, v.0))
+                .sorted()
+                .take(100)
+                .collect::<Vec<_>>()
+        );
         2
     }
 }
