@@ -5,7 +5,7 @@ use {
         geometric::{Dim2, GeometricMath},
         progress,
     },
-    std::collections::{BinaryHeap, HashSet},
+    std::collections::{BinaryHeap, HashMap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -13,16 +13,15 @@ pub struct Puzzle {
     line: Vec<Vec<u8>>,
     sum_path: Vec<Vec<usize>>,
     path_index: Vec<Vec<Option<usize>>>,
-    num_path: usize,
     vector_template: Vec<bool>,
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct Route {
-    // estimate: f64,
     visited: usize,
     pos: Dim2<usize>,
-    map: Vec<bool>,
+    pre: Dim2<usize>,
+    map: Vec<usize>,
 }
 
 impl PartialOrd for Route {
@@ -85,7 +84,6 @@ impl AdventOfCode for Puzzle {
             self.path_index[*y][*x] = Some(i);
             self.vector_template.push(false);
         }
-        self.num_path = pathes.len();
         // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -131,26 +129,24 @@ impl AdventOfCode for Puzzle {
         longest
     }
     fn part2(&mut self) -> Self::Output2 {
+        dbg!(check_branches(&self.line));
         let height = self.line.len();
         let width = self.line[0].len();
         let goal = (height - 1, width - 2);
         let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
         let mut longest = 0;
-        // let accessables = self
-        //     .line
-        //     .iter()
-        //     .map(|v| v.iter().filter(|p| **p != b'#').count())
-        //     .sum::<usize>();
         to_visit.push(Route {
             visited: 1,
             pos: (0, 1),
-            map: self.vector_template.clone(), // self.line.iter().map(|l| l.iter().map(||)),
+            pre: (0, 0),
+            map: Vec::new(), // self.vector_template.clone(), // self.line.iter().map(|l| l.iter().map(||)),
         });
-        let mut visited: HashSet<Route> = HashSet::new();
-        while let Some(p) = to_visit.pop() {
-            if visited.contains(&p) {
-                continue;
-            }
+        let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
+        // let mut visited: HashSet<Route> = HashSet::new();
+        // let mut count = 0;
+        while let Some(mut p) = to_visit.pop() {
+            // count += 1;
+            // println!("{:?}", &p);
             if to_visit.len() % 20 == 0 {
                 progress!(visited.len());
             }
@@ -160,36 +156,55 @@ impl AdventOfCode for Puzzle {
                 }
                 continue;
             }
-            if visited.contains(&p) {
+            if p.map.contains(&self.path_index[p.pos.0][p.pos.1].unwrap()) {
                 continue;
             }
-            // let estimate = self.sum_path[p.pos.0][p.pos.1] as f64
-            //     / p.map
-            //         .iter()
-            //         .filter(|(y, x)| *y <= p.pos.0 && *x <= p.pos.1)
-            //         .count() as f64;
-            let iter = p
+            let next = p
                 .pos
                 .neighbors4((0, 0), (height, width))
                 .into_iter()
-                .filter(|(y, x)| {
-                    self.line[*y][*x] != b'#' && !p.map[self.path_index[*y][*x].unwrap()]
-                })
+                .filter(|(y, x)| self.line[*y][*x] != b'#')
+                .filter(|(y, x)| p.pre != (*y, *x))
                 .collect::<Vec<_>>();
-            let at_branch = 1 < iter.len();
+            let at_branch = 1 < next.len();
             if at_branch {
-                visited.insert(p.clone());
+                if let Some(k) = visited.get(&p.map) {
+                    if p.visited < *k {
+                        continue;
+                    }
+                }
+                p.map.push(self.path_index[p.pos.0][p.pos.1].unwrap());
+                visited.insert(p.map.clone(), p.visited);
             }
-            for q0 in iter.iter() {
+            for q0 in next.iter() {
                 let mut q = p.clone();
-                // q.estimate = estimate;
                 q.visited += 1;
                 q.pos = *q0;
-                q.map[self.path_index[q0.0][q0.1].unwrap()] = true;
-                // q.map.insert(*q0);
+                q.pre = p.pos;
                 to_visit.push(q);
             }
         }
-        longest
+        longest - 1
     }
+}
+
+fn check_branches(v: &[Vec<u8>]) -> usize {
+    let height = v.len();
+    let width = v[0].len();
+    v.iter()
+        .enumerate()
+        .map(|(y, l)| {
+            l.iter()
+                .enumerate()
+                .filter(|(x, p)| {
+                    2 < (y, *x)
+                        .neighbors4((0, 0), (height, width))
+                        .into_iter()
+                        .filter(|_| **p != b'#')
+                        .filter(|(y, x)| v[*y][*x] != b'#')
+                        .count()
+                })
+                .count()
+        })
+        .count()
 }
