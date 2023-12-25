@@ -1,13 +1,8 @@
 //! <https://adventofcode.com/2023/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, progress, regex,
+        progress,
     },
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
@@ -71,7 +66,7 @@ impl AdventOfCode for Puzzle {
         dbg!(self.hash.values().filter(|v| v.len() == 8).count());
         dbg!(self.hash.values().filter(|v| v.len() == 9).count());
         dbg!(self.hash.values().filter(|v| v.len() == 10).count());
-        let total: f64 = num_node.pow(2) as f64 / 2 as f64;
+        let total: f64 = num_node.pow(2) as f64 / 2_f64;
         for i in 0..num_node {
             if self.hash.get(&i).map_or(true, |v| 5 > v.len()) {
                 continue;
@@ -87,7 +82,7 @@ impl AdventOfCode for Puzzle {
                     }
                     let v = self.node_connectivity(vec![i, j, k]);
                     if 1 < v.len() {
-                        let cand_rule_set = vec![i, j, k]
+                        let cand_rule_set = [i, j, k]
                             .iter()
                             .flat_map(|i| self.hash.get(i).unwrap())
                             .collect::<HashSet<_>>();
@@ -101,7 +96,7 @@ impl AdventOfCode for Puzzle {
                             for j in i + 1..n_cands {
                                 progress!((i * num_edge + j));
                                 for k in j + 1..n_cands {
-                                    let v = self.edge_connectivity(&vec![
+                                    let v = self.edge_connectivity(&[
                                         cand_rules[i],
                                         cand_rules[j],
                                         cand_rules[k],
@@ -139,8 +134,8 @@ impl Puzzle {
                 used.insert(n);
                 ng += 1;
                 if let Some(v) = self.hash.get(&n) {
-                    for (i, to) in v.iter() {
-                        if forbidden.contains(&to) {
+                    for (_, to) in v.iter() {
+                        if forbidden.contains(to) {
                             continue;
                         }
                         if !used.contains(to) {
@@ -175,7 +170,7 @@ impl Puzzle {
                 ng += 1;
                 if let Some(v) = self.hash.get(&n) {
                     for (i, to) in v.iter() {
-                        if forbidden.contains(&i) {
+                        if forbidden.contains(i) {
                             continue;
                         }
                         if !used.contains(to) {
