@@ -146,17 +146,12 @@ impl AdventOfCode for Puzzle {
             size: (1, 1),
         });
         let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
-        // let mut visited: HashSet<Route> = HashSet::new();
-        // let mut count = 0;
         let mut threshold = 0.0;
         while let Some(mut p) = to_visit.pop() {
-            // count += 1;
-            // println!("{:?}", &p);
             if p.pos == goal {
                 if longest < p.cost {
                     longest = p.cost;
                     progress!(format!("{longest}/{threshold}"));
-                    assert!(visited.len() < 40_000_000);
                 }
                 continue;
             }
@@ -191,7 +186,6 @@ impl AdventOfCode for Puzzle {
                     + (p.used.len() * p.used.len()) as f64
                         / ((q.size.0 * q.size.1) as f64 * nbranch);
                 if covered * 1.05 < threshold {
-                    dbg!();
                     continue;
                 } else if threshold < covered {
                     threshold = covered;
