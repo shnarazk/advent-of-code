@@ -62,15 +62,16 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        println!(
-            "{:?}",
-            self.line
-                .iter()
-                .map(|(p, v)| (p.0, v.0))
-                .sorted()
-                .take(100)
-                .collect::<Vec<_>>()
-        );
+        // println!(
+        //     "{:?}",
+        //     self.line
+        //         .iter()
+        //         .map(|(p, v)| (p.0, v.0))
+        //         .sorted()
+        //         .take(100)
+        //         .collect::<Vec<_>>()
+        // );
+        // sort on X-axis: it leads a constrain about rock's initial position and velocity. Solve it. Then repeat the same procedure on Y and Z.
         2
     }
 }
