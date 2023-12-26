@@ -9,9 +9,8 @@ use {
         line_parser,
     },
     itertools::Itertools,
+    std::collections::{HashMap, HashSet},
 };
-
-// std::collections::HashMap,
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -62,16 +61,107 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // println!(
-        //     "{:?}",
-        //     self.line
-        //         .iter()
-        //         .map(|(p, v)| (p.0, v.0))
-        //         .sorted()
-        //         .take(100)
-        //         .collect::<Vec<_>>()
-        // );
+        println!(
+            "lifting pos:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(p, v)| (0 < v.0).then_some(p.0))
+                .sorted()
+                .rev()
+                .take(4)
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "lifting pos:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(p, v)| (0 < v.0).then_some(p.0))
+                .sorted()
+                .take(4)
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "lifting vec:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(_, v)| (0 < v.0).then_some(v.0))
+                .sorted()
+                .rev()
+                .take(4)
+                .rev()
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "falling pos:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(p, v)| (0 > v.0).then_some(p.0))
+                .sorted()
+                .take(4)
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "falling pos:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(p, v)| (0 > v.0).then_some(p.0))
+                .sorted()
+                .rev()
+                .take(4)
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "falling vec:{:?}",
+            self.line
+                .iter()
+                .flat_map(|(_, v)| (0 > v.0).then_some(v.0))
+                .sorted()
+                .take(4)
+                .collect::<Vec<_>>()
+        );
+        let ax = self
+            .line
+            .iter()
+            .enumerate()
+            .flat_map(|(i, (p, v))| (v.0 < 0).then_some((p.0, v.0, i)))
+            .sorted()
+            .last()
+            .unwrap();
+        let bx = self
+            .line
+            .iter()
+            .enumerate()
+            .flat_map(|(i, (p, v))| (v.0 > 0).then_some((p.0, v.0, i)))
+            .sorted()
+            .last()
+            .unwrap();
         // sort on X-axis: it leads a constrain about rock's initial position and velocity. Solve it. Then repeat the same procedure on Y and Z.
+
+        let mut converge: HashMap<isize, Vec<(usize, isize)>> = HashMap::new();
+        for test in -4000..4000 {
+            if test == 0 {
+                continue;
+            }
+            let mut countup: HashMap<isize, usize> = HashMap::new();
+            for (x, v) in self.line.iter().map(|(p, v)| (p.0, v.0)) {
+                let mut diffs: HashSet<isize> = HashSet::new();
+                for t in 1..1000isize {
+                    let diff = x + t * v - t * test;
+                    diffs.insert(diff);
+                }
+                for d in diffs.iter() {
+                    *countup.entry(*d).or_default() += 1;
+                }
+            }
+            for (d, count) in countup.iter() {
+                converge.entry(*d).or_default().push((*count, test));
+            }
+        }
+        for value in converge.values_mut() {
+            value.sort();
+            value.reverse();
+        }
+        dbg!(converge.iter().map(|(x, l)| (l[0], x)).max().unwrap());
         2
     }
 }
