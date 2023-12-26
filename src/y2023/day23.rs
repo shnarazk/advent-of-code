@@ -16,33 +16,35 @@ pub struct Puzzle {
     vector_template: Vec<bool>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default)]
 struct Route {
-    visited: usize,
+    estimate: f64,
+    cost: usize,
     pos: Dim2<usize>,
     pre: Dim2<usize>,
-    map: Vec<usize>,
+    used: Vec<usize>,
+    size: Dim2<usize>,
 }
 
 impl PartialOrd for Route {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.visited.cmp(&other.visited))
+        self.estimate.partial_cmp(&other.estimate)
     }
 }
 
 impl Ord for Route {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.visited.cmp(&other.visited)
+        self.estimate.partial_cmp(&other.estimate).unwrap()
     }
 }
 
-// impl PartialEq for Route {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.pos.eq(&other.pos) && self.map.eq(&other.map)
-//     }
-// }
+impl PartialEq for Route {
+    fn eq(&self, other: &Self) -> bool {
+        self.pos.eq(&other.pos) && self.used.eq(&other.used)
+    }
+}
 
-// impl Eq for Route {}
+impl Eq for Route {}
 
 #[aoc(2023, 23)]
 impl AdventOfCode for Puzzle {
@@ -129,34 +131,36 @@ impl AdventOfCode for Puzzle {
         longest
     }
     fn part2(&mut self) -> Self::Output2 {
-        dbg!(check_branches(&self.line));
+        let nbranch = dbg!(check_branches(&self.line)) as f64;
         let height = self.line.len();
         let width = self.line[0].len();
         let goal = (height - 1, width - 2);
         let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
         let mut longest = 0;
         to_visit.push(Route {
-            visited: 1,
+            estimate: 0.0,
+            cost: 1,
             pos: (0, 1),
             pre: (0, 0),
-            map: Vec::new(), // self.vector_template.clone(), // self.line.iter().map(|l| l.iter().map(||)),
+            used: Vec::new(),
+            size: (1, 1),
         });
         let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
         // let mut visited: HashSet<Route> = HashSet::new();
         // let mut count = 0;
+        let mut threshold = 0.0;
         while let Some(mut p) = to_visit.pop() {
             // count += 1;
             // println!("{:?}", &p);
-            if to_visit.len() % 20 == 0 {
-                progress!(visited.len());
-            }
             if p.pos == goal {
-                if longest < p.visited {
-                    longest = dbg!(p.visited);
+                if longest < p.cost {
+                    longest = p.cost;
+                    progress!(format!("{longest}/{threshold}"));
+                    assert!(visited.len() < 40_000_000);
                 }
                 continue;
             }
-            if p.map.contains(&self.path_index[p.pos.0][p.pos.1].unwrap()) {
+            if p.used.contains(&self.path_index[p.pos.0][p.pos.1].unwrap()) {
                 continue;
             }
             let next = p
@@ -168,19 +172,31 @@ impl AdventOfCode for Puzzle {
                 .collect::<Vec<_>>();
             let at_branch = 1 < next.len();
             if at_branch {
-                if let Some(k) = visited.get(&p.map) {
-                    if p.visited < *k {
+                if let Some(k) = visited.get(&p.used) {
+                    if p.cost < *k {
                         continue;
                     }
                 }
-                p.map.push(self.path_index[p.pos.0][p.pos.1].unwrap());
-                visited.insert(p.map.clone(), p.visited);
+                p.used.push(self.path_index[p.pos.0][p.pos.1].unwrap());
+                visited.insert(p.used.clone(), p.cost);
             }
             for q0 in next.iter() {
                 let mut q = p.clone();
-                q.visited += 1;
+                q.cost += 1;
                 q.pos = *q0;
                 q.pre = p.pos;
+                q.size.0 = q.size.0.max(q0.0);
+                q.size.1 = q.size.1.max(q0.1);
+                let covered = 1.0
+                    + (p.used.len() * p.used.len()) as f64
+                        / ((q.size.0 * q.size.1) as f64 * nbranch);
+                if covered * 1.05 < threshold {
+                    dbg!();
+                    continue;
+                } else if threshold < covered {
+                    threshold = covered;
+                }
+                q.estimate = covered;
                 to_visit.push(q);
             }
         }
