@@ -6,7 +6,7 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, Dim3},
-        line_parser,
+        line_parser, progress,
     },
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
@@ -138,7 +138,8 @@ impl AdventOfCode for Puzzle {
         // sort on X-axis: it leads a constrain about rock's initial position and velocity. Solve it. Then repeat the same procedure on Y and Z.
 
         let mut converge: HashMap<isize, Vec<(usize, isize)>> = HashMap::new();
-        for test in -4000..4000 {
+        for test in -1000..1000 {
+            progress!((test + 1000) as f64 / 2000 as f64);
             if test == 0 {
                 continue;
             }
