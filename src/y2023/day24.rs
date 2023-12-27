@@ -61,6 +61,19 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
+        let forbiddens = self
+            .line
+            .iter()
+            .map(|(p, v)| v.0)
+            .collect::<HashSet<_>>()
+            .iter()
+            .sorted()
+            .cloned()
+            .collect::<Vec<_>>();
+        let min = self.line.iter().map(|(p, v)| p.0).min().unwrap();
+        let max = self.line.iter().map(|(p, v)| p.0).max().unwrap();
+        panic!();
+        self.sweep(&forbiddens, (min, max));
         println!(
             "lifting pos:{:?}",
             self.line
@@ -137,16 +150,38 @@ impl AdventOfCode for Puzzle {
             .unwrap();
         // sort on X-axis: it leads a constrain about rock's initial position and velocity. Solve it. Then repeat the same procedure on Y and Z.
 
+        let mut range = 3_000_000_000;
+        let mut v = 0;
+        while range > 0 {
+            range /= 2;
+            let l_diff = self.check(v - range);
+            let r_diff = self.check(v + range);
+            if l_diff.abs() < r_diff.abs() {
+                v -= range;
+                println!("{:10}< | {:10}/{:10}", range, v, l_diff);
+            } else {
+                v += range;
+                println!("{:10}> | {:10}/{:10}", range, v, r_diff);
+            }
+        }
+        for o in -5..=5 {
+            println!("v={}: {}", v + o, self.check(v + o));
+        }
+        2
+    }
+}
+impl Puzzle {
+    fn sweep(&self, forbidden: &[isize], range: (isize, isize)) {
         let mut converge: HashMap<isize, Vec<(usize, isize)>> = HashMap::new();
-        for test in -1000..1000 {
-            progress!((test + 1000) as f64 / 2000 as f64);
-            if test == 0 {
+        let width = range.1 - range.0;
+        for test in -50..=50 {
+            if test == 0 || forbidden.contains(&test) {
                 continue;
             }
             let mut countup: HashMap<isize, usize> = HashMap::new();
             for (x, v) in self.line.iter().map(|(p, v)| (p.0, v.0)) {
                 let mut diffs: HashSet<isize> = HashSet::new();
-                for t in 1..1000isize {
+                for t in 1..=dbg!((width / test).abs()) {
                     let diff = x + t * v - t * test;
                     diffs.insert(diff);
                 }
@@ -154,16 +189,52 @@ impl AdventOfCode for Puzzle {
                     *countup.entry(*d).or_default() += 1;
                 }
             }
-            for (d, count) in countup.iter() {
-                converge.entry(*d).or_default().push((*count, test));
+            for (dist, count) in countup.iter() {
+                converge.entry(*dist).or_default().push((*count, test));
             }
         }
         for value in converge.values_mut() {
             value.sort();
             value.reverse();
         }
-        dbg!(converge.iter().map(|(x, l)| (l[0], x)).max().unwrap());
-        2
+        dbg!(converge.len());
+        dbg!(converge
+            .iter()
+            .map(|(x, l)| (l[0], x))
+            .sorted()
+            .rev()
+            .take(2)
+            .collect::<Vec<_>>());
+        // for value in converge.values_mut() {
+        //     value.sort();
+        //     value.reverse();
+        // }
+        // dbg!(converge.iter().map(|(x, l)| (l[0], x)).max().unwrap());
+    }
+    fn check(&self, at: isize) -> isize {
+        let mut converge: HashMap<isize, Vec<(usize, isize)>> = HashMap::new();
+        for test in 0..=0 {
+            let mut countup: HashMap<isize, usize> = HashMap::new();
+            for (x, v) in self.line.iter().map(|(p, v)| (p.0, v.0)) {
+                let mut diffs: HashSet<isize> = HashSet::new();
+                for t in 1..2000isize {
+                    let diff = x + t * v - t * (test + at);
+                    diffs.insert(diff);
+                }
+                for d in diffs.iter() {
+                    *countup.entry(*d).or_default() += 1;
+                }
+            }
+            for (dist, count) in countup.iter() {
+                converge.entry(*dist).or_default().push((*count, test + at));
+            }
+        }
+        // for value in converge.values_mut() {
+        //     value.sort();
+        //     value.reverse();
+        // }
+        // dbg!(converge.iter().map(|(x, l)| (l[0], x)).max().unwrap());
+        return converge.iter().map(|(dist, l)| dist.abs()).min().unwrap();
     }
 }
 
