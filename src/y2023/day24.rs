@@ -5,7 +5,7 @@ use {
         geometric::{Dim2, Dim3},
         line_parser,
     },
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -54,54 +54,98 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let forbiddens = self.line.iter().map(|(_, v)| v.0).collect::<HashSet<_>>();
-        dbg!(self.line.len() - forbiddens.len());
-        let forbiddens = self.line.iter().map(|(_, v)| v.0).collect::<HashSet<_>>();
-        for (i, (p0, v0)) in self.line.iter().enumerate() {
-            for (_, (p1, v1)) in self.line.iter().enumerate().skip(i) {
-                if v0.0 != v1.0 {
-                    continue;
-                }
-                for s in -400..=400 {
-                    if s == v0.0 {
+        let vx = {
+            let forbiddens = self.line.iter().map(|(_, v)| v.0).collect::<HashSet<_>>();
+            let mut hist: HashMap<isize, usize> = HashMap::new();
+            for (i, (p0, v0)) in self.line.iter().enumerate() {
+                for (p1, v1) in self.line.iter().skip(i + 1) {
+                    if v0.0 != v1.0 {
                         continue;
                     }
-                    let m = (p1.0 - p0.0) % (s - v0.0);
-                    if m == 0 {
-                        dbg!(s);
+                    for s in -400..=400 {
+                        if (s - v0.0).abs() != 0
+                            && (p1.0 - p0.0) % (s - v0.0) == 0
+                            && !forbiddens.contains(&s)
+                        {
+                            *hist.entry(s).or_default() += 1;
+                        }
                     }
                 }
             }
-        }
-        return 0;
-        'next_speed: for s in -400..=400 {
-            if forbiddens.contains(&s) {
-                continue;
-            }
-            // if s != -356 { continue; }
-            let mut mods: HashSet<isize> = HashSet::new();
-            // for (p, v) in self.line.iter() {
-            //     if s - v.0 == 0 {
-            //         continue 'next_speed;
-            //     }
-            //     let m = p.0 % (s - v.0);
-            //     mods.insert(m);
-            // }
-            for (p, v) in self.line.iter() {
-                for (q, w) in self.line.iter() {
-                    // if v.0 == w.0 {
-                    let m = (q.0 - p.0) % (s + v.0);
-                    mods.insert(m);
+            dbg!(*hist.iter().map(|(k, v)| (v, k)).max().unwrap().1)
+        };
+        let vy = {
+            let forbiddens = self.line.iter().map(|(_, v)| v.1).collect::<HashSet<_>>();
+            let mut hist: HashMap<isize, usize> = HashMap::new();
+            for (i, (p0, v0)) in self.line.iter().enumerate() {
+                for (p1, v1) in self.line.iter().skip(i + 1) {
+                    if v0.1 != v1.1 {
+                        continue;
+                    }
+                    for s in -400..=400 {
+                        if (s - v0.1).abs() != 0
+                            && (p1.1 - p0.1) % (s - v0.1) == 0
+                            && !forbiddens.contains(&s)
+                        {
+                            *hist.entry(s).or_default() += 1;
+                        }
+                    }
                 }
-                let m = p.0 % (s - v.0);
-                mods.insert(m);
             }
-            dbg!(mods.len());
-            if mods.len() <= 6 {
-                return dbg!(s as usize);
+            dbg!(*hist.iter().map(|(k, v)| (v, k)).max().unwrap().1)
+        };
+        let vz = {
+            let forbiddens = self.line.iter().map(|(_, v)| v.2).collect::<HashSet<_>>();
+            let mut hist: HashMap<isize, usize> = HashMap::new();
+            for (i, (p0, v0)) in self.line.iter().enumerate() {
+                for (p1, v1) in self.line.iter().skip(i + 1) {
+                    if v0.2 != v1.2 {
+                        continue;
+                    }
+                    for s in -400..=400 {
+                        if (s - v0.2).abs() != 0
+                            && (p1.2 - p0.2) % (s - v0.2) == 0
+                            && !forbiddens.contains(&s)
+                        {
+                            *hist.entry(s).or_default() += 1;
+                        }
+                    }
+                }
             }
-        }
-        0
+            dbg!(*hist.iter().map(|(k, v)| (v, k)).max().unwrap().1)
+        };
+        let a = self.line[0];
+        let b = self.line[1];
+        /*
+        -(1) cx + at * vx = a.0.0 + a.1.0 * at
+        -(2) cy + at * vy = a.0.1 + a.1.1 * at
+        -(3) cx + bt * vx = b.0.0 + b.1.0 * bt
+        -(4) cy + bt * vy = b.0.1 + b.1.1 * bt
+
+        (1=3) (a.1.0 - vx) * at = b.0.0 - a.0.0 + (b.1.0 - vx) * bt
+        (2=4) (a.1.1 - vy) * at = b.0.1 - a.0.1 + (b.1.1 - vy) * bt
+
+        (as formula for at)
+
+        (1=3)' (a.1.0 - vx) * at + a.0.0 - b.0.0 = (b.1.0 - vx) * bt
+        (2=4)' (a.1.1 - vy) * at + a.0.1 - b.0.1 = (b.1.1 - vy) * bt
+
+            (b.1.1 - vy) * {(a.1.0 - vx) * at + a.0.0 - b.0.0} = (b.1.0 - vx) * {(a.1.1 - vy) * at + a.0.1 - b.0.1}
+
+            (b.1.1 - vy) * (a.1.0 - vx) * at + (b.1.1 - vy) * (a.0.0 - b.0.0) = (b.1.0 - vx) * (a.1.1 - vy) * at + (b.1.0 - vx) * (a.0.1 - b.0.1)
+
+            (b.1.1 - vy) * (a.1.0 - vx) * at - (b.1.0 - vx) * (a.1.1 - vy) * at = (b.1.0 - vx) * (a.0.1 - b.0.1) - (b.1.1 - vy) * (a.0.0 - b.0.0)
+            at = (b.1.0 - vx) * (a.0.1 - b.0.1) - (b.1.1 - vy) * (a.0.0 - b.0.0)
+                   / ((b.1.1 - vy) * (a.1.0 - vx) - (b.1.0 - vx) * (a.1.1 - vy))
+        */
+        let at = ((b.1 .0 - vx) * (a.0 .1 - b.0 .1) - (b.1 .1 - vy) * (a.0 .0 - b.0 .0))
+            / ((b.1 .1 - vy) * (a.1 .0 - vx) - (b.1 .0 - vx) * (a.1 .1 - vy));
+        dbg!(at);
+
+        let pos_x = (a.0 .0 + a.1 .0 * at) - vx * at;
+        let pos_y = (a.0 .1 + a.1 .1 * at) - vy * at;
+        let pos_z = (a.0 .2 + a.1 .2 * at) - vz * at;
+        return (pos_x + pos_y + pos_z) as usize;
     }
 }
 
