@@ -1,10 +1,10 @@
 [package]
 name = "adventofcode"
-version = "0.20.0"
+version = "0.20.1"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
-rust-version = "1.66"
+rust-version = "1.70"
 
 [dependencies]
 aoc_macro = { version = "^0.2", path = "aoc_macro" }

@@ -208,47 +208,52 @@ pub trait AdventOfCode: fmt::Debug + Default {
     fn solve(
         config: ConfigAoC,
         description: impl Borrow<Description>,
-        part: usize,
     ) -> Answer<Self::Output1, Self::Output2> {
         let desc = description.borrow();
         let input = desc.name(Self::YEAR, Self::DAY).expect("no input");
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
-        match part {
+        match config.part {
             0 => {
                 Self::parse(config, desc).expect(&parse_error).serialize();
                 Answer::Dump
             }
             1 => {
-                println!(
-                    "{}# year: {}, day: {}, part: 1, input: {}{}",
-                    color::GREEN,
-                    Self::YEAR,
-                    Self::DAY,
-                    input,
-                    color::RESET,
-                );
+                if !config.serialize {
+                    println!(
+                        "{}# year: {}, day: {}, part: 1, input: {}{}",
+                        color::GREEN,
+                        Self::YEAR,
+                        Self::DAY,
+                        input,
+                        color::RESET,
+                    );
+                }
                 Answer::Part1(Self::parse(config, desc).expect(&parse_error).part1())
             }
             2 => {
-                println!(
-                    "{}# year: {}, day: {}, part: 2, input: {}{}",
-                    color::GREEN,
-                    Self::YEAR,
-                    Self::DAY,
-                    input,
-                    color::RESET,
-                );
+                if !config.serialize {
+                    println!(
+                        "{}# year: {}, day: {}, part: 2, input: {}{}",
+                        color::GREEN,
+                        Self::YEAR,
+                        Self::DAY,
+                        input,
+                        color::RESET,
+                    );
+                }
                 Answer::Part2(Self::parse(config, desc).expect(&parse_error).part2())
             }
             3 => {
-                println!(
-                    "{}# year: {}, day: {}, input: {}{}",
-                    color::GREEN,
-                    Self::YEAR,
-                    Self::DAY,
-                    input,
-                    color::RESET,
-                );
+                if !config.serialize {
+                    println!(
+                        "{}# year: {}, day: {}, input: {}{}",
+                        color::GREEN,
+                        Self::YEAR,
+                        Self::DAY,
+                        input,
+                        color::RESET,
+                    );
+                }
                 let ans1 = Self::parse(config.clone(), desc)
                     .expect(&parse_error)
                     .part1();

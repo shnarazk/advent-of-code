@@ -29,13 +29,12 @@ use {
 };
 
 pub fn main() {
-    let config = ConfigAoC::parse();
+    let mut config = ConfigAoC::parse();
     assert!(0 < config.day && config.day <= 25);
     let day = config.day;
     assert!(config.part <= 3);
-    let mut part = config.part;
-    if config.serialize {
-        part = 0;
+    if config.part == 0 {
+        config.serialize = true;
     }
     let desc = match config.clone().alt {
         Some(ext) if ext == "-" => Description::TestData("".to_string()),
@@ -66,7 +65,6 @@ pub fn main() {
         _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
-    dbg!(quiet);
     if !quiet {
         println!(
             "{}# Execution time: {:.1} msec.{}",
