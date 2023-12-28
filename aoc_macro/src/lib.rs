@@ -94,13 +94,15 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     let match_body: String = format!(
         "match day {{ {} _=> panic!(\"{}an invalid day{}\"), }}\n",
         (day_from..=day_to)
-            .map(|d| format!(
-                "{} => {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(config, desc, part)); }}",
+            .map(|d| {
+                format!(
+                "{} => {{ if config.serialize {{y{:0>4}::day{:0>2}::Puzzle::solve(config, desc, part);}} else {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(config, desc, part));}} }}",
                 d,
+                year, d,
                 color::BLUE,
                 color::RESET,
                 year, d,
-            ))
+            )})
             .collect::<Vec<String>>()
             .join("\n"),
         color::RED,
