@@ -66,32 +66,26 @@ impl AdventOfCode for Puzzle {
         dbg!(self.hash.values().filter(|v| v.len() == 8).count());
         dbg!(self.hash.values().filter(|v| v.len() == 9).count());
         dbg!(self.hash.values().filter(|v| v.len() == 10).count());
-        let total: f64 = num_node.pow(2) as f64 / 2_f64;
         for i in 0..num_node {
-            if self.hash.get(&i).map_or(true, |v| 5 > v.len()) {
+            if self.hash.get(&i).map_or(true, |v| 6 > v.len()) {
                 continue;
             }
+            progress!(i as f64 / num_node as f64);
             for j in i + 1..num_node {
                 if self.hash.get(&j).map_or(true, |v| 5 > v.len()) {
                     continue;
                 }
-                progress!((i * num_node + j) as f64 / total);
                 for k in j + 1..num_node {
                     if self.hash.get(&k).map_or(true, |v| 5 > v.len()) {
                         continue;
                     }
-                    let v = self.node_connectivity(vec![i, j, k]);
-                    if 1 < v.len() {
-                        let cand_rule_set = [i, j, k]
+                    if 1 < self.node_connectivity(vec![i, j, k]).len() {
+                        let cand_rules = [i, j, k]
                             .iter()
                             .flat_map(|i| self.hash.get(i).unwrap())
-                            .collect::<HashSet<_>>();
-                        let cand_rules = cand_rule_set
-                            .iter()
                             .map(|(i, _)| *i)
                             .collect::<Vec<usize>>();
                         let n_cands = cand_rules.len();
-
                         for i in 0..n_cands {
                             for j in i + 1..n_cands {
                                 progress!((i * num_edge + j));
@@ -118,6 +112,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 impl Puzzle {
+    // FIXME: we don't need build a complete map.
+    // Just check whether a-b and a-c connectivities are hold.
     fn node_connectivity(&self, forbidden: Vec<usize>) -> Vec<usize> {
         let len = self.names.len() - forbidden.len();
         let mut result: Vec<usize> = vec![];

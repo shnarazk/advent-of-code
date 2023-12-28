@@ -16,35 +16,14 @@ pub struct Puzzle {
     vector_template: Vec<bool>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
 struct Route {
-    estimate: f64,
     cost: usize,
     pos: Dim2<usize>,
     pre: Dim2<usize>,
     used: Vec<usize>,
     size: Dim2<usize>,
 }
-
-impl PartialOrd for Route {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.estimate.partial_cmp(&other.estimate)
-    }
-}
-
-impl Ord for Route {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.estimate.partial_cmp(&other.estimate).unwrap()
-    }
-}
-
-impl PartialEq for Route {
-    fn eq(&self, other: &Self) -> bool {
-        self.pos.eq(&other.pos) && self.used.eq(&other.used)
-    }
-}
-
-impl Eq for Route {}
 
 #[aoc(2023, 23)]
 impl AdventOfCode for Puzzle {
@@ -72,7 +51,7 @@ impl AdventOfCode for Puzzle {
             .flat_map(|(y, l)| {
                 l.iter()
                     .enumerate()
-                    .flat_map(|(x, p)| (*p != b'#').then(|| (y, x)))
+                    .flat_map(|(x, p)| (*p != b'#').then_some((y, x)))
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
@@ -130,15 +109,16 @@ impl AdventOfCode for Puzzle {
         }
         longest
     }
+    // This is not a variant of shortest path finding problem, for which
+    // we should make a heuristc evaluation.
+    // Instead We should cut the unused path as pre-processing task.
     fn part2(&mut self) -> Self::Output2 {
-        let nbranch = dbg!(check_branches(&self.line)) as f64;
         let height = self.line.len();
         let width = self.line[0].len();
         let goal = (height - 1, width - 2);
         let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
         let mut longest = 0;
         to_visit.push(Route {
-            estimate: 0.0,
             cost: 1,
             pos: (0, 1),
             pre: (0, 0),
@@ -146,12 +126,11 @@ impl AdventOfCode for Puzzle {
             size: (1, 1),
         });
         let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
-        let mut threshold = 0.0;
         while let Some(mut p) = to_visit.pop() {
             if p.pos == goal {
                 if longest < p.cost {
                     longest = p.cost;
-                    progress!(format!("{longest}/{threshold}"));
+                    progress!(longest);
                 }
                 continue;
             }
@@ -182,22 +161,15 @@ impl AdventOfCode for Puzzle {
                 q.pre = p.pos;
                 q.size.0 = q.size.0.max(q0.0);
                 q.size.1 = q.size.1.max(q0.1);
-                let covered = 1.0
-                    + (p.used.len() * p.used.len()) as f64
-                        / ((q.size.0 * q.size.1) as f64 * nbranch);
-                if covered * 1.05 < threshold {
-                    continue;
-                } else if threshold < covered {
-                    threshold = covered;
-                }
-                q.estimate = covered;
                 to_visit.push(q);
             }
         }
+        progress!("");
         longest - 1
     }
 }
 
+#[allow(dead_code)]
 fn check_branches(v: &[Vec<u8>]) -> usize {
     let height = v.len();
     let width = v[0].len();
@@ -216,5 +188,5 @@ fn check_branches(v: &[Vec<u8>]) -> usize {
                 })
                 .count()
         })
-        .count()
+        .sum()
 }

@@ -46,7 +46,7 @@ impl AdventOfCode for Puzzle {
                     .filter(|(x, _)| y < *x)
                     .filter(|(_, q)| {
                         intersect_in_plane(p, *q).map_or(false, |(y, x)| {
-                            LEAST <= y && y <= MOST && LEAST <= x && x <= MOST
+                            (LEAST..=MOST).contains(&y) && (LEAST..=MOST).contains(&x)
                         })
                     })
                     .count()
@@ -145,7 +145,7 @@ impl AdventOfCode for Puzzle {
         let pos_x = (a.0 .0 + a.1 .0 * at) - vx * at;
         let pos_y = (a.0 .1 + a.1 .1 * at) - vy * at;
         let pos_z = (a.0 .2 + a.1 .2 * at) - vz * at;
-        return (pos_x + pos_y + pos_z) as usize;
+        (pos_x + pos_y + pos_z) as usize
     }
 }
 

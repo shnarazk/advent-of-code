@@ -7,9 +7,11 @@
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
 
-## 2023
+## 2023 completed
 
-<img width="720" alt="スクリーンショット 2023-12-21 2 05 41" src="https://github.com/shnarazk/advent-of-code/assets/997855/927d9b6c-f5a3-47ab-be7f-53f1477896f2">
+* [calendar](https://adventofcode.com/2023)
+
+!["スクリーンショット 2023-12-28 15 55 59](https://github.com/shnarazk/advent-of-code/assets/997855/c3a5f888-5785-49a5-b528-35cb9c2328c8.png)
 
 ## 2022 completed
 
