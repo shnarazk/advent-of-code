@@ -54,6 +54,15 @@ impl AdventOfCode for Puzzle {
         dbg!(self.names.len());
         dbg!(self.link.len());
     }
+    // FIXME:
+    //   1. pick up a pair of nodes and find a path between them, then delete the path.
+    //   2. until finding a pair which are unreachable
+    //      At this point, more than three pathes were deleted. Pick up essential ones
+    //      By checking reachablity of a pair selected randomly.
+    //   3. the puth a path back respectbly, and check the intersection of found path
+    //      and restored path.
+    //   4. they make a small set that includes the answer set.
+    //   5. repeat such a process until the total length of selected pathes becomes three.
     fn part1(&mut self) -> Self::Output1 {
         let num_node = self.names.len();
         let num_edge = self.link.len();
