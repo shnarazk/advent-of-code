@@ -43,6 +43,7 @@ pub fn main() {
         None => Description::None,
     };
     let beg = Instant::now();
+    let quiet = config.serialize;
     match config.year {
         #[cfg(feature = "y2015")]
         2015 => aoc_arms!(2015),
@@ -65,10 +66,13 @@ pub fn main() {
         _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
-    println!(
-        "{}# Execution time: {:.1} msec.{}",
-        color::RED,
-        (end - beg).as_secs_f64() * 1000.0,
-        color::RESET
-    );
+    dbg!(quiet);
+    if !quiet {
+        println!(
+            "{}# Execution time: {:.1} msec.{}",
+            color::RED,
+            (end - beg).as_secs_f64() * 1000.0,
+            color::RESET
+        );
+    }
 }
