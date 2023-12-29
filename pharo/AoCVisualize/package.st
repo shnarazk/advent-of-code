@@ -1,1 +1,1 @@
-Package { #name : #'AoCVisualize' }
+Package { #name : 'AoCVisualize' }
