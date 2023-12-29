@@ -1,3 +1,6 @@
+"
+I am a class for AoC visualizers.
+"
 Class {
 	#name : 'AoCView',
 	#superclass : 'Object',

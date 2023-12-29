@@ -1,3 +1,7 @@
+"
+I am visualizer for AoC 2023 problems.
+
+"
 Class {
 	#name : 'AoC2023',
 	#superclass : 'AoCView',
@@ -7,8 +11,9 @@ Class {
 
 { #category : 'public' }
 AoC2023 >> day25 [
+"Visualize node connectivity"
 
-	^self day25view: self day25load
+	^ self day25view: self day25load
 ]
 
 { #category : 'private - loading' }
