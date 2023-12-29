@@ -18,19 +18,17 @@ AoC2023 >> day25 [
 
 { #category : 'private - loading' }
 AoC2023 >> day25load [
-	| data nodes|
-	data := (baseDirectory / 'day25.json') asFileReference readStreamDo: [ :stream | STON fromStream: stream ].
-	
-	nodes := data inject: Dictionary new 
-	  into: [ :dic :element |dic at: (element at: 1)
-	  update: [ :set | set  add: (element at: 2); yourself ]
-        initial: [ Set new add: (element at: 2); yourself ]; yourself ].
 
-	data do: [ :each || to |
-         to := each at: 2.
-         (nodes keys includes: to) ifFalse: [ nodes at: to put: {  } ] ].
-    ^nodes
+   | data nodes |
+   data := (baseDirectory / 'tmp/day25.json') asFileReference readStreamDo: [ :stream | STON fromStream: stream ].
 
+   nodes := data inject: Dictionary new into: [ :dic :element |
+               | to |
+               to := element at: 2.
+               dic at: (element at: 1) update: [ :set | set add: to; yourself ] initial: [ Set new add: to; yourself ].
+               (dic keys includes: to) ifFalse: [ dic at: to put: Set new ].
+               dic ].
+   ^ nodes
 ]
 
 { #category : 'private - building' }
