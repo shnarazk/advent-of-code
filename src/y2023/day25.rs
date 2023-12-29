@@ -126,8 +126,8 @@ impl AdventOfCode for Puzzle {
 impl Puzzle {
     // FIXME: we don't need build a complete map.
     // Just check whether a-b and a-c connectivities are hold.
-    fn node_connectivity(&self, forbidden: Vec<usize>) -> Vec<usize> {
-        let len = self.names.len() - forbidden.len();
+    fn node_connectivity(&self, forbidden_nodes: Vec<usize>) -> Vec<usize> {
+        let len = self.names.len() - forbidden_nodes.len();
         let mut result: Vec<usize> = vec![];
         let mut used: HashSet<usize> = HashSet::new();
         let mut ng = 0;
@@ -143,7 +143,7 @@ impl Puzzle {
                 ng += 1;
                 if let Some(v) = self.hash.get(&n) {
                     for (_, to) in v.iter() {
-                        if forbidden.contains(to) {
+                        if forbidden_nodes.contains(to) {
                             continue;
                         }
                         if !used.contains(to) {
@@ -161,7 +161,7 @@ impl Puzzle {
         }
         result
     }
-    fn edge_connectivity(&self, forbidden: &[usize]) -> Vec<usize> {
+    fn edge_connectivity(&self, forbidden_edges: &[usize]) -> Vec<usize> {
         let len = self.names.len();
         let mut result: Vec<usize> = vec![];
         let mut used: HashSet<usize> = HashSet::new();
@@ -178,7 +178,7 @@ impl Puzzle {
                 ng += 1;
                 if let Some(v) = self.hash.get(&n) {
                     for (i, to) in v.iter() {
-                        if forbidden.contains(i) {
+                        if forbidden_edges.contains(i) {
                             continue;
                         }
                         if !used.contains(to) {
