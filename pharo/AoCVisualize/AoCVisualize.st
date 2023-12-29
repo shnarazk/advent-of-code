@@ -1,1 +1,15 @@
-Object subclass: #AoCView	instanceVariableNames: 'baseDirectory'	classVariableNames: ''	package: 'AoCVisualize'!!AoCView methodsFor: 'initialization' stamp: 'NarazakiShuji 12/29/2023 15:18'!initialize	super initialize.	baseDirectory := (Smalltalk os environment at: 'HOME') asPath	                 / 'Repositories/advent-of-code'! !"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!AoCView class	instanceVariableNames: 'base_directory'!AoCView subclass: #AoC2023	instanceVariableNames: ''	classVariableNames: ''	package: 'AoCVisualize'!!AoC2023 methodsFor: 'public' stamp: 'NarazakiShuji 12/29/2023 15:21'!day25	^self day25view: self day25load! !!AoC2023 methodsFor: 'private - loading' stamp: 'NarazakiShuji 12/29/2023 15:17'!day25load	| data nodes|	data := (baseDirectory / 'day25.json') asFileReference readStreamDo: [		        :stream | STON fromStream: stream ].	nodes := data inject: Dictionary new into: [ :dic :element |		         dic			         at: (element at: 1) update: [ :set |				         set					         add: (element at: 2);					         yourself ]			         initial: [				         Set new					         add: (element at: 2);					         yourself ];			         yourself ].	data do: [ :each |		| to |		to := each at: 2.		(nodes keys includes: to) ifFalse: [ nodes at: to put: {  } ] ].	^nodes! !!AoC2023 methodsFor: 'private - building' stamp: 'NarazakiShuji 12/29/2023 15:20'!day25view: nodes	| canvas lb elements |	canvas := RSCanvas new.	elements := nodes keys		            collect: [ :c |			            RSEllipse new				            size: 5;				            model: c ]		            as: RSGroup.	elements @ RSDraggable.	canvas addAll: elements.	lb := RSLineBuilder line.	lb canvas: canvas.	lb color: Color red.	lb connectFromAll: [ :each | nodes at: each ].	RSForceBasedLayout new on: elements.	canvas @ RSCanvasController.	^canvas! !
+Class {
+	#name : 'AoCView',
+	#superclass : 'Object',
+	#instVars : [
+		'baseDirectory'
+	],
+	#category : 'AoCVisualize',
+	#package : 'AoCVisualize'
+}
+
+{ #category : 'initialization' }
+AoCView >> initialize [ 
+super initialize .
+baseDirectory := (Smalltalk os environment at: 'HOME') asPath / 'Repositories/advent-of-code'.
+]
