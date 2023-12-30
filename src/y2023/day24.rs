@@ -31,6 +31,14 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     // fn end_of_data(&mut self) { dbg!(self.line.len()); }
+    fn serialize(&self) -> Option<String> {
+        let vec_x = self
+            .line
+            .iter()
+            .map(|(p, v)| (p.0, v.0))
+            .collect::<Vec<_>>();
+        serde_json::to_string(&vec_x).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         const LEAST: f64 = 200000000000000.0;
         const MOST: f64 = 400000000000000.0;
