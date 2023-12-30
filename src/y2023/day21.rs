@@ -33,6 +33,9 @@ impl AdventOfCode for Puzzle {
         let width = self.line[0].len();
         self.cycle_len = height + width;
     }
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(&self.line).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         let steps = 64;
         let height = self.line.len();
