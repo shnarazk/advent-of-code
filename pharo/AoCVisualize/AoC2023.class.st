@@ -10,6 +10,17 @@ Class {
 }
 
 { #category : 'public' }
+AoC2023 class >> day20 [
+  ^self new day20
+]
+
+{ #category : 'public' }
+AoC2023 class >> day25 [
+
+	^ self new day25
+]
+
+{ #category : 'public' }
 AoC2023 >> day20 [
    "Visualize node connectivity"
 
@@ -33,15 +44,15 @@ AoC2023 >> day20load [
 ]
 
 { #category : 'private - building' }
-AoC2023 >> day20view: nodes [
+AoC2023 >> day20view: aCollection [
 
    | canvas lb elements |
    canvas := RSCanvas new.
-   elements := nodes keys collect: [ :name | RSEllipse new size: 5; model: name ] as: RSGroup.
+   elements := aCollection keys collect: [ :name | RSEllipse new size: 5; model: name ] as: RSGroup.
    elements @ RSDraggable.
    canvas addAll: elements.
    lb := RSLineBuilder line.
-   lb canvas: canvas; color: Color red; connectFromAll: [ :each | (nodes at: each) at: #inputs ].
+   lb canvas: canvas; color: Color red; connectFromAll: [ :each | (aCollection at: each) at: #inputs ].
    RSTreeLayout new on: elements.
    canvas @ RSCanvasController.
    ^ canvas
@@ -69,15 +80,23 @@ AoC2023 >> day25load [
 ]
 
 { #category : 'private - building' }
-AoC2023 >> day25view: nodes [
+AoC2023 >> day25view: aCollection [
 
    | canvas lb elements |
    canvas := RSCanvas new.
-   elements := nodes keys collect: [ :c | RSEllipse new size: 5; model: c ] as: RSGroup.
+   elements := aCollection keys
+                  collect: [ :c |
+                     RSEllipse new
+                        size: 5;
+                        model: c ]
+                  as: RSGroup.
    elements @ RSDraggable.
    canvas addAll: elements.
    lb := RSLineBuilder line.
-   lb canvas: canvas; color: Color red; connectFromAll: [ :each | nodes at: each ].
+   lb
+      canvas: canvas;
+      color: Color red;
+      connectFromAll: [ :each | aCollection at: each ].
    RSForceBasedLayout new on: elements.
    canvas @ RSCanvasController.
    ^ canvas
