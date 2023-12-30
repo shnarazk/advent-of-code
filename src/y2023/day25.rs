@@ -54,8 +54,8 @@ impl AdventOfCode for Puzzle {
         // dbg!(self.names.len());
         // dbg!(self.link.len());
     }
-    fn serialize(&self) {
-        print!("{}", serde_json::to_string(&self.link).unwrap());
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(&self.link).ok()
     }
     // FIXME:
     //   1. pick up a pair of nodes and find a path between them, then delete the path.

@@ -21,12 +21,20 @@ impl fmt::Display for Description {
 }
 
 impl Description {
-    /// return file name
-    fn name(&self, year: usize, day: usize) -> Result<String, ParseError> {
+    /// return data file name
+    fn data_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match self {
             Description::FileTag(tag) => Ok(format!("data/{year}/input-day{day:>02}-{tag}.txt")),
             Description::None => Ok(format!("data/{year}/input-day{day:>02}.txt")),
             Description::TestData(_) => Ok("A test input".to_string()),
+        }
+    }
+    /// return the file name for serialization
+    fn serialization_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
+        match self {
+            Description::FileTag(tag) => Ok(format!("tmp/{year}/day{day:>02}-{tag}.json")),
+            Description::None => Ok(format!("tmp/{year}/day{day:>02}.json")),
+            Description::TestData(_) => Ok("test.json".to_string()),
         }
     }
 }
@@ -165,10 +173,15 @@ pub trait AdventOfCode: fmt::Debug + Default {
         }
         let desc = description.borrow();
         match desc {
-            Description::FileTag(_) => load_file(desc.name(Self::YEAR, Self::DAY)?),
+            Description::FileTag(_) => load_file(desc.data_filename(Self::YEAR, Self::DAY)?),
             Description::TestData(_) => load_data(desc),
-            Description::None => load_file(desc.name(Self::YEAR, Self::DAY)?),
+            Description::None => load_file(desc.data_filename(Self::YEAR, Self::DAY)?),
         }
+    }
+    /// # UNDER THE HOOD
+    fn write(file_name: String, content: String) -> Result<(), std::io::Error> {
+        let mut file = File::create(file_name)?;
+        writeln!(file, "{}", content)
     }
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
@@ -201,8 +214,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// }
     /// ```
     fn part2(&mut self) -> Self::Output2;
-    /// dump the data in JSON format
-    fn serialize(&self) {}
+    /// returns String by serialization in JSON format
+    fn serialize(&self) -> Option<String> {
+        None
+    }
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(
@@ -210,11 +225,16 @@ pub trait AdventOfCode: fmt::Debug + Default {
         description: impl Borrow<Description>,
     ) -> Answer<Self::Output1, Self::Output2> {
         let desc = description.borrow();
-        let input = desc.name(Self::YEAR, Self::DAY).expect("no input");
+        let input = desc.data_filename(Self::YEAR, Self::DAY).expect("no input");
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match config.part {
             0 => {
-                Self::parse(config, desc).expect(&parse_error).serialize();
+                let solver = Self::parse(config, desc).expect(&parse_error);
+                if let Some(json) = solver.serialize() {
+                    if let Ok(output) = desc.serialization_filename(Self::YEAR, Self::DAY) {
+                        Self::write(output, json).expect("failed to serialize");
+                    }
+                }
                 Answer::Dump
             }
             1 => {

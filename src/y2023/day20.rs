@@ -89,11 +89,8 @@ impl AdventOfCode for Puzzle {
             }
         }
     }
-    fn serialize(&self) {
-        print!(
-            "{}",
-            serde_json::to_string(&self.modules.iter().collect::<Vec<_>>()).unwrap()
-        );
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(&self.modules.iter().collect::<Vec<_>>()).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.start(1000);
