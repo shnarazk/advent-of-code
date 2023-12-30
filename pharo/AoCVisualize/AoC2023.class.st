@@ -17,6 +17,12 @@ AoC2023 class >> day20 [
 ]
 
 { #category : 'public' }
+AoC2023 class >> day21 [
+
+   self new day21 open
+]
+
+{ #category : 'public' }
 AoC2023 class >> day25 [
 
    self new day25 open
@@ -69,6 +75,48 @@ AoC2023 >> day20load [
                      #output
                   put: (props at: 'dests'); at: #type put: (props at: 'module_type').
                pool at: name put: dic; yourself ].
+   ^ nodes
+]
+
+{ #category : 'initialization' }
+AoC2023 >> day21 [
+   "(AoC2023 day21 isNil) >>> false"
+
+   title := 'y2023 day21'.
+   update := [ self day21 ].
+   graph := self day21graph: self day21load
+
+]
+
+{ #category : 'private - building' }
+AoC2023 >> day21graph: anArray [
+
+   | canvas elements black gray |
+   black := Color black.
+   gray := Color white darker.
+   canvas := RSCanvas new.
+   elements := anArray inject: OrderedCollection new into: [ :array :row |
+                  row do: [ :cell |
+                     | box |
+                     box := RSBox new size: 3; model: cell; yourself.
+                     cell ifTrue: [ box color: black ]
+                        ifFalse: [ box color: gray ].
+                     array add: box; yourself ].
+                  array ].
+   elements := elements as: RSGroup.
+   canvas addAll: elements.
+   RSCellLayout new lineItemsCount: 131; gapSize: 1; on: elements.
+   canvas @ RSCanvasController.
+   ^ SpRoassalPresenter new canvas: canvas; yourself
+]
+
+{ #category : 'private - loading' }
+AoC2023 >> day21load [
+
+   | data nodes |
+   data := (baseDirectory / 'tmp/2023/day21.json') asFileReference readStreamDo: [ :stream |
+              STON fromStream: stream ].
+   nodes := (data collect: [ :each | each asArray ]) asArray.
    ^ nodes
 ]
 
