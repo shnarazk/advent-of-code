@@ -5,7 +5,10 @@ use {
         progress,
     },
     itertools::Itertools,
-    std::collections::{HashMap, HashSet},
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashMap, HashSet},
+    },
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -51,68 +54,43 @@ impl AdventOfCode for Puzzle {
             self.hash.entry(*from).or_default().push((i, *to));
             self.hash.entry(*to).or_default().push((i, *from));
         }
-        // dbg!(self.names.len());
-        // dbg!(self.link.len());
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.link).ok()
     }
-    // FIXME:
     //   1. pick up a pair of nodes and find a path between them, then delete the path.
-    //   2. until finding a pair which are unreachable
-    //      At this point, more than three pathes were deleted. Pick up essential ones
-    //      By checking reachablity of a pair selected randomly.
-    //   3. the puth a path back respectbly, and check the intersection of found path
-    //      and restored path.
-    //   4. they make a small set that includes the answer set.
-    //   5. repeat such a process until the total length of selected pathes becomes three.
+    //   2. repeat above gain until finding a pair which are unreachable.
+    //   4. they make a small link set that includes the answer set.
+    //   5. find the triplet that makes the graph bigraph.
     fn part1(&mut self) -> Self::Output1 {
-        let num_node = self.names.len();
-        let num_edge = self.link.len();
-        dbg!(self.hash.values().map(|v| v.len()).max().unwrap());
-        dbg!(self.hash.values().filter(|v| v.len() == 3).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 4).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 5).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 6).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 7).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 8).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 9).count());
-        dbg!(self.hash.values().filter(|v| v.len() == 10).count());
-        for i in 0..num_node {
-            if self.hash.get(&i).map_or(true, |v| 6 > v.len()) {
-                continue;
+        let num_nodes = self.names.len();
+        let mut forbidden_links: Vec<usize> = Vec::new();
+        let mut used_nodes: Vec<usize> = Vec::new();
+        while self.is_a_graph(&forbidden_links) {
+            let unused_nodes = (0..num_nodes)
+                .filter(|n| !used_nodes.contains(n))
+                .collect::<Vec<_>>();
+            let a = unused_nodes[0];
+            let b = unused_nodes[unused_nodes.len() - 1];
+            used_nodes.push(a);
+            used_nodes.push(b);
+            if let Some(mut v) = self.path_between(a, b, &forbidden_links) {
+                forbidden_links.append(&mut v);
             }
-            progress!(i as f64 / num_node as f64);
-            for j in i + 1..num_node {
-                if self.hash.get(&j).map_or(true, |v| 5 > v.len()) {
-                    continue;
-                }
-                for k in j + 1..num_node {
-                    if self.hash.get(&k).map_or(true, |v| 5 > v.len()) {
-                        continue;
-                    }
-                    if 1 < self.node_connectivity(vec![i, j, k]).len() {
-                        let cand_rules = [i, j, k]
-                            .iter()
-                            .flat_map(|i| self.hash.get(i).unwrap())
-                            .map(|(i, _)| *i)
-                            .collect::<Vec<usize>>();
-                        let n_cands = cand_rules.len();
-                        for i in 0..n_cands {
-                            for j in i + 1..n_cands {
-                                progress!((i * num_edge + j));
-                                for k in j + 1..n_cands {
-                                    let v = self.edge_connectivity(&[
-                                        cand_rules[i],
-                                        cand_rules[j],
-                                        cand_rules[k],
-                                    ]);
-                                    if v.len() == 2 {
-                                        return v.iter().product();
-                                    }
-                                }
-                            }
-                        }
+        }
+        let n_cands = forbidden_links.len();
+        let n_combs = n_cands * (n_cands - 1) * (n_cands - 2);
+        for i in 0..n_cands {
+            for j in i + 1..n_cands {
+                progress!((i * n_cands + j) as f64 / n_combs as f64);
+                for k in j + 1..n_cands {
+                    let v = self.edge_connectivity(&[
+                        forbidden_links[i],
+                        forbidden_links[j],
+                        forbidden_links[k],
+                    ]);
+                    if v.len() == 2 {
+                        return v.iter().product();
                     }
                 }
             }
@@ -124,42 +102,29 @@ impl AdventOfCode for Puzzle {
     }
 }
 impl Puzzle {
-    // FIXME: we don't need build a complete map.
-    // Just check whether a-b and a-c connectivities are hold.
-    fn node_connectivity(&self, forbidden_nodes: Vec<usize>) -> Vec<usize> {
-        let len = self.names.len() - forbidden_nodes.len();
-        let mut result: Vec<usize> = vec![];
-        let mut used: HashSet<usize> = HashSet::new();
-        let mut ng = 0;
-        while result.iter().sum::<usize>() < len {
-            let mut to_visit: Vec<usize> = Vec::new();
-            let remain = (0..len).find(|x| !used.contains(x)).unwrap();
-            to_visit.push(remain);
-            while let Some(n) = to_visit.pop() {
-                if used.contains(&n) {
-                    continue;
-                }
-                used.insert(n);
-                ng += 1;
-                if let Some(v) = self.hash.get(&n) {
-                    for (_, to) in v.iter() {
-                        if forbidden_nodes.contains(to) {
-                            continue;
-                        }
-                        if !used.contains(to) {
-                            to_visit.push(*to);
-                        }
+    fn is_a_graph(&self, forbidden_links: &[usize]) -> bool {
+        let len = self.names.len();
+        let mut used_nodes: HashSet<usize> = HashSet::new();
+        let mut to_visit: Vec<usize> = Vec::new();
+        let remain = (0..len).find(|x| !used_nodes.contains(x)).unwrap();
+        to_visit.push(remain);
+        while let Some(n) = to_visit.pop() {
+            if used_nodes.contains(&n) {
+                continue;
+            }
+            used_nodes.insert(n);
+            if let Some(v) = self.hash.get(&n) {
+                for (link, to) in v.iter() {
+                    if forbidden_links.contains(link) {
+                        continue;
+                    }
+                    if !used_nodes.contains(to) {
+                        to_visit.push(*to);
                     }
                 }
             }
-            assert!(0 < ng);
-            result.push(ng);
-            if 2 < result.len() {
-                return vec![];
-            }
-            ng = 0;
         }
-        result
+        used_nodes.len() == len
     }
     fn edge_connectivity(&self, forbidden_edges: &[usize]) -> Vec<usize> {
         let len = self.names.len();
@@ -194,5 +159,37 @@ impl Puzzle {
             ng = 0;
         }
         result
+    }
+    fn path_between(
+        &self,
+        from_node: usize,
+        to_node: usize,
+        forbidden_links: &[usize],
+    ) -> Option<Vec<usize>> {
+        type OrderedRoute = (usize, Vec<(usize, usize)>);
+        let mut used_links: HashSet<usize> = HashSet::new();
+        let mut to_visit: BinaryHeap<Reverse<OrderedRoute>> = BinaryHeap::new();
+        to_visit.push(Reverse((0, vec![(usize::MAX, from_node)])));
+        while let Some(Reverse((len, r))) = to_visit.pop() {
+            let last_link_node = *r.last().unwrap();
+            if last_link_node.1 == to_node {
+                return Some(r.iter().skip(1).map(|(link, _)| *link).collect::<Vec<_>>());
+            }
+            if used_links.contains(&last_link_node.0) {
+                continue;
+            }
+            used_links.insert(last_link_node.0);
+            for link_to in self.hash.get(&last_link_node.1).unwrap().iter() {
+                if forbidden_links.contains(&link_to.0) {
+                    continue;
+                }
+                if !used_links.contains(&link_to.0) {
+                    let mut cand = r.clone();
+                    cand.push(*link_to);
+                    to_visit.push(Reverse((len + 1, cand)));
+                }
+            }
+        }
+        None
     }
 }
