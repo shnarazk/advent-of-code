@@ -3,23 +3,22 @@ use {
     crate::{
         // color,
         framework::{aoc, AdventOfCode, ParseError},
-        geometric,
+        geometric::{neighbors8, Dim2},
     },
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
-type Pos2 = (isize, isize);
-const START: Pos2 = (0, 0);
+const START: Dim2<isize> = (0, 0);
 
-fn add((py, px): &Pos2, (qy, qx): &Pos2) -> Pos2 {
+fn add((py, px): &Dim2<isize>, (qy, qx): &Dim2<isize>) -> Dim2<isize> {
     (py + qy, px + qx)
 }
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-struct Pipe(Vec<Pos2>);
+struct Pipe(Vec<Dim2<isize>>);
 
 impl Pipe {
-    fn go_through(&self, at: &Pos2, from: &Pos2) -> Option<Pos2> {
+    fn go_through(&self, at: &Dim2<isize>, from: &Dim2<isize>) -> Option<Dim2<isize>> {
         (self.0.len() == 2).then(|| add(&self.0[(*from == add(&self.0[0], at)) as usize], at))
     }
 }
@@ -27,7 +26,7 @@ impl Pipe {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Vec<Pipe>>,
-    start: Pos2,
+    start: Dim2<isize>,
 }
 
 #[aoc(2023, 10)]
@@ -62,13 +61,61 @@ impl AdventOfCode for Puzzle {
             }
         }
     }
+    fn serialize(&self) -> Option<String> {
+        let mut hash: HashSet<Dim2<usize>> = HashSet::new();
+        for (y, l) in self.line.iter().enumerate() {
+            for (x, t) in l.iter().enumerate() {
+                match t {
+                    _ if *t == Pipe(vec![(-1, 0), (1, 0)]) => {
+                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 2, 3 * x + 1));
+                    }
+                    _ if *t == Pipe(vec![(0, -1), (0, 1)]) => {
+                        hash.insert((3 * y + 1, 3 * x + 0));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 2));
+                    }
+                    _ if *t == Pipe(vec![(-1, 0), (0, 1)]) => {
+                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 2));
+                    }
+                    _ if *t == Pipe(vec![(-1, 0), (0, -1)]) => {
+                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 0));
+                    }
+                    _ if *t == Pipe(vec![(1, 0), (0, 1)]) => {
+                        hash.insert((3 * y + 2, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 2));
+                    }
+                    _ if *t == Pipe(vec![(1, 0), (0, -1)]) => {
+                        hash.insert((3 * y + 2, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 1));
+                        hash.insert((3 * y + 1, 3 * x + 0));
+                    }
+                    _ => (),
+                }
+            }
+        }
+        let vec: Vec<Vec<_>> = (0..(3 * self.line.len()))
+            .map(|y| {
+                (0..(3 * self.line[0].len()))
+                    .map(|x| hash.contains(&(y, x)))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        serde_json::to_string(&vec).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len() as isize;
         let width = self.line[0].len() as isize;
         [(1, 0), (-1, 0), (0, -1), (0, 1)]
             .iter()
-            .map(|dir: &Pos2| {
-                let mut pre: Pos2 = self.start;
+            .map(|dir: &Dim2<isize>| {
+                let mut pre: Dim2<isize> = self.start;
                 let mut pos = Some(add(&self.start, dir));
                 let mut step = 1;
                 while let Some(p) = pos {
@@ -90,8 +137,8 @@ impl AdventOfCode for Puzzle {
         let width = self.line[0].len();
         let loops = [(1, 0), (-1, 0), (0, -1), (0, 1)]
             .iter()
-            .flat_map(|dir: &Pos2| {
-                let mut pre: Pos2 = self.start;
+            .flat_map(|dir: &Dim2<isize>| {
+                let mut pre: Dim2<isize> = self.start;
                 let mut pos = Some(add(&self.start, dir));
                 let mut route: HashMap<(usize, usize), (isize, isize)> = HashMap::new();
                 while let Some(p) = pos {
@@ -148,7 +195,7 @@ fn colorize(
     }
     while let Some(p) = to_visit.pop() {
         m[p.0][p.1] = 0;
-        for l in geometric::neighbors8(p.0, p.1, h2, w2) {
+        for l in neighbors8(p.0, p.1, h2, w2) {
             if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
                 to_visit.push(l);
             }
