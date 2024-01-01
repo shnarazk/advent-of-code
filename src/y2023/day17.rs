@@ -100,7 +100,7 @@ impl Puzzle {
         let mut visited: HashMap<(Dim2<usize>, Direction), (usize, usize)> = HashMap::new();
         let mut cost = 1359;
         let start = Crucible {
-            estimate: 9 * height + width,
+            estimate: height + width,
             cost: 0,
             pos: (0, 0),
             dir: Direction::EAST,
@@ -130,7 +130,7 @@ impl Puzzle {
             let mut cands = c.possible_dirs(threshold2, threshold, height, width);
             while let Some(mut cand) = cands.pop() {
                 cand.cost += self.line[cand.pos.0][cand.pos.1];
-                cand.estimate = cand.cost + 9 * (goal.0 - cand.pos.0 + goal.1 - cand.pos.1);
+                cand.estimate = cand.cost + (goal.0 - cand.pos.0 + goal.1 - cand.pos.1);
                 to_visit.push(Reverse(cand));
             }
         }
