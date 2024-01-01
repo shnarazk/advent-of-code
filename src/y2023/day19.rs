@@ -155,7 +155,12 @@ impl AdventOfCode for Puzzle {
             .map(|setting| setting.values().sum::<usize>())
             .sum::<usize>()
     }
+    // FIXME: divide dynamically and recursively
     fn part2(&mut self) -> Self::Output2 {
+        self.gather_positives(
+            "in".to_string(),
+            vec![(0, 4001), (0, 4001), (0, 4001), (0, 4001)],
+        );
         let s0 = self.rating_settings[0]
             .iter()
             .sorted()
@@ -216,5 +221,11 @@ impl AdventOfCode for Puzzle {
                     .sum::<usize>()
             })
             .sum::<usize>()
+    }
+}
+
+impl Puzzle {
+    fn gather_positives(&self, _rule: Label, _constraints: Vec<(usize, usize)>) -> usize {
+        0
     }
 }
