@@ -158,74 +158,52 @@ impl AdventOfCode for Puzzle {
     // FIXME: divide dynamically and recursively
     fn part2(&mut self) -> Self::Output2 {
         self.gather_positives(
-            "in".to_string(),
+            &"in".to_string(),
             vec![(0, 4001), (0, 4001), (0, 4001), (0, 4001)],
-        );
-        let s0 = self.rating_settings[0]
-            .iter()
-            .sorted()
-            .copied()
-            .collect::<Vec<_>>();
-        let s1 = self.rating_settings[1]
-            .iter()
-            .sorted()
-            .copied()
-            .collect::<Vec<_>>();
-        let s2 = self.rating_settings[2]
-            .iter()
-            .sorted()
-            .copied()
-            .collect::<Vec<_>>();
-        let s3 = self.rating_settings[3]
-            .iter()
-            .sorted()
-            .copied()
-            .collect::<Vec<_>>();
-        s0.windows(2)
-            .map(|w0| {
-                let [x, xe] = *w0 else {
-                    panic!();
-                };
-                progress!(x as f64 / 4001.0);
-                s1.windows(2)
-                    .map(|w1| {
-                        let [m, me] = *w1 else {
-                            panic!();
-                        };
-                        s2.windows(2)
-                            .map(|w2| {
-                                let [a, ae] = *w2 else {
-                                    panic!();
-                                };
-                                s3.windows(2)
-                                    .map(|w3| {
-                                        let [s, se] = *w3 else {
-                                            panic!();
-                                        };
-                                        let setting: HashMap<Var, Val> = HashMap::from([
-                                            ("x".to_string(), x),
-                                            ("m".to_string(), m),
-                                            ("a".to_string(), a),
-                                            ("s".to_string(), s),
-                                        ]);
-                                        if self.check(&setting) {
-                                            (xe - x) * (me - m) * (ae - a) * (se - s)
-                                        } else {
-                                            0
-                                        }
-                                    })
-                                    .sum::<usize>()
-                            })
-                            .sum::<usize>()
-                    })
-                    .sum::<usize>()
-            })
-            .sum::<usize>()
+        )
     }
 }
 
 impl Puzzle {
-    fn gather_positives(&self, _rule: Label, _constraints: Vec<(usize, usize)>) -> usize {
-        0
+    fn gather_positives(&self, node: &Label, constraints: Vec<(usize, usize)>) -> usize {
+        dbg!(node);
+        let mut total: usize = 0;
+        if node == "A" {
+            return constraints.iter().map(|(b, e)| *e - *b).product::<usize>();
+        }
+        if node == "R" {
+            return 0;
+        }
+        for (condition, dest) in self.rules.get(node).unwrap() {
+            if let Some(condition) = condition {
+                let index = ["x", "m", "a", "s"]
+                    .iter()
+                    .enumerate()
+                    .find(|(_, v)| **v == condition.0.as_str())
+                    .unwrap()
+                    .0;
+                let mut cons = constraints.clone();
+                match condition.1 {
+                    Op::Less if constraints[index].0 + 1 <= condition.2 => {
+                        continue;
+                    }
+                    Op::Less => {
+                        cons[index].1 = condition.2.min(cons[index].1);
+                        constraints = todo!();
+                    }
+                    Op::Greater if constraints[index].1 + 1 <= condition.2 => {
+                        continue;
+                    }
+                    Op::Greater => {
+                        cons[index].0 = condition.2.max(cons[index].0);
+                        constraints = todo!();
+                    }
+                }
+                total += self.gather_positives(dest, cons);
+            } else if dest == "A" {
+                total += constraints.iter().map(|(b, e)| *e - *b).product::<usize>();
+            }
+        }
+        total
     }
 }
