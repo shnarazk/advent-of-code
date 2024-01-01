@@ -42,9 +42,11 @@ impl PartialOrd for Block {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     blocks: Vec<Block>,
+    supported: Vec<Vec<usize>>,
+    supporting: HashMap<usize, Vec<usize>>,
 }
 
 #[aoc(2023, 22)]
@@ -64,10 +66,9 @@ impl AdventOfCode for Puzzle {
         self.blocks.push(blk);
         Ok(())
     }
-    fn end_of_data(&mut self) {}
-    fn part1(&mut self) -> Self::Output1 {
+    fn end_of_data(&mut self) {
         stabilize(&mut self.blocks);
-        let supports = (0..self.blocks.len())
+        self.supported = (0..self.blocks.len())
             .map(|i| {
                 let mut v = (0..self.blocks.len())
                     .filter(|j| {
@@ -86,41 +87,22 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
+    }
+    fn part1(&mut self) -> Self::Output1 {
         (0..self.blocks.len())
-            .filter(|i| supports.iter().all(|v| !v.contains(i) || 1 < v.len()))
+            .filter(|i| self.supported.iter().all(|v| !v.contains(i) || 1 < v.len()))
             .count()
     }
     fn part2(&mut self) -> Self::Output1 {
-        stabilize(&mut self.blocks);
-        let supports = (0..self.blocks.len())
-            .map(|i| {
-                let mut v = (0..self.blocks.len())
-                    .filter(|j| {
-                        self.blocks[*j].partial_cmp(&self.blocks[i]) == Some(Ordering::Less)
-                    })
-                    .map(|j| (self.blocks[j].pos.2 + self.blocks[j].shape.2, j))
-                    .collect::<Vec<_>>();
-                v.sort();
-                v.reverse();
-                let Some((l, _)) = v.first() else {
-                    return Vec::new();
-                };
-                v.iter()
-                    .filter(|(level, _)| *level == *l)
-                    .map(|(_, j)| *j)
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        let mut propagating: HashMap<usize, Vec<usize>> = HashMap::new();
-        for (i, v) in supports.iter().enumerate() {
+        for (i, v) in self.supported.iter().enumerate() {
             for j in v.iter() {
-                propagating.entry(*j).or_default().push(i);
+                self.supporting.entry(*j).or_default().push(i);
             }
         }
 
         (0..self.blocks.len())
-            .filter(|i| !supports.iter().all(|v| !v.contains(i) || 1 < v.len()))
-            .map(|i| chain_len(&propagating, &supports, i))
+            .filter(|i| !self.supported.iter().all(|v| !v.contains(i) || 1 < v.len()))
+            .map(|i| self.chain_len(i))
             .sum()
     }
 }
@@ -144,26 +126,24 @@ fn move_down(blocks: &mut [Block], i: usize) -> bool {
     false
 }
 
-fn chain_len(
-    propagating: &HashMap<usize, Vec<usize>>,
-    supports: &[Vec<usize>],
-    start: usize,
-) -> usize {
-    let mut blacklist: HashSet<usize> = HashSet::new();
-    blacklist.insert(start);
-    let mut to_visit: Vec<usize> = vec![start];
-    while let Some(i) = to_visit.pop() {
-        for to in propagating.get(&i).unwrap_or(&vec![]) {
-            if supports[*to]
-                .iter()
-                .filter(|s| !blacklist.contains(*s))
-                .count()
-                == 0
-            {
-                blacklist.insert(*to);
-                to_visit.push(*to);
+impl Puzzle {
+    fn chain_len(&self, start: usize) -> usize {
+        let mut blacklist: HashSet<usize> = HashSet::new();
+        blacklist.insert(start);
+        let mut to_visit: Vec<usize> = vec![start];
+        while let Some(i) = to_visit.pop() {
+            for to in self.supporting.get(&i).unwrap_or(&vec![]) {
+                if self.supported[*to]
+                    .iter()
+                    .filter(|s| !blacklist.contains(*s))
+                    .count()
+                    == 0
+                {
+                    blacklist.insert(*to);
+                    to_visit.push(*to);
+                }
             }
         }
+        blacklist.len() - 1
     }
-    blacklist.len() - 1
 }
