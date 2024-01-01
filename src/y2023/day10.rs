@@ -67,24 +67,24 @@ impl AdventOfCode for Puzzle {
             for (x, t) in l.iter().enumerate() {
                 match t {
                     _ if *t == Pipe(vec![(-1, 0), (1, 0)]) => {
-                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 1));
                         hash.insert((3 * y + 2, 3 * x + 1));
                     }
                     _ if *t == Pipe(vec![(0, -1), (0, 1)]) => {
-                        hash.insert((3 * y + 1, 3 * x + 0));
+                        hash.insert((3 * y + 1, 3 * x));
                         hash.insert((3 * y + 1, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 2));
                     }
                     _ if *t == Pipe(vec![(-1, 0), (0, 1)]) => {
-                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 2));
                     }
                     _ if *t == Pipe(vec![(-1, 0), (0, -1)]) => {
-                        hash.insert((3 * y + 0, 3 * x + 1));
+                        hash.insert((3 * y, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 1));
-                        hash.insert((3 * y + 1, 3 * x + 0));
+                        hash.insert((3 * y + 1, 3 * x));
                     }
                     _ if *t == Pipe(vec![(1, 0), (0, 1)]) => {
                         hash.insert((3 * y + 2, 3 * x + 1));
@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
                     _ if *t == Pipe(vec![(1, 0), (0, -1)]) => {
                         hash.insert((3 * y + 2, 3 * x + 1));
                         hash.insert((3 * y + 1, 3 * x + 1));
-                        hash.insert((3 * y + 1, 3 * x + 0));
+                        hash.insert((3 * y + 1, 3 * x));
                     }
                     _ => (),
                 }
