@@ -5,6 +5,7 @@ use {
         progress, regex,
     },
     itertools::Itertools,
+    serde_json,
     std::collections::{HashMap, HashSet},
 };
 
@@ -130,6 +131,22 @@ impl AdventOfCode for Puzzle {
                 self.rating_settings[i].insert(4001);
             }
         }
+    }
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(
+            &self
+                .rules
+                .iter()
+                .flat_map(|(from, rules)| {
+                    rules
+                        .iter()
+                        .filter(|(_, to)| !["A", "R"].contains(&to.as_str()))
+                        .map(|(_, to)| (from, to))
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>(),
+        )
+        .ok()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.settings
