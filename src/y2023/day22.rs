@@ -5,10 +5,7 @@ use {
         geometric::Dim3,
         line_parser,
     },
-    std::{
-        cmp::Ordering,
-        collections::{HashMap, HashSet},
-    },
+    std::{cmp::Ordering, collections::HashMap},
 };
 
 #[derive(Debug, Default, Eq, Hash, PartialEq)]
@@ -46,7 +43,6 @@ impl PartialOrd for Block {
 pub struct Puzzle {
     blocks: Vec<Block>,
     supported: Vec<Vec<usize>>,
-    supporting: HashMap<usize, Vec<usize>>,
 }
 
 #[aoc(2023, 22)]
@@ -70,15 +66,13 @@ impl AdventOfCode for Puzzle {
         stabilize(&mut self.blocks);
         self.supported = (0..self.blocks.len())
             .map(|i| {
-                let mut v = (0..self.blocks.len())
+                let v = (0..self.blocks.len())
                     .filter(|j| {
                         self.blocks[*j].partial_cmp(&self.blocks[i]) == Some(Ordering::Less)
                     })
                     .map(|j| (self.blocks[j].pos.2 + self.blocks[j].shape.2, j))
                     .collect::<Vec<_>>();
-                v.sort();
-                v.reverse();
-                let Some((l, _)) = v.first() else {
+                let Some((l, _)) = v.iter().max() else {
                     return Vec::new();
                 };
                 v.iter()
@@ -94,21 +88,15 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output1 {
-        for (i, v) in self.supported.iter().enumerate() {
-            for j in v.iter() {
-                self.supporting.entry(*j).or_default().push(i);
-            }
-        }
-
-        (0..self.blocks.len())
-            .filter(|i| !self.supported.iter().all(|v| !v.contains(i) || 1 < v.len()))
-            .map(|i| self.chain_len(i))
-            .sum()
+        self.build_colapse_map().values().map(|l| l.len()).sum()
     }
 }
 
 fn stabilize(blocks: &mut [Block]) {
-    while (0..blocks.len()).any(|i| move_down(blocks, i)) {}
+    blocks.sort_by_key(|b| b.pos.2);
+    for i in 0..blocks.len() {
+        move_down(blocks, i);
+    }
 }
 
 fn move_down(blocks: &mut [Block], i: usize) -> bool {
@@ -127,23 +115,43 @@ fn move_down(blocks: &mut [Block], i: usize) -> bool {
 }
 
 impl Puzzle {
-    fn chain_len(&self, start: usize) -> usize {
-        let mut blacklist: HashSet<usize> = HashSet::new();
-        blacklist.insert(start);
-        let mut to_visit: Vec<usize> = vec![start];
-        while let Some(i) = to_visit.pop() {
-            for to in self.supporting.get(&i).unwrap_or(&vec![]) {
-                if self.supported[*to]
-                    .iter()
-                    .filter(|s| !blacklist.contains(*s))
-                    .count()
-                    == 0
-                {
-                    blacklist.insert(*to);
-                    to_visit.push(*to);
-                }
-            }
+    fn build_colapse_map(&self) -> HashMap<usize, Vec<usize>> {
+        let mut hash: HashMap<usize, Vec<usize>> = HashMap::new();
+        for n in 0..self.blocks.len() {
+            let _ = self.colapsed_by(n, &mut hash);
         }
-        blacklist.len() - 1
+        hash
+    }
+    fn colapsed_by(&self, start: usize, memo: &mut HashMap<usize, Vec<usize>>) -> Vec<usize> {
+        if let Some(l) = memo.get(&start) {
+            return l.clone();
+        }
+        let supported = &self.supported[start];
+        let path = match supported.len() {
+            0 => Vec::new(),
+            1 => {
+                let mut p = self.colapsed_by(supported[0], memo);
+                p.push(supported[0]);
+                p
+            }
+            _ => {
+                let cands = supported
+                    .iter()
+                    .map(|c| self.colapsed_by(*c, memo))
+                    .collect::<Vec<_>>();
+                let len = cands.iter().map(|l| l.len()).min().unwrap();
+                let mut tmp = Vec::new();
+                for i in 0..len {
+                    if cands.iter().map(|l| l[i]).all(|p| p == cands[0][i]) {
+                        tmp.push(cands[0][i]);
+                    } else {
+                        break;
+                    }
+                }
+                tmp
+            }
+        };
+        memo.insert(start, path.clone());
+        path
     }
 }
