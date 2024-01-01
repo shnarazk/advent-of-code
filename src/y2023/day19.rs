@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        progress, regex,
+        regex,
     },
     itertools::Itertools,
     serde_json,
@@ -26,39 +26,6 @@ pub struct Puzzle {
     settings: Vec<HashMap<Var, Val>>,
     reading_settings: bool,
     rating_settings: [HashSet<usize>; 4],
-}
-
-impl Puzzle {
-    fn execute(&self, setting: &HashMap<Var, Val>, label: &Label) -> bool {
-        match label.as_str() {
-            "A" => return true,
-            "R" => return false,
-            _ => (),
-        }
-        let Some(rules) = self.rules.get(label) else {
-            panic!();
-        };
-        for (cond, lbl) in rules {
-            if let Some((var, op, val)) = cond {
-                let Some(var_val) = setting.get(var) else {
-                    unreachable!();
-                };
-                let exp = match op {
-                    Op::Less => var_val < val,
-                    Op::Greater => var_val > val,
-                };
-                if exp {
-                    return self.execute(setting, lbl);
-                }
-            } else {
-                return self.execute(setting, lbl);
-            }
-        }
-        false
-    }
-    fn check(&self, setting: &HashMap<Var, Val>) -> bool {
-        self.execute(setting, &"in".to_string())
-    }
 }
 
 #[aoc(2023, 19)]
@@ -155,53 +122,84 @@ impl AdventOfCode for Puzzle {
             .map(|setting| setting.values().sum::<usize>())
             .sum::<usize>()
     }
-    // FIXME: divide dynamically and recursively
     fn part2(&mut self) -> Self::Output2 {
         self.gather_positives(
             &"in".to_string(),
-            vec![(0, 4001), (0, 4001), (0, 4001), (0, 4001)],
+            vec![(1, 4000), (1, 4000), (1, 4000), (1, 4000)],
         )
     }
 }
 
 impl Puzzle {
-    fn gather_positives(&self, node: &Label, constraints: Vec<(usize, usize)>) -> usize {
-        dbg!(node);
+    fn execute(&self, setting: &HashMap<Var, Val>, label: &Label) -> bool {
+        match label.as_str() {
+            "A" => return true,
+            "R" => return false,
+            _ => (),
+        }
+        let Some(rules) = self.rules.get(label) else {
+            panic!();
+        };
+        for (cond, lbl) in rules {
+            if let Some((var, op, val)) = cond {
+                let Some(var_val) = setting.get(var) else {
+                    unreachable!();
+                };
+                let exp = match op {
+                    Op::Less => var_val < val,
+                    Op::Greater => var_val > val,
+                };
+                if exp {
+                    return self.execute(setting, lbl);
+                }
+            } else {
+                return self.execute(setting, lbl);
+            }
+        }
+        false
+    }
+    fn check(&self, setting: &HashMap<Var, Val>) -> bool {
+        self.execute(setting, &"in".to_string())
+    }
+    fn gather_positives(&self, node: &Label, mut constraints: Vec<(usize, usize)>) -> usize {
         let mut total: usize = 0;
         if node == "A" {
-            return constraints.iter().map(|(b, e)| *e - *b).product::<usize>();
+            return constraints
+                .iter()
+                .map(|(b, e)| *e - *b + 1)
+                .product::<usize>();
         }
         if node == "R" {
             return 0;
         }
         for (condition, dest) in self.rules.get(node).unwrap() {
-            if let Some(condition) = condition {
+            if let Some((var, op, val)) = condition {
                 let index = ["x", "m", "a", "s"]
                     .iter()
                     .enumerate()
-                    .find(|(_, v)| **v == condition.0.as_str())
+                    .find(|(_, v)| **v == var.as_str())
                     .unwrap()
                     .0;
                 let mut cons = constraints.clone();
-                match condition.1 {
-                    Op::Less if constraints[index].0 + 1 <= condition.2 => {
+                match op {
+                    Op::Less if *val <= constraints[index].0 => {
                         continue;
                     }
                     Op::Less => {
-                        cons[index].1 = condition.2.min(cons[index].1);
-                        constraints = todo!();
+                        cons[index].1 = cons[index].1.min(*val - 1);
+                        constraints[index].0 = constraints[index].0.max(*val);
                     }
-                    Op::Greater if constraints[index].1 + 1 <= condition.2 => {
+                    Op::Greater if constraints[index].1 <= *val => {
                         continue;
                     }
                     Op::Greater => {
-                        cons[index].0 = condition.2.max(cons[index].0);
-                        constraints = todo!();
+                        cons[index].0 = cons[index].0.max(*val + 1);
+                        constraints[index].1 = constraints[index].1.min(*val);
                     }
                 }
                 total += self.gather_positives(dest, cons);
-            } else if dest == "A" {
-                total += constraints.iter().map(|(b, e)| *e - *b).product::<usize>();
+            } else {
+                total += self.gather_positives(dest, constraints.clone());
             }
         }
         total
