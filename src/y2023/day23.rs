@@ -121,26 +121,31 @@ impl AdventOfCode for Puzzle {
         let mut longest_so_far = 0;
         let mut start = Route::default();
         start.used.insert(0);
-        let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
+        let mut to_visit: Vec<Route> = Vec::new();
+        let mut next: Vec<Route> = Vec::new();
         to_visit.push(start);
-        while let Some(p) = to_visit.pop() {
-            if p.pos == goal {
-                if longest < p.cost {
-                    longest = p.cost;
-                    progress!(longest);
+        while !to_visit.is_empty() {
+            for p in to_visit.iter() {
+                if p.pos == goal {
+                    if longest < p.cost {
+                        longest = p.cost;
+                        progress!(longest);
+                    }
+                    continue;
                 }
-                continue;
-            }
-            for j in 0..self.branch_graph.len() {
-                if !p.used.contains(&j) && self.branch_graph[p.pos][j] < usize::MAX {
-                    let mut q = p.clone();
-                    q.pos = j;
-                    q.cost = p.cost + self.branch_graph[p.pos][j];
-                    longest_so_far = longest_so_far.max(q.cost);
-                    q.used.insert(j);
-                    to_visit.push(q);
+                for j in 0..self.branch_graph.len() {
+                    if self.branch_graph[p.pos][j] < usize::MAX && !p.used.contains(&j) {
+                        let mut q = p.clone();
+                        q.pos = j;
+                        q.cost = p.cost + self.branch_graph[p.pos][j];
+                        longest_so_far = longest_so_far.max(q.cost);
+                        q.used.insert(j);
+                        next.push(q);
+                    }
                 }
             }
+            to_visit.clear();
+            std::mem::swap(&mut to_visit, &mut next);
         }
         progress!("");
         longest
