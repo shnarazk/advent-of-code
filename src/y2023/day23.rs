@@ -5,24 +5,38 @@ use {
         geometric::{Dim2, GeometricMath},
         progress,
     },
-    std::collections::{BinaryHeap, HashMap, HashSet},
+    std::{
+        cmp::Reverse,
+        collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+    },
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
-    sum_path: Vec<Vec<usize>>,
-    path_index: Vec<Vec<Option<usize>>>,
-    vector_template: Vec<bool>,
+    size: Dim2<usize>,
+    branch_index: Vec<Vec<Option<usize>>>,
+    branch_positions: Vec<Dim2<usize>>,
+    branch_graph: Vec<Vec<usize>>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 struct Route {
     cost: usize,
-    pos: Dim2<usize>,
-    pre: Dim2<usize>,
-    used: Vec<usize>,
-    size: Dim2<usize>,
+    pos: usize,
+    used: HashSet<usize>,
+}
+
+impl PartialOrd for Route {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cost.cmp(&other.cost))
+    }
+}
+
+impl Ord for Route {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.cost.cmp(&other.cost)
+    }
 }
 
 #[aoc(2023, 23)]
@@ -33,43 +47,34 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        self.sum_path = self
-            .line
-            .iter()
-            .map(|v| v.iter().map(|p| (*p != b'#') as usize).collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-        for (y, l) in self.line.iter().enumerate() {
-            for (x, _) in l.iter().enumerate() {
-                self.sum_path[y][x] += if y == 0 { 0 } else { self.sum_path[y - 1][x] }
-                    + if x == 0 { 0 } else { self.sum_path[y][x - 1] };
-            }
-        }
-        let pathes = self
+        self.size = (self.line.len(), self.line[0].len());
+        let branching = self.branch_map();
+        self.branch_positions = self
             .line
             .iter()
             .enumerate()
             .flat_map(|(y, l)| {
                 l.iter()
                     .enumerate()
-                    .flat_map(|(x, p)| (*p != b'#').then_some((y, x)))
+                    .flat_map(|(x, _)| (2 < branching[y][x]).then_some((y, x)))
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
-        self.path_index = self
+        // inject the start and the goal
+        self.branch_positions.insert(0, (0, 1));
+        self.branch_positions
+            .push((self.size.0 - 1, self.size.1 - 2));
+        self.branch_index = self
             .line
             .iter()
             .map(|v| v.iter().map(|_| None).collect::<Vec<_>>())
             .collect::<Vec<_>>();
-        self.vector_template = Vec::new();
-        for (i, (y, x)) in pathes.iter().enumerate() {
-            self.path_index[*y][*x] = Some(i);
-            self.vector_template.push(false);
+        for (i, (y, x)) in self.branch_positions.iter().enumerate() {
+            self.branch_index[*y][*x] = Some(i);
         }
-        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        let height = self.line.len();
-        let width = self.line[0].len();
+        let (height, width) = self.size;
         let goal = (height - 1, width - 2);
         let mut to_visit: Vec<(Dim2<usize>, HashSet<Dim2<usize>>)> = vec![];
         let mut longest = 0;
@@ -109,24 +114,16 @@ impl AdventOfCode for Puzzle {
         }
         longest
     }
-    // This is not a variant of shortest path finding problem, for which
-    // we should make a heuristc evaluation.
-    // Instead We should cut the unused path as pre-processing task.
     fn part2(&mut self) -> Self::Output2 {
-        let height = self.line.len();
-        let width = self.line[0].len();
-        let goal = (height - 1, width - 2);
-        let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
+        self.build_path_graph();
+        let goal = self.branch_positions.len() - 1;
         let mut longest = 0;
-        to_visit.push(Route {
-            cost: 1,
-            pos: (0, 1),
-            pre: (0, 0),
-            used: Vec::new(),
-            size: (1, 1),
-        });
-        let mut visited: HashMap<Vec<usize>, usize> = HashMap::new();
-        while let Some(mut p) = to_visit.pop() {
+        let mut longest_so_far = 0;
+        let mut start = Route::default();
+        start.used.insert(0);
+        let mut to_visit: BinaryHeap<Route> = BinaryHeap::new();
+        to_visit.push(start);
+        while let Some(p) = to_visit.pop() {
             if p.pos == goal {
                 if longest < p.cost {
                     longest = p.cost;
@@ -134,59 +131,69 @@ impl AdventOfCode for Puzzle {
                 }
                 continue;
             }
-            if p.used.contains(&self.path_index[p.pos.0][p.pos.1].unwrap()) {
-                continue;
-            }
-            let next = p
-                .pos
-                .neighbors4((0, 0), (height, width))
-                .into_iter()
-                .filter(|(y, x)| self.line[*y][*x] != b'#')
-                .filter(|(y, x)| p.pre != (*y, *x))
-                .collect::<Vec<_>>();
-            let at_branch = 1 < next.len();
-            if at_branch {
-                if let Some(k) = visited.get(&p.used) {
-                    if p.cost < *k {
-                        continue;
-                    }
+            for j in 0..self.branch_graph.len() {
+                if !p.used.contains(&j) && self.branch_graph[p.pos][j] < usize::MAX {
+                    let mut q = p.clone();
+                    q.pos = j;
+                    q.cost = p.cost + self.branch_graph[p.pos][j];
+                    longest_so_far = longest_so_far.max(q.cost);
+                    q.used.insert(j);
+                    to_visit.push(q);
                 }
-                p.used.push(self.path_index[p.pos.0][p.pos.1].unwrap());
-                visited.insert(p.used.clone(), p.cost);
-            }
-            for q0 in next.iter() {
-                let mut q = p.clone();
-                q.cost += 1;
-                q.pos = *q0;
-                q.pre = p.pos;
-                q.size.0 = q.size.0.max(q0.0);
-                q.size.1 = q.size.1.max(q0.1);
-                to_visit.push(q);
             }
         }
         progress!("");
-        longest - 1
+        longest
     }
 }
 
-#[allow(dead_code)]
-fn check_branches(v: &[Vec<u8>]) -> usize {
-    let height = v.len();
-    let width = v[0].len();
-    v.iter()
-        .enumerate()
-        .map(|(y, l)| {
-            l.iter()
-                .enumerate()
-                .filter(|(x, p)| {
-                    2 < (y, *x)
-                        .neighbors4((0, 0), (height, width))
-                        .into_iter()
-                        .filter(|_| **p != b'#')
-                        .filter(|(y, x)| v[*y][*x] != b'#')
-                        .count()
-                })
-                .count()
-        })
-        .sum()
+impl Puzzle {
+    fn build_path_graph(&mut self) {
+        self.branch_graph = (0..self.branch_positions.len())
+            .map(|i| self.branch_distances(self.branch_positions[i]))
+            .collect::<Vec<_>>();
+    }
+    fn branch_distances(&self, pos: Dim2<usize>) -> Vec<usize> {
+        let size = self.size;
+        let mut to_visit: BinaryHeap<Reverse<(usize, Dim2<usize>)>> = BinaryHeap::new();
+        let mut visited: HashMap<Dim2<usize>, usize> = HashMap::new();
+        to_visit.push(Reverse((0, pos)));
+        while let Some(Reverse((cost, p))) = to_visit.pop() {
+            if let Entry::Vacant(e) = visited.entry(p) {
+                e.insert(cost);
+                if p != pos && self.branch_index[p.0][p.1].is_some() {
+                    continue;
+                }
+                for q in p.neighbors4((0, 0), size) {
+                    if self.line[q.0][q.1] != b'#' && !visited.contains_key(&q) {
+                        to_visit.push(Reverse((cost + 1, q)));
+                    }
+                }
+            }
+        }
+        self.branch_positions
+            .iter()
+            .map(|pos| *visited.get(pos).unwrap_or(&usize::MAX))
+            .collect::<Vec<_>>()
+    }
+    fn branch_map(&self) -> Vec<Vec<usize>> {
+        let size = self.size;
+        self.line
+            .iter()
+            .enumerate()
+            .map(|(y, l)| {
+                l.iter()
+                    .enumerate()
+                    .map(|(x, p)| {
+                        (y, x)
+                            .neighbors4((0, 0), size)
+                            .into_iter()
+                            .filter(|_| *p != b'#')
+                            .filter(|(y, x)| self.line[*y][*x] != b'#')
+                            .count()
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
+    }
 }
