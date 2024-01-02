@@ -233,8 +233,14 @@ pub trait AdventOfCode: fmt::Debug + Default {
             return;
         };
         if let Some(json) = self.serialize() {
-            let mut file = File::create(output).expect("fail to open");
+            let mut file = File::create(&output).expect("fail to open");
             writeln!(file, "{}", json).expect("fail to save");
+            println!(
+                "{}# write JSON data on {}{}",
+                color::MAGENTA,
+                output,
+                color::RESET,
+            );
         };
     }
     /// # UNDER THE HOOD
@@ -255,42 +261,36 @@ pub trait AdventOfCode: fmt::Debug + Default {
                 Answer::Dump
             }
             1 => {
-                if !config.serialize {
-                    println!(
-                        "{}# year: {}, day: {}, part: 1, input: {}{}",
-                        color::GREEN,
-                        Self::YEAR,
-                        Self::DAY,
-                        input,
-                        color::RESET,
-                    );
-                }
+                println!(
+                    "{}# year: {}, day: {}, part: 1, input: {}{}",
+                    color::GREEN,
+                    Self::YEAR,
+                    Self::DAY,
+                    input,
+                    color::RESET,
+                );
                 Answer::Part1(Self::parse(config, desc).expect(&parse_error).part1())
             }
             2 => {
-                if !config.serialize {
-                    println!(
-                        "{}# year: {}, day: {}, part: 2, input: {}{}",
-                        color::GREEN,
-                        Self::YEAR,
-                        Self::DAY,
-                        input,
-                        color::RESET,
-                    );
-                }
+                println!(
+                    "{}# year: {}, day: {}, part: 2, input: {}{}",
+                    color::GREEN,
+                    Self::YEAR,
+                    Self::DAY,
+                    input,
+                    color::RESET,
+                );
                 Answer::Part2(Self::parse(config, desc).expect(&parse_error).part2())
             }
             3 => {
-                if !config.serialize {
-                    println!(
-                        "{}# year: {}, day: {}, input: {}{}",
-                        color::GREEN,
-                        Self::YEAR,
-                        Self::DAY,
-                        input,
-                        color::RESET,
-                    );
-                }
+                println!(
+                    "{}# year: {}, day: {}, input: {}{}",
+                    color::GREEN,
+                    Self::YEAR,
+                    Self::DAY,
+                    input,
+                    color::RESET,
+                );
                 let ans1 = Self::parse(config.clone(), desc)
                     .expect(&parse_error)
                     .part1();

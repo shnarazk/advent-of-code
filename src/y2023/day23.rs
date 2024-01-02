@@ -11,13 +11,14 @@ use {
     },
 };
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     size: Dim2<usize>,
     branch_index: Vec<Vec<Option<usize>>>,
     branch_positions: Vec<Dim2<usize>>,
     branch_graph: Vec<Vec<usize>>,
+    solution: Option<Route>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -72,6 +73,21 @@ impl AdventOfCode for Puzzle {
         for (i, (y, x)) in self.branch_positions.iter().enumerate() {
             self.branch_index[*y][*x] = Some(i);
         }
+    }
+    fn serialize(&self) -> Option<String> {
+        let mut map: Vec<Vec<u8>> = self.line.clone();
+        for l in map.iter_mut() {
+            for p in l.iter_mut() {
+                *p = (*p == b'#') as u8;
+            }
+        }
+        if let Some(route) = &self.solution {
+            for branch_id in route.used.iter() {
+                let pos = self.branch_positions[*branch_id];
+                map[pos.0][pos.1] = 2;
+            }
+        }
+        serde_json::to_string(&map).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
         let (height, width) = self.size;
@@ -130,6 +146,7 @@ impl AdventOfCode for Puzzle {
                     if longest < p.cost {
                         longest = p.cost;
                         progress!(longest);
+                        self.solution = Some(p.clone());
                     }
                     continue;
                 }
@@ -148,6 +165,7 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut to_visit, &mut next);
         }
         progress!("");
+        self.dump();
         longest
     }
 }

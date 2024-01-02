@@ -96,9 +96,8 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
         (day_from..=day_to)
             .map(|d| {
                 format!(
-                "{} => {{ if config.serialize {{y{:0>4}::day{:0>2}::Puzzle::solve(config, desc);}} else {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(config, desc));}} }}",
+                "{} => {{ println!(\"{}{{}}{}\", y{:0>4}::day{:0>2}::Puzzle::solve(config, desc));}}",
                 d,
-                year, d,
                 color::BLUE,
                 color::RESET,
                 year, d,
