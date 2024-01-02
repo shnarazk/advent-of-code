@@ -99,7 +99,7 @@ pub struct ConfigAoC {
     /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
     pub alt: Option<String>,
     /// serialize as JSON format
-    #[arg(long)]
+    #[arg(short, long)]
     pub serialize: bool,
 }
 
