@@ -5,6 +5,7 @@ use {
         geometric::{Dim2, GeometricMath},
         progress,
     },
+    serde::Serialize,
     std::{
         cmp::Reverse,
         collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
@@ -25,7 +26,7 @@ pub struct Puzzle {
 struct Route {
     cost: usize,
     pos: usize,
-    used: HashSet<usize>,
+    used: Vec<usize>,
 }
 
 impl PartialOrd for Route {
@@ -75,19 +76,22 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn serialize(&self) -> Option<String> {
-        let mut map: Vec<Vec<u8>> = self.line.clone();
-        for l in map.iter_mut() {
-            for p in l.iter_mut() {
-                *p = (*p == b'#') as u8;
-            }
+        #[derive(Debug, Default, Eq, PartialEq, Serialize)]
+        struct Dump {
+            map: Vec<Vec<u8>>,
+            route: Vec<usize>,
         }
-        if let Some(route) = &self.solution {
-            for branch_id in route.used.iter() {
-                let pos = self.branch_positions[*branch_id];
-                map[pos.0][pos.1] = 2;
-            }
+        let mut map: Vec<Vec<u8>> = self
+            .line
+            .clone()
+            .iter()
+            .map(|l| l.iter().map(|c| (*c == b'#') as u8).collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        for b in self.branch_positions.iter() {
+            map[b.0][b.1] = 2;
         }
-        serde_json::to_string(&map).ok()
+        let route = self.solution.clone().map_or(Vec::new(), |l| l.used);
+        serde_json::to_string(&Dump { map, route }).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
         let (height, width) = self.size;
@@ -136,7 +140,7 @@ impl AdventOfCode for Puzzle {
         let mut longest = 0;
         let mut longest_so_far = 0;
         let mut start = Route::default();
-        start.used.insert(0);
+        start.used.push(0);
         let mut to_visit: Vec<Route> = Vec::new();
         let mut next: Vec<Route> = Vec::new();
         to_visit.push(start);
@@ -150,13 +154,13 @@ impl AdventOfCode for Puzzle {
                     }
                     continue;
                 }
-                for j in 0..self.branch_graph.len() {
+                for j in 1..self.branch_graph.len() {
                     if self.branch_graph[p.pos][j] < usize::MAX && !p.used.contains(&j) {
                         let mut q = p.clone();
                         q.pos = j;
                         q.cost = p.cost + self.branch_graph[p.pos][j];
                         longest_so_far = longest_so_far.max(q.cost);
-                        q.used.insert(j);
+                        q.used.push(j);
                         next.push(q);
                     }
                 }
