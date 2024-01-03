@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2022/day/19>
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
+        progress, regex,
     },
     std::collections::{BinaryHeap, HashMap},
 };
@@ -89,7 +90,7 @@ impl Blueprint {
                 let total = state.resources[0] + (limit - state.time) * state.robots[0];
                 if num_geodes < total {
                     num_geodes = total;
-                    dbg!(num_geodes);
+                    progress!(num_geodes);
                 }
             }
             for (i, requires) in self.trans.iter().enumerate() {
@@ -183,10 +184,6 @@ impl AdventOfCode for Puzzle {
             });
         }
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().map(|bp| bp.id * bp.profit(24)).sum()

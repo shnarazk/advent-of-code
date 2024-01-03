@@ -97,21 +97,22 @@ impl AdventOfCode for Puzzle {
         dbg!(self.blizzard_l.len());
         dbg!(self.blizzard_u.len());
     }
-    fn serialize(&self) {
-        let time = 13;
-        dbg!(time);
-        for (j, l) in self.line.iter().enumerate() {
-            for (i, c) in l.iter().enumerate() {
-                if *c == '#' {
-                    print!("#");
-                } else if self.is_open(time, &(j, i)) {
-                    print!(".");
-                } else {
-                    print!("*");
-                }
-            }
-            println!();
-        }
+    fn serialize(&self) -> Option<String> {
+        // let time = 13;
+        // dbg!(time);
+        // for (j, l) in self.line.iter().enumerate() {
+        //     for (i, c) in l.iter().enumerate() {
+        //         if *c == '#' {
+        //             print!("#");
+        //         } else if self.is_open(time, &(j, i)) {
+        //             print!(".");
+        //         } else {
+        //             print!("*");
+        //         }
+        //     }
+        //     println!();
+        // }
+        serde_json::to_string(&self.line).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.search(0, &self.start, &self.goal)

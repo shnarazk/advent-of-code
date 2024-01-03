@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2022/day/16>
+
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
+        progress, regex,
     },
     std::{
         cmp::Reverse,
@@ -39,7 +40,6 @@ impl AdventOfCode for Puzzle {
             self.map.insert(label.clone(), (*flow, linked.clone()));
         }
         self.initialize_distacnes();
-        dbg!(&self.distance.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let init = State {
@@ -159,7 +159,8 @@ impl Puzzle {
     fn traverse2(&self, state: State2, best: &mut usize, path_len: usize) {
         const DURATION: usize = 26;
         if *best < state.total_flow {
-            *best = dbg!(state.total_flow);
+            *best = state.total_flow;
+            progress!(*best);
         }
         if DURATION <= state.state1.0.min(state.state2.0) || state.path.len() == path_len {
             return;
