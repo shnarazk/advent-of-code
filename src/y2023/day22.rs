@@ -82,6 +82,9 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
     }
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(&self.supported).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         (0..self.blocks.len())
             .filter(|i| self.supported.iter().all(|v| !v.contains(i) || 1 < v.len()))
