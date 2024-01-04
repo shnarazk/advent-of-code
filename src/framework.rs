@@ -7,6 +7,28 @@ use {
     std::{borrow::Borrow, fmt, fs::File, io::prelude::*},
 };
 
+#[derive(Clone, Debug, Parser)]
+#[command(author, version, about, long_about = None)]
+pub struct ConfigAoC {
+    /// Target year like 2023
+    #[arg(long)]
+    pub bench: Option<usize>,
+    /// Target year like 2023
+    #[arg(short, long, default_value_t = 2023)]
+    pub year: usize,
+    #[arg(short, long, default_value_t = 3)]
+    pub part: usize,
+    /// Target day like 1
+    pub day: Option<usize>,
+    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
+    pub alt: Option<String>,
+    /// serialize as JSON format
+    #[arg(short, long)]
+    pub serialize: bool,
+}
+
+static CONFIG: OnceCell<ConfigAoC> = OnceCell::new();
+
 /// IT MUST BE UNDER THE HOOD
 #[derive(Clone, fmt::Debug, Eq, PartialEq)]
 pub enum Description {
@@ -85,25 +107,6 @@ impl std::fmt::Display for ParseError {
 }
 
 impl std::error::Error for ParseError {}
-
-#[derive(Clone, Debug, Parser)]
-#[command(author, version, about, long_about = None)]
-pub struct ConfigAoC {
-    /// Target year like 2023
-    #[arg(short, long, default_value_t = 2023)]
-    pub year: usize,
-    #[arg(short, long, default_value_t = 3)]
-    pub part: usize,
-    /// Target day like 1
-    pub day: usize,
-    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
-    pub alt: Option<String>,
-    /// serialize as JSON format
-    #[arg(short, long)]
-    pub serialize: bool,
-}
-
-static CONFIG: OnceCell<ConfigAoC> = OnceCell::new();
 
 /// The standard interface for a problem description with solving methods
 pub trait AdventOfCode: fmt::Debug + Default {
@@ -186,9 +189,14 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(_config: ConfigAoC, desc: impl Borrow<Description>) -> Result<Self, ParseError> {
+    fn parse(config: ConfigAoC) -> Result<Self, ParseError> {
+        let description = match config.alt {
+            Some(ext) if ext == "-" => Description::TestData("".to_string()),
+            Some(ext) => Description::FileTag(ext.to_string()),
+            None => Description::None,
+        };
         let mut instance = Self::default();
-        let contents = Self::load(desc.borrow())?;
+        let contents = Self::load(description)?;
         let remains = instance.header(contents)?;
         for block in remains.split(Self::DELIMITER) {
             if !block.is_empty() {
@@ -245,19 +253,29 @@ pub trait AdventOfCode: fmt::Debug + Default {
     }
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
-    fn solve(
-        config: ConfigAoC,
-        description: impl Borrow<Description>,
-    ) -> Answer<Self::Output1, Self::Output2> {
-        CONFIG.set(config.clone()).expect("fail to store config");
-        let desc = description.borrow();
-        DATA_SOURCE.set(desc.clone()).expect("fail to store config");
-        let input = desc.data_filename(Self::YEAR, Self::DAY).expect("no input");
+    fn solve(config: ConfigAoC) -> Answer<Self::Output1, Self::Output2> {
+        let description = match config.clone().alt {
+            Some(ext) if ext == "-" => Description::TestData("".to_string()),
+            Some(ext) => Description::FileTag(ext.to_string()),
+            None => Description::None,
+        };
+
+        if CONFIG.get().is_none() {
+            CONFIG.set(config.clone()).expect("fail to store config");
+        }
+        if DATA_SOURCE.get().is_none() {
+            DATA_SOURCE
+                .set(description.clone())
+                .expect("fail to store config");
+        }
+        let input = description
+            .data_filename(Self::YEAR, Self::DAY)
+            .expect("no input");
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match config.part {
             0 => {
                 assert!(config.serialize);
-                Self::parse(config, desc).expect(&parse_error).dump();
+                Self::parse(config).expect(&parse_error).dump();
                 Answer::Dump
             }
             1 => {
@@ -269,7 +287,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::parse(config, desc).expect(&parse_error).part1())
+                Answer::Part1(Self::parse(config).expect(&parse_error).part1())
             }
             2 => {
                 println!(
@@ -280,7 +298,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::parse(config, desc).expect(&parse_error).part2())
+                Answer::Part2(Self::parse(config).expect(&parse_error).part2())
             }
             3 => {
                 println!(
@@ -291,10 +309,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                let ans1 = Self::parse(config.clone(), desc)
-                    .expect(&parse_error)
-                    .part1();
-                let ans2 = Self::parse(config, desc).expect(&parse_error).part2();
+                let ans1 = Self::parse(config.clone()).expect(&parse_error).part1();
+                let ans2 = Self::parse(config).expect(&parse_error).part2();
                 Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,

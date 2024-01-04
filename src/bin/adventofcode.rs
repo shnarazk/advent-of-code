@@ -22,25 +22,28 @@ use {
     adventofcode::{
         aoc_arms, color,
         framework::{AdventOfCode, ConfigAoC},
-        Description,
+        progress,
     },
     clap::Parser,
-    std::time::Instant,
+    std::{fs::File, io::prelude::*, time::Instant},
 };
 
 pub fn main() {
-    let mut config = ConfigAoC::parse();
-    assert!(0 < config.day && config.day <= 25);
-    let day = config.day;
+    let config = ConfigAoC::parse();
+    dbg!(&config);
+    if config.bench.is_some() {
+        bench(config);
+    } else {
+        run_solver(config);
+    }
+}
+
+fn run_solver(mut config: ConfigAoC) {
+    assert!(config.day.is_some() && 0 < config.day.unwrap() && config.day.unwrap() <= 25);
     assert!(config.part <= 3);
     if config.part == 0 {
         config.serialize = true;
     }
-    let desc = match config.clone().alt {
-        Some(ext) if ext == "-" => Description::TestData("".to_string()),
-        Some(ext) => Description::FileTag(ext.to_string()),
-        None => Description::None,
-    };
     let beg = Instant::now();
     match config.year {
         #[cfg(feature = "y2015")]
@@ -70,4 +73,55 @@ pub fn main() {
         (end - beg).as_secs_f64() * 1000.0,
         color::RESET
     );
+}
+
+fn bench(config: ConfigAoC) {
+    let results = (1..25)
+        .map(|day| {
+            let mut config = config.clone();
+            config.day = Some(day);
+            let beg = Instant::now();
+            match config.year {
+                #[cfg(feature = "y2015")]
+                2015 => aoc_arms!(2015),
+                #[cfg(feature = "y2016")]
+                2016 => aoc_arms!(2016),
+                #[cfg(feature = "y2017")]
+                2017 => aoc_arms!(2017),
+                #[cfg(feature = "y2018")]
+                2018 => aoc_arms!(2018),
+                #[cfg(feature = "y2019")]
+                2019 => aoc_arms!(2019),
+                #[cfg(feature = "y2020")]
+                2020 => aoc_arms!(2020),
+                #[cfg(feature = "y2021")]
+                2021 => aoc_arms!(2021),
+                #[cfg(feature = "y2022")]
+                2022 => aoc_arms!(2022),
+                #[cfg(feature = "y2023")]
+                2023 => aoc_arms!(2023),
+                _ => println!("invalid year: {}", config.year),
+            }
+            let end = Instant::now();
+            progress!(format!(
+                "{}day{:2}: {:?}{}",
+                color::MAGENTA,
+                day,
+                (end - beg).as_secs_f64() * 1000.0,
+                color::RESET,
+            ));
+            (day, (end - beg).as_secs_f64() * 1000.0)
+        })
+        .collect::<Vec<_>>();
+    let output = format!("tmp/{}/execution_time.json", config.year);
+    if let Ok(json) = serde_json::to_string(&results) {
+        let mut file = File::create(&output).expect("fail to open");
+        writeln!(file, "{}", json).expect("fail to save");
+        println!(
+            "{}# write JSON data on {}{}",
+            color::MAGENTA,
+            output,
+            color::RESET,
+        );
+    };
 }
