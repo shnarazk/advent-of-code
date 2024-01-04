@@ -123,4 +123,9 @@ fn bench(config: ConfigAoC) {
             color::RESET,
         );
     };
+    println!("|   day |    time |");
+    println!("|------:|---------:");
+    for (day, time) in results.iter() {
+        println!("| day{:<2} | {:>7.1} |", day, time);
+    }
 }
