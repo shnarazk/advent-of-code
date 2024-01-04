@@ -75,7 +75,7 @@ fn run_solver(mut config: ConfigAoC) {
 }
 
 fn bench(config: ConfigAoC) {
-    let results = (1..25)
+    let results = (1..26)
         .map(|day| {
             let mut config = config.clone();
             config.day = Some(day);
