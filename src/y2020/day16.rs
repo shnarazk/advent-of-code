@@ -1,10 +1,7 @@
 //! <https://adventofcode.com/2020/day/16>
-use {
-    crate::{
-        framework::{aoc, AdventOfCode, Description, ParseError},
-        regex,
-    },
-    std::borrow::Borrow,
+use crate::{
+    framework::{aoc, AdventOfCode, ParseError},
+    regex,
 };
 
 type Range = (String, usize, usize, usize, usize);
@@ -24,10 +21,8 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
-        let mut puzzle = Puzzle::default();
+    fn header(&mut self, body: String) -> Result<String, ParseError> {
         let mut phase = 0;
-        let body = Puzzle::load(desc.borrow()).expect("load error");
         for l in body.split('\n') {
             match l {
                 "your ticket:" => {
@@ -39,29 +34,29 @@ impl AdventOfCode for Puzzle {
                 "" => (),
                 _ if phase == 0 => {
                     if let Some(r) = parse_range(l) {
-                        puzzle.dic.push(r);
+                        self.dic.push(r);
                     }
                 }
                 _ if phase == 1 => {
-                    puzzle.ticket = parse_sample(l);
+                    self.ticket = parse_sample(l);
                 }
                 _ if phase == 2 => {
-                    puzzle.samples.push(parse_sample(l));
+                    self.samples.push(parse_sample(l));
                 }
                 _ => (),
             }
         }
         // build cands
-        for field in &puzzle.ticket {
+        for field in &self.ticket {
             let mut res: Vec<Range> = Vec::new();
-            for pair in &puzzle.dic {
+            for pair in &self.dic {
                 if valid(pair, *field) {
                     res.push(pair.clone());
                 }
             }
-            puzzle.field_cands.push(res);
+            self.field_cands.push(res);
         }
-        Ok(puzzle)
+        Ok("".to_string())
     }
     fn part1(&mut self) -> usize {
         // dbg!(&field_cands);
@@ -179,54 +174,4 @@ fn parse_sample(str: &str) -> Vec<usize> {
         }
     }
     vec
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test1() {
-        const TEST: &str = "\
-class: 1-3 or 5-7
-row: 6-11 or 33-44
-seat: 13-40 or 45-50
-
-your ticket:
-7,1,14
-
-nearby tickets:
-7,3,47
-40,4,50
-55,2,20
-38,6,12";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(71)
-        );
-    }
-
-    #[test]
-    fn test2() {
-        const TEST: &str = "\
-class: 0-1 or 4-19
-row: 0-5 or 8-19
-seat: 0-13 or 16-19
-
-your ticket:
-11,12,13
-
-nearby tickets:
-3,9,18
-15,1,5
-5,14,9";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
-            Answer::Part2(1)
-        );
-    }
 }

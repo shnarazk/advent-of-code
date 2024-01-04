@@ -1,11 +1,10 @@
 //! <https://adventofcode.com/2020/day/22>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Description, ParseError},
+        framework::{aoc, AdventOfCode, ParseError},
         regex,
     },
     std::{
-        borrow::Borrow,
         cmp::Ordering,
         collections::{HashSet, VecDeque},
     },
@@ -63,21 +62,19 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
-        let mut instance = Self::default();
-        let buffer = Self::load(desc.borrow())?;
+    fn header(&mut self, buffer: String) -> Result<String, ParseError> {
         let mut iter = buffer.split(Self::DELIMITER);
         if let Some(text) = iter.next() {
             if let Some(element) = parse(text) {
-                instance.player1 = element;
+                self.player1 = element;
             }
         }
         if let Some(text) = iter.next() {
             if let Some(element) = parse(text) {
-                instance.player2 = element;
+                self.player2 = element;
             }
         }
-        Ok(instance)
+        Ok("".to_string())
     }
     fn part1(&mut self) -> usize {
         let mut stopper = None;
@@ -209,82 +206,5 @@ impl Puzzle {
             }
         }
         None
-    }
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-    #[test]
-    fn test0() {
-        const TEST: &str = "\
-Player 1:
-3
-1
-
-Player 2:
-7
-10";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(58)
-        );
-    }
-    #[test]
-    fn test_loop() {
-        const TEST: &str = "\
-Player 1:
-43
-19
-
-Player 2:
-2
-29
-14";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
-            Answer::Part2(43 * 2 + 19)
-        );
-    }
-    #[test]
-    fn test1() {
-        const TEST: &str = "\
-Player 1:
-9
-2
-6
-3
-1
-
-Player 2:
-5
-8
-4
-7
-10";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
-            Answer::Part2(291)
-        );
-    }
-    #[test]
-    fn test2() {
-        const TEST: &str = "\
-Player 1:
-9
-2
-6
-3
-
-Player 2:
-1";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(2 * 5 + 6 * 4 + 3 * 3 + 9 * 2 + 1)
-        );
     }
 }

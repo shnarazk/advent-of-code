@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/25>
-use {
-    crate::framework::{aoc_at, AdventOfCode, Answer, Description, ParseError},
-    std::borrow::Borrow,
-};
+use crate::framework::{aoc_at, AdventOfCode, Description, ParseError};
 
 #[derive(Debug, Default)]
 pub struct Puzzle {}
@@ -16,26 +13,16 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> usize {
-        day25(0, Description::None);
-        day25(0, Description::TestData("".to_string()))
+        day25(0, Description::TestData("".to_string()));
+        day25(0, Description::None)
     }
     fn part2(&mut self) -> Self::Output2 {
         "That's it!".to_string()
     }
-    fn solve(
-        _description: impl Borrow<Description>,
-        part: usize,
-    ) -> Answer<Self::Output1, Self::Output2> {
-        match part {
-            1 => Answer::Part1(Puzzle::default().part1()),
-            2 => Answer::Part2(Puzzle::default().part2()),
-            _ => Answer::Answers(Puzzle::default().part1(), Puzzle::default().part2()),
-        }
-    }
 }
 
 fn day25(_: usize, tag: Description) -> usize {
-    if tag != Description::None {
+    if let Description::TestData(_) = tag {
         let card_pubkey = 5764801;
         let door_pubkey = 17807724;
         assert_eq!(transform(8, 7), card_pubkey);
@@ -60,7 +47,6 @@ fn day25(_: usize, tag: Description) -> usize {
         assert_eq!(transform(card_loop_size, 7), card_pubkey);
         assert_eq!(transform(door_loop_size, 7), door_pubkey);
 
-        dbg!((card_loop_size, door_loop_size));
         let encryption_key_by_card = transform(card_loop_size, door_pubkey);
         let encryption_key_by_door = transform(door_loop_size, card_pubkey);
         dbg!(encryption_key_by_card);

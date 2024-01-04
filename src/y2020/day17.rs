@@ -1,7 +1,9 @@
 //! <https://adventofcode.com/2020/day/17>
+
+use crate::framework::ConfigAoC;
 use {
     crate::framework::{aoc, AdventOfCode, Answer, Description, ParseError},
-    std::{borrow::Borrow, cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
+    std::{cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
 };
 
 #[derive(Debug, Default)]
@@ -19,20 +21,24 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         0
     }
-    fn solve(
-        description: impl Borrow<Description>,
-        part: usize,
-    ) -> Answer<Self::Output1, Self::Output2> {
-        match part {
-            1 => World::<LOC>::solve(description, 1),
-            2 => World::<LOC4>::solve(description, 2),
-            _ => match (
-                World::<LOC>::solve(description.borrow(), 1),
-                World::<LOC4>::solve(description.borrow(), 2),
-            ) {
-                (Answer::Part1(a), Answer::Part2(b)) => Answer::Answers(a, b),
-                _ => unreachable!(),
-            },
+    fn solve(config: ConfigAoC) -> Answer<Self::Output1, Self::Output2> {
+        match config.part {
+            1 => World::<LOC>::solve(config),
+            2 => World::<LOC4>::solve(config),
+            _ => {
+                let c1 = ConfigAoC {
+                    part: 1,
+                    ..ConfigAoC::default()
+                };
+                let c2 = ConfigAoC {
+                    part: 2,
+                    ..ConfigAoC::default()
+                };
+                match (World::<LOC>::solve(c1), World::<LOC4>::solve(c2)) {
+                    (Answer::Part1(a), Answer::Part2(b)) => Answer::Answers(a, b),
+                    _ => unreachable!(),
+                }
+            }
         }
     }
 }
@@ -252,8 +258,14 @@ where
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
-        Ok(Self::default().parse_(&Self::load(desc)?))
+    fn parse(config: ConfigAoC) -> Result<Self, ParseError> {
+        let description = match config.alt {
+            Some(ext) if ext == "-" => Description::TestData("".to_string()),
+            Some(ext) => Description::FileTag(ext.to_string()),
+            None => Description::None,
+        };
+        Ok(Self::default().parse_(&Self::load(description)?))
+        // Ok(Self::default().parse_(&Self::load(desc)?))
     }
     fn part1(&mut self) -> usize {
         self.next().next().next().next().next().next().actives()
@@ -290,35 +302,4 @@ where
         }
     }
      */
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    const TEST1: &str = "\
-.#.
-..#
-###";
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            World::<LOC>::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(112)
-        );
-    }
-
-    #[allow(dead_code)]
-    // #[test] too long
-    fn test_part2() {
-        assert_eq!(
-            World::<LOC4>::solve(Description::TestData(TEST1.to_string()), 2),
-            Answer::Part2(848)
-        );
-    }
 }

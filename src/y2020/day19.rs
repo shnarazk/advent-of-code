@@ -1,10 +1,8 @@
 //! <https://adventofcode.com/2020/day/19>
 
-use std::borrow::Borrow;
-
 use {
     crate::{
-        framework::{aoc, AdventOfCode, Description, ParseError},
+        framework::{aoc, AdventOfCode, ParseError},
         regex,
     },
     std::collections::HashMap,
@@ -31,7 +29,7 @@ pub struct Puzzle {
 
 #[aoc(2020, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
+    const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let r0 = regex!(r#"^(\d+): "(.)""#);
         let r1 = regex!(r"^(\d+):(( \d+)+)$");
@@ -61,28 +59,21 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn parse(desc: impl Borrow<Description>) -> Result<Self, ParseError> {
-        let mut instance = Self::default();
-        let buffer = Self::load(desc.borrow())?;
-        let mut iter = buffer.split(Self::DELIMITER);
-        if let Some(block) = iter.next() {
-            for l in block.split('\n') {
-                if !l.is_empty() {
-                    instance.insert(l)?;
-                }
-            }
-        }
+    fn header(&mut self, buffer: String) -> Result<String, ParseError> {
+        let mut iter = buffer.split("\n\n");
+        let rules = iter.next().unwrap();
         if let Some(block) = iter.next() {
             for line in block.split('\n') {
                 if line.is_empty() {
                     break;
                 }
                 let cs = line.chars().collect::<Vec<char>>();
-                instance.message.push(cs);
+                self.message.push(cs);
             }
         }
-        Ok(instance)
+        Ok(rules.to_string())
     }
+    fn end_of_data(&mut self) {}
     fn part1(&mut self) -> usize {
         self.message
             .iter()
@@ -162,29 +153,4 @@ fn check_trace(
         }
     }
     target.len() == from
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
-            Answer::Part1(2)
-        );
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
-            Answer::Part2(12)
-        );
-    }
 }

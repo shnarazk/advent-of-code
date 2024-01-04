@@ -30,7 +30,6 @@ use {
 
 pub fn main() {
     let config = ConfigAoC::parse();
-    dbg!(&config);
     if config.bench {
         bench(config);
     } else {

@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/23>
-use {
-    crate::framework::{aoc_at, AdventOfCode, Answer, Description, ParseError},
-    std::borrow::Borrow,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
@@ -21,32 +18,22 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> String {
+        let cups = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
+        self.setup(9, 100, &cups);
         if 20 < self.next_cup.len() {
             return String::new();
         }
         self.turn_rounds().answer1()
     }
     fn part2(&mut self) -> usize {
-        self.turn_rounds().answer2()
-    }
-    fn solve(
-        _description: impl Borrow<Description>,
-        part: usize,
-    ) -> Answer<Self::Output1, Self::Output2> {
         let cups = vec![3, 6, 2, 9, 8, 1, 7, 5, 4];
-        match part {
-            1 => Answer::Part1(Puzzle::new(9, 100, &cups).part1()),
-            2 => Answer::Part2(Puzzle::new(1_000_000, 10_000_000, &cups).part2()),
-            _ => Answer::Answers(
-                Puzzle::new(9, 100, &cups).part1(),
-                Puzzle::new(1_000_000, 10_000_000, &cups).part2(),
-            ),
-        }
+        self.setup(1_000_000, 10_000_000, &cups);
+        self.turn_rounds().answer2()
     }
 }
 
 impl Puzzle {
-    fn new(len: usize, nr: usize, init: &[usize]) -> Puzzle {
+    fn setup(&mut self, len: usize, nr: usize, init: &[usize]) {
         let mut next_cup: Vec<usize> = Vec::new();
         for i in 0..=len {
             next_cup.push(i + 1);
@@ -65,12 +52,10 @@ impl Puzzle {
             next_cup[*last_of_init] = init[0];
         }
         // dbg!(&next_cup[1..]);
-        Puzzle {
-            next_cup,
-            start_from: init[0],
-            round_end: nr,
-            highest: len,
-        }
+        self.next_cup = next_cup;
+        self.start_from = init[0];
+        self.round_end = nr;
+        self.highest = len;
     }
     fn round(&mut self, current: usize) -> usize {
         let pick1: usize = self.next_cup[current];

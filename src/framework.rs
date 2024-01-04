@@ -7,7 +7,7 @@ use {
     std::{borrow::Borrow, fmt, fs::File, io::prelude::*},
 };
 
-#[derive(Clone, Debug, Parser)]
+#[derive(Clone, Debug, Default, Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct ConfigAoC {
     /// Dump all execution times to tmp/YEAR/execution_time.json
@@ -316,10 +316,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
             _ => Answer::None,
         }
     }
-    fn get_config() -> &'static ConfigAoC {
+    fn get_config(&self) -> &'static ConfigAoC {
         CONFIG.get().unwrap()
     }
-    fn get_data_source() -> &'static Description {
+    fn get_data_source(&self) -> &'static Description {
         DATA_SOURCE.get().unwrap()
     }
 }
