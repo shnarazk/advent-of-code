@@ -1,8 +1,9 @@
 //! <https://adventofcode.com/2019/day/25>
 use {
     crate::{
+        color,
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        line_parser, regex,
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -23,33 +24,90 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        let stdin = std::io::stdin();
+        // let stdin = std::io::stdin();
+        let parser = regex!(r" typing (\d{5,}) on");
         let mut buffer = String::new();
         let mut droid = Intcode::new(&self.line);
         let mut input: VecDeque<isize> = VecDeque::new();
         let mut output: VecDeque<isize> = VecDeque::new();
+        let mut answer: VecDeque<&str> = VecDeque::from(vec![
+            "north",
+            "west",
+            "west",
+            "take spool of cat6",
+            "east",
+            "east",
+            "south",
+            // goto Hallway
+            "west",
+            "north",
+            "take dark matter",
+            "south",
+            // back to Hull
+            "east",
+            "east",
+            "north",
+            "take sand",
+            "west",
+            "take coin", // get coin
+            "north",
+            "take jam", // get sand
+            "south",
+            "west",
+            "south",
+            "take wreath",
+            "west",
+            "take fuel cell",
+            "east",
+            "north",
+            "north",
+            "west",
+            // seek for the right combination
+            "drop coin",
+            "drop dark matter",
+            "fuel cell",
+            "jam",
+            "sand",
+            "spool of cat6",
+            "drop wreath",
+            //
+            "south",
+        ]);
         loop {
             match droid.run(&mut input, &mut output) {
                 State::None => {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
-                    print!("{message}");
+                    print!("{}{}{}", color::GREEN, message, color::RESET);
                     buffer.clear();
                     output.clear();
+                    dbg!();
+                    if let Some(found) = parser.captures(&message) {
+                        println!("{}{}{}", color::RED, &found[1], color::RESET);
+                        return found[1].parse::<usize>().unwrap();
+                    }
                     return 0;
                 }
                 State::HasOutput => {}
                 State::WaitInput => {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
+
                     output.clear();
-                    print!("{message}");
+                    print!("{}{}{}", color::BLUE, message, color::RESET);
                     if message.is_empty() {
                         return 0;
                     }
-                    buffer.clear();
-                    stdin.read_line(&mut buffer).expect("fail to io");
-                    for c in buffer.trim().chars() {
+                    // buffer.clear();
+                    // stdin.read_line(&mut buffer).expect("fail to io");
+                    // for c in buffer.trim().chars() {
+                    //     input.push_back(c as usize as isize);
+                    // }
+                    let Some(action) = answer.pop_front() else {
+                        panic!("no more input")
+                    };
+                    for c in action.chars() {
                         input.push_back(c as usize as isize);
                     }
+                    println!("{}{}{}", color::RED, action, color::RESET);
                     input.push_back(b'\n' as usize as isize);
                 }
             }
