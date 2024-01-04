@@ -43,9 +43,7 @@ impl Puzzle {
         let width = self.line[0].len();
         let mut grid: Vec<Vec<usize>> = Vec::new();
         for _ in 0..height * 5 {
-            let mut v: Vec<usize> = Vec::new();
-            v.resize(width * 5, 0);
-            grid.push(v);
+            grid.push(vec![0; width * 5]);
         }
         for dj in 0..5 {
             for di in 0..5 {

@@ -151,10 +151,9 @@ fn execute(bits: &[bool], level: usize) -> (usize, usize) {
     if bits.is_empty() || bits.iter().all(|b| !b) {
         return (0, bits.len());
     }
-    let result;
     let type_id = &bits[3..6];
     let mut i = 6;
-    match as_usize(type_id) {
+    let result = match as_usize(type_id) {
         4 => {
             // so skip to ...
             let mut digits: Vec<bool> = Vec::new();
@@ -170,7 +169,7 @@ fn execute(bits: &[bool], level: usize) -> (usize, usize) {
                 to_string(&digits),
                 as_usize(&digits),
             );
-            result = as_usize(&digits);
+            as_usize(&digits)
         }
         op => {
             // operator packet
@@ -226,7 +225,7 @@ fn execute(bits: &[bool], level: usize) -> (usize, usize) {
                     i += ii;
                 }
             }
-            result = match op {
+            match op {
                 0 => results.iter().sum(),
                 1 => results.iter().product(),
                 2 => *results.iter().min().unwrap(),
@@ -235,9 +234,9 @@ fn execute(bits: &[bool], level: usize) -> (usize, usize) {
                 6 => (results[0] < results[1]) as usize,
                 7 => (results[0] == results[1]) as usize,
                 _ => panic!(),
-            };
+            }
         }
-    }
+    };
     println!("{} - result: {}", header, result);
     (result, i)
 }

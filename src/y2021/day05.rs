@@ -49,9 +49,7 @@ impl AdventOfCode for Puzzle {
             .max()
             .unwrap_or(0);
         for _ in 0..=self.max_y {
-            let mut v = Vec::new();
-            v.resize(self.max_x + 1, 0);
-            self.count.push(v);
+            self.count.push(vec![0; self.max_x + 1]);
         }
     }
     fn part1(&mut self) -> usize {

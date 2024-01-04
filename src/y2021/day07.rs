@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
         for pos in 0..=len {
             fmin = fmin.min(
                 vec.iter()
-                    .map(|i| (*i as isize - pos as isize).abs() as usize)
+                    .map(|i| (*i as isize - pos as isize).unsigned_abs())
                     .sum(),
             );
         }
@@ -48,7 +48,7 @@ impl AdventOfCode for Puzzle {
         for pos in 0..=len {
             fmin = fmin.min(
                 vec.iter()
-                    .map(|i| get(&mut fuel_table, (*i as isize - pos as isize).abs() as usize))
+                    .map(|i| get(&mut fuel_table, (*i as isize - pos as isize).unsigned_abs()))
                     .sum(),
             );
         }

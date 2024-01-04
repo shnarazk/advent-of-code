@@ -32,7 +32,7 @@ pub struct Puzzle {
 
 impl Puzzle {
     fn count_to(&self, path: Vec<&Node>) -> usize {
-        let here: &Node = *path.last().unwrap();
+        let here: &Node = path.last().unwrap();
         if *here == Node::Start {
             let mut p = path.clone();
             p.reverse();
@@ -51,7 +51,7 @@ impl Puzzle {
         count
     }
     fn count_to2(&self, path: Vec<&Node>, favorite: Option<&Node>) -> usize {
-        let here: &Node = *path.last().unwrap();
+        let here: &Node = path.last().unwrap();
         if *here == Node::Start {
             if let Some(f) = favorite {
                 if path.iter().filter(|n| **n == f).count() == 2 {

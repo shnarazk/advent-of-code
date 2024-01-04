@@ -24,7 +24,7 @@ struct P1 {
 
 impl PartialOrd for P1 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.cost.partial_cmp(&other.cost)
+        Some(self.cost.cmp(&other.cost))
     }
 }
 

@@ -6,7 +6,7 @@ use {
         framework::{aoc_at, AdventOfCode, ParseError},
         line_parser, regex,
     },
-    std::{cmp::Ordering, collections::HashMap, fmt},
+    std::{cmp::Ordering, collections::HashMap, fmt, fmt::Write},
 };
 
 enum Opr {
@@ -102,19 +102,19 @@ impl AdventOfCode for Puzzle {
         self.direction = Some(Ordering::Greater);
         self.best = [1; 14].to_vec();
         self.search(Vec::new(), 0);
-        self.best
-            .iter()
-            .map(|n| format!("{}", n))
-            .collect::<String>()
+        self.best.iter().fold(String::new(), |mut output, n| {
+            let _ = write!(output, "{n}");
+            output
+        })
     }
     fn part2(&mut self) -> Self::Output2 {
         self.direction = Some(Ordering::Less);
         self.best = [9; 14].to_vec();
         self.search(Vec::new(), 0);
-        self.best
-            .iter()
-            .map(|n| format!("{}", n))
-            .collect::<String>()
+        self.best.iter().fold(String::new(), |mut output, n| {
+            let _ = write!(output, "{n}");
+            output
+        })
     }
 }
 
@@ -302,7 +302,7 @@ impl Puzzle {
             let input2 = input.clone();
             input.reverse();
             let mut z: isize = 0;
-            for (_pc, inst) in self.line.iter().enumerate() {
+            for inst in self.line.iter() {
                 match inst {
                     Inst::Inp(r1) => {
                         if let Some(index) = 13_usize.checked_sub(input.len()) {

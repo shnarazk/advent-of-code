@@ -75,7 +75,7 @@ impl AdventOfCode for Puzzle {
                 println!("swipped at sx = {}, stoped at sy = {}", init_sx, init_sy);
             }
         }
-        result.abs() as usize
+        result.unsigned_abs()
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut nsat: usize = 0;
