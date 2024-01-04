@@ -10,9 +10,9 @@ use {
 #[derive(Clone, Debug, Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct ConfigAoC {
-    /// Target year like 2023
+    /// Dump all execution times to tmp/YEAR/execution_time.json
     #[arg(long)]
-    pub bench: Option<usize>,
+    pub bench: bool,
     /// Target year like 2023
     #[arg(short, long, default_value_t = 2023)]
     pub year: usize,
@@ -22,7 +22,7 @@ pub struct ConfigAoC {
     pub day: Option<usize>,
     /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
     pub alt: Option<String>,
-    /// serialize as JSON format
+    /// activate 'dump' function for JSON serialization
     #[arg(short, long)]
     pub serialize: bool,
 }

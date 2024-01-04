@@ -31,7 +31,7 @@ use {
 pub fn main() {
     let config = ConfigAoC::parse();
     dbg!(&config);
-    if config.bench.is_some() {
+    if config.bench {
         bench(config);
     } else {
         run_solver(config);
