@@ -4,8 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         line_parser,
     },
-    std::collections::{HashMap, VecDeque},
-    std::io::Write,
+    std::collections::HashMap,
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -36,14 +35,11 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
-        let mut env = Env {
-            input_stream: VecDeque::from(include!("day13-joystick.rs")),
-            ..Default::default()
-        };
+        let mut env = Env::default();
         env.display(true);
         self.start(&mut env);
         env.display(false);
-        0
+        env.score
     }
 }
 
@@ -186,48 +182,14 @@ pub struct Env {
     packet: [isize; 3],
     objects: HashMap<(isize, isize), Object>,
     score: usize,
-    input_stream: VecDeque<isize>,
-    buffer: String,
-    input_history: Vec<isize>,
+    paddle_pos: isize,
+    ball_pos: isize,
 }
 
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
         self.display(false);
-        if let Some(recorded) = self.input_stream.pop_front() {
-            println!();
-            self.input_history.push(recorded);
-            recorded
-        } else {
-            let stdin = std::io::stdin();
-            loop {
-                self.buffer.clear();
-                stdin.read_line(&mut self.buffer).expect("strange error");
-                // I'm an Engram user.
-                match self.buffer.chars().next().unwrap_or('_') {
-                    'c' => {
-                        self.input_history.push(-1);
-                        return -1;
-                    }
-                    'i' | ' ' | '\n' => {
-                        self.input_history.push(0);
-                        return 0;
-                    }
-                    'e' => {
-                        self.input_history.push(1);
-                        return 1;
-                    }
-                    's' => {
-                        if let Ok(f) = std::fs::File::create("day13-joystick.rs") {
-                            let mut obuf = std::io::BufWriter::new(f);
-                            obuf.write_all(format!("{:?}\n", self.input_history).as_bytes())
-                                .expect("save error");
-                        }
-                    }
-                    _ => (),
-                }
-            }
-        }
+        return (self.ball_pos - self.paddle_pos).signum();
     }
     pub fn hanle_output(&mut self, output: isize) {
         self.packet[self.output_mode] = output;
@@ -243,7 +205,7 @@ impl Env {
         }
         self.output_mode = (self.output_mode + 1) % 3;
     }
-    fn display(&self, init: bool) {
+    fn display(&mut self, init: bool) {
         if !init {
             print!("\x1B[25A\x1B[1G");
         } else {
@@ -256,8 +218,14 @@ impl Env {
                         Object::Empty => " ",
                         Object::Wall => "#",
                         Object::Block => "*",
-                        Object::Paddle => "T",
-                        Object::Ball => "o",
+                        Object::Paddle => {
+                            self.paddle_pos = x;
+                            "T"
+                        }
+                        Object::Ball => {
+                            self.ball_pos = x;
+                            "o"
+                        }
                     };
                     print!("{}", d);
                 } else {
@@ -270,6 +238,6 @@ impl Env {
                 println!();
             }
         }
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        // std::thread::sleep(std::time::Duration::from_millis(2));
     }
 }
