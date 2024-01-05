@@ -164,9 +164,6 @@ impl Cubic {
     fn affecting(&self, world: &Puzzle) -> usize {
         world.num_robots - self.outside
     }
-    fn affecting_(&self) -> isize {
-        -(self.outside as isize)
-    }
     fn setup_membership(&mut self, world: &Puzzle) {
         self.inside = world
             .line
@@ -304,6 +301,6 @@ impl PartialOrd for Cubic {
 
 impl Ord for Cubic {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.affecting_().cmp(&other.affecting_())
+        self.outside.cmp(&other.outside)
     }
 }
