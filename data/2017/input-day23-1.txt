@@ -1,0 +1,71 @@
+mul b 6700 -100000
+set c 6700 -100000 -17000
+set d 2    ## from L30
+set e 2    ## from L22
+set g d    ## from L18
+mul g e
+sub g b
+jnz g 2
+set f 0
+sub e -1
+set g e
+sub g b
+jnz g -8  ## L18
+sub d -1
+set g d
+sub g b
+jnz g -13 ## L22
+jnz f 2
+sub h -1
+set g b
+sub g c
+jnz g 2
+jnz 1 3
+sub b -17
+jnz 1 -22  ## L30
+
+
+b = 6700 - 100000;
+c = 6700 - 100000 - 17000;
+loop {
+	match goto {
+		30=> {
+			d = 2;
+			e = 2;
+			g = d;
+			g *= e;
+		}
+22 => {
+			e = 2;
+			g = d;
+			g *= e;
+}
+		18=> {
+			g = d;
+			g *= e;
+		}
+	}
+	g -= b;
+	if 0 == g { f = 0; }
+	e += 1;
+	g = e - b;
+	if 0 != g {
+		goto = 18;
+		continue;
+	} 
+	d += 1;
+	g = d;
+	if 0 != g {
+		goto = 22;
+		continue;
+	}
+	if f == 0 {
+h += 1;		
+	}
+	g = b - c;
+	if g == 0 {
+		break;
+	}
+ b += 17;
+goto = 30;
+}
