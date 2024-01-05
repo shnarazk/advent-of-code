@@ -6,7 +6,7 @@ use {
         progress,
     },
     std::{
-        cmp::{Ordering, Reverse},
+        cmp::Reverse,
         collections::{BinaryHeap, HashMap, HashSet, VecDeque},
     },
 };
@@ -20,61 +20,21 @@ type Location = (usize, usize);
 ///
 /// For part 1
 ///
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct State {
     estimate: usize,
     current_cost: usize,
     inventry: Vec<u8>,
 }
 
-impl PartialEq for State {
-    fn eq(&self, other: &Self) -> bool {
-        self.inventry.eq(&other.inventry)
-    }
-}
-
-impl Eq for State {}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.estimate.cmp(&other.estimate)
-    }
-}
-
 ///
 /// For part 2
 ///
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct State4 {
     estimate: usize,
     current_cost: usize,
     inventry: [Vec<u8>; 4],
-}
-
-impl PartialEq for State4 {
-    fn eq(&self, other: &Self) -> bool {
-        self.inventry.eq(&other.inventry)
-    }
-}
-
-impl Eq for State4 {}
-
-impl PartialOrd for State4 {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for State4 {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.estimate.cmp(&other.estimate)
-    }
 }
 
 #[derive(Debug, Default, Eq, PartialEq)]
