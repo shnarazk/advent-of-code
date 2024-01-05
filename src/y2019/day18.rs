@@ -3,10 +3,11 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors4,
+        progress,
     },
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, VecDeque},
+        collections::{BinaryHeap, HashMap, HashSet, VecDeque},
     },
 };
 
@@ -19,7 +20,7 @@ type Location = (usize, usize);
 ///
 /// For part 1
 ///
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, Hash)]
 struct State {
     estimate: usize,
     current_cost: usize,
@@ -42,17 +43,14 @@ impl PartialOrd for State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        match self.estimate.cmp(&other.estimate) {
-            Ordering::Equal => self.current_cost.cmp(&other.current_cost),
-            result => result,
-        }
+        self.estimate.cmp(&other.estimate)
     }
 }
 
 ///
 /// For part 2
 ///
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, Hash)]
 struct State4 {
     estimate: usize,
     current_cost: usize,
@@ -75,10 +73,7 @@ impl PartialOrd for State4 {
 
 impl Ord for State4 {
     fn cmp(&self, other: &Self) -> Ordering {
-        match self.estimate.cmp(&other.estimate) {
-            Ordering::Equal => self.current_cost.cmp(&other.current_cost),
-            result => result,
-        }
+        self.estimate.cmp(&other.estimate)
     }
 }
 
@@ -122,6 +117,7 @@ impl AdventOfCode for Puzzle {
         let n_keys = self.keys.len();
         let shortest = 5;
         let mut to_check: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+        let mut visited: HashSet<State> = HashSet::new();
         to_check.push(Reverse(State {
             estimate: n_keys * shortest,
             current_cost: 0,
@@ -132,12 +128,15 @@ impl AdventOfCode for Puzzle {
             if 4545 <= state.current_cost {
                 continue;
             }
+            if visited.contains(&state) {
+                continue;
+            }
             if state.inventry.len() == self.keys.len() {
                 return state.current_cost;
             }
             if len < state.inventry.len() {
                 len = state.inventry.len();
-                println!("{}:{}/{}", len, state.estimate, to_check.len());
+                progress!(format!("{}:{}/{}", len, state.estimate, to_check.len()));
             }
             let from = *state.inventry.last().unwrap_or(&ENTRANCE);
             let map = self.build_cost_map(from, &state.inventry);
@@ -159,6 +158,7 @@ impl AdventOfCode for Puzzle {
                     }
                 }
             }
+            visited.insert(state);
         }
         0
     }
@@ -184,6 +184,7 @@ impl AdventOfCode for Puzzle {
         let n_keys = self.keys.len();
         let shortest = 80;
         let mut to_check: BinaryHeap<Reverse<State4>> = BinaryHeap::new();
+        let mut visited: HashSet<State4> = HashSet::new();
         to_check.push(Reverse(State4 {
             estimate: n_keys * shortest,
             current_cost: 0,
@@ -194,19 +195,23 @@ impl AdventOfCode for Puzzle {
             if 1693 <= state.current_cost {
                 continue;
             }
+            if visited.contains(&state) {
+                continue;
+            }
             let len_inventry = state.inventry.iter().map(|v| v.len()).sum::<usize>();
             {
                 if len_inventry == n_keys {
+                    progress!("");
                     return state.current_cost;
                 }
                 if len < len_inventry {
                     len = len_inventry;
-                    println!(
+                    progress!(format!(
                         "got {}: estimated cost={}, states={}",
                         len,
                         state.estimate,
                         to_check.len()
-                    );
+                    ));
                 }
             }
             for i in 0..4 {
@@ -237,6 +242,7 @@ impl AdventOfCode for Puzzle {
                     }
                 }
             }
+            visited.insert(state);
         }
         0
     }
