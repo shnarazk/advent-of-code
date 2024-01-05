@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2022/day/17>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        progress,
+    },
     std::collections::{HashMap, HashSet, VecDeque},
 };
 
@@ -23,9 +26,6 @@ impl AdventOfCode for Puzzle {
                 .collect::<Vec<isize>>();
         }
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut wind = self.line.iter().cycle();
@@ -75,15 +75,15 @@ impl AdventOfCode for Puzzle {
         let target = 1000000000000;
         let (header_len, _header_height, unit_len, unit_height) = self.cyclic_pattern(None);
         let num_units = (target - header_len) / unit_len;
-        let remain_rocks = (target - header_len) % unit_len;
-        let remain_height = self.cyclic_pattern(Some(header_len + remain_rocks)).0;
+        let remain_len = (target - header_len) % unit_len;
+        let remain_height = self.cyclic_pattern(Some(header_len + remain_len)).0;
         num_units * unit_height + remain_height
     }
 }
 
 impl Puzzle {
     fn cyclic_pattern(&mut self, upto: Option<usize>) -> (usize, usize, usize, usize) {
-        let depth = 40;
+        let depth = 34;
         const MEMORY_LEN: usize = 7;
         let mut memory: HashMap<[usize; MEMORY_LEN + 1], (usize, usize)> = HashMap::new();
         let mut cycles = 0;
@@ -123,13 +123,14 @@ impl Puzzle {
                     pre_x[5],
                     pre_x[6],
                 ];
-                println!("{cycles:>4}, i:{i:>8}, key:{:?}", &key);
+                progress!(format!("cycle:{cycles:>4}, blocks:{i:>8}"));
                 if let Some((header_len, header_height)) = memory.get(&key) {
-                    return dbg!(
+                    progress!("");
+                    return (
                         *header_len,
                         *header_height,
                         i - *header_len,
-                        bottom - *header_height
+                        bottom - *header_height,
                     );
                 }
                 memory.insert(key, (i, bottom));
@@ -147,14 +148,14 @@ impl Puzzle {
                     break;
                 }
                 y = tmp_y;
-                assert!(bottom < y + depth);
+                debug_assert!(bottom < y + depth);
             }
             blocks.retain(|(_, h)| bottom <= *h + depth);
             bottom = place((x, y), &shape[id], &mut blocks);
             pre_x.push_front(x);
             pre_x.resize(MEMORY_LEN, 0);
         }
-        assert!(upto.is_some());
+        debug_assert!(upto.is_some());
         (bottom, 0, 0, 0)
     }
 }
