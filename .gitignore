@@ -12,6 +12,6 @@ Cargo.lock
 .DS_Store
 *~
 
-/data/*/
-# /data/*/*.txt
+/data/2*.tar.xz
+/data/2*/input-day??.txt
 /tmp/
