@@ -152,7 +152,7 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let mut line = self.line.clone();
         let b_value = self.part1();
-        line.retain(|c| !matches!(&*c, Code::Input(Id::Const(_), Id::Wire(b)) if b == "b"));
+        line.retain(|c| !matches!(c, Code::Input(Id::Const(_), Id::Wire(b)) if b == "b"));
         line.push(Code::Input(Id::Const(b_value), Id::Wire("b".to_string())));
         dbg!(line.len());
         self.line = line;

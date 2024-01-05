@@ -42,8 +42,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let end = 2503;
-        let mut point: Vec<usize> = Vec::new();
-        point.resize(self.line.len(), 0);
+        let mut point: Vec<usize> = vec![0; self.line.len()];
         let mut dist = point.clone();
 
         for t in 0..end {

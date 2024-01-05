@@ -129,9 +129,7 @@ impl AdventOfCode for Puzzle {
                                 panic!();
                             }
                             *total.entry(g).or_insert(0) += e - b;
-                            days.entry(g)
-                                .or_insert_with(HashSet::new)
-                                .insert(ts.as_day());
+                            days.entry(g).or_default().insert(ts.as_day());
                         }
                     }
                     beg = None;

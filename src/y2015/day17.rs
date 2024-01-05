@@ -26,8 +26,7 @@ impl AdventOfCode for Puzzle {
 
 impl Puzzle {
     fn patterns_for(&self, target: usize) -> usize {
-        let mut memo: Vec<usize> = Vec::new();
-        memo.resize(target + 1, 0);
+        let mut memo: Vec<usize> = vec![0; target + 1];
         memo[0] = 1;
         for l in self.line.iter() {
             for i in (0..=target).rev() {

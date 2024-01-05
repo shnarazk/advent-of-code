@@ -98,18 +98,16 @@ impl AdventOfCode for Puzzle {
                     match (dy, dx) {
                         (0, 0) => (),
                         (0, _) => {
-                            let entry = visible.entry((0, dx.signum())).or_insert(Vec::new());
+                            let entry = visible.entry((0, dx.signum())).or_default();
                             entry.push((dx.unsigned_abs(), jj, ii));
                         }
                         (_, 0) => {
-                            let entry = visible.entry((dy.signum(), 0)).or_insert(Vec::new());
+                            let entry = visible.entry((dy.signum(), 0)).or_default();
                             entry.push((dy.unsigned_abs(), jj, ii));
                         }
                         _ => {
                             let factor = gcd(dy.unsigned_abs(), dx.unsigned_abs()) as isize;
-                            let entry = visible
-                                .entry((dy / factor, dx / factor))
-                                .or_insert(Vec::new());
+                            let entry = visible.entry((dy / factor, dx / factor)).or_default();
                             entry.push((factor as usize, jj, ii));
                         }
                     }

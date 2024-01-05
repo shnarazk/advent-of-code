@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
         let mut dic: HashMap<char, usize> = HashMap::new();
         let n = block.lines().count();
         for ch in block.chars() {
-            if ('a'..='z').contains(&ch) {
+            if ch.is_ascii_lowercase() {
                 *dic.entry(ch).or_insert(0) += 1;
             }
         }

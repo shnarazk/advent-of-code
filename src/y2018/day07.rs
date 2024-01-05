@@ -44,8 +44,8 @@ impl AdventOfCode for Puzzle {
         for rel in self.line.iter() {
             letters.insert(rel.0);
             letters.insert(rel.1);
-            succs.entry(rel.0).or_insert(Vec::new()).push(rel.1);
-            conds.entry(rel.1).or_insert(Vec::new()).push(rel.0);
+            succs.entry(rel.0).or_default().push(rel.1);
+            conds.entry(rel.1).or_default().push(rel.0);
             prev.insert(rel.1, rel.0);
         }
         dbg!(letters.len());
@@ -95,8 +95,8 @@ impl AdventOfCode for Puzzle {
         for rel in self.line.iter() {
             letters.insert(rel.0);
             letters.insert(rel.1);
-            succs.entry(rel.0).or_insert(Vec::new()).push(rel.1);
-            conds.entry(rel.1).or_insert(Vec::new()).push(rel.0);
+            succs.entry(rel.0).or_default().push(rel.1);
+            conds.entry(rel.1).or_default().push(rel.0);
             prev.insert(rel.1, rel.0);
         }
         let mut available: Vec<char> = succs

@@ -181,7 +181,7 @@ impl Cubic {
         assert!(0 < self.radius || self.inside + self.outside == world.num_robots);
     }
     fn is_coherent(&mut self, world: &Puzzle) -> Option<usize> {
-        (world.num_robots == self.inside + self.outside).then(|| self.inside)
+        (world.num_robots == self.inside + self.outside).then_some(self.inside)
     }
     fn divide(&self, world: &Puzzle) -> Vec<Cubic> {
         let c = self.center;
@@ -298,7 +298,7 @@ impl Geometry for Cubic {
 
 impl PartialOrd for Cubic {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.affecting_().partial_cmp(&other.affecting_())
+        Some(self.cmp(other))
     }
 }
 

@@ -33,10 +33,10 @@ impl AdventOfCode for Puzzle {
         let mut env = Env::default();
         env.panel.insert((0, 0), (true, 0));
         self.start(&mut env);
-        let y_beg = env.panel.iter().map(|(loc, _)| loc.0).min().unwrap();
-        let y_end = env.panel.iter().map(|(loc, _)| loc.0).max().unwrap();
-        let x_beg = env.panel.iter().map(|(loc, _)| loc.1).min().unwrap();
-        let x_end = env.panel.iter().map(|(loc, _)| loc.1).max().unwrap();
+        let y_beg = env.panel.keys().map(|loc| loc.0).min().unwrap();
+        let y_end = env.panel.keys().map(|loc| loc.0).max().unwrap();
+        let x_beg = env.panel.keys().map(|loc| loc.1).min().unwrap();
+        let x_end = env.panel.keys().map(|loc| loc.1).max().unwrap();
         for y in y_beg..=y_end {
             for x in x_beg..=x_end {
                 if env.panel.get(&(y, x)).map_or(false, |(c, _)| *c) {

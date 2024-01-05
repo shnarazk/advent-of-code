@@ -4,7 +4,7 @@ use crate::framework::{aoc, AdventOfCode, ParseError};
 /// Don't work
 #[allow(dead_code)]
 fn formatter_recursive(vec: &[usize]) -> Vec<usize> {
-    if let Some(n) = vec.get(0) {
+    if let Some(n) = vec.first() {
         let mut nrepeat = 0;
         for (i, x) in vec.iter().enumerate() {
             if x == n {

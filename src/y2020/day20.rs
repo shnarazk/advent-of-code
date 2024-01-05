@@ -132,7 +132,7 @@ pub fn flip_bits(width: usize, mut n: usize) -> usize {
     let mut result = 0;
     for _ in 0..width {
         result *= 2;
-        result += (n % 2) as usize;
+        result += n % 2;
         n /= 2;
     }
     result

@@ -27,7 +27,7 @@ struct State {
 
 impl PartialOrd for State {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.cost.partial_cmp(&other.cost)
+        Some(self.cost.cmp(&other.cost))
     }
 }
 
@@ -77,10 +77,7 @@ impl AdventOfCode for Puzzle {
                                 if portal_name == "ZZ" {
                                     self.portal.insert(locs.1, (0, 0));
                                 }
-                                self.gate
-                                    .entry(portal_name)
-                                    .or_insert(Vec::new())
-                                    .push(locs);
+                                self.gate.entry(portal_name).or_default().push(locs);
                             }
                         } else if let Some(h) = self.map.get(&(y, x - 1)) {
                             if b'A' <= *h && *h <= b'Z' {
@@ -105,10 +102,7 @@ impl AdventOfCode for Puzzle {
                                 if portal_name == "ZZ" {
                                     self.portal.insert(locs.1, (0, 0));
                                 }
-                                self.gate
-                                    .entry(portal_name)
-                                    .or_insert(Vec::new())
-                                    .push(locs);
+                                self.gate.entry(portal_name).or_default().push(locs);
                             }
                         }
                     }
@@ -261,7 +255,7 @@ impl Puzzle {
         let goal = self.gate.get("ZZ").unwrap()[0].0;
         for (name, entries) in self.gate.iter() {
             for portal_entry in entries.iter() {
-                for (dest, (cost, flag)) in self.build_cost_table(&inner, portal_entry.1).iter() {
+                for (dest, (cost, flag)) in self.build_cost_table(inner, portal_entry.1).iter() {
                     if name == "AA" {
                         dbg!(portal_entry.1, dest, cost);
                     }

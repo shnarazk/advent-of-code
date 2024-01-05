@@ -41,7 +41,7 @@ impl<const N: usize> PartialEq for State<N> {
 impl<const N: usize> Eq for State<N> {}
 impl<const N: usize> PartialOrd for State<N> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.estimate.partial_cmp(&other.estimate)
+        Some(self.cmp(other))
     }
 }
 impl<const N: usize> Ord for State<N> {
@@ -97,7 +97,7 @@ impl<const N: usize> State<N> {
             cost: self.cost + 1,
             estimate: -(self.cost as isize + 1 + (e as isize)),
         };
-        s.is_safe().then(|| s)
+        s.is_safe().then_some(s)
     }
     fn adjacent(&self) -> std::vec::IntoIter<State<N>> {
         let mut list: Vec<State<N>> = Vec::new();

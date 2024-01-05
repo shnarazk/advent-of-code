@@ -66,10 +66,7 @@ impl Group {
 
 impl PartialOrd for Group {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match other.effective_power().partial_cmp(&self.effective_power()) {
-            Some(std::cmp::Ordering::Equal) => other.initiative.partial_cmp(&self.initiative),
-            e => e,
-        }
+        Some(self.cmp(other))
     }
 }
 
@@ -177,7 +174,7 @@ impl Puzzle {
                 }
                 if best_damage < real_damage
                     || (best_damage == real_damage
-                        && (best_target == None
+                        && (best_target.is_none()
                             || (best_target.unwrap().effective_power() < target.effective_power()
                                 || (best_target.unwrap().effective_power()
                                     == target.effective_power()

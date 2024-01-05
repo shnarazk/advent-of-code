@@ -189,7 +189,7 @@ pub struct Env {
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
         self.display(false);
-        return (self.ball_pos - self.paddle_pos).signum();
+        (self.ball_pos - self.paddle_pos).signum()
     }
     pub fn hanle_output(&mut self, output: isize) {
         self.packet[self.output_mode] = output;

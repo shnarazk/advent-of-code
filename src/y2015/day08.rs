@@ -2,7 +2,7 @@
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
 fn count(vec: &[char]) -> usize {
-    if let Some(ch) = vec.get(0) {
+    if let Some(ch) = vec.first() {
         match ch {
             '\\' if vec.get(1) == Some(&'\\') => 1 + count(&vec[2..]),
             '\\' if vec.get(1) == Some(&'"') => 1 + count(&vec[2..]),
@@ -15,7 +15,7 @@ fn count(vec: &[char]) -> usize {
 }
 
 fn encode(vec: &[char]) -> usize {
-    if let Some(ch) = vec.get(0) {
+    if let Some(ch) = vec.first() {
         match ch {
             '"' => 2 + encode(&vec[1..]),
             '\\' => 2 + encode(&vec[1..]),

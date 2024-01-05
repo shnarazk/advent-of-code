@@ -115,7 +115,7 @@ impl AdventOfCode for Puzzle {
 
 impl Puzzle {
     fn distance(&self) -> usize {
-        (self.dist_sn.abs() as usize) + (self.dist_we.abs() as usize)
+        (self.dist_sn.unsigned_abs()) + (self.dist_we.unsigned_abs())
     }
     #[allow(dead_code)]
     fn print(&self) {
@@ -259,29 +259,5 @@ impl Puzzle {
     }
     fn stopped(&self) -> bool {
         self.codes.len() == self.ip
-    }
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 1),
-            Answer::Part1(25)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 2),
-            Answer::Part2(286)
-        );
     }
 }

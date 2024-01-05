@@ -40,7 +40,7 @@ impl AdventOfCode for Puzzle {
         let mut count = 0;
         for j in 0..self.line.len() / 3 {
             for i in 0..3 {
-                let mut v = vec![
+                let mut v = [
                     self.line[j * 3][i],
                     self.line[j * 3 + 1][i],
                     self.line[j * 3 + 2][i],

@@ -77,7 +77,7 @@ impl Puzzle {
         let mut y_max: isize = isize::MIN;
         let mut x_max: isize = isize::MIN;
         for l in source.iter() {
-            map.entry(l[1]).or_insert(Vec::new()).push(l[0]);
+            map.entry(l[1]).or_default().push(l[0]);
             x_min = x_min.min(l[0]);
             y_min = y_min.min(l[1]);
             x_max = x_max.max(l[0]);

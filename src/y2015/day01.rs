@@ -10,7 +10,7 @@ pub struct Puzzle {
 }
 
 fn floor(vec: &[char]) -> isize {
-    match vec.get(0) {
+    match vec.first() {
         None => 0,
         Some('(') => 1 + floor(&vec[1..]),
         Some(')') => -1 + floor(&vec[1..]),
@@ -19,7 +19,7 @@ fn floor(vec: &[char]) -> isize {
 }
 
 fn to_basement(vec: &[char], level: isize) -> isize {
-    match vec.get(0) {
+    match vec.first() {
         Some('(') => 1 + to_basement(&vec[1..], level + 1),
         Some(')') if level == 0 => 1,
         Some(')') => 1 + to_basement(&vec[1..], level - 1),

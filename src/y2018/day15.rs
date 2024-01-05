@@ -21,7 +21,7 @@ enum Creature {
 
 impl PartialOrd for Creature {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.position().partial_cmp(other.position())
+        Some(self.cmp(other))
     }
 }
 
@@ -73,7 +73,7 @@ impl Creature {
             }
         }
     }
-    fn target_creatures<'a, 'b>(&'a self, world: &'b Puzzle) -> Vec<&'b Creature> {
+    fn target_creatures<'b>(&self, world: &'b Puzzle) -> Vec<&'b Creature> {
         world
             .creatures
             .iter()
@@ -125,7 +125,7 @@ impl Creature {
             *targets[0]
         })
     }
-    fn is_in_a_range<'a, 'b>(&'a self, world: &'b Puzzle) -> Option<Vec<&'b Creature>> {
+    fn is_in_a_range<'b>(&self, world: &'b Puzzle) -> Option<Vec<&'b Creature>> {
         let p = self.position();
         let enemies = self.target_creatures(world);
         let mut targets: HashSet<&Creature> = HashSet::new();

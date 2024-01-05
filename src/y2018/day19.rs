@@ -107,11 +107,7 @@ impl Inst {
     }
 }
 
-fn execute<'a, 'b>(
-    op: &Inst,
-    register: &'a [usize; 6],
-    out: &'b mut [usize; 6],
-) -> &'b mut [usize; 6] {
+fn execute<'b>(op: &Inst, register: &[usize; 6], out: &'b mut [usize; 6]) -> &'b mut [usize; 6] {
     macro_rules! reg {
         ($num: expr) => {{
             register[*$num]

@@ -52,7 +52,7 @@ impl AdventOfCode for Puzzle {
         bag.insert("FUEL", 1);
         let mut num_ore: usize = 0;
         while let Some((key, amount)) = bag.iter().next() {
-            let k: &str = *key;
+            let k: &str = key;
             let mut amount = *amount;
             bag.remove(k);
             if let Some(requires) = hash.get(k) {
@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
             bag.insert("FUEL", trying);
             let mut num_ore: usize = 0;
             while let Some((key, amount)) = bag.iter().next() {
-                let k: &str = *key;
+                let k: &str = key;
                 let mut amount = *amount;
                 bag.remove(k);
                 if let Some(requires) = hash.get(k) {

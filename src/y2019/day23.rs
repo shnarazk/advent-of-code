@@ -149,7 +149,7 @@ impl Nat {
         } else {
             self.idling = 0;
         }
-        (2 < self.idling).then(|| (self.x, self.y))
+        (2 < self.idling).then_some((self.x, self.y))
     }
 }
 
@@ -184,7 +184,7 @@ impl Intcode {
     }
     fn resume_in(&mut self, val: isize) {
         if let State::WaitInput(addr) = self.state {
-            self.memory.insert(addr as usize, val);
+            self.memory.insert(addr, val);
             self.pc += 2;
         }
     }

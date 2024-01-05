@@ -313,28 +313,25 @@ e>  5: b = 0;
 
 fn part1() -> usize {
     let mut b: usize = 0;
+    let mut c = b | 65536;
+    b = 6663054;
     loop {
-        let mut c = b | 65536;
-        b = 6663054;
-        loop {
-            let mut e = c & 255;
-            b += e;
-            b &= 16777215;
-            b *= 65899;
-            b &= 16777215;
-            if 256 > c {
-                return b;
-                // continue 'outer;
-            }
-            e = 0;
-            loop {
-                if 256 * (e + 1) > c {
-                    break;
-                }
-                e += 1;
-            }
-            c = e;
+        let mut e = c & 255;
+        b += e;
+        b &= 16777215;
+        b *= 65899;
+        b &= 16777215;
+        if 256 > c {
+            return b;
         }
+        e = 0;
+        loop {
+            if 256 * (e + 1) > c {
+                break;
+            }
+            e += 1;
+        }
+        c = e;
     }
 }
 

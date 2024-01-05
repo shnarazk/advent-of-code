@@ -40,7 +40,7 @@ impl AdventOfCode for Puzzle {
                     let y = pos.0 as isize + d.0;
                     let x = pos.1 as isize + d.1;
                     (valid_range.contains(&y) && valid_range.contains(&x))
-                        .then(|| (y as usize, x as usize))
+                        .then_some((y as usize, x as usize))
                 })
                 .zip(hasher.get(&path).iter())
                 .filter(|(p, b)| p.is_some() && b.is_some())
@@ -72,7 +72,7 @@ impl AdventOfCode for Puzzle {
                     let y = pos.0 as isize + d.0;
                     let x = pos.1 as isize + d.1;
                     (valid_range.contains(&y) && valid_range.contains(&x))
-                        .then(|| (y as usize, x as usize))
+                        .then_some((y as usize, x as usize))
                 })
                 .zip(hasher.get(&path).iter())
                 .filter(|(p, b)| p.is_some() && b.is_some())
@@ -107,7 +107,7 @@ impl<'a> Hasher<'a> {
             .chars()
             .take(4)
             .collect::<Vec<char>>();
-        let is_open = |c: &char, d: char| ['b', 'c', 'd', 'e', 'f'].contains(c).then(|| d);
+        let is_open = |c: &char, d: char| ['b', 'c', 'd', 'e', 'f'].contains(c).then_some(d);
         [
             is_open(&phrase[0], 'U'),
             is_open(&phrase[1], 'D'),

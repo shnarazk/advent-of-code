@@ -36,10 +36,7 @@ impl Eq for State {}
 
 impl PartialOrd for State {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.estimate.partial_cmp(&other.estimate) {
-            Some(Ordering::Equal) => self.current_cost.partial_cmp(&other.current_cost),
-            result => result,
-        }
+        Some(self.cmp(other))
     }
 }
 
@@ -72,10 +69,7 @@ impl Eq for State4 {}
 
 impl PartialOrd for State4 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.estimate.partial_cmp(&other.estimate) {
-            Some(Ordering::Equal) => self.current_cost.partial_cmp(&other.current_cost),
-            result => result,
-        }
+        Some(self.cmp(other))
     }
 }
 

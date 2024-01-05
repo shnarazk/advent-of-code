@@ -25,8 +25,7 @@ impl AdventOfCode for Puzzle {
         // self.points = 25;
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut points = Vec::new();
-        points.resize(self.players, 0);
+        let mut points = vec![0; self.players];
         let mut circle = vec![0];
         let mut current = 1;
         let mut next_ball = 1;
@@ -59,10 +58,8 @@ impl AdventOfCode for Puzzle {
         self.points *= 100;
         // self.players = 10;
         // self.points = 1618;
-        let mut points = Vec::new();
-        points.resize(self.players, 0);
-        let mut circle_next = Vec::new();
-        circle_next.resize(self.points, 0);
+        let mut points = vec![0; self.players];
+        let mut circle_next = vec![0; self.points];
         let mut current = 0;
         let mut next_ball = 1;
         let mut following_ptr = 0;

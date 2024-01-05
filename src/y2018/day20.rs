@@ -103,12 +103,10 @@ fn parse_to_sequence(string: &[u8], start: usize) -> Result<(Rege, usize), Parse
         if let Ok((element, j)) = parse_to_branch(string, i) {
             vec.push(element);
             i = j;
-        } else {
         }
     } else if let Ok((element, j)) = parse_to_run(string, i) {
         vec.push(Rege::Segment(element.0));
         i = j;
-    } else {
     }
     while let Some(c) = string.get(i) {
         // dbg!(*c as char);
@@ -144,12 +142,10 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
         if let Ok((element, j)) = parse_to_branch(string, i) {
             vec.push(element);
             i = j;
-        } else {
         }
     } else if let Ok((element, j)) = parse_to_sequence(string, i) {
         vec.push(element);
         i = j;
-    } else {
     }
     while let Some(c) = string.get(i) {
         // dbg!(*c as char);
@@ -172,7 +168,6 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
                 } else if let Ok((element, j)) = parse_to_sequence(string, i) {
                     vec.push(element);
                     i = j;
-                } else {
                 }
             }
             b')' | b'$' => {
