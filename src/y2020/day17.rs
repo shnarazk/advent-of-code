@@ -2,7 +2,7 @@
 
 use crate::framework::ConfigAoC;
 use {
-    crate::framework::{aoc, AdventOfCode, Answer, Description, ParseError},
+    crate::framework::{aoc, AdventOfCode, Answer, ParseError},
     std::{cmp::PartialEq, collections::HashMap, fmt::Debug, hash::Hash},
 };
 
@@ -259,13 +259,7 @@ where
         Ok(())
     }
     fn parse(config: ConfigAoC) -> Result<Self, ParseError> {
-        let description = match config.alt {
-            Some(ext) if ext == "-" => Description::TestData("".to_string()),
-            Some(ext) => Description::FileTag(ext.to_string()),
-            None => Description::None,
-        };
-        Ok(Self::default().parse_(&Self::load(description)?))
-        // Ok(Self::default().parse_(&Self::load(desc)?))
+        Ok(Self::default().parse_(&Self::load(config)?))
     }
     fn part1(&mut self) -> usize {
         self.next().next().next().next().next().next().actives()

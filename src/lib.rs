@@ -25,7 +25,6 @@ pub mod y2022;
 pub mod y2023;
 
 pub use aoc_macro::aoc_arms;
-pub use framework::Description;
 
 #[macro_export]
 macro_rules! regex {

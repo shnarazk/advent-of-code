@@ -1,61 +1,46 @@
 //! <https://adventofcode.com/2020/day/25>
-use crate::framework::{aoc_at, AdventOfCode, Description, ParseError};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
 #[derive(Debug, Default)]
-pub struct Puzzle {}
+pub struct Puzzle {
+    card: usize,
+    door: usize,
+}
 
 #[aoc_at(2020, 25)]
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+        if self.card == 0 {
+            self.card = block.parse::<usize>().unwrap();
+        } else {
+            self.door = block.parse::<usize>().unwrap();
+        }
         Ok(())
     }
     fn part1(&mut self) -> usize {
-        day25(0, Description::TestData("".to_string()));
-        day25(0, Description::None)
+        day25(5764801, 17807724);
+        day25(self.card, self.door)
     }
     fn part2(&mut self) -> Self::Output2 {
         "That's it!".to_string()
     }
 }
 
-fn day25(_: usize, tag: Description) -> usize {
-    if let Description::TestData(_) = tag {
-        let card_pubkey = 5764801;
-        let door_pubkey = 17807724;
-        assert_eq!(transform(8, 7), card_pubkey);
-        assert_eq!(transform(11, 7), door_pubkey);
+fn day25(card_pubkey: usize, door_pubkey: usize) -> usize {
+    let card_loop_size = determine_loop_size(card_pubkey);
+    let door_loop_size = determine_loop_size(door_pubkey);
 
-        let card_loop_size = determine_loop_size(card_pubkey);
-        let door_loop_size = determine_loop_size(door_pubkey);
+    let encryption_key_by_card = transform(card_loop_size, door_pubkey);
+    let encryption_key_by_door = transform(door_loop_size, card_pubkey);
+    dbg!(encryption_key_by_card);
+    dbg!(encryption_key_by_door);
 
-        let encryption_key_by_card = transform(card_loop_size, door_pubkey);
-        let encryption_key_by_door = transform(door_loop_size, card_pubkey);
-        dbg!(encryption_key_by_card);
-        dbg!(encryption_key_by_door);
+    assert_eq!(encryption_key_by_card, encryption_key_by_door);
 
-        assert_eq!(encryption_key_by_card, encryption_key_by_door);
-
-        encryption_key_by_card
-    } else {
-        let card_pubkey = 12320657;
-        let door_pubkey = 9659666;
-        let card_loop_size = determine_loop_size(card_pubkey);
-        let door_loop_size = determine_loop_size(door_pubkey);
-        assert_eq!(transform(card_loop_size, 7), card_pubkey);
-        assert_eq!(transform(door_loop_size, 7), door_pubkey);
-
-        let encryption_key_by_card = transform(card_loop_size, door_pubkey);
-        let encryption_key_by_door = transform(door_loop_size, card_pubkey);
-        dbg!(encryption_key_by_card);
-        dbg!(encryption_key_by_door);
-
-        assert_eq!(encryption_key_by_card, encryption_key_by_door);
-
-        encryption_key_by_card
-    }
+    encryption_key_by_card
 }
 
 fn transform(loop_size: usize, subject_number: usize) -> usize {
@@ -74,5 +59,5 @@ fn determine_loop_size(public_key: usize) -> usize {
             return i;
         }
     }
-    0
+    unreachable!()
 }

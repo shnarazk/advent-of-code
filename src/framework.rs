@@ -4,7 +4,7 @@ use {
     crate::color,
     clap::Parser,
     once_cell::sync::OnceCell,
-    std::{borrow::Borrow, fmt, fs::File, io::prelude::*},
+    std::{fmt, fs::File, io::prelude::*},
 };
 
 #[derive(Clone, Debug, Default, Parser)]
@@ -26,43 +26,26 @@ pub struct ConfigAoC {
     #[arg(short, long)]
     pub serialize: bool,
 }
-
-static CONFIG: OnceCell<ConfigAoC> = OnceCell::new();
-
-/// IT MUST BE UNDER THE HOOD
-#[derive(Clone, fmt::Debug, Eq, PartialEq)]
-pub enum Description {
-    FileTag(String),
-    TestData(String),
-    None,
-}
-
-impl fmt::Display for Description {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{self:?}")
-    }
-}
-
-impl Description {
+impl ConfigAoC {
     /// return data file name
     fn data_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
-        match self {
-            Description::FileTag(tag) => Ok(format!("data/{year}/input-day{day:>02}-{tag}.txt")),
-            Description::None => Ok(format!("data/{year}/input-day{day:>02}.txt")),
-            Description::TestData(_) => Ok("A test input".to_string()),
+        match &self.alt {
+            Some(ext) if ext == "-" => Ok("A test input".to_string()),
+            Some(ext) => Ok(format!("data/{year}/input-day{day:>02}-{ext}.txt")),
+            None => Ok(format!("data/{year}/input-day{day:>02}.txt")),
         }
     }
     /// return the file name for serialization
     fn serialization_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
-        match self {
-            Description::FileTag(tag) => Ok(format!("tmp/{year}/day{day:>02}-{tag}.json")),
-            Description::None => Ok(format!("tmp/{year}/day{day:>02}.json")),
-            Description::TestData(_) => Ok("test.json".to_string()),
+        match &self.alt {
+            Some(ext) if ext == "-" => Ok("test.json".to_string()),
+            Some(ext) => Ok(format!("tmp/{year}/day{day:>02}-{ext}.json")),
+            None => Ok(format!("tmp/{year}/day{day:>02}.json")),
         }
     }
 }
 
-static DATA_SOURCE: OnceCell<Description> = OnceCell::new();
+static CONFIG: OnceCell<ConfigAoC> = OnceCell::new();
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Debug, Eq, PartialEq)]
@@ -159,7 +142,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// ```
     fn end_of_data(&mut self) {}
     /// # UNDER THE HOOD
-    fn load(description: impl Borrow<Description>) -> Result<String, ParseError> {
+    fn load(config: ConfigAoC) -> Result<String, ParseError> {
         fn load_file(file_name: String) -> Result<String, ParseError> {
             match File::open(&file_name) {
                 Ok(mut file) => {
@@ -173,30 +156,20 @@ pub trait AdventOfCode: fmt::Debug + Default {
                 Err(e) => panic!("Can't read {file_name}: {e:?}"),
             }
         }
-        fn load_data(desc: &Description) -> Result<String, ParseError> {
-            match desc {
-                Description::TestData(s) => Ok(s.to_string()),
-                _ => Err(ParseError),
-            }
-        }
-        let desc = description.borrow();
-        match desc {
-            Description::FileTag(_) => load_file(desc.data_filename(Self::YEAR, Self::DAY)?),
-            Description::TestData(_) => load_data(desc),
-            Description::None => load_file(desc.data_filename(Self::YEAR, Self::DAY)?),
-        }
+        // fn load_data(desc: &Description) -> Result<String, ParseError> {
+        //     match desc {
+        //         Description::TestData(s) => Ok(s.to_string()),
+        //         _ => Err(ParseError),
+        //     }
+        // }
+        load_file(config.data_filename(Self::YEAR, Self::DAY)?)
     }
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
     fn parse(config: ConfigAoC) -> Result<Self, ParseError> {
-        let description = match config.alt {
-            Some(ext) if ext == "-" => Description::TestData("".to_string()),
-            Some(ext) => Description::FileTag(ext.to_string()),
-            None => Description::None,
-        };
         let mut instance = Self::default();
-        let contents = Self::load(description)?;
+        let contents = Self::load(config)?;
         let remains = instance.header(contents)?;
         for block in remains.split(Self::DELIMITER) {
             if !block.is_empty() {
@@ -231,13 +204,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
         let Some(config) = CONFIG.get() else {
             return;
         };
-        let Some(desc) = DATA_SOURCE.get() else {
-            return;
-        };
         if !config.serialize {
             return;
         }
-        let Ok(output) = desc.serialization_filename(Self::YEAR, Self::DAY) else {
+        let Ok(output) = config.serialization_filename(Self::YEAR, Self::DAY) else {
             return;
         };
         if let Some(json) = self.serialize() {
@@ -254,21 +224,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(config: ConfigAoC) -> Answer<Self::Output1, Self::Output2> {
-        let description = match config.clone().alt {
-            Some(ext) if ext == "-" => Description::TestData("".to_string()),
-            Some(ext) => Description::FileTag(ext.to_string()),
-            None => Description::None,
-        };
-
         if CONFIG.get().is_none() {
             CONFIG.set(config.clone()).expect("fail to store config");
         }
-        if DATA_SOURCE.get().is_none() {
-            DATA_SOURCE
-                .set(description.clone())
-                .expect("fail to store config");
-        }
-        let input = description
+        let input = config
             .data_filename(Self::YEAR, Self::DAY)
             .expect("no input");
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
@@ -318,8 +277,5 @@ pub trait AdventOfCode: fmt::Debug + Default {
     }
     fn get_config(&self) -> &'static ConfigAoC {
         CONFIG.get().unwrap()
-    }
-    fn get_data_source(&self) -> &'static Description {
-        DATA_SOURCE.get().unwrap()
     }
 }
