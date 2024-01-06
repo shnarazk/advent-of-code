@@ -3,6 +3,10 @@
 - https://www.uiua.org
 - https://github.com/uiua-lang/uiua
 
+#### updated: 2024-01-05
+
+Still *very slow*.
+
 #### updated: 2023-12-02
 
 But still lacks $O(1)$ mapping from hashable object to an object.
