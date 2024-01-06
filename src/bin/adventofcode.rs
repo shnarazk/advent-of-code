@@ -124,7 +124,7 @@ fn bench(config: ConfigAoC) {
         );
     };
     println!("|   day |    time |");
-    println!("|------:|---------:");
+    println!("|------:|--------:|");
     for (day, time) in results.iter() {
         println!("| day{:<2} | {:>7.1} |", day, time);
     }
