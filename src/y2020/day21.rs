@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
+        progress, regex,
     },
     splr::*,
     std::{
@@ -84,35 +84,15 @@ impl AdventOfCode for Puzzle {
         let cnf = self.make_cnf();
         let mut count: usize = 0;
         for ing in self.ingredients.keys() {
-            let mut satisfiable = false;
-            for al in self.allergens.keys() {
-                let mut asserted = cnf.clone();
-                asserted.push(vec![self.var_of(ing, al)]);
-                if let Certificate::SAT(_) = Certificate::try_from(asserted).expect("panic!") {
-                    satisfiable = true;
-                    break;
-                /*
-                // println!("Assigning {} to {} has an answer {:?}", al, ing, ans);
-                'next: for lit in ans.iter() {
-                    if *lit < 0 {
-                        continue;
-                    }
-                    for i in ingredients.iter() {
-                        for a in allergens.iter() {
-                            if var_of(i, a) == *lit {
-                                println!(" - Under assigning {} to {}, {} has {}.", ing, al, i, a);
-                                continue 'next;
-                            }
-                        }
-                    }
-                }
-                 */
-                } else {
-                    // println!("Assigning {} to {} emits a conflict", al, ing);
-                }
-            }
-            if !satisfiable {
-                println!("{} is safe", ing);
+            let mut asserted = cnf.clone();
+            asserted.push(
+                self.allergens
+                    .keys()
+                    .map(|al| self.var_of(ing, al))
+                    .collect::<Vec<_>>(),
+            );
+            if let Ok(Certificate::UNSAT) = Certificate::try_from(asserted) {
+                progress!(format!("{} is safe", ing));
                 count += self
                     .rules
                     .iter()
