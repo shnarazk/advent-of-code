@@ -11,7 +11,7 @@ use {
 #[command(author, version, about, long_about = None)]
 pub struct ConfigAoC {
     /// Dump all execution times to tmp/YEAR/execution_time.json
-    #[arg(long)]
+    #[arg(short, long)]
     pub bench: bool,
     /// Target year like 2023
     #[arg(short, long, default_value_t = 2023)]
