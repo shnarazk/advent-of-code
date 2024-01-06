@@ -128,4 +128,9 @@ fn bench(config: ConfigAoC) {
     for (day, time) in results.iter() {
         println!("| day{:<2} | {:>7.1} |", day, time);
     }
+    println!(
+        "| y{} | {:>7.1} |",
+        config.year,
+        results.iter().map(|p| p.1).sum::<f64>()
+    );
 }
