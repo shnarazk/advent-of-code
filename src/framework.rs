@@ -7,8 +7,8 @@ use {
     std::{fmt, fs::File, io::prelude::*},
 };
 
-const JSON_DUMP_DIR: &'static str = "misc";
-const DATA_DIR: &'static str = "data";
+pub const JSON_DUMP_DIR: &'static str = "misc";
+pub const DATA_DIR: &'static str = "data";
 
 #[derive(Clone, Debug, Default, Parser)]
 #[command(author, version, about, long_about = None)]
