@@ -7,8 +7,10 @@ use {
     std::{cmp::Reverse, collections::BinaryHeap},
 };
 
+type SpellProp = (usize, usize, (usize, usize, usize, usize));
+
 // (hitpoint, damage, armor, mana)
-const SPELL: [(usize, usize, (usize, usize, usize, usize)); 5] = [
+const SPELL: [SpellProp; 5] = [
     (53, 1, (0, 4, 0, 0)),
     (73, 1, (2, 2, 0, 0)),
     (113, 6, (0, 0, 7, 0)),
