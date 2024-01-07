@@ -1,7 +1,10 @@
 //! <https://adventofcode.com/2015/day/22>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        regex,
+    },
+    std::{cmp::Reverse, collections::BinaryHeap},
 };
 
 // (hitpoint, damage, armor, mana)
@@ -25,7 +28,6 @@ enum GameState {
 struct Player {
     hit_point: usize,
     damage: usize,
-    armor: usize,
     mana: usize,
     state: [Option<usize>; 5], // Magic Missile, Drain, Shild, Poison, Rechage
 }
@@ -38,10 +40,11 @@ struct Boss {
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    hit_point: usize,
-    damage: usize,
+    used_mana: usize,
     player: Player,
     boss: Boss,
+    hit_point: usize,
+    damage: usize,
 }
 
 impl Puzzle {
@@ -53,6 +56,8 @@ impl Puzzle {
         let mut new_state = self.clone();
         // spelling
         new_state.player.state[kind] = Some(SPELL[kind].1);
+        new_state.used_mana -= SPELL[kind].0;
+        let mut armor = 0;
         // your spell effects just before the boss's turn
         for (kind, _) in SPELL.iter().enumerate() {
             if let Some(remain) = &mut new_state.player.state[kind] {
@@ -61,243 +66,23 @@ impl Puzzle {
                 } else {
                     *remain -= 1;
                     new_state.player.hit_point += SPELL[kind].2 .0;
-                    new_state.boss.hit_point -= SPELL[kind].2 .1;
-                    new_state.player.armor += SPELL[kind].2 .2;
+                    new_state.boss.hit_point = new_state
+                        .boss
+                        .hit_point
+                        .checked_sub(SPELL[kind].2 .1)
+                        .ok_or(GameState::Won)?;
+                    armor += SPELL[kind].2 .2;
                     new_state.player.mana += SPELL[kind].2 .3;
                 }
             }
         }
         // boss atack
-        new_state.player.hit_point = new_state
-            .player
-            .hit_point
+        new_state.player.hit_point = (new_state.player.hit_point + 7 * armor)
             .checked_sub(new_state.boss.damage)
             .ok_or(GameState::Lose)?;
-        return Ok(new_state);
+        Ok(new_state)
     }
 }
-
-// impl State {
-//     fn spell(&self, kind: usize) -> Option<State> {
-//         let mut s = self.clone();
-//         s.born = true;
-//         // your turn
-//         match kind {
-//             // Magic Missile
-//             1 if 53 <= s.mana => {
-//                 s.damage = 4;
-//                 s.mana -= 53;
-//                 s.used_mana += 53;
-//             }
-//             // Drain
-//             2 if 73 <= s.mana => {
-//                 s.damage = 2;
-//                 s.hit_point += 2;
-//                 s.mana -= 73;
-//                 s.used_mana += 73;
-//             }
-//             // Shield
-//             3 if 113 <= s.mana && s.extra_armor == 0 => {
-//                 s.extra_armor = -6 - 1;
-//                 s.mana -= 113;
-//                 s.used_mana += 113;
-//             }
-//             3 if 113 <= s.mana && s.extra_armor == 1 => {
-//                 s.extra_armor = 7;
-//                 s.mana -= 113;
-//                 s.used_mana += 113;
-//             }
-//             // Poison
-//             4 if 173 <= s.mana && s.extra_damage == 0 => {
-//                 s.extra_damage = -6 - 1;
-//                 s.mana -= 173;
-//                 s.used_mana += 173;
-//             }
-//             4 if 173 <= s.mana && s.extra_damage == 1 => {
-//                 s.extra_damage = 7;
-//                 s.mana -= 173;
-//                 s.used_mana += 173;
-//             }
-//             // Shield
-//             5 if 229 <= s.mana && s.extra_mana == 0 => {
-//                 s.extra_mana = -5 - 1;
-//                 s.mana -= 229;
-//                 s.used_mana += 229;
-//             }
-//             5 if 229 <= s.mana && s.extra_mana == 1 => {
-//                 s.extra_mana = 6;
-//                 s.mana -= 229;
-//                 s.used_mana += 229;
-//             }
-//             _ => {
-//                 return None;
-//             }
-//         }
-//         Some(s)
-//     }
-//     fn turn(&mut self, enemy: &mut State) {
-//         assert!(0 < enemy.hit_point);
-//         if 0 < self.extra_mana {
-//             self.mana += 101;
-//         }
-//         let damage = if 0 < self.extra_damage {
-//             self.damage + 3
-//         } else {
-//             self.damage
-//         };
-//         if enemy.hit_point <= damage {
-//             enemy.hit_point = 0;
-//             return;
-//         } else {
-//             enemy.hit_point -= damage;
-//         }
-//         self.damage = 0;
-//         // enemy turn
-//         self.extra_damage = self
-//             .extra_damage
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_armor = self
-//             .extra_armor
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_mana = self
-//             .extra_mana
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         if 0 < self.extra_mana {
-//             self.mana += 101;
-//         }
-//         let armor = if 0 < self.extra_armor { 7 } else { 0 };
-
-//         if 0 < self.extra_damage {
-//             if enemy.hit_point <= 3 {
-//                 enemy.hit_point = 0;
-//                 return;
-//             } else {
-//                 enemy.hit_point -= 3;
-//             }
-//         }
-
-//         if enemy.damage <= armor {
-//             if self.hit_point == 1 {
-//                 self.hit_point = 0;
-//                 return;
-//             }
-//             self.hit_point -= 1;
-//         } else if self.hit_point + armor <= enemy.damage {
-//             self.hit_point = 0;
-//             return;
-//         } else {
-//             self.hit_point -= enemy.damage - armor;
-//         }
-//         self.extra_damage = self
-//             .extra_damage
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_armor = self
-//             .extra_armor
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_mana = self
-//             .extra_mana
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//     }
-//     fn turn2(&mut self, enemy: &mut State) {
-//         assert!(0 < enemy.hit_point);
-//         if 0 < self.hit_point {
-//             self.hit_point -= 1;
-//         } else {
-//             self.hit_point = 0;
-//             return;
-//         }
-//         if 0 < self.extra_mana {
-//             self.mana += 101;
-//         }
-//         let damage = if 0 < self.extra_damage {
-//             self.damage + 3
-//         } else {
-//             self.damage
-//         };
-//         if enemy.hit_point <= damage {
-//             enemy.hit_point = 0;
-//             return;
-//         } else {
-//             enemy.hit_point -= damage;
-//         }
-//         self.damage = 0;
-//         // enemy turn
-//         if 0 < self.hit_point {
-//             self.hit_point -= 1;
-//         } else {
-//             self.hit_point = 0;
-//             return;
-//         }
-//         self.extra_damage = self
-//             .extra_damage
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_armor = self
-//             .extra_armor
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_mana = self
-//             .extra_mana
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         if 0 < self.extra_mana {
-//             self.mana += 101;
-//         }
-//         let armor = if 0 < self.extra_armor { 7 } else { 0 };
-
-//         if 0 < self.extra_damage {
-//             if enemy.hit_point <= 3 {
-//                 enemy.hit_point = 0;
-//                 return;
-//             } else {
-//                 enemy.hit_point -= 3;
-//             }
-//         }
-
-//         if enemy.damage <= armor {
-//             if self.hit_point == 1 {
-//                 self.hit_point = 0;
-//                 return;
-//             }
-//             self.hit_point -= 1;
-//         } else if self.hit_point + armor <= enemy.damage {
-//             self.hit_point = 0;
-//             return;
-//         } else {
-//             self.hit_point -= enemy.damage - armor;
-//         }
-//         self.extra_damage = self
-//             .extra_damage
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_armor = self
-//             .extra_armor
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//         self.extra_mana = self
-//             .extra_mana
-//             .abs()
-//             .checked_sub(1)
-//             .map_or_else(|| 0, |v| v);
-//     }
-// }
 
 #[aoc(2015, 22)]
 impl AdventOfCode for Puzzle {
@@ -314,13 +99,24 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        self.player.hit_point = self.hit_point;
-        self.boss.hit_point = self.hit_point;
-        self.player.damage = self.damage;
+        self.player.hit_point = 50 - 1;
+        self.player.mana = 500;
+        self.boss.hit_point = self.hit_point - 1;
         self.boss.damage = self.damage;
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        let mut to_visit: BinaryHeap<Reverse<Puzzle>> = BinaryHeap::new();
+        to_visit.push(Reverse(self.clone()));
+        while let Some(Reverse(w)) = to_visit.pop() {
+            for (i, _) in SPELL.iter().enumerate() {
+                match w.turn(i) {
+                    Ok(ww) => to_visit.push(Reverse(ww)),
+                    Err(GameState::Won) => return w.used_mana,
+                    Err(GameState::Impossible) | Err(GameState::Lose) => continue,
+                }
+            }
+        }
+        unreachable!();
     }
     fn part2(&mut self) -> Self::Output2 {
         0
