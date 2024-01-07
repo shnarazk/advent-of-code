@@ -139,10 +139,10 @@ impl AdventOfCode for Puzzle {
             let j2 = *to_index_y.get(&(*y2 + 1)).unwrap();
             let k1 = *to_index_x.get(x1).unwrap();
             let k2 = *to_index_x.get(&(*x2 + 1)).unwrap();
-            for i in i1..i2 {
-                for j in j1..j2 {
-                    for k in k1..k2 {
-                        grid[i][j][k] = *to;
+            for zz in grid.iter_mut().take(i2).skip(i1) {
+                for yy in zz.iter_mut().take(j2).skip(j1) {
+                    for xx in yy.iter_mut().take(k2).skip(k1) {
+                        *xx = *to;
                     }
                 }
             }
