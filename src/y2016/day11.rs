@@ -160,30 +160,38 @@ impl AdventOfCode for Puzzle {
         //         return 0;
         //     }
         // }
-        let mut visit: HashSet<usize> = HashSet::new();
+        let mut visited: HashSet<usize> = HashSet::new();
         let mut bag: BinaryHeap<State<11>> = BinaryHeap::new();
         bag.push(State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1]));
         while let Some(state) = bag.pop() {
             if state.is_goal() {
                 return state.cost;
             }
-            visit.insert(state.index());
-            for s in state.adjacent().filter(|s| !visit.contains(&s.index())) {
+            let index = state.index();
+            if visited.contains(&index) {
+                continue;
+            }
+            visited.insert(index);
+            for s in state.adjacent() {
                 bag.push(s);
             }
         }
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut visit: HashSet<usize> = HashSet::new();
+        let mut visited: HashSet<usize> = HashSet::new();
         let mut bag: BinaryHeap<State<15>> = BinaryHeap::new();
         bag.push(State::from([0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0]));
         while let Some(state) = bag.pop() {
             if state.is_goal() {
                 return state.cost;
             }
-            visit.insert(state.index());
-            for s in state.adjacent().filter(|s| !visit.contains(&s.index())) {
+            let index = state.index();
+            if visited.contains(&index) {
+                continue;
+            }
+            visited.insert(index);
+            for s in state.adjacent() {
                 bag.push(s);
             }
         }
