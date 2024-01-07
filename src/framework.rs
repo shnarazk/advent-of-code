@@ -7,10 +7,13 @@ use {
     std::{fmt, fs::File, io::prelude::*},
 };
 
+const JSON_DUMP_DIR: &'static str = "misc";
+const DATA_DIR: &'static str = "data";
+
 #[derive(Clone, Debug, Default, Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct ConfigAoC {
-    /// Dump all execution times to tmp/YEAR/execution_time.json
+    /// Dump all execution times to misc/YEAR/execution_time.json
     #[arg(short, long)]
     pub bench: bool,
     /// Target year like 2023
@@ -31,16 +34,16 @@ impl ConfigAoC {
     fn data_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match &self.alt {
             Some(ext) if ext == "-" => Ok("A test input".to_string()),
-            Some(ext) => Ok(format!("data/{year}/input-day{day:>02}-{ext}.txt")),
-            None => Ok(format!("data/{year}/input-day{day:>02}.txt")),
+            Some(ext) => Ok(format!("{DATA_DIR}/{year}/input-day{day:>02}-{ext}.txt")),
+            None => Ok(format!("{DATA_DIR}/{year}/input-day{day:>02}.txt")),
         }
     }
     /// return the file name for serialization
     fn serialization_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match &self.alt {
             Some(ext) if ext == "-" => Ok("test.json".to_string()),
-            Some(ext) => Ok(format!("tmp/{year}/day{day:>02}-{ext}.json")),
-            None => Ok(format!("tmp/{year}/day{day:>02}.json")),
+            Some(ext) => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}.json")),
+            None => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}.json")),
         }
     }
 }
@@ -187,7 +190,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// }
     /// ```
     fn part1(&mut self) -> Self::Output1;
-    /// the solver for part1
+    /// the solver for part2
     /// ## A typical implementation example
     /// ```ignore
     /// fn part2(&mut self) -> Output2 {
