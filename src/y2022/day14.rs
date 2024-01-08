@@ -91,33 +91,22 @@ impl AdventOfCode for Puzzle {
         self.map.len() - num_wall
     }
     fn part2(&mut self) -> Self::Output2 {
-        let num_wall = self.map.len();
-        'next_sand: loop {
-            let mut pos: Loc = (500, 0);
-            let mut tmp = pos;
-            'moving: loop {
-                tmp.1 += 1;
-                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
-                    pos = tmp;
-                    continue 'moving;
+        let mut num_sands = 0;
+        let mut rows: HashSet<usize> = HashSet::new();
+        let mut next: HashSet<usize> = HashSet::new();
+        rows.insert(500);
+        for depth in 0..=self.threshold + 1 {
+            for x in rows.iter() {
+                for xx in x - 1..=x + 1 {
+                    if !self.map.contains(&(xx, depth + 1)) {
+                        next.insert(xx);
+                    }
                 }
-                tmp.0 -= 1;
-                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
-                    pos = tmp;
-                    continue 'moving;
-                }
-                tmp.0 += 2;
-                if !self.map.contains(&tmp) && tmp.1 <= self.threshold + 1 {
-                    pos = tmp;
-                    continue 'moving;
-                }
-                self.map.insert(pos);
-                if pos == (500, 0) {
-                    break 'next_sand;
-                }
-                continue 'next_sand;
             }
+            num_sands += rows.len();
+            rows.clear();
+            std::mem::swap(&mut rows, &mut next);
         }
-        self.map.len() - num_wall
+        num_sands
     }
 }
