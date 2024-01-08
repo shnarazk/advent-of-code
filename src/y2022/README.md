@@ -2,32 +2,32 @@
 
 |   day |    time |
 |------:|--------:|
-| day1  |     0.5 |
-| day2  |     0.4 |
-| day3  |     0.6 |
-| day4  |     1.1 |
+| day1  |     0.4 |
+| day2  |     0.3 |
+| day3  |     0.5 |
+| day4  |     1.0 |
 | day5  |     0.9 |
-| day6  |     0.6 |
-| day7  |     1.9 |
-| day8  |    10.2 |
-| day9  |     1.9 |
+| day6  |     0.7 |
+| day7  |     1.7 |
+| day8  |     9.4 |
+| day9  |     1.8 |
 | day10 |     0.2 |
-| day11 |     9.7 |
-| day12 |     3.4 |
-| day13 |     1.1 |
-| day14 |    65.3 |
+| day11 |     8.9 |
+| day12 |     3.1 |
+| day13 |     0.9 |
+| day14 |    63.9 |
 | day15 |     0.2 |
-| day16 |  2676.4 |
-| day17 | 15409.0 |
-| day18 |     6.4 |
-| day19 |  1269.9 |
-| day20 |   622.1 |
-| day21 |     8.7 |
+| day16 |  3747.5 |
+| day17 |  9413.9 |
+| day18 |     5.8 |
+| day19 |  1280.4 |
+| day20 |   616.8 |
+| day21 |     8.5 |
 | day22 |     5.1 |
-| day23 |   577.4 |
-| day24 |   666.7 |
-| day25 |     0.2 |
-| y2022 | 21340.1 |
+| day23 |   597.6 |
+| day24 |   673.4 |
+| day25 |     0.3 |
+| y2022 | 16443.1 |
 
 ### day14 https://adventofcode.com/2022/day/14
 buckets floading problem similar with [y2018 day17](https://adventofcode.com/2018/day/17)

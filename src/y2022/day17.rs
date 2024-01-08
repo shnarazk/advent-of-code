@@ -90,7 +90,7 @@ impl AdventOfCode for Puzzle {
                 }
                 y = tmp_y;
             }
-            bottom = place((x, y), &self.shape[id], &mut blocks);
+            bottom = place((x, y), &self.shape[id], &mut blocks, bottom);
         }
         bottom
     }
@@ -168,7 +168,7 @@ impl Puzzle {
                 }
                 y = tmp_y;
             }
-            bottom = place((x, y), &self.shape[id], &mut blocks);
+            bottom = place((x, y), &self.shape[id], &mut blocks, bottom);
             pre_x.push_front(x);
             if i % 20 == 19 {
                 blocks.retain(|(_, h)| bottom <= *h + depth);
@@ -185,11 +185,13 @@ fn clash(loc: Loc, shape: &[Loc], map: &HashSet<Loc>) -> bool {
         .any(|(x, y)| map.contains(&(x + loc.0, y + loc.1)))
 }
 
-fn place(loc: Loc, shape: &[Loc], map: &mut HashSet<Loc>) -> usize {
+fn place(loc: Loc, shape: &[Loc], map: &mut HashSet<Loc>, bottom: usize) -> usize {
+    let mut b = bottom;
     for (x, y) in shape.iter() {
         map.insert((x + loc.0, y + loc.1));
+        b = b.max(y + loc.1);
     }
-    map.iter().map(|(_, y)| *y).max().unwrap_or_default()
+    b
 }
 
 #[allow(dead_code)]
