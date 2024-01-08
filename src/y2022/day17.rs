@@ -2,6 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
+        geometric::Dim2,
         progress,
     },
     std::collections::{HashMap, HashSet, VecDeque},
@@ -9,9 +10,12 @@ use {
 
 type Loc = (usize, usize);
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<isize>,
+    shape: [Vec<Dim2<usize>>; 5],
+    shape_h: [Vec<Dim2<usize>>; 5],
+    shape_v: [Vec<Dim2<usize>>; 5],
 }
 
 #[aoc(2022, 17)]
@@ -26,6 +30,29 @@ impl AdventOfCode for Puzzle {
                 .collect::<Vec<isize>>();
         }
         Ok(())
+    }
+    fn end_of_data(&mut self) {
+        self.shape = [
+            vec![(0, 0), (1, 0), (2, 0), (3, 0)],
+            vec![(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
+            vec![(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
+            vec![(0, 0), (0, 1), (0, 2), (0, 3)],
+            vec![(0, 0), (1, 0), (0, 1), (1, 1)],
+        ];
+        self.shape_h = [
+            vec![(0, 0), (3, 0)],
+            vec![(1, 0), (0, 1), (2, 1), (1, 2)],
+            vec![(0, 0), (2, 0), (2, 1), (2, 2)],
+            vec![(0, 0), (0, 1), (0, 2), (0, 3)],
+            vec![(0, 0), (1, 0), (0, 1), (1, 1)],
+        ];
+        self.shape_v = [
+            vec![(0, 0), (1, 0), (2, 0), (3, 0)],
+            vec![(1, 0), (0, 1), (2, 1)],
+            vec![(0, 0), (1, 0), (2, 0)],
+            vec![(0, 0)],
+            vec![(0, 0), (1, 0)],
+        ];
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut wind = self.line.iter().cycle();
@@ -43,31 +70,27 @@ impl AdventOfCode for Puzzle {
         for i in 0..7 {
             blocks.insert((i, 0));
         }
-        let shape = [
-            vec![(0, 0), (1, 0), (2, 0), (3, 0)],
-            vec![(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
-            vec![(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
-            vec![(0, 0), (0, 1), (0, 2), (0, 3)],
-            vec![(0, 0), (1, 0), (0, 1), (1, 1)],
-        ];
         let shape_w = [4, 3, 3, 1, 2];
         let mut bottom = 0;
         for i in 0..2022 {
             let id = i % 5;
             let mut x: usize = 3;
-            let mut y = bottom + 4;
+            x = blow!(x, shape_w[id]);
+            x = blow!(x, shape_w[id]);
+            x = blow!(x, shape_w[id]);
+            let mut y = bottom + 1;
             loop {
                 let tmp_x = blow!(x, shape_w[id]);
-                if !clash((tmp_x, y), &shape[id], &blocks) {
+                if !clash((tmp_x, y), &self.shape_h[id], &blocks) {
                     x = tmp_x;
                 }
                 let tmp_y = y - 1;
-                if clash((x, tmp_y), &shape[id], &blocks) {
+                if clash((x, tmp_y), &self.shape_v[id], &blocks) {
                     break;
                 }
                 y = tmp_y;
             }
-            bottom = place((x, y), &shape[id], &mut blocks);
+            bottom = place((x, y), &self.shape[id], &mut blocks);
         }
         bottom
     }
@@ -100,13 +123,6 @@ impl Puzzle {
         for i in 0..7 {
             blocks.insert((i, 0));
         }
-        let shape = [
-            vec![(0, 0), (1, 0), (2, 0), (3, 0)],
-            vec![(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
-            vec![(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
-            vec![(0, 0), (0, 1), (0, 2), (0, 3)],
-            vec![(0, 0), (1, 0), (0, 1), (1, 1)],
-        ];
         let shape_w = [4, 3, 3, 1, 2];
         let mut bottom = 0;
         for i in 0..upto.unwrap_or(usize::MAX) {
@@ -137,25 +153,28 @@ impl Puzzle {
                 pre_bottom = bottom;
             }
             let mut x: usize = 3;
-            let mut y = bottom + 4;
+            x = blow!(x, shape_w[id]);
+            x = blow!(x, shape_w[id]);
+            x = blow!(x, shape_w[id]);
+            let mut y = bottom + 1;
             loop {
                 let tmp_x = blow!(x, shape_w[id]);
-                if bottom < y || !clash((tmp_x, y), &shape[id], &blocks) {
+                if !clash((tmp_x, y), &self.shape_h[id], &blocks) {
                     x = tmp_x;
                 }
                 let tmp_y = y - 1;
-                if tmp_y <= bottom && clash((x, tmp_y), &shape[id], &blocks) {
+                if clash((x, tmp_y), &self.shape_v[id], &blocks) {
                     break;
                 }
                 y = tmp_y;
-                debug_assert!(bottom < y + depth);
             }
-            blocks.retain(|(_, h)| bottom <= *h + depth);
-            bottom = place((x, y), &shape[id], &mut blocks);
+            bottom = place((x, y), &self.shape[id], &mut blocks);
             pre_x.push_front(x);
-            pre_x.resize(MEMORY_LEN, 0);
+            if i % 20 == 19 {
+                blocks.retain(|(_, h)| bottom <= *h + depth);
+                pre_x.resize(MEMORY_LEN, 0);
+            }
         }
-        debug_assert!(upto.is_some());
         (bottom, 0, 0, 0)
     }
 }
