@@ -9,6 +9,35 @@ use {
 
 type Pos = [isize; 3];
 
+const UNIT: [Pos; 3] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+
+const ROTATIONS: [[Pos; 3]; 24] = [
+    [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    [[0, 0, 1], [0, 1, 0], [-1, 0, 0]],
+    [[-1, 0, 0], [0, 1, 0], [0, 0, -1]],
+    [[0, 0, -1], [0, 1, 0], [1, 0, 0]],
+    [[0, -1, 0], [1, 0, 0], [0, 0, 1]],
+    [[0, 0, 1], [1, 0, 0], [0, 1, 0]],
+    [[0, 1, 0], [1, 0, 0], [0, 0, -1]],
+    [[0, 0, -1], [1, 0, 0], [0, -1, 0]],
+    [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
+    [[0, 0, 1], [-1, 0, 0], [0, -1, 0]],
+    [[0, -1, 0], [-1, 0, 0], [0, 0, -1]],
+    [[0, 0, -1], [-1, 0, 0], [0, 1, 0]],
+    [[1, 0, 0], [0, 0, -1], [0, 1, 0]],
+    [[0, 1, 0], [0, 0, -1], [-1, 0, 0]],
+    [[-1, 0, 0], [0, 0, -1], [0, -1, 0]],
+    [[0, -1, 0], [0, 0, -1], [1, 0, 0]],
+    [[1, 0, 0], [0, -1, 0], [0, 0, -1]],
+    [[0, 0, -1], [0, -1, 0], [-1, 0, 0]],
+    [[-1, 0, 0], [0, -1, 0], [0, 0, 1]],
+    [[0, 0, 1], [0, -1, 0], [1, 0, 0]],
+    [[1, 0, 0], [0, 0, 1], [0, -1, 0]],
+    [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
+    [[-1, 0, 0], [0, 0, 1], [0, 1, 0]],
+    [[0, 1, 0], [0, 0, 1], [1, 0, 0]],
+];
+
 #[derive(Clone, Debug, Default)]
 struct Block {
     id: usize,
@@ -63,19 +92,19 @@ pub struct Puzzle {
 }
 
 fn merge(mut sensors: Vec<Block>) -> (Vec<Pos>, Vec<Pos>) {
-    println!("merge {} sensors", sensors.len());
+    // println!("merge {} sensors", sensors.len());
     let mut base: Vec<Pos> = sensors.remove(0).pos;
     let mut sensor_locations: Vec<Pos> = vec![[0, 0, 0]];
     let mut remove: Option<usize> = None;
     'matched: while !sensors.is_empty() {
         if let Some(i) = remove {
             sensors.retain(|s| s.id != i);
-            println!("remove sensor{:>2}, {} remains.", i, sensors.len());
+            // println!("remove sensor{:>2}, {} remains.", i, sensors.len());
             remove = None;
         }
         for sensor in sensors.iter() {
             let mut nsolutions = 0;
-            let mut good_rotation = 0;
+            // let mut good_rotation = 0;
             let mut good_estimation: Block = Block::default();
             let mut dx: isize = 0;
             let mut dy: isize = 0;
@@ -100,11 +129,11 @@ fn merge(mut sensors: Vec<Block>) -> (Vec<Pos>, Vec<Pos>) {
                 let ayd = y_dists.iter().max_by_key(|(_, n)| *n).unwrap();
                 let azd = z_dists.iter().max_by_key(|(_, n)| *n).unwrap();
                 if matches <= *axd.1 && matches <= *ayd.1 && matches <= *azd.1 {
-                    println!(
-                        " - sensor{:0>2} - r{}/{:?},{:?},{:?}",
-                        sensor.id, r_index, axd, ayd, azd
-                    );
-                    good_rotation = r_index;
+                    // println!(
+                    //     " - sensor{:0>2} - r{}/{:?},{:?},{:?}",
+                    //     sensor.id, r_index, axd, ayd, azd
+                    // );
+                    // good_rotation = r_index;
                     nsolutions += 1;
                     dx = *axd.0;
                     dy = *ayd.0;
@@ -115,10 +144,10 @@ fn merge(mut sensors: Vec<Block>) -> (Vec<Pos>, Vec<Pos>) {
             }
             if 0 < nsolutions {
                 // assert_eq!(1, nsolutions);
-                println!(
-                    "sensor{:0>2} - r{}/{:?},{:?},{:?}",
-                    sensor.id, good_rotation, dx, dy, dz
-                );
+                // println!(
+                //     "sensor{:0>2} - r{}/{:?},{:?},{:?}",
+                //     sensor.id, good_rotation, dx, dy, dz
+                // );
                 for p in good_estimation.pos.iter() {
                     let v = [p[0] + dx, p[1] + dy, p[2] + dz];
                     if !base.contains(&v) {
@@ -133,7 +162,7 @@ fn merge(mut sensors: Vec<Block>) -> (Vec<Pos>, Vec<Pos>) {
             }
         }
         if !sensors.is_empty() {
-            println!("check isolated group");
+            // println!("check isolated group");
             sensors.push(Block {
                 id: 0,
                 pos: base.clone(),
@@ -142,7 +171,7 @@ fn merge(mut sensors: Vec<Block>) -> (Vec<Pos>, Vec<Pos>) {
             // panic!("nothing happended; remains {}", sensors.len());
         }
     }
-    assert!(sensors.is_empty());
+    debug_assert!(sensors.is_empty());
     (base, sensor_locations)
 }
 
@@ -216,54 +245,25 @@ impl AdventOfCode for Puzzle {
         self.line.push(Block { id: n, pos: v });
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // self.build();
-    }
     fn part1(&mut self) -> Self::Output1 {
         merge(self.line.clone()).0.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let n = self.line.len();
         let dists = merge(self.line.clone()).1;
-        assert_eq!(n, dists.len());
-        let mut max_dist = 0;
-        for j in 0..n {
-            for i in 0..n {
-                let d = (dists[j][0] - dists[i][0]).abs()
-                    + (dists[j][1] - dists[i][1]).abs()
-                    + (dists[j][2] - dists[i][2]).abs();
-                max_dist = max_dist.max(d as usize);
-            }
-        }
-        max_dist
+        let n = self.line.len();
+        debug_assert_eq!(n, dists.len());
+        (0..n)
+            .map(|i| {
+                (0..n)
+                    .map(|j| {
+                        (dists[j][0] - dists[i][0]).unsigned_abs()
+                            + (dists[j][1] - dists[i][1]).unsigned_abs()
+                            + (dists[j][2] - dists[i][2]).unsigned_abs()
+                    })
+                    .max()
+                    .unwrap()
+            })
+            .max()
+            .unwrap()
     }
 }
-
-const UNIT: [Pos; 3] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-
-const ROTATIONS: [[Pos; 3]; 24] = [
-    [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-    [[0, 0, 1], [0, 1, 0], [-1, 0, 0]],
-    [[-1, 0, 0], [0, 1, 0], [0, 0, -1]],
-    [[0, 0, -1], [0, 1, 0], [1, 0, 0]],
-    [[0, -1, 0], [1, 0, 0], [0, 0, 1]],
-    [[0, 0, 1], [1, 0, 0], [0, 1, 0]],
-    [[0, 1, 0], [1, 0, 0], [0, 0, -1]],
-    [[0, 0, -1], [1, 0, 0], [0, -1, 0]],
-    [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
-    [[0, 0, 1], [-1, 0, 0], [0, -1, 0]],
-    [[0, -1, 0], [-1, 0, 0], [0, 0, -1]],
-    [[0, 0, -1], [-1, 0, 0], [0, 1, 0]],
-    [[1, 0, 0], [0, 0, -1], [0, 1, 0]],
-    [[0, 1, 0], [0, 0, -1], [-1, 0, 0]],
-    [[-1, 0, 0], [0, 0, -1], [0, -1, 0]],
-    [[0, -1, 0], [0, 0, -1], [1, 0, 0]],
-    [[1, 0, 0], [0, -1, 0], [0, 0, -1]],
-    [[0, 0, -1], [0, -1, 0], [-1, 0, 0]],
-    [[-1, 0, 0], [0, -1, 0], [0, 0, 1]],
-    [[0, 0, 1], [0, -1, 0], [1, 0, 0]],
-    [[1, 0, 0], [0, 0, 1], [0, -1, 0]],
-    [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
-    [[-1, 0, 0], [0, 0, 1], [0, 1, 0]],
-    [[0, 1, 0], [0, 0, 1], [1, 0, 0]],
-];
