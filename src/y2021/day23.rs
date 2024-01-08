@@ -2,9 +2,12 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        line_parser, progress,
     },
-    std::cmp::{Ord, Ordering, PartialOrd},
+    std::{
+        cmp::Reverse,
+        collections::{BinaryHeap, HashSet},
+    },
 };
 
 #[derive(Debug, Default)]
@@ -12,46 +15,14 @@ pub struct Puzzle {
     line: Vec<char>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialOrd, PartialEq)]
 struct P1 {
-    // val: usize,
-    id: usize,
     cost: usize,
     state: [char; 7],
     rooms: [Vec<char>; 4],
-    pre: usize,
 }
 
-impl PartialOrd for P1 {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cost.cmp(&other.cost))
-    }
-}
-
-impl Ord for P1 {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
-    }
-}
-
-impl PartialEq for P1 {
-    fn eq(&self, to: &Self) -> bool {
-        self.state == to.state && self.rooms == to.rooms
-    }
-}
-
-impl Eq for P1 {}
-
-trait Game {
-    fn check_them(&self, msg: &str);
-    fn walkable_between(&self, s: usize, r: usize, maybe_me: Option<char>) -> bool;
-    fn neighbor_states(&self) -> Vec<Self>
-    where
-        Self: Sized;
-    fn heuristics(&self) -> isize;
-}
-
-impl Game for P1 {
+impl P1 {
     fn heuristics(&self) -> isize {
         self.rooms
             .iter()
@@ -70,31 +41,14 @@ impl Game for P1 {
             })
             .sum()
     }
-    fn check_them(&self, _msg: &str) {
-        /*
-                debug_assert!(
-                    self.state.iter().filter(|c| **c != '.').count()
-                        + self
-                            .rooms
-                            .iter()
-                            .map(|r| r.iter().filter(|c| **c != '.').count())
-                            .sum::<usize>()
-                        == 8,
-                    "!! {}",
-                    msg
-                );
-        */
-    }
     fn walkable_between(&self, s: usize, room_number: usize, maybe_me: Option<char>) -> bool {
         if s < room_number + 2 {
             (s..room_number + 2).all(|i| {
-                self.state[i] == '.'
-                    || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.' || maybe_me.map_or(false, |me| i == s && self.state[i] == me)
             })
         } else {
             (room_number + 2..=s).all(|i| {
-                self.state[i] == '.'
-                    || maybe_me.map_or_else(|| false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.' || maybe_me.map_or(false, |me| i == s && self.state[i] == me)
             })
         }
     }
@@ -120,8 +74,6 @@ impl Game for P1 {
                     news.state[j] = *amph;
                     news.rooms[i][d] = '.';
                     news.cost += COST[(*amph as u8 - b'A') as usize] * (DIST_FROM_ROOM[i][j] + d);
-                    // news.check_them("out");
-                    news.pre = self.id;
                     result.push(news);
                 }
             }
@@ -148,7 +100,6 @@ impl Game for P1 {
                     debug_assert_eq!(news.rooms[j][d], '.');
                     news.rooms[j][d] = *amph;
                     news.cost += COST[(*amph as u8 - b'A') as usize] * (DIST_FROM_ROOM[j][i] + d);
-                    news.pre = self.id;
                     result.push(news);
                 }
             }
@@ -173,11 +124,9 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.line.retain(|c| *c != '#' && *c != '.');
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let goal: P1 = P1 {
-            id: 0,
             cost: 0,
             state: ['.', '.', '.', '.', '.', '.', '.'],
             rooms: [
@@ -186,10 +135,8 @@ impl AdventOfCode for Puzzle {
                 vec!['C', 'C'],
                 vec!['D', 'D'],
             ],
-            pre: 0,
         };
-        let init = P1 {
-            id: 0,
+        let start = P1 {
             cost: 0,
             state: goal.state,
             rooms: [
@@ -198,95 +145,11 @@ impl AdventOfCode for Puzzle {
                 vec![self.line[2], self.line[6]],
                 vec![self.line[3], self.line[7]],
             ],
-            pre: 0,
         };
-        let mut point: isize = init.heuristics();
-        let mut expanded: Vec<P1> = vec![init];
-        let mut updated: Vec<P1> = expanded.clone();
-        let mut id_counter = 0;
-        while let Some(rstate) = updated.iter().min_by_key(|s| s.cost) {
-            let state = rstate.clone();
-            if state == goal {
-                debug_assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
-                let mut s = &state;
-                while s.id != 0 {
-                    println!(
-                        "#{}{}.{}.{}.{}.{}{}#",
-                        s.state[0],
-                        s.state[1],
-                        s.state[2],
-                        s.state[3],
-                        s.state[4],
-                        s.state[5],
-                        s.state[6]
-                    );
-                    println!(
-                        "###{}#{}#{}#{}###",
-                        s.rooms[0][0], s.rooms[1][0], s.rooms[2][0], s.rooms[3][0]
-                    );
-                    println!(
-                        "  #{}#{}#{}#{}#",
-                        s.rooms[0][1], s.rooms[1][1], s.rooms[2][1], s.rooms[3][1]
-                    );
-                    println!("  ######### {}", s.cost);
-                    s = expanded.iter().find(|p| p.id == s.pre).unwrap();
-                }
-                return state.cost;
-            }
-            if point < state.heuristics() {
-                point = state.heuristics();
-                println!(
-                    "{:>6}/{:>6}, {:?} {:?}; {:>8}",
-                    state.cost,
-                    point,
-                    state.state.iter().collect::<String>(),
-                    state
-                        .rooms
-                        .iter()
-                        .map(|r| r.iter().collect::<String>())
-                        .collect::<Vec<_>>(),
-                    expanded.len(),
-                );
-            }
-            let nn = updated.len();
-            updated.retain(|s| s.id != state.id);
-            debug_assert_eq!(nn, updated.len() + 1);
-            for mut news in state.neighbor_states() {
-                // println!("-- {:?} {:?}", news.state, news.rooms);
-                if let Some(found) = expanded.iter_mut().find(|e| **e == news) {
-                    if news.cost < found.cost {
-                        if let Some(found2) = updated.iter_mut().find(|e| **e == news) {
-                            debug_assert_eq!(found2.cost, found.cost);
-                            found2.cost = news.cost;
-                            found2.pre = news.pre;
-                            found.cost = news.cost;
-                            found.pre = news.pre;
-                            continue;
-                        }
-                        news.id = found.id;
-                        found.cost = news.cost;
-                        found.pre = news.pre;
-                        // debug_assert!(updated.iter().all(|s| *s != news));
-                        updated.push(news);
-                    }
-                } else {
-                    news.id = id_counter;
-                    id_counter += 1;
-                    debug_assert!(expanded.iter().all(|s| *s != news));
-                    expanded.push(news.clone());
-                    debug_assert!(updated.iter().all(|s| *s != news));
-                    updated.push(news);
-                }
-            }
-            // if 120 < id_counter {
-            // panic!();
-            // }
-        }
-        0
+        self.search(start, goal)
     }
     fn part2(&mut self) -> Self::Output2 {
         let goal: P1 = P1 {
-            id: 0,
             cost: 0,
             state: ['.', '.', '.', '.', '.', '.', '.'],
             rooms: [
@@ -295,10 +158,8 @@ impl AdventOfCode for Puzzle {
                 vec!['C', 'C', 'C', 'C'],
                 vec!['D', 'D', 'D', 'D'],
             ],
-            pre: 0,
         };
-        let init = P1 {
-            id: 0,
+        let start = P1 {
             cost: 0,
             state: goal.state,
             rooms: [
@@ -307,52 +168,29 @@ impl AdventOfCode for Puzzle {
                 vec![self.line[2], 'B', 'A', self.line[6]],
                 vec![self.line[3], 'A', 'C', self.line[7]],
             ],
-            pre: 0,
         };
-        let mut point: isize = init.heuristics();
-        let mut expanded: Vec<P1> = vec![init];
-        let mut updated: Vec<P1> = expanded.clone();
-        let mut id_counter = 0;
-        while let Some(rstate) = updated.iter().min_by_key(|s| s.cost) {
-            let state = rstate.clone();
-            if state == goal {
-                // debug_assert!(updated.iter().min_by_key(|s| s.cost).unwrap().cost <= state.cost);
-                let mut s = &state;
-                while s.id != 0 {
-                    println!(
-                        "#{}{}.{}.{}.{}.{}{}#",
-                        s.state[0],
-                        s.state[1],
-                        s.state[2],
-                        s.state[3],
-                        s.state[4],
-                        s.state[5],
-                        s.state[6]
-                    );
-                    println!(
-                        "###{}#{}#{}#{}###",
-                        s.rooms[0][0], s.rooms[1][0], s.rooms[2][0], s.rooms[3][0]
-                    );
-                    println!(
-                        "  #{}#{}#{}#{}#",
-                        s.rooms[0][1], s.rooms[1][1], s.rooms[2][1], s.rooms[3][1]
-                    );
-                    println!(
-                        "  #{}#{}#{}#{}#",
-                        s.rooms[0][2], s.rooms[1][2], s.rooms[2][2], s.rooms[3][2]
-                    );
-                    println!(
-                        "  #{}#{}#{}#{}#",
-                        s.rooms[0][3], s.rooms[1][3], s.rooms[2][3], s.rooms[3][3]
-                    );
-                    println!("  ######### {}", s.cost);
-                    s = expanded.iter().find(|p| p.id == s.pre).unwrap();
-                }
+        self.search(start, goal)
+    }
+}
+
+impl Puzzle {
+    fn search(&self, start: P1, goal: P1) -> usize {
+        let mut point: isize = start.heuristics();
+        let mut to_visit: BinaryHeap<Reverse<P1>> = BinaryHeap::new();
+        to_visit.push(Reverse(start));
+        let mut visited: HashSet<P1> = HashSet::new();
+        while let Some(Reverse(state)) = to_visit.pop() {
+            if visited.contains(&state) {
+                continue;
+            }
+            if state.state == goal.state && state.rooms == goal.rooms {
+                progress!("");
                 return state.cost;
             }
-            if point < state.heuristics() {
-                point = state.heuristics();
-                println!(
+            let h = state.heuristics();
+            if point < h {
+                point = h;
+                progress!(format!(
                     "{:>6}({:>6}), {:?} {:?}, {:>8}",
                     state.cost,
                     point,
@@ -362,57 +200,14 @@ impl AdventOfCode for Puzzle {
                         .iter()
                         .map(|r| r.iter().collect::<String>())
                         .collect::<Vec<_>>(),
-                    expanded.len(),
-                );
+                    visited.len(),
+                ));
             }
-            let nn = updated.len();
-            updated.retain(|s| s.id != state.id);
-            debug_assert_eq!(nn, updated.len() + 1);
-
-            for mut news in state.neighbor_states() {
-                if let Some(found) = expanded.iter_mut().find(|e| **e == news) {
-                    if news.cost < found.cost {
-                        if let Some(found2) = updated.iter_mut().find(|e| **e == news) {
-                            debug_assert_eq!(found2.cost, found.cost);
-                            found2.cost = news.cost;
-                            found2.pre = news.pre;
-                            found.cost = news.cost;
-                            found.pre = news.pre;
-                            continue;
-                        }
-                        news.id = found.id;
-                        found.cost = news.cost;
-                        found.pre = news.pre;
-                        // debug_assert!(updated.iter().all(|s| *s != news));
-                        updated.push(news);
-                    }
-                } else {
-                    news.id = id_counter;
-                    id_counter += 1;
-                    // debug_assert!(expanded.iter().all(|s| *s != news));
-                    expanded.push(news.clone());
-                    // debug_assert!(updated.iter().all(|s| *s != news));
-                    updated.push(news);
-                }
+            for news in state.neighbor_states() {
+                to_visit.push(Reverse(news));
             }
-            /*
-                        for mut news in state.neighbor_states() {
-                            if let Some(found) = updated.iter_mut().find(|e| **e == news) {
-                                if news.cost < found.cost {
-                                    found.cost = news.cost;
-                                    found.pre = news.pre;
-                                    // expanded.push(news.clone());
-                                    // updated.push(news);
-                                }
-                            } else {
-                                news.id = id_counter;
-                                id_counter += 1;
-                                expanded.push(news.clone());
-                                updated.push(news);
-                            }
-                        }
-            */
+            visited.insert(state);
         }
-        0
+        unreachable!()
     }
 }
