@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
+        progress, regex,
     },
     std::collections::HashMap,
 };
@@ -20,9 +20,6 @@ impl AdventOfCode for Puzzle {
         let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push(segment[2].parse::<usize>()?);
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pos: [usize; 2] = [self.line[0], self.line[1]];
@@ -43,77 +40,79 @@ impl AdventOfCode for Puzzle {
             score[t] += pos[t];
             dices += 3;
             turn += 1;
-            println!(
+            progress!(format!(
                 "turn {}, dice {}, step {}, pos {} score{:?}",
                 turn, current_dice, step, pos[t], &score
-            );
+            ));
         }
-        dbg!(score[0].min(score[1]), dices);
+        progress!("");
         score[0].min(score[1]) * dices
     }
     fn part2(&mut self) -> Self::Output2 {
         // (pos, score), (pos, score), turn => the number of universes
         let mut scores: HashMap<(usize, usize, usize, usize, bool), usize> = HashMap::new();
+        let mut next: HashMap<(usize, usize, usize, usize, bool), usize> = HashMap::new();
         let mut universes: (usize, usize) = (0, 0);
         scores.insert((self.line[0], 0, self.line[1], 0, false), 1); // false means the next turn is player 0.
         while !scores.is_empty() {
-            let (key, count) = scores.iter().next().unwrap();
-            let k = *key;
-            let c = *count;
-            scores.remove(&k);
-            if 21 <= k.1 {
-                universes.0 += c;
-                continue;
-            }
-            if 21 <= k.3 {
-                universes.1 += c;
-                continue;
-            }
-            // generate new universes
-            // 3: 1:: (1, 1, 1)
-            // 4: 3:: (1, 1, 2), (1, 2, 1), (2, 1, 1)
-            // 5: 6:: (1, 2, 2), (2, 1, 2), (2, 2, 1), (1, 1, 3), (1, 3, 1), (3, 1, 1)
-            // 6: 7:: (1, 2, 3), (1, 3, 2), (2, 1, 3), (2, 3, 1), (3, 1, 2), (3, 2, 1), (2, 2, 2)
-            // 7: 6:: (1, 2, 2), (2, 1, 2), (2, 2, 1), (1, 1, 3), (1, 3, 1), (3, 1, 1)
-            // 8: 3:: (3, 3, 2), (3, 2, 3), (2, 3, 3)
-            // 9: 1:: (3, 3, 3)
-            if k.4 {
-                // player 1
-                let (pos, score) = (k.2, k.3);
-                for i in 3..=9 {
-                    let new_pos = (pos + i - 1) % 10 + 1;
-                    assert!(0 < new_pos && new_pos <= 10, "{}", new_pos);
-                    let new_score = score + new_pos;
-                    let n = match i {
-                        3 | 9 => 1,
-                        4 | 8 => 3,
-                        5 | 7 => 6,
-                        _ => 7,
-                    };
-                    *scores
-                        .entry((k.0, k.1, new_pos, new_score, false))
-                        .or_insert(0) += n * c;
+            for (key, count) in scores.iter() {
+                let k = *key;
+                let c = *count;
+                if 21 <= k.1 {
+                    universes.0 += c;
+                    continue;
                 }
-            } else {
-                // player 0
-                let (pos, score) = (k.0, k.1);
-                for i in 3..=9 {
-                    let new_pos = (pos + i - 1) % 10 + 1;
-                    assert!(0 < new_pos && new_pos <= 10, "{}", new_pos);
-                    let new_score = score + new_pos;
-                    let n = match i {
-                        3 | 9 => 1,
-                        4 | 8 => 3,
-                        5 | 7 => 6,
-                        _ => 7,
-                    };
-                    *scores
-                        .entry((new_pos, new_score, k.2, k.3, true))
-                        .or_insert(0) += n * c;
+                if 21 <= k.3 {
+                    universes.1 += c;
+                    continue;
+                }
+                // generate new universes
+                // 3: 1:: (1, 1, 1)
+                // 4: 3:: (1, 1, 2), (1, 2, 1), (2, 1, 1)
+                // 5: 6:: (1, 2, 2), (2, 1, 2), (2, 2, 1), (1, 1, 3), (1, 3, 1), (3, 1, 1)
+                // 6: 7:: (1, 2, 3), (1, 3, 2), (2, 1, 3), (2, 3, 1), (3, 1, 2), (3, 2, 1), (2, 2, 2)
+                // 7: 6:: (1, 2, 2), (2, 1, 2), (2, 2, 1), (1, 1, 3), (1, 3, 1), (3, 1, 1)
+                // 8: 3:: (3, 3, 2), (3, 2, 3), (2, 3, 3)
+                // 9: 1:: (3, 3, 3)
+                if k.4 {
+                    // player 1
+                    let (pos, score) = (k.2, k.3);
+                    for i in 3..=9 {
+                        let new_pos = (pos + i - 1) % 10 + 1;
+                        debug_assert!(0 < new_pos && new_pos <= 10, "{}", new_pos);
+                        let new_score = score + new_pos;
+                        let n = match i {
+                            3 | 9 => 1,
+                            4 | 8 => 3,
+                            5 | 7 => 6,
+                            _ => 7,
+                        };
+                        *next
+                            .entry((k.0, k.1, new_pos, new_score, false))
+                            .or_default() += n * c;
+                    }
+                } else {
+                    // player 0
+                    let (pos, score) = (k.0, k.1);
+                    for i in 3..=9 {
+                        let new_pos = (pos + i - 1) % 10 + 1;
+                        debug_assert!(0 < new_pos && new_pos <= 10, "{}", new_pos);
+                        let new_score = score + new_pos;
+                        let n = match i {
+                            3 | 9 => 1,
+                            4 | 8 => 3,
+                            5 | 7 => 6,
+                            _ => 7,
+                        };
+                        *next
+                            .entry((new_pos, new_score, k.2, k.3, true))
+                            .or_default() += n * c;
+                    }
                 }
             }
+            scores.clear();
+            std::mem::swap(&mut scores, &mut next);
         }
-        dbg!(universes);
         universes.0.max(universes.1)
     }
 }
