@@ -41,11 +41,54 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let mut border: HashMap<usize, usize> = HashMap::new();
         self.initialize();
-        let mut count: usize = 0;
-        let mut start: usize = 0;
-        'next_y: for y in 100.. {
+        let mut y: usize = 1;
+        let mut x: usize = 1;
+        'first_on: for yy in 1..100 {
+            for xx in 1..100 {
+                if self.is_pulling(yy as isize, xx as isize) {
+                    y = yy;
+                    x = xx;
+                    break 'first_on;
+                }
+            }
+        }
+        let mut span_x = 0;
+        let mut span_y = 0;
+        'not_enough_span: loop {
+            x += span_x;
+            'horizontal: loop {
+                if self.is_pulling(y as isize, x as isize) {
+                    x += 1;
+                    span_x += 1;
+                    continue 'horizontal;
+                }
+                x -= 1;
+                break 'horizontal;
+            }
+            y += span_y;
+            'vertical: loop {
+                if self.is_pulling(y as isize, x as isize) {
+                    y += 1;
+                    span_y += 1;
+                    continue 'vertical;
+                }
+                if 100 <= span_y && 100 <= span_x {
+                    break 'not_enough_span;
+                }
+                y -= 1;
+                break 'vertical;
+            }
+            // dbg!(span_y, span_x);
+            if span_y == 1 && span_x == 1 {
+                x += 1;
+                y += 1;
+            }
+        }
+        let start_y = y;
+        let mut start_x: usize = x + span_x;
+        'next_y: for y in start_y.. {
             let mut span = 0;
-            for x in start.. {
+            for x in start_x.. {
                 let on = self.is_pulling(y as isize, x as isize);
                 if span == 0 && on {
                     if let Some(xx) = border.get(&(y - 99)) {
@@ -54,7 +97,7 @@ impl AdventOfCode for Puzzle {
                         }
                     }
                     span = 1;
-                    start = x - 1;
+                    start_x = x - 1;
                 } else if 0 < span {
                     if on {
                         span += 1;
@@ -63,11 +106,10 @@ impl AdventOfCode for Puzzle {
                         continue 'next_y;
                     }
                 }
-                count += on as usize;
             }
-            println!();
         }
-        count
+        unreachable!()
+        //count
     }
 }
 
