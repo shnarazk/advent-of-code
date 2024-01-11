@@ -16,50 +16,25 @@ impl AdventOfCode for Puzzle {
         self.line = block.to_string();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
-        // self.line = "abcdef".to_string();
-        // self.line = "pqrstuv".to_string();
         for i in 0.. {
-            let target: String = format!("{}{}", self.line, i);
             let mut hasher = Md5::new();
-            hasher.update(&target);
-            let d = hasher
-                .finalize()
-                .iter()
-                .map(|n| format!("{:0>2x}", n))
-                .collect::<Vec<String>>()
-                .join("");
-            if d.starts_with("00000") {
-                dbg!(i, d);
+            hasher.update(&format!("{}{}", self.line, i));
+            let d = hasher.finalize();
+            if d[0] == 0 && d[1] == 0 && d[2] < 16 {
                 return i;
             }
         }
-        // for n in &hasher.finalize()[..] {
-        //     print!("{:0>2X}", n);
-        // }
-        0
+        unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
         for i in 0.. {
-            let target: String = format!("{}{}", self.line, i);
             let mut hasher = Md5::new();
-            hasher.update(&target);
+            hasher.update(&format!("{}{}", self.line, i));
             if hasher.finalize().iter().take(3).all(|n| *n == 0) {
-                let mut hasher = Md5::new();
-                hasher.update(&target);
-                let d = hasher
-                    .finalize()
-                    .iter()
-                    .map(|n| format!("{:0>2x}", n))
-                    .collect::<Vec<String>>()
-                    .join("");
-                dbg!(i, d);
                 return i;
             }
         }
-        0
+        unreachable!()
     }
 }
