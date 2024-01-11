@@ -1,27 +1,6 @@
 //! <https://adventofcode.com/2015/day/10>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-/// Don't work
-#[allow(dead_code)]
-fn formatter_recursive(vec: &[usize]) -> Vec<usize> {
-    if let Some(n) = vec.first() {
-        let mut nrepeat = 0;
-        for (i, x) in vec.iter().enumerate() {
-            if x == n {
-                nrepeat = i;
-            } else {
-                break;
-            }
-        }
-        nrepeat += 1;
-        let mut v = vec![nrepeat, *n];
-        v.append(&mut formatter1(&vec[nrepeat..]));
-        v
-    } else {
-        vec![]
-    }
-}
-
 fn formatter1(mut vec: &[usize]) -> Vec<usize> {
     let mut v = Vec::new();
     while !vec.is_empty() {
@@ -44,7 +23,7 @@ fn formatter1(mut vec: &[usize]) -> Vec<usize> {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<Vec<usize>>,
+    line: Vec<usize>,
 }
 
 #[aoc(2015, 10)]
@@ -58,76 +37,23 @@ impl AdventOfCode for Puzzle {
             n /= 10;
         }
         vec.reverse();
-        self.line.push(vec);
+        self.line = vec;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
-        for v in self.line.iter() {
-            let mut n = v.clone();
-            for i in 0..40 {
-                let result = n
-                    .iter()
-                    .map(|n| format!("{}", n))
-                    .collect::<Vec<String>>()
-                    .join("");
-                if result.len() < 30 {
-                    println!("{}:{}", i, result);
-                } else {
-                    println!("{}:{}", i, result.len());
-                }
-                n = formatter1(&n);
-            }
-            // break;
-            let result = n
-                .iter()
-                .map(|n| format!("{}", n))
-                .collect::<Vec<String>>()
-                .join("");
-            println!(
-                "{:?} => {}",
-                v.iter()
-                    .map(|n| format!("{}", n))
-                    .collect::<Vec<String>>()
-                    .join(""),
-                result.len(),
-            );
-        }
-        0
+        self.iterate(self.line.clone(), 40)
     }
     fn part2(&mut self) -> Self::Output2 {
-        for v in self.line.iter() {
-            let mut n = v.clone();
-            for i in 0..50 {
-                let result = n
-                    .iter()
-                    .map(|n| format!("{}", n))
-                    .collect::<Vec<String>>()
-                    .join("");
-                if result.len() < 30 {
-                    println!("{}:{}", i, result);
-                } else {
-                    println!("{}:{}", i, result.len());
-                }
-                n = formatter1(&n);
-            }
-            // break;
-            let result = n
-                .iter()
-                .map(|n| format!("{}", n))
-                .collect::<Vec<String>>()
-                .join("");
-            println!(
-                "{:?} => {}",
-                v.iter()
-                    .map(|n| format!("{}", n))
-                    .collect::<Vec<String>>()
-                    .join(""),
-                result.len(),
-            );
-        }
-        0
+        self.iterate(self.line.clone(), 50)
+    }
+}
+
+impl Puzzle {
+    fn iterate(&self, n: Vec<usize>, upto: usize) -> usize {
+        (0..upto)
+            .fold(n, |n, _| formatter1(&n))
+            .iter()
+            .map(|n| n.ilog10() as usize + 1)
+            .sum::<usize>()
     }
 }
