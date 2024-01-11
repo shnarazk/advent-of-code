@@ -54,7 +54,7 @@ impl AdventOfCode for Puzzle {
                 increment(&mut p);
             }
             result = p.iter().collect::<String>();
-            println!("{} => {}", l.iter().collect::<String>(), result);
+            // println!("{} => {}", l.iter().collect::<String>(), result);
         }
         result
     }

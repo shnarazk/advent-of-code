@@ -37,9 +37,6 @@ impl AdventOfCode for Puzzle {
         });
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut rank_max: usize = 0;
         let n = self.line.len();
@@ -52,7 +49,6 @@ impl AdventOfCode for Puzzle {
                     let vec = vec![n1, n2];
                     let r = self.rank(&vec);
                     if rank_max < r {
-                        dbg!(&vec);
                         rank_max = r;
                     }
                 }
@@ -69,7 +65,6 @@ impl AdventOfCode for Puzzle {
                             let vec = vec![n0, n1, n2, n3];
                             let r = self.rank(&vec);
                             if rank_max < r {
-                                dbg!(&vec);
                                 rank_max = r;
                             }
                         }
@@ -91,7 +86,6 @@ impl AdventOfCode for Puzzle {
                     let vec = vec![n1, n2];
                     let r = self.rank(&vec);
                     if self.calorie(&vec) == 500 && rank_max < r {
-                        dbg!(&vec);
                         rank_max = r;
                     }
                 }
@@ -108,7 +102,6 @@ impl AdventOfCode for Puzzle {
                             let vec = vec![n0, n1, n2, n3];
                             let r = self.rank(&vec);
                             if self.calorie(&vec) == 500 && rank_max < r {
-                                dbg!(&vec);
                                 rank_max = r;
                             }
                         }

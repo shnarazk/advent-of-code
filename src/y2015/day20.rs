@@ -27,9 +27,9 @@ impl AdventOfCode for Puzzle {
             if INPUT <= sum * 10 {
                 return n;
             }
-            if n % 10000 == 0 {
-                dbg!(n, sum);
-            }
+            // if n % 10000 == 0 {
+            //     dbg!(n, sum);
+            // }
         }
         0
     }
@@ -54,9 +54,9 @@ impl AdventOfCode for Puzzle {
             if INPUT <= sum * 11 {
                 return n;
             }
-            if n % 10000 == 0 {
-                dbg!(n, sum);
-            }
+            // if n % 10000 == 0 {
+            //     dbg!(n, sum);
+            // }
         }
         0
     }

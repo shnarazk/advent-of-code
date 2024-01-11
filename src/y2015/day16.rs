@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
         // assert_eq!(self.line.len(), 500);
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -98,7 +98,7 @@ impl AdventOfCode for Puzzle {
                     && sue.perfumes.map_or(true, |v| v == 1)
             })
             .collect::<Vec<_>>();
-        dbg!(&they);
+        // dbg!(&they);
         they[0].id
     }
 }

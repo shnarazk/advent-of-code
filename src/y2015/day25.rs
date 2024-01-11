@@ -26,22 +26,22 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        for j in 1..=6 {
-            for i in 1..=6 {
-                print!("{:>4}", at(j, i));
-            }
-            println!();
-        }
-        println!();
+        // for j in 1..=6 {
+        //     for i in 1..=6 {
+        //         print!("{:>4}", at(j, i));
+        //     }
+        //     println!();
+        // }
+        // println!();
     }
     fn part1(&mut self) -> Self::Output1 {
         // Enter the code at row 2981, column 3075.
-        for j in 1..=6 {
-            for i in 1..=6 {
-                print!("{:>10}", code(j, i));
-            }
-            println!();
-        }
+        // for j in 1..=6 {
+        //     for i in 1..=6 {
+        //         print!("{:>10}", code(j, i));
+        //     }
+        //     println!();
+        // }
         code(2981, 3075)
     }
     fn part2(&mut self) -> Self::Output2 {

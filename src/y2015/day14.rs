@@ -28,15 +28,15 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let t = 2503;
         let mut longest: usize = 0;
-        for (name, speed, duration, rest) in self.line.iter() {
+        for (_name, speed, duration, rest) in self.line.iter() {
             let n_cycle = t / (duration + rest);
             let extra = (t % (duration + rest)).min(*duration);
             let length = speed * (n_cycle * duration + extra);
             longest = longest.max(length);
-            println!(
-                "{} flies {} * ({} * {} + {}) = {} km.",
-                name, speed, n_cycle, duration, extra, length
-            );
+            // println!(
+            //     "{} flies {} * ({} * {} + {}) = {} km.",
+            //     name, speed, n_cycle, duration, extra, length
+            // );
         }
         longest
     }
@@ -51,7 +51,7 @@ impl AdventOfCode for Puzzle {
                     dist[i] += speed;
                 }
             }
-            println!("{:?}", dist);
+            // println!("{:?}", dist);
             let longest = dist.iter().max().unwrap();
             for (i, d) in dist.iter().enumerate() {
                 if d == longest {
@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         // println!("{} flies {} * ({} * {} + {}) = {} km.", name, speed, n_cycle, duration, extra, length);
-        dbg!(&point);
+        // dbg!(&point);
         point.iter().copied().max().unwrap()
     }
 }

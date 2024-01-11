@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/19>
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc, AdventOfCode, ParseError},
         regex,
     },
@@ -79,21 +79,21 @@ impl AdventOfCode for Puzzle {
         // dbg!(&self.line);
         // dbg!(&self.dic);
         // coloring teminator
-        println!("- {}unique rule{}", color::RED, color::RESET);
-        println!("- {}without rule{}", color::BLUE, color::RESET);
-        for ch in self.line.iter() {
-            match ch.as_str() {
-                // unique
-                "Si" | "Th" => print!("{}{}{}", color::RED, ch, color::RESET),
-                // expandable
-                "Al" | "B" | "Ca" | "F" | "H" | "Mg" | "N" | "O" | "P" | "Ti" | "e" => {
-                    print!("{}", ch)
-                }
-                // not expandable
-                _ => print!("{}{}{}", color::BLUE, ch, color::RESET),
-            }
-        }
-        println!();
+        // println!("- {}unique rule{}", color::RED, color::RESET);
+        // println!("- {}without rule{}", color::BLUE, color::RESET);
+        // for ch in self.line.iter() {
+        //     match ch.as_str() {
+        //         // unique
+        //         "Si" | "Th" => print!("{}{}{}", color::RED, ch, color::RESET),
+        //         // expandable
+        //         "Al" | "B" | "Ca" | "F" | "H" | "Mg" | "N" | "O" | "P" | "Ti" | "e" => {
+        //             print!("{}", ch)
+        //         }
+        //         // not expandable
+        //         _ => print!("{}{}{}", color::BLUE, ch, color::RESET),
+        //     }
+        // }
+        // println!();
         // make all combination of pairs
         let nrules = self.rule.iter().filter(|(from, _)| *from != "e").count();
         let rule2: Vec<String> = self
@@ -111,12 +111,12 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<String>>();
         assert_eq!(rule2.len(), nrules * nrules);
-        for (i, (from, tos)) in self.rule.iter().enumerate().filter(|p| p.1 .0 != "e") {
-            let target = tos.iter().cloned().collect::<String>();
-            if rule2.iter().filter(|s| s.contains(&target)).count() == 2 * nrules - 1 {
-                println!("{:>2}: {:>2} -> {:<11}", i, from, target);
-            }
-        }
+        // for (i, (from, tos)) in self.rule.iter().enumerate().filter(|p| p.1 .0 != "e") {
+        //     let target = tos.iter().cloned().collect::<String>();
+        //     if rule2.iter().filter(|s| s.contains(&target)).count() == 2 * nrules - 1 {
+        //         println!("{:>2}: {:>2} -> {:<11}", i, from, target);
+        //     }
+        // }
         let unique_terminators: Vec<(String, String)> = self
             .rule
             .iter()
@@ -126,7 +126,7 @@ impl AdventOfCode for Puzzle {
                 rule2.iter().filter(|s| s.contains(target)).count() == 2 * nrules - 1
             })
             .collect::<Vec<_>>();
-        println!("{:?}", unique_terminators);
+        // println!("{:?}", unique_terminators);
         let mut m: String = self.line.iter().cloned().collect::<String>();
         let mut counter = 0;
         for _ in 0..56 {
@@ -135,16 +135,16 @@ impl AdventOfCode for Puzzle {
                 let c = counter;
                 counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
                 if c != counter {
-                    let p = re
-                        .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
-                        .to_string();
-                    println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
+                    // let p = re
+                    //     .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
+                    //     .to_string();
+                    // println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
                     m = re.replace_all(&m, from).to_string();
                 }
             }
         }
-        println!("212;     NAl => e : NAl");
-        println!("212;              : e");
+        // println!("212;     NAl => e : NAl");
+        // println!("212;              : e");
     }
     fn part1(&mut self) -> Self::Output1 {
         // dbg!(&self.rule);
@@ -185,12 +185,12 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        for s in new_bag.iter() {
-            println!(
-                "{:?}",
-                s.iter().map(|n| dic[*n]).collect::<Vec<&str>>().join("")
-            );
-        }
+        // for s in new_bag.iter() {
+        //     println!(
+        //         "{:?}",
+        //         s.iter().map(|n| dic[*n]).collect::<Vec<&str>>().join("")
+        //     );
+        // }
         new_bag.len()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -228,16 +228,16 @@ impl AdventOfCode for Puzzle {
                 let c = counter;
                 counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
                 if c != counter {
-                    let p = re
-                        .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
-                        .to_string();
-                    println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
+                    // let p = re
+                    //     .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
+                    //     .to_string();
+                    // println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
                     m = re.replace_all(&m, from).to_string();
                 }
             }
         }
-        println!("212;     NAl => e : NAl");
-        println!("212;              : e");
+        // println!("212;     NAl => e : NAl");
+        // println!("212;              : e");
         counter + 1
     }
 }

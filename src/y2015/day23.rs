@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
                 line_parser::to_isize(&segment[2])?,
             ));
         } else {
-            dbg!(block);
+            // dbg!(block);
             return Err(ParseError);
         }
         Ok(())
@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
             }
             pc += 1;
         }
-        dbg!(&reg);
+        // dbg!(&reg);
         reg[1]
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -128,7 +128,6 @@ impl AdventOfCode for Puzzle {
             }
             pc += 1;
         }
-        dbg!(&reg);
         reg[1]
     }
 }

@@ -35,7 +35,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut lights: [[bool; 1000]; 1000] = [[false; 1000]; 1000];

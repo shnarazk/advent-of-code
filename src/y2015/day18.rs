@@ -55,9 +55,9 @@ impl AdventOfCode for Puzzle {
             //     println!("{:?}", v.iter().collect::<String>());
             // }
         }
-        for v in grid.iter() {
-            println!("{}", v.iter().collect::<String>());
-        }
+        // for v in grid.iter() {
+        //     println!("{}", v.iter().collect::<String>());
+        // }
         grid.iter()
             .map(|v| v.iter().filter(|l| **l == '#').count())
             .sum()
@@ -106,9 +106,9 @@ impl AdventOfCode for Puzzle {
             //     println!("{}", v.iter().collect::<String>());
             // }
         }
-        for v in grid.iter() {
-            println!("{}", v.iter().collect::<String>());
-        }
+        // for v in grid.iter() {
+        //     println!("{}", v.iter().collect::<String>());
+        // }
         grid.iter()
             .map(|v| v.iter().filter(|l| **l == '#').count())
             .sum()
