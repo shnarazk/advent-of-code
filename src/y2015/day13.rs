@@ -40,7 +40,7 @@ impl AdventOfCode for Puzzle {
             self.person.insert(p1.to_string());
             self.person.insert(p2.to_string());
         }
-        dbg!(&self.person);
+        // dbg!(&self.person);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut likes: HashMap<(&str, &str), isize> = HashMap::new();
@@ -53,31 +53,31 @@ impl AdventOfCode for Puzzle {
         for pos in (0..n).permutations(n) {
             let mut happiness: isize = 0;
             // pos[n - 1] - pos[0] - pos[1]
-            println!(
-                "{} - {} - {}",
-                &person[pos[n - 1]],
-                &person[pos[0]],
-                &person[pos[1]],
-            );
+            // println!(
+            //     "{} - {} - {}",
+            //     &person[pos[n - 1]],
+            //     &person[pos[0]],
+            //     &person[pos[1]],
+            // );
             happiness += likes.get(&(person[pos[0]], person[pos[n - 1]])).unwrap();
             happiness += likes.get(&(person[pos[0]], person[pos[1]])).unwrap();
             for p in pos.windows(3) {
-                println!("{} - {} - {}", &person[p[0]], &person[p[1]], &person[p[2]],);
+                // println!("{} - {} - {}", &person[p[0]], &person[p[1]], &person[p[2]],);
                 happiness += likes.get(&(person[p[1]], person[p[0]])).unwrap();
                 happiness += likes.get(&(person[p[1]], person[p[2]])).unwrap();
             }
             // pos[n - 2] - pos[n-1] - pos[0]
-            println!(
-                "{} - {} - {}",
-                &person[pos[n - 2]],
-                &person[pos[n - 1]],
-                &person[pos[0]],
-            );
+            // println!(
+            //     "{} - {} - {}",
+            //     &person[pos[n - 2]],
+            //     &person[pos[n - 1]],
+            //     &person[pos[0]],
+            // );
             happiness += likes
                 .get(&(person[pos[n - 1]], person[pos[n - 2]]))
                 .unwrap();
             happiness += likes.get(&(person[pos[n - 1]], person[pos[0]])).unwrap();
-            println!();
+            // println!();
             max_happiness = max_happiness.max(happiness);
         }
         max_happiness
