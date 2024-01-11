@@ -1,5 +1,8 @@
 //! <https://adventofcode.com/2016/day/02>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use {
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    std::fmt::Write,
+};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -8,15 +11,12 @@ pub struct Puzzle {
 
 #[aoc_at(2016, 2)]
 impl AdventOfCode for Puzzle {
-    type Output1 = Vec<usize>;
-    type Output2 = Vec<char>;
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(block.trim().chars().collect::<Vec<char>>());
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut key: Vec<usize> = Vec::new();
@@ -34,7 +34,9 @@ impl AdventOfCode for Puzzle {
             }
             key.push((3 * (y + 1) + (x + 1) + 1) as usize);
         }
-        key
+        key.iter().fold(String::new(), |mut s, n| {
+            write!(s, "{n}").map(|_| s).unwrap()
+        })
     }
     fn part2(&mut self) -> Self::Output2 {
         fn to_char(y: isize, x: isize) -> char {
@@ -74,6 +76,8 @@ impl AdventOfCode for Puzzle {
             }
             key.push(to_char(y, x));
         }
-        key
+        key.iter().fold(String::new(), |mut s, n| {
+            write!(s, "{n}").map(|_| s).unwrap()
+        })
     }
 }

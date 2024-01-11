@@ -81,12 +81,12 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        for (i, l) in self.cost.iter().enumerate() {
-            for d in l.iter() {
-                print!("{d:>4},");
-            }
-            println!("\t{:?}", self.targets[i]);
-        }
+        // for (i, l) in self.cost.iter().enumerate() {
+        //     for d in l.iter() {
+        //         print!("{d:>4},");
+        //     }
+        //     println!("\t{:?}", self.targets[i]);
+        // }
     }
     fn part1(&mut self) -> Self::Output1 {
         let goal = self.targets.len();
@@ -97,7 +97,6 @@ impl AdventOfCode for Puzzle {
             if path.len() == goal {
                 if cost < least {
                     least = cost;
-                    dbg!(least);
                 }
                 continue;
             }
@@ -124,7 +123,6 @@ impl AdventOfCode for Puzzle {
                 let c = cost + self.cost[lst][0];
                 if c < least {
                     least = c;
-                    dbg!(least);
                 }
                 continue;
             }

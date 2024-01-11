@@ -62,7 +62,7 @@ impl AdventOfCode for Puzzle {
                     let ch = s[0];
                     if queue.iter().any(|(_, cs)| cs.contains(&ch)) {
                         passed += 1;
-                        println!("{:3>}, {:9>}: {:?}", passed, check - 1, phrase);
+                        // println!("{:3>}, {:9>}: {:?}", passed, check - 1, phrase);
                         continue 'next_phrase;
                     }
                     break;
@@ -129,7 +129,7 @@ impl AdventOfCode for Puzzle {
                     let ch = s[0];
                     if queue.iter().any(|(_, cs)| cs.contains(&ch)) {
                         passed += 1;
-                        println!("{:3>}, {:9>}: {:?}", passed, check - 1, phrase);
+                        // println!("{:3>}, {:9>}: {:?}", passed, check - 1, phrase);
                         continue 'next_phrase;
                     }
                     break;

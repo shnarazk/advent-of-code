@@ -31,7 +31,6 @@ impl AdventOfCode for Puzzle {
             .filter(|vec| {
                 let mut v: Vec<usize> = vec.to_vec();
                 v.sort_unstable();
-                dbg!(&v);
                 v[2] < v[0] + v[1]
             })
             .count()

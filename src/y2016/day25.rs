@@ -68,7 +68,7 @@ impl Puzzle {
                     }
                 }
                 Code::Out(val) => {
-                    dbg!((self.pass_count % 2) as isize == self.get(val));
+                    // dbg!((self.pass_count % 2) as isize == self.get(val));
                     if (self.pass_count % 2) as isize == self.get(val) {
                         if 0 < self.pass_count {
                             self.pass_count -= 1;
@@ -81,7 +81,7 @@ impl Puzzle {
                     }
                 }
                 _ => {
-                    dbg!(code);
+                    // dbg!(code);
                     // unreachable!()
                 }
             }
@@ -157,7 +157,6 @@ impl AdventOfCode for Puzzle {
             self.pass_count = 10;
             self.run();
             if self.pass {
-                dbg!(i);
                 return i;
             }
         }

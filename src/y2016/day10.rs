@@ -57,9 +57,6 @@ impl AdventOfCode for Puzzle {
         }
         Err(ParseError)
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<usize, (Destination, Destination)> = HashMap::new();
         for op in self.line.iter() {
@@ -121,7 +118,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         for (bot, (c1, c2)) in state.iter() {
-            println!("b{bot}: {c1:?}-{c2:?}");
+            // println!("b{bot}: {c1:?}-{c2:?}");
             if *c1 == Some(17) && *c2 == Some(61) {
                 return *bot;
             }

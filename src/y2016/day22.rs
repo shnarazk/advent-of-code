@@ -35,9 +35,9 @@ impl AdventOfCode for Puzzle {
         // if 17 != site.0 && 100 < site.2.min(site.3) {
         //     dbg!(site);
         // }
-        if 0 == site.3 {
-            dbg!(site);
-        }
+        // if 0 == site.3 {
+        //     dbg!(site);
+        // }
         Ok(())
     }
     fn end_of_data(&mut self) {
@@ -48,7 +48,7 @@ impl AdventOfCode for Puzzle {
         }
         let width = w + 1;
         for (i, site) in self.line.iter().enumerate() {
-            assert_eq!(i, site.0 * width + site.1);
+            debug_assert_eq!(i, site.0 * width + site.1);
         }
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -73,40 +73,40 @@ impl AdventOfCode for Puzzle {
         }
         let width = w + 1;
         let height = h + 1;
-        dbg!(width, height);
-        assert_eq!(width * height, self.line.len());
+        // dbg!(width, height);
+        debug_assert_eq!(width * height, self.line.len());
         let mut to_visit: BinaryHeap<(isize, usize, State, usize)> = BinaryHeap::new();
         let mut visited: HashSet<(State, usize)> = HashSet::new();
         let init = self.line.iter().map(|site| site.3).collect::<Vec<usize>>();
         let mut check: isize = -1_000_000;
         to_visit.push((check + 1, 0, init, width - 1));
         while let Some((a_star, cost, state, goal)) = to_visit.pop() {
-            assert!(visited.len() < 1_000_000);
+            debug_assert!(visited.len() < 1_000_000);
             let empty = state
                 .iter()
                 .enumerate()
                 .find(|(_, used)| **used == 0)
                 .unwrap()
                 .0;
-            if (-1400 < check && check < a_star + cost as isize) || 0 == goal {
-                for (i, c) in state.iter().enumerate() {
-                    if i == goal {
-                        print!("G{:>2},", *c);
-                    } else if *c == 0 {
-                        print!("  _,");
-                    } else {
-                        print!("{:>3},", *c);
-                    }
-                    if (i + 1) % width == 0 {
-                        println!();
-                    }
-                }
-                dbg!(cost);
-            }
+            // if (-1400 < check && check < a_star + cost as isize) || 0 == goal {
+            //     for (i, c) in state.iter().enumerate() {
+            //         if i == goal {
+            //             print!("G{:>2},", *c);
+            //         } else if *c == 0 {
+            //             print!("  _,");
+            //         } else {
+            //             print!("{:>3},", *c);
+            //         }
+            //         if (i + 1) % width == 0 {
+            //             println!();
+            //         }
+            //     }
+            //     dbg!(cost);
+            // }
             check = check.max(a_star + cost as isize);
 
             if 0 == goal {
-                return dbg!(cost);
+                return cost;
             }
             let mut neighbors: Vec<(usize, Vec<usize>)> = Vec::new();
             macro_rules! ADD {

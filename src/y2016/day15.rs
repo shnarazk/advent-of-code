@@ -30,25 +30,24 @@ impl AdventOfCode for Puzzle {
         for (i, tuple) in self.line.iter().enumerate() {
             let mut m = (tuple.0 + tuple.1 + ((i + 1) % tuple.0)) % tuple.0;
             m = tuple.0 - m;
-            println!("周期{}で{}start", tuple.0, m);
+            // println!("周期{}で{}start", tuple.0, m);
             if i == 0 {
                 x = (tuple.0, m);
             } else {
                 x = chinese(x, (tuple.0, m));
             }
         }
-        dbg!(&x);
         let mut vec = self.line.iter().map(|(_, o)| *o).collect::<Vec<_>>();
-        for t in 0..=(x.1 + self.line.len()) {
-            if x.1 < t + self.line.len() {
-                println!("{:>4}: {:?}", t, vec);
-            }
+        for _ in 0..=(x.1 + self.line.len()) {
+            // if x.1 < t + self.line.len() {
+            //     println!("{:>4}: {:?}", t, vec);
+            // }
             for (i, v) in vec.iter_mut().enumerate() {
                 *v = (*v + 1) % self.line[i].0;
             }
-            if t == x.1 {
-                println!("-------------------");
-            }
+            // if t == x.1 {
+            //     println!("-------------------");
+            // }
         }
         x.1
     }
@@ -58,7 +57,7 @@ impl AdventOfCode for Puzzle {
         for (i, tuple) in self.line.iter().enumerate() {
             let mut m = (tuple.0 + tuple.1 + ((i + 1) % tuple.0)) % tuple.0;
             m = tuple.0 - m;
-            println!("周期{}で{}start", tuple.0, m);
+            // println!("周期{}で{}start", tuple.0, m);
             if i == 0 {
                 x = (tuple.0, m);
             } else {
@@ -100,36 +99,4 @@ fn solve1(a: usize, m: usize) -> usize {
         }
     }
     panic!("can't");
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_chinese() {
-        let a = chinese((3, 2), (5, 3));
-        assert_eq!(a.1, 8);
-        let c = chinese(a, (2, 7));
-        assert_eq!(c.1, 23);
-    }
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 1),
-            Answer::Part1(295)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 2),
-            Answer::Part2(1068781)
-        );
-    }
 }

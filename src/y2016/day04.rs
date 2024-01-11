@@ -89,7 +89,7 @@ impl AdventOfCode for Puzzle {
                     words.push(word);
                 }
                 if words.join("").contains("northpole") {
-                    println!("{sector_id}, {:?}", words);
+                    // println!("{sector_id}, {:?}", words);
                     return true;
                 }
                 false

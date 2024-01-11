@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/21>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{aoc_at, AdventOfCode, ParseError},
     line_parser, regex,
 };
 use std::collections::VecDeque;
@@ -19,8 +19,10 @@ pub struct Puzzle {
     line: Vec<OpCode>,
 }
 
-#[aoc(2016, 21)]
+#[aoc_at(2016, 21)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let rule0 = regex!(r"swap position (\d+) with position (\d+)");
@@ -60,10 +62,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let p = b"fbgdceah";
-        let p = b"fcdbahge";
-        let mut phrase: VecDeque<u8> = VecDeque::from(p.to_vec());
-        // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
+        let mut phrase: VecDeque<u8> = VecDeque::from(b"abcdefgh".to_vec());
         for code in self.line.iter() {
             match code {
                 OpCode::Swap0(arg1, arg2) => {
@@ -108,20 +107,11 @@ impl AdventOfCode for Puzzle {
                     }
                 }
             }
-            dbg!(String::from_utf8_lossy(
-                &phrase.iter().copied().collect::<Vec<u8>>()
-            ));
         }
-        dbg!(String::from_utf8_lossy(
-            &phrase.iter().copied().collect::<Vec<u8>>()
-        ));
-        0
+        phrase.iter().map(|c| *c as char).collect::<String>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let p = b"fbgdceah";
-        // let p = b"decab";
-        let mut phrase: VecDeque<u8> = VecDeque::from(p.to_vec());
-        // let mut phrase: VecDeque<u8> = VecDeque::from(b"abcde".to_vec());
+        let mut phrase: VecDeque<u8> = VecDeque::from(b"fbgdceah".to_vec());
         for code in self.line.iter().rev() {
             match code {
                 OpCode::Swap0(arg1, arg2) => {
@@ -171,26 +161,13 @@ impl AdventOfCode for Puzzle {
                                 0 => 7,
                                 _ => unreachable!(),
                             };
-                            // let i = match j {
-                            //     1 => 0,
-                            //     3 => 1,
-                            //     2 => 3,
-                            //     0 => 4,
-                            //     _ => unreachable!(),
-                            // };
                             phrase.rotate_left((m + j - i) % m);
                             break;
                         }
                     }
                 }
             }
-            dbg!(String::from_utf8_lossy(
-                &phrase.iter().copied().collect::<Vec<u8>>()
-            ));
         }
-        dbg!(String::from_utf8_lossy(
-            &phrase.iter().copied().collect::<Vec<u8>>()
-        ));
-        0
+        phrase.iter().map(|c| *c as char).collect::<String>()
     }
 }

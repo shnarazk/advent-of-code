@@ -13,9 +13,6 @@ impl AdventOfCode for Puzzle {
         self.line = block.chars().map(|c| c == '^').collect::<Vec<_>>();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut work = self.line.clone();
         let mut count = self.line.iter().filter(|b| !**b).count();
