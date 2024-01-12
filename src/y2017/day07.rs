@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/017/day/7>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{aoc_at, AdventOfCode, ParseError},
         regex,
     },
     std::collections::HashMap,
@@ -33,8 +33,10 @@ pub struct Puzzle {
     line: Vec<Tree>,
 }
 
-#[aoc(2017, 7)]
+#[aoc_at(2017, 7)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = usize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         // dqyjg (65)
@@ -58,9 +60,6 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut parent: HashMap<String, String> = HashMap::new();
         for node in self.line.iter() {
@@ -74,8 +73,7 @@ impl AdventOfCode for Puzzle {
         while let Some(p) = parent.get(target) {
             target = p;
         }
-        dbg!(target);
-        0
+        target.to_string()
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut parent: HashMap<String, String> = HashMap::new();
@@ -97,7 +95,6 @@ impl AdventOfCode for Puzzle {
 }
 
 fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
-    dbg!(name);
     if let Some(Tree::Node(_, _, subs)) = tree.get(name) {
         for s in subs.iter() {
             if let Some(val) = seek(s.as_str(), tree) {
@@ -115,12 +112,12 @@ fn seek<'a>(name: &'a str, tree: &'a HashMap<String, Tree>) -> Option<usize> {
             for (i, name) in subs.iter().enumerate() {
                 if w_count.get(&weights[i]) == Some(&1) {
                     let expected = weights[(i == 0) as usize];
-                    println!(
-                        "{:?}",
-                        subs.iter()
-                            .map(|n| (tree.get(n).unwrap().node_weight(), total_weight(n, tree)))
-                            .collect::<Vec<_>>()
-                    );
+                    // println!(
+                    //     "{:?}",
+                    //     subs.iter()
+                    //         .map(|n| (tree.get(n).unwrap().node_weight(), total_weight(n, tree)))
+                    //         .collect::<Vec<_>>()
+                    // );
                     return Some(tree.get(name).unwrap().node_weight() + expected - weights[i]);
                 }
             }

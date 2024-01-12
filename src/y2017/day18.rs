@@ -281,9 +281,6 @@ impl AdventOfCode for Puzzle {
         self.line.push(Inst::try_from(block)?);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut processor: Runtime = Runtime::initialize(-1, &self.line);
         loop {

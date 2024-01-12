@@ -13,9 +13,6 @@ impl AdventOfCode for Puzzle {
         self.line = block.to_string();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut total = 0;
         let mut level = 0;

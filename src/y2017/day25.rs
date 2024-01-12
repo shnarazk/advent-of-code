@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/25>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -19,8 +19,10 @@ pub struct Puzzle {
     step: usize,
 }
 
-#[aoc(2017, 25)]
+#[aoc_at(2017, 25)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
@@ -173,7 +175,7 @@ impl AdventOfCode for Puzzle {
             move_forward: true,
             next_state: b'A',
         });
-        dbg!(&self.line);
+        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut tape: HashMap<isize, usize> = HashMap::new();
@@ -191,6 +193,6 @@ impl AdventOfCode for Puzzle {
         tape.values().sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        "Happy holidays!".to_string()
     }
 }

@@ -54,9 +54,6 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut dir: (isize, isize) = (0, 0);
         for d in self.line.iter() {

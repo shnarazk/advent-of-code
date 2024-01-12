@@ -19,9 +19,6 @@ impl AdventOfCode for Puzzle {
             .push((segment[1].parse::<usize>()?, segment[2].parse::<usize>()?));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut severity: usize = 0;
         for (depth, range) in self.line.iter() {

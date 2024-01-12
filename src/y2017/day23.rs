@@ -32,7 +32,6 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part2(&mut self) -> Self::Output2 {
-        println!();
         let mut b = 67 * 100 + 100000;
         let c = b + 17000;
         // let mut d = 2;

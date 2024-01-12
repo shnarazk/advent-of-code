@@ -74,7 +74,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        dbg!(self.line.len());
+        // dbg!(self.line.len());
         for (j, line) in self.line.iter().enumerate() {
             for (i, b) in line.iter().enumerate() {
                 if *b {
@@ -84,14 +84,14 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(self.infection_map.len());
+        // dbg!(self.infection_map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let len = self.line.len();
         let mut carrier_position: Location = ((len / 2) as isize, (len / 2) as isize);
         let mut carrier_direction: Location = UP;
         let mut infects = 0;
-        self.render();
+        // self.render();
         for _ in 0..10000 {
             let mode = self.infection_map.contains(&carrier_position);
             carrier_direction = turn_to(carrier_direction, mode);
@@ -113,7 +113,7 @@ impl AdventOfCode for Puzzle {
         let mut carrier_position: Location = ((len / 2) as isize, (len / 2) as isize);
         let mut carrier_direction: Location = UP;
         let mut infects = 0;
-        self.render2();
+        // self.render2();
         for _ in 0..10_000_000 {
             let mode: &Mode2 = self
                 .infection_map2
@@ -147,6 +147,7 @@ impl AdventOfCode for Puzzle {
     }
 }
 
+#[allow(dead_code)]
 impl Puzzle {
     fn render(&self) {
         for j in -3..6_isize {

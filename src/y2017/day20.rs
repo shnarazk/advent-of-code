@@ -65,9 +65,6 @@ impl AdventOfCode for Puzzle {
         });
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut mi = 0;
         let mut md = usize::MAX;
@@ -101,7 +98,7 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut self.line, &mut tmp);
             count.clear();
             if self.line.len() < c {
-                c = dbg!(self.line.len());
+                c = self.line.len();
             }
         }
         c

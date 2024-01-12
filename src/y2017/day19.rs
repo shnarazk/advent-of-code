@@ -30,7 +30,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(&self.map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let start_position: Location = {

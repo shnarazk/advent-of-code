@@ -16,7 +16,6 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.len = self.line.len();
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pc: isize = 0;

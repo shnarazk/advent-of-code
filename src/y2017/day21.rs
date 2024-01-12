@@ -117,7 +117,7 @@ trait Block: Clone {
     fn rotate_cw(&self) -> Self;
     fn flip_h(&self) -> Self;
     fn permutation(&self, index: usize) -> Self {
-        assert!(index < 8);
+        debug_assert!(index < 8);
         let mut p: Self = self.clone();
         for _ in 0..(index >> 1) {
             p = p.rotate_cw();
@@ -253,16 +253,15 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(&self.rule.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut grid: Plane = Plane {
             size: 3,
             plane: vec![false, true, false, false, false, true, true, true, true],
         };
-        for i in 0..5 {
+        for _ in 0..5 {
             grid = grid.extend(&self.rule).expect("something is wrong.");
-            println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
+            // println!("loop: {}, size: {}:\n{:?}", i, grid.size, grid);
         }
         grid.count()
     }

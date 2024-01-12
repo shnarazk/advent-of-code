@@ -13,9 +13,6 @@ impl AdventOfCode for Puzzle {
         self.line = block.parse::<usize>()?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let step = self.line;
         let mut ring: Vec<usize> = vec![0];
@@ -28,9 +25,9 @@ impl AdventOfCode for Puzzle {
                 ring.insert(pos + 1, i);
             }
             pos += 1;
-            if pos == 1 {
-                println!("{i:>6} {:?}", &ring[0..ring.len().min(20)]);
-            }
+            // if pos == 1 {
+            //     println!("{i:>6} {:?}", &ring[0..ring.len().min(20)]);
+            // }
         }
         ring[(pos + 1) % ring.len()]
     }
@@ -41,7 +38,7 @@ impl AdventOfCode for Puzzle {
         for i in 1..=50_000_000 {
             pos = (step + pos) % i + 1;
             if pos == 1 {
-                at_pos_1 = dbg!(i);
+                at_pos_1 = i;
             }
         }
         at_pos_1

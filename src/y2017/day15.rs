@@ -22,7 +22,6 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.factor = (16807, 48271);
-        dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let m = 2147483647;

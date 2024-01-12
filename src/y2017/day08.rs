@@ -61,9 +61,6 @@ impl AdventOfCode for Puzzle {
         // self.line.push(segment[0].parse::<_>());
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut reg: HashMap<String, isize> = HashMap::new();
         for Inst {
@@ -88,7 +85,7 @@ impl AdventOfCode for Puzzle {
                 *reg += offset;
             }
         }
-        dbg!(*reg.values().max().unwrap_or(&0)) as usize
+        *reg.values().max().unwrap_or(&0) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut highest: isize = isize::MIN;
@@ -116,6 +113,6 @@ impl AdventOfCode for Puzzle {
                 highest = highest.max(*reg);
             }
         }
-        dbg!(highest) as usize
+        highest as usize
     }
 }

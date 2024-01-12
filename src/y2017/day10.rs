@@ -1,7 +1,10 @@
 //! <https://adventofcode.com/2017/day/10>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
+use {
+    crate::{
+        framework::{aoc_at, AdventOfCode, ParseError},
+        line_parser,
+    },
+    std::fmt::Write,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -10,8 +13,10 @@ pub struct Puzzle {
     strn: String,
 }
 
-#[aoc(2017, 10)]
+#[aoc_at(2017, 10)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = line_parser::to_usizes(block, ',')?;
@@ -97,11 +102,11 @@ impl AdventOfCode for Puzzle {
                 _ => working ^= *c,
             }
         }
-        assert_eq!(16, result.len());
-        for i in result.iter() {
-            print!("{}", &format!("{:#x}", i)[2..]);
-        }
-        println!();
-        0
+        debug_assert_eq!(16, result.len());
+        result.iter().fold(String::new(), |mut s, v| {
+            write!(s, "{}", &format!("{:#x}", v)[2..])
+                .map(|_| s)
+                .unwrap()
+        })
     }
 }

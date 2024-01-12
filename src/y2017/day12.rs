@@ -25,9 +25,6 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<usize, Vec<usize>> = HashMap::new();
         for (from, tos) in self.line.iter() {

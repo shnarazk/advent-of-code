@@ -22,7 +22,6 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.len = self.line.len();
-        dbg!(self.len);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut visited: HashSet<Vec<usize>> = HashSet::new();

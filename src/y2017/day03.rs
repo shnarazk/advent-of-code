@@ -28,15 +28,15 @@ impl AdventOfCode for Puzzle {
                 let max_node = (2 * radius + 1).pow(2);
                 if *n <= max_node {
                     if 0 < radius {
-                        let start = (2 * (radius - 1) + 1).pow(2) + 1;
+                        // let start = (2 * (radius - 1) + 1).pow(2) + 1;
                         let mut corner: usize = max_node;
                         for _ in 0..4 {
                             corner -= 2 * radius;
                             if corner <= *n {
                                 let base = corner + radius;
                                 distance = radius + n.abs_diff(base);
-                                dbg!(n, radius, start, max_node, corner, base, distance);
-                                println!();
+                                // dbg!(n, radius, start, max_node, corner, base, distance);
+                                // println!();
                                 continue 'next;
                             }
                         }
@@ -67,13 +67,11 @@ impl AdventOfCode for Puzzle {
                 // dbg!(map.get(&(y, x)).unwrap());
                 let value = *map.get(&(y, x)).unwrap();
                 if self.line[0] <= value {
-                    println!(" * ({y}, {x}) => {value}");
+                    // println!(" * ({y}, {x}) => {value}");
                     self.line.remove(0);
                     if self.line.is_empty() {
                         return *map.get(&(y, x)).unwrap();
                     }
-                } else {
-                    println!("   ({y}, {x}) => {}", map.get(&(y, x)).unwrap());
                 }
             }};
         }

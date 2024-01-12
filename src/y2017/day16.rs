@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/16>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{aoc_at, AdventOfCode, ParseError},
     regex,
 };
 
@@ -44,8 +44,10 @@ pub struct Puzzle {
     line: Vec<Dance>,
 }
 
-#[aoc(2017, 16)]
+#[aoc_at(2017, 16)]
 impl AdventOfCode for Puzzle {
+    type Output1 = String;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         for seg in block.split(',') {
@@ -53,28 +55,20 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let m = 16;
         let list = self.collapse(
             &self.line.iter().collect::<Vec<_>>(),
             &(0..m).collect::<Vec<usize>>(),
         );
-        println!(
-            "{}",
-            list.iter()
-                .map(|c| ((*c as u8) + b'a') as char)
-                .collect::<String>()
-        );
-        0
+        list.iter()
+            .map(|c| ((*c as u8) + b'a') as char)
+            .collect::<String>()
     }
     fn part2(&mut self) -> Self::Output2 {
         let m = 16;
         let cycle: usize = (1..=6).product::<usize>();
         let remain: usize = 1_000_000_000_usize % cycle;
-        dbg!(cycle, remain);
         let dance = self.line.iter().collect::<Vec<_>>();
         let mut order1 = (0..m).collect::<Vec<usize>>();
         for _ in 0..remain {
@@ -82,14 +76,10 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut order1, &mut work1);
             // dbg!(format!("{order1:?}"));
         }
-        println!(
-            "{}",
-            order1
-                .iter()
-                .map(|c| ((*c as u8) + b'a') as char)
-                .collect::<String>()
-        );
-        0
+        order1
+            .iter()
+            .map(|c| ((*c as u8) + b'a') as char)
+            .collect::<String>()
     }
 }
 
