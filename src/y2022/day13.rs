@@ -42,8 +42,16 @@ impl Ord for Expr {
             (Expr::Num(a), Expr::Num(b)) => a.cmp(b),
             (Expr::Array(v1), Expr::Array(v2)) => {
                 for i in 0..v1.len().max(v2.len()) {
-                    let Some(i1) = v1.get(i) else { return if i == v2.len() { Ordering::Equal} else { Ordering::Less};};
-                    let Some(i2) = v2.get(i) else { return Ordering::Greater;};
+                    let Some(i1) = v1.get(i) else {
+                        return if i == v2.len() {
+                            Ordering::Equal
+                        } else {
+                            Ordering::Less
+                        };
+                    };
+                    let Some(i2) = v2.get(i) else {
+                        return Ordering::Greater;
+                    };
                     match i1.cmp(i2) {
                         Ordering::Equal => (),
                         other => return other,
@@ -72,9 +80,6 @@ impl AdventOfCode for Puzzle {
             parse_expr(lines.next().unwrap()).expect("!!!!").1,
         ));
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

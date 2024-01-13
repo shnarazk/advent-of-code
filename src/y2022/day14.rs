@@ -56,9 +56,6 @@ impl AdventOfCode for Puzzle {
                 self.map.insert(start_end[1]);
             }
         }
-        dbg!(&self.line.len());
-        dbg!(&self.map.len());
-        dbg!(self.threshold);
     }
     fn part1(&mut self) -> Self::Output1 {
         let num_wall = self.map.len();

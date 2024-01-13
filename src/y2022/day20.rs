@@ -36,7 +36,6 @@ impl AdventOfCode for Puzzle {
         }
         // dbg!(count.get(&0));
         // assert!(count.values().all(|c| *c == 1));
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut next: Vec<usize> = (0..self.len)
@@ -52,8 +51,8 @@ impl AdventOfCode for Puzzle {
             let mut check = next.clone();
             check.sort();
             let cal = (0..self.len).collect::<Vec<usize>>();
-            assert_eq!(check, cal);
-            assert!(self.is_sound(&next), "{n}");
+            debug_assert_eq!(check, cal);
+            debug_assert!(self.is_sound(&next), "{n}");
         }
         // self.print(&next);
         self.value(&next)
@@ -115,11 +114,11 @@ impl Puzzle {
         let prev_i = prev[i];
         let next_i = next[i];
         let next_j = next[j];
-        assert_ne!(i, j);
-        assert_ne!(i, next_i);
-        assert_ne!(i, prev_i);
-        assert_ne!(i, next_j); // we are supposed to have skipped this situation.
-        assert_ne!(j, next_j);
+        debug_assert_ne!(i, j);
+        debug_assert_ne!(i, next_i);
+        debug_assert_ne!(i, prev_i);
+        debug_assert_ne!(i, next_j); // we are supposed to have skipped this situation.
+        debug_assert_ne!(j, next_j);
         next[prev_i] = next_i;
         next[j] = i;
         next[i] = next_j;
@@ -143,7 +142,7 @@ impl Puzzle {
         for count in 1..=3000 {
             i = next[i];
             if [1000, 2000, 3000].contains(&count) {
-                val += dbg!(self.line[i]);
+                val += self.line[i];
             }
         }
         val

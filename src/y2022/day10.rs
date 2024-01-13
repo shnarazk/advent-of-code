@@ -36,7 +36,6 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.register = 1;
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         for _ in 0..self.line.len() {
@@ -75,7 +74,9 @@ impl Puzzle {
         }
     }
     fn execute(&mut self) {
-        let Some(inst) = &self.line.get(self.pc) else { return; };
+        let Some(inst) = &self.line.get(self.pc) else {
+            return;
+        };
         match inst {
             Code::Noop => {
                 self.update_cycle(1);
@@ -96,7 +97,9 @@ impl Puzzle {
             self.pc += 1;
             self.state = None;
         } else {
-            let Some(inst) = &self.line.get(self.pc) else { return; };
+            let Some(inst) = &self.line.get(self.pc) else {
+                return;
+            };
             match inst {
                 Code::Noop => {
                     self.update_cycle(1);

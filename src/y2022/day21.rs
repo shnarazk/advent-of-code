@@ -122,12 +122,9 @@ impl AdventOfCode for Puzzle {
                 _ => unreachable!(),
             });
         } else {
-            dbg!(block);
+            // dbg!(block);
         }
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut values: HashMap<String, isize> = HashMap::new();
@@ -218,13 +215,13 @@ fn reduce(monkeys: &mut Vec<&Expr>, values: &mut HashMap<String, isize>) {
             let a1 = m.arg1();
             let a2 = m.arg2();
             let Some(v1) = values.get(a1) else {
-                    remain.push(m);
-                    continue;
-                };
+                remain.push(m);
+                continue;
+            };
             let Some(v2) = values.get(a2) else {
-                    remain.push(m);
-                    continue;
-                };
+                remain.push(m);
+                continue;
+            };
             let result = m.eval(*v1, *v2);
             values.insert(m.label().to_string(), result);
             generated = true;

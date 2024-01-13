@@ -31,8 +31,8 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(&self.map.len());
     }
+    #[allow(dead_code)]
     fn dump(&self) {
         println!("[");
         let end = self.map.len();
@@ -64,8 +64,8 @@ impl AdventOfCode for Puzzle {
             [(1, 1), (0, 1), (-1, 1)],
         ];
         let mut target_base = 0;
-        self.print();
-        for round in 0..10 {
+        // self.print();
+        for _ in 0..10 {
             let mut targets: HashMap<Dim, Dim> = HashMap::new();
             'next_elf: for pos in self.map.iter() {
                 if check_all.iter().any(|d| self.map.contains(&pos.add(d))) {
@@ -99,11 +99,11 @@ impl AdventOfCode for Puzzle {
             }
             std::mem::swap(&mut self.map, &mut next);
             target_base = (target_base + 1) % 4;
-            if round < 5 {
-                self.print();
-            }
+            // if round < 5 {
+            //     self.print();
+            // }
         }
-        self.print();
+        // self.print();
         self.empties()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -170,6 +170,7 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
+    #[allow(dead_code)]
     fn print(&self) {
         let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();
         let max_y = self.map.iter().map(|(y, _)| *y).max().unwrap();

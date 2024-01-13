@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2022/day/22>
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, Vec2},
         regex,
@@ -176,12 +176,12 @@ impl Seeker {
                         );
                         match map.0.get(&new_position) {
                             Some(&'.') => {
-                                if self.trace.len() < 600 {
-                                    println!(
-                                        "jump from {:?} with offset {} to {:?}",
-                                        self.position, offset, new_position
-                                    );
-                                }
+                                // if self.trace.len() < 600 {
+                                //     println!(
+                                //         "jump from {:?} with offset {} to {:?}",
+                                //         self.position, offset, new_position
+                                //     );
+                                // }
                                 self.jump_to(&new_position);
                                 self.direction(&to.2);
                             }
@@ -206,13 +206,13 @@ impl Seeker {
                             _ => unreachable!(),
                         }
                     } else {
-                        for k in map
-                            .1
-                            .keys()
-                            .filter(|(j, i)| *j == self.position.0 || *i == self.position.1)
-                        {
-                            println!("jump table points {k:?}");
-                        }
+                        // for k in map
+                        //     .1
+                        //     .keys()
+                        //     .filter(|(j, i)| *j == self.position.0 || *i == self.position.1)
+                        // {
+                        //     println!("jump table points {k:?}");
+                        // }
                         panic!();
                     }
                     assert!(map.0.get(&self.position) == Some(&'.'));
@@ -267,7 +267,6 @@ impl AdventOfCode for Puzzle {
                     buffer = &buffer[segment[1].len()..];
                     continue;
                 }
-                dbg!(buffer);
                 break;
             }
         }
@@ -330,15 +329,10 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.plane_size = (max_width + 1) / 3;
-        assert_eq!(
+        debug_assert_eq!(
             self.plane_size, 50,
             "This problem is configured just for the real problem."
         );
-        dbg!(&self.line.len());
-        dbg!(&self.map.len());
-        dbg!(&self.ring_h.len());
-        dbg!(&self.ring_v.len());
-        dbg!(&self.path.len());
     }
     fn dump(&self) {
         let affine = HashMap::from(FLIP_TABLE);
@@ -353,39 +347,23 @@ impl AdventOfCode for Puzzle {
             seeker.step(d, &map, Some(&affine));
         }
         seeker.trace.resize(70, (0, 0));
-        let h = self.line.len();
-        let w = self.line.iter().map(|l| l.len()).max().unwrap_or_default();
-        for j in 0..h {
-            for i in 0..w {
-                if i == usize::MAX && self.map.contains_key(&(j, i)) {
-                    let p = (Seeker {
-                        position: (j, i),
-                        plane_size: self.plane_size,
-                        ..Default::default()
-                    })
-                    .jump_parameters()
-                    .0;
-                    print!("{}", (b'A' + (p.0 * 3 + p.1) as u8) as char);
-                } else if seeker.trace.contains(&(j, i)) {
-                    print!(
-                        "{}{}{}",
-                        color::REVERSE,
-                        self.map.get(&(j, i)).unwrap_or(&' '),
-                        color::RESET
-                    );
-                } else if self.ring_h.contains_key(&(j, i)) || self.ring_v.contains_key(&(j, i)) {
-                    print!(
-                        "{}{}{}",
-                        color::RED,
-                        self.map.get(&(j, i)).unwrap_or(&' '),
-                        color::RESET
-                    );
-                } else {
-                    print!("{}", self.map.get(&(j, i)).unwrap_or(&' '));
-                }
-            }
-            println!();
-        }
+        // let h = self.line.len();
+        // let w = self.line.iter().map(|l| l.len()).max().unwrap_or_default();
+        // for j in 0..h {
+        //     for i in 0..w {
+        //         if i == usize::MAX && self.map.contains_key(&(j, i)) {
+        //             let p = (Seeker {
+        //                 position: (j, i),
+        //                 plane_size: self.plane_size,
+        //                 ..Default::default()
+        //             })
+        //             .jump_parameters()
+        //             .0;
+        //             print!("{}", (b'A' + (p.0 * 3 + p.1) as u8) as char);
+        //         }
+        //     }
+        //     // println!();
+        // }
     }
     fn part1(&mut self) -> Self::Output1 {
         let start = self.map.keys().min().unwrap();

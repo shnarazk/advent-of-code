@@ -56,7 +56,6 @@ impl AdventOfCode for Puzzle {
         self.width = self.line[0].len();
         self.line[self.start.0][self.start.1] = 0;
         self.line[self.goal.0][self.goal.1] = 'z' as usize - 'a' as usize;
-        dbg!(&self.goal, self.height, self.width);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();

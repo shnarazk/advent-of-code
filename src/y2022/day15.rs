@@ -91,17 +91,14 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let target = 2_000_000; // 10;
         let mut on_target: HashSet<isize> = HashSet::new();
         let mut bands = Vec::new();
-        for (i, p) in self.line.iter().enumerate() {
+        for p in self.line.iter() {
             if let Some(len) = mdist(&p.0, &p.1).checked_sub(p.0 .1.abs_diff(target)) {
                 let range_on_target = (p.0 .0 - len as isize, p.0 .0 + len as isize);
-                println!("{i}-th{:?}:range {:?}", p.0, &range_on_target);
+                // println!("{i}-th{:?}:range {:?}", p.0, &range_on_target);
                 bands.push(range_on_target);
             }
             if p.1 .1 == target {

@@ -83,24 +83,6 @@ impl AdventOfCode for Puzzle {
     fn end_of_data(&mut self) {
         // dbg!(&self.line.len());
     }
-    fn dump(&self) {
-        for m in self.line.iter() {
-            println!(
-                "{},{},{},{},{},{},{}",
-                m.id,
-                m.operation.0 as usize,
-                m.operation.1.unwrap_or(0),
-                m.test,
-                m.test_then,
-                m.test_else,
-                m.items
-                    .iter()
-                    .map(|i| format!("{i}"))
-                    .collect::<Vec<_>>()
-                    .join(","),
-            );
-        }
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut tmp = vec![Vec::new(); self.line.len()];
         for _ in 0..20 {
@@ -109,16 +91,16 @@ impl AdventOfCode for Puzzle {
                 m.update(&mut tmp);
                 self.thrown(&mut tmp);
             }
-            println!(
-                "{:?}",
-                self.line.iter().map(|m| &m.items).collect::<Vec<_>>()
-            );
+            // println!(
+            //     "{:?}",
+            //     self.line.iter().map(|m| &m.items).collect::<Vec<_>>()
+            // );
         }
-        dbg!(self
-            .line
-            .iter()
-            .map(|m| m.num_inspect)
-            .collect::<Vec<usize>>());
+        // dbg!(self
+        //     .line
+        //     .iter()
+        //     .map(|m| m.num_inspect)
+        //     .collect::<Vec<usize>>());
         let mut v = self
             .line
             .iter()
@@ -138,11 +120,11 @@ impl AdventOfCode for Puzzle {
                 self.thrown(&mut tmp);
             }
         }
-        dbg!(self
-            .line
-            .iter()
-            .map(|m| m.num_inspect)
-            .collect::<Vec<usize>>());
+        // dbg!(self
+        //     .line
+        //     .iter()
+        //     .map(|m| m.num_inspect)
+        //     .collect::<Vec<usize>>());
         let mut v = self
             .line
             .iter()

@@ -92,10 +92,6 @@ impl AdventOfCode for Puzzle {
                 self.map.insert((j, i), *c);
             }
         }
-        dbg!(self.blizzard_r.len());
-        dbg!(self.blizzard_d.len());
-        dbg!(self.blizzard_l.len());
-        dbg!(self.blizzard_u.len());
     }
     fn serialize(&self) -> Option<String> {
         // let time = 13;

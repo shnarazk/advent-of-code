@@ -25,9 +25,6 @@ impl AdventOfCode for Puzzle {
         );
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut sum: usize = self
             .line
@@ -39,10 +36,9 @@ impl AdventOfCode for Puzzle {
                     .enumerate()
                     .fold(0, |acc, (i, k)| acc + k * 5_isize.pow(i as u32))
                     as usize;
-                dbg!(v)
+                v
             })
             .sum();
-        dbg!(sum);
         let mut buffer: Vec<char> = Vec::new();
         while 0 < sum {
             let digit = sum % 5;
