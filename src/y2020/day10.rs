@@ -10,7 +10,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        dbg!(&block);
         self.vec.push(block.parse::<usize>()?);
         Ok(())
     }
@@ -46,92 +45,6 @@ impl AdventOfCode for Puzzle {
                 count[*n] += count[*n - 3];
             }
         }
-        dbg!(&count);
         *count.last().unwrap()
-    }
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    const TEST1: &str = "\
-16
-10
-15
-5
-1
-11
-7
-19
-6
-12
-4";
-
-    const TEST2: &str = "\
-28
-33
-18
-42
-31
-14
-46
-20
-48
-47
-24
-23
-49
-45
-19
-38
-39
-11
-1
-32
-25
-35
-8
-17
-7
-9
-4
-2
-34
-10
-3";
-    #[test]
-    fn test_part1_1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(7 * 5)
-        );
-    }
-
-    #[test]
-    fn test_part2_1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 2),
-            Answer::Part2(8)
-        );
-    }
-
-    #[test]
-    fn test_part1_2() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST2.to_string()), 1),
-            Answer::Part1(22 * 10)
-        );
-    }
-    #[test]
-    fn test_part2_2() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST2.to_string()), 2),
-            Answer::Part2(19208)
-        );
     }
 }

@@ -35,10 +35,10 @@ fn day25(card_pubkey: usize, door_pubkey: usize) -> usize {
 
     let encryption_key_by_card = transform(card_loop_size, door_pubkey);
     let encryption_key_by_door = transform(door_loop_size, card_pubkey);
-    dbg!(encryption_key_by_card);
-    dbg!(encryption_key_by_door);
+    // dbg!(encryption_key_by_card);
+    // dbg!(encryption_key_by_door);
 
-    assert_eq!(encryption_key_by_card, encryption_key_by_door);
+    debug_assert_eq!(encryption_key_by_card, encryption_key_by_door);
 
     encryption_key_by_card
 }

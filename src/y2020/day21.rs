@@ -81,6 +81,7 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> usize {
+        let verbose = !self.get_config().bench;
         let cnf = self.make_cnf();
         let mut count: usize = 0;
         for ing in self.ingredients.keys() {
@@ -92,7 +93,9 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>(),
             );
             if let Ok(Certificate::UNSAT) = Certificate::try_from(asserted) {
-                progress!(format!("{} is safe", ing));
+                if verbose {
+                    progress!(format!("{} is safe", ing));
+                }
                 count += self
                     .rules
                     .iter()

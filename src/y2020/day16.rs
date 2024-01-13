@@ -65,16 +65,16 @@ impl AdventOfCode for Puzzle {
             let mut ok = true;
             for (i, e) in v.iter().enumerate() {
                 if let Some(n) = invalid(&self.field_cands[i], *e) {
-                    println!(
-                        "{}th element {} is out of range {:?}",
-                        i, e, &self.field_cands[i]
-                    );
+                    // println!(
+                    //     "{}th element {} is out of range {:?}",
+                    //     i, e, &self.field_cands[i]
+                    // );
                     count += n;
                     ok = false;
                 }
             }
             if ok {
-                println!("is good");
+                // println!("is good");
                 self.good_samples.push(v.clone());
             }
         }
@@ -94,13 +94,13 @@ impl AdventOfCode for Puzzle {
                     valids.push((range.0.clone(), self.ticket[i]));
                 }
             }
-            println!(
-                "{}-th field ({}) has {} cands: {:?}",
-                i,
-                self.ticket[i],
-                valids.len(),
-                valids.iter().map(|r| &r.0).collect::<Vec<_>>(),
-            );
+            // println!(
+            //     "{}-th field ({}) has {} cands: {:?}",
+            //     i,
+            //     self.ticket[i],
+            //     valids.len(),
+            //     valids.iter().map(|r| &r.0).collect::<Vec<_>>(),
+            // );
             result.push(valids);
         }
         // simplify
@@ -116,7 +116,7 @@ impl AdventOfCode for Puzzle {
             if let Some(n) = index {
                 let name: String = result[n][0].0.clone();
                 trimmed.push(result[n][0].clone());
-                println!("asserted {}", name);
+                // println!("asserted {}", name);
                 for v in result.iter_mut() {
                     v.retain(|range| range.0 != name);
                 }
@@ -127,7 +127,7 @@ impl AdventOfCode for Puzzle {
         let mut count = 1;
         for r in &trimmed {
             if r.0.contains("departure") {
-                println!("{}:\t{}", r.0, r.1);
+                // println!("{}:\t{}", r.0, r.1);
                 count *= r.1;
             }
         }

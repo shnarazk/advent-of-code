@@ -80,20 +80,20 @@ impl AdventOfCode for Puzzle {
         let mut stopper = None;
         while self.check_winner(stopper).is_none() {
             stopper = self.round_part1();
-            println!(
-                " 1 -> {:?}\n 2 -> {:?}\n {} cached, stopper: {:?}",
-                &self.player1,
-                &self.player2,
-                self.cache.set.len(),
-                stopper
-            );
+            // println!(
+            //     " 1 -> {:?}\n 2 -> {:?}\n {} cached, stopper: {:?}",
+            //     &self.player1,
+            //     &self.player2,
+            //     self.cache.set.len(),
+            //     stopper
+            // );
         }
         let mut score = 0;
         if let Some(p) = self.check_winner(stopper) {
-            println!(
-                "found winner {}: {:?} {:?}",
-                p, &self.player1, &self.player2
-            );
+            // println!(
+            //     "found winner {}: {:?} {:?}",
+            //     p, &self.player1, &self.player2
+            // );
             let v = if p == 1 { &self.player1 } else { &self.player2 };
             for (i, h) in v.iter().rev().enumerate() {
                 score += (i + 1) * *h;
@@ -109,10 +109,10 @@ impl AdventOfCode for Puzzle {
         }
         let mut score = 0;
         if let Some(p) = self.check_winner(stopper) {
-            println!(
-                "found winner {}: {:?} {:?}",
-                p, &self.player1, &self.player2
-            );
+            // println!(
+            //     "found winner {}: {:?} {:?}",
+            //     p, &self.player1, &self.player2
+            // );
             let v = if p == 1 { &self.player1 } else { &self.player2 };
             for (i, h) in v.iter().rev().enumerate() {
                 score += (i + 1) * *h;
@@ -182,11 +182,11 @@ impl Puzzle {
                         };
                         child.player1.truncate(p1_head);
                         child.player2.truncate(p2_head);
-                        println!(
-                            "{:>width$}",
-                            ">",
-                            width = child.player1.len() + child.player2.len()
-                        );
+                        // println!(
+                        //     "{:>width$}",
+                        //     ">",
+                        //     width = child.player1.len() + child.player2.len()
+                        // );
                         let mut stopper = None;
                         while child.check_winner(stopper).is_none() {
                             stopper = child.round_part2();

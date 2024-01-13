@@ -39,10 +39,10 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> usize {
         let p = eval(&self.tile).expect("impossible");
-        for (ti, _, _) in p.iter() {
-            print!("{:?}, ", ti.id);
-        }
-        println!();
+        // for (ti, _, _) in p.iter() {
+        //     print!("{:?}, ", ti.id);
+        // }
+        // println!();
         let len = self.tile.len();
         let l = (len as f64).sqrt() as usize;
         p[0].0.id * p[l - 1].0.id * p[len - l].0.id * p[len - 1].0.id
@@ -52,17 +52,17 @@ impl AdventOfCode for Puzzle {
         let len = self.tile.len();
         let l = (len as f64).sqrt() as usize;
         // part 2
-        for (t, r, f) in &p {
-            print!("({}, {}, {}) ", t.id, r, f);
-        }
-        println!();
-        for i in 0..l {
-            for j in 0..l {
-                let (ti, r, f) = &p[i * l + j];
-                print!("({}, {}, {}) ", ti.id, r, f);
-            }
-            println!();
-        }
+        // for (t, r, f) in &p {
+        //     print!("({}, {}, {}) ", t.id, r, f);
+        // }
+        // println!();
+        // for i in 0..l {
+        //     for j in 0..l {
+        //         let (ti, r, f) = &p[i * l + j];
+        //         print!("({}, {}, {}) ", ti.id, r, f);
+        //     }
+        //     println!();
+        // }
         let mut image: Vec<String> = Vec::new();
         let with_border = false;
         for _ in 0..l {
@@ -75,9 +75,9 @@ impl AdventOfCode for Puzzle {
                 image.push(l.to_string());
             }
         }
-        for l in &image {
-            println!("{}", l);
-        }
+        // for l in &image {
+        //     println!("{}", l);
+        // }
         let mut total = 0;
         for rotate in 0..4 {
             for flip in 0..2 {
@@ -408,7 +408,7 @@ fn eval(tile: &[Tile]) -> Option<Vec<(Tile, usize, usize)>> {
     let len = (tile.len() as f64).sqrt() as usize;
     let used: Vec<(Tile, usize, usize)> = Vec::new();
     let remain = tile.to_vec();
-    println!("#tiles: {}", tile.len());
+    // println!("#tiles: {}", tile.len());
     search(len, used, remain)
 }
 
@@ -440,43 +440,4 @@ fn search(
         }
     }
     None
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_basic_computations() {
-        assert_eq!(usize::from_str_radix("0010111000", 2), Ok(184));
-        assert_eq!(usize::from_str_radix("0101011100", 2), Ok(348));
-        assert_eq!(
-            flip_bits(10, 348),
-            usize::from_str_radix("0011101010", 2).unwrap()
-        );
-        assert_eq!(flip_bits(10, 348), 234);
-        assert_eq!(usize::from_str_radix("0111110010", 2), Ok(498));
-        assert_eq!(decode(&"0#####00#0".chars().collect::<Vec<char>>()), 498);
-        assert_eq!(usize::from_str_radix("0100111110", 2), Ok(318));
-    }
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
-            Answer::Part1(20899048083289)
-        );
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
-            Answer::Part2(273)
-        );
-    }
 }

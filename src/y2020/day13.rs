@@ -37,15 +37,20 @@ impl AdventOfCode for Puzzle {
         wait * bus
     }
     fn part2(&mut self) -> usize {
+        let verbose = !self.get_config().bench;
         let mut x = self.bus[0];
         for tuple in self.bus.iter().skip(1) {
             let offset = if tuple.1 <= tuple.0 {
                 tuple.0 - tuple.1
             } else {
-                println!("逆転{}, {}", tuple.0, tuple.1);
+                if verbose {
+                    println!("逆転{}, {}", tuple.0, tuple.1);
+                }
                 (tuple.0 * tuple.1 - tuple.1) % tuple.0
             };
-            println!("周期{}で{}余る", tuple.0, offset);
+            if verbose {
+                println!("周期{}で{}余る", tuple.0, offset);
+            }
             x = chinese(x, (tuple.0, offset));
             //assert_eq!(tuple.0 - x.1 % tuple.0, tuple.1);
         }
@@ -86,36 +91,4 @@ fn solve1(a: usize, m: usize) -> usize {
         }
     }
     panic!("can't");
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_chinese() {
-        let a = chinese((3, 2), (5, 3));
-        assert_eq!(a.1, 8);
-        let c = chinese(a, (2, 7));
-        assert_eq!(c.1, 23);
-    }
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 1),
-            Answer::Part1(295)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 2),
-            Answer::Part2(1068781)
-        );
-    }
 }

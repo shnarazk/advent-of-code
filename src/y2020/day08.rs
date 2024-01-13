@@ -89,7 +89,6 @@ impl AdventOfCode for Puzzle {
         for i in 0..self.code.len() {
             if let Some(mut variant) = flip(&self.code, i) {
                 if let Some(result) = CPU::run2(&mut variant) {
-                    dbg!(&result);
                     return result.accumulator;
                 }
             }
