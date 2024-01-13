@@ -110,7 +110,7 @@ impl AdventOfCode for Puzzle {
         let mut beg: Option<usize> = None;
         let mut total: HashMap<usize, usize> = HashMap::new();
         let mut days: HashMap<usize, HashSet<Day>> = HashMap::new();
-        for (_l, r) in self.line.iter().enumerate() {
+        for r in self.line.iter() {
             match r {
                 Record::Start(_ts, g) => {
                     guard = Some(*g);
@@ -122,9 +122,6 @@ impl AdventOfCode for Puzzle {
                     if let Some(g) = guard {
                         if let Some(b) = beg {
                             if *e < b {
-                                // for i in l - 2..l + 2 {
-                                //     println!("{:?}", &self.line[i]);
-                                // }
                                 panic!();
                             }
                             *total.entry(g).or_insert(0) += e - b;
