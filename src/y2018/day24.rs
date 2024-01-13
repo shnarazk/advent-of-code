@@ -209,12 +209,12 @@ impl Puzzle {
                 matching.1.get(attacker_id)
             } {
                 let attacker = self.get(*attacker_id);
-                assert_eq!(*attacker_id, attacker.id);
+                debug_assert_eq!(*attacker_id, attacker.id);
                 if attacker.killed() {
                     continue;
                 }
                 let target = self.get(*target_id);
-                assert_eq!(*target_id, target.id);
+                debug_assert_eq!(*target_id, target.id);
                 if target.killed() {
                     continue;
                 }
@@ -312,23 +312,19 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.immune.len());
-        dbg!(&self.infection.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut remains = self.remains();
         let mut stag = 0;
         loop {
             let list = self.target_selection();
-            self.attacking(list, 97 < stag);
-            if 97 < stag {
-                println!(
-                    "### Immute remains {} groups, Infection remains {} groups.",
-                    self.immune.iter().filter(|g| !g.killed()).count(),
-                    self.infection.iter().filter(|g| !g.killed()).count()
-                );
-            }
+            self.attacking(list, false /* 97 < stag */);
+            // if 97 < stag {
+            //     println!(
+            //         "### Immute remains {} groups, Infection remains {} groups.",
+            //         self.immune.iter().filter(|g| !g.killed()).count(),
+            //         self.infection.iter().filter(|g| !g.killed()).count()
+            //     );
+            // }
             if self.immune.iter().filter(|g| !g.killed()).count() == 0
                 || self.infection.iter().filter(|g| !g.killed()).count() == 0
             {
@@ -378,18 +374,18 @@ impl AdventOfCode for Puzzle {
             let tmp = w.part1();
             if let Some(result) = w.got_happy_end() {
                 if result {
-                    println!("ok at {med}, {tmp}");
+                    // println!("ok at {med}, {tmp}");
                     // ok = med;
                     units = tmp;
                 } else {
-                    println!("no at {med}, {tmp}");
+                    // println!("no at {med}, {tmp}");
                     // ng = m, 95 < staged;
                 }
             } else if tmp == 0 {
-                println!(
-                    "loop at {med}, {}",
-                    w.immune.iter().map(|g| g.units).sum::<usize>()
-                );
+                // println!(
+                //     "loop at {med}, {}",
+                //     w.immune.iter().map(|g| g.units).sum::<usize>()
+                // );
                 // ng = med;
             } else {
                 panic!();

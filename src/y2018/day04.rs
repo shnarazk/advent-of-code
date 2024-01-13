@@ -104,14 +104,13 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.line.sort_by_key(|e| e.timestamp());
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut guard: Option<usize> = None;
         let mut beg: Option<usize> = None;
         let mut total: HashMap<usize, usize> = HashMap::new();
         let mut days: HashMap<usize, HashSet<Day>> = HashMap::new();
-        for (l, r) in self.line.iter().enumerate() {
+        for (_l, r) in self.line.iter().enumerate() {
             match r {
                 Record::Start(_ts, g) => {
                     guard = Some(*g);
@@ -123,9 +122,9 @@ impl AdventOfCode for Puzzle {
                     if let Some(g) = guard {
                         if let Some(b) = beg {
                             if *e < b {
-                                for i in l - 2..l + 2 {
-                                    println!("{:?}", &self.line[i]);
-                                }
+                                // for i in l - 2..l + 2 {
+                                //     println!("{:?}", &self.line[i]);
+                                // }
                                 panic!();
                             }
                             *total.entry(g).or_insert(0) += e - b;
@@ -195,7 +194,7 @@ impl AdventOfCode for Puzzle {
                 Record::Wake_(_ts, e) => {
                     if let Some(g) = guard {
                         if let Some(b) = beg {
-                            assert!(b < *e);
+                            debug_assert!(b < *e);
                             *total.entry(g).or_insert(0) += e - b;
                             for t in b..*e {
                                 minite_report.entry(g).or_insert([0; 60])[t] += 1;

@@ -1,10 +1,10 @@
 //! <https://adventofcode.com/2018/day/25>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{aoc_at, AdventOfCode, ParseError},
         line_parser,
     },
-    std::collections::{HashMap, HashSet},
+    std::collections::HashMap,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -12,15 +12,14 @@ pub struct Puzzle {
     line: Vec<Vec<isize>>,
 }
 
-#[aoc(2018, 25)]
+#[aoc_at(2018, 25)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(line_parser::to_isizes(block, ',')?);
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut constellation: HashMap<usize, usize> = HashMap::new();
@@ -41,7 +40,7 @@ impl AdventOfCode for Puzzle {
             constellation_id += 1;
             constellation.insert(i, constellation_id);
         }
-        dbg!(constellation_id);
+        // dbg!(constellation_id);
         for (i, p) in self.line.iter().enumerate() {
             for (j, q) in self.line.iter().enumerate().skip(i) {
                 let ci = constellation[&i];
@@ -64,10 +63,10 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(constellation.values().collect::<HashSet<_>>().len());
+        // dbg!(constellation.values().collect::<HashSet<_>>().len());
         constellation_id
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        "Happy Holidays!".to_string()
     }
 }

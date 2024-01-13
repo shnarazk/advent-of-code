@@ -67,6 +67,7 @@ impl TryFrom<&str> for Inst {
 }
 
 impl Inst {
+    #[allow(dead_code)]
     fn disassemble(&self, addr: usize, pc_index: usize) -> String {
         let l = |n: &usize| match *n {
             _ if *n == pc_index => "pc",
@@ -121,13 +122,10 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
-        for (i, c) in self.line.iter().enumerate() {
-            println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
-        }
+        // for (i, c) in self.line.iter().enumerate() {
+        //     println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
+        // }
         part1()
     }
     fn part2(&mut self) -> Self::Output2 {

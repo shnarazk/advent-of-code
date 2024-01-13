@@ -24,7 +24,7 @@ impl AdventOfCode for Puzzle {
         // x=550, y=1443..1454
         let parser = regex!(r"^(x|y)=(\d+), (x|y)=(\d+)\.\.(\d+)$");
         let segment = parser.captures(block).ok_or(ParseError)?;
-        assert!(
+        debug_assert!(
             (&segment[1] == "x" && &segment[3] == "y")
                 || (&segment[1] == "y" && &segment[3] == "x")
         );
@@ -48,9 +48,9 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();
-        let min_x = self.map.iter().map(|(_, x)| *x).min().unwrap();
+        // let min_x = self.map.iter().map(|(_, x)| *x).min().unwrap();
         let max_y = self.map.iter().map(|(y, _)| *y).max().unwrap();
-        let max_x = self.map.iter().map(|(_, x)| *x).max().unwrap();
+        // let max_x = self.map.iter().map(|(_, x)| *x).max().unwrap();
         let start = (0, 500);
         let mut water: HashMap<Dim2, Water> = HashMap::new();
         water.insert(start, Water::On);
@@ -59,15 +59,15 @@ impl AdventOfCode for Puzzle {
         }
         let mut to_update: Vec<Dim2> = vec![start];
         to_update.push((start.0 + 1, start.1));
-        let focus = (30, 500);
-        self.render(&focus, &water, false);
-        let mut count = 0;
+        // let focus = (30, 500);
+        // self.render(&focus, &water, false);
+        // let mut count = 0;
         // self.depth = 20;
         while let Some(pos) = to_update.pop() {
             if pos.0 == 0 || max_y < pos.0 {
                 continue;
             }
-            count += 1;
+            // count += 1;
             // dbg!(pos.0);
             // if 80800 < count {
             //     break;
@@ -88,15 +88,15 @@ impl AdventOfCode for Puzzle {
                 to_update.push(right);
                 to_update.push(below);
             }
-            if count % 100 == 0 {
-                self.render(&pos, &water, true);
-            }
+            // if count % 100 == 0 {
+            //     self.render(&pos, &water, true);
+            // }
             // if count == 800 {
             //     break;
             // }
         }
-        self.render(&focus, &water, true);
-        println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
+        // self.render(&focus, &water, true);
+        // println!("({},{})-({},{})", min_y, min_x, max_y, max_x);
         water
             .iter()
             .filter(|(p, s)| {
@@ -115,14 +115,14 @@ impl AdventOfCode for Puzzle {
         }
         let mut to_update: Vec<Dim2> = vec![start];
         to_update.push((start.0 + 1, start.1));
-        let focus = (30, 500);
-        self.render(&focus, &water, false);
-        let mut count = 0;
+        // let focus = (30, 500);
+        // self.render(&focus, &water, false);
+        // let mut count = 0;
         while let Some(pos) = to_update.pop() {
             if pos.0 == 0 || max_y < pos.0 {
                 continue;
             }
-            count += 1;
+            // count += 1;
             let state = water.get(&pos).unwrap_or(&Water::None);
             let above = (pos.0 - 1, pos.1);
             let left = (pos.0, pos.1 - 1);
@@ -139,11 +139,11 @@ impl AdventOfCode for Puzzle {
                 to_update.push(right);
                 to_update.push(below);
             }
-            if count % 1000 == 0 {
-                self.render(&pos, &water, true);
-            }
+            // if count % 1000 == 0 {
+            //     self.render(&pos, &water, true);
+            // }
         }
-        self.render(&focus, &water, true);
+        // self.render(&focus, &water, true);
         water
             .iter()
             .filter(|(p, s)| min_y <= p.0 && p.0 <= max_y && **s == Water::BothBound)
@@ -219,6 +219,7 @@ fn transition(
 }
 
 impl Puzzle {
+    #[allow(dead_code)]
     fn render(&self, pos: &Dim2, water: &HashMap<Dim2, Water>, repaint: bool) {
         let center = &(pos.0 / 20 * 20, (pos.1 + 30) / 20 * 20 - 30);
         let height: isize = 50;

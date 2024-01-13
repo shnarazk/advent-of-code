@@ -65,6 +65,7 @@ impl TryFrom<&str> for Inst {
 }
 
 impl Inst {
+    #[allow(dead_code)]
     fn disassemble(&self, addr: usize, pc_index: usize) -> String {
         let l = |n: &usize| match *n {
             _ if *n == pc_index => "pc",
@@ -165,10 +166,6 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-        dbg!(&self.pc_index);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut register: [usize; 6] = [0; 6];
         let mut work: [usize; 6] = [0; 6];
@@ -177,13 +174,13 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut register, &mut work);
             register[self.pc_index] += 1;
         }
-        dbg!(&register);
+        // dbg!(&register);
         register[0]
     }
     fn part2(&mut self) -> Self::Output2 {
-        for (i, c) in self.line.iter().enumerate() {
-            println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
-        }
+        // for (i, c) in self.line.iter().enumerate() {
+        //     println!("{:>3}: {}", i, c.disassemble(i, self.pc_index));
+        // }
         part2_1()
     }
 }

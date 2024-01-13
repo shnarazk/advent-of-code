@@ -20,6 +20,7 @@ enum Rege {
 }
 
 impl Rege {
+    #[allow(dead_code)]
     fn render(&self) {
         match self {
             Rege::Segment(v) => print!("{}", v.iter().map(|c| *c as char).collect::<String>()),
@@ -194,8 +195,8 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.line.push(b')');
         if let Ok((tree, _)) = parse_to_sequence(&self.line, 1) {
-            tree.render();
-            println!();
+            // tree.render();
+            // println!();
             let start = HashSet::from([(0, 0)]);
             let mut map: HashSet<(Dim2, Dim2)> = HashSet::new();
             let _ = tree.map_to_map(&start, &mut map);

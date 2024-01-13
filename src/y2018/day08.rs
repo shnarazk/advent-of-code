@@ -19,9 +19,6 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_usizes(block, ' ')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.build_span(0).1
     }

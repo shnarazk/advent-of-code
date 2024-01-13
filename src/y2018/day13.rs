@@ -115,7 +115,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(self.line.len(), self.line[0].len(), self.cart.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render();
@@ -123,6 +122,9 @@ impl AdventOfCode for Puzzle {
             // self.render();
             if let Some(clash) = self.update1() {
                 // self.render();
+                // if m != n {
+                //     dbg!(self.cart.len());
+                // }
                 return format!("{},{}", clash.1, clash.0);
             }
         }
@@ -209,12 +211,7 @@ impl Puzzle {
                 }
             }
         }
-        let m = self.cart.len();
         self.cart.retain(|c| c.direction != DEAD);
-        let n = self.cart.len();
-        if m != n {
-            dbg!(self.cart.len());
-        }
         (self.cart.len() == 1).then(|| self.cart[0].location)
     }
     #[allow(dead_code)]

@@ -174,7 +174,7 @@ impl Creature {
         world.creatures.iter().any(|c| c.id() == id)
     }
     fn turn(&mut self, world: &mut Puzzle) -> bool {
-        assert!(self.exists_on(world));
+        debug_assert!(self.exists_on(world));
         if self.attack(world) {
             return true;
         }
@@ -198,7 +198,7 @@ impl Creature {
                     }
                 }
             }
-            assert_ne!(r, *pos);
+            debug_assert_ne!(r, *pos);
             // println!(" - creatue at {:?} moves to {:?}", pos, r);
             world.move_creature(pos, &r);
             self.set_position(&r);
@@ -218,6 +218,7 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
+    #[allow(dead_code)]
     fn render(&self, overlay: Option<HashMap<Dim2, char>>) {
         let mut map: HashMap<Dim2, char> = HashMap::new();
         let mut hps: HashMap<Dim2, usize> = HashMap::new();
@@ -328,13 +329,12 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(self.creatures.len());
         self.height = self.line.len();
         self.width = self.line[0].len();
         self.elf_power = ATTACK_POWER;
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.render(None);
+        // self.render(None);
         for turn in 0.. {
             self.creatures.sort();
             let mut creatures = self.creatures.clone();
@@ -343,24 +343,23 @@ impl AdventOfCode for Puzzle {
                     continue;
                 }
                 if c.target_creatures(self).is_empty() {
-                    println!("On turn {}, ", turn + 1);
-                    self.render(None);
-                    assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
+                    // println!("On turn {}, ", turn + 1);
+                    // self.render(None);
+                    debug_assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
                     let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
-                    dbg!(hit_points);
                     return turn * hit_points;
                 }
                 c.turn(self);
             }
-            println!("turn {} completed.", turn + 1);
-            self.render(None);
+            // println!("turn {} completed.", turn + 1);
+            // self.render(None);
         }
         unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
         for power in 4.. {
             if let Some(n) = self.clone().experiment(power) {
-                dbg!(power);
+                // dbg!(power);
                 return n;
             }
         }
@@ -380,10 +379,9 @@ impl Puzzle {
                     continue;
                 }
                 if c.target_creatures(&self).is_empty() {
-                    println!("On turn {}, ", turn + 1);
-                    assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
+                    // println!("On turn {}, ", turn + 1);
+                    debug_assert!(self.creatures.iter().all(|c| 0 < c.hit_point()));
                     let hit_points = self.creatures.iter().map(|c| c.hit_point()).sum::<usize>();
-                    dbg!(hit_points);
                     return Some(turn * hit_points);
                 }
                 c.turn(&mut self);

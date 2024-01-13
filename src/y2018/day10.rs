@@ -27,9 +27,6 @@ impl AdventOfCode for Puzzle {
         ]);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut last: (usize, Vec<Vec<isize>>) = (usize::MAX, Vec::new());
         let mut data = self.line.clone();

@@ -33,9 +33,6 @@ impl AdventOfCode for Puzzle {
         ));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut succs: HashMap<char, Vec<char>> = HashMap::new();
         let mut conds: HashMap<char, Vec<char>> = HashMap::new();
@@ -48,15 +45,11 @@ impl AdventOfCode for Puzzle {
             conds.entry(rel.1).or_default().push(rel.0);
             prev.insert(rel.1, rel.0);
         }
-        dbg!(letters.len());
-        dbg!(succs.len());
-        dbg!(prev.len());
         let mut available: Vec<char> = succs
             .keys()
             .filter(|n| prev.get(n).is_none())
             .copied()
             .collect::<Vec<_>>();
-        dbg!(&available);
         let mut result: String = String::new();
         loop {
             if available.is_empty() {
@@ -84,7 +77,6 @@ impl AdventOfCode for Puzzle {
             }
             result.push(c);
         }
-        dbg!(result.len());
         result
     }
     fn part2(&mut self) -> Self::Output2 {

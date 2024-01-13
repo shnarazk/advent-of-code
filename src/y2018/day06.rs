@@ -26,16 +26,12 @@ impl AdventOfCode for Puzzle {
         self.line.push((v[1], v[0]));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.line.iter().map(|(y, _)| *y).min().expect("strange");
         let max_y = self.line.iter().map(|(y, _)| *y).max().expect("strange");
         let min_x = self.line.iter().map(|(_, x)| *x).min().expect("strange");
         let max_x = self.line.iter().map(|(_, x)| *x).max().expect("strange");
-        dbg!(min_y, min_x, max_y, max_x);
-        assert!(10 < min_y && 10 < min_x);
+        debug_assert!(10 < min_y && 10 < min_x);
         let offset: usize = 10;
         let mut infinite_ids: HashSet<usize> = HashSet::new();
         // top edge and bottom edge
@@ -54,7 +50,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(infinite_ids.len());
         // let's draw the picture
         let mut count: HashMap<usize, usize> = HashMap::new();
         for y in min_y..=max_y {
@@ -73,12 +68,11 @@ impl AdventOfCode for Puzzle {
         let max_y = self.line.iter().map(|(y, _)| *y).max().expect("strange");
         let min_x = self.line.iter().map(|(_, x)| *x).min().expect("strange");
         let max_x = self.line.iter().map(|(_, x)| *x).max().expect("strange");
-        dbg!(min_y, min_x, max_y, max_x);
         let offset: usize = 0;
-        assert!(limit < self.distance_sum((min_y - offset, min_x - offset)));
-        assert!(limit < self.distance_sum((min_y - offset, max_x + offset)));
-        assert!(limit < self.distance_sum((max_y + offset, min_x - offset)));
-        assert!(limit < self.distance_sum((max_y + offset, max_x + offset)));
+        debug_assert!(limit < self.distance_sum((min_y - offset, min_x - offset)));
+        debug_assert!(limit < self.distance_sum((min_y - offset, max_x + offset)));
+        debug_assert!(limit < self.distance_sum((max_y + offset, min_x - offset)));
+        debug_assert!(limit < self.distance_sum((max_y + offset, max_x + offset)));
         let mut count = 0;
         for y in min_y..=max_y {
             for x in min_x..=max_x {

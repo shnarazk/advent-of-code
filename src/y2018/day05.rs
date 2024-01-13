@@ -16,9 +16,6 @@ impl AdventOfCode for Puzzle {
         self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let dist = b'a' - b'A';
         let mut updated = true;
@@ -48,7 +45,6 @@ impl AdventOfCode for Puzzle {
         for c in self.line.iter().filter(|c| b'A' <= **c && **c <= b'Z') {
             units.insert(*c);
         }
-        dbg!(units.len());
         let mut len = usize::MAX;
         for unit in units.iter() {
             let v = self

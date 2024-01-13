@@ -2,9 +2,10 @@
 
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser, regex,
+        line_parser,
+        regex,
     },
     std::collections::HashMap,
 };
@@ -35,10 +36,6 @@ impl AdventOfCode for Puzzle {
         self.line
             .push(line_parser::to_usizes_spliting_with(block, &[' ', ','])?);
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.rules.len());
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: [usize; 4] = [0; 4];
@@ -76,7 +73,7 @@ impl Puzzle {
             0 => {
                 let parser = regex!(r"^Before: \[([0-9, ]+)\]$");
                 let segment = parser.captures(block).ok_or(ParseError)?;
-                assert!(self.input_buffer.is_empty());
+                debug_assert!(self.input_buffer.is_empty());
                 let v = line_parser::to_usizes_spliting_with(&segment[1], &[' ', ','])?;
                 self.input_buffer.push([v[0], v[1], v[2], v[3]]);
                 self.input_mode = 1;
@@ -97,7 +94,7 @@ impl Puzzle {
                 self.input_mode = 3;
             }
             3 => {
-                assert!(block.is_empty());
+                debug_assert!(block.is_empty());
                 self.input_mode = 0;
             }
             _ => unreachable!(),
@@ -124,25 +121,25 @@ impl Puzzle {
             }
         }
         for on_note in 0..16 {
-            print!("{:>3}/{:>2}: ", on_note, tries.get(&on_note).unwrap_or(&0),);
-            let mut sum = 0;
+            // print!("{:>3}/{:>2}: ", on_note, tries.get(&on_note).unwrap_or(&0),);
+            // let mut sum = 0;
             for code in 0..16 {
-                let occ = *result.entry((on_note, code)).or_insert(0);
-                let neg = *fail.entry((on_note, code)).or_insert(0);
-                print!(
-                    "{}{:>3}/{:>2}{}",
-                    if 0 < occ && 0 == neg {
-                        color::CYAN
-                    } else {
-                        color::RESET
-                    },
-                    occ,
-                    neg,
-                    color::RESET
-                );
-                sum += occ;
+                let _occ = *result.entry((on_note, code)).or_insert(0);
+                let _neg = *fail.entry((on_note, code)).or_insert(0);
+                // print!(
+                //     "{}{:>3}/{:>2}{}",
+                //     if 0 < occ && 0 == neg {
+                //         color::CYAN
+                //     } else {
+                //         color::RESET
+                //     },
+                //     occ,
+                //     neg,
+                //     color::RESET
+                // );
+                // sum += occ;
             }
-            println!("  | {:>2}", sum);
+            // println!("  | {:>2}", sum);
         }
         let mut map: HashMap<usize, usize> = HashMap::new();
         'found: while !fail.is_empty() {
@@ -162,16 +159,16 @@ impl Puzzle {
                     }
                 }
                 if 1 == zero {
-                    println!("{} is {}.", on_note, i);
+                    // println!("{} is {}.", on_note, i);
                     map.insert(on_note, i);
                     fail.retain(|k, _| k.0 != on_note);
                     continue 'found;
                 }
-                println!("{} has {} possibilities.", i, zero);
+                // println!("{} has {} possibilities.", i, zero);
             }
             unreachable!();
         }
-        assert!(map.len() == 16);
+        debug_assert!(map.len() == 16);
         map
     }
 }
@@ -198,7 +195,7 @@ fn execute_as<'a, 'b>(
         }};
     }
     out[..4].copy_from_slice(&register[..4]);
-    assert_eq!(&register, &out);
+    debug_assert_eq!(&register, &out);
     match op {
         // addr, addi
         0 => out[set!(3)] = reg!(1) + reg!(2),

@@ -21,9 +21,6 @@ impl AdventOfCode for Puzzle {
         self.line.push(line_parser::to_isize(block)?);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().copied().sum::<isize>()
     }

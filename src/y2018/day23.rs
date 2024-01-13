@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/23>
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc, AdventOfCode, ParseError},
         regex,
     },
@@ -79,7 +79,7 @@ impl AdventOfCode for Puzzle {
             .max()
             .unwrap()
             .next_power_of_two();
-        dbg!(self.num_robots, self.radius);
+        // dbg!(self.num_robots, self.radius);
     }
     fn part1(&mut self) -> Self::Output1 {
         let strongest: (&usize, &Dim3) = self.line.iter().map(|(p, r)| (r, p)).max().unwrap();
@@ -95,7 +95,7 @@ impl AdventOfCode for Puzzle {
             (self.count(p.1), (p.1.abs_dist(), *p.1))
         };
         let mut terminals: BinaryHeap<Reverse<Cubic>> = BinaryHeap::new();
-        println!();
+        // println!();
         while let Some(Reverse(mut p)) = terminals.pop().or_else(|| to_visit.pop()) {
             let (target, a) = (p.closest(), p.affecting(self));
             if a < max_count || a == max_count && best.0 < target.0 {
@@ -107,11 +107,11 @@ impl AdventOfCode for Puzzle {
                 std::cmp::Ordering::Less => {
                     max_count = n;
                     best = target;
-                    println!("{}n = {}, d = {}", color::REVERT, n, best.0);
+                    // println!("{}n = {}, d = {}", color::REVERT, n, best.0);
                 }
                 std::cmp::Ordering::Equal if target.0 < best.0 => {
                     best = target;
-                    println!("{}n = {}, d = {}", color::REVERT, n, best.0);
+                    // println!("{}n = {}, d = {}", color::REVERT, n, best.0);
                 }
                 _ => (),
             }
@@ -175,7 +175,7 @@ impl Cubic {
             .iter()
             .filter(|r| !r.within_range(&self.center, 3 * self.radius as isize))
             .count();
-        assert!(0 < self.radius || self.inside + self.outside == world.num_robots);
+        debug_assert!(0 < self.radius || self.inside + self.outside == world.num_robots);
     }
     fn is_coherent(&mut self, world: &Puzzle) -> Option<usize> {
         (world.num_robots == self.inside + self.outside).then_some(self.inside)

@@ -68,7 +68,6 @@ impl AdventOfCode for Puzzle {
                 self.map.insert((j as isize, i as isize), *c);
             }
         }
-        dbg!(&self.map.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();
@@ -137,8 +136,8 @@ impl AdventOfCode for Puzzle {
                 let delta = step - check_point;
                 let n = (limit - check_point) / delta;
                 step = n * delta + check_point;
-                dbg!(delta, step);
-                dbg!((limit - check_point) / delta);
+                // dbg!(delta, step);
+                // dbg!((limit - check_point) / delta);
                 self.map = init.clone();
             }
         }
