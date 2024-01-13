@@ -92,7 +92,6 @@ impl AdventOfCode for Puzzle {
             })
             .collect();
         let result = x.iter().min_by_key(|(h, _)| h).expect("??");
-        dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
     }
     fn part2(&mut self) -> usize {
@@ -113,7 +112,6 @@ impl AdventOfCode for Puzzle {
             })
             .collect();
         let result = x.iter().max_by_key(|(h, _)| h).expect("??");
-        dbg!(self.hands[result.0], result.1);
         self.hands[result.0] * result.1
     }
 }

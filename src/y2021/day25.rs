@@ -27,11 +27,11 @@ impl AdventOfCode for Puzzle {
             width: self.line[0].len(),
             loc: self.line.clone(),
         };
-        grid.show();
+        // grid.show();
         for i in 1.. {
             let new_grid = grid.shift_right().shift_down();
             if grid == new_grid {
-                grid.show();
+                // grid.show();
                 return i;
             }
             grid = new_grid;
@@ -51,6 +51,7 @@ struct Grid {
 }
 
 impl Grid {
+    #[allow(dead_code)]
     fn show(&self) {
         for v in self.loc.iter() {
             for c in v.iter() {

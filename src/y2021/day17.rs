@@ -23,28 +23,25 @@ impl AdventOfCode for Puzzle {
             .push((y1.max(y2), y1.min(y2), x1.min(x2), x1.max(x2)));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut result: isize = 0;
         for (y1, y2, x1, x2) in self.line.iter() {
-            let mut init_sy = 0;
+            let mut init_sy;
             'next: for init_sx in 1_isize..=*x2 {
                 for y in 1_isize..(x2.abs() + y2.abs()) {
                     init_sy = y;
                     let mut sy = init_sy;
                     let mut sx = init_sx;
-                    println!("trace: {},{}", init_sy, init_sx);
+                    // println!("trace: {},{}", init_sy, init_sx);
                     let mut depth: isize = init_sy;
                     let mut dist: isize = init_sx;
                     while *y1 < depth || dist < *x1 {
-                        print!("({}, {})|{}->", depth, dist, sx);
+                        // print!("({}, {})|{}->", depth, dist, sx);
                         if sx == 0 && dist < *x1 {
-                            println!(
-                                "skip to next of init_sx = {} at ({}, {})",
-                                init_sx, depth, dist,
-                            );
+                            // println!(
+                            //     "skip to next of init_sx = {} at ({}, {})",
+                            //     init_sx, depth, dist,
+                            // );
                             continue 'next;
                         }
                         sx = (sx - 1).max(0);
@@ -56,9 +53,9 @@ impl AdventOfCode for Puzzle {
                         break;
                     }
                     // assert!(!(init_sy == 2 && init_sx == 7));
-                    println!("at ({}, {}) by ({}, {})", depth, dist, init_sy, init_sx);
+                    // println!("at ({}, {}) by ({}, {})", depth, dist, init_sy, init_sx);
                     if *y2 <= depth && dist <= *x2 {
-                        println!("- found {}, {}", init_sy, init_sx);
+                        // println!("- found {}, {}", init_sy, init_sx);
                         // simulate again
                         let mut sy = init_sy;
                         let mut max_height: isize = 0;
@@ -68,11 +65,10 @@ impl AdventOfCode for Puzzle {
                             sy -= 1;
                             height += sy;
                         }
-                        dbg!(max_height);
                         result = result.max(max_height);
                     }
                 }
-                println!("swipped at sx = {}, stoped at sy = {}", init_sx, init_sy);
+                // println!("swipped at sx = {}, stoped at sy = {}", init_sx, init_sy);
             }
         }
         result.unsigned_abs()
@@ -89,7 +85,7 @@ impl AdventOfCode for Puzzle {
                     let mut depth: isize = init_sy;
                     let mut dist: isize = init_sx;
                     while *y1 < depth || dist < *x1 {
-                        print!("({}, {})|{}->", depth, dist, sx);
+                        // print!("({}, {})|{}->", depth, dist, sx);
                         if sx == 0 && dist < *x1 {
                             continue 'next;
                         }
@@ -102,9 +98,9 @@ impl AdventOfCode for Puzzle {
                         break;
                     }
                     // assert!(!(init_sy == 2 && init_sx == 7));
-                    println!("at ({}, {}) by ({}, {})", depth, dist, init_sy, init_sx);
+                    // println!("at ({}, {}) by ({}, {})", depth, dist, init_sy, init_sx);
                     if *y2 <= depth && dist <= *x2 {
-                        println!("- found {}, {}", init_sy, init_sx);
+                        // println!("- found {}, {}", init_sy, init_sx);
                         nsat += 1;
                     }
                 }

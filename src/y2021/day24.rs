@@ -2,11 +2,12 @@
 
 use {
     crate::{
-        color,
+        // color,
         framework::{aoc_at, AdventOfCode, ParseError},
-        line_parser, regex,
+        line_parser,
+        regex,
     },
-    std::{cmp::Ordering, collections::HashMap, fmt, fmt::Write},
+    std::{cmp::Ordering, fmt, fmt::Write},
 };
 
 enum Opr {
@@ -82,21 +83,21 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         self.jit = self.build();
-        assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
-        println!("pass");
-        for n in (0..14).rev() {
-            print!(
-                "{}, ",
-                26usize.pow(
-                    self.jit
-                        .iter()
-                        .take(13 - n)
-                        .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
-                        .sum::<isize>() as u32
-                ),
-            );
-        }
-        println!();
+        debug_assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
+        // println!("pass");
+        // for n in (0..14).rev() {
+        //     print!(
+        //         "{}, ",
+        //         26usize.pow(
+        //             self.jit
+        //                 .iter()
+        //                 .take(13 - n)
+        //                 .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
+        //                 .sum::<isize>() as u32
+        //         ),
+        //     );
+        // }
+        // println!();
     }
     fn part1(&mut self) -> Self::Output1 {
         self.direction = Some(Ordering::Greater);
@@ -121,15 +122,16 @@ impl AdventOfCode for Puzzle {
 impl Puzzle {
     fn check(&self, ans: Vec<usize>) -> bool {
         let mut z = 0;
-        println!("{:?}", ans);
-        print!("{}, ", z);
+        // println!("{:?}", ans);
+        // print!("{}, ", z);
         for (pc, w) in ans.iter().enumerate() {
             z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, *w);
-            print!("{}, ", z);
+            // print!("{}, ", z);
         }
-        println!();
+        // println!();
         z == 0
     }
+    #[allow(dead_code)]
     fn dump_z(&self, ans: &[usize]) {
         let mut z = 0;
         print!("{}, ", z);
@@ -170,13 +172,13 @@ impl Puzzle {
                     let mut best = base.clone();
                     best.insert(0, w);
                     if z == z_pre && z_start == 0 && Some(best.cmp(&self.best)) == self.direction {
-                        print!(
-                            "{}: ",
-                            best.iter()
-                                .map(|c| (b'0' + *c as u8) as char)
-                                .collect::<String>()
-                        );
-                        self.dump_z(&best);
+                        // print!(
+                        //     "{}: ",
+                        //     best.iter()
+                        //         .map(|c| (b'0' + *c as u8) as char)
+                        //         .collect::<String>()
+                        // );
+                        // self.dump_z(&best);
                         self.best = best;
                     }
                     continue;
@@ -236,40 +238,40 @@ impl Puzzle {
             if matches!(l, Inst::Inp(_)) {
                 // /*
                 // print!("{:>3}: ", i);
-                for j in i..i + 18 {
-                    print!(
-                        "{} ",
-                        &match &self.line[j] {
-                            Inst::Inp(c) => format!("In{}", c),
-                            Inst::Add(c, d) => format!(
-                                "Ad{}{}{:?}{}",
-                                c,
-                                if [4, 5, 15].contains(&(j % 18)) {
-                                    color::RED
-                                } else {
-                                    color::RESET
-                                },
-                                d,
-                                color::RESET,
-                            ),
-                            Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
-                            Inst::Div(c, d) => format!(
-                                "Di{}{}{:?}{}",
-                                c,
-                                if [4, 5, 15].contains(&(j % 18)) {
-                                    color::RED
-                                } else {
-                                    color::RESET
-                                },
-                                d,
-                                color::RESET,
-                            ),
-                            Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
-                            Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
-                        }
-                    );
-                }
-                println!();
+                // for j in i..i + 18 {
+                //     print!(
+                //         "{} ",
+                //         &match &self.line[j] {
+                //             Inst::Inp(c) => format!("In{}", c),
+                //             Inst::Add(c, d) => format!(
+                //                 "Ad{}{}{:?}{}",
+                //                 c,
+                //                 if [4, 5, 15].contains(&(j % 18)) {
+                //                     color::RED
+                //                 } else {
+                //                     color::RESET
+                //                 },
+                //                 d,
+                //                 color::RESET,
+                //             ),
+                //             Inst::Mul(c, d) => format!("Mu{}{:?}", c, d),
+                //             Inst::Div(c, d) => format!(
+                //                 "Di{}{}{:?}{}",
+                //                 c,
+                //                 if [4, 5, 15].contains(&(j % 18)) {
+                //                     color::RED
+                //                 } else {
+                //                     color::RESET
+                //                 },
+                //                 d,
+                //                 color::RESET,
+                //             ),
+                //             Inst::Mod(c, d) => format!("Mo{}{:?}", c, d),
+                //             Inst::Eql(c, d) => format!("Eq{}{:?}", c, d),
+                //         }
+                //     );
+                // }
+                // println!();
                 // */
                 if let Inst::Div(_, Opr::Lit(a1)) = self.line[i + 4] {
                     if let Inst::Add(_, Opr::Lit(a2)) = self.line[i + 5] {
@@ -281,105 +283,10 @@ impl Puzzle {
                 }
             }
         }
-        for l in jit.iter() {
-            print!("{:?},", l.0);
-        }
-        println!();
+        // for l in jit.iter() {
+        //     print!("{:?},", l.0);
+        // }
+        // println!();
         jit
-    }
-    #[allow(dead_code)]
-    fn old_part1(&mut self) -> isize {
-        let mut cpu: HashMap<char, isize> = HashMap::new();
-        let mut fourteen_digit_number = Some([1usize; 14].to_vec());
-        // let mut fourteen_digit_number = Some([9usize; 5].to_vec());
-        while let Some(ref n) = fourteen_digit_number {
-            cpu.insert('w', 0);
-            cpu.insert('x', 0);
-            cpu.insert('y', 0);
-            cpu.insert('z', 0);
-            let mut input = n.to_vec();
-            // println!("{:?}", input);
-            let input2 = input.clone();
-            input.reverse();
-            let mut z: isize = 0;
-            for inst in self.line.iter() {
-                match inst {
-                    Inst::Inp(r1) => {
-                        if let Some(index) = 13_usize.checked_sub(input.len()) {
-                            let (a1, a2, a3) = self.jit[index];
-                            dbg!((a1, a2, a3, z));
-                            z = run_with(a1, a2, a3, z, input2[index]);
-                            assert_eq!(z, *cpu.get(&'z').unwrap());
-                        }
-                        // println!("{},{},{},{}",
-                        //          cpu.get(&'w').unwrap(),
-                        //          cpu.get(&'x').unwrap(),
-                        //          cpu.get(&'y').unwrap(),
-                        //          cpu.get(&'z').unwrap(),
-                        // );
-                        // dbg!(&cpu);
-                        *cpu.entry(*r1).or_default() = input.pop().unwrap() as isize;
-                    }
-                    Inst::Add(r1, Opr::Lit(n)) => {
-                        *cpu.entry(*r1).or_default() += n;
-                    }
-                    Inst::Add(r1, Opr::Var(r2)) => {
-                        let v = *cpu.get(r2).unwrap();
-                        *cpu.entry(*r1).or_default() += v;
-                    }
-                    Inst::Mul(r1, Opr::Lit(n)) => {
-                        *cpu.entry(*r1).or_default() *= n;
-                    }
-                    Inst::Mul(r1, Opr::Var(r2)) => {
-                        let v = *cpu.get(r2).unwrap();
-                        *cpu.entry(*r1).or_default() *= v;
-                    }
-                    Inst::Div(r1, Opr::Lit(n)) => {
-                        *cpu.entry(*r1).or_default() /= n;
-                    }
-                    Inst::Div(r1, Opr::Var(r2)) => {
-                        let v = *cpu.get(r2).unwrap();
-                        *cpu.entry(*r1).or_default() /= v;
-                    }
-                    Inst::Mod(r1, Opr::Lit(n)) => {
-                        *cpu.entry(*r1).or_default() %= n;
-                    }
-                    Inst::Mod(r1, Opr::Var(r2)) => {
-                        let v = *cpu.get(r2).unwrap();
-                        *cpu.entry(*r1).or_default() %= v;
-                    }
-                    Inst::Eql(r1, Opr::Lit(n)) => {
-                        *cpu.entry(*r1).or_default() =
-                            if *cpu.get(r1).unwrap() == *n { 1 } else { 0 };
-                    }
-                    Inst::Eql(r1, Opr::Var(r2)) => {
-                        *cpu.entry(*r1).or_default() =
-                            if *cpu.get(r1).unwrap() == *cpu.get(r2).unwrap() {
-                                1
-                            } else {
-                                0
-                            };
-                    }
-                }
-            }
-            /*
-                        let mut z = 0;
-                        for (i, w) in input2.iter().enumerate() {
-                            if let Inst::Jit(a1, a2, a3) = self.jit[i] {
-                                dbg!((a1, a2, a3, z));
-                                z = run_with(a1, a2, a3, z, *w);
-                            }
-                        }
-                        assert_eq!(z, *cpu.get(&'z').unwrap());
-            */
-            if *cpu.get(&'z').unwrap() == 0 {
-                dbg!(n);
-                return 0;
-            } else if *cpu.get(&'z').unwrap() < 200 {
-                println!("{}", cpu.get(&'z').unwrap());
-            }
-            fourteen_digit_number = incl(fourteen_digit_number);
-        }
-        0
     }
 }

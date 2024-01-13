@@ -33,9 +33,9 @@ impl AdventOfCode for Puzzle {
         // for v in self.image.iter() {
         //     println!({}",v.iter().collect::<String>());
         // }
-        println!("{}", self.enhancer[..70].iter().collect::<String>());
-        println!("{}", self.enhancer[441..512].iter().collect::<String>());
-        assert_eq!(self.enhancer.len(), 512);
+        // println!("{}", self.enhancer[..70].iter().collect::<String>());
+        // println!("{}", self.enhancer[441..512].iter().collect::<String>());
+        debug_assert_eq!(self.enhancer.len(), 512);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut image = self.image.clone();
@@ -58,10 +58,10 @@ impl AdventOfCode for Puzzle {
             image.push(v.clone());
             image.push(v.clone());
 
-            println!("before {}", count);
-            for v in image.iter() {
-                println!("{}", v.iter().collect::<String>());
-            }
+            // println!("before {}", count);
+            // for v in image.iter() {
+            //     println!("{}", v.iter().collect::<String>());
+            // }
 
             let height = image.len();
             let width = image[0].len();
@@ -88,15 +88,15 @@ impl AdventOfCode for Puzzle {
             }
 
             std::mem::swap(&mut image, &mut next);
-            println!("after {}", count);
-            for v in image.iter() {
-                println!("{}", v.iter().collect::<String>());
-            }
+            // println!("after {}", count);
+            // for v in image.iter() {
+            //     println!("{}", v.iter().collect::<String>());
+            // }
         }
-        println!();
-        for v in image.iter() {
-            println!("{}", v.iter().collect::<String>());
-        }
+        // println!();
+        // for v in image.iter() {
+        //     println!("{}", v.iter().collect::<String>());
+        // }
         image
             .iter()
             .map(|v| v.iter().filter(|c| **c == '#').count())
@@ -155,10 +155,10 @@ impl AdventOfCode for Puzzle {
             }
             */
         }
-        println!();
-        for v in image.iter() {
-            println!("{}", v.iter().collect::<String>());
-        }
+        // println!();
+        // for v in image.iter() {
+        //     println!("{}", v.iter().collect::<String>());
+        // }
         image
             .iter()
             .map(|v| v.iter().filter(|c| **c == '#').count())

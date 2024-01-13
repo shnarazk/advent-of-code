@@ -84,7 +84,6 @@ impl AdventOfCode for Puzzle {
         for (j, i) in self.line.iter() {
             self.grid[*j][*i] = true;
         }
-        print_grid(&self.grid);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut r = self.grid.clone();

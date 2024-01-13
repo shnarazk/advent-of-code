@@ -113,7 +113,6 @@ impl AdventOfCode for Puzzle {
             self.path.insert((from.clone(), to.clone()));
             self.path.insert((to.clone(), from.clone()));
         }
-        dbg!(self.path.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         self.count_to(vec![&Node::End])

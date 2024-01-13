@@ -73,13 +73,11 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> usize {
         let (g, e) = self.gamma_and_epsilon();
-        dbg!(g, e);
         g * e
     }
     fn part2(&mut self) -> usize {
         let o = oxygen_g_rate(self.line.clone(), 0);
         let c = co2_s_rate(self.line.clone(), 0);
-        dbg!(o, c);
         o * c
     }
 }

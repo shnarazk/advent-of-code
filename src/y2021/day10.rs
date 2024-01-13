@@ -55,7 +55,6 @@ impl AdventOfCode for Puzzle {
             // assert!(stack.is_empty(), "{:?} => {:?}", l, &stack);
             0
         }
-        dbg!(&self.line);
         self.line.iter().map(|l| syntax_error(l)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -108,10 +107,8 @@ impl AdventOfCode for Puzzle {
                     _ => panic!(),
                 };
             }
-            dbg!(count);
             count
         }
-        dbg!(&self.line);
         let mut v = self
             .line
             .iter()
@@ -120,7 +117,6 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
 
         v.sort_unstable();
-        dbg!(&v);
         v[v.len() / 2]
     }
 }

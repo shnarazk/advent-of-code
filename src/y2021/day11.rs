@@ -18,13 +18,13 @@ impl Puzzle {
         if flash.is_empty() {
             debug_assert!(self.line.iter().all(|v| v.iter().all(|i| *i <= 9)));
             if self.step == 0 {
-                for v in self.line.iter() {
-                    for i in v.iter() {
-                        print!("{}", i);
-                    }
-                    println!();
-                }
-                println!();
+                // for v in self.line.iter() {
+                //     for i in v.iter() {
+                //         print!("{}", i);
+                //     }
+                //     println!();
+                // }
+                // println!();
                 return total;
             }
             for (j, v) in self.line.iter_mut().enumerate() {

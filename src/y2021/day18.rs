@@ -79,7 +79,7 @@ impl Tree {
                 _ => panic!("{:?}", str),
             }
         }
-        assert!(!tree.is_empty());
+        debug_assert!(!tree.is_empty());
         (Tree::List(tree), str)
     }
     fn size(&self) -> usize {
@@ -212,18 +212,18 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn end_of_data(&mut self) {
-        for (i, l) in self.line.iter().enumerate() {
-            println!("{:>2} {:?}", i, &l);
-        }
+        // for (i, l) in self.line.iter().enumerate() {
+        //     println!("{:>2} {:?}", i, &l);
+        // }
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.reverse();
         let mut transformed = self.line.pop().unwrap(); // l.clone().explode();
         self.line.reverse();
         for l in self.line.iter() {
-            println!("\n+ {:?}", &l);
+            // println!("\n+ {:?}", &l);
             transformed = transformed.add(l);
-            println!("\tafter addition: {:?}", &transformed);
+            // println!("\tafter addition: {:?}", &transformed);
             let mut modified = true;
             while modified {
                 if modified {
@@ -232,7 +232,7 @@ impl AdventOfCode for Puzzle {
                     modified = m;
                 }
                 if modified {
-                    println!("\tafter explode:  {:?}", &transformed);
+                    // println!("\tafter explode:  {:?}", &transformed);
                     continue;
                 }
                 let mut spliting = true;
@@ -244,11 +244,11 @@ impl AdventOfCode for Puzzle {
                         modified = true;
                     }
                 }
-                if modified {
-                    println!("\tafter split:    {:?}", &transformed);
-                }
+                // if modified {
+                //     println!("\tafter split:    {:?}", &transformed);
+                // }
             }
-            println!("= {:?}", &transformed);
+            // println!("= {:?}", &transformed);
         }
         transformed.magnitude()
     }

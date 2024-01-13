@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|c| now.iter().filter(|d| c == *d).count())
             .collect::<Vec<usize>>();
-        println!("{}", now.iter().collect::<String>());
+        // println!("{}", now.iter().collect::<String>());
         occurs.iter().max().unwrap() - occurs.iter().min().unwrap()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -82,7 +82,6 @@ impl AdventOfCode for Puzzle {
             }
             std::mem::swap(&mut now, &mut next);
         }
-        dbg!(&now);
         let occurs = self
             .atom
             .iter()
@@ -92,7 +91,6 @@ impl AdventOfCode for Puzzle {
                     .sum()
             })
             .collect::<Vec<usize>>();
-        dbg!(&occurs);
         occurs.iter().max().unwrap() - occurs.iter().min().unwrap()
     }
 }
