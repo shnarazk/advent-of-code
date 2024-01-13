@@ -13,9 +13,6 @@ impl AdventOfCode for Puzzle {
         self.line.push(block.parse::<usize>()?);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().map(|v| fuel(*v)).sum()
     }

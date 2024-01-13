@@ -21,18 +21,15 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut inputs = VecDeque::new();
         inputs.push_back(1);
-        dbg!(self.execute(&mut inputs))[0] as usize
+        self.execute(&mut inputs)[0] as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut inputs = VecDeque::new();
         inputs.push_back(2);
-        dbg!(self.execute(&mut inputs))[0] as usize
+        self.execute(&mut inputs)[0] as usize
     }
 }
 
@@ -87,7 +84,7 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = deref!(1);
-                    println!("input at {pc}");
+                    // println!("input at {pc}");
                     memory.insert(dst, inputs.pop_front().expect("not enough input"));
                     pc += 2;
                 }
@@ -140,7 +137,6 @@ impl Puzzle {
             }
         }
         assert!(1 == output.len());
-        dbg!(&output);
         output
     }
 }

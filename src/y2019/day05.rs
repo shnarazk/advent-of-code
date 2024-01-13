@@ -16,9 +16,6 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let input = 1;
         let mut output: Vec<isize> = Vec::new();
@@ -66,7 +63,6 @@ impl AdventOfCode for Puzzle {
                 }
                 4 => {
                     let op1 = fetch!(1);
-                    dbg!(op1);
                     output.push(op1);
                     pc += 2;
                 }
@@ -76,7 +72,7 @@ impl AdventOfCode for Puzzle {
                 _ => panic!(),
             }
         }
-        dbg!(*output.last().unwrap()) as usize
+        *output.last().unwrap() as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         let input = 5;
@@ -164,6 +160,6 @@ impl AdventOfCode for Puzzle {
                 _ => panic!("op: {op} at {pc}"),
             }
         }
-        dbg!(*output.last().unwrap()) as usize
+        *output.last().unwrap() as usize
     }
 }

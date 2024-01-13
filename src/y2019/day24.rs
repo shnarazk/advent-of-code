@@ -17,9 +17,6 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.to_u32());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut visited: HashSet<u32> = HashSet::new();
         let mut state: u32 = self.to_u32();
@@ -45,9 +42,8 @@ impl AdventOfCode for Puzzle {
                     _ => (),
                 }
             }
-            dbg!(state);
             if visited.contains(&new_state) {
-                dump(state);
+                // dump(state);
                 return new_state as usize;
             }
             visited.insert(new_state);
@@ -60,16 +56,13 @@ impl AdventOfCode for Puzzle {
         state.insert(1, 0);
         state.insert(-1, 0);
         let mut plane = Plane { state };
-        plane.dump(0);
-        println!();
+        // plane.dump(0);
         for _ in 0..200 {
             plane = plane.proceed();
             // plane.dump(0);
             // println!();
         }
-        plane.dump(0);
-        println!();
-        dbg!(plane.state.len());
+        // plane.dump(0);
         plane.bugs()
     }
 }
@@ -88,6 +81,7 @@ impl Puzzle {
     }
 }
 
+#[allow(dead_code)]
 fn dump(state: u32) {
     for i in 0..25 {
         print!(
@@ -104,6 +98,7 @@ struct Plane {
 }
 
 impl Plane {
+    #[allow(dead_code)]
     fn dump(&self, level: i32) {
         if let Some(state) = self.state.get(&level) {
             for i in 0..25 {

@@ -83,11 +83,11 @@ fn decompose(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
                     .iter()
                     .all(|v| v.len() != seg_mid.len() || **v == *seg_mid)
             {
-                println!("Whole path: {original_v:?}");
-                println!("Function A: {seg_beg:?}");
-                println!("Function B: {seg_mid:?}");
-                println!("Function C: {seg_end:?}");
-                println!("Some proof: {vvv:?}");
+                // println!("Whole path: {original_v:?}");
+                // println!("Function A: {seg_beg:?}");
+                // println!("Function B: {seg_mid:?}");
+                // println!("Function C: {seg_end:?}");
+                // println!("Some proof: {vvv:?}");
                 return Some(vec![seg_beg, seg_mid.to_vec(), seg_end]);
             }
         }
@@ -177,13 +177,13 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let map: HashMap<Location, u8> = self.recognize();
-        for y in -1..46 {
-            print!("|");
-            for x in -2..39 {
-                print!("{}", *map.get(&Location(y, x)).unwrap_or(&b'?') as char);
-            }
-            println!("|");
-        }
+        // for y in -1..46 {
+        //     print!("|");
+        //     for x in -2..39 {
+        //         print!("{}", *map.get(&Location(y, x)).unwrap_or(&b'?') as char);
+        //     }
+        //     println!("|");
+        // }
         let mut val: usize = 0;
         for (loc, cell) in map.iter() {
             if *cell != b'#' {
@@ -199,7 +199,6 @@ impl AdventOfCode for Puzzle {
                 val += (loc.0 * loc.1) as usize;
             }
         }
-        dbg!(self.cross_points.len());
         val
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -218,7 +217,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.cross_points.sort();
-        assert_eq!(12, self.cross_points.len());
+        debug_assert_eq!(12, self.cross_points.len());
         let mut flow: Vec<u8> = Vec::new();
         let mut functions: Vec<Vec<Segment>> = Vec::new();
         // let mut best: Vec<Segment> = Vec::new();
@@ -314,7 +313,7 @@ impl AdventOfCode for Puzzle {
                         }
                     }
                     functions = fs;
-                    println!("Main func:  {:?}", &flow);
+                    // println!("Main func:  {:?}", &flow);
                     break 'found;
                 }
             }
@@ -356,10 +355,10 @@ impl AdventOfCode for Puzzle {
         inputs.push_back(b'n' as isize);
         inputs.push_back(b'\n' as isize);
         // println!("{:?}", inputs);
-        for c in inputs.iter() {
-            print!("{}", *c as u8 as char);
-        }
-        println!();
+        // for c in inputs.iter() {
+        //     print!("{}", *c as u8 as char);
+        // }
+        // println!();
         self.line[0] = 2;
         self.initialize();
         let mut total: usize = 0;

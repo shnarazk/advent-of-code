@@ -20,14 +20,16 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut env = Env::default();
-        env.display(true);
+        let verbose = !self.get_config().bench;
+        if verbose {
+            env.display(true);
+        }
         self.start(&mut env);
-        env.display(false);
+        if verbose {
+            env.display(false);
+        }
         env.objects
             .iter()
             .filter(|(_, o)| **o == Object::Block)
@@ -35,16 +37,22 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line[0] = 2;
+        let verbose = !self.get_config().bench;
         let mut env = Env::default();
-        env.display(true);
+        if verbose {
+            env.display(true);
+        }
         self.start(&mut env);
-        env.display(false);
+        if verbose {
+            env.display(false);
+        }
         env.score
     }
 }
 
 impl Puzzle {
     fn start(&mut self, environment: &mut Env) {
+        let verbose = !self.get_config().bench;
         let mut memory: HashMap<usize, isize> = HashMap::new();
         for (i, v) in self.line.iter().enumerate() {
             memory.insert(i, *v);
@@ -98,7 +106,7 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = deref!(1);
-                    let i = environment.hanle_input();
+                    let i = environment.hanle_input(verbose);
                     // println!("input at {pc}");
                     memory.insert(dst, i);
                     pc += 2;
@@ -187,8 +195,10 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn hanle_input(&mut self) -> isize {
-        self.display(false);
+    pub fn hanle_input(&mut self, verbose: bool) -> isize {
+        if verbose {
+            self.display(false);
+        }
         (self.ball_pos - self.paddle_pos).signum()
     }
     pub fn hanle_output(&mut self, output: isize) {

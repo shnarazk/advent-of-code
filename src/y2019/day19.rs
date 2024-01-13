@@ -22,9 +22,6 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.initialize();
         let mut count: usize = 0;
@@ -32,9 +29,9 @@ impl AdventOfCode for Puzzle {
             for x in 0..50 {
                 let on = self.is_pulling(y, x);
                 count += on as usize;
-                print!("{}", if on { "#" } else { "." });
+                // print!("{}", if on { "#" } else { "." });
             }
-            println!();
+            // println!();
         }
         count
     }

@@ -16,9 +16,6 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<i32>>();
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let base_pattern: Vec<i32> = vec![0, 1, 0, -1];
         let mut scratch = self.line.clone();
@@ -38,7 +35,7 @@ impl AdventOfCode for Puzzle {
             }
             // println!("{:?}", &self.line);
         }
-        println!("{:?}", &self.line[0..8]);
+        // println!("{:?}", &self.line[0..8]);
         self.line.iter().take(8).fold(0, |sum, d| sum * 10 + *d) as usize
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -46,16 +43,13 @@ impl AdventOfCode for Puzzle {
         for _ in 0..10_000 {
             v.append(&mut self.line.clone());
         }
-        dbg!(v.len());
         let skip = v.iter().take(7).fold(0, |sum, d| sum * 10 + *d) as usize;
-        dbg!(skip);
-        assert!(v.len() < 2 * skip);
+        debug_assert!(v.len() < 2 * skip);
         self.line.clear();
         for x in v.iter().skip(skip) {
             self.line.push(*x);
         }
         let len = self.line.len();
-        dbg!(len);
         v.truncate(len);
         for _repeat in 0..100 {
             let mut psum = 0;
@@ -66,8 +60,6 @@ impl AdventOfCode for Puzzle {
             }
             std::mem::swap(&mut self.line, &mut v);
         }
-        dbg!(self.line.last().unwrap());
-        println!("{:?}", &self.line[0..8]);
         self.line.iter().take(8).fold(0, |s, d| s * 10 + *d) as usize
     }
 }

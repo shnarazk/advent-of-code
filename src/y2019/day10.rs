@@ -20,15 +20,9 @@ impl AdventOfCode for Puzzle {
             .push(block.chars().map(|c| c == '#').collect::<Vec<bool>>());
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        let height = self.line.len();
-        let width = self.line[0].len();
-        dbg!(height, width);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let _height = self.line.len();
         let _width = self.line[0].len();
-        let mut best = (0, 0);
         let mut max_visible = 0;
         for (j, l) in self.line.iter().enumerate() {
             for (i, p) in l.iter().enumerate() {
@@ -60,31 +54,29 @@ impl AdventOfCode for Puzzle {
                 let n = visible.len();
                 if max_visible < n {
                     max_visible = n;
-                    best = (j, i);
                 }
             }
         }
-        dbg!(&best);
         max_visible
     }
     fn part2(&mut self) -> Self::Output2 {
-        for p in [
-            (-1, 0),
-            (-4, 2),
-            (-4, 5),
-            (0, 1),
-            (1, 4),
-            (1, 2),
-            (1, 0),
-            (1, -2),
-            (1, -3),
-            (0, -1),
-            (-1, -5),
-            (-1, -2),
-            (-2, -1),
-        ] {
-            println!("mk_rad({}, {}) = {}", p.0, p.1, mk_rad(p.0, p.1));
-        }
+        // for p in [
+        //     (-1, 0),
+        //     (-4, 2),
+        //     (-4, 5),
+        //     (0, 1),
+        //     (1, 4),
+        //     (1, 2),
+        //     (1, 0),
+        //     (1, -2),
+        //     (1, -3),
+        //     (0, -1),
+        //     (-1, -5),
+        //     (-1, -2),
+        //     (-2, -1),
+        // ] {
+        //     println!("mk_rad({}, {}) = {}", p.0, p.1, mk_rad(p.0, p.1));
+        // }
         type Loc = (usize, usize, usize);
         type Degree = (isize, isize);
         let oy = 29;

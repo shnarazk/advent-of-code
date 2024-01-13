@@ -93,7 +93,7 @@ enum Cell {
     Empty,
     Target,
     Wall,
-    Unknown,
+    // Unknown,
 }
 
 impl From<isize> for Cell {
@@ -113,9 +113,6 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Location, Cell> = HashMap::new();
@@ -149,25 +146,24 @@ impl AdventOfCode for Puzzle {
                     map.insert(loc, output);
                     direction = direction.rotate_forward();
                 }
-                _ => unreachable!(),
             }
-            if false {
-                print!("\x1B[45A\x1B[1G");
-                for y in -25..20 {
-                    for x in -40..50 {
-                        print!(
-                            "{}",
-                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
-                                Cell::Empty => " ",
-                                Cell::Target => "!",
-                                Cell::Wall => "#",
-                                Cell::Unknown => "?",
-                            }
-                        );
-                    }
-                    println!();
-                }
-            }
+            // {
+            //     print!("\x1B[45A\x1B[1G");
+            //     for y in -25..20 {
+            //         for x in -40..50 {
+            //             print!(
+            //                 "{}",
+            //                 match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+            //                     Cell::Empty => " ",
+            //                     Cell::Target => "!",
+            //                     Cell::Wall => "#",
+            //                     Cell::Unknown => "?",
+            //                 }
+            //             );
+            //         }
+            //         println!();
+            //     }
+            // }
         }
         while location != Location(0, 0) && count < 5000 {
             count += 1;
@@ -192,27 +188,25 @@ impl AdventOfCode for Puzzle {
                     map.insert(loc, output);
                     direction = direction.rotate_forward();
                 }
-                _ => unreachable!(),
             }
-            if false {
-                print!("\x1B[45A\x1B[1G");
-                for y in -25..20 {
-                    for x in -40..50 {
-                        print!(
-                            "{}",
-                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
-                                Cell::Empty => " ",
-                                Cell::Target => "!",
-                                Cell::Wall => "#",
-                                Cell::Unknown => "?",
-                            }
-                        );
-                    }
-                    println!();
-                }
-            }
+            // {
+            //     print!("\x1B[45A\x1B[1G");
+            //     for y in -25..20 {
+            //         for x in -40..50 {
+            //             print!(
+            //                 "{}",
+            //                 match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+            //                     Cell::Empty => " ",
+            //                     Cell::Target => "!",
+            //                     Cell::Wall => "#",
+            //                     Cell::Unknown => "?",
+            //                 }
+            //             );
+            //         }
+            //         println!();
+            //     }
+            // }
         }
-        dbg!(map.len());
         let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
         let mut visited: HashSet<Location> = HashSet::new();
         to_visit.push(Reverse((0, Location(0, 0))));
@@ -259,25 +253,24 @@ impl AdventOfCode for Puzzle {
                     map.insert(loc, output);
                     direction = direction.rotate_forward();
                 }
-                _ => unreachable!(),
             }
-            if false {
-                print!("\x1B[45A\x1B[1G");
-                for y in -25..20 {
-                    for x in -40..50 {
-                        print!(
-                            "{}",
-                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
-                                Cell::Empty => " ",
-                                Cell::Target => "!",
-                                Cell::Wall => "#",
-                                Cell::Unknown => "?",
-                            }
-                        );
-                    }
-                    println!();
-                }
-            }
+            // {
+            //     print!("\x1B[45A\x1B[1G");
+            //     for y in -25..20 {
+            //         for x in -40..50 {
+            //             print!(
+            //                 "{}",
+            //                 match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+            //                     Cell::Empty => " ",
+            //                     Cell::Target => "!",
+            //                     Cell::Wall => "#",
+            //                     Cell::Unknown => "?",
+            //                 }
+            //             );
+            //         }
+            //         println!();
+            //     }
+            // }
         }
         while location != Location(0, 0) && count < 5000 {
             count += 1;
@@ -298,25 +291,24 @@ impl AdventOfCode for Puzzle {
                     map.insert(loc, output);
                     direction = direction.rotate_forward();
                 }
-                _ => unreachable!(),
             }
-            if false {
-                print!("\x1B[45A\x1B[1G");
-                for y in -25..20 {
-                    for x in -40..50 {
-                        print!(
-                            "{}",
-                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
-                                Cell::Empty => " ",
-                                Cell::Target => "!",
-                                Cell::Wall => "#",
-                                Cell::Unknown => "?",
-                            }
-                        );
-                    }
-                    println!();
-                }
-            }
+            // {
+            //     print!("\x1B[45A\x1B[1G");
+            //     for y in -25..20 {
+            //         for x in -40..50 {
+            //             print!(
+            //                 "{}",
+            //                 match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+            //                     Cell::Empty => " ",
+            //                     Cell::Target => "!",
+            //                     Cell::Wall => "#",
+            //                     Cell::Unknown => "?",
+            //                 }
+            //             );
+            //         }
+            //         println!();
+            //     }
+            // }
         }
         let mut max_cost = 0;
         let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
@@ -333,24 +325,24 @@ impl AdventOfCode for Puzzle {
                 max_cost = max_cost.max(cost + 1);
             }
             visited.insert(pos);
-            if true {
-                print!("\x1B[42A\x1B[1G");
-                for y in -22..20 {
-                    for x in -40..50 {
-                        print!(
-                            "{}",
-                            match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
-                                Cell::Empty if visited.contains(&Location(y, x)) => "O",
-                                Cell::Empty => " ",
-                                Cell::Target => "!",
-                                Cell::Wall => "#",
-                                Cell::Unknown => "?",
-                            }
-                        );
-                    }
-                    println!();
-                }
-            }
+            // {
+            //     print!("\x1B[42A\x1B[1G");
+            //     for y in -22..20 {
+            //         for x in -40..50 {
+            //             print!(
+            //                 "{}",
+            //                 match map.get(&Location(y, x)).unwrap_or(&Cell::Unknown) {
+            //                     Cell::Empty if visited.contains(&Location(y, x)) => "O",
+            //                     Cell::Empty => " ",
+            //                     Cell::Target => "!",
+            //                     Cell::Wall => "#",
+            //                     Cell::Unknown => "?",
+            //                 }
+            //             );
+            //         }
+            //         println!();
+            //     }
+            // }
         }
         max_cost
     }

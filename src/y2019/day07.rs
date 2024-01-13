@@ -23,9 +23,6 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut highest_score = 0;
         for init_a in 0..5 {
@@ -63,7 +60,6 @@ impl AdventOfCode for Puzzle {
                                 .clone()
                                 .execute(&mut VecDeque::from(vec![init_e, out_d[0]]));
                             if highest_score < out_e[0] {
-                                println!("{},{},{},{},{}", init_a, init_b, init_c, init_d, init_e);
                                 highest_score = out_e[0];
                             }
                         }
@@ -71,7 +67,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(highest_score) as usize
+        highest_score as usize
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut highest_score = 0;
@@ -107,7 +103,7 @@ impl AdventOfCode for Puzzle {
             }
             highest_score = highest_score.max(score);
         }
-        dbg!(highest_score) as usize
+        highest_score as usize
     }
 }
 
@@ -152,18 +148,18 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = fetch!(1, true);
-                    println!("input at {pc}");
+                    // println!("input at {pc}");
                     memory[dst] = inputs.pop_front().expect("not enough input");
                     pc += 2;
                 }
                 4 => {
                     let op1 = fetch!(1);
-                    dbg!("output");
+                    // dbg!("output");
                     output.push(op1);
                     pc += 2;
                 }
                 5 => {
-                    dbg!("5");
+                    // dbg!("5");
                     let op1 = fetch!(1);
                     let dst = fetch!(2) as usize;
                     if 0 != op1 {
@@ -173,7 +169,7 @@ impl Puzzle {
                     }
                 }
                 6 => {
-                    dbg!("6");
+                    // dbg!("6");
                     let op1 = fetch!(1);
                     let dst = fetch!(2) as usize;
                     if 0 == op1 {
@@ -202,8 +198,7 @@ impl Puzzle {
                 _ => panic!("op: {op} at {pc}"),
             }
         }
-        assert!(1 == output.len());
-        dbg!(&output);
+        debug_assert!(1 == output.len());
         output
     }
     fn run(&mut self, inputs: &mut VecDeque<isize>) -> Option<isize> {
@@ -243,14 +238,14 @@ impl Puzzle {
                 }
                 3 => {
                     let dst = fetch!(1, true);
-                    println!("input at {}", self.pc);
+                    // println!("input at {}", self.pc);
                     self.line[dst] = inputs.pop_front().expect("not enough input");
                     self.pc += 2;
                 }
                 4 => {
                     let op1 = fetch!(1);
                     self.pc += 2;
-                    return Some(dbg!(op1));
+                    return Some(op1);
                 }
                 5 => {
                     let op1 = fetch!(1);

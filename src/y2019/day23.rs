@@ -19,9 +19,6 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut nodes: Vec<Intcode> = (0..50).map(|_| Intcode::default()).collect::<Vec<_>>();
         for node in nodes.iter_mut() {
@@ -107,7 +104,6 @@ impl AdventOfCode for Puzzle {
                     return y as usize;
                 }
                 last_y = y;
-                dbg!(y);
                 let input_queue = &mut network.get_mut(&0).unwrap().0;
                 input_queue.push_back(x);
                 input_queue.push_back(y);

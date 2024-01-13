@@ -41,12 +41,8 @@ impl AdventOfCode for Puzzle {
         self.line.push((vec, parse_chemical_unit(&segment[4])?));
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let hash = self.make_hash();
-        dbg!(&hash.keys().count());
         let mut bag: HashMap<&str, usize> = HashMap::new();
         let mut extra: HashMap<&str, usize> = HashMap::new();
         bag.insert("FUEL", 1);
@@ -85,7 +81,6 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let max_ore = 1_000_000_000_000;
         let hash = self.make_hash();
-        dbg!(&hash.keys().count());
         let mut range = (1, 100_000_000_000);
         while 1 < range.1 - range.0 {
             let trying = (range.1 + range.0) / 2;
@@ -129,7 +124,6 @@ impl AdventOfCode for Puzzle {
             }
             // dbg!(&range);
         }
-        dbg!(&range);
         range.0
     }
 }

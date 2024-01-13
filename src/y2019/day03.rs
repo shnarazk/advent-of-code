@@ -49,7 +49,6 @@ impl AdventOfCode for Puzzle {
             oy += dy;
             ox += dx;
         }
-        dbg!(checked.len());
         let mut lowest = usize::MAX / 4;
         oy = 0;
         ox = 0;
@@ -67,7 +66,7 @@ impl AdventOfCode for Puzzle {
             oy += dy;
             ox += dx;
         }
-        dbg!(lowest)
+        lowest
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut checked: HashMap<(isize, isize), usize> = HashMap::new();
@@ -87,7 +86,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(checked.len());
         let mut lowest = usize::MAX / 4;
         oy = 0;
         ox = 0;
@@ -103,7 +101,7 @@ impl AdventOfCode for Puzzle {
                     ox += dx.signum();
                     time += 1;
                     if let Some(t) = checked.get(&(oy, ox)) {
-                        println!("({}, {}) @ {}", oy, ox, t);
+                        // println!("({}, {}) @ {}", oy, ox, t);
                         if time + t < lowest {
                             lowest = time + t;
                         }
@@ -111,6 +109,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(lowest)
+        lowest
     }
 }

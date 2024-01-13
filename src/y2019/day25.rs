@@ -20,13 +20,11 @@ impl AdventOfCode for Puzzle {
         self.line = line_parser::to_isizes(block, ',')?;
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         // let stdin = std::io::stdin();
+        let verbose = !self.get_config().bench;
         let parser = regex!(r" typing (\d{5,}) on");
-        let mut buffer = String::new();
+        // let mut buffer = String::new();
         let mut droid = Intcode::new(&self.line);
         let mut input: VecDeque<isize> = VecDeque::new();
         let mut output: VecDeque<isize> = VecDeque::new();
@@ -77,24 +75,29 @@ impl AdventOfCode for Puzzle {
             match droid.run(&mut input, &mut output) {
                 State::None => {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
-                    print!("{}{}{}", color::GREEN, message, color::RESET);
-                    buffer.clear();
-                    output.clear();
-                    dbg!();
                     if let Some(found) = parser.captures(&message) {
-                        println!("{}{}{}", color::RED, &found[1], color::RESET);
+                        if verbose {
+                            println!("{}{}{}", color::RED, &found[1], color::RESET);
+                        }
                         return found[1].parse::<usize>().unwrap();
                     }
+                    if verbose {
+                        print!("{}{}{}", color::GREEN, message, color::RESET);
+                        dbg!();
+                    }
+                    // buffer.clear();
+                    output.clear();
                     return 0;
                 }
                 State::HasOutput => {}
                 State::WaitInput => {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
-
-                    output.clear();
-                    print!("{}{}{}", color::BLUE, message, color::RESET);
                     if message.is_empty() {
                         return 0;
+                    }
+                    if verbose {
+                        output.clear();
+                        print!("{}{}{}", color::BLUE, message, color::RESET);
                     }
                     // buffer.clear();
                     // stdin.read_line(&mut buffer).expect("fail to io");
@@ -107,7 +110,9 @@ impl AdventOfCode for Puzzle {
                     for c in action.chars() {
                         input.push_back(c as usize as isize);
                     }
-                    println!("{}{}{}", color::RED, action, color::RESET);
+                    if verbose {
+                        println!("{}{}{}", color::RED, action, color::RESET);
+                    }
                     input.push_back(b'\n' as usize as isize);
                 }
             }

@@ -117,9 +117,7 @@ impl AdventOfCode for Puzzle {
             self.portal.insert(v[0].0, v[1].1);
             self.portal.insert(v[1].0, v[0].1);
         }
-        dbg!(&self.map.len());
-        dbg!(&self.gate.len());
-        assert!(self
+        debug_assert!(self
             .gate
             .iter()
             .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str())));
@@ -130,9 +128,7 @@ impl AdventOfCode for Puzzle {
         let mut to_visit: BinaryHeap<Reverse<(usize, Location)>> = BinaryHeap::new();
         let mut visited: HashSet<Location> = HashSet::new();
         let start = self.gate.get("AA").unwrap()[0].1;
-        dbg!(&start);
         let goal = self.gate.get("ZZ").unwrap()[0].1;
-        dbg!(&goal);
         to_visit.push(Reverse((0, start)));
         while let Some(Reverse((cost, loc))) = to_visit.pop() {
             if loc == goal {
@@ -165,7 +161,6 @@ impl AdventOfCode for Puzzle {
         let mut visited: HashSet<(Location, isize)> = HashSet::new();
         let start = (0, 0);
         let goal = self.gate.get("ZZ").unwrap()[0].0;
-        dbg!(&goal);
         to_visit.push(Reverse(State {
             cost: 0,
             current_level: 0,
@@ -176,29 +171,29 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             visited.insert((state.location, state.current_level));
-            assert!(
+            debug_assert!(
                 self.map.get(&state.location) == Some(&b'*') || state.location == start,
                 "L188: {:?} at {:?}",
                 *self.map.get(&state.location).unwrap() as char,
                 state.location,
             );
             let warp = *self.portal.get(&state.location).unwrap();
-            println!(
-                "search from {warp:?} warped from {:?} (current cost {}, level {})",
-                state.location, state.cost, state.current_level,
-            );
+            // println!(
+            //     "search from {warp:?} warped from {:?} (current cost {}, level {})",
+            //     state.location, state.cost, state.current_level,
+            // );
             for ((_, next), (step_cost, flag)) in distance.iter().filter(|(from, _)| from.0 == warp)
             {
                 if visited.contains(&(*next, state.current_level + flag)) {
                     continue;
                 }
-                assert!(self.map.get(next) == Some(&b'*'));
+                debug_assert!(self.map.get(next) == Some(&b'*'));
                 if *next == goal && state.current_level == 0 {
-                    println!(
-                        "found the path to goal (cost {}, level {})",
-                        state.cost + step_cost - 1,
-                        state.current_level
-                    );
+                    // println!(
+                    //     "found the path to goal (cost {}, level {})",
+                    //     state.cost + step_cost - 1,
+                    //     state.current_level
+                    // );
                     return state.cost + step_cost - 1;
                 }
                 let current_level = state.current_level + flag;
@@ -252,31 +247,31 @@ impl Puzzle {
         let inner = move |l: &Location| {
             top_left.0 <= l.0 && l.0 <= bottom_right.0 && top_left.1 <= l.1 && l.1 <= bottom_right.1
         };
-        let goal = self.gate.get("ZZ").unwrap()[0].0;
-        for (name, entries) in self.gate.iter() {
+        // let goal = self.gate.get("ZZ").unwrap()[0].0;
+        for (_, entries) in self.gate.iter() {
             for portal_entry in entries.iter() {
                 for (dest, (cost, flag)) in self.build_cost_table(inner, portal_entry.1).iter() {
-                    if name == "AA" {
-                        dbg!(portal_entry.1, dest, cost);
-                    }
+                    // if name == "AA" {
+                    //     dbg!(portal_entry.1, dest, cost);
+                    // }
                     if 0 < *cost {
-                        assert!(self.map.get(dest) == Some(&b'*'));
+                        debug_assert!(self.map.get(dest) == Some(&b'*'));
                         table.insert((portal_entry.1, *dest), (*cost, *flag));
-                        if goal == *dest {
-                            println!(
-                                "to ZZ: {:?} -> {:?}/{}, {}",
-                                portal_entry.0, dest, cost, flag
-                            );
-                        }
+                        // if goal == *dest {
+                        //     println!(
+                        //         "to ZZ: {:?} -> {:?}/{}, {}",
+                        //         portal_entry.0, dest, cost, flag
+                        //     );
+                        // }
                     }
                 }
             }
         }
-        dbg!(table.len());
-        dbg!(&table
-            .iter()
-            // .filter(|((s, e), _)| *s == (2_usize, 53_usize))
-            .collect::<Vec<_>>());
+        // dbg!(table.len());
+        // dbg!(&table
+        //     .iter()
+        //     // .filter(|((s, e), _)| *s == (2_usize, 53_usize))
+        //     .collect::<Vec<_>>());
         table
     }
     fn build_cost_table(
@@ -303,7 +298,7 @@ impl Puzzle {
                     }
                     Some(&b'*') => {
                         let sgn = if inner(next) { 1 } else { -1 };
-                        assert!(self.map.get(next) == Some(&b'*'));
+                        debug_assert!(self.map.get(next) == Some(&b'*'));
                         table.insert(*next, (cost + 1, sgn));
                     }
                     _ => (),

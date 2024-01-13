@@ -26,9 +26,6 @@ impl AdventOfCode for Puzzle {
         ]);
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut delta = Vec::new();
         for _ in self.line.iter() {
@@ -108,18 +105,18 @@ impl AdventOfCode for Puzzle {
             // }
             if self.line.iter().all(|m| m[3] == 0) && factor[0] == 0 {
                 factor[0] = time;
-                dbg!("X", time);
+                // dbg!("X", time);
             }
             if self.line.iter().all(|m| m[4] == 0) && factor[1] == 0 {
                 factor[1] = time;
-                dbg!("Y", time);
+                // dbg!("Y", time);
             }
             if self.line.iter().all(|m| m[5] == 0) && factor[2] == 0 {
                 factor[2] = time;
-                dbg!("Z", time);
+                // dbg!("Z", time);
             }
             if factor.iter().all(|a| 0 != *a) {
-                dbg!(&factor);
+                // dbg!(&factor);
                 let least = lcm(factor[2], lcm(factor[1], factor[0]));
                 return least * 2; // least wasn't a solution. So try doubled one.
             }
