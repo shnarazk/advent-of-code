@@ -66,40 +66,44 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let aa = *self.label_id.get("AA").unwrap();
+        let mut used = vec![false; self.label_id.len()];
+        used[aa] = true;
         let init = State {
-            path: vec![aa],
-            // contribution: vec![(0, 0)],
+            used,
+            last: aa,
             ..Default::default()
         };
         self.traverse(init)
     }
     fn part2(&mut self) -> Self::Output2 {
         let aa = *self.label_id.get("AA").unwrap();
+        let mut used = vec![false; self.label_id.len()];
+        used[aa] = true;
         let init = State2 {
-            path: vec![aa],
+            used,
             state1: (0, aa),
             state2: (0, aa),
             ..Default::default()
         };
-        let mut best: usize = 0;
-        let path_len = 1 + self.map.values().filter(|(f, _)| 0 < *f).count();
-        self.traverse2(init, &mut best, path_len);
-        best
+        // let path_len = 1 + self.map.values().filter(|(f, _)| 0 < *f).count();
+        self.traverse2(init)
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 struct State {
-    path: Vec<usize>,
-    time: usize,
+    estimate: usize,
     total_flow: usize,
-    // contribution: Vec<(usize, usize)>,
+    used: Vec<bool>,
+    last: usize,
+    time: usize,
 }
 
 #[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 struct State2 {
+    estimate: usize,
     total_flow: usize,
-    path: Vec<usize>,
+    used: Vec<bool>,
     state1: (usize, usize),
     state2: (usize, usize),
 }
@@ -137,80 +141,108 @@ impl Puzzle {
             }
         }
     }
-    fn traverse(&self, state: State) -> usize {
-        const REMAIN: usize = 30;
-        if state.time == REMAIN {
-            return state.total_flow;
-        }
-        let mut best = state.total_flow;
-        let now = state.path.last().unwrap();
-        for ((_, next), dist) in self.distance.iter().filter(|((s, _), _)| s == now) {
-            if state.path.contains(next) {
-                continue;
-            }
-            let time = state.time + *dist + 1;
-            if REMAIN <= time {
-                continue;
-            }
-            let flow = self.map.get(next).unwrap().0;
-            if flow == 0 {
-                continue;
-            }
-            let total_flow = state.total_flow + (REMAIN - time) * flow;
-            let mut path = state.path.clone();
-            path.push(*next);
-            // let mut contribution = state.contribution.clone();
-            // contribution.push((time, self.map.get(next).unwrap().0));
-            best = self
-                .traverse(State {
-                    path,
-                    time,
-                    total_flow,
-                    // contribution,
-                })
-                .max(best);
-        }
-        best
-    }
     // calculate the expected reward in a cheap way
-    fn reward_bound(&self, remain: usize, path: &[usize]) -> usize {
+    fn reward_bound(&self, remain: usize, path: &[bool]) -> usize {
         self.map
             .iter()
-            .filter(|(l, _)| !path.contains(l))
+            .filter(|(l, _)| !path[**l])
             .map(|(_, (f, _))| *f * remain)
             .sum()
     }
-    fn traverse2(&self, state: State2, best: &mut usize, path_len: usize) {
-        const DURATION: usize = 26;
-        if *best < state.total_flow {
-            *best = state.total_flow;
-            progress!(*best);
-        }
-        if DURATION <= state.state1.0.min(state.state2.0) || state.path.len() == path_len {
-            return;
-        }
-        let current = &(&state.state1).min(&state.state2).1;
-        for ((_, label), dist) in self.distance.iter().filter(|((s, _), _)| s == current) {
-            if state.path.contains(label) {
+    fn traverse(&self, state: State) -> usize {
+        let mut best = 0;
+        let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
+        to_visit.push(state);
+        let mut visited: HashMap<(usize, Vec<bool>), usize> = HashMap::new();
+        const DURATION: usize = 30;
+        while let Some(state) = to_visit.pop() {
+            let current_pos = state.last;
+            if DURATION < state.time {
                 continue;
             }
-            let mut next = state.clone();
-            let working = (&mut next.state1).min(&mut next.state2);
-            working.0 += *dist + 1;
-            working.1 = *label;
-            let flow = self.map.get(label).unwrap().0;
-            if DURATION <= working.0 || flow == 0 {
-                continue;
+            if best < state.total_flow {
+                best = state.total_flow;
+                progress!(best);
             }
-            next.total_flow += (DURATION - working.0) * flow;
-            next.path.push(*label);
-            if next.total_flow
-                + self.reward_bound(DURATION - next.state1.0.max(next.state2.0) - 1, &next.path)
-                < *best
+            if visited
+                .get(&(state.time, state.used.clone()))
+                .map_or(false, |v| state.total_flow < *v)
             {
                 continue;
             }
-            self.traverse2(next, best, path_len);
+            for ((s, dist), travel_time) in self.distance.iter() {
+                if *s != current_pos || state.used[*dist] {
+                    continue;
+                }
+                let flow = self.map.get(dist).unwrap().0;
+                let time = state.time + *travel_time + 1;
+                if DURATION <= time || flow == 0 {
+                    continue;
+                }
+                let mut next = state.clone();
+                next.time = time;
+                next.last = *dist;
+                next.total_flow += (DURATION - next.time) * flow;
+                next.used[*dist] = true;
+                let estimate =
+                    next.total_flow + self.reward_bound(DURATION - next.time - 1, &next.used);
+                if estimate < best {
+                    continue;
+                }
+                next.estimate = estimate;
+                to_visit.push(next)
+            }
+            visited.insert((state.time, state.used), state.total_flow);
         }
+        best
+    }
+    fn traverse2(&self, state: State2) -> usize {
+        let mut best = 0;
+        let mut to_visit: BinaryHeap<State2> = BinaryHeap::new();
+        to_visit.push(state);
+        let mut visited: HashMap<(usize, Vec<bool>), usize> = HashMap::new();
+        const DURATION: usize = 26;
+        while let Some(state) = to_visit.pop() {
+            if best < state.total_flow {
+                best = state.total_flow;
+                progress!(best);
+            }
+            let pos = (&state.state1).min(&state.state2).1;
+            let now = (&state.state1).max(&state.state2).0;
+            if DURATION <= state.state1.0.min(state.state2.0) {
+                continue;
+            }
+            if visited
+                .get(&(now, state.used.clone()))
+                .map_or(false, |v| state.total_flow < *v)
+            {
+                continue;
+            }
+            for ((s, dist), travel_time) in self.distance.iter() {
+                if *s != pos || state.used[*dist] {
+                    continue;
+                }
+                let mut next = state.clone();
+                let working = (&mut next.state1).min(&mut next.state2);
+                working.0 += *travel_time + 1;
+                working.1 = *dist;
+                let flow = self.map.get(dist).unwrap().0;
+                if DURATION <= working.0 || flow == 0 {
+                    continue;
+                }
+                next.total_flow += (DURATION - working.0) * flow;
+                next.used[*dist] = true;
+                let estimate = next.total_flow
+                    + self
+                        .reward_bound(DURATION - next.state1.0.max(next.state2.0) - 1, &next.used);
+                if estimate < best {
+                    continue;
+                }
+                next.estimate = estimate;
+                to_visit.push(next)
+            }
+            visited.insert((now, state.used), state.total_flow);
+        }
+        best
     }
 }
