@@ -4,6 +4,8 @@ pub trait GeometricMath {
     type BaseType;
     type Vector;
     fn add(&self, other: &Self) -> Self;
+    fn add_scalar(&self, other: Self::BaseType) -> Self;
+    fn mul_scalar(&self, other: Self::BaseType) -> Self;
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
         Self: Sized;
@@ -118,6 +120,12 @@ impl GeometricMath for Dim2<isize> {
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1)
     }
+    fn add_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 + other, self.1 + other)
+    }
+    fn mul_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 * other, self.1 * other)
+    }
     fn shift(&self, vec: &Vec2) -> Option<Self>
     where
         Self: Sized,
@@ -185,6 +193,12 @@ impl GeometricMath for Dim2<usize> {
     type Vector = Vec2;
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1)
+    }
+    fn add_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 + other, self.1 + other)
+    }
+    fn mul_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 * other, self.1 * other)
     }
     fn shift(&self, vec: &Vec2) -> Option<Self>
     where
@@ -296,6 +310,12 @@ impl GeometricMath for Dim3<isize> {
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1, self.2 + other.2)
     }
+    fn add_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 + other, self.1 + other, self.2 + other)
+    }
+    fn mul_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 * other, self.1 * other, self.2 * other)
+    }
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
         Self: Sized,
@@ -343,6 +363,12 @@ impl GeometricMath for Dim3<usize> {
     type Vector = Vec3;
     fn add(&self, other: &Self) -> Self {
         (self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    }
+    fn add_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 + other, self.1 + other, self.2 + other)
+    }
+    fn mul_scalar(&self, other: Self::BaseType) -> Self {
+        (self.0 * other, self.1 * other, self.2 * other)
     }
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
