@@ -27,6 +27,7 @@ impl AdventOfCode for Puzzle {
     }
 }
 
+#[allow(clippy::ptr_arg)]
 fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
     let width = m[0].len();
     let height = m.len();
@@ -57,6 +58,7 @@ fn cleanup(m: &mut Vec<Vec<bool>>) -> usize {
     unreachable!()
 }
 
+#[allow(clippy::ptr_arg)]
 fn evaluate(m: &Vec<Vec<bool>>) -> usize {
     let width = m[0].len();
     let height = m.len();

@@ -9,6 +9,7 @@ pub fn rotate_clockwise<I: Clone>(m: Vec<Vec<I>>) -> Vec<Vec<I>> {
     n
 }
 
+#[allow(clippy::ptr_arg)]
 pub fn transpose<I: Clone>(v: &Vec<Vec<I>>) -> Vec<Vec<I>> {
     let h = v.len();
     let w = v[0].len();
