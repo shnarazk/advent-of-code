@@ -1,18 +1,25 @@
 ! Copyright (C) 2022 Your name.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: environment formatting io.pathnames sequences ;
-IN: test
+USING: command-line environment formatting io.pathnames kernel math namespaces sequences ;
+IN: advent-of-code-2023
 
-! <PRIVATE
+<PRIVATE
 : base-dir ( -- path ) "AOC_DIR" os-env ; 
-! PRIVATE>
+PRIVATE>
 
-! : parse ( something -- ) utf8 file-contents print ;
-
-: target-data ( day alt -- string )
-  drop ! for now
-  "input-%02d.txt" sprintf
+: target-data ( alt day -- string )
+  swap
+  dup length zero?
+  [ drop "input-day%02d.txt" sprintf ]
+  [ "input-day%02d-%s.txt" sprintf ]
+  if
   { "data" "2023" } base-dir [ append-path ] reduce
   prepend-path
 ;
 
+: day>data ( n -- string )
+  command-line get dup length
+  zero? [ drop "" ] [ first ] if
+  swap target-data
+  utf8 file-contents
+;
