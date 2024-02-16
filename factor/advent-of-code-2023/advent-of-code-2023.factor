@@ -1,6 +1,6 @@
 ! Copyright (C) 2022 Your name.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: command-line environment formatting io.pathnames kernel math namespaces sequences ;
+USING: command-line environment formatting io.encodings.utf8 io.files io.pathnames kernel math namespaces prettyprint sequences ;
 IN: advent-of-code-2023
 
 <PRIVATE
