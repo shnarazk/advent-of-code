@@ -3,4 +3,4 @@
 -- import Mathlib.Data.Rat.Basic
 -- import Mathlib.Data.Real.Basic
 import Std
-import «AoC».Basic
+import «AoC».Day01
