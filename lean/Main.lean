@@ -1,15 +1,10 @@
 import «AoC»
 import Aesop
-import Std.Data.String
-import Std.Data.List
-import Std.Data.Nat
-
-def readData (datafilename : String) : IO (Array String) := do
-     IO.FS.lines datafilename
 
 def solve1_line (s : String) : Nat :=
-  (sk.head!.toNat - '0'.toNat) * 10 + (sk.getLast!.toNat - '0'.toNat)
+  asNum sk.head! * 10 + asNum sk.getLast!
   where
+    asNum (c : Char) := c.toNat - '0'.toNat
     sk := s.toList.filter fun c => c.isDigit
 
 #eval solve1_line "aa2aa3"
@@ -21,9 +16,6 @@ def solve1 (lines : Array String): IO Unit := do
   return ()
 
 def main : IO Unit := do
-  IO.println s!"Hello, {hello}!"
-  let lines ← readData "../data/2023/input-day01.txt"
-  -- let solver1 := bind (pure lines) solve1
-  let solver1 := pure lines >>= solve1
+  let solver1 := dataFor 2023 1 >>= solve1
   let result ← Aesop.time' solver1
   IO.println s!" => {result.printAsMillis}"
