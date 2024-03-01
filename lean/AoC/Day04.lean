@@ -17,7 +17,18 @@ def parsed (source : String) : List Nat × List Nat :=
 
 #eval parsed "Card 1: 41 48 | 83  1 41"
 
-def solve1_line (_line : String) : Nat := 0
+def solve1_line (line : String) : Nat :=
+  match found.length with
+  | 0 => 0
+  | n => 2 ^ (n - 1)
+  where
+    x := parsed line
+    found := List.filter (fun c => List.contains x.fst c) x.snd
+
+#eval solve1_line "Card 1: 41 48  2 | 83  1 41 68"
+#eval solve1_line "Card 1: 41 48    | 83  1 41 48"
+#eval solve1_line "Card 1: 41 48  2 |  2 83  41 48"
+#eval solve1_line "Card 1: 41 48  2 |  3 83  42 49"
 
 def solve1 (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve1_line lines
