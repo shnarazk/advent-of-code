@@ -21,7 +21,8 @@
       };
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive uiua.packages.${system}.default uiua-driver ];
+        packages = [ pkgs.bashInteractive pkgs.uiua ];
+        # packages = [ pkgs.bashInteractive uiua.packages.${system}.default uiua-driver ];
       };
     });
 }
