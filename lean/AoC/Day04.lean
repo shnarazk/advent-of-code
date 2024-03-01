@@ -36,12 +36,20 @@ def solve1 (lines : Array String) : IO Unit := do
   IO.println s!" part1: {sum}"
   return ()
 
-def solve2_line (_line : String) : Nat := 0
+def solve2_rec (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)) : Nat :=
+  match table with
+  | [] => Array.foldr (. + .) 0 counts
+  | List.cons line table' =>
+    let found := List.filter (fun c => List.contains line.fst c) line.snd
+    let num := counts.get! n
+    let counts' := List.foldr (fun k c => c.modify (n + k) (. + num)) counts (List.iota found.length)
+    solve2_rec (n+1) counts' table'
 
 def solve2 (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!" part1: {sum}"
+  let table := List.map parsed lines.toList
+  let counts := Array.mkArray lines.size 1
+  let sum := solve2_rec 0 counts table
+  IO.println s!" part2: {sum}"
   return ()
 
 end Day04
