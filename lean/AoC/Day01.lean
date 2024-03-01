@@ -20,24 +20,15 @@ def solve1 (lines : Array String) : IO Unit := do
 #eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
 
 def mnemonic (s : String) : Char :=
-  if s.startsWith "one"
-  then '1'
-  else if s.startsWith "two"
-  then '2'
-  else if s.startsWith "three"
-  then '3'
-  else if s.startsWith "four"
-  then '4'
-  else if s.startsWith "five"
-  then '5'
-  else if s.startsWith "six"
-  then '6'
-  else if s.startsWith "seven"
-  then '7'
-  else if s.startsWith "eight"
-  then '8'
-  else if s.startsWith "nine"
-  then '9'
+  if      s.startsWith "one"   then '1'
+  else if s.startsWith "two"   then '2'
+  else if s.startsWith "three" then '3'
+  else if s.startsWith "four"  then '4'
+  else if s.startsWith "five"  then '5'
+  else if s.startsWith "six"   then '6'
+  else if s.startsWith "seven" then '7'
+  else if s.startsWith "eight" then '8'
+  else if s.startsWith "nine"  then '9'
   else s.get! 0
 
 def solve2_ (s : String) : Nat :=
@@ -52,7 +43,6 @@ def solve2 (lines : Array String) : IO Unit := do
 end Day01
 
 def day01 : IO Unit := do
-  IO.println s!"{List.range 10}"
   let data ← dataFor 2023 1
   pure data >>= Day01.solve1
   pure data >>= Day01.solve2
