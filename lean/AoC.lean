@@ -4,3 +4,4 @@
 -- import Mathlib.Data.Real.Basic
 import Std
 import «AoC».Day01
+import «AoC».Day02
