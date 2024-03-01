@@ -3,10 +3,10 @@ import «AoC».Basic
 
 namespace Day05
 
-def parsed (source : String) : sorry := sorry
+def parsed (_source : String) : Nat := 0
 
-def solve1_line (line : String) : Nat :=
-  sorry
+def solve1_line (_line : String) : Nat :=
+  0
 
 #eval solve1_line ""
 
@@ -16,8 +16,8 @@ def solve1 (lines : Array String) : IO Unit := do
   IO.println s!" part1: {sum}"
   return ()
 
-def solve2_line (line : String) : Nat :=
-  sorry
+def solve2_line (_line : String) : Nat :=
+  0
 
 def solve2 (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve2_line lines
