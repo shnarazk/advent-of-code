@@ -5,3 +5,5 @@
 import Std
 import «AoC».Day01
 import «AoC».Day02
+import «AoC».Day03
+import «AoC».Day04
