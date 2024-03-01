@@ -9,13 +9,16 @@ def toHashMap (source : String) /- : Std.HashMap String Nat -/ :=
       List.foldl
         (fun hash assoc =>
           let (l, n) := association assoc
-          hash.insert l n)
+          match hash.find? l with
+          | some n' => hash.insert l (max n n')
+          | none => hash.insert l n)
         hash
         items
     )
-    Std.HashMap.empty
+    (Std.HashMap.empty.insert "«id»" id)
     items_in_bags
   where
+    id := ((List.getD (String.split source (. == ':')) 0 "-1").drop 5).trim.toInt!
     body := List.getD (String.split source (. == ':')) 1 ""
     turns := String.split body (. == ';')
     items_in_bags := turns.map (fun b => String.split b (. == ','))
@@ -28,14 +31,18 @@ def toHashMap (source : String) /- : Std.HashMap String Nat -/ :=
 #eval (toHashMap "case 1: 3 red; 5 blue").findEntry? "blue" = some ("blue", 5)
 
 def solve1_line (line : String) : Nat :=
-  Std.HashMap.size hash
+  if   Std.HashMap.findD hash "red" 0   <= 12
+    && Std.HashMap.findD hash "green" 0 <= 13
+    && Std.HashMap.findD hash "blue" 0  <= 14
+  then (Std.HashMap.find! hash "«id»").toNat
+  else 0
   where
     hash := toHashMap line
 
 def solve1 (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve1_line lines
   let sum := Array.foldl (. + .) 0 points
-  IO.println s!" part1: not yet implemented {lines.size}, {sum}"
+  IO.println s!" part1: {sum}"
   return ()
 
 def solve2 (lines : Array String) : IO Unit := do
