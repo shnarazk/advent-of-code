@@ -19,20 +19,22 @@ def solve1 (lines : Array String) : IO Unit := do
 
 #eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
 
-def mnemonic (s : String) : Char :=
-  if      s.startsWith "one"   then '1'
-  else if s.startsWith "two"   then '2'
-  else if s.startsWith "three" then '3'
-  else if s.startsWith "four"  then '4'
-  else if s.startsWith "five"  then '5'
-  else if s.startsWith "six"   then '6'
-  else if s.startsWith "seven" then '7'
-  else if s.startsWith "eight" then '8'
-  else if s.startsWith "nine"  then '9'
+def mnemonic (s : List Char) : Char :=
+  if      (String.toList "one").isPrefixOf s   then '1'
+  else if (String.toList "two").isPrefixOf s   then '2'
+  else if (String.toList "three").isPrefixOf s then '3'
+  else if (String.toList "four").isPrefixOf s  then '4'
+  else if (String.toList "five").isPrefixOf s  then '5'
+  else if (String.toList "six").isPrefixOf s   then '6'
+  else if (String.toList "seven").isPrefixOf s then '7'
+  else if (String.toList "eight").isPrefixOf s then '8'
+  else if (String.toList "nine").isPrefixOf s  then '9'
   else s.get! 0
 
 def solve2_ (s : String) : Nat :=
-  solve1_ ((List.map (fun n => s.drop n) (List.range s.length)).map mnemonic)
+  solve1_ ((List.takeWhile (. != []) s.toList.tails).map mnemonic)
+
+#eval ((List.takeWhile (. != []) (List.tails (String.toList "two3four"))).map mnemonic)
 
 def solve2 (lines : Array String) : IO Unit := do
   let nums := lines.map solve2_
