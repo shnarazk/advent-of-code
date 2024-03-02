@@ -1,9 +1,42 @@
 import Std
 import «AoC».Basic
+import «AoC».Parser
+import Lean.Data.Parsec
 
 namespace Day05
 
-def parsed (_source : String) : Nat := 0
+structure Range where
+  dest   : Nat
+  source : Nat
+  span   : Nat
+deriving Repr
+
+namespace parser
+open Lean Parsec
+
+def plabel := do
+  let _ ← many1Chars asciiLetter <* pstring "-to-"
+  let _ ← many1Chars asciiLetter <* pchar ' '
+  let _ ← pstring "map:"
+  return ()
+
+#eval Parsec.run plabel "water-to-light map:"
+
+def range := do
+  let r ← number <* separator ' '
+  let d ← number <* separator ' '
+  let s ← number <* separator₀ ' '
+  return ({ dest := d, source := s, span := r } : Range)
+
+def pmap := manySep range eol
+
+#eval Parsec.run pmap "88 18 7\n18 25 70"
+
+def parser : Parsec (Array Range) := manySep (plabel *> range) (pstring "\n\n")
+
+def parse (data : String) := Parsec.run parser data
+
+end parser
 
 def solve1_line (_line : String) : Nat :=
   0
