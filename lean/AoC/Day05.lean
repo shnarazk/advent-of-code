@@ -14,6 +14,9 @@ deriving Repr
 namespace parser
 open Lean Parsec
 
+def pseeds := do
+  pstring "seeds: " *> sepBy1 number (pchar ' ') <* eol <* eol
+
 def plabel := do
   let _ ← many1Chars asciiLetter <* pstring "-to-"
   let _ ← many1Chars asciiLetter <* pstring " map:\n"
@@ -22,9 +25,9 @@ def plabel := do
 #eval Parsec.run plabel "water-to-light map:\n"
 
 def range := do
-  let r ← number <* separator ' '
   let d ← number <* separator ' '
-  let s ← number <* separator₀ ' '
+  let s ← number <* separator ' '
+  let r ← number <* separator₀ ' '
   return ({ dest := d, source := s, span := r } : Range)
 
 def pmap := sepBy1 range eol
@@ -33,28 +36,41 @@ def pmap := sepBy1 range eol
 #eval Parsec.run pmap "88 18 7\n18 25 70"
 
 -- def parser : Parsec Range := (plabel *> range)
-def parser : Parsec (Array (Array Range)) := sepBy1 (plabel *> pmap) (pstring "\n\n")
+def parser : Parsec ((Array Nat) × (Array (Array Range))) := do
+  let ss ← pseeds
+  let ms ← sepBy1 (plabel *> pmap) (pstring "\n\n")
+  return (ss, ms)
 
-#eval Parsec.run parser "a-to-b map:\n88 18 7"
+#eval Parsec.run parser "seeds: 2 5\n\na-to-b map:\n88 18 7"
 
 def parse (data : String) :=
   match Parsec.run parser data with
   | Except.ok ret  => some ret
   | Except.error _ => none
 
-#eval parse "a-to-b map:\n0 1 2\n\n"
+#eval parse "seeds: 1\n\na-to-b map:\n0 1 2"
 
 end parser
 
-def solve1_line (_line : String) : Nat :=
-  0
+def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
+  match rs with
+  | [] => pos
+  | List.cons range rs' =>
+      if range.source ≤ pos && pos < range.source + range.span
+      then range.dest + pos - range.source
+      else transpose₀ pos rs'
 
-#eval solve1_line ""
+def transpose (seeds : Array Nat) (rs : Array Range) :=
+  Array.map (fun seed => transpose₀ seed (Array.toList rs)) seeds
 
 def solve1 (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve1_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!" part1: {sum}"
+  let data := Array.foldl (fun b s => b ++ s ++ "\n") "" lines
+  match parser.parse data with
+  | some (seeds, maps) =>
+    -- IO.println s!" part1: {seeds}"
+    let point : Array Nat := Array.foldl transpose seeds maps
+    IO.println s!" part1: {point.minD 0}"
+  | _ => IO.println s!" part1: parse error"
   return ()
 
 def solve2_line (_line : String) : Nat :=
