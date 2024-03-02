@@ -2,15 +2,31 @@ import Lean.Data.Parsec
 
 open Lean Parsec
 
+/--
+end of line
+--/
 def eol : Parsec Unit := pchar '\n' *> return ()
 
 def sepBy1 (p : Parsec α) (s : Parsec β) : Parsec $ Array α := do
   manyCore (attempt (s *> p)) #[←p]
 
+/--
+a sequence of space or TAB
+--/
+def whitespaces : Parsec Unit := many1 (pchar ' ' <|> pchar '\t') *> return ()
+
+/--
+[A-Za-z]+
+--/
+def alphabets := many1Chars asciiLetter
+
 def separator (ch : Char)  : Parsec Unit := many1 (pchar ch) *> return ()
 
 def separator₀ (ch : Char)  : Parsec Unit := optional (many (pchar ch)) *> return ()
 
+/--
+a `Nat`
+--/
 def number := do
   let s ← many1 digit
   return (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)

@@ -15,11 +15,11 @@ namespace parser
 open Lean Parsec
 
 def pseeds := do
-  pstring "seeds: " *> sepBy1 number (pchar ' ') <* eol <* eol
+  pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
 
 def plabel := do
-  let _ ← many1Chars asciiLetter <* pstring "-to-"
-  let _ ← many1Chars asciiLetter <* pstring " map:\n"
+  let _ ← alphabets <* pstring "-to-"
+  let _ ← alphabets <* pstring " map:\n"
   return ()
 
 #eval Parsec.run plabel "water-to-light map:\n"
@@ -67,7 +67,6 @@ def solve1 (lines : Array String) : IO Unit := do
   let data := Array.foldl (fun b s => b ++ s ++ "\n") "" lines
   match parser.parse data with
   | some (seeds, maps) =>
-    -- IO.println s!" part1: {seeds}"
     let point : Array Nat := Array.foldl transpose seeds maps
     IO.println s!" part1: {point.minD 0}"
   | _ => IO.println s!" part1: parse error"
