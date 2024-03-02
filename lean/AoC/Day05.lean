@@ -16,11 +16,10 @@ open Lean Parsec
 
 def plabel := do
   let _ ← many1Chars asciiLetter <* pstring "-to-"
-  let _ ← many1Chars asciiLetter <* pchar ' '
-  let _ ← pstring "map:"
+  let _ ← many1Chars asciiLetter <* pstring " map:\n"
   return ()
 
-#eval Parsec.run plabel "water-to-light map:"
+#eval Parsec.run plabel "water-to-light map:\n"
 
 def range := do
   let r ← number <* separator ' '
@@ -28,13 +27,22 @@ def range := do
   let s ← number <* separator₀ ' '
   return ({ dest := d, source := s, span := r } : Range)
 
-def pmap := manySep range eol
+def pmap := sepBy1 range eol
 
+#eval Parsec.run pmap "88 18 7"
 #eval Parsec.run pmap "88 18 7\n18 25 70"
 
-def parser : Parsec (Array Range) := manySep (plabel *> range) (pstring "\n\n")
+-- def parser : Parsec Range := (plabel *> range)
+def parser : Parsec (Array (Array Range)) := sepBy1 (plabel *> pmap) (pstring "\n\n")
 
-def parse (data : String) := Parsec.run parser data
+#eval Parsec.run parser "a-to-b map:\n88 18 7"
+
+def parse (data : String) :=
+  match Parsec.run parser data with
+  | Except.ok ret  => some ret
+  | Except.error _ => none
+
+#eval parse "a-to-b map:\n0 1 2\n\n"
 
 end parser
 

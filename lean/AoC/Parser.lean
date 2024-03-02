@@ -4,7 +4,7 @@ open Lean Parsec
 
 def eol : Parsec Unit := pchar '\n' *> return ()
 
-def manySep (p : Parsec α) (s : Parsec β) : Parsec $ Array α := do
+def sepBy1 (p : Parsec α) (s : Parsec β) : Parsec $ Array α := do
   manyCore (attempt (s *> p)) #[←p]
 
 def separator (ch : Char)  : Parsec Unit := many1 (pchar ch) *> return ()
@@ -23,7 +23,7 @@ def label := many1Chars asciiLetter <* pchar ':'
 
 #eval Parsec.run label "Game: 0, "
 
-def fields := manySep (separator₀ ' ' *> label *> separator ' ' *> number) (pchar ',')
+def fields := sepBy1 (separator₀ ' ' *> label *> separator ' ' *> number) (pchar ',')
 
 #eval Parsec.run fields "a: 0, bb: 8"
 
