@@ -6,11 +6,9 @@ import Lean.Data.Parsec
 namespace Day06
 
 structure Race where
-  time : Array Nat
-  dist : Array Nat
+  time : Nat
+  dist : Nat
 deriving Repr
-
-#eval ({ time := #[3, 3, 1], dist := #[1, 2, 3] } : Race).time
 
 namespace parser
 open Lean Parsec
@@ -22,10 +20,11 @@ def pdist := pstring "Distance:" *> whitespaces *> numbers
 
 #eval Parsec.run ptime "Time:     7 15  30"
 
-def parser : Parsec Race := do
+def parser : Parsec (List Race) := do
   let t ← ptime <* eol
   let d ← pdist
-  return ({ time := t, dist := d } : Race)
+  let m := List.transpose [t.toList, d.toList]
+  return (List.map (fun r => ({ time := r.get! 0, dist := r.get! 1 } : Race)) m)
 
 def parse (data : String) :=
   match Parsec.run parser data with
@@ -36,10 +35,16 @@ def parse (data : String) :=
 
 end parser
 
+def evaluate₁ (race : Race) : Nat :=
+  let ts := List.iota race.time
+  (ts.filter (fun t => race.dist ≤ (race.time - t) * t)).length
+
 def solve1 (data : String) : IO Unit := do
   match parser.parse data with
-  | some x =>
-    IO.println s!" part1: not yet implemented {x.time}"
+  | some races =>
+    let _ ← List.mapM (fun r => IO.println s!"{r.time}, {r.dist}") races
+    let vars := List.map evaluate₁ races
+    IO.println s!" part1: {vars.foldl (. * .) 1}"
   | _ =>
     IO.println s!" part1: parse error"
   return ()
@@ -48,12 +53,10 @@ def solve2_line (_line : String) : Nat :=
   0
 
 def solve2 (data : String) : IO Unit := do
-  match parser.parse data with
-  | some _ =>
-    IO.println s!" part2: not yet implemented"
-  | _ =>
-      IO.println s!"error"
-  return ()
+  let x := (data.split (. == '\n')).map (fun l =>
+    List.foldl (fun n d => n * 10 + d.toNat - '0'.toNat) 0 (l.toList.filter Char.isDigit))
+  let res := evaluate₁ ({ time := x.get! 0, dist := x.get! 1} : Race)
+  IO.println s!" part2: {res}"
 
 end Day06
 
