@@ -5,8 +5,14 @@ def dataFileName (year day : Nat) : IO String := do
 
 #eval dataFileName 2023 2
 
-def readData (datafilename : String) : IO (Array String) := do
+def readData (datafilename : String) : IO String := do
+     IO.FS.readFile datafilename
+
+def dataOf (year day : Nat) : IO String :=
+  dataFileName year day >>= readData
+
+def readLines (datafilename : String) : IO (Array String) := do
      IO.FS.lines datafilename
 
-def dataFor (year day : Nat) : IO (Array String) :=
-  dataFileName year day >>= readData
+def linesOf (year day : Nat) : IO (Array String) :=
+  dataFileName year day >>= readLines

@@ -16,6 +16,11 @@ a sequence of space or TAB
 def whitespaces : Parsec Unit := many1 (pchar ' ' <|> pchar '\t') *> return ()
 
 /--
+an optional sequence of space or TAB
+--/
+def whitespaces? : Parsec Unit := many (pchar ' ' <|> pchar '\t') *> return ()
+
+/--
 [A-Za-z]+
 --/
 def alphabets := many1Chars asciiLetter

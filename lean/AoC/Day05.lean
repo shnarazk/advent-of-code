@@ -63,8 +63,7 @@ def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
 def transpose (seeds : Array Nat) (rs : Array Range) :=
   Array.map (fun seed => transpose₀ seed (Array.toList rs)) seeds
 
-def solve1 (lines : Array String) : IO Unit := do
-  let data := Array.foldl (fun b s => b ++ s ++ "\n") "" lines
+def solve1 (data : String) : IO Unit := do
   match parser.parse data with
   | some (seeds, maps) =>
     let point : Array Nat := Array.foldl transpose seeds maps
@@ -75,15 +74,16 @@ def solve1 (lines : Array String) : IO Unit := do
 def solve2_line (_line : String) : Nat :=
   0
 
-def solve2 (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!" part2: {sum}"
+def solve2 (data : String) : IO Unit := do
+  match parser.parse data with
+  | some _ =>
+    IO.println s!" part2: not yet implemented"
+  | _ => IO.println s!" part1: parse error"
   return ()
 
 end Day05
 
 def day05 : IO Unit := do
-  let data ← dataFor 2023 5
+  let data ← dataOf 2023 5
   pure data >>= Day05.solve1
-  pure data >>= Day05.solve2
+  -- pure data >>= Day05.solve2
