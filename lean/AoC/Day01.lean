@@ -44,7 +44,7 @@ def solve2 (lines : Array String) : IO Unit := do
 
 end Day01
 
-def day01 : IO Unit := do
-  let data ← linesOf 2023 1
+def day01 (alt : Option String): IO Unit := do
+  let data ← linesOf 2023 1 alt
   pure data >>= Day01.solve1
   pure data >>= Day01.solve2

@@ -83,7 +83,7 @@ def solve2 (data : String) : IO Unit := do
 
 end Day05
 
-def day05 : IO Unit := do
-  let data ← dataOf 2023 5
+def day05 (ext : Option String) : IO Unit := do
+  let data ← dataOf 2023 5 ext
   pure data >>= Day05.solve1
   -- pure data >>= Day05.solve2

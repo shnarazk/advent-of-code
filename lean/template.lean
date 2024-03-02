@@ -5,8 +5,7 @@ namespace Day0?
 
 def parsed (_source : String) : Nat := 0
 
-def solve1_line (_line : String) : Nat :=
-  0
+def solve1_line (_line : String) : Nat := 0
 
 #eval solve1_line ""
 
@@ -27,7 +26,7 @@ def solve2 (lines : Array String) : IO Unit := do
 
 end Day0?
 
-def day0? : IO Unit := do
-  let data ← dataFor 2023 ?
+def day0? (ext : Option String) : IO Unit := do
+  let data ← dataOf 2023 ? ext
   pure data >>= Day0?.solve1
   pure data >>= Day0?.solve2
