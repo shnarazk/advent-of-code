@@ -2,11 +2,13 @@ import «AoC»
 import Aesop
 
 def main (args : List String) : IO Unit := do
-  IO.println s!"{args}"
-  let result ← Aesop.time' day01
-  let result ← Aesop.time' day02
-  let result ← Aesop.time' day03
-  let result ← Aesop.time' day04
-  let result ← Aesop.time' day05
-  let result ← Aesop.time' day06
+  let day := (args.getD 0 "6").toNat!
+  let result ← match day with
+    | 1 => Aesop.time' day01
+    | 2 => Aesop.time' day02
+    | 3 => Aesop.time' day03
+    | 4 => Aesop.time' day04
+    | 5 => Aesop.time' day05
+    | 6 => Aesop.time' day06
+    | _ => Aesop.time' (return ())
   IO.println s!" => {result.printAsMillis}"
