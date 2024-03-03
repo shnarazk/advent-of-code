@@ -4,6 +4,7 @@
 -- import Mathlib.Data.Real.Basic
 import Std
 import Aesop
+import «AoC».Combinator
 import «AoC».Day01
 import «AoC».Day02
 import «AoC».Day03
