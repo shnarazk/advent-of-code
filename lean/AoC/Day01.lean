@@ -9,15 +9,15 @@ def solve1_ (s : List Char) : Nat :=
     asNum (c : Char) := c.toNat - '0'.toNat
     sk := s.filter Char.isDigit
 
-#eval solve1_ "aa2aa3".toList
+-- #eval solve1_ "aa2aa3".toList
 
 def solve1 (lines : Array String) : IO Unit := do
   let nums := lines.map (fun (s) => solve1_ s.toList)
   let sum := Array.foldl (. + .) 0 nums
-  IO.println s!" part1: {sum}"
+  IO.println s!"  part1: {sum}"
   return ()
 
-#eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
+-- #eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
 
 def mnemonic (s : List Char) : Char :=
   if      (String.toList "one").isPrefixOf s   then '1'
@@ -34,12 +34,12 @@ def mnemonic (s : List Char) : Char :=
 def solve2_ (s : String) : Nat :=
   solve1_ ((List.takeWhile (. != []) s.toList.tails).map mnemonic)
 
-#eval ((List.takeWhile (. != []) (List.tails (String.toList "two3four"))).map mnemonic)
+-- #eval ((List.takeWhile (. != []) (List.tails (String.toList "two3four"))).map mnemonic)
 
 def solve2 (lines : Array String) : IO Unit := do
   let nums := lines.map solve2_
   let sum := Array.foldl (. + .) 0 nums
-  IO.println s!" part2: {sum}"
+  IO.println s!"  part2: {sum}"
   return ()
 
 end Day01

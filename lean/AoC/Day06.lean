@@ -18,7 +18,7 @@ def numbers := sepBy1 number whitespaces
 def ptime := pstring "Time:" *> whitespaces *> numbers
 def pdist := pstring "Distance:" *> whitespaces *> numbers
 
-#eval Parsec.run ptime "Time:     7 15  30"
+-- #eval Parsec.run ptime "Time:     7 15  30"
 
 def parser : Parsec (List Race) := do
   let t ← ptime <* eol
@@ -31,7 +31,7 @@ def parse (data : String) :=
   | Except.ok ret  => some ret
   | Except.error _ => none
 
-#eval parse "Time: 7 15 30\nDistance: 9 40 200"
+-- #eval parse "Time: 7 15 30\nDistance: 9 40 200"
 
 end parser
 
@@ -42,11 +42,11 @@ def evaluate₁ (race : Race) : Nat :=
 def solve1 (data : String) : IO Unit := do
   match parser.parse data with
   | some races =>
-    let _ ← List.mapM (fun r => IO.println s!"{r.time}, {r.dist}") races
+    -- let _ ← List.mapM (fun r => IO.println s!"{r.time}, {r.dist}") races
     let vars := List.map evaluate₁ races
-    IO.println s!" part1: {vars.foldl (. * .) 1}"
+    IO.println s!"  part1: {vars.foldl (. * .) 1}"
   | _ =>
-    IO.println s!" part1: parse error"
+    IO.println s!"  part1: parse error"
   return ()
 
 def solve2_line (_line : String) : Nat :=
@@ -56,7 +56,7 @@ def solve2 (data : String) : IO Unit := do
   let x := (data.split (. == '\n')).map (fun l =>
     List.foldl (fun n d => n * 10 + d.toNat - '0'.toNat) 0 (l.toList.filter Char.isDigit))
   let res := evaluate₁ ({ time := x.get! 0, dist := x.get! 1} : Race)
-  IO.println s!" part2: {res}"
+  IO.println s!"  part2: {res}"
 
 end Day06
 

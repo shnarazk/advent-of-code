@@ -15,7 +15,7 @@ def parsed (source : String) : List Nat × List Nat :=
       let numbers := List.filter (fun s => s != "") pair
       List.map String.toNat! numbers
 
-#eval parsed "Card 1: 41 48 | 83  1 41"
+-- #eval parsed "Card 1: 41 48 | 83  1 41"
 
 def solve1_line (line : String) : Nat :=
   match found.length with
@@ -25,15 +25,15 @@ def solve1_line (line : String) : Nat :=
     x := parsed line
     found := List.filter (fun c => List.contains x.fst c) x.snd
 
-#eval solve1_line "Card 1: 41 48  2 | 83  1 41 68"
-#eval solve1_line "Card 1: 41 48    | 83  1 41 48"
-#eval solve1_line "Card 1: 41 48  2 |  2 83  41 48"
-#eval solve1_line "Card 1: 41 48  2 |  3 83  42 49"
+-- #eval solve1_line "Card 1: 41 48  2 | 83  1 41 68"
+-- #eval solve1_line "Card 1: 41 48    | 83  1 41 48"
+-- #eval solve1_line "Card 1: 41 48  2 |  2 83  41 48"
+-- #eval solve1_line "Card 1: 41 48  2 |  3 83  42 49"
 
 def solve1 (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve1_line lines
   let sum := Array.foldl (. + .) 0 points
-  IO.println s!" part1: {sum}"
+  IO.println s!"  part1: {sum}"
   return ()
 
 def solve2_rec (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)) : Nat :=
@@ -49,7 +49,7 @@ def solve2 (lines : Array String) : IO Unit := do
   let table := List.map parsed lines.toList
   let counts := Array.mkArray lines.size 1
   let sum := solve2_rec 0 counts table
-  IO.println s!" part2: {sum}"
+  IO.println s!"  part2: {sum}"
   return ()
 
 end Day04
