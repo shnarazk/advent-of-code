@@ -1,5 +1,6 @@
 import Lean.Data.Parsec
 
+namespace AoCParser
 open Lean Parsec
 
 /--
@@ -55,3 +56,10 @@ def parse := pstring "Game:" *> manyChars (pchar ' ') *> digit
 def parsed (_source : String) : Nat := 0
 
 end test
+
+def parse (parser : Parsec a) (source : String) : Option a :=
+  match Parsec.run parser source with
+  | Except.ok r    => some r
+  | Except.error _ => none
+
+end AoCParser

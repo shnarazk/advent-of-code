@@ -1,7 +1,7 @@
 import Std
+import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Parser
-import Lean.Data.Parsec
 
 namespace Day06
 
@@ -11,7 +11,7 @@ structure Race where
 deriving Repr
 
 namespace parser
-open Lean Parsec
+open Lean Parsec AoCParser
 
 def numbers := sepBy1 number whitespaces
 

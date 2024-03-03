@@ -12,7 +12,7 @@ structure Range where
 deriving Repr
 
 namespace parser
-open Lean Parsec
+open Lean Parsec AoCParser
 
 def pseeds := do
   pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
