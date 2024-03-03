@@ -9,7 +9,7 @@ open Std
 structure Puzzle where
   new ::
   path     : List Char
-  branches : Std.HashMap String (String × String)
+  branches : HashMap String (String × String)
 
 namespace parser
 open Lean.Parsec AoCParser
@@ -43,12 +43,25 @@ def solve1 (data : String) : IO Unit := do
   | some p => IO.println s!"  part1: {trace p 0 "AAA"}"
   return ()
 
-def solve2_line (_line : String) : Nat := 0
+partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
+  if pos.endsWith "Z"
+  then step
+  else
+    let (left, right) := puzzle.branches.find! pos
+    let dir := puzzle.path[step % puzzle.path.length]!
+    trace₂ puzzle (step + 1) $ if dir == 'L' then left else right
 
--- #eval solve2_line ""
+#eval Nat.lcm 1 9
 
-def solve2 (_data : String) : IO Unit := do
-  IO.println s!"  part2: -"
+def analyze (p : Puzzle) : Nat :=
+  p.branches.toList |>.filter (String.endsWith ·.fst "A") |>.map (·.fst)
+    |>.map (trace₂ p 0 ·)
+    |>.foldl Nat.lcm 1
+
+def solve2 (data : String) : IO Unit := do
+  match AoCParser.parse parser.parser data with
+  | none   => IO.println s!"  part2: parse error}"
+  | some p => IO.println s!"  part2: {analyze p}"
   return ()
 
 end Day08
