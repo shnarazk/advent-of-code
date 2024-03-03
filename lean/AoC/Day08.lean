@@ -30,17 +30,17 @@ def parser := do
 
 end parser
 
-partial def trace : Puzzle → Nat → String → Nat
-  | _, step, "ZZZ" => step
-  | puzzle, step, pos =>
+partial def trace₁ : Puzzle → Nat → String → Nat
+  | _     , step, "ZZZ" => step
+  | puzzle, step, pos   =>
     let (left, right) := puzzle.branches.find! pos
     let dir := puzzle.path[step % puzzle.path.length]!
-    trace puzzle (step + 1) $ if dir == 'L' then left else right
+    trace₁ puzzle (step + 1) $ if dir == 'L' then left else right
 
 def solve1 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
-  | some p => IO.println s!"  part1: {trace p 0 "AAA"}"
+  | some p => IO.println s!"  part1: {trace₁ p 0 "AAA"}"
   return ()
 
 partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
@@ -51,11 +51,11 @@ partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
     let dir := puzzle.path[step % puzzle.path.length]!
     trace₂ puzzle (step + 1) $ if dir == 'L' then left else right
 
-#eval Nat.lcm 1 9
+-- #eval Nat.lcm 1 9
 
 def analyze (p : Puzzle) : Nat :=
-  p.branches.toList |>.filter (String.endsWith ·.fst "A") |>.map (·.fst)
-    |>.map (trace₂ p 0 ·)
+  p.branches.toList.filter (String.endsWith ·.fst "A")
+    |>.map (trace₂ p 0 ·.fst)
     |>.foldl Nat.lcm 1
 
 def solve2 (data : String) : IO Unit := do
