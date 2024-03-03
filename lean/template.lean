@@ -4,12 +4,13 @@ import «AoC».Basic
 import «AoC».Parser
 
 namespace Day0?
+open Std
 
 -- structure Data where
 --deriving Repr
 
 namespace parser
-open Lean Parsec
+open Lean.Parsec
 
 def parser := sorry
 

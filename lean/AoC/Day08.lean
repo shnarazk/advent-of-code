@@ -4,21 +4,20 @@ import «AoC».Basic
 import «AoC».Parser
 
 namespace Day08
-
-open Lean
+open Std
 
 structure Puzzle where
   new ::
   path     : List Char
-  branches : HashMap String (String × String)
+  branches : Std.HashMap String (String × String)
 
 namespace parser
-open Parsec AoCParser
+open Lean.Parsec AoCParser
 
 def ppath := alphabets
 def pbranch := do
   let label ← alphabets <* whitespaces <* pchar '=' <* whitespaces
-  let left ← pchar '(' *> alphabets <* pchar ',' <* whitespaces
+  let left  ← pchar '(' *> alphabets <* pchar ',' <* whitespaces
   let right ← alphabets <* pchar ')'
   return (label, (left, right))
 
@@ -41,23 +40,20 @@ partial def trace : Puzzle → Nat → String → Nat
 def solve1 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
-  | some map => IO.println s!"  part1: {trace map 0 "AAA"}"
+  | some p => IO.println s!"  part1: {trace p 0 "AAA"}"
   return ()
 
 def solve2_line (_line : String) : Nat := 0
 
 -- #eval solve2_line ""
 
-def solve2 (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!"  part2: {sum}"
+def solve2 (_data : String) : IO Unit := do
+  IO.println s!"  part2: -"
   return ()
 
 end Day08
 
 def day08 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 8 ext
-  let lines ← linesOf 2023 8 ext
   pure data >>= Day08.solve1
-  pure lines >>= Day08.solve2
+  pure data >>= Day08.solve2
