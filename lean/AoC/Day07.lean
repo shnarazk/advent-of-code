@@ -9,7 +9,7 @@ structure Hand where
   hand ::
   cards : Array Char
   bid   : Nat
-deriving Repr
+deriving Inhabited, Repr
 
 namespace parser
 open Lean Parsec AoCParser

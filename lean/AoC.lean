@@ -28,5 +28,5 @@ def run (day : Nat) (extra : Option String) : IO Unit := do
     | 5 => Aesop.time' $ day05 extra
     | 6 => Aesop.time' $ day06 extra
     | 7 => Aesop.time' $ day07 extra
-    | _ => Aesop.time' (return ())
+    | _ => Aesop.time' $ return ()
   IO.println s!"{color.green} => {result.printAsMillis}{color.reset}"

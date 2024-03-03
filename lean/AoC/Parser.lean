@@ -57,7 +57,7 @@ def parsed (_source : String) : Nat := 0
 
 end test
 
-def parse (parser : Parsec a) (source : String) : Option a :=
+def parse (parser : Parsec α) (source : String) : Option α :=
   match Parsec.run parser source with
   | Except.ok r    => some r
   | Except.error _ => none
