@@ -5,6 +5,10 @@
 
 ### Benchmarks
 
+```
+  $ lake exe aoc
+```
+
 |day|time(msec)|
 |--:|---------:|
 | 01|      3.4 |
