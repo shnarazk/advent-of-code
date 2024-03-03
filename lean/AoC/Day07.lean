@@ -40,7 +40,7 @@ def occurences (cs : Array Char) : Array Nat :=
 /--
 larger is higher
 -/
-def order : Char -> Nat
+def order₁ : Char -> Nat
   | 'A' => 14
   | 'K' => 13
   | 'Q' => 12
@@ -56,14 +56,14 @@ def order : Char -> Nat
   | '2' => 2
   | _ => 0
 
-#eval order 'A'
+#eval order₁ 'A'
 
-def orderOf (h : Hand) : Array Nat :=
+def orderOf (order : Char -> Nat) (h : Hand) : Array Nat :=
   Array.map order h.cards
 
 def evaluation (h : Hand) : (Nat × List Nat) × Nat :=
-  let ord := orderOf h |> Array.toList
-    match occurences h.cards with
+  let ord := orderOf order₁ h |> Array.toList
+  match occurences h.cards with
   | #[5]          => ((7, ord), h.bid) -- Five of a kind
   | #[4, 1]       => ((6, ord), h.bid) -- Four of a kind
   | #[3, 2]       => ((5, ord), h.bid) -- Full house
@@ -99,11 +99,48 @@ def solve1 (data : String) : IO Unit := do
     IO.println s!"  part1: {winnings.fst}"
   return ()
 
-def solve2_line (_line : String) : Nat := 0
+def order₂ : Char -> Nat
+  | 'A' => 14
+  | 'K' => 13
+  | 'Q' => 12
+  | 'J' => 1
+  | 'T' => 10
+  | '9' => 9
+  | '8' => 8
+  | '7' => 7
+  | '6' => 6
+  | '5' => 5
+  | '4' => 4
+  | '3' => 3
+  | '2' => 2
+  | _ => 0
 
-def solve2 (_lines : String) : IO Unit := do
-  let sum := 0
-  IO.println s!"  part2: {sum}"
+def evaluation₂ (h : Hand) : (Nat × List Nat) × Nat :=
+  let ord := orderOf order₂ h |> Array.toList
+  let num_J := Array.filter (. == 'J') h.cards |> Array.size
+  let cardsJ := Array.filter (· != 'J') h.cards
+  let oc := if num_J == 5 then #[5] else Array.modify (occurences cardsJ) 0 (. + num_J)
+  match oc with
+  | #[5]          => ((7, ord), h.bid) -- Five of a kind
+  | #[4, 1]       => ((6, ord), h.bid) -- Four of a kind
+  | #[3, 2]       => ((5, ord), h.bid) -- Full house
+  | #[3, 1, 1]    => ((4, ord), h.bid) -- Three of a kind
+  | #[2, 2, 1]    => ((3, ord), h.bid) -- Two pair
+  | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
+  | _             => ((1, ord), h.bid) -- High card
+
+#eval evaluation₂ $ Hand.hand #['A', '3', '9', 'J', 'A'] 33
+
+def solve2 (data : String) : IO Unit := do
+  match AoCParser.parse parser.parser data with
+  | none   => IO.println s!"  part2: parse error"
+  | some d =>
+    let o := Array.qsort (d.map evaluation₂) (fun a b =>
+      match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
+      | Ordering.eq, ord => ord == Ordering.lt
+      | ord, _ => ord == Ordering.lt)
+    let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
+    IO.println s!"  part2: {winnings.fst}"
   return ()
 
 end Day07
