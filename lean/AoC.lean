@@ -15,7 +15,9 @@ import «AoC».Day08
 -- import «AoC».Day09
 -- import «AoC».Day10
 
-def solved : List Nat := [1, 2, 3, 4, 5, 6, 7]
+def solved : List Nat := List.iota 8 |>.reverse
+
+#eval solved
 
 def run (day : Nat) (extra : Option String) : IO Unit := do
   let f ← dataFileName 2023 day extra
