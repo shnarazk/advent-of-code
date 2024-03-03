@@ -18,10 +18,7 @@ def card := digit <|> pchar 'A' <|> pchar 'K' <|> pchar 'Q' <|> pchar 'J' <|> pc
 
 def cards := many1 card <* whitespaces
 
-def line := do
-  let c ← cards
-  let b ← number
-  return Hand.hand c b
+def line : Parsec Hand := (pure Hand.hand) <*> cards <*> number
 
 def parser := sepBy1 line eol
 
