@@ -6,6 +6,7 @@ import «AoC».Parser
 namespace Day06
 
 structure Race where
+  race::
   time : Nat
   dist : Nat
 deriving Repr
@@ -24,7 +25,7 @@ def parser : Parsec (List Race) := do
   let t ← ptime <* eol
   let d ← pdist
   let m := List.transpose [t.toList, d.toList]
-  return (List.map (fun r => ({ time := r.get! 0, dist := r.get! 1 } : Race)) m)
+  return (List.map (fun r => Race.race (r.get! 0) (r.get! 1)) m)
 
 def parse (data : String) :=
   match Parsec.run parser data with

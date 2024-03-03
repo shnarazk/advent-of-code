@@ -6,6 +6,7 @@ import «AoC».Parser
 namespace Day07
 
 structure Hand where
+  hand ::
   cards : Array Char
   bid   : Nat
 deriving Repr
@@ -20,7 +21,7 @@ def cards := many1 card <* whitespaces
 def line := do
   let c ← cards
   let b ← number
-  return ({ cards := c, bid := b } : Hand)
+  return Hand.hand c b
 
 def parser := sepBy1 line eol
 
