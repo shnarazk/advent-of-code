@@ -1,3 +1,4 @@
+import Lean
 /--
 Build and retrun a data filename
 -/
@@ -36,3 +37,12 @@ def color.cyan    : String := "\x1B[001m\x1B[036m"
 def color.reset   : String := "\x1B[000m"
 def color.revert  : String := "\x1B[1A\x1B[1G\x1B[1K"
 def color.reverse : String := "\x1B[001m\x1B[07m"
+
+/--
+Return an array consisting of elements in `a`
+-/
+def unique (a : Array α) [BEq α] [Hashable α] : Array α :=
+  let hash := Array.foldl (fun h e => h.insert e) (Lean.HashSet.empty : Lean.HashSet α) a
+  hash.toArray
+
+#eval unique #[1, 0, 2, 1, 3, 2]
