@@ -15,6 +15,15 @@ deriving Ord, Repr
 instance : ToString Number where
   toString n := String.join [toString n.val, toString (n.row, n.beg, n.en)]
 
+def symbols (lines : Array String) : List (Int × Int) :=
+  lines.foldl (fun (i, l) line =>
+      (i + 1, line.foldl (fun (j, l) ch =>
+          (j + 1, if !ch.isDigit &&  ch != '.' then l ++ [(i, j)] else l))
+        (0, l)
+      |>.snd))
+    ((0, []) : Int × List (Int × Int))
+  |>.snd
+
 def asterisks (lines : Array String) : List (Int × Int) :=
   lines.foldl (fun (i, l) line =>
       (i + 1, line.foldl (fun (j, l) ch =>
@@ -46,6 +55,14 @@ def numbers (lines : Array String) : List Number :=
 
 #eval (3 : Int).natAbs
 
+def solve1 (lines : Array String) : IO Unit := do
+  let cands := symbols lines
+  let numbers := numbers lines
+  let part_number := numbers.filter
+        (fun num => cands.any (fun (y₀, x₀) => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en))
+  IO.println s!"  part1: {part_number.map (·.val) |>.sum}"
+  return ()
+
 def solve2 (lines : Array String) : IO Unit := do
   let cands := asterisks lines
   let numbers := numbers lines
@@ -54,15 +71,7 @@ def solve2 (lines : Array String) : IO Unit := do
       let neighbors := numbers.filter (fun num => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en)
       if neighbors.length == 2 then (neighbors.map (·.val) |>.foldl (fun a x => a * x) 1 |> (acc ++ [·])) else acc)
     ([] : List Nat)
-  IO.println s!"  part1: {gears.sum}"
-  return ()
-
-def solve2_line (_line : String) : Nat := 0
-
-def solve1 (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!"  part2: {sum}"
+  IO.println s!"  part2: {gears.sum}"
   return ()
 
 end Day03
