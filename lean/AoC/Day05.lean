@@ -5,11 +5,30 @@ import Lean.Data.Parsec
 
 namespace Day05
 
+structure ClosedSpan where
+  new ::
+  _beg : Nat
+  _end : Nat
+deriving Repr
+
+instance : ToString ClosedSpan where
+  toString s := s!"[{s._beg},{s._end}]"
+
+def ClosedSpan.splitAt (a : ClosedSpan) (c : Nat) : List ClosedSpan :=
+  if a._beg < c && c <= a._end
+  then [ClosedSpan.new a._beg (c - 1), ClosedSpan.new c a._end]
+  else [a]
+
+#eval ClosedSpan.new 8 30 |>.splitAt 12
+
 structure Range where
   dest   : Nat
   source : Nat
   span   : Nat
 deriving Repr
+
+instance : ToString Range where
+  toString r := s!"({r.dest},{r.source},{r.span})"
 
 namespace parser
 open Lean Parsec AoCParser
@@ -43,13 +62,6 @@ def parser : Parsec ((Array Nat) × (Array (Array Range))) := do
 
 -- #eval Parsec.run parser "seeds: 2 5\n\na-to-b map:\n88 18 7"
 
-def parse (data : String) :=
-  match Parsec.run parser data with
-  | Except.ok ret  => some ret
-  | Except.error _ => none
-
--- #eval parse "seeds: 1\n\na-to-b map:\n0 1 2"
-
 end parser
 
 def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
@@ -64,7 +76,7 @@ def transpose (seeds : Array Nat) (rs : Array Range) :=
   Array.map (fun seed => transpose₀ seed (Array.toList rs)) seeds
 
 def solve1 (data : String) : IO Unit := do
-  match parser.parse data with
+  match AoCParser.parse parser.parser data with
   | some (seeds, maps) =>
     let point : Array Nat := Array.foldl transpose seeds maps
     IO.println s!"  part1: {point.minD 0}"
@@ -74,10 +86,59 @@ def solve1 (data : String) : IO Unit := do
 def solve2_line (_line : String) : Nat :=
   0
 
+def windows₂ (l : List α) : List (α × α) :=
+  match l with
+  | [] => []
+  | a :: b :: c => (a, b) :: windows₂ c
+  | _ :: _ => panic! "ee"
+
+#eval windows₂ $ List.range 6
+
+/--
+return `Option converted-span` and `List non-converted-span`
+-/
+def transpose_span (span : ClosedSpan) (range : Range)
+    : (Option ClosedSpan) × (List ClosedSpan) :=
+  let b : Nat := Nat.max span._beg range.source
+  let e : Nat := Nat.min span._end (range.source + range.span - 1)
+  if (b ≤ e : Bool)
+  then
+    (some (ClosedSpan.new (range.dest + b - range.source) (range.dest + e - range.source)),
+        match (span._beg < b : Bool), (e < span._end : Bool) with
+        | false, false => []
+        | false, true  => [ClosedSpan.new (e + 1) span._end]
+        | true,  false => [ClosedSpan.new span._beg (b - 1)]
+        | true,  true  => [ClosedSpan.new span._beg (b - 1), ClosedSpan.new (e + 1) span._end])
+  else (none, [span])
+
+-- def transpose₂ (ss : List ClosedSpan) (rules : Array Range) : List ClosedSpan :=
+--   Array.foldl (fun tmp _ =>
+
+--   ) (ss, []) rules
+--   |>.snd
+
+def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSpan :=
+  Array.foldl (fun spans' stage =>
+      Array.foldl (fun (not_yet, done) rule =>
+          List.foldl (fun (accum : List ClosedSpan × List ClosedSpan) (span : ClosedSpan) =>
+              match transpose_span span rule with
+              | (some s', rest) => (accum.fst ++ rest, accum.snd ++ [s'])
+              | (none,    rest) => (accum.fst ++ rest, accum.snd))
+            ([], [])
+            not_yet
+          |> (fun (r, d) => (r, done ++ d)))
+        (spans', ([] : List ClosedSpan))
+        stage
+      |>( fun (r, d) => r ++ d))
+    spans
+    (stages : Array (Array Range))
+
 def solve2 (data : String) : IO Unit := do
-  match parser.parse data with
-  | some _ =>
-    IO.println s!"  part2: not yet implemented"
+  match AoCParser.parse parser.parser data with
+  | some (d, rule) =>
+    let spans := windows₂ d.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
+    let spans' : List ClosedSpan := tp2 spans rule
+    IO.println s!"  part2: {spans'.map (·._beg) |>.minimum? |>.getD 0}"
   | _ => IO.println s!" part1: parse error"
   return ()
 
@@ -86,4 +147,4 @@ end Day05
 def day05 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 5 ext
   pure data >>= Day05.solve1
-  -- pure data >>= Day05.solve2
+  pure data >>= Day05.solve2
