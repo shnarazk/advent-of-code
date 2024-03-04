@@ -44,6 +44,9 @@ def solve2 (lines : Array String) : IO Unit := do
 
 end Day01
 
+-- def train {m : Type u₁ → Type u₂} {β₁ β₂ : Type u₁} (a : α → m β₁) (b : α → m β₂) : α → m β₂ :=
+--   fun (x : α) => a x >>= (fun _ => b x)
+
 def day01 (alt : Option String): IO Unit := do
   let data ← linesOf 2023 1 alt
   Day01.solve1 data
