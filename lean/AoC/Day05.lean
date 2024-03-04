@@ -90,7 +90,7 @@ def windows₂ (l : List α) : List (α × α) :=
   match l with
   | [] => []
   | a :: b :: c => (a, b) :: windows₂ c
-  | _ :: _ => panic! "ee"
+  | _ :: _ => panic! "impossible"
 
 #eval windows₂ $ List.range 6
 
@@ -110,12 +110,6 @@ def transpose_span (span : ClosedSpan) (range : Range)
         | true,  false => [ClosedSpan.new span._beg (b - 1)]
         | true,  true  => [ClosedSpan.new span._beg (b - 1), ClosedSpan.new (e + 1) span._end])
   else (none, [span])
-
--- def transpose₂ (ss : List ClosedSpan) (rules : Array Range) : List ClosedSpan :=
---   Array.foldl (fun tmp _ =>
-
---   ) (ss, []) rules
---   |>.snd
 
 def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSpan :=
   Array.foldl (fun spans' stage =>
@@ -139,7 +133,7 @@ def solve2 (data : String) : IO Unit := do
     let spans := windows₂ d.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
     let spans' : List ClosedSpan := tp2 spans rule
     IO.println s!"  part2: {spans'.map (·._beg) |>.minimum? |>.getD 0}"
-  | _ => IO.println s!" part1: parse error"
+  | _ => IO.println s!" part2: parse error"
   return ()
 
 end Day05
