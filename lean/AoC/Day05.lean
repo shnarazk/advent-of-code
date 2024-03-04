@@ -92,7 +92,7 @@ def windows₂ (l : List α) : List (α × α) :=
   | a :: b :: c => (a, b) :: windows₂ c
   | _ :: _ => panic! "impossible"
 
-#eval windows₂ $ List.range 6
+#eval windows₂ <| List.range 6
 
 /--
 return `Option converted-span` and `List non-converted-span`
@@ -140,5 +140,5 @@ end Day05
 
 def day05 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 5 ext
-  pure data >>= Day05.solve1
-  pure data >>= Day05.solve2
+  Day05.solve1 data
+  Day05.solve2 data

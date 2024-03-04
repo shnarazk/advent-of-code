@@ -18,7 +18,7 @@ def card := digit <|> pchar 'A' <|> pchar 'K' <|> pchar 'Q' <|> pchar 'J' <|> pc
 
 def cards := many1 card <* whitespaces
 
-def line : Parsec Hand := (pure Hand.hand) <*> cards <*> number
+def line : Parsec Hand := (return Hand.hand) <*> cards <*> number
 
 def parser := sepBy1 line eol
 
@@ -72,7 +72,7 @@ def evaluation (h : Hand) : (Nat × List Nat) × Nat :=
   | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
   | _             => ((1, ord), h.bid) -- High card
 
-#eval evaluation $ Hand.hand #['A', '3', '9', 'A', 'A'] 33
+#eval evaluation <| Hand.hand #['A', '3', '9', 'A', 'A'] 33
 
 def compareList (a b : List Nat) : Ordering :=
   match a, b with
@@ -129,7 +129,7 @@ def evaluation₂ (h : Hand) : (Nat × List Nat) × Nat :=
   | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
   | _             => ((1, ord), h.bid) -- High card
 
-#eval evaluation₂ $ Hand.hand #['A', '3', '9', 'J', 'A'] 33
+#eval evaluation₂ <| Hand.hand #['A', '3', '9', 'J', 'A'] 33
 
 def solve2 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
@@ -147,5 +147,5 @@ end Day07
 
 def day07 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 7 ext
-  pure data >>= Day07.solve1
-  pure data >>= Day07.solve2
+  Day07.solve1 data
+  Day07.solve2 data

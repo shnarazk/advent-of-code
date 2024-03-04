@@ -37,5 +37,5 @@ end Day0?
 def day0? (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 ? ext
   let lines ← linesOf 2023 ? ext
-  pure data >>= Day0?.solve1
-  pure lines >>= Day0?.solve2
+  Day0?.solve1 data
+  Day0?.solve2 lines

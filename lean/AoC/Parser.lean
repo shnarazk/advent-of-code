@@ -8,7 +8,7 @@ end of line
 --/
 def eol : Parsec Unit := pchar '\n' *> return ()
 
-def sepBy1 (p : Parsec α) (s : Parsec β) : Parsec $ Array α := do
+def sepBy1 (p : Parsec α) (s : Parsec β) : Parsec (Array α) := do
   manyCore (attempt (s *> p)) #[←p]
 
 /--

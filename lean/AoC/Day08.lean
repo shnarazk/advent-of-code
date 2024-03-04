@@ -35,7 +35,7 @@ partial def trace₁ : Puzzle → Nat → String → Nat
   | puzzle, step, pos   =>
     let (left, right) := puzzle.branches.find! pos
     let dir := puzzle.path[step % puzzle.path.length]!
-    trace₁ puzzle (step + 1) $ if dir == 'L' then left else right
+    trace₁ puzzle (step + 1) <| if dir == 'L' then left else right
 
 def solve1 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
@@ -49,7 +49,7 @@ partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
   else
     let (left, right) := puzzle.branches.find! pos
     let dir := puzzle.path[step % puzzle.path.length]!
-    trace₂ puzzle (step + 1) $ if dir == 'L' then left else right
+    trace₂ puzzle (step + 1) <| if dir == 'L' then left else right
 
 -- #eval Nat.lcm 1 9
 
@@ -68,5 +68,5 @@ end Day08
 
 def day08 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 8 ext
-  pure data >>= Day08.solve1
-  pure data >>= Day08.solve2
+  Day08.solve1 data
+  Day08.solve2 data

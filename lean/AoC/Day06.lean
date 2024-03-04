@@ -64,5 +64,5 @@ end Day06
 
 def day06 (ext : Option String): IO Unit := do
   let data ← dataOf 2023 6 ext
-  pure data >>= Day06.solve1
-  pure data >>= Day06.solve2
+  Day06.solve1 data
+  Day06.solve2 data
