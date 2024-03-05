@@ -1,5 +1,6 @@
 import Std
 import Lean.Data.Parsec
+import Mathlib.Data.Matrix.Basic
 import «AoC».Basic
 import «AoC».Parser
 
@@ -10,6 +11,12 @@ structure Data where
   new ::
   grid : Array (Array Char)
 deriving Repr
+
+-- def Data.of (self : Data) (y : Nat) (x : Nat) : Char := (self.grid[y]!)[x]!
+def Data.at (self : Data) : Matrix Nat Nat Char := fun y x => (self.grid[y]!)[x]!
+
+#eval (Data.new #[#['0', '1'], #['2', '3']]).at 0 0
+#eval (Data.new #[#['0', '1'], #['2', '3']]).at 1 1
 
 inductive Circuit where
   | h : Circuit
@@ -25,7 +32,7 @@ def dest (pre : Nat × Nat) (c : Circuit) (pos : Nat × Nat) : Nat × Nat :=
   match c with
   | .h /- - -/ => (pos.fst      , pos.snd + dx)
   | .l /- L -/ => (pos.fst + dy , pos.snd)
-  | .j /- J -/ => (pos.fst      , pos.snd)
+  | .j /- J -/ => (pos.fst + dx , pos.snd)
   | .k /- 7 -/ => (pos.fst      , pos.snd)
   | .f /- F -/ => (pos.fst      , pos.snd)
   | .S /- . -/ => (pos.fst      , pos.snd)
