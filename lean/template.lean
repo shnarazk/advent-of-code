@@ -10,7 +10,7 @@ open Std
 --deriving Repr
 
 namespace parser
-open Lean.Parsec
+open Lean.Parsec AoCParser
 
 def parser := sorry
 

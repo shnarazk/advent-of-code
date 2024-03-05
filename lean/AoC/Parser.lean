@@ -1,3 +1,4 @@
+import Std
 import Lean.Data.Parsec
 
 namespace AoCParser
@@ -38,6 +39,21 @@ def number := do
   return (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)
 
 #eval Parsec.run number "21, 8,"
+
+/--
+a signed number
+--/
+def number_p := do
+  let s ← many1 digit
+  return Int.ofNat (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)
+
+def number_m := do
+  let n ← pchar '-' *> number_p
+  return -n
+
+def number_signed := number_m <|> number_p
+
+#eval Parsec.run number_signed "-21, 8,"
 
 namespace test
 
