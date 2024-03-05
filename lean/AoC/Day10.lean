@@ -11,6 +11,25 @@ structure Data where
   grid : Array (Array Char)
 deriving Repr
 
+inductive Circuit where
+  | h : Circuit
+  | l : Circuit
+  | j : Circuit
+  | k : Circuit
+  | f : Circuit
+  | S : Circuit
+
+def dest (pre : Nat × Nat) (c : Circuit) (pos : Nat × Nat) : Nat × Nat :=
+  let dy := pos.fst - pre.fst
+  let dx := pos.snd - pre.snd
+  match c with
+  | .h /- - -/ => (pos.fst      , pos.snd + dx)
+  | .l /- L -/ => (pos.fst + dy , pos.snd)
+  | .j /- J -/ => (pos.fst      , pos.snd)
+  | .k /- 7 -/ => (pos.fst      , pos.snd)
+  | .f /- F -/ => (pos.fst      , pos.snd)
+  | .S /- . -/ => (pos.fst      , pos.snd)
+
 #eval #['a', 'b'].toList.toString
 #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
 
@@ -47,21 +66,17 @@ end part1
 
 namespace part2
 
-def solve2_line (_line : String) : Nat := 0
-
--- #eval solve2_line ""
-
-def solve (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!"  part2: {sum}"
+def solve (data : String) : IO Unit := do
+  match AoCParser.parse parser.parser data with
+  | none   => IO.println s!"  part2: parse error"
+  | some d => IO.println s!"  part2: {d}"
   return ()
+
 end part2
 
 end Day10
 
 def day10 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 10 ext
-  let lines ← linesOf 2023 10 ext
   Day10.part1.solve data
-  Day10.part2.solve lines
+  Day10.part2.solve data
