@@ -8,34 +8,42 @@ open Std
 
 -- structure Data where
 --deriving Repr
+-- instance : ToString Data where
+--   toString s := s!"[{s._beg},{s._end}]"
 
 namespace parser
 open Lean.Parsec AoCParser
 
-def parser := sorry
+def parser := sepBy1 number whitespaces
 
 end parser
 
-def solve1 (data : String) : IO Unit := do
+namespace part1
+def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
   | some d => IO.println s!"  part1: {d.size}"
   return ()
 
+end part1
+
+namespace part2
+
 def solve2_line (_line : String) : Nat := 0
 
 -- #eval solve2_line ""
 
-def solve2 (lines : Array String) : IO Unit := do
+def solve (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve2_line lines
   let sum := Array.foldl (. + .) 0 points
   IO.println s!"  part2: {sum}"
   return ()
+end part2
 
 end Day0?
 
 def day0? (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 ? ext
   let lines ← linesOf 2023 ? ext
-  Day0?.solve1 data
-  Day0?.solve2 lines
+  Day0?.part1.solve data
+  Day0?.part2.solve lines
