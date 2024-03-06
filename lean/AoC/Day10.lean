@@ -26,16 +26,16 @@ inductive Circuit where
   | f : Circuit
   | S : Circuit
 
-def dest (pre : Nat × Nat) (c : Circuit) (pos : Nat × Nat) : Nat × Nat :=
+def Circuit.dest (c : Circuit) (pre : Nat × Nat) (pos : Nat × Nat) : (Nat × Nat) × (Nat × Nat) :=
   let dy := pos.fst - pre.fst
   let dx := pos.snd - pre.snd
   match c with
-  | .h /- - -/ => (pos.fst      , pos.snd + dx)
-  | .l /- L -/ => (pos.fst + dy , pos.snd)
-  | .j /- J -/ => (pos.fst + dx , pos.snd)
-  | .k /- 7 -/ => (pos.fst      , pos.snd)
-  | .f /- F -/ => (pos.fst      , pos.snd)
-  | .S /- . -/ => (pos.fst      , pos.snd)
+  | .h /- - -/ => (pos, (pos.fst      , pos.snd + dx))
+  | .l /- L -/ => (pos, (pos.fst + dy , pos.snd     ))
+  | .j /- J -/ => (pos, (pos.fst + dx , pos.snd     ))
+  | .k /- 7 -/ => (pos, (pos.fst      , pos.snd     ))
+  | .f /- F -/ => (pos, (pos.fst      , pos.snd     ))
+  | .S /- . -/ => (pos, pos)
 
 #eval #['a', 'b'].toList.toString
 #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
