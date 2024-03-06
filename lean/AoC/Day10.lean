@@ -71,15 +71,15 @@ def Data.at (self : Data) (pos : Pos) : Option Circuit :=
 
 partial def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, pos) := vec
-  let dy := pos.fst - pre.fst
-  let dx := pos.snd - pre.snd
+  let dy : Int := Int.ofNat pos.fst - Int.ofNat pre.fst
+  let dx : Int := Int.ofNat pos.snd - Int.ofNat pre.snd
   match c.at pos with
-  | some .v /- | -/ => (pos, (pos.fst + dy , pos.snd     ))
-  | some .h /- - -/ => (pos, (pos.fst      , pos.snd + dx))
-  | some .l /- L -/ => (pos, (pos.fst      , pos.snd + dy))
-  | some .j /- J -/ => (pos, (pos.fst - dx , pos.snd     ))
-  | some .k /- 7 -/ => (pos, (pos.fst + dx , pos.snd     ))
-  | some .f /- F -/ => (pos, (pos.fst      , pos.snd - dy))
+  | some .v /- | -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dy , Int.toNat $ Int.ofNat pos.snd     ))
+  | some .h /- - -/ => (pos, (Int.toNat $ Int.ofNat pos.fst      , Int.toNat $ Int.ofNat pos.snd + dx))
+  | some .l /- L -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dx , Int.toNat $ Int.ofNat pos.snd + dy))
+  | some .j /- J -/ => (pos, (Int.toNat $ Int.ofNat pos.fst - dx , Int.toNat $ Int.ofNat pos.snd - dy))
+  | some .k /- 7 -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dx , Int.toNat $ Int.ofNat pos.snd + dy))
+  | some .f /- F -/ => (pos, (Int.toNat $ Int.ofNat pos.fst - dx , Int.toNat $ Int.ofNat pos.snd - dy))
   | _ /- . -/ => (pos, pos)
 
 #eval #['a', 'b'].toList.toString
@@ -89,11 +89,11 @@ partial def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
    toString self := self.grid.map (·|>.map toString |>.foldl String.append ""|>.append "\n")
       |>.foldl String.append ""
 
-partial def Data.loop_len (self : Data) (vec : Pos × Pos) : Nat :=
+partial def Data.loop_len (self : Data) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
   let v' := self.dest vec
   if v'.fst == v'.snd
-  then 0
-  else 1 + self.loop_len v'
+  then if v'.snd == start then len + 1 else 0
+  else  self.loop_len start (len + 1) v'
 
 namespace parser
 open Lean.Parsec AoCParser
@@ -118,7 +118,7 @@ def makeNeighbors (s : Pos) : List Pos :=
 
 #eval makeNeighbors (0, 0)
 
-def makeVecs (start : Pos) : List (Pos × Pos) := makeNeighbors start |>.map ((·, start))
+def makeVecs (start : Pos) : List (Pos × Pos) := makeNeighbors start |>.map ((start, ·))
 
 #eval makeVecs (2, 2)
 
@@ -127,8 +127,11 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
   | some map =>
-    let _ ← (makeVecs map.start) |>.mapM (fun x => IO.println s!"{x}")
-    IO.println s!"{(makeVecs map.start) |>.map map.loop_len}"
+    -- IO.println s!"{map}"
+    -- let _ ← (makeVecs map.start) |>.mapM (fun x => IO.println s!"{x}")
+    let loops := (makeVecs map.start) |>.map (map.loop_len map.start 0 .)
+    let longest := loops.maximum? |>.getD 0 |> (· / 2)
+    IO.println s!"  part1: {longest}"
   return ()
 
 end part1
