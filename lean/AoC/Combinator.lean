@@ -32,3 +32,11 @@ infixl:80   " ⟜ " => after
 notation:80 " ◀️ " lhs:80 " | " mhs:80 " | " rhs:80 " ▶️ " => train lhs mhs rhs
 
 end CiCL
+
+namespace CoP -- combinators on pair
+
+def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)
+def both2 (f : α → β → γ) (x : α × α) (y : β × β) : γ × γ := (f x.fst y.fst, f x.snd y.snd)
+def join (f : α → α → β) (x : α × α) : β := f x.fst x.snd
+
+end CoP

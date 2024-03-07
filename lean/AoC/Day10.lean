@@ -1,17 +1,15 @@
 import Std
 import Lean.Data.Parsec
 import «AoC».Basic
+import «AoC».Combinator
 import «AoC».Parser
 
 namespace Day10
-open Std
+open Std CoP
 
 def Pos : Type := Nat × Nat
 deriving BEq, Repr, ToString, Hashable
 
-def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)
-def both2 (f : α → β → γ) (x : α × α) (y : β × β) : γ × γ := (f x.fst y.fst, f x.snd y.snd)
-def join (f : α → α → β) (x : α × α) : β := f x.fst x.snd
 def Pos.double : Pos → Pos := both (· * 2)
 
 #eval Pos.double ((3, 4) : Pos)
