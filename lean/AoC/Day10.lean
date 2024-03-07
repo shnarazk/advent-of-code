@@ -34,7 +34,7 @@ inductive Circuit where
   | j : Circuit
   | k : Circuit
   | f : Circuit
-  | S : Circuit
+  | s : Circuit
   | x : Circuit
 deriving BEq, Repr
 
@@ -47,7 +47,7 @@ instance : ToString Circuit where
   | .j => "J"
   | .k => "7"
   | .f => "F"
-  | .S => "S"
+  | .s => "S"
   | _  => " "
 
 def Circuit.ofChar (c : Char) : Circuit :=
@@ -58,7 +58,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
   | 'J' => .j
   | '7' => .k
   | 'F' => .f
-  | 'S' => .S
+  | 'S' => .s
   |  _  => .x
 
 #eval (Circuit.ofChar 'f') |> toString
@@ -77,7 +77,7 @@ def seek (a: Array (Array Circuit)) (n : Nat) (target : Circuit) : Pos :=
   else (0, 0)
 termination_by a.size - n
 
-def Data.start (self : Data) : Pos := seek self.grid 0 Circuit.S
+def Data.start (self : Data) : Pos := seek self.grid 0 Circuit.s
 
 def Data.at (self : Data) (pos : Pos) : Option Circuit :=
   (self.grid[pos.fst]?) >>= (·[pos.snd]?)
