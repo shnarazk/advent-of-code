@@ -9,6 +9,15 @@ open Std
 def Pos : Type := Nat × Nat
 deriving BEq, Repr, ToString
 
+def makeNeighbors (s : Pos) : List Pos :=
+  [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
+
+#eval makeNeighbors (0, 0)
+
+def makeVecs (start : Pos) : List (Pos × Pos) := makeNeighbors start |>.map ((start, ·))
+
+#eval makeVecs (2, 2)
+
 instance : ToString Pos where
   toString s := s!"P({s.fst}, {s.snd})"
 
@@ -83,15 +92,9 @@ partial def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
 #eval #['a', 'b'].toList.toString
 #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
 
- instance : ToString Data where
-   toString self := self.grid.map (·|>.map toString |>.foldl String.append ""|>.append "\n")
+instance : ToString Data where
+  toString self := self.grid.map (·|>.map toString |>.foldl String.append ""|>.append "\n")
       |>.foldl String.append ""
-
-partial def Data.loop_len (self : Data) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
-  let v' := self.dest vec
-  if v'.fst == v'.snd
-  then if v'.snd == start then len + 1 else 0
-  else  self.loop_len start (len + 1) v'
 
 namespace parser
 open Lean.Parsec AoCParser
@@ -111,35 +114,49 @@ def parser := (return Data.new) <*>many (many pcircuit <* eol)
 
 end parser
 
-def makeNeighbors (s : Pos) : List Pos :=
-  [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
-
-#eval makeNeighbors (0, 0)
-
-def makeVecs (start : Pos) : List (Pos × Pos) := makeNeighbors start |>.map ((start, ·))
-
-#eval makeVecs (2, 2)
-
 namespace part1
+
+partial def loop_len (self : Data) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
+  let v' := self.dest vec
+  if v'.fst == v'.snd
+  then if v'.snd == start then len + 1 else 0
+  else loop_len self start (len + 1) v'
+
 def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
-  | some map =>
-    -- IO.println s!"{map}"
-    -- let _ ← (makeVecs map.start) |>.mapM (fun x => IO.println s!"{x}")
-    let loops := (makeVecs map.start) |>.map (map.loop_len map.start 0 .)
-    let longest := loops.maximum? |>.getD 0 |> (· / 2)
-    IO.println s!"  part1: {longest}"
+  | some m =>
+    let len := (makeVecs m.start) |>.map (loop_len m m.start 0 .)
+        |>.maximum? |>.getD 0 |> (· / 2)
+    IO.println s!"  part1: {len}"
   return ()
 
 end part1
 
 namespace part2
 
+/-!
+  1. pick the looping route
+  2. double the scale
+  3. draw the loop
+  4. run propagation
+  5. count the unmarked cells
+-/
+
+partial def loop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+    : List Pos :=
+  let v' := self.dest vec
+  if v'.fst == v'.snd
+  then if v'.snd == start then path ++ [v'.snd] else []
+  else loop self start (path ++ [v'.snd]) v'
+
 def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
-  | some d => IO.println s!"  part2: {d.start}"
+  | some m =>
+    let loop := (makeVecs m.start) |>.map (loop m m.start [] .)
+        |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
+    IO.println s!"  part1: {loop}"
   return ()
 
 end part2
