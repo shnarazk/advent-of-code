@@ -53,18 +53,16 @@ structure Data where
   grid : Array (Array Circuit)
 deriving BEq, Repr
 
-partial def seek (a: Array (Array Circuit)) (n : Nat) (target : Circuit) : Option Pos :=
-  match a.get? n with
-  | none => some (0, 0)
-  | some l =>
+def seek (a: Array (Array Circuit)) (n : Nat) (target : Circuit) : Pos :=
+  if h : n < a.size then
+    let l := a[n]'h
     match Array.findIdx? l (· == target) with
-    | some m => some (n, m)
-    | _ => seek a (n + 1) target
+    | some m => (n, m)
+    | _      => seek a (n + 1) target
+  else (0, 0)
+termination_by a.size - n
 
-def Data.start (self : Data) : Pos :=
-  match seek self.grid 0 Circuit.S with
-  | some p => p
-  | none =>(0, 0)
+def Data.start (self : Data) : Pos := seek self.grid 0 Circuit.S
 
 def Data.at (self : Data) (pos : Pos) : Option Circuit :=
   (self.grid[pos.fst]?) >>= (·[pos.snd]?)
