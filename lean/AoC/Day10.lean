@@ -144,12 +144,12 @@ open Lean
   5. [ ] count the unmarked cells
 -/
 
-partial def loop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+partial def mkLoop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
     : List Pos :=
   let v' := self.dest vec
   if v'.fst == v'.snd
-  then if v'.snd == start then start :: path else []
-  else loop self start (path ++ [v'.snd]) v'
+  then if v'.snd == start then path ++ [v'.fst] else []
+  else mkLoop self start (path ++ [v'.fst]) v'
 
 def Pos.double (p : Pos) : Pos := (p.fst * 2, p.snd * 2)
 
@@ -168,8 +168,8 @@ This generates a list of dupicated nodes.
 -/
 def scaleUp : List Pos → List Pos
   | [] => []
-  | pos :: [] => [Pos.double pos]
-  | p :: q :: l' => [Pos.double p, Pos.interpolate p q, Pos.double p] ++ scaleUp (q :: l')
+  | p :: [] => [Pos.double p]
+  | p :: q :: l' => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l')
 
 def toHashMap (elements : List Pos) : HashSet Pos :=
   elements.foldl (fun h e => h.insert e) HashSet.empty
@@ -188,19 +188,33 @@ partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) :
       (linked, [])
     propagate size l' t'
 
+def isEven (n : Nat) : Bool := n % 2 == 0
+
 def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some m =>
     let size := (m.grid.size * 2, m.grid[0]!.size * 2)
-    let loop := (makeVecs m.start) |>.map (loop m m.start [] .)
+    let loop' := (makeVecs m.start) |>.map (mkLoop m m.start [m.start] .)
         |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
-        |> scaleUp
+    -- IO.println s!"  start: {m.start}"
+    -- IO.println s!"  loop': {loop'}"
+    let loop := scaleUp loop'
+    -- IO.println s!"  loop: {loop}"
     let map := propagate size (toHashMap loop) [(0, 0)]
-    IO.println s!"  part2: {loop.length}, {size} {map.size}"
-    let ans := (size.fst * size.snd - map.size) / 4
-    IO.println s!"  part2: {ans}"
+    -- IO.println s!"  part2: {loop'.length} → {loop.length}, size {size} {map.size}"
+    let n := List.range size.fst
+      |>.foldl (fun count y =>
+          List.range size.snd
+            |>.filter (fun x => isEven y && isEven x && !map.contains (y, x))
+            |>.length
+            |> (· + count))
+        0
+    let _ans := (size.fst * size.snd - map.size) / 4
+    IO.println s!"  part2: {n}"
   return ()
+
+#eval List.range 9
 
 end part2
 
