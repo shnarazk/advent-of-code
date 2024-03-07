@@ -7,7 +7,7 @@ namespace Day10
 open Std
 
 def Pos : Type := Nat × Nat
-deriving BEq, Repr, ToString
+deriving BEq, Repr, ToString, Hashable
 
 def makeNeighbors (s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
@@ -76,7 +76,7 @@ def Data.start (self : Data) : Pos := seek self.grid 0 Circuit.S
 def Data.at (self : Data) (pos : Pos) : Option Circuit :=
   (self.grid[pos.fst]?) >>= (·[pos.snd]?)
 
-partial def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
+def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, pos) := vec
   let dy : Int := Int.ofNat pos.fst - Int.ofNat pre.fst
   let dx : Int := Int.ofNat pos.snd - Int.ofNat pre.snd
@@ -134,29 +134,72 @@ def solve (data : String) : IO Unit := do
 end part1
 
 namespace part2
+open Lean
 
 /-!
-  1. pick the looping route
-  2. double the scale
-  3. draw the loop
-  4. run propagation
-  5. count the unmarked cells
+  1. [x] pick the looping route
+  2. [x] double the scale
+  3. [x] draw the loop
+  4. [ ] run propagation
+  5. [ ] count the unmarked cells
 -/
 
 partial def loop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
     : List Pos :=
   let v' := self.dest vec
   if v'.fst == v'.snd
-  then if v'.snd == start then path ++ [v'.snd] else []
+  then if v'.snd == start then start :: path else []
   else loop self start (path ++ [v'.snd]) v'
+
+def Pos.double (p : Pos) : Pos := (p.fst * 2, p.snd * 2)
+
+#eval Pos.double ((3, 4) : Pos)
+#eval Pos.double ((3, 5) : Pos)
+
+def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
+  let p' := Pos.double p
+  let q' := Pos.double q
+  ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
+
+#eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
+
+/--
+This generates a list of dupicated nodes.
+-/
+def scaleUp : List Pos → List Pos
+  | [] => []
+  | pos :: [] => [Pos.double pos]
+  | p :: q :: l' => [Pos.double p, Pos.interpolate p q, Pos.double p] ++ scaleUp (q :: l')
+
+def toHashMap (elements : List Pos) : HashSet Pos :=
+  elements.foldl (fun h e => h.insert e) HashSet.empty
+
+#eval makeNeighbors (0, 0)
+
+def Pos.lt (self : Pos) (other : Pos) : Bool := self.fst < other.fst && self.snd < other.snd
+
+partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) : HashSet Pos :=
+  match toVisit with
+  | [] => linked
+  | _ =>
+    let x := toVisit.map makeNeighbors |>.join |>.filter (Pos.lt · size)
+    let (l', t') := x.foldl (fun (l, t) e =>
+        if l.contains e then (l, t) else (l.insert e, t ++ [e]))
+      (linked, [])
+    propagate size l' t'
 
 def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some m =>
+    let size := (m.grid.size * 2, m.grid[0]!.size * 2)
     let loop := (makeVecs m.start) |>.map (loop m m.start [] .)
         |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
-    IO.println s!"  part1: {loop}"
+        |> scaleUp
+    let map := propagate size (toHashMap loop) [(0, 0)]
+    IO.println s!"  part2: {loop.length}, {size} {map.size}"
+    let ans := (size.fst * size.snd - map.size) / 4
+    IO.println s!"  part2: {ans}"
   return ()
 
 end part2
