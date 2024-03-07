@@ -9,6 +9,14 @@ open Std
 def Pos : Type := Nat × Nat
 deriving BEq, Repr, ToString, Hashable
 
+def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)
+def both2 (f : α → β → γ) (x : α × α) (y : β × β) : γ × γ := (f x.fst y.fst, f x.snd y.snd)
+def join (f : α → α → β) (x : α × α) : β := f x.fst x.snd
+def Pos.double : Pos → Pos := both (· * 2)
+
+#eval Pos.double ((3, 4) : Pos)
+#eval Pos.double ((3, 5) : Pos)
+
 def makeNeighbors (s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
 
@@ -78,16 +86,16 @@ def Data.at (self : Data) (pos : Pos) : Option Circuit :=
 
 def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, pos) := vec
-  let dy : Int := Int.ofNat pos.fst - Int.ofNat pre.fst
-  let dx : Int := Int.ofNat pos.snd - Int.ofNat pre.snd
+  let (dy, dx) := both2 (fun x y => Int.ofNat x - Int.ofNat y) pos pre
+  let trans := (fun x y => Int.ofNat x + y |>.toNat)
   match c.at pos with
-  | some .v /- | -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dy , Int.toNat $ Int.ofNat pos.snd     ))
-  | some .h /- - -/ => (pos, (Int.toNat $ Int.ofNat pos.fst      , Int.toNat $ Int.ofNat pos.snd + dx))
-  | some .l /- L -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dx , Int.toNat $ Int.ofNat pos.snd + dy))
-  | some .j /- J -/ => (pos, (Int.toNat $ Int.ofNat pos.fst - dx , Int.toNat $ Int.ofNat pos.snd - dy))
-  | some .k /- 7 -/ => (pos, (Int.toNat $ Int.ofNat pos.fst + dx , Int.toNat $ Int.ofNat pos.snd + dy))
-  | some .f /- F -/ => (pos, (Int.toNat $ Int.ofNat pos.fst - dx , Int.toNat $ Int.ofNat pos.snd - dy))
-  | _ /- . -/ => (pos, pos)
+  | some .v => (pos, both2 trans pos ( dy,   0))
+  | some .h => (pos, both2 trans pos (  0,  dx))
+  | some .l => (pos, both2 trans pos ( dx,  dy))
+  | some .j => (pos, both2 trans pos (-dx, -dy))
+  | some .k => (pos, both2 trans pos ( dx,  dy))
+  | some .f => (pos, both2 trans pos (-dx, -dy))
+  | _       => (pos, pos)
 
 #eval #['a', 'b'].toList.toString
 #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
@@ -137,11 +145,11 @@ namespace part2
 open Lean
 
 /-!
-  1. [x] pick the looping route
-  2. [x] double the scale
-  3. [x] draw the loop
-  4. [ ] run propagation
-  5. [ ] count the unmarked cells
+  1. pick the looping route
+  2. double the scale
+  3. draw the loop
+  4. run propagation
+  5. count the unmarked cells
 -/
 
 partial def mkLoop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
@@ -151,10 +159,6 @@ partial def mkLoop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × P
   then if v'.snd == start then path ++ [v'.fst] else []
   else mkLoop self start (path ++ [v'.fst]) v'
 
-def Pos.double (p : Pos) : Pos := (p.fst * 2, p.snd * 2)
-
-#eval Pos.double ((3, 4) : Pos)
-#eval Pos.double ((3, 5) : Pos)
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let p' := Pos.double p
@@ -176,7 +180,7 @@ def toHashMap (elements : List Pos) : HashSet Pos :=
 
 #eval makeNeighbors (0, 0)
 
-def Pos.lt (self : Pos) (other : Pos) : Bool := self.fst < other.fst && self.snd < other.snd
+def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
 
 partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) : HashSet Pos :=
   match toVisit with
@@ -188,29 +192,24 @@ partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) :
       (linked, [])
     propagate size l' t'
 
-def isEven (n : Nat) : Bool := n % 2 == 0
+def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
 def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some m =>
-    let size := (m.grid.size * 2, m.grid[0]!.size * 2)
+    let size : Pos := (m.grid.size, m.grid[0]!.size)
     let loop' := (makeVecs m.start) |>.map (mkLoop m m.start [m.start] .)
         |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
-    -- IO.println s!"  start: {m.start}"
-    -- IO.println s!"  loop': {loop'}"
     let loop := scaleUp loop'
-    -- IO.println s!"  loop: {loop}"
-    let map := propagate size (toHashMap loop) [(0, 0)]
-    -- IO.println s!"  part2: {loop'.length} → {loop.length}, size {size} {map.size}"
+    let map := propagate (Pos.double size) (toHashMap loop) [(0, 0)]
     let n := List.range size.fst
       |>.foldl (fun count y =>
           List.range size.snd
-            |>.filter (fun x => isEven y && isEven x && !map.contains (y, x))
+            |>.filter (fun x => !map.contains (Pos.double (y, x)))
             |>.length
             |> (· + count))
         0
-    let _ans := (size.fst * size.snd - map.size) / 4
     IO.println s!"  part2: {n}"
   return ()
 
