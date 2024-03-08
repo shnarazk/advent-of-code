@@ -1,6 +1,6 @@
 import Std
 import «AoC».Basic
-import Mathlib.Data.List.BigOperators.Defs
+-- import Mathlib.Data.List.BigOperators.Defs
 
 namespace Day03
 
@@ -60,7 +60,7 @@ def solve1 (lines : Array String) : IO Unit := do
   let numbers := numbers lines
   let part_number := numbers.filter
         (fun num => cands.any (fun (y₀, x₀) => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en))
-  IO.println s!"  part1: {part_number.map (·.val) |>.sum}"
+  IO.println s!"  part1: {part_number.map (·.val) |>.foldl Nat.add 0}"
   return ()
 
 def solve2 (lines : Array String) : IO Unit := do
@@ -71,7 +71,7 @@ def solve2 (lines : Array String) : IO Unit := do
       let neighbors := numbers.filter (fun num => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en)
       if neighbors.length == 2 then (neighbors.map (·.val) |>.foldl (fun a x => a * x) 1 |> (acc ++ [·])) else acc)
     ([] : List Nat)
-  IO.println s!"  part2: {gears.sum}"
+  IO.println s!"  part2: {gears.foldl Nat.add 0}"
   return ()
 
 end Day03

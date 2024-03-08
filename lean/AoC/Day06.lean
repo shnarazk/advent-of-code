@@ -2,7 +2,7 @@ import Std
 import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Parser
-import Mathlib.Data.List.BigOperators.Defs
+-- import Mathlib.Data.List.BigOperators.Defs
 
 namespace Day06
 
@@ -46,7 +46,7 @@ def solve1 (data : String) : IO Unit := do
   | some races =>
     -- let _ ← List.mapM (fun r => IO.println s!"{r.time}, {r.dist}") races
     let vars := List.map evaluate₁ races
-    IO.println s!"  part1: {vars.prod}"
+    IO.println s!"  part1: {vars.foldl Nat.mul 0}"
   | _ =>
     IO.println s!"  part1: parse error"
   return ()
