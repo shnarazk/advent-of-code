@@ -8,7 +8,7 @@ namespace Day10
 open Std CiCL CoP
 
 def Pos : Type := Nat × Nat
-deriving BEq, Repr, ToString, Hashable
+deriving BEq, Repr, ToString
 
 def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
 
@@ -144,6 +144,33 @@ def solve (data : String) : IO Unit := do
 
 end part1
 
+structure Map where
+  new ::
+  size : Pos
+  cells : Array Bool
+
+namespace Map
+
+#eval #[1, 2].isEmpty
+
+#check @Fin.ofNat' 10 3
+
+def countElements (size: Pos) : Nat := size.fst * size.snd
+
+def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
+
+def contains (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
+
+def set (self : Map) (p : Pos) : Map :=
+  { self with cells := self.cells.set! (Map.index self p) true }
+
+def of (size : Pos) (locs : List Pos) : Map :=
+  locs.foldl
+    (fun map pos => Map.set map pos)
+    (Map.new size (Array.mkArray (countElements size) false))
+
+end Map
+
 namespace part2
 open Lean Data
 
@@ -177,21 +204,18 @@ def scaleUp : List Pos → List Pos
   | p :: [] => [Pos.double p]
   | p :: q :: l' => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l')
 
-def toHashMap (elements : List Pos) : HashSet Pos :=
-  elements.foldl (fun h e => h.insert e) HashSet.empty
-
 #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) : HashSet Pos :=
+partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
   match toVisit with
   | [] => linked
   | _ =>
-    toVisit.map (makeNeighbors size)
-        |>.join
-        |>.foldl
-          (fun lt e => if lt.fst.contains e then lt else (lt.fst.insert e, e :: lt.snd))
-          (linked, [])
-      |> uncurry (propagate size)
+    toVisit.map (makeNeighbors linked.size)
+      |>.join
+      |>.foldl
+        (fun lt e => if lt.fst.contains e then lt else (lt.fst.set e, e :: lt.snd))
+        (linked, [])
+      |> uncurry propagate
 
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
@@ -199,16 +223,17 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some m =>
-    let loop' := (makeVecs m.size m.start) |>.map (mkLoop m m.start [m.start] .)
-        |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
-    let loop := scaleUp loop'
-    let map := propagate (Pos.double m.size) (toHashMap loop) [(0, 0)]
+    let loop := (makeVecs m.size m.start)
+      |>.map (mkLoop m m.start [m.start] .)
+      |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
+      |> scaleUp
+    let map := propagate (Map.of (Pos.double m.size) loop) [(0, 0)]
     let n := List.range m.size.fst
       |>.foldl (fun count y =>
-          List.range m.size.snd
-            |>.filter (fun x => !map.contains (Pos.double (y, x)))
-            |>.length
-            |> (· + count))
+        List.range m.size.snd
+          |>.filter (fun x => !map.contains (Pos.double (y, x)))
+          |>.length
+          |> (· + count))
         0
     IO.println s!"  part2: {n}"
   return ()
