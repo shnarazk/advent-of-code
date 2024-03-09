@@ -15,7 +15,6 @@ def solve1 (lines : Array String) : IO Unit := do
   let nums := lines.map (fun (s) => solve1_ s.toList)
   let sum := Array.foldl (. + .) 0 nums
   IO.println s!"  part1: {sum}"
-  return ()
 
 -- #eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
 
@@ -40,7 +39,6 @@ def solve2 (lines : Array String) : IO Unit := do
   let nums := lines.map solve2_
   let sum := Array.foldl (. + .) 0 nums
   IO.println s!"  part2: {sum}"
-  return ()
 
 end Day01
 

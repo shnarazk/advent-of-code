@@ -1,6 +1,5 @@
 import Std
 import «AoC».Basic
--- import Mathlib.Data.List.BigOperators.Defs
 
 namespace Day03
 
@@ -59,9 +58,8 @@ def solve1 (lines : Array String) : IO Unit := do
   let cands := symbols lines
   let numbers := numbers lines
   let part_number := numbers.filter
-        (fun num => cands.any (fun (y₀, x₀) => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en))
+        (fun num => cands.any (fun (y, x) => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en))
   IO.println s!"  part1: {part_number.map (·.val) |>.foldl Nat.add 0}"
-  return ()
 
 def solve2 (lines : Array String) : IO Unit := do
   let cands := asterisks lines
@@ -72,11 +70,10 @@ def solve2 (lines : Array String) : IO Unit := do
       if neighbors.length == 2 then (neighbors.map (·.val) |>.foldl (fun a x => a * x) 1 |> (acc ++ [·])) else acc)
     ([] : List Nat)
   IO.println s!"  part2: {gears.foldl Nat.add 0}"
-  return ()
 
 end Day03
 
-def day03 (ext : Option String): IO Unit := do
+def day03 (ext : Option String) : IO Unit := do
   let data ← linesOf 2023 3 ext
   Day03.solve1 data
   Day03.solve2 data
