@@ -5,24 +5,27 @@ import «AoC».Combinator
 import «AoC».Parser
 
 namespace Day10
-open Std CoP
+open Std CiCL CoP
 
 def Pos : Type := Nat × Nat
 deriving BEq, Repr, ToString, Hashable
+
+def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
 
 def Pos.double : Pos → Pos := both (· * 2)
 
 #eval Pos.double ((3, 4) : Pos)
 #eval Pos.double ((3, 5) : Pos)
 
-def makeNeighbors (s : Pos) : List Pos :=
+def makeNeighbors (size s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
+  |>.filter (Pos.lt · size)
 
-#eval makeNeighbors (0, 0)
+#eval makeNeighbors (10, 10) (0, 0)
 
-def makeVecs (start : Pos) : List (Pos × Pos) := makeNeighbors start |>.map ((start, ·))
+def makeVecs (size start : Pos) : List (Pos × Pos) := makeNeighbors size start |>.map ((start, ·))
 
-#eval makeVecs (2, 2)
+#eval makeVecs (10, 10) (2, 2)
 
 instance : ToString Pos where
   toString s := s!"P({s.fst}, {s.snd})"
@@ -67,6 +70,8 @@ structure Data where
   new ::
   grid : Array (Array Circuit)
 deriving BEq, Repr
+
+def Data.size (self : Data) := (self.grid.size, self.grid.getD 0 #[] |>.size)
 
 def seek (a: Array (Array Circuit)) (n : Nat) (target : Circuit) : Pos :=
   if h : n < a.size then
@@ -132,7 +137,7 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
   | some m =>
-    let len := (makeVecs m.start) |>.map (loop_len m m.start 0 .)
+    let len := (makeVecs m.size m.start) |>.map (loop_len m m.start 0 .)
         |>.maximum? |>.getD 0 |> (· / 2)
     IO.println s!"  part1: {len}"
   return ()
@@ -140,7 +145,7 @@ def solve (data : String) : IO Unit := do
 end part1
 
 namespace part2
-open Lean
+open Lean Data
 
 /-!
   1. pick the looping route
@@ -156,7 +161,6 @@ partial def mkLoop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × P
   if v'.fst == v'.snd
   then if v'.snd == start then path ++ [v'.fst] else []
   else mkLoop self start (path ++ [v'.fst]) v'
-
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let p' := Pos.double p
@@ -176,19 +180,18 @@ def scaleUp : List Pos → List Pos
 def toHashMap (elements : List Pos) : HashSet Pos :=
   elements.foldl (fun h e => h.insert e) HashSet.empty
 
-#eval makeNeighbors (0, 0)
-
-def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
+#eval makeNeighbors (10, 10) (0, 0)
 
 partial def propagate (size : Pos) (linked : HashSet Pos) (toVisit : List Pos) : HashSet Pos :=
   match toVisit with
   | [] => linked
   | _ =>
-    let x := toVisit.map makeNeighbors |>.join |>.filter (Pos.lt · size)
-    let (l', t') := x.foldl (fun (l, t) e =>
-        if l.contains e then (l, t) else (l.insert e, t ++ [e]))
-      (linked, [])
-    propagate size l' t'
+    toVisit.map (makeNeighbors size)
+        |>.join
+        |>.foldl
+          (fun lt e => if lt.fst.contains e then lt else (lt.fst.insert e, e :: lt.snd))
+          (linked, [])
+      |> uncurry (propagate size)
 
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
@@ -196,14 +199,13 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some m =>
-    let size : Pos := (m.grid.size, m.grid[0]!.size)
-    let loop' := (makeVecs m.start) |>.map (mkLoop m m.start [m.start] .)
+    let loop' := (makeVecs m.size m.start) |>.map (mkLoop m m.start [m.start] .)
         |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     let loop := scaleUp loop'
-    let map := propagate (Pos.double size) (toHashMap loop) [(0, 0)]
-    let n := List.range size.fst
+    let map := propagate (Pos.double m.size) (toHashMap loop) [(0, 0)]
+    let n := List.range m.size.fst
       |>.foldl (fun count y =>
-          List.range size.snd
+          List.range m.size.snd
             |>.filter (fun x => !map.contains (Pos.double (y, x)))
             |>.length
             |> (· + count))
