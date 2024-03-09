@@ -6,7 +6,7 @@ import «AoC».Parser
 namespace Day06
 
 structure Race where
-  race::
+  new::
   time : Nat
   dist : Nat
 deriving Repr
@@ -46,7 +46,7 @@ def parser : Parsec (List Race) := do
   let t ← ptime <* eol
   let d ← pdist
   let m := List.transpose [t.toList, d.toList]
-  return (List.map (fun r => Race.race (r.get! 0) (r.get! 1)) m)
+  return (List.map (fun r => Race.new (r.get! 0) (r.get! 1)) m)
 
 def parse (data : String) :=
   match Parsec.run parser data with
@@ -61,12 +61,8 @@ namespace Part1
 
 def solve (data : String) : IO Unit := do
   match parser.parse data with
-  | some races =>
-    let vars := List.map Race.evaluate races
-    IO.println s!"  part1: {vars.foldl Nat.mul 1}"
-  | _ =>
-    IO.println s!"  part1: parse error"
-  return ()
+  | some races => IO.println s!"  part1: {races.map Race.evaluate|>.foldl Nat.mul 1}"
+  | _          => IO.println s!"  part1: parse error"
 
 end Part1
 
@@ -75,7 +71,7 @@ namespace Part2
 def solve (data : String) : IO Unit := do
   let x := (data.split (. == '\n')).map (fun l =>
     List.foldl (fun n d => n * 10 + d.toNat - '0'.toNat) 0 (l.toList.filter Char.isDigit))
-  let r := Race.race (x.get! 0) (x.get! 1)
+  let r := Race.new (x.get! 0) (x.get! 1)
   IO.println s!"  part2: {r.evaluate}"
 
 end Part2

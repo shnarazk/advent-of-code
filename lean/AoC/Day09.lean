@@ -41,7 +41,6 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
   | some d => IO.println s!"  part1: {d.map evaluate |>.foldl (. + .) 0}"
-  return ()
 
 end part1
 
@@ -55,9 +54,7 @@ def evaluate_ (n : Nat) (a : List Int) : Int :=
   | 0 => 0
   | n' + 1 =>
     let diff : List Int := windows₂ a |>.map (fun (a, b) => b - a)
-    if diff.all (· == 0)
-    then a.getLast!
-    else a[0]! - (evaluate_ n' diff)
+    if diff.all (· == 0) then a.getLast! else a[0]! - (evaluate_ n' diff)
 
 def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
 
@@ -65,7 +62,6 @@ def solve (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error"
   | some d => IO.println s!"  part2: {d.map evaluate |>.foldl (. + .) 0}"
-  return ()
 
 end part2
 

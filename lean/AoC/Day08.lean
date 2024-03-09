@@ -24,8 +24,9 @@ def pbranch := do
 def parser := do
   let path ← ppath <* eol <* eol
   let branches  ← sepBy1 pbranch eol
-  let hash := Array.foldl (fun h (b : String × String × String) =>
-    HashMap.insert h b.fst b.snd) (HashMap.empty) branches
+  let hash := branches.foldl
+    (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
+    HashMap.empty
   return Puzzle.new path.toList hash
 
 end parser
@@ -41,7 +42,6 @@ def solve1 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part1: parse error"
   | some p => IO.println s!"  part1: {trace₁ p 0 "AAA"}"
-  return ()
 
 partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
   if pos.endsWith "Z"
@@ -62,7 +62,6 @@ def solve2 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
   | none   => IO.println s!"  part2: parse error}"
   | some p => IO.println s!"  part2: {analyze p}"
-  return ()
 
 end Day08
 

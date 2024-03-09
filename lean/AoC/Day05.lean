@@ -73,18 +73,12 @@ def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
       else transpose₀ pos rs'
 
 def transpose (seeds : Array Nat) (rs : Array Range) :=
-  Array.map (fun seed => transpose₀ seed (Array.toList rs)) seeds
+  seeds.map (transpose₀ · rs.toList)
 
 def solve1 (data : String) : IO Unit := do
   match AoCParser.parse parser.parser data with
-  | some (seeds, maps) =>
-    let point : Array Nat := Array.foldl transpose seeds maps
-    IO.println s!"  part1: {point.minD 0}"
-  | _ => IO.println s!" part1: parse error"
-  return ()
-
-def solve2_line (_line : String) : Nat :=
-  0
+  | some (seeds, maps) => IO.println s!"  part1: {maps.foldl transpose seeds |>.minD 0}"
+  | _                  => IO.println s!"  part1: parse error"
 
 def windows₂ (l : List α) : List (α × α) :=
   match l with
@@ -113,16 +107,14 @@ def transpose_span (span : ClosedSpan) (range : Range)
 
 def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSpan :=
   Array.foldl (fun spans' stage =>
-      Array.foldl (fun (not_yet, done) rule =>
-          List.foldl (fun (accum : List ClosedSpan × List ClosedSpan) (span : ClosedSpan) =>
+      stage.foldl (fun (not_yet, done) rule =>
+          not_yet.foldl (fun (accum : List ClosedSpan × List ClosedSpan) (span : ClosedSpan) =>
               match transpose_span span rule with
               | (some s', rest) => (accum.fst ++ rest, accum.snd ++ [s'])
-              | (none,    rest) => (accum.fst ++ rest, accum.snd))
+              | (none   , rest) => (accum.fst ++ rest, accum.snd))
             ([], [])
-            not_yet
           |> (fun (r, d) => (r, done ++ d)))
         (spans', ([] : List ClosedSpan))
-        stage
       |>( fun (r, d) => r ++ d))
     spans
     (stages : Array (Array Range))
@@ -134,7 +126,6 @@ def solve2 (data : String) : IO Unit := do
     let spans' : List ClosedSpan := tp2 spans rule
     IO.println s!"  part2: {spans'.map (·._beg) |>.minimum? |>.getD 0}"
   | _ => IO.println s!" part2: parse error"
-  return ()
 
 end Day05
 

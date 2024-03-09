@@ -30,10 +30,11 @@ def uniqueChars (cs : Array Char) : List Char :=
   Array.foldl (fun l e => if l.contains e then l else e :: l) [] cs
 
 def occurences (cs : Array Char) : Array Nat :=
-  List.map (fun c => (Array.filter (. == c) cs).size) (uniqueChars cs)
-    |> List.toArray
-    |> Array.qsortOrd
-    |> Array.reverse
+  uniqueChars cs
+    |>.map (fun c => (cs.filter (· == c)).size)
+    |>.toArray
+    |>.qsortOrd
+    |>.reverse
 
 #eval occurences #['A', '3', '9', 'A', 'A']
 
