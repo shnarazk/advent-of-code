@@ -15,8 +15,6 @@ namespace Race
 
 private def qualify (r : Race) (t : Nat) : Ordering := compare ((r.time - t) * t) r.dist
 
-private def absDiff (i j : Nat) : Nat := max (i - j) (j - i)
-
 private def seek (r : Race) (span : Nat) (i j : Nat) (inc : Bool) : Nat :=
   if span = 0 then if inc then j else i
   else
