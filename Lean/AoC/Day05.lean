@@ -33,8 +33,7 @@ instance : ToString Range where
 namespace parser
 open Lean Parsec AoCParser
 
-def pseeds := do
-  pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
+def pseeds := pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
 
 def plabel := do
   let _ ← alphabets <* pstring "-to-"
@@ -75,18 +74,17 @@ def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
 def transpose (seeds : Array Nat) (rs : Array Range) :=
   seeds.map (transpose₀ · rs.toList)
 
-def solve1 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | some (seeds, maps) => IO.println s!"  part1: {maps.foldl transpose seeds |>.minD 0}"
-  | _                  => IO.println s!"  part1: parse error"
+def Part1.solve (data : String) : IO Unit := do
+  if let some (seeds, maps) := AoCParser.parse parser.parser data then
+    IO.println s!"  part1: {maps.foldl transpose seeds |>.minD 0}"
 
-def windows₂ (l : List α) : List (α × α) :=
+def pairs (l : List α) : List (α × α) :=
   match l with
   | [] => []
-  | a :: b :: c => (a, b) :: windows₂ c
+  | a :: b :: c => (a, b) :: pairs c
   | _ :: _ => panic! "impossible"
 
-#eval windows₂ <| List.range 6
+#eval pairs <| List.range 6
 
 /--
 return `Option converted-span` and `List non-converted-span`
@@ -119,17 +117,15 @@ def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSp
     spans
     (stages : Array (Array Range))
 
-def solve2 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | some (d, rule) =>
-    let spans := windows₂ d.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
+def Part2.solve (data : String) : IO Unit := do
+  if let some (d, rule) := AoCParser.parse parser.parser data then
+    let spans := pairs d.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
     let spans' : List ClosedSpan := tp2 spans rule
     IO.println s!"  part2: {spans'.map (·._beg) |>.minimum? |>.getD 0}"
-  | _ => IO.println s!" part2: parse error"
 
 end Day05
 
 def day05 (ext : Option String) : IO Unit := do
   let data ← dataOf 2023 5 ext
-  Day05.solve1 data
-  Day05.solve2 data
+  Day05.Part1.solve data
+  Day05.Part2.solve data
