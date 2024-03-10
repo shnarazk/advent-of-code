@@ -3,7 +3,7 @@ import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
-namespace Day0?
+namespace Day??
 open Std
 
 -- structure Data where
@@ -19,11 +19,10 @@ def parser := sepBy1 number whitespaces
 end parser
 
 namespace part1
+
 def solve (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part1: parse error"
-  | some d => IO.println s!"  part1: {d.size}"
-  return ()
+  if let some d := AoCParser.parse parser.parser data then
+  IO.println s!"  part1: {d.size}"
 
 end part1
 
@@ -37,13 +36,13 @@ def solve (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve2_line lines
   let sum := Array.foldl (. + .) 0 points
   IO.println s!"  part2: {sum}"
-  return ()
+
 end part2
 
-end Day0?
+end Day??
 
-def day0? (ext : Option String) : IO Unit := do
-  let data ← dataOf 2023 ? ext
-  let lines ← linesOf 2023 ? ext
-  Day0?.part1.solve data
-  Day0?.part2.solve lines
+def day?? (ext : Option String) : IO Unit := do
+  let data ← dataOf 2023 ?? ext
+  let lines ← linesOf 2023 ?? ext
+  Day??.part1.solve data
+  Day??.part2.solve lines
