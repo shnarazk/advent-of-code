@@ -1,6 +1,6 @@
 # 2023 in Rust
 
-|   day |    time |
+|   day |    time(msec) |
 |------:|--------:|
 | day1  |     0.7 |
 | day2  |     0.6 |
