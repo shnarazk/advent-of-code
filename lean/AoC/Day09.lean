@@ -6,9 +6,6 @@ import «AoC».Parser
 namespace Day09
 open Std
 
--- structure Data where
---deriving Repr
-
 namespace parser
 open Lean.Parsec AoCParser
 
@@ -38,30 +35,27 @@ def evaluate_ (n : Nat) (a : List Int) : Int :=
 def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
 
 def solve (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part1: parse error"
-  | some d => IO.println s!"  part1: {d.map evaluate |>.foldl (. + .) 0}"
+  if let some d := AoCParser.parse parser.parser data then
+    IO.println s!"  part1: {d.map evaluate |>.foldl (. + .) 0}"
 
 end part1
 
 -- #eval solve2_line ""
+
 namespace part2
 
-def evaluate_ (n : Nat) (a : List Int) : Int :=
+def evaluate (n : Nat) (a : List Int) : Int :=
   -- n is used for termination assertion
   -- or proove diff length is smaller than a's
   match n with
   | 0 => 0
   | n' + 1 =>
     let diff : List Int := windows₂ a |>.map (fun (a, b) => b - a)
-    if diff.all (· == 0) then a.getLast! else a[0]! - (evaluate_ n' diff)
-
-def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
+    if diff.all (· == 0) then a.getLast! else a[0]! - (evaluate n' diff)
 
 def solve (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part2: parse error"
-  | some d => IO.println s!"  part2: {d.map evaluate |>.foldl (. + .) 0}"
+  if let some d := AoCParser.parse parser.parser data then
+    IO.println s!"  part2: {d.map (fun a => evaluate a.size a.toList) |>.foldl (. + .) 0}"
 
 end part2
 

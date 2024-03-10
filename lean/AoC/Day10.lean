@@ -19,7 +19,7 @@ def Pos.double : Pos → Pos := both (· * 2)
 
 def makeNeighbors (size s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
-  |>.filter (Pos.lt · size)
+    |>.filter (Pos.lt · size)
 
 #eval makeNeighbors (10, 10) (0, 0)
 
@@ -89,16 +89,14 @@ def Data.at (self : Data) (pos : Pos) : Option Circuit :=
 
 def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, pos) := vec
-  let (dy, dx) := both2 (fun x y => Int.ofNat x - Int.ofNat y) pos pre
-  let trans := (fun x y => Int.ofNat x + y |>.toNat)
+  let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) pos pre
+  let trans      := fun x y => Int.ofNat x + y |>.toNat
   match c.at pos with
-  | some .v => (pos, both2 trans pos ( dy,   0))
-  | some .h => (pos, both2 trans pos (  0,  dx))
-  | some .l => (pos, both2 trans pos ( dx,  dy))
-  | some .j => (pos, both2 trans pos (-dx, -dy))
-  | some .k => (pos, both2 trans pos ( dx,  dy))
-  | some .f => (pos, both2 trans pos (-dx, -dy))
-  | _       => (pos, pos)
+  | some .v           => (pos, both2 trans pos ( dy,   0))
+  | some .h           => (pos, both2 trans pos (  0,  dx))
+  | some .l | some .k => (pos, both2 trans pos ( dx,  dy))
+  | some .j | some .f => (pos, both2 trans pos (-dx, -dy))
+  | _                 => (pos, pos)
 
 #eval #['a', 'b'].toList.toString
 #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
@@ -134,13 +132,11 @@ partial def loop_len (self : Data) (start : Pos) (len : Nat) (vec : Pos × Pos) 
   else loop_len self start (len + 1) v'
 
 def solve (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part1: parse error"
-  | some m =>
-    let len := (makeVecs m.size m.start) |>.map (loop_len m m.start 0 .)
-        |>.maximum? |>.getD 0 |> (· / 2)
+  if let some m := AoCParser.parse parser.parser data then
+    let len := makeVecs m.size m.start
+      |>.map (loop_len m m.start 0 .)
+      |>.maximum? |>.getD 0 |> (· / 2)
     IO.println s!"  part1: {len}"
-  return ()
 
 end part1
 
@@ -220,9 +216,7 @@ partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
 def solve (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part2: parse error"
-  | some m =>
+  if let some m := AoCParser.parse parser.parser data then
     let loop := (makeVecs m.size m.start)
       |>.map (mkLoop m m.start [m.start] .)
       |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
@@ -236,7 +230,6 @@ def solve (data : String) : IO Unit := do
           |> (· + count))
         0
     IO.println s!"  part2: {n}"
-  return ()
 
 #eval List.range 9
 

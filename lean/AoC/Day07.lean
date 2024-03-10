@@ -89,16 +89,13 @@ def compareList (a b : List Nat) : Ordering :=
 #eval compareList [2, 3, 1] [2, 1] == Ordering.gt
 
 def solve1 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part1: parse error"
-  | some d =>
+  if let some d := AoCParser.parse parser.parser data then
     let o := Array.qsort (d.map evaluation) (fun a b =>
       match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
       | Ordering.eq, ord => ord == Ordering.lt
       | ord, _ => ord == Ordering.lt)
     let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
     IO.println s!"  part1: {winnings.fst}"
-  return ()
 
 def order₂ : Char -> Nat
   | 'A' => 14
@@ -133,16 +130,13 @@ def evaluation₂ (h : Hand) : (Nat × List Nat) × Nat :=
 #eval evaluation₂ <| Hand.hand #['A', '3', '9', 'J', 'A'] 33
 
 def solve2 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part2: parse error"
-  | some d =>
+  if let some d := AoCParser.parse parser.parser data then
     let o := Array.qsort (d.map evaluation₂) (fun a b =>
       match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
       | Ordering.eq, ord => ord == Ordering.lt
-      | ord, _ => ord == Ordering.lt)
+      | ord        , _   => ord == Ordering.lt)
     let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
     IO.println s!"  part2: {winnings.fst}"
-  return ()
 
 end Day07
 

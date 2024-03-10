@@ -39,9 +39,8 @@ partial def trace₁ : Puzzle → Nat → String → Nat
     trace₁ puzzle (step + 1) <| if dir == 'L' then left else right
 
 def solve1 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part1: parse error"
-  | some p => IO.println s!"  part1: {trace₁ p 0 "AAA"}"
+  if let some p := AoCParser.parse parser.parser data then
+    IO.println s!"  part1: {trace₁ p 0 "AAA"}"
 
 partial def trace₂ (puzzle : Puzzle) (step : Nat) (pos : String) : Nat :=
   if pos.endsWith "Z"
@@ -59,9 +58,8 @@ def analyze (p : Puzzle) : Nat :=
     |>.foldl Nat.lcm 1
 
 def solve2 (data : String) : IO Unit := do
-  match AoCParser.parse parser.parser data with
-  | none   => IO.println s!"  part2: parse error}"
-  | some p => IO.println s!"  part2: {analyze p}"
+  if let some p := AoCParser.parse parser.parser data then
+    IO.println s!"  part2: {analyze p}"
 
 end Day08
 
