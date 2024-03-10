@@ -153,10 +153,13 @@ namespace Map
 
 def countElements (size: Pos) : Nat := size.fst * size.snd
 
+@[inline]
 def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
 
+@[inline]
 def contains (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
 
+@[inline]
 def set (self : Map) (p : Pos) : Map :=
   { self with cells := self.cells.set! (Map.index self p) true }
 
@@ -196,9 +199,9 @@ def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
 This generates a list of dupicated nodes.
 -/
 def scaleUp : List Pos → List Pos
-  | [] => []
-  | p :: [] => [Pos.double p]
-  | p :: q :: l' => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l')
+  | []          => []
+  | p :: []     => [Pos.double p]
+  | p :: q :: l => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l)
 
 #eval makeNeighbors (10, 10) (0, 0)
 

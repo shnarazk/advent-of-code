@@ -14,13 +14,6 @@ deriving Repr
 instance : ToString ClosedSpan where
   toString s := s!"[{s._beg},{s._end}]"
 
-def ClosedSpan.splitAt (a : ClosedSpan) (c : Nat) : List ClosedSpan :=
-  if a._beg < c && c <= a._end
-  then [ClosedSpan.new a._beg (c - 1), ClosedSpan.new c a._end]
-  else [a]
-
-#eval ClosedSpan.new 8 30 |>.splitAt 12
-
 structure Range where
   dest   : Nat
   source : Nat
