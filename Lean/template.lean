@@ -1,12 +1,14 @@
 import Std
 import Lean.Data.Parsec
 import «AoC».Basic
+import «AoC».Combinator
 import «AoC».Parser
 
 namespace Day??
-open Std Accumulation
+open Std Accumulation CoP
 
--- structure Data where
+--structure Data where
+--  new ::
 --deriving Repr
 -- instance : ToString Data where
 --   toString s := s!"[{s._beg},{s._end}]"
