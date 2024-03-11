@@ -67,7 +67,7 @@ def Part1.solve (data : String) : IO Unit := do
       |>.snd
     -- scale up
     let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
-    IO.println s!"{sum_of_dist m'}"
+    IO.println s!"  part1: {sum_of_dist m'}"
 
 def Part2.solve (data : String) : IO Unit := do
   if let some d := AoCParser.parse parser.parser data then
@@ -91,7 +91,7 @@ def Part2.solve (data : String) : IO Unit := do
       |>.snd
     -- scale up
     let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
-    IO.println s!"{sum_of_dist m'}"
+    IO.println s!"  part2: {sum_of_dist m'}"
 
 end Day11
 

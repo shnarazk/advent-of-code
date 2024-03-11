@@ -2,6 +2,7 @@ import Std
 import «AoC».Basic
 
 namespace Day01
+open Accumulation
 
 def solve1_ (s : List Char) : Nat :=
   asNum sk.head! * 10 + asNum sk.getLast!
@@ -13,8 +14,7 @@ def solve1_ (s : List Char) : Nat :=
 
 def solve1 (lines : Array String) : IO Unit := do
   let nums := lines.map (fun (s) => solve1_ s.toList)
-  let sum := Array.foldl (. + .) 0 nums
-  IO.println s!"  part1: {sum}"
+  IO.println s!"  part1: {sum nums}"
 
 -- #eval List.filterMap (fun x => if 2 < x then some x else none) [5, 2, 0, 3]
 
@@ -37,8 +37,7 @@ def solve2_ (s : String) : Nat :=
 
 def solve2 (lines : Array String) : IO Unit := do
   let nums := lines.map solve2_
-  let sum := Array.foldl (. + .) 0 nums
-  IO.println s!"  part2: {sum}"
+  IO.println s!"  part2: {sum nums}"
 
 end Day01
 

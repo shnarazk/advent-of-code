@@ -2,6 +2,7 @@ import Std
 import «AoC».Basic
 
 namespace Day04
+open Accumulation
 
 def parsed (source : String) : List Nat × List Nat :=
   (toNats targets, toNats cands)
@@ -31,8 +32,7 @@ def solve1_line (line : String) : Nat :=
 
 def Part1.solve (lines : Array String) : IO Unit := do
   let points : Array Nat := lines.map solve1_line
-  let sum := points.foldl (. + .) 0
-  IO.println s!"  part1: {sum}"
+  IO.println s!"  part1: {sum points}"
 
 def solve2_rec (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)) : Nat :=
   match table with

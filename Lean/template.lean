@@ -4,7 +4,7 @@ import «AoC».Basic
 import «AoC».Parser
 
 namespace Day??
-open Std
+open Std Accumulation
 
 -- structure Data where
 --deriving Repr
@@ -34,8 +34,7 @@ def solve2_line (_line : String) : Nat := 0
 
 def solve (lines : Array String) : IO Unit := do
   let points : Array Nat := Array.map solve2_line lines
-  let sum := Array.foldl (. + .) 0 points
-  IO.println s!"  part2: {sum}"
+  IO.println s!"  part2: {sum points}"
 
 end part2
 

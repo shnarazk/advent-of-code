@@ -2,6 +2,7 @@ import Std
 import «AoC».Basic
 
 namespace Day02
+open Accumulation
 
 def toHashMap (source : String) : Std.HashMap String Nat :=
   List.foldl
@@ -41,7 +42,7 @@ def solve1_line (line : String) : Nat :=
 
 def solve1 (lines : Array String) : IO Unit := do
   let points : Array Nat := lines.map solve1_line
-  let sum := points.foldl (· + ·) 0
+  let sum := sum points
   IO.println s!"  part1: {sum}"
 
 def solve2_line (line : String) : Nat :=
@@ -53,7 +54,7 @@ def solve2_line (line : String) : Nat :=
 
 def solve2 (lines : Array String) : IO Unit := do
   let points : Array Nat := lines.map solve2_line
-  let sum := points.foldl (· + ·) 0
+  let sum := sum points
   IO.println s!"  part2: {sum}"
 
 end Day02

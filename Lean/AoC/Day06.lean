@@ -4,6 +4,7 @@ import «AoC».Basic
 import «AoC».Parser
 
 namespace Day06
+open Accumulation
 
 structure Race where
   new::
@@ -59,7 +60,7 @@ end parser
 
 def Part1.solve (data : String) : IO Unit := do
   if let some races := parser.parse data then
-    IO.println s!"  part1: {races.map Race.evaluate|>.foldl Nat.mul 1}"
+    IO.println s!"  part1: {races.map Race.evaluate|> product}"
 
 def Part2.solve (data : String) : IO Unit := do
   let x := (data.split (. == '\n')).map (fun l =>
