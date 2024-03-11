@@ -46,3 +46,29 @@ def unique (a : Array α) [BEq α] [Hashable α] : Array α :=
   hash.toArray
 
 #eval unique #[1, 0, 2, 1, 3, 2]
+
+class Accumulation (α : Type) where
+  sum    : α → Nat
+  product: α → Nat
+
+instance : Accumulation (List Nat) where
+  sum     a := a.foldl Nat.add 0
+  product a := a.foldl Nat.mul 1
+
+instance : Accumulation (List Int) where
+  sum     a := Int.toNat <| a.foldl Int.add 0
+  product a := Int.toNat <| a.foldl Int.mul 1
+
+instance : Accumulation (Array Nat) where
+  sum     a := a.foldl Nat.add 0
+  product a := a.foldl Nat.mul 1
+
+instance : Accumulation (Array Int) where
+  sum     a := Int.toNat <| a.foldl Int.add 0
+  product a := Int.toNat <| a.foldl Int.mul 1
+
+open Accumulation
+
+#eval Accumulation.sum [1, 3, 5]
+#eval sum [1, 3, 5]
+#eval product [1, 3, 5]

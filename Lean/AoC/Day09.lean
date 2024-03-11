@@ -4,7 +4,7 @@ import «AoC».Basic
 import «AoC».Parser
 
 namespace Day09
-open Std
+open Std Accumulation
 
 namespace parser
 open Lean.Parsec AoCParser
@@ -36,7 +36,7 @@ def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
 
 def solve (data : String) : IO Unit := do
   if let some d := AoCParser.parse parser.parser data then
-    IO.println s!"  part1: {d.map evaluate |>.foldl (. + .) 0}"
+    IO.println s!"  part1: {d.map evaluate |> sum}"
 
 end part1
 
@@ -55,7 +55,7 @@ def evaluate (n : Nat) (a : List Int) : Int :=
 
 def solve (data : String) : IO Unit := do
   if let some d := AoCParser.parse parser.parser data then
-    IO.println s!"  part2: {d.map (fun a => evaluate a.size a.toList) |>.foldl (. + .) 0}"
+    IO.println s!"  part2: {d.map (fun a => evaluate a.size a.toList) |> sum}"
 
 end part2
 
