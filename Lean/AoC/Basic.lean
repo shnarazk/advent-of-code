@@ -72,3 +72,11 @@ open Accumulation
 #eval Accumulation.sum [1, 3, 5]
 #eval sum [1, 3, 5]
 #eval product [1, 3, 5]
+
+def List.enumerate (a : List α) : List (Nat × α) := List.zip (List.range a.length) a
+
+#eval [2, 4, 5].enumerate
+
+def Array.enumerate (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
+
+#eval #[2, 4, 5].enumerate
