@@ -29,37 +29,32 @@ def toHashMap (source : String) : Std.HashMap String Nat :=
       let label := (pair.getD 1 "no name").trim
       (label, value)
 
-#eval (toHashMap "case 1: 3 red; 5 blue").findEntry? "blue" = some ("blue", 5)
+namespace Part1
 
-def solve1_line (line : String) : Nat :=
-  if   Std.HashMap.findD hash "red" 0   ≤ 12
-    && Std.HashMap.findD hash "green" 0 ≤ 13
-    && Std.HashMap.findD hash "blue" 0  ≤ 14
-  then Std.HashMap.find! hash "«id»"
+def evaluate (line : String) : Nat :=
+  let hash := toHashMap line
+  if hash.findD "red" 0 ≤ 12 && hash.findD "green" 0 ≤ 13 && hash.findD "blue" 0 ≤ 14
+  then hash.find! "«id»"
   else 0
-  where
-    hash := toHashMap line
 
-def solve1 (lines : Array String) : IO Unit := do
-  let points : Array Nat := lines.map solve1_line
-  let sum := sum points
-  IO.println s!"  part1: {sum}"
+def solve (lines : Array String) : IO (Array String) := do
+  IO.println s!"  part1: {lines.map evaluate |> sum}"
+  return lines
 
-def solve2_line (line : String) : Nat :=
-  (Std.HashMap.findD hash "red" 0)
-  * (Std.HashMap.findD hash "green" 0)
-  * (Std.HashMap.findD hash "blue" 0)
-  where
-    hash := toHashMap line
+end Part1
 
-def solve2 (lines : Array String) : IO Unit := do
-  let points : Array Nat := lines.map solve2_line
-  let sum := sum points
-  IO.println s!"  part2: {sum}"
+namespace Part2
+
+def evaluate (line : String) : Nat :=
+  let hash := toHashMap line
+  (hash.findD "red" 0) * (hash.findD "green" 0) * (hash.findD "blue" 0)
+
+def solve (lines : Array String) : IO Unit := do
+  IO.println s!"  part2: {lines.map evaluate |> sum}"
+
+end Part2
 
 end Day02
 
 def day02 (ext : Option String) : IO Unit := do
-  let data ← linesOf 2023 2 ext
-  Day02.solve1 data
-  Day02.solve2 data
+  linesOf 2023 2 ext >>= Day02.Part1.solve >>= Day02.Part2.solve

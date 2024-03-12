@@ -45,36 +45,32 @@ def numbers_in_line (line : String) : List (Int × Int × Nat) :=
     (([] : List (Int × Int × Nat)), 0, (none : Option (Int × Nat)))
   |>.fst
 
-#eval numbers_in_line "467..114.."
-
-def numbers (lines : Array String) : List Number :=
+def to_numbers (lines : Array String) : List Number :=
   lines.foldl (fun (row, result) line =>
       line |> numbers_in_line |>.map (fun n => Number.new row n.fst n.snd.fst n.snd.snd) |> (row + 1, result ++ .))
     ((0, []) : Int × List Number)
   |>.snd
 
-#eval (3 : Int).natAbs
-
-def solve1 (lines : Array String) : IO Unit := do
+def Part1.solve (lines : Array String) : IO (Array String) := do
   let cands := symbols lines
-  let numbers := numbers lines
-  let part_number := numbers.filter
-        (fun num => cands.any (fun (y, x) => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en))
+  let nums  := to_numbers lines
+  let part_number := nums.filter
+      (fun num => cands.any (fun (y, x) => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en))
   IO.println s!"  part1: {part_number.map (·.val) |> sum}"
+  return lines
 
-def solve2 (lines : Array String) : IO Unit := do
+def Part2.solve (lines : Array String) : IO Unit := do
   let cands := asterisks lines
-  let numbers := numbers lines
+  let nums  := to_numbers lines
   let gears := cands.foldl
-    (fun acc (y₀, x₀) =>
-      let neighbors := numbers.filter (fun num => (num.row - y₀).natAbs ≤ 1 && num.beg ≤ x₀ && x₀ ≤ num.en)
-      if neighbors.length == 2 then (neighbors.map (·.val) |>.foldl (fun a x => a * x) 1 |> (acc ++ [·])) else acc)
+    (fun acc (y, x) =>
+      let neighbors := nums.filter
+        (fun num => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en)
+      if neighbors.length == 2 then neighbors.map (·.val) |> product |> (acc ++ [·]) else acc)
     ([] : List Nat)
   IO.println s!"  part2: {sum gears}"
 
 end Day03
 
 def day03 (ext : Option String) : IO Unit := do
-  let data ← linesOf 2023 3 ext
-  Day03.solve1 data
-  Day03.solve2 data
+  linesOf 2023 3 ext >>= Day03.Part1.solve >>= Day03.Part2.solve
