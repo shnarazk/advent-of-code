@@ -125,16 +125,20 @@ end parser
 
 namespace part1
 
-partial def loop_len (self : Data) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
-  let v' := self.dest vec
-  if v'.fst == v'.snd
-  then if v'.snd == start then len + 1 else 0
-  else loop_len self start (len + 1) v'
+def loop_len (self : Data) (limit : Nat) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
+  match limit with
+  | 0        => 0
+  | lim' + 1 =>
+    let v' := self.dest vec
+    if v'.fst == v'.snd
+    then if v'.snd == start then len + 1 else 0
+    else loop_len self lim' start (len + 1) v'
 
 def solve (data : String) : IO Unit := do
   if let some m := AoCParser.parse parser.parser data then
+    let limit := m.grid.size * m.grid[0]!.size
     let len := makeVecs m.size m.start
-      |>.map (loop_len m m.start 0 .)
+      |>.map (loop_len m limit m.start 0 .)
       |>.maximum? |>.getD 0 |> (· / 2)
     IO.println s!"  part1: {len}"
 
@@ -181,12 +185,15 @@ open Lean Data
   5. count the unmarked cells
 -/
 
-partial def mkLoop (self : Data) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+def mkLoop (self : Data) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
     : List Pos :=
-  let v' := self.dest vec
-  if v'.fst == v'.snd
-  then if v'.snd == start then path ++ [v'.fst] else []
-  else mkLoop self start (path ++ [v'.fst]) v'
+  match limit with
+  | 0        => []
+  | lim' + 1 =>
+    let v' := self.dest vec
+    if v'.fst == v'.snd
+    then if v'.snd == start then path ++ [v'.fst] else []
+    else mkLoop self lim' start (path ++ [v'.fst]) v'
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let p' := Pos.double p
@@ -205,7 +212,10 @@ def scaleUp : List Pos → List Pos
 
 #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
+def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
+  match limit with
+  | 0       => linked
+  | lim + 1 =>
   match toVisit with
   | [] => linked
   | _ =>
@@ -214,17 +224,18 @@ partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
       |>.foldl
         (fun lt e => if lt.fst.contains e then lt else (lt.fst.set e, e :: lt.snd))
         (linked, [])
-      |> uncurry propagate
+      |> uncurry (propagate lim)
 
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
 def solve (data : String) : IO Unit := do
   if let some m := AoCParser.parse parser.parser data then
+    let limit := m.grid.size * m.grid[0]!.size
     let loop := (makeVecs m.size m.start)
-      |>.map (mkLoop m m.start [m.start] .)
+      |>.map (mkLoop m limit m.start [m.start] .)
       |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
       |> scaleUp
-    let map := propagate (Map.of (Pos.double m.size) loop) [(0, 0)]
+    let map := propagate limit (Map.of (Pos.double m.size) loop) [(0, 0)]
     let n := List.range m.size.fst
       |>.foldl (fun count y =>
         List.range m.size.snd
