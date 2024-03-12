@@ -30,38 +30,60 @@ end parser
 
 namespace part1
 
-private def match_sequence
-    (hash   : HashMap (String × Nat) Nat)
-    (target : Array Char)
-    (rule   : Array Nat)
-    : (HashMap (String × Nat) Nat) × Nat :=
-  match target, rule with
-  | #[], #[] => (hash, 1)
-  | _  , #[] => (hash, if target.all (· != '#') then 1 else 0)
-  | #[],   _ => (hash, 0)
-  |   _,   _ =>
-    if target.size < sum rule then (hash, 0) else
-      let _start := target[0]!
-      let _ends_at := target.enumerate.find? (fun (_i, x) => x == ' ')
-      (hash, 0)
+#eval [1, 2, 5].tail
+#eval List.drop 2 [1, 2, 5]
+#eval compare 3 5 == Ordering.lt
 
-/--
-memorizing wrapper
--/
-private def match_sequence'
+private partial def match_sequence
     (hash   : HashMap (String × Nat) Nat)
-    (target : Array Char)
-    (rule   : Array Nat)
+    (target : List Char)
+    (rule   : List Nat)
     : (HashMap (String × Nat) Nat) × Nat :=
-  let key := (target.foldl (fun s e => s.push e) "", rule.size)
+  -- check memorized value first
+  let key := (target.foldl (fun s e => s.push e) "", rule.length)
   match hash.find? key with
   | some combinations => (hash, combinations)
   | none =>
-    let (h', n) := match_sequence hash target rule
-    (h'.insert key n, n)
+    match target with
+    | []      => let x := if rule == [] then 1 else 0 ;  (hash.insert key x, x)
+    | t :: t' =>
+      match rule with
+      | []      => let x := if target.all (· != '#') then 1 else 0 ; (hash.insert key x, x)
+      | r :: r' =>
+        if target.length < rule.length then (hash.insert key 0, 0) else
+          let ends_at : Nat := match target.enumerate.find? (fun (_, x) => x == t) with
+            | some (i, _) => i
+            | none        => target.length
+          match t with
+          | '.' => match_sequence hash t' rule
+          | '#' => match compare r ends_at with
+            | Ordering.lt => (hash.insert key 0, 0)
+            | Ordering.eq =>
+              if r == rule.length
+              then (hash.insert key 1, 1)
+              else match target[r]! with
+                | '.' | '?' => (hash, 0)
+                | _     => panic "impossible"
+            | Ordering.gt =>
+              if target.length ≤ r
+              then (hash.insert key 0, 0)
+              else
+                if (List.drop ends_at (List.range (min r target.length)) |>.all (fun i => target[i]! != '.'))
+                  && (r == target.length || target[r]! !=  '#')
+                then
+                  if target.length < r + 1
+                  then let x := if rule.length == 1 then 1 else 0 ; (hash.insert key x, x)
+                  else match_sequence hash (List.drop (r + 1) target) r'
+                else
+                  (hash.insert key 0, 0)
+          | '?' =>
+            let (_, m) := match_sequence hash ('.' :: t') rule
+            let (_, n) := match_sequence hash ('#' :: t') rule
+            (hash, m + n)
+          | _   => panic "impossible"
 
 def evaluate (conf : Data) : Nat :=
-  match_sequence (HashMap.empty : HashMap (String × Nat) Nat) conf.pattern conf.rule
+  match_sequence (HashMap.empty : HashMap (String × Nat) Nat) conf.pattern.toList conf.rule.toList
   |>.snd
 
 def solve (data : String) : IO Unit := do
