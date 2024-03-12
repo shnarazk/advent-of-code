@@ -44,43 +44,46 @@ private partial def match_sequence
   match hash.find? key with
   | some combinations => (hash, combinations)
   | none =>
+    let key := (target.foldl (fun s e => s.push e) "", rule.length)
     match target with
     | []      => let x := if rule == [] then 1 else 0 ;  (hash.insert key x, x)
     | t :: t' =>
       match rule with
       | []      => let x := if target.all (· != '#') then 1 else 0 ; (hash.insert key x, x)
       | r :: r' =>
+        -- index boundary check
         if target.length < rule.length then (hash.insert key 0, 0) else
-          let ends_at : Nat := match target.enumerate.find? (fun (_, x) => x == t) with
-            | some (i, _) => i
-            | none        => target.length
           match t with
           | '.' => match_sequence hash t' rule
-          | '#' => match compare r ends_at with
+          | '#' =>
+            let chank_len : Nat := target.findIdx (· != t)
+            match compare r chank_len with
             | Ordering.lt => (hash.insert key 0, 0)
-            | Ordering.eq =>
-              if r == rule.length
-              then (hash.insert key 1, 1)
-              else match target[r]! with
-                | '.' | '?' => (hash, 0)
-                | _     => panic "impossible"
+            | Ordering.eq => match_sequence hash (List.drop r t') r'
             | Ordering.gt =>
-              if target.length ≤ r
+              if target.length < r
               then (hash.insert key 0, 0)
               else
-                if (List.drop ends_at (List.range (min r target.length)) |>.all (fun i => target[i]! != '.'))
-                  && (r == target.length || target[r]! !=  '#')
-                then
-                  if target.length < r + 1
-                  then let x := if rule.length == 1 then 1 else 0 ; (hash.insert key x, x)
-                  else match_sequence hash (List.drop (r + 1) target) r'
-                else
-                  (hash.insert key 0, 0)
+                if (List.range r).all (target[·]! != '.') && (r == target.length || target[r]! != '#')
+                then match_sequence hash (List.drop r t') r'
+                else (hash.insert key 0, 0)
           | '?' =>
             let (_, m) := match_sequence hash ('.' :: t') rule
             let (_, n) := match_sequence hash ('#' :: t') rule
             (hash, m + n)
           | _   => panic "impossible"
+
+-- #eval match_sequence HashMap.empty "..".toList [] |>.snd
+-- #eval match_sequence HashMap.empty "##".toList [2] |>.snd
+-- #eval match_sequence HashMap.empty "#.#".toList [1,1] |>.snd
+#eval match_sequence HashMap.empty "?".toList [1] |>.snd
+#eval match_sequence HashMap.empty "??".toList [2] |>.snd
+#eval match_sequence HashMap.empty "#?".toList [2] |>.snd
+#eval match_sequence HashMap.empty "?#?".toList [2] |>.snd
+#eval match_sequence HashMap.empty "#?#?".toList [2] |>.snd
+#eval match_sequence HashMap.empty "#?#?".toList [3] |>.snd
+#eval match_sequence HashMap.empty "#?#?".toList [4] |>.snd
+#eval match_sequence HashMap.empty "?#?#?".toList [3] |>.snd
 
 def evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) conf.pattern.toList conf.rule.toList
