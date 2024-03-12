@@ -28,8 +28,6 @@ def parser := sepBy1 line_parser eol
 
 end parser
 
-namespace part1
-
 #eval [1, 2, 5].tail
 #eval List.drop 2 [1, 2, 5]
 #eval compare 3 5 == Ordering.lt
@@ -68,9 +66,9 @@ private partial def match_sequence
                 then match_sequence hash (List.drop r t') r'
                 else (hash.insert key 0, 0)
           | '?' =>
-            let (_, m) := match_sequence hash ('.' :: t') rule
-            let (_, n) := match_sequence hash ('#' :: t') rule
-            (hash, m + n)
+            let (h', m) := match_sequence hash ('.' :: t') rule
+            let (h'', n) := match_sequence h' ('#' :: t') rule
+            (h''.insert key (m + n), m + n)
           | _   => panic "impossible"
 
 -- #eval match_sequence HashMap.empty "..".toList [] |>.snd
@@ -85,6 +83,8 @@ private partial def match_sequence
 #eval match_sequence HashMap.empty "#?#?".toList [4] |>.snd
 #eval match_sequence HashMap.empty "?#?#?".toList [3] |>.snd
 
+namespace part1
+
 def evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) conf.pattern.toList conf.rule.toList
   |>.snd
@@ -97,9 +97,13 @@ end part1
 
 namespace part2
 
-def evaluate (_conf : Data) : Nat := 0
-
--- #eval evaluate ""
+def evaluate (conf : Data) : Nat :=
+  let p := Array.foldl (fun s c => s.push c) "" conf.pattern
+  let pattern := String.intercalate "?" [p, p, p, p, p]
+  let r := conf.rule.toList
+  let rule := [r, r, r, r, r].join
+  match_sequence (HashMap.empty : HashMap (String × Nat) Nat) pattern.toList rule
+  |>.snd
 
 def solve (data : String) : IO Unit := do
   if let some cs := AoCParser.parse parser.parser data then
