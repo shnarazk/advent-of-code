@@ -102,7 +102,10 @@ fn match_sequences_aux(
         0 => match_sequences(hash, &a[1..], b),
         1 => match b[0].cmp(&ends_at) {
             Ordering::Less => 0,
-            Ordering::Equal if b[0] == a.len() => 1,
+            Ordering::Equal if b[0] == a.len() => {
+                assert!(b.len() == 1); // wrong assumption??
+                1 // ?? (b.len() == 1) as usize
+            }
             Ordering::Equal => match a[b[0]] {
                 0 | 2 => match_sequences(hash, &a[b[0] + 1..], &b[1..]),
                 _ => unreachable!(),
