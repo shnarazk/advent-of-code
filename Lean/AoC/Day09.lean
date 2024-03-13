@@ -34,9 +34,11 @@ def evaluate_ (n : Nat) (a : List Int) : Int :=
 
 def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
 
-def solve (data : String) : IO Unit := do
+def solve (data : String) : IO (Array (Array Int)) := do
   if let some d := AoCParser.parse parser.parser data then
     IO.println s!"  part1: {d.map evaluate |> sum}"
+    return d
+  return panic "parse error"
 
 end part1
 
@@ -53,15 +55,12 @@ def evaluate (n : Nat) (a : List Int) : Int :=
     let diff : List Int := windows₂ a |>.map (fun (a, b) => b - a)
     if diff.all (· == 0) then a.getLast! else a[0]! - (evaluate n' diff)
 
-def solve (data : String) : IO Unit := do
-  if let some d := AoCParser.parse parser.parser data then
-    IO.println s!"  part2: {d.map (fun a => evaluate a.size a.toList) |> sum}"
+def solve (d : Array (Array Int)) : IO Unit :=
+  IO.println s!"  part2: {d.map (fun a => evaluate a.size a.toList) |> sum}"
 
 end part2
 
 end Day09
 
-def day09 (ext : Option String) : IO Unit := do
-  let data ← dataOf 2023 9 ext
-  Day09.part1.solve data
-  Day09.part2.solve data
+def day09 (ext : Option String) : IO Unit :=
+  dataOf 2023 9 ext >>= Day09.part1.solve >>= Day09.part2.solve

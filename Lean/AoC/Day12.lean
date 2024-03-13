@@ -94,9 +94,11 @@ def evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (2 * conf.pattern.size) conf.pattern.toList conf.rule.toList
   |>.snd
 
-def solve (data : String) : IO Unit := do
+def solve (data : String) : IO (Array Data) := do
   if let some cs := AoCParser.parse parser.parser data then
     IO.println s!"  part1: {sum $ Array.map evaluate cs}"
+    return cs
+  return panic "parse error"
 
 end part1
 
@@ -110,15 +112,12 @@ def evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-def solve (data : String) : IO Unit := do
-  if let some cs := AoCParser.parse parser.parser data then
-    IO.println s!"  part2: {sum $ Array.map evaluate cs}"
+def solve (cs : Array Data) : IO Unit :=
+  IO.println s!"  part2: {sum $ Array.map evaluate cs}"
 
 end part2
 
 end Day12
 
-def day12 (ext : Option String) : IO Unit := do
-  let data ← dataOf 2023 12 ext
-  Day12.part1.solve data
-  Day12.part2.solve data
+def day12 (ext : Option String) : IO Unit :=
+  dataOf 2023 12 ext >>= Day12.part1.solve >>= Day12.part2.solve
