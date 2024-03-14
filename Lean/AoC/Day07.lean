@@ -36,7 +36,7 @@ def occurences (cs : Array Char) : Array Nat :=
     |>.qsortOrd
     |>.reverse
 
-#eval occurences #['A', '3', '9', 'A', 'A']
+-- #eval occurences #['A', '3', '9', 'A', 'A']
 
 /--
 larger is higher
@@ -57,7 +57,7 @@ def order₁ : Char -> Nat
   | '2' => 2
   | _ => 0
 
-#eval order₁ 'A'
+-- #eval order₁ 'A'
 
 def orderOf (order : Char -> Nat) (h : Hand) : Array Nat :=
   Array.map order h.cards
@@ -73,7 +73,7 @@ def evaluation (h : Hand) : (Nat × List Nat) × Nat :=
   | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
   | _             => ((1, ord), h.bid) -- High card
 
-#eval evaluation <| Hand.hand #['A', '3', '9', 'A', 'A'] 33
+-- #eval evaluation <| Hand.hand #['A', '3', '9', 'A', 'A'] 33
 
 def compareList (a b : List Nat) : Ordering :=
   match a, b with
@@ -85,10 +85,10 @@ def compareList (a b : List Nat) : Ordering :=
     then compareList a' b'
     else compare a₀ b₀
 
-#eval compareList [2, 4] [2, 4] == Ordering.eq
-#eval compareList [2, 3, 1] [2, 1] == Ordering.gt
+-- #eval compareList [2, 4] [2, 4] == Ordering.eq
+-- #eval compareList [2, 3, 1] [2, 1] == Ordering.gt
 
-def solve1 (d : Array Hand) : IO Unit := do
+def solve1 (d : Array Hand) : Nat :=
   let o := Array.qsort (d.map evaluation) (fun a b =>
     match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
     | Ordering.eq, ord => ord == Ordering.lt
@@ -96,7 +96,7 @@ def solve1 (d : Array Hand) : IO Unit := do
   let winnings := o.foldl
       (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1))
       (0, 1)
-  IO.println s!"  part1: {winnings.fst}"
+  winnings.fst
 
 def order₂ : Char -> Nat
   | 'A' => 14
@@ -128,19 +128,19 @@ def evaluation₂ (h : Hand) : (Nat × List Nat) × Nat :=
   | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
   | _             => ((1, ord), h.bid) -- High card
 
-#eval evaluation₂ <| Hand.hand #['A', '3', '9', 'J', 'A'] 33
+-- #eval evaluation₂ <| Hand.hand #['A', '3', '9', 'J', 'A'] 33
 
-def solve2 (d : Array Hand) : IO Unit := do
+def solve2 (d : Array Hand) : Nat :=
   let o := Array.qsort (d.map evaluation₂) (fun a b =>
     match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
     | Ordering.eq, ord => ord == Ordering.lt
     | ord        , _   => ord == Ordering.lt)
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
-  IO.println s!"  part2: {winnings.fst}"
+  winnings.fst
 
 end Day07
 
-def day07 (ext : Option String) : IO Unit := do
-  if let some d := AoCParser.parse Day07.parser.parser (← dataOf 2023 7 ext) then
-    Day07.solve1 d
-    Day07.solve2 d
+def day07 (ext : Option String) : IO Answers := do
+  if let some d := AoCParser.parse Day07.parser.parser (← dataOf 2023 7 ext)
+  then return (s!"{Day07.solve1 d}", s!"{Day07.solve2 d}")
+  else return ("parse error", "")

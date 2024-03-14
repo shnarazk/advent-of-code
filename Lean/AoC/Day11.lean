@@ -4,6 +4,8 @@ import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
+-- set_option maxHeartbeats 500000
+
 namespace Day11
 open CoP
 open Std
@@ -16,8 +18,8 @@ deriving Repr
 
 namespace Data
 
-#eval #[false, false, true, false].size
-#eval Data.new (2, 2) #[false, false, true, false]
+-- #eval #[false, false, true, false].size
+-- #eval Data.new (2, 2) #[false, false, true, false]
 
 instance : ToString Data where
   toString s := s!"({toString s.size})[{toString s.array}]"
@@ -44,9 +46,17 @@ def sum_of_dist : List (Nat × Nat) → Nat
     let dists := b.foldl (fun sum e => sum + join Nat.add (both2 dist e a)) 0
     dists + sum_of_dist b
 
-#eval Nat.sub 3 1
+-- #eval Nat.sub 3 1
 
-def Part1.solve (d: Array (Array Bool)) : IO Unit := do
+def make_transform_map (m : List Nat) (r : Nat) : List Nat :=
+  List.range r
+    |>.foldl (fun (base, result) i =>
+       (if m.all (· != i) then base + 1 else base, result ++ [i + base]))
+      (0, ([] : List Nat))
+    |>.snd
+
+set_option maxHeartbeats 1000000
+def Part1.solve (d: Array (Array Bool)) : Nat :=
   let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
     |>.map (·.snd)
     |>.foldl (fun (i, l) e => (i + 1, l ++ e.map ((i, ·)))) (0, ([] : List (Nat × Nat)))
@@ -54,21 +64,22 @@ def Part1.solve (d: Array (Array Bool)) : IO Unit := do
   let range := m.foldl (fun m e => (max m.fst e.fst, max m.snd e.snd)) (0, 0)
     |> (fun p => (p.fst + 1, p.snd + 1))
   -- build transformation map
-  let trans_y := List.range range.fst
-    |>.foldl (fun (base, result) i =>
-       (if m.all (·.fst != i) then base + 1 else base, result ++ [i + base]))
-      (0, ([] : List Nat))
-    |>.snd
-  let trans_x := List.range range.snd
-    |>.foldl (fun (base, result) i =>
-       (if m.all (·.snd != i) then base + 1 else base, result ++ [i + base]))
-      (0, ([] : List Nat))
-    |>.snd
+  let trans_y : List Nat := make_transform_map (m.map (·.fst)) range.fst
+  let trans_x : List Nat := make_transform_map (m.map (·.snd)) range.snd
+  -- let trans_y : List Nat := List.range range.fst
+  --   |>.foldl (fun (base, result) i =>
+  --      (if m.all (·.fst != i) then base + 1 else base, result ++ [i + base]))
+  --     (0, ([] : List Nat))
+  --   |>.snd
+  -- let trans_x : List Nat := List.range range.snd
+  --   |>.foldl (fun (base, result) i =>
+  --      (if m.all (·.snd != i) then base + 1 else base, result ++ [i + base]))
+  --     (0, (fst[] : List Nat))
+  --   |>.snd
   -- scale up
-  let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
-  IO.println s!"  part1: {sum_of_dist m'}"
+  sum_of_dist $ m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
 
-def Part2.solve (d: Array (Array Bool)) : IO Unit := do
+partial def Part2.solve (d: Array (Array Bool)) : Nat :=
   let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
     |>.map (·.snd)
     |>.foldl (fun (i, l) e => (i + 1, l ++ e.map ((i, ·)))) (0, ([] : List (Nat × Nat)))
@@ -89,11 +100,11 @@ def Part2.solve (d: Array (Array Bool)) : IO Unit := do
     |>.snd
   -- scale up
   let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
-  IO.println s!"  part2: {sum_of_dist m'}"
+  sum_of_dist m'
 
 end Day11
 
-def day11 (ext : Option String) : IO Unit := do
-  if let some d := AoCParser.parse Day11.parser.parser (← dataOf 2023 11 ext) then
-    Day11.Part1.solve d
-    Day11.Part2.solve d
+def day11 (ext : Option String) : IO Answers := do
+  if let some d := AoCParser.parse Day11.parser.parser (← dataOf 2023 11 ext)
+  then return (s!"{Day11.Part1.solve d}", s!"{← Day11.Part2.solve d}")
+  else return ("parse error", "")

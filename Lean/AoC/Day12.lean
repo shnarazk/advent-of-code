@@ -29,9 +29,9 @@ def parser := sepBy1 line_parser eol
 
 end parser
 
-#eval [1, 2, 5].tail
-#eval List.drop 2 [1, 2, 5]
-#eval compare 3 5 == Ordering.lt
+-- #eval [1, 2, 5].tail
+-- #eval List.drop 2 [1, 2, 5]
+-- #eval compare 3 5 == Ordering.lt
 
 def match_sequence
     (hash   : HashMap (String × Nat) Nat)
@@ -103,8 +103,8 @@ def Part2.evaluate (conf : Data) : Nat :=
 
 end Day12
 
-def day12 (ext : Option String) : IO Unit := do
-  if let some cs := AoCParser.parse Day12.parser.parser (← dataOf 2023 12 ext) then
-    IO.println s!"  Part1: {sum $ cs.map Day12.Part1.evaluate}"
-    IO.println s!"  Part2: {sum $ cs.map Day12.Part2.evaluate}"
+def day12 (ext : Option String) : IO Answers := do
+  if let some cs := AoCParser.parse Day12.parser.parser (← dataOf 2023 12 ext)
+  then return (s!"{sum $ cs.map Day12.Part1.evaluate}", s!"{sum $ cs.map Day12.Part2.evaluate}")
+  else return ("parse error", "")
 

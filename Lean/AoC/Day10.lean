@@ -14,18 +14,18 @@ def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a 
 
 def Pos.double : Pos → Pos := both (· * 2)
 
-#eval Pos.double ((3, 4) : Pos)
-#eval Pos.double ((3, 5) : Pos)
+-- #eval Pos.double ((3, 4) : Pos)
+-- #eval Pos.double ((3, 5) : Pos)
 
 def makeNeighbors (size s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
     |>.filter (Pos.lt · size)
 
-#eval makeNeighbors (10, 10) (0, 0)
+-- #eval makeNeighbors (10, 10) (0, 0)
 
 def makeVecs (size start : Pos) : List (Pos × Pos) := makeNeighbors size start |>.map ((start, ·))
 
-#eval makeVecs (10, 10) (2, 2)
+-- #eval makeVecs (10, 10) (2, 2)
 
 instance : ToString Pos where
   toString s := s!"P({s.fst}, {s.snd})"
@@ -64,7 +64,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
   | 'S' => .s
   |  _  => .x
 
-#eval (Circuit.ofChar 'f') |> toString
+-- #eval (Circuit.ofChar 'f') |> toString
 
 structure Data where
   new ::
@@ -98,8 +98,8 @@ def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
   | some .j | some .f => (pos, both2 trans pos (-dx, -dy))
   | _                 => (pos, pos)
 
-#eval #['a', 'b'].toList.toString
-#eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
+-- #eval #['a', 'b'].toList.toString
+-- #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
 
 instance : ToString Data where
   toString self := self.grid.map (·|>.map toString |>.foldl String.append ""|>.append "\n")
@@ -134,13 +134,11 @@ def loop_len (self : Data) (limit : Nat) (start : Pos) (len : Nat) (vec : Pos ×
     then if v'.snd == start then len + 1 else 0
     else loop_len self lim' start (len + 1) v'
 
-def solve (data : String) : IO Unit := do
-  if let some m := AoCParser.parse parser.parser data then
-    let limit := m.grid.size * m.grid[0]!.size
-    let len := makeVecs m.size m.start
-      |>.map (loop_len m limit m.start 0 .)
-      |>.maximum? |>.getD 0 |> (· / 2)
-    IO.println s!"  part1: {len}"
+def solve (m : Data) : Nat :=
+  let limit := m.grid.size * m.grid[0]!.size
+  makeVecs m.size m.start
+    |>.map (loop_len m limit m.start 0 .)
+    |>.maximum? |>.getD 0 |> (· / 2)
 
 end part1
 
@@ -151,9 +149,8 @@ structure Map where
 
 namespace Map
 
-#eval #[1, 2].isEmpty
-
-#check @Fin.ofNat' 10 3
+-- #eval #[1, 2].isEmpty
+-- #check @Fin.ofNat' 10 3
 
 def countElements (size: Pos) : Nat := size.fst * size.snd
 
@@ -200,7 +197,7 @@ def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let q' := Pos.double q
   ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
 
-#eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
+-- #eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
 
 /--
 This generates a list of dupicated nodes.
@@ -210,7 +207,7 @@ def scaleUp : List Pos → List Pos
   | p :: []     => [Pos.double p]
   | p :: q :: l => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l)
 
-#eval makeNeighbors (10, 10) (0, 0)
+-- #eval makeNeighbors (10, 10) (0, 0)
 
 def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
   match limit with
@@ -228,30 +225,28 @@ def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
 
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
-def solve (data : String) : IO Unit := do
-  if let some m := AoCParser.parse parser.parser data then
-    let limit := m.grid.size * m.grid[0]!.size
-    let loop := (makeVecs m.size m.start)
-      |>.map (mkLoop m limit m.start [m.start] .)
-      |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
-      |> scaleUp
-    let map := propagate limit (Map.of (Pos.double m.size) loop) [(0, 0)]
-    let n := List.range m.size.fst
-      |>.foldl (fun count y =>
-        List.range m.size.snd
-          |>.filter (fun x => !map.contains (Pos.double (y, x)))
-          |>.length
-          |> (· + count))
-        0
-    IO.println s!"  part2: {n}"
+def solve (m: Data) : Nat :=
+  let limit := m.grid.size * m.grid[0]!.size
+  let loop := (makeVecs m.size m.start)
+    |>.map (mkLoop m limit m.start [m.start] .)
+    |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
+    |> scaleUp
+  let map := propagate limit (Map.of (Pos.double m.size) loop) [(0, 0)]
+  List.range m.size.fst
+    |>.foldl (fun count y =>
+      List.range m.size.snd
+        |>.filter (fun x => !map.contains (Pos.double (y, x)))
+        |>.length
+        |> (· + count))
+      0
 
-#eval List.range 9
+-- #eval List.range 9
 
 end part2
 
 end Day10
 
-def day10 (ext : Option String) : IO Unit := do
-  let data ← dataOf 2023 10 ext
-  Day10.part1.solve data
-  Day10.part2.solve data
+def day10 (ext : Option String) : IO Answers := do
+  if let some m := AoCParser.parse Day10.parser.parser (← dataOf 2023 10 ext)
+  then return (s!"{Day10.part1.solve m}", s!"{Day10.part2.solve m}")
+  else return ("parse error", "")

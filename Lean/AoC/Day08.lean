@@ -39,9 +39,8 @@ def trace₁ : Puzzle → Nat → Nat → String → Nat
     let dir := puzzle.path[step % puzzle.path.length]!
     trace₁ puzzle lim (step + 1) <| if dir == 'L' then left else right
 
-def Part1.solve (p : Puzzle) : IO Unit := do
-  let limit := Nat.lcm p.path.length p.branches.size
-  IO.println s!"  part1: {trace₁ p limit 0 "AAA"}"
+def Part1.solve (p : Puzzle) : Nat :=
+  trace₁ p (Nat.lcm p.path.length p.branches.size) 0 "AAA"
 
 def trace₂ (puzzle : Puzzle) (limit : Nat) (step : Nat) (pos : String) : Nat :=
   match limit with
@@ -62,12 +61,12 @@ def analyze (p : Puzzle) : Nat :=
     |>.map (trace₂ p limit 0 ·.fst)
     |>.foldl Nat.lcm 1
 
-def Part2.solve (p: Puzzle) : IO Unit :=
-  IO.println s!"  part2: {analyze p}"
+def Part2.solve (p: Puzzle) : Nat:= analyze p
 
 end Day08
 
-def day08 (ext : Option String) : IO Unit := do
-  if let some p := AoCParser.parse Day08.parser.parser (← dataOf 2023 8 ext) then
-    Day08.Part1.solve p
-    Day08.Part2.solve p
+def day08 (ext : Option String) : IO Answers := do
+  if let some p := AoCParser.parse Day08.parser.parser (← dataOf 2023 8 ext)
+  then return (s!"{Day08.Part1.solve p}", s!"{Day08.Part2.solve p}")
+  else return ("parse error", "")
+
