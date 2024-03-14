@@ -15,7 +15,7 @@ import «AoC».Day07
 import «AoC».Day08
 import «AoC».Day09
 import «AoC».Day10
--- import «AoC».Day11
+import «AoC».Day11
 import «AoC».Day12
 
 def solved : List Nat := List.iota 12 |>.reverse
@@ -33,7 +33,7 @@ def run (day : Nat) (extra : Option String) : IO Unit := do
     |  8 => Aesop.time <| day08 extra
     |  9 => Aesop.time <| day09 extra
     | 10 => Aesop.time <| day10 extra
-    -- | 11 => Aesop.time <| day11 extra
+    | 11 => Aesop.time <| day11 extra
     | 12 => Aesop.time <| day12 extra
     | _  => Aesop.time <| return ("", "")
   IO.println s!"{color.blue}- {f}{color.reset}: {time.printAsMillis}{color.reset}"
