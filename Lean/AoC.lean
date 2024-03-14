@@ -18,23 +18,26 @@ import «AoC».Day10
 import «AoC».Day11
 import «AoC».Day12
 
-def solved : List Nat := List.iota 12 |>.reverse
+def lastDay := 12
 
-def run (day : Nat) (extra : Option String) : IO Unit := do
-  let f ← dataFileName 2023 day extra
+theorem DayIsNotZero: 12 > 0 := by simp
+
+def solved : List (Fin 12) := List.range lastDay |>.map (Fin.ofNat' · DayIsNotZero)
+
+def run (day : Fin 12) (extra : Option String) : IO Unit := do
+  let f ← dataFileName 2023 (1 + day) extra
   let (results, time) ← match day with
-    |  1 => Aesop.time <| day01 extra
-    |  2 => Aesop.time <| day02 extra
-    |  3 => Aesop.time <| day03 extra
-    |  4 => Aesop.time <| day04 extra
-    |  5 => Aesop.time <| day05 extra
-    |  6 => Aesop.time <| day06 extra
-    |  7 => Aesop.time <| day07 extra
-    |  8 => Aesop.time <| day08 extra
-    |  9 => Aesop.time <| day09 extra
-    | 10 => Aesop.time <| day10 extra
-    | 11 => Aesop.time <| day11 extra
-    | 12 => Aesop.time <| day12 extra
-    | _  => Aesop.time <| return ("", "")
+    |  0 => Aesop.time <| day01 extra
+    |  1 => Aesop.time <| day02 extra
+    |  2 => Aesop.time <| day03 extra
+    |  3 => Aesop.time <| day04 extra
+    |  4 => Aesop.time <| day05 extra
+    |  5 => Aesop.time <| day06 extra
+    |  6 => Aesop.time <| day07 extra
+    |  7 => Aesop.time <| day08 extra
+    |  8 => Aesop.time <| day09 extra
+    |  9 => Aesop.time <| day10 extra
+    | 10 => Aesop.time <| day11 extra
+    | 11 => Aesop.time <| day12 extra
   IO.println s!"{color.blue}- {f}{color.reset}: {time.printAsMillis}{color.reset}"
   IO.println s!"{color.green}  => {results.fst}, {results.snd}{color.reset}"
