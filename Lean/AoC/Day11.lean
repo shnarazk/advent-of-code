@@ -30,32 +30,23 @@ namespace parser
 open Lean.Parsec AoCParser
 
 def pcell := (pchar '.' *> return false) <|> (pchar '#' *> return true)
-def parser := do
-  sepBy1 (many1 pcell) eol
-  -- return Array.join a
-  -- return Data.new (a.size, a[0]!.size) (Array.join a)
+def parser := sepBy1 (many1 pcell) eol
 
 end parser
 
 def dist (a b : Nat) : Nat := Nat.max (a - b) (b - a)
 
 def sum_of_dist : List (Nat × Nat) → Nat
-  | [] => 0
-  | _ :: [] => 0
-  | a :: b =>
-    let dists := b.foldl (fun sum e => sum + join Nat.add (both2 dist e a)) 0
-    dists + sum_of_dist b
+  |     [] => 0
+  |    [_] => 0
+  | a :: b => sum_of_dist b + b.foldl (fun sum e => sum + join Nat.add (both2 dist e a)) 0
 
--- #eval Nat.sub 3 1
-
-def make_transform_map (m : List Nat) (r : Nat) (s : Nat) : List Nat :=
+def expand (m : List Nat) (r : Nat) (s : Nat) : List Nat :=
   List.range r
     |>.foldl (fun (base, result) i =>
        (if m.all (· != i) then base + s else base, result ++ [i + base]))
       (0, ([] : List Nat))
     |>.snd
-
--- set_option maxHeartbeats 1000000
 
 def Part1.solve (d: Array (Array Bool)) : Nat :=
   let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
@@ -65,8 +56,8 @@ def Part1.solve (d: Array (Array Bool)) : Nat :=
   let range := m.foldl (fun m e => (max m.fst e.fst, max m.snd e.snd)) (0, 0)
     |> (fun p => (p.fst + 1, p.snd + 1))
   -- build transformation map
-  let trans_y : List Nat := make_transform_map (m.map (·.fst)) range.fst 1
-  let trans_x : List Nat := make_transform_map (m.map (·.snd)) range.snd 1
+  let trans_y : List Nat := expand (m.map (·.fst)) range.fst 1
+  let trans_x : List Nat := expand (m.map (·.snd)) range.snd 1
   sum_of_dist $ m.map (fun (y, x) => (trans_y[y]!, trans_x[x]!))
 
 def Part2.solve (d: Array (Array Bool)) : Nat :=
@@ -78,8 +69,8 @@ def Part2.solve (d: Array (Array Bool)) : Nat :=
     |> (fun p => (p.fst + 1, p.snd + 1))
   -- build transformation map
   let scaling := 1000000 - 1
-  let trans_y : List Nat := make_transform_map (m.map (·.fst)) range.fst scaling
-  let trans_x : List Nat := make_transform_map (m.map (·.snd)) range.snd scaling
+  let trans_y : List Nat := expand (m.map (·.fst)) range.fst scaling
+  let trans_x : List Nat := expand (m.map (·.snd)) range.snd scaling
   sum_of_dist $ m.map (fun (y, x) => (trans_y[y]!, trans_x[x]!))
 
 end Day11
