@@ -67,11 +67,8 @@ def transpose₀ (pos : Nat) (rs : List Range) : Nat :=
 def transpose (seeds : Array Nat) (rs : Array Range) :=
   seeds.map (transpose₀ · rs.toList)
 
-def Part1.solve (data : String) : IO (Array Nat × Array (Array Range)) := do
-  if let some (seeds, maps) := AoCParser.parse parser.parser data then
-    IO.println s!"  part1: {maps.foldl transpose seeds |>.minD 0}"
-    return (seeds, maps)
-  return panic "parse error"
+def Part1.solve (seeds : Array Nat) (maps : Array (Array Range)) : IO Unit :=
+  IO.println s!"  part1: {maps.foldl transpose seeds |>.minD 0}"
 
 def pairs (l : List α) : List (α × α) :=
   match l with
@@ -112,13 +109,15 @@ def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSp
     spans
     (stages : Array (Array Range))
 
-def Part2.solve (data : Array Nat × Array (Array Range)) : IO Unit := do
-  let (d, rule) := data
-  let spans := pairs d.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
+def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : IO Unit := do
+  let spans := pairs seeds.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
   let spans' : List ClosedSpan := tp2 spans rule
   IO.println s!"  part2: {spans'.map (·._beg) |>.minimum? |>.getD 0}"
 
 end Day05
 
 def day05 (ext : Option String) : IO Unit := do
-  dataOf 2023 5 ext >>= Day05.Part1.solve >>= Day05.Part2.solve
+  let data ← dataOf 2023 5 ext
+  if let some (seeds, maps) := AoCParser.parse Day05.parser.parser data then
+    Day05.Part1.solve seeds maps
+    Day05.Part2.solve seeds maps

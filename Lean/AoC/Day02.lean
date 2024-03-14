@@ -37,9 +37,8 @@ def evaluate (line : String) : Nat :=
   then hash.find! "«id»"
   else 0
 
-def solve (lines : Array String) : IO (Array String) := do
+def solve (lines : Array String) : IO Unit := do
   IO.println s!"  part1: {lines.map evaluate |> sum}"
-  return lines
 
 end Part1
 
@@ -57,4 +56,6 @@ end Part2
 end Day02
 
 def day02 (ext : Option String) : IO Unit := do
-  linesOf 2023 2 ext >>= Day02.Part1.solve >>= Day02.Part2.solve
+  let lines ← linesOf 2023 2 ext
+  Day02.Part1.solve lines
+  Day02.Part2.solve lines

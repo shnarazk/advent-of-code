@@ -46,30 +46,27 @@ def sum_of_dist : List (Nat × Nat) → Nat
 
 #eval Nat.sub 3 1
 
-def Part1.solve (data : String) : IO (Array (Array Bool)) := do
-  if let some d := AoCParser.parse parser.parser data then
-    let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
-      |>.map (·.snd)
-      |>.foldl (fun (i, l) e => (i + 1, l ++ e.map ((i, ·)))) (0, ([] : List (Nat × Nat)))
-      |>.snd
-    let range := m.foldl (fun m e => (max m.fst e.fst, max m.snd e.snd)) (0, 0)
-      |> (fun p => (p.fst + 1, p.snd + 1))
-    -- build transformation map
-    let trans_y := List.range range.fst
-      |>.foldl (fun (base, result) i =>
-         (if m.all (·.fst != i) then base + 1 else base, result ++ [i + base]))
-        (0, ([] : List Nat))
-      |>.snd
-    let trans_x := List.range range.snd
-      |>.foldl (fun (base, result) i =>
-         (if m.all (·.snd != i) then base + 1 else base, result ++ [i + base]))
-        (0, ([] : List Nat))
-      |>.snd
-    -- scale up
-    let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
-    IO.println s!"  part1: {sum_of_dist m'}"
-    return d
-  return panic "parse error"
+def Part1.solve (d: Array (Array Bool)) : IO Unit := do
+  let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
+    |>.map (·.snd)
+    |>.foldl (fun (i, l) e => (i + 1, l ++ e.map ((i, ·)))) (0, ([] : List (Nat × Nat)))
+    |>.snd
+  let range := m.foldl (fun m e => (max m.fst e.fst, max m.snd e.snd)) (0, 0)
+    |> (fun p => (p.fst + 1, p.snd + 1))
+  -- build transformation map
+  let trans_y := List.range range.fst
+    |>.foldl (fun (base, result) i =>
+       (if m.all (·.fst != i) then base + 1 else base, result ++ [i + base]))
+      (0, ([] : List Nat))
+    |>.snd
+  let trans_x := List.range range.snd
+    |>.foldl (fun (base, result) i =>
+       (if m.all (·.snd != i) then base + 1 else base, result ++ [i + base]))
+      (0, ([] : List Nat))
+    |>.snd
+  -- scale up
+  let m' := m.map (fun p => (trans_y[p.fst]!, trans_x[p.snd]!))
+  IO.println s!"  part1: {sum_of_dist m'}"
 
 def Part2.solve (d: Array (Array Bool)) : IO Unit := do
   let m := d.map (·.foldl (fun (j, l) b => (j + 1, if b then l ++ [j] else l)) (0, []))
@@ -96,5 +93,7 @@ def Part2.solve (d: Array (Array Bool)) : IO Unit := do
 
 end Day11
 
-def day11 (ext : Option String) : IO Unit :=
-  dataOf 2023 11 ext >>= Day11.Part1.solve >>= Day11.Part2.solve
+def day11 (ext : Option String) : IO Unit := do
+  if let some d := AoCParser.parse Day11.parser.parser (← dataOf 2023 11 ext) then
+    Day11.Part1.solve d
+    Day11.Part2.solve d

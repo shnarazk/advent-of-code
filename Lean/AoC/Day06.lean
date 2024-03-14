@@ -58,10 +58,9 @@ def parse (data : String) :=
 
 end parser
 
-def Part1.solve (data : String) : IO String := do
+def Part1.solve (data : String) : IO Unit := do
   if let some races := parser.parse data then
     IO.println s!"  part1: {races.map Race.evaluate|> product}"
-  return data
 
 def Part2.solve (data : String) : IO Unit := do
   let x := (data.split (. == '\n')).map (fun l =>
@@ -72,4 +71,6 @@ def Part2.solve (data : String) : IO Unit := do
 end Day06
 
 def day06 (ext : Option String): IO Unit := do
-  dataOf 2023 6 ext >>= Day06.Part1.solve >>= Day06.Part2.solve
+  let data ← dataOf 2023 6 ext
+  Day06.Part1.solve data
+  Day06.Part2.solve data

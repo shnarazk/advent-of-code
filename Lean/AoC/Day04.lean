@@ -32,9 +32,8 @@ def evaluate (line : String) : Nat :=
 -- #eval evaluate "Card 1: 41 48  2 |  2 83  41 48"
 -- #eval evaluate "Card 1: 41 48  2 |  3 83  42 49"
 
-def solve (lines : Array String) : IO (Array String) := do
+def solve (lines : Array String) : IO Unit :=
   IO.println s!"  part1: {sum $ lines.map evaluate }"
-  return lines
 
 end Part1
 
@@ -58,5 +57,7 @@ end Part2
 
 end Day04
 
-def day04 (ext : Option String) : IO Unit :=
-  linesOf 2023 4 ext >>= Day04.Part1.solve >>= Day04.Part2.solve
+def day04 (ext : Option String) : IO Unit := do
+  let lines ← linesOf 2023 4 ext
+  Day04.Part1.solve lines
+  Day04.Part2.solve lines
