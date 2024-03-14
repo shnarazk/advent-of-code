@@ -11,10 +11,8 @@ def evaluate (s : List Char) : Nat :=
   let sk := s.filter Char.isDigit
   asNum sk.head! * 10 + asNum sk.getLast!
 
-def solve (lines : Array String) : IO (Array String) := do
-  let nums := lines.map (fun (s) => evaluate s.toList)
-  IO.println s!"  part1: {sum nums}"
-  return lines
+def solve (lines : Array String) : Nat :=
+  sum $ lines.map (fun (s) => evaluate s.toList)
 
 end Part1
 
@@ -32,14 +30,14 @@ def mnemonic (s : List Char) : Char :=
   else if (String.toList "nine" ).isPrefixOf s then '9'
   else s.get! 0
 
-def solve (lines : Array String) : IO Unit := do
-  let nums := lines.map (fun s =>
-    (List.takeWhile (. != []) s.toList.tails).map mnemonic
-    |> Part1.evaluate)
-  IO.println s!"  part2: {sum nums}"
+def solve (lines : Array String) : Nat :=
+  lines.map (fun s =>
+      (List.takeWhile (. != []) s.toList.tails).map mnemonic |> Part1.evaluate)
+    |> sum
 
 end Part2
 end Day01
 
-def day01 (alt : Option String): IO Unit := do
-  linesOf 2023 1 alt >>= Day01.Part1.solve >>= Day01.Part2.solve
+def day01 (alt : Option String): IO Answers := do
+  let lines ← linesOf 2023 1 alt
+  return (s!"{Day01.Part1.solve lines}", s!"{Day01.Part2.solve lines}")

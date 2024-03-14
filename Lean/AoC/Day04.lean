@@ -32,8 +32,7 @@ def evaluate (line : String) : Nat :=
 -- #eval evaluate "Card 1: 41 48  2 |  2 83  41 48"
 -- #eval evaluate "Card 1: 41 48  2 |  3 83  42 49"
 
-def solve (lines : Array String) : IO Unit :=
-  IO.println s!"  part1: {sum $ lines.map evaluate }"
+def solve (lines : Array String) : Nat := sum $ lines.map evaluate
 
 end Part1
 
@@ -47,17 +46,15 @@ def evaluate (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)
     let counts' := (List.iota found.length).foldr (fun k c => c.modify (n + k) (. + num)) counts
     evaluate (n+1) counts' table'
 
-def solve (lines : Array String) : IO Unit := do
+def solve (lines : Array String) : Nat :=
   let table  := lines.toList.map parsed
   let counts := Array.mkArray lines.size 1
-  let sum    := evaluate 0 counts table
-  IO.println s!"  part2: {sum}"
+  evaluate 0 counts table
 
 end Part2
 
 end Day04
 
-def day04 (ext : Option String) : IO Unit := do
+def day04 (ext : Option String) : IO Answers := do
   let lines ← linesOf 2023 4 ext
-  Day04.Part1.solve lines
-  Day04.Part2.solve lines
+  return (s!"{Day04.Part1.solve lines}", s!"{Day04.Part2.solve lines}")

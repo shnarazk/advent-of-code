@@ -1,4 +1,7 @@
 import Lean
+
+def Answers := String × String
+
 /--
 Build and retrun a data filename
 -/

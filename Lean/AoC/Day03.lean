@@ -51,14 +51,14 @@ def to_numbers (lines : Array String) : List Number :=
     ((0, []) : Int × List Number)
   |>.snd
 
-def Part1.solve (lines : Array String) : IO Unit := do
+def Part1.solve (lines : Array String) : IO Nat := do
   let cands := symbols lines
   let nums  := to_numbers lines
   let part_number := nums.filter
       (fun num => cands.any (fun (y, x) => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en))
-  IO.println s!"  part1: {part_number.map (·.val) |> sum}"
+  return part_number.map (·.val) |> sum
 
-def Part2.solve (lines : Array String) : IO Unit := do
+def Part2.solve (lines : Array String) : IO Nat := do
   let cands := asterisks lines
   let nums  := to_numbers lines
   let gears := cands.foldl
@@ -67,11 +67,11 @@ def Part2.solve (lines : Array String) : IO Unit := do
         (fun num => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en)
       if neighbors.length == 2 then neighbors.map (·.val) |> product |> (acc ++ [·]) else acc)
     ([] : List Nat)
-  IO.println s!"  part2: {sum gears}"
+  return sum gears
 
 end Day03
 
-def day03 (ext : Option String) : IO Unit := do
+def day03 (ext : Option String) : IO Answers := do
   let lines ← linesOf 2023 3 ext
-  Day03.Part1.solve lines
-  Day03.Part2.solve lines
+  return (s!"{← Day03.Part1.solve lines}", s!"{← Day03.Part2.solve lines}")
+
