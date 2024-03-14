@@ -22,28 +22,26 @@ end parser
 
 namespace part1
 
-def solve (data : String) : IO Unit := do
-  if let some d := AoCParser.parse parser.parser data then
-  IO.println s!"  part1: {d.size}"
+def solve (_data : Data) : Nat := 0
 
 end part1
 
 namespace part2
 
-def solve2_line (_line : String) : Nat := 0
+def evaluate (_line : Data) : Nat := 0
 
--- #eval solve2_line ""
+-- #eval evaluate ""
 
-def solve (lines : Array String) : IO Unit := do
-  let points : Array Nat := Array.map solve2_line lines
-  IO.println s!"  part2: {sum points}"
+def solve (data : Array Data) : IO Nat := do
+  return sum $ data.map evaluate
 
 end part2
 
 end Day??
 
-def day?? (ext : Option String) : IO Unit := do
+def day?? (ext : Option String) : IO Answers := do
   let data ← dataOf 2023 ?? ext
-  let lines ← linesOf 2023 ?? ext
-  Day??.part1.solve data
-  Day??.part2.solve lines
+  let _lines ← linesOf 2023 ?? ext
+  if let some d := AoCParser.parse Day??.parser.parser data
+    then return (s!"{← Day??.part1.solve data}", s!"←{← Day??.part2.solve lines}")
+    else return ("parse error", "")
