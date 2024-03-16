@@ -13,6 +13,7 @@
           packages = [
             pkgs.bashInteractive
             pkgs.elan
+            pkgs.tokei
             pkgs.vscodium
           ];
         };
