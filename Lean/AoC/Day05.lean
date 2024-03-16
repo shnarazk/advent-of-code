@@ -76,7 +76,7 @@ def pairs (l : List α) : List (α × α) :=
   | a :: b :: c => (a, b) :: pairs c
   | _ :: _ => panic! "impossible"
 
-#eval pairs <| List.range 6
+-- #eval pairs <| List.range 6
 
 /--
 return `Option converted-span` and `List non-converted-span`
