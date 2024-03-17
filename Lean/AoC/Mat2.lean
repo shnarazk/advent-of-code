@@ -3,6 +3,7 @@ structure Mat2 (size : Nat × Nat) (α : Type) where
   height : Fin (size.fst)
   width  : Fin (size.snd)
   values : Array α
+deriving Repr
 
 instance [ToString α] : ToString (Mat2 size α) where
   toString m := s!"{size}{toString m.values}"
@@ -20,9 +21,14 @@ def new {α : Type} [Inhabited α] (vecs : Array (Array α)) :=
   ({
     height := Fin.ofNat' size.fst H,
     width  := Fin.ofNat' size.snd W,
-    values := array } : Mat2 size α)
+    values := array } : Mat2 size (array.size > 0) α)
 
 #eval Mat2.new #[#[2, 3], #[8, 9]]
 #check Mat2.new #[#[2, 3], #[8, 9]]
+#eval 10 % 0
+
+def get (self : Mat2 size α) (y x : Nat) : α :=
+  let i := min ((y * self.width + x) % self.values.size) self.values.size
+  self.values.get[i % self.values.size]
 
 end Mat2
