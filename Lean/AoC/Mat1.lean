@@ -50,6 +50,14 @@ def set {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (val : α) : Mat1
 -- #eval get x 0 0
 -- #eval get y 0 1
 
+def findIxAtRow {α : Type} [Inhabited α] (mat : Mat1 α) (i : Nat) α : (Nat × Nat) :=
+  let f := i * mat.width
+  let t := (i + 1) * mat.width
+  let i := mat.vector.findIdx?
+  if h : mat.vector.size > 0
+  then mat.vector.get (Fin.ofNat' ix h)
+  else (default : α)
+
 end Mat1
 
 -- def x := Mat1.new #[true, false, true, false] 2
