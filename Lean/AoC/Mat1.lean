@@ -50,13 +50,52 @@ def set {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (val : α) : Mat1
 -- #eval get x 0 0
 -- #eval get y 0 1
 
-def findIxAtRow {α : Type} [Inhabited α] (mat : Mat1 α) (i : Nat) α : (Nat × Nat) :=
+/--
+modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
+-/
+def modify {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
+  let ix := i * mat.width + j
+  if h : mat.vector.size > 0
+  then { mat with vector := mat.vector.modify (Fin.ofNat' ix h) f}
+  else mat
+
+/--
+search an element that satisfies the predicate and return indices or none
+-/
+def findIdx? {α : Type} [Inhabited α] [BEq α] (mat : Mat1 α) (f : α → Bool) : Option (Nat × Nat) :=
+  match mat.vector.findIdx? f with
+  | some i => some (i / mat.width, i % mat.width)
+  | none => none
+
+def y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]]
+#eval y.findIdx? (· == 6)
+
+private partial def findIdxOnSubarray {α : Type} [Inhabited α] [BEq α]
+    (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
+    : Option Nat :=
+  if pred (sa.get limit)
+  then some limit
+  else
+    match (limit : Nat) with
+    | 0 => none
+    | _ => findIdxOnSubarray sa (limit.sub sub1) sub1 pred
+
+/--
+search an element in a specific row
+-/
+def findIdxAtRow? {α : Type} [Inhabited α] [BEq α]
+    (mat : Mat1 α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * mat.width
   let t := (i + 1) * mat.width
-  let i := mat.vector.findIdx?
-  if h : mat.vector.size > 0
-  then mat.vector.get (Fin.ofNat' ix h)
-  else (default : α)
+  let sa := mat.vector.toSubarray f t
+  if h : sa.size > 0
+  then
+    match findIdxOnSubarray sa (Fin.ofNat' (t - f - 1) h) (Fin.ofNat' 1 h) pred with
+    | some j => some (i, j)
+    | none => none
+  else none
+
+#eval y.findIdxAtRow? 1 (· == 4)
 
 end Mat1
 
