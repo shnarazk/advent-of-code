@@ -35,8 +35,8 @@ inductive Circuit where
   | h : Circuit
   | l : Circuit
   | j : Circuit
-  | k : Circuit
-  | f : Circuit
+  -- | k : Circuit
+  -- | f : Circuit
   | s : Circuit
   | x : Circuit
 deriving BEq, Repr
@@ -51,8 +51,8 @@ instance : ToString Circuit where
   | .h => "-"
   | .l => "L"
   | .j => "J"
-  | .k => "7"
-  | .f => "F"
+  -- | .k => "7"
+  -- | .f => "F"
   | .s => "S"
   | _  => " "
 
@@ -62,8 +62,8 @@ def Circuit.ofChar (c : Char) : Circuit :=
   | '-' => .h
   | 'L' => .l
   | 'J' => .j
-  | '7' => .k
-  | 'F' => .f
+  | '7' => .l -- .k
+  | 'F' => .j -- .f
   | 'S' => .s
   |  _  => .x
 
@@ -73,15 +73,16 @@ def startPosition (self : Mat1 Circuit) : Pos :=
   self.findIdx? (· == Circuit.s) |>.getD (0, 0)
 
 def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
-  let (pre, pos) := vec
-  let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) pos pre
+  let (pre, now) := vec
+  let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) now pre
   let trans      := fun x y => Int.ofNat x + y |>.toNat
-  match uncurry mat.get? pos with
-  | some .v           => (pos, both2 trans pos ( dy,   0))
-  | some .h           => (pos, both2 trans pos (  0,  dx))
-  | some .l | some .k => (pos, both2 trans pos ( dx,  dy))
-  | some .j | some .f => (pos, both2 trans pos (-dx, -dy))
-  | _                 => (pos, pos)
+  let diff := match uncurry mat.get? now with
+  | some .v => ( dy,   0)
+  | some .h => (  0,  dx)
+  | some .l => ( dx,  dy) -- | some .k => ( dx,  dy)
+  | some .j => (-dx, -dy) -- | some .f => (-dx, -dy)
+  |       _ => (  0,   0)
+  (now, both2 trans now diff)
 
 namespace parser
 open Lean.Parsec AoCParser
