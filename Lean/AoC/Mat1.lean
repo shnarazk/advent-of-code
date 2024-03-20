@@ -1,3 +1,4 @@
+import Init.Data.Array.Subarray
 
 structure Mat1 (α : Type) [Inhabited α] where
   width  : Nat
@@ -83,7 +84,7 @@ private partial def findIdxOnSubarray {α : Type} [Inhabited α] [BEq α]
 /--
 search an element in a specific row
 -/
-def findIdxAtRow? {α : Type} [Inhabited α] [BEq α]
+def findIdxInRow? {α : Type} [Inhabited α] [BEq α]
     (mat : Mat1 α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * mat.width
   let t := (i + 1) * mat.width
@@ -95,7 +96,30 @@ def findIdxAtRow? {α : Type} [Inhabited α] [BEq α]
     | none => none
   else none
 
-#eval y.findIdxAtRow? 1 (· == 4)
+#eval y.findIdxInRow? 1 (· == 4)
+
+def foldl {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (f : β → α → β) (init : β) : β :=
+  self.vector.foldl f init
+
+def foldlRows {α : Type} [Inhabited α] [BEq α]
+    (self : Mat1 α) (f : β → α → β) (init : β ): Array β :=
+  Array.range (self.vector.size / self.width)
+    |> .map (fun i => self.vector.toSubarray i (i + self.width)
+      |> Array.ofSubarray
+      |>.foldl f init)
+
+def mapRows {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (f : Array α → β) :  Array β :=
+  Array.range (self.vector.size / self.width)
+    |> .map (fun i => self.vector.toSubarray i (i + self.width) |> Array.ofSubarray |> f)
+
+def row {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (i : Nat) : Subarray α :=
+  let j := i % (self.vector.size % self.width)
+  let f := j * self.width
+  let t := f + self.width
+  self.vector.toSubarray f t
+
+def column {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (i : Nat) : Array α :=
+  Array.range (self.vector.size / self.width) |> .map (self.get · i)
 
 end Mat1
 
