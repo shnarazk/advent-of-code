@@ -225,6 +225,6 @@ end part2
 end Day10
 
 def day10 (ext : Option String) : IO Answers := do
-  if let some m := AoCParser.parse Day10.parser.parser (← dataOf 2023 10 ext)
+  if let some (some m) := AoCParser.parse Day10.parser.parser (← dataOf 2023 10 ext)
   then return (s!"{Day10.part1.solve m}", s!"{Day10.part2.solve m}")
   else return ("parse error", "")

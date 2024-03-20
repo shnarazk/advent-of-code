@@ -3,6 +3,7 @@ import Init.Data.Array.Subarray
 structure Mat1 (α : Type) [BEq α] [Inhabited α] where
   width  : Nat
   vector : Array α
+  nonZero : vector.size > 0
 deriving Repr
 
 instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
@@ -10,25 +11,24 @@ instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
 
 namespace Mat1
 /--
-return a new instance of Mat1 of an array
+return an optional new instance of Mat1 of an array
 -/
-def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Mat1 α :=
-  ({width := w, vector := vec} : Mat1 α)
+def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option (Mat1 α) :=
+  if h : vec.size > 0
+  then ({width := w, vector := vec, nonZero := h } : Mat1 α) |> some
+  else none
 
 /--
-return a new instacne of Mat1 of an 2D array
+return an optional new instacne of Mat1 of an 2D array
 -/
-def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Mat1 α :=
-  ({width := (m.getD 1 #[]).size, vector := m.foldl Array.append #[]} : Mat1 α)
+def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Option (Mat1 α) :=
+  new (m.foldl Array.append #[]) (m.getD 1 #[]).size
 
 /--
 return the `(i,j)`-th element of Mat1 instance
 -/
 def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
-  let ix := i * self.width + j
-  if h : self.vector.size > 0
-  then self.vector.get (Fin.ofNat' ix h)
-  else (default : α)
+  self.vector.get (Fin.ofNat' (i * self.width + j) self.nonZero)
 
 def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
   0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
@@ -41,8 +41,9 @@ set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
   let ix := i * self.width + j
-  if h : self.vector.size > 0
-  then { self with vector := self.vector.set (Fin.ofNat' ix h) val}
+  let v := self.vector.set (Fin.ofNat' ix self.nonZero) val
+  if h : v.size > 0  -- I don't know how to reuse self.nonZero
+  then ({width := self.width, vector := v, nonZero := h } : Mat1 α)
   else self
 
 -- def x := new #[true, false, true, false] 2
@@ -60,11 +61,12 @@ def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : 
 /--
 modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def modify {α : Type} [BEq α] [Inhabited α] (mat : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
-  let ix := i * mat.width + j
-  if h : mat.vector.size > 0
-  then { mat with vector := mat.vector.modify (Fin.ofNat' ix h) f}
-  else mat
+def modify {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
+  let ix := i * self.width + j
+  let v := self.vector.modify (Fin.ofNat' ix self.nonZero) f
+  if h : v.size > 0  -- I don't know how to reuse self.nonZero
+  then ({width := self.width, vector := v, nonZero := h } : Mat1 α)
+  else self
 
 /--
 search an element that satisfies the predicate and return indices or none
@@ -74,8 +76,7 @@ def findIdx? {α : Type} [BEq α] [Inhabited α] (mat : Mat1 α) (f : α → Boo
   | some i => some (i / mat.width, i % mat.width)
   | none => none
 
-def y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]]
-#eval y.findIdx? (· == 6)
+-- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdx? (· == 6) else none
 
 private partial def findIdxOnSubarray {α : Type} [BEq α] [Inhabited α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
@@ -102,7 +103,7 @@ def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
     | none => none
   else none
 
-#eval y.findIdxInRow? 1 (· == 4)
+-- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
 def foldl {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
