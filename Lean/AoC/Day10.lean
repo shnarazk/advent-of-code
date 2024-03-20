@@ -41,6 +41,9 @@ inductive Circuit where
   | x : Circuit
 deriving BEq, Repr
 
+instance : Inhabited Circuit where
+  default := Circuit.x
+
 instance : ToString Circuit where
   toString s :=
   match s with
@@ -66,44 +69,19 @@ def Circuit.ofChar (c : Char) : Circuit :=
 
 -- #eval (Circuit.ofChar 'f') |> toString
 
-structure Data where
-  new ::
-  grid : Array (Array Circuit)
-deriving BEq, Repr
+def startPosition (self : Mat1 Circuit) : Pos :=
+  self.findIdx? (· == Circuit.s) |>.getD (0, 0)
 
-def Data.size (self : Data) := (self.grid.size, self.grid.getD 0 #[] |>.size)
-
-def seek (a: Array (Array Circuit)) (n : Nat) (target : Circuit) : Pos :=
-  if h : n < a.size then
-    let l := a[n]'h
-    match Array.findIdx? l (· == target) with
-    | some m => (n, m)
-    | _      => seek a (n + 1) target
-  else (0, 0)
-termination_by a.size - n
-
-def Data.start (self : Data) : Pos := seek self.grid 0 Circuit.s
-
-def Data.at (self : Data) (pos : Pos) : Option Circuit :=
-  (self.grid[pos.fst]?) >>= (·[pos.snd]?)
-
-def Data.dest (c : Data) (vec : Pos × Pos) : Pos × Pos :=
+def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, pos) := vec
   let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) pos pre
   let trans      := fun x y => Int.ofNat x + y |>.toNat
-  match c.at pos with
+  match uncurry mat.get? pos with
   | some .v           => (pos, both2 trans pos ( dy,   0))
   | some .h           => (pos, both2 trans pos (  0,  dx))
   | some .l | some .k => (pos, both2 trans pos ( dx,  dy))
   | some .j | some .f => (pos, both2 trans pos (-dx, -dy))
   | _                 => (pos, pos)
-
--- #eval #['a', 'b'].toList.toString
--- #eval #["aa", "bb"].foldl (fun x y => x ++ y) ""
-
-instance : ToString Data where
-  toString self := self.grid.map (·|>.map toString |>.foldl String.append ""|>.append "\n")
-      |>.foldl String.append ""
 
 namespace parser
 open Lean.Parsec AoCParser
@@ -119,25 +97,24 @@ def cell := pchar '|'
 
 def pcircuit := (return Circuit.ofChar) <*> cell
 
-def parser := (return Data.new) <*>many (many pcircuit <* eol)
+def parser := (return Mat1.of2DMatrix) <*>many (many pcircuit <* eol)
 
 end parser
 
 namespace part1
 
-def loop_len (self : Data) (limit : Nat) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
+def loop_len (self : Mat1 Circuit) (limit : Nat) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
   match limit with
   | 0        => 0
   | lim' + 1 =>
-    let v' := self.dest vec
+    let v' := dest self vec
     if v'.fst == v'.snd
     then if v'.snd == start then len + 1 else 0
     else loop_len self lim' start (len + 1) v'
 
-def solve (m : Data) : Nat :=
-  let limit := m.grid.size * m.grid[0]!.size
-  makeVecs m.size m.start
-    |>.map (loop_len m limit m.start 0 .)
+def solve (m : Mat1 Circuit) : Nat :=
+  makeVecs m.shape (startPosition m)
+    |>.map (loop_len m m.size (startPosition m) 0 .)
     |>.maximum? |>.getD 0 |> (· / 2)
 
 end part1
@@ -182,12 +159,12 @@ open Lean Data
   5. count the unmarked cells
 -/
 
-def mkLoop (self : Data) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+def mkLoop (self : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
     : List Pos :=
   match limit with
   | 0        => []
   | lim' + 1 =>
-    let v' := self.dest vec
+    let v' := dest self vec
     if v'.fst == v'.snd
     then if v'.snd == start then path ++ [v'.fst] else []
     else mkLoop self lim' start (path ++ [v'.fst]) v'
@@ -225,16 +202,17 @@ def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
 
 def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
-def solve (m: Data) : Nat :=
-  let limit := m.grid.size * m.grid[0]!.size
-  let loop := (makeVecs m.size m.start)
-    |>.map (mkLoop m limit m.start [m.start] .)
+def solve (m: Mat1 Circuit) : Nat :=
+  let st := startPosition m
+  let sp := m.shape
+  let loop := makeVecs sp st
+    |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let map := propagate limit (Map.of (Pos.double m.size) loop) [(0, 0)]
-  List.range m.size.fst
+  let map := propagate m.size (Map.of (Pos.double sp) loop) [(0, 0)]
+  List.range sp.fst
     |>.foldl (fun count y =>
-      List.range m.size.snd
+      List.range sp.snd
         |>.filter (fun x => !map.contains (Pos.double (y, x)))
         |>.length
         |> (· + count))

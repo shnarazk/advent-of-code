@@ -1,43 +1,49 @@
 import Init.Data.Array.Subarray
 
-structure Mat1 (α : Type) [Inhabited α] where
+structure Mat1 (α : Type) [BEq α] [Inhabited α] where
   width  : Nat
   vector : Array α
 deriving Repr
 
-instance [ToString α] [Inhabited α] : ToString (Mat1 α) where
+instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
   toString m := s!"{m.width}{toString m.vector}"
 
 namespace Mat1
 /--
 return a new instance of Mat1 of an array
 -/
-def new {α : Type} [Inhabited α] (vec : Array α) (w : Nat) : Mat1 α :=
+def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Mat1 α :=
   ({width := w, vector := vec} : Mat1 α)
 
 /--
 return a new instacne of Mat1 of an 2D array
 -/
-def of2DMatrix {α : Type} [Inhabited α] (m : Array (Array α)) : Mat1 α :=
+def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Mat1 α :=
   ({width := (m.getD 1 #[]).size, vector := m.foldl Array.append #[]} : Mat1 α)
 
 /--
 return the `(i,j)`-th element of Mat1 instance
 -/
-def get {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) : α :=
-  let ix := i * mat.width + j
-  if h : mat.vector.size > 0
-  then mat.vector.get (Fin.ofNat' ix h)
+def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
+  let ix := i * self.width + j
+  if h : self.vector.size > 0
+  then self.vector.get (Fin.ofNat' ix h)
   else (default : α)
+
+def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
+  0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
+
+def get? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Option α :=
+  if self.validIndex? i j then self.get i j |> some else none
 
 /--
 set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def set {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
-  let ix := i * mat.width + j
-  if h : mat.vector.size > 0
-  then { mat with vector := mat.vector.set (Fin.ofNat' ix h) val}
-  else mat
+def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
+  let ix := i * self.width + j
+  if h : self.vector.size > 0
+  then { self with vector := self.vector.set (Fin.ofNat' ix h) val}
+  else self
 
 -- def x := new #[true, false, true, false] 2
 -- def y := of2DMatrix #[#[1,2,3], #[4,5,6]]
@@ -54,7 +60,7 @@ def set {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (val : α) : Mat1
 /--
 modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def modify {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
+def modify {α : Type} [BEq α] [Inhabited α] (mat : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
   let ix := i * mat.width + j
   if h : mat.vector.size > 0
   then { mat with vector := mat.vector.modify (Fin.ofNat' ix h) f}
@@ -63,7 +69,7 @@ def modify {α : Type} [Inhabited α] (mat : Mat1 α) (i j : Nat) (f : α → α
 /--
 search an element that satisfies the predicate and return indices or none
 -/
-def findIdx? {α : Type} [Inhabited α] [BEq α] (mat : Mat1 α) (f : α → Bool) : Option (Nat × Nat) :=
+def findIdx? {α : Type} [BEq α] [Inhabited α] (mat : Mat1 α) (f : α → Bool) : Option (Nat × Nat) :=
   match mat.vector.findIdx? f with
   | some i => some (i / mat.width, i % mat.width)
   | none => none
@@ -71,7 +77,7 @@ def findIdx? {α : Type} [Inhabited α] [BEq α] (mat : Mat1 α) (f : α → Boo
 def y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]]
 #eval y.findIdx? (· == 6)
 
-private partial def findIdxOnSubarray {α : Type} [Inhabited α] [BEq α]
+private partial def findIdxOnSubarray {α : Type} [BEq α] [Inhabited α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=
   if pred (sa.get limit)
@@ -84,7 +90,7 @@ private partial def findIdxOnSubarray {α : Type} [Inhabited α] [BEq α]
 /--
 search an element in a specific row
 -/
-def findIdxInRow? {α : Type} [Inhabited α] [BEq α]
+def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
     (mat : Mat1 α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * mat.width
   let t := (i + 1) * mat.width
@@ -98,28 +104,34 @@ def findIdxInRow? {α : Type} [Inhabited α] [BEq α]
 
 #eval y.findIdxInRow? 1 (· == 4)
 
-def foldl {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (f : β → α → β) (init : β) : β :=
+def foldl {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
-def foldlRows {α : Type} [Inhabited α] [BEq α]
+def foldlRows {α : Type} [BEq α] [Inhabited α]
     (self : Mat1 α) (f : β → α → β) (init : β ): Array β :=
   Array.range (self.vector.size / self.width)
     |> .map (fun i => self.vector.toSubarray i (i + self.width)
       |> Array.ofSubarray
       |>.foldl f init)
 
-def mapRows {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (f : Array α → β) :  Array β :=
+def mapRows {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : Array α → β) :  Array β :=
   Array.range (self.vector.size / self.width)
     |> .map (fun i => self.vector.toSubarray i (i + self.width) |> Array.ofSubarray |> f)
 
-def row {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (i : Nat) : Subarray α :=
+def row {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Subarray α :=
   let j := i % (self.vector.size % self.width)
   let f := j * self.width
   let t := f + self.width
   self.vector.toSubarray f t
 
-def column {α : Type} [Inhabited α] [BEq α] (self : Mat1 α) (i : Nat) : Array α :=
+def column {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Array α :=
   Array.range (self.vector.size / self.width) |> .map (self.get · i)
+
+def shape {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) : Nat × Nat :=
+  (self.vector.size / self.width, self.width)
+
+def size {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) : Nat :=
+  self.vector.size
 
 end Mat1
 
