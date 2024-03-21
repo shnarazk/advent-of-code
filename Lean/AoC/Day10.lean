@@ -3,6 +3,10 @@ import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
+import Mathlib.Algebra.Order.WithZero
+-- import Mathlib.Algebra.Order.Monoid.Lemmas
+import Mathlib.Init.Data.Nat.Lemmas
+import Mathlib.Init.Order.LinearOrder
 
 namespace Day10
 open Std CiCL CoP
@@ -125,18 +129,19 @@ structure Map where
   size : Pos
   cells : Array Bool
 
+/-
 namespace Map
 
 -- #eval #[1, 2].isEmpty
 -- #check @Fin.ofNat' 10 3
 
-def countElements (size: Pos) : Nat := size.fst * size.snd
+def countElements : Pos → Nat := join (· * ·) -- size.fst * size.snd
 
 @[inline]
 def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
 
 @[inline]
-def contains (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
+def get (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
 
 @[inline]
 def set (self : Map) (p : Pos) : Map :=
@@ -148,6 +153,29 @@ def of (size : Pos) (locs : List Pos) : Map :=
     (Map.new size (Array.mkArray (countElements size) false))
 
 end Map
+-/
+
+def mappingOf (size : Pos) (locs : List Pos) : Mat1 Bool :=
+  let s' := (max 1 size.fst, max 1 size.snd)
+  let noneZero : s'.fst * s'.snd > 0 := by
+    -- dsimp
+    simp
+    -- have fst : 1 ≤ max 1 s'.fst := by
+    --   exact le_max_left 1 s'.fst
+    --   done
+    -- have snd : 1 ≤ max 1 s'.snd := by exact le_max_left 1 s'.snd
+    -- have one_le_mul (a : Nat) (b : Nat) (ola : 1 ≤ a) (olb : 1 ≤ b) : 1 ≤ a * b := by
+    --   done
+    -- have so : 1 ≤ max 1 s'.fst * max 1 s'.snd := by
+    --   exact one_le_mul₀
+    -- done
+    done
+  locs.foldl
+    (fun mat pos => mat.set₂ pos true)
+    (Mat1.new! s' noneZero false)
+    -- (Map.new size (Array.mkArray (countElements size) false))
+
+-- #eval mappingOf (2, 2) [(0,0), (1,1)]
 
 namespace part2
 open Lean Data
@@ -187,21 +215,16 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
-  match limit with
-  | 0       => linked
-  | lim + 1 =>
-  match toVisit with
-  | [] => linked
-  | _ =>
-    toVisit.map (makeNeighbors linked.size)
+partial def propagate (limit : Nat) (self : Mat1 Bool) (toVisit : List Pos) : Mat1 Bool :=
+  match toVisit, limit with
+  | [], _ | _, 0 => self
+  |  _, lim + 1  =>
+    toVisit.map (makeNeighbors self.shape)
       |>.join
       |>.foldl
-        (fun lt e => if lt.fst.contains e then lt else (lt.fst.set e, e :: lt.snd))
-        (linked, [])
+        (fun lt e => if lt.fst.get₂ e then lt else (lt.fst.set₂ e true, e :: lt.snd))
+        (self, [])
       |> uncurry (propagate lim)
-
-def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
@@ -210,11 +233,11 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let map := propagate m.size (Map.of (Pos.double sp) loop) [(0, 0)]
+  let map := propagate m.size (mappingOf (Pos.double sp) loop) [(0, 0)]
   List.range sp.fst
     |>.foldl (fun count y =>
       List.range sp.snd
-        |>.filter (fun x => !map.contains (Pos.double (y, x)))
+        |>.filter (fun x => !map.get₂ (Pos.double (y, x)))
         |>.length
         |> (· + count))
       0
