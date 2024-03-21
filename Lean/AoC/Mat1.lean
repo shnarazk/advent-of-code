@@ -53,6 +53,7 @@ def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
 def get₂ {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (p : Nat × Nat) : α :=
   self.get p.fst p.snd
 
+@[inline]
 def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
   0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
 

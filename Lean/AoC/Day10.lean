@@ -76,6 +76,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
 def startPosition (self : Mat1 Circuit) : Pos :=
   self.findIdx? (· == Circuit.s) |>.getD (0, 0)
 
+@[inline]
 def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, now) := vec
   let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) now pre
@@ -157,23 +158,8 @@ end Map
 
 def mappingOf (size : Pos) (locs : List Pos) : Mat1 Bool :=
   let s' := (max 1 size.fst, max 1 size.snd)
-  let noneZero : s'.fst * s'.snd > 0 := by
-    -- dsimp
-    simp
-    -- have fst : 1 ≤ max 1 s'.fst := by
-    --   exact le_max_left 1 s'.fst
-    --   done
-    -- have snd : 1 ≤ max 1 s'.snd := by exact le_max_left 1 s'.snd
-    -- have one_le_mul (a : Nat) (b : Nat) (ola : 1 ≤ a) (olb : 1 ≤ b) : 1 ≤ a * b := by
-    --   done
-    -- have so : 1 ≤ max 1 s'.fst * max 1 s'.snd := by
-    --   exact one_le_mul₀
-    -- done
-    done
-  locs.foldl
-    (fun mat pos => mat.set₂ pos true)
-    (Mat1.new! s' noneZero false)
-    -- (Map.new size (Array.mkArray (countElements size) false))
+  let noneZero : s'.fst * s'.snd > 0 := by simp
+  locs.foldl (fun mat pos => mat.set₂ pos true) (Mat1.new! s' noneZero false)
 
 -- #eval mappingOf (2, 2) [(0,0), (1,1)]
 
@@ -188,15 +174,15 @@ open Lean Data
   5. count the unmarked cells
 -/
 
-def mkLoop (self : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+def mkLoop (mat : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
     : List Pos :=
   match limit with
-  | 0        => []
-  | lim' + 1 =>
-    let v' := dest self vec
+  | 0       => []
+  | lim + 1 =>
+    let v' := dest mat vec
     if v'.fst == v'.snd
-    then if v'.snd == start then path ++ [v'.fst] else []
-    else mkLoop self lim' start (path ++ [v'.fst]) v'
+    then if v'.snd == start then (v'.fst :: path).reverse else []
+    else mkLoop mat lim start (v'.fst :: path) v'
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let p' := Pos.double p
@@ -233,7 +219,8 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let map := propagate m.size (mappingOf (Pos.double sp) loop) [(0, 0)]
+  -- loop.length
+  let map := propagate (min 1 m.size) (mappingOf (Pos.double sp) loop) [(0, 0)]
   List.range sp.fst
     |>.foldl (fun count y =>
       List.range sp.snd
