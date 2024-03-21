@@ -113,7 +113,7 @@ def loop_len (self : Mat1 Circuit) (limit : Nat) (start : Pos) (len : Nat) (vec 
   match limit with
   | 0        => 0
   | lim' + 1 =>
-    let v' := dest self vec
+    let v' := destinationVector self vec
     if v'.fst == v'.snd
     then if v'.snd == start then len + 1 else 0
     else loop_len self lim' start (len + 1) v'
@@ -129,32 +129,6 @@ structure Map where
   new ::
   size : Pos
   cells : Array Bool
-
-/-
-namespace Map
-
--- #eval #[1, 2].isEmpty
--- #check @Fin.ofNat' 10 3
-
-def countElements : Pos → Nat := join (· * ·) -- size.fst * size.snd
-
-@[inline]
-def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
-
-@[inline]
-def get (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
-
-@[inline]
-def set (self : Map) (p : Pos) : Map :=
-  { self with cells := self.cells.set! (Map.index self p) true }
-
-def of (size : Pos) (locs : List Pos) : Map :=
-  locs.foldl
-    (fun map pos => Map.set map pos)
-    (Map.new size (Array.mkArray (countElements size) false))
-
-end Map
--/
 
 def mappingOf (size : Pos) (locs : List Pos) : Mat1 Bool :=
   let s' := (max 1 size.fst, max 1 size.snd)
@@ -179,9 +153,9 @@ def mkLoop (mat : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (v
   match limit with
   | 0       => []
   | lim + 1 =>
-    let v' := dest mat vec
+    let v' := destinationVector mat vec
     if v'.fst == v'.snd
-    then if v'.snd == start then (v'.fst :: path).reverse else []
+    then if v'.snd == start then v'.fst :: path else []
     else mkLoop mat lim start (v'.fst :: path) v'
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
