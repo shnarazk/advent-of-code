@@ -11,6 +11,6 @@ lean_lib «AoC» where
 lean_exe «aoc» where
   root := `Main
 
--- require mathlib from git "https://github.com/leanprover-community/mathlib4"
-require std from git "https://github.com/leanprover/std4" @ "main"
+require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.7.0-rc2"
+-- require std from git "https://github.com/leanprover/std4" @ "main"
 require aesop from git "https://github.com/leanprover-community/aesop" @ "master"
