@@ -10,8 +10,9 @@ instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
   toString m := s!"{m.width}{toString m.vector}"
 
 namespace Mat1
+
 /--
-return an optional new instance of Mat1 with a given shepe (height, width)
+return a new non-empty instance of Mat1 with a given shepe (height, width) and prep
 -/
 def new! {α : Type} [BEq α] [Inhabited α]
     (shp : Nat × Nat)
@@ -24,6 +25,9 @@ def new! {α : Type} [BEq α] [Inhabited α]
     done
   ({width := shp.snd, vector := vector, nonZero := h } : Mat1 α)
 
+/--
+return an optional new instance of Mat1 with a given shepe (height, width)
+-/
 def new {α : Type} [BEq α] [Inhabited α]
     (shp : Nat × Nat) (init : α := default) : Option (Mat1 α) :=
   let size := shp.fst * shp.snd
@@ -44,24 +48,29 @@ def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Opti
   ofVector (m.foldl Array.append #[]) (m.getD 1 #[]).size
 
 /--
-return the `(i,j)`-th element of Mat1 instance
+return the i, j-th element of Mat1 instance
 -/
 @[inline]
 def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
   self.vector.get (Fin.ofNat' (i * self.width + j) self.nonZero)
 
+/--
+return the `(i,j)`-th element of Mat1 instance
+-/
+@[inline]
 def get₂ {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (p : Nat × Nat) : α :=
   self.get p.fst p.snd
 
 @[inline]
-def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
+private def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
   0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
 
+@[inline]
 def get? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Option α :=
   if self.validIndex? i j then self.get i j |> some else none
 
 /--
-set the `(i,j)`-th element to `val` and return the modified Mat1 instance
+set the i, j-th element to `val` and return the modified Mat1 instance
 -/
 @[inline]
 def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
@@ -83,14 +92,17 @@ def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : 
 -- #eval get x 0 0
 -- #eval get y 0 1
 
+/--
+set the `(i,j)`-th element to `val` and return the modified Mat1 instance
+-/
+@[inline]
 def set₂ {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (p : Nat × Nat) (val : α) : Mat1 α :=
   self.set p.fst p.snd val
 
-theorem noneZero : (2, 2).fst * (2, 2).snd > 0 := by simp
-
-def x := new! (2, 2) noneZero false
-#eval x
-#eval x.set₂ (0,1) true
+-- theorem noneZero : (2, 2).fst * (2, 2).snd > 0 := by simp
+-- def x := new! (2, 2) noneZero false
+-- #eval x
+-- #eval x.set₂ (0,1) true
 
 /--
 modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
