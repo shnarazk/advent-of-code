@@ -14,7 +14,7 @@ open Std CiCL CoP
 def Pos : Type := Nat × Nat
 deriving BEq, Repr, ToString
 
-def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
+def Pos.lt (a : Pos) (b : Pos) : Bool := uncurry and <| both2 (fun i j => i < j) a b
 
 def Pos.double : Pos → Pos := both (· * 2)
 
@@ -77,11 +77,11 @@ def startPosition (self : Mat1 Circuit) : Pos :=
   self.findIdx? (· == Circuit.s) |>.getD (0, 0)
 
 @[inline]
-def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
+def destinationVector (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, now) := vec
   let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) now pre
   let trans      := fun x y => Int.ofNat x + y |>.toNat
-  let diff := match uncurry mat.get? now with
+  let diff       := match uncurry mat.get? now with
   | some .v => ( dy,   0)
   | some .h => (  0,  dx)
   | some .l => ( dx,  dy) -- | some .k => ( dx,  dy)

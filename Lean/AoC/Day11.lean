@@ -39,7 +39,7 @@ def dist (a b : Nat) : Nat := Nat.max (a - b) (b - a)
 def sum_of_dist : List (Nat × Nat) → Nat
   |     [] => 0
   |    [_] => 0
-  | a :: b => sum_of_dist b + b.foldl (fun sum e => sum + join Nat.add (both2 dist e a)) 0
+  | a :: b => sum_of_dist b + b.foldl (fun sum e => sum + uncurry Nat.add (both2 dist e a)) 0
 
 def expand (m : List Nat) (r : Nat) (s : Nat) : List Nat :=
   List.range r

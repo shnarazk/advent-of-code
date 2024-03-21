@@ -25,8 +25,6 @@ def S (x : α → β → γ) (y : α → β) (z : α) := x z (y z)
 def before (y : α → β) (x : β → α → γ) (z : α) : γ := x (y z) z
 def after  (x : α → β → γ) (y : α → β) (z : α) : γ := x z (y z)
 def train (x : α → β) (z : β → γ → ε) (y : α → γ) (a : α) : ε := z (x a) (y a)
-@[inline]
-def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
 
 infix:80    " ⊸ " => before
 infixl:80   " ⟜ " => after
@@ -37,8 +35,13 @@ end CiCL
 
 namespace CoP -- combinators on pair
 
+@[inline]
 def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)
+
+@[inline]
 def both2 (f : α → β → γ) (x : α × α) (y : β × β) : γ × γ := (f x.fst y.fst, f x.snd y.snd)
-def join (f : α → α → β) (x : α × α) : β := f x.fst x.snd
+
+@[inline]
+def uncurry (f : α → β → γ) (x : α × β) : γ := f x.fst x.snd
 
 end CoP
