@@ -219,14 +219,13 @@ def count {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : α → Bool)
 def countWithIdx {α : Type} [BEq α] [Inhabited α]
     (self : Mat1 α) (f : Nat → Nat → α → Bool) : Nat :=
   self.vector.foldl
-    (fun (n, acc) e => (n + 1, if f (n % self.width) (n / self.width) e then acc + 1 else acc))
+    (fun (n, acc) e => (n + 1, if f (n / self.width) (n % self.width) e then acc + 1 else acc))
     (0, 0)
   |>.2
 
 @[inline]
 def row {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Subarray α :=
-  let j := i % (self.vector.size % self.width)
-  let f := j * self.width
+  let f := i * self.width
   let t := f + self.width
   self.vector.toSubarray f t
 
@@ -245,7 +244,7 @@ def cloneWith {α : Type} [BEq α] [Inhabited α] [BEq β] [Inhabited β]
     rw [P1]
     exact self.nonZero
     done
-  { self with vector := v, nonZero := nonZero }
+  {self with vector := v, nonZero := nonZero}
 
 @[inline]
 def shape {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) : Nat × Nat :=
