@@ -25,7 +25,7 @@ def makeNeighbors (size s : Pos) : List Pos :=
   [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
     |>.filter (Pos.lt · size)
 
--- #eval makeNeighbors (10, 10) (0, 0)
+#eval makeNeighbors (10, 10) (9, 8)
 
 def makeVecs (size start : Pos) : List (Pos × Pos) := makeNeighbors size start |>.map ((start, ·))
 
@@ -168,6 +168,23 @@ def scaleUp : List Pos → List Pos
   | p :: []     => [Pos.double p]
   | p :: q :: l => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l)
 
+def print (r : Mat1 OBool) : IO Unit := do
+  let sp := both (· / 2) r.shape
+  let _ ← List.range sp.1
+    |>.mapM
+      (fun i => do
+        let _ ← List.range sp.2
+          |>.mapM
+            (fun j => do
+              match r.get (i * 2) (j * 2) with
+              | none       => IO.print "."
+              | some false => IO.print "x"
+              | some true  => IO.print "#"
+            )
+        IO.print "\n"
+        return ())
+  return ()
+
 -- #eval makeNeighbors (10, 10) (0, 0)
 
 -- FIXME: use `foldWithIdx`
@@ -187,32 +204,20 @@ partial def propagate (mat : Mat1 OBool) (toVisit : Mat1 Bool) : Mat1 OBool :=
     (false, mat, toVisit.cloneWith false)
   if progress then propagate mat' toVisit' else mat'
 
-def solve (m: Mat1 Circuit) : IO (Nat × Nat × Nat) := do
+def solve (m: Mat1 Circuit) : IO Nat := do
   let st := startPosition m
   let sp := m.shape
   let loop := makeVecs sp st
     |>.map (findLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let r := propagate (mappingOf (Pos.double sp) loop) (m.cloneWith false |>.set 0 0 true)
-  let _ ← List.range sp.1
-    |>.mapM
-      (fun i => do
-        let _ ← List.range sp.2
-          |>.mapM
-            (fun j => do
-              match r.get (i * 2) (j * 2) with
-              | none       => IO.print "."
-              | some false => IO.print "x"
-              | some true  => IO.print "#"
-            )
-        IO.print "\n"
-        return ())
-  return (
-    r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none),
-    r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == some false),
-    r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == some true),
-  )
+  let m2 := mappingOf (Pos.double sp) loop
+  -- print m2
+  -- IO.println s!"{m2.shape}"
+  let r := propagate m2 (m2.cloneWith false |>.set 0 0 true)
+  -- IO.println ""
+  -- print r
+  return r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none)
   -- let r := mappingOf (Pos.double sp) (dbgTraceVal loop)
   -- (
   --   r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none),
