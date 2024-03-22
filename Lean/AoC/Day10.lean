@@ -204,7 +204,7 @@ partial def propagate (mat : Mat1 OBool) (toVisit : Mat1 Bool) : Mat1 OBool :=
     (false, mat, toVisit.cloneWith false)
   if progress then propagate mat' toVisit' else mat'
 
-def solve (m: Mat1 Circuit) : IO Nat := do
+def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
   let sp := m.shape
   let loop := makeVecs sp st
@@ -212,20 +212,8 @@ def solve (m: Mat1 Circuit) : IO Nat := do
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
   let m2 := mappingOf (Pos.double sp) loop
-  -- print m2
-  -- IO.println s!"{m2.shape}"
   let r := propagate m2 (m2.cloneWith false |>.set 0 0 true)
-  -- IO.println ""
-  -- print r
-  return r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none)
-  -- let r := mappingOf (Pos.double sp) (dbgTraceVal loop)
-  -- (
-  --   r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none),
-  --   r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == some false),
-  --   r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == some true),
-  -- )
-
--- #eval List.range 9
+  r.countWithIdx (fun i j e => i % 2 == 0 && j % 2 == 0 && e == none)
 
 end part2
 
@@ -233,6 +221,5 @@ end Day10
 
 def day10 (ext : Option String) : IO Answers := do
   if let some (some m) := AoCParser.parse Day10.parser.parser (← dataOf 2023 10 ext)
-  then
-    return (s!"{Day10.Part1.solve m}", s!"{← Day10.part2.solve m}")
+  then return (s!"{Day10.Part1.solve m}", s!"{Day10.part2.solve m}")
   else return ("parse error", "")
