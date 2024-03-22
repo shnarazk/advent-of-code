@@ -9,7 +9,7 @@ structure Mat1 (α : Type) [BEq α] [Inhabited α] where
 deriving Repr
 
 instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
-  toString m := -- s!"{m.width}{toString m.vector}"
+  toString m :=
     let s := Array.range (m.vector.size / m.width)
       |>.map (fun i => m.vector.toSubarray (i * m.width) ((i + 1) * m.width))
     let r := s.map (fun e => s!"{e}\n")
@@ -30,6 +30,8 @@ def new! {α : Type} [BEq α] [Inhabited α]
     exact noneZero
     done
   ({width := shp.snd, vector := vector, nonZero := h } : Mat1 α)
+
+#eval Array.mkArray (1000 * 1000) false
 
 theorem noneZero : (2, 3).fst * (2, 3).snd > 0 := by simp
 def mat := new! (2, 3) noneZero false
@@ -218,10 +220,7 @@ def count {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : α → Bool)
 
 def countWithIdx {α : Type} [BEq α] [Inhabited α]
     (self : Mat1 α) (f : Nat → Nat → α → Bool) : Nat :=
-  self.vector.foldl
-    (fun (n, acc) e => (n + 1, if f (n / self.width) (n % self.width) e then acc + 1 else acc))
-    (0, 0)
-  |>.2
+  self.vector.mapIdx (fun n e => f (n / self.width) (n % self.width) e) |>.size
 
 @[inline]
 def row {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Subarray α :=
