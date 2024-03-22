@@ -75,6 +75,7 @@ def get₂ {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (p : Nat × Nat)
 private def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
   0 ≤ i && i * self.width < self.vector.size && 0 ≤ j && j < self.width
 
+#eval mat.width
 #eval mat.validIndex? 1 0
 #eval mat.validIndex? 1 2
 #eval mat.validIndex? 2 1
@@ -202,7 +203,7 @@ def foldlRows {α : Type} [BEq α] [Inhabited α]
 def foldWithIdx {α : Type} [BEq α] [Inhabited α]
     (self : Mat1 α) (f : β → Nat → Nat → α → β) (init : β) : β :=
   self.vector.foldl
-    (fun (n, acc) e => (n + 1, f acc (n % self.width) (n / self.width) e))
+    (fun (n, acc) e => (n + 1, f acc (n / self.width) (n % self.width) e))
     (0, init)
   |>.2
 
