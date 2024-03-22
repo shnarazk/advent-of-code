@@ -123,7 +123,7 @@ end part1
 structure Map where
   new ::
   size : Pos
-  cells : Array Bool
+  cells : Array (Option Bool)
 
 namespace Map
 
@@ -136,16 +136,16 @@ def countElements (size: Pos) : Nat := size.fst * size.snd
 def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
 
 @[inline]
-def contains (self : Map) (p : Pos) : Bool := self.cells.get! $ Map.index self p
+def checked (self : Map) (p : Pos) : Bool := self.cells.get! (Map.index self p) != none
 
 @[inline]
-def set (self : Map) (p : Pos) : Map :=
-  { self with cells := self.cells.set! (Map.index self p) true }
+def set (self : Map) (p : Pos) (b : Bool) : Map :=
+  { self with cells := self.cells.set! (Map.index self p) (some b) }
 
 def of (size : Pos) (locs : List Pos) : Map :=
   locs.foldl
-    (fun map pos => Map.set map pos)
-    (Map.new size (Array.mkArray (countElements size) false))
+    (fun map pos => Map.set map pos false)
+    (Map.new size (Array.mkArray (countElements size) none))
 
 end Map
 
@@ -187,21 +187,30 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
-  match limit with
-  | 0       => linked
-  | lim + 1 =>
+partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
   match toVisit with
   | [] => linked
   | _ =>
     toVisit.map (makeNeighbors linked.size)
       |>.join
       |>.foldl
-        (fun lt e => if lt.fst.contains e then lt else (lt.fst.set e, e :: lt.snd))
+        (fun lt e => if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
         (linked, [])
-      |> uncurry (propagate lim)
+      |> uncurry propagate
 
-def isEven : Pos → Bool := (join and) ∘ (both (· % 2 == 0))
+-- def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
+--   match limit with
+--   | 0       => linked
+--   | lim + 1 =>
+--   match toVisit with
+--   | [] => linked
+--   | _ =>
+--     toVisit.map (makeNeighbors linked.size)
+--       |>.join
+--       |>.foldl
+--         (fun lt e => if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
+--         (linked, [])
+--       |> uncurry (propagate lim)
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
@@ -210,11 +219,11 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let map := propagate m.size (Map.of (Pos.double sp) loop) [(0, 0)]
+  let map := propagate (Map.of (Pos.double sp) loop) [(0, 0)]
   List.range sp.fst
     |>.foldl (fun count y =>
       List.range sp.snd
-        |>.filter (fun x => !map.contains (Pos.double (y, x)))
+        |>.filter (fun x => !map.checked (Pos.double (y, x)))
         |>.length
         |> (· + count))
       0
