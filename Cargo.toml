@@ -11,7 +11,7 @@ aoc_macro = { version = "^0.2", path = "aoc_macro" }
 clap = { version = "^4.4", features = ["derive"] }
 combine = { version = "^4.4", optional = true }
 once_cell = "^1.19"
-itertools = { version = "0.12", optional = true }
+itertools = { version = "0.13", optional = true }
 md-5 = { version = "0.10", optional = true }
 nom = { version = "^7.1", optional = true, features = ["alloc"] }
 regex = "^1.9"
