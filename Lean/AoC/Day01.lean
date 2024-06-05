@@ -1,4 +1,4 @@
-import Std
+import Batteries
 import «AoC».Basic
 
 namespace Day01

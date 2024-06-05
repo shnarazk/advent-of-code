@@ -1,10 +1,10 @@
-import Std
+import Batteries
 import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
 namespace Day08
-open Std
+open Batteries
 
 structure Puzzle where
   new ::

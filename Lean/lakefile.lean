@@ -12,5 +12,5 @@ lean_exe «aoc» where
   root := `Main
 
 -- require mathlib from git "https://github.com/leanprover-community/mathlib4"
-require std from git "https://github.com/leanprover/std4" @ "main"
+require batteries from git "https://github.com/leanprover-community/batteries" @ "main"
 require aesop from git "https://github.com/leanprover-community/aesop" @ "master"

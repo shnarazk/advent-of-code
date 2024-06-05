@@ -1,4 +1,4 @@
-import Std
+import Batteries
 import Lean.Data.Parsec
 import «AoC».Basic
 import «AoC».Combinator
@@ -6,7 +6,7 @@ import «AoC».Parser
 
 open Accumulation
 namespace Day12
-open Std CoP
+open Batteries CoP
 
 structure Data where
   new ::

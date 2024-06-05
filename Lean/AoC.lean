@@ -2,8 +2,8 @@
 -- Import modules here that should be built as part of the library.
 -- import Mathlib.Data.Rat.Basic
 -- import Mathlib.Data.Real.Basic
-import Std
 import Aesop
+import Batteries
 import «AoC».Combinator
 import «AoC».Day01
 import «AoC».Day02

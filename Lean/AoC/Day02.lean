@@ -1,10 +1,10 @@
-import Std
+import Batteries
 import «AoC».Basic
 
 namespace Day02
 open Accumulation
 
-def toHashMap (source : String) : Std.HashMap String Nat :=
+def toHashMap (source : String) : Batteries.HashMap String Nat :=
   List.foldl
     (fun hash items =>
       List.foldl
@@ -16,7 +16,7 @@ def toHashMap (source : String) : Std.HashMap String Nat :=
         hash
         items
     )
-    (Std.HashMap.empty.insert "«id»" id)
+    (Batteries.HashMap.empty.insert "«id»" id)
     items_in_bags
   where
     id := ((List.getD (source.split (. == ':')) 0 "-1").drop 5).trim.toNat!
