@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
     fn end_of_data(&mut self) {
         self.num_col = self.board[0][0].len();
         self.num_row = self.board[0].len();
-        self.order = self.hands.clone();
+        self.order.clone_from(&self.hands);
         for (i, h) in self.hands.iter().enumerate() {
             self.order[*h] = i;
         }

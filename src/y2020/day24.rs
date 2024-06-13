@@ -155,7 +155,7 @@ impl Puzzle {
             } */
             next.cell.insert(*k, self.next_state(k));
             for l in neighbors(k).iter() {
-                if next.cell.get(l).is_none() {
+                if !next.cell.contains_key(l) {
                     next.cell.insert(*l, self.next_state(l));
                     /* if self.next_state(l) {
                         println!("\t\t=> {:?}", l);

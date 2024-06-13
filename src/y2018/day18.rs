@@ -131,14 +131,14 @@ impl AdventOfCode for Puzzle {
             std::mem::swap(&mut tmp, &mut self.map);
             step += 1;
             if step == check_point {
-                init = self.map.clone();
+                init.clone_from(&self.map);
             } else if check_point < step && step < check_point + 1000 && self.map == init {
                 let delta = step - check_point;
                 let n = (limit - check_point) / delta;
                 step = n * delta + check_point;
                 // dbg!(delta, step);
                 // dbg!((limit - check_point) / delta);
-                self.map = init.clone();
+                self.map.clone_from(&init);
             }
         }
         let n_tree = self.map.values().filter(|f| **f == Field::Tree).count();

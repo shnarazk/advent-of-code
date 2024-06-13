@@ -50,7 +50,9 @@ impl AdventOfCode for Puzzle {
                     if let Some(seg) = dir_parser.captures(line) {
                         Entry::Dir(seg[1].to_string())
                     } else if let Some(seg) = file_parser.captures(line) {
-                        let Ok(size) = seg[1].parse::<usize>() else {panic!();};
+                        let Ok(size) = seg[1].parse::<usize>() else {
+                            panic!();
+                        };
                         Entry::File(seg[2].to_string(), size)
                     } else {
                         dbg!(line);
@@ -111,7 +113,9 @@ impl AdventOfCode for Puzzle {
                     pwd = "/".to_string();
                 }
                 Command::CdUp => {
-                    let Some(dir) = self.file_system.get(&pwd) else {panic!("{}", pwd);};
+                    let Some(dir) = self.file_system.get(&pwd) else {
+                        panic!("{}", pwd);
+                    };
                     pwd = dir.parent.to_string();
                 }
                 Command::CdTo(sub) => {
@@ -144,7 +148,7 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let unused = 70_000_000 - self.file_system.get(&"/".to_string()).unwrap().total_size;
+        let unused = 70_000_000 - self.file_system.get("/").unwrap().total_size;
         let required = 30_000_000;
         let values = self.file_system.values().collect::<Vec<_>>();
         values

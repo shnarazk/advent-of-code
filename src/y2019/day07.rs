@@ -1,6 +1,5 @@
 //! <https://adventofcode.com/2019/day/7>
 
-use std::usize;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},

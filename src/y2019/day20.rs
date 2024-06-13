@@ -221,7 +221,7 @@ impl Puzzle {
         let width = self.line[0].len();
         'loop1: for y in 2..height {
             for x in 2..width {
-                if self.map.get(&(y, x)).is_none()
+                if !self.map.contains_key(&(y, x))
                     && self.map.get(&(y - 1, x - 1)) == Some(&b'#')
                     && self.map.get(&(y - 1, x)) == Some(&b'#')
                     && self.map.get(&(y, x - 1)) == Some(&b'#')
@@ -233,7 +233,7 @@ impl Puzzle {
         }
         'loop2: for y in 2..height {
             for x in 2..width {
-                if self.map.get(&(y, x)).is_none()
+                if !self.map.contains_key(&(y, x))
                     && self.map.get(&(y + 1, x + 1)) == Some(&b'#')
                     && self.map.get(&(y + 1, x)) == Some(&b'#')
                     && self.map.get(&(y, x + 1)) == Some(&b'#')

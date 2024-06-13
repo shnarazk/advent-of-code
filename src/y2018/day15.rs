@@ -265,7 +265,7 @@ impl Puzzle {
             man.insert(pos, dist);
             for d in DIRS.iter() {
                 let x = (pos.0 + d.0, pos.1 + d.1);
-                if self.map.contains(&x) && !man.contains_key(&x) && creatures.get(&x).is_none() {
+                if self.map.contains(&x) && !man.contains_key(&x) && !creatures.contains(&x) {
                     to_visit.push(Reverse((dist + 1, x)));
                 }
             }

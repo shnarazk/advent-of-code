@@ -62,14 +62,14 @@ impl AdventOfCode for Puzzle {
         // dbg!((&ingredients, &allergens));
         let mut num_ingredient = self.ingredients.len();
         for ing in ingredients.iter() {
-            if self.ingredients.get(ing).is_none() {
+            if !self.ingredients.contains_key(ing) {
                 self.ingredients.insert(ing.to_string(), num_ingredient);
                 num_ingredient += 1;
             }
         }
         let mut num_allergen = self.allergens.len();
         for ale in allergens.iter() {
-            if self.allergens.get(ale).is_none() {
+            if !self.allergens.contains_key(ale) {
                 self.allergens.insert(ale.to_string(), num_allergen);
                 num_allergen += 1;
             }

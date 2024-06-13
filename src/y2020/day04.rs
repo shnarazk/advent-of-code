@@ -25,7 +25,7 @@ impl Rule {
     fn check_values(&self) -> bool {
         let mut count = 0;
         for key in &KEYS {
-            if let Some(val) = self.dic.get(&key.to_string()) {
+            if let Some(val) = self.dic.get(key.to_owned()) {
                 if valid(key, val) {
                     count += 1;
                 } else {

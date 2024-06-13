@@ -188,9 +188,7 @@ impl AdventOfCode for Puzzle {
         }
         for y in corner0.0..corner1.0 {
             for x in corner0.1..corner1.1 {
-                if map.get(&(y, x)).is_none() {
-                    map.insert((y, x), 2);
-                }
+                map.entry((y, x)).or_insert(2);
             }
         }
         for patterny in revertyl.windows(2) {

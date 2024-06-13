@@ -47,7 +47,7 @@ impl AdventOfCode for Puzzle {
         }
         let mut available: Vec<char> = succs
             .keys()
-            .filter(|n| prev.get(n).is_none())
+            .filter(|n| !prev.contains_key(n))
             .copied()
             .collect::<Vec<_>>();
         let mut result: String = String::new();
@@ -93,7 +93,7 @@ impl AdventOfCode for Puzzle {
         }
         let mut available: Vec<char> = succs
             .keys()
-            .filter(|n| prev.get(n).is_none())
+            .filter(|n| !prev.contains_key(n))
             .copied()
             .collect::<Vec<_>>();
         let mut result: String = String::new();

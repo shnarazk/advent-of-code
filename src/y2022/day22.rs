@@ -286,7 +286,7 @@ impl AdventOfCode for Puzzle {
             let mut start = None;
             let mut end = None;
             for (i, _) in l.iter().enumerate() {
-                if self.map.get(&(j, i)).is_some() {
+                if self.map.contains_key(&(j, i)) {
                     start = start.or(Some(i));
                 } else if start.is_some() {
                     end = end.or(Some(i));
@@ -310,7 +310,7 @@ impl AdventOfCode for Puzzle {
         for (j, l) in self.line.iter().enumerate() {
             for (i, _) in l.iter().enumerate() {
                 max_width = max_width.max(i);
-                if self.map.get(&(j, i)).is_some() {
+                if self.map.contains_key(&(j, i)) {
                     let e_min = min_y.entry(i).or_insert(usize::MAX);
                     *e_min = (*e_min).min(j);
                     let e_max = max_y.entry(i).or_insert(0);
