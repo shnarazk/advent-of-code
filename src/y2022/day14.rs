@@ -5,14 +5,6 @@ use {
 };
 
 type Loc = (usize, usize);
-trait Below {
-    fn below(&self) -> Self;
-}
-impl Below for Loc {
-    fn below(&self) -> Self {
-        (self.0, self.1 + 1)
-    }
-}
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {

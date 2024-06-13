@@ -52,20 +52,20 @@ impl AdventOfCode for Puzzle {
                 }
             }
             let mut next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 continue;
             }
             direction = (direction.1, direction.0);
             next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 direction = (next.0 - p.0, next.1 - p.1);
                 continue;
             }
             direction = (-direction.0, -direction.1);
             next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 continue;
             }
@@ -90,20 +90,20 @@ impl AdventOfCode for Puzzle {
         while let Some(p) = to_visit {
             steps += 1;
             let mut next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 continue;
             }
             direction = (direction.1, direction.0);
             next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 direction = (next.0 - p.0, next.1 - p.1);
                 continue;
             }
             direction = (-direction.0, -direction.1);
             next = (p.0 + direction.0, p.1 + direction.1);
-            if self.map.get(&next).is_some() {
+            if self.map.contains_key(&next) {
                 to_visit = Some(next);
                 continue;
             }

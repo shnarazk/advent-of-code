@@ -25,12 +25,12 @@ impl fmt::Debug for Opr {
 }
 #[derive(Debug)]
 enum Inst {
-    Inp(char),
-    Add(char, Opr),
-    Mul(char, Opr),
-    Div(char, Opr),
-    Mod(char, Opr),
-    Eql(char, Opr),
+    Inp,
+    Add(Opr),
+    Mul,
+    Div(Opr),
+    Mod,
+    Eql,
 }
 
 #[derive(Debug, Default)]
@@ -50,31 +50,30 @@ impl AdventOfCode for Puzzle {
         let inp = regex!(r"^inp ([a-z])$");
         let opr = regex!(r"^([a-z]+) ([a-z]) ([a-z])$");
         let opl = regex!(r"^([a-z]+) ([a-z]) (-?[0-9]+)$");
-        if let Some(segment) = inp.captures(block) {
-            self.line
-                .push(Inst::Inp(segment[1].chars().next().unwrap()));
+        if let Some(_segment) = inp.captures(block) {
+            self.line.push(Inst::Inp);
             return Ok(());
         } else if let Some(segment) = opr.captures(block) {
-            let reg1 = segment[2].chars().next().unwrap();
+            let _reg1 = segment[2].chars().next().unwrap();
             let reg2 = Opr::Var(segment[3].chars().next().unwrap());
             self.line.push(match &segment[1] {
-                "add" => Inst::Add(reg1, reg2),
-                "mul" => Inst::Mul(reg1, reg2),
-                "div" => Inst::Div(reg1, reg2),
-                "mod" => Inst::Mod(reg1, reg2),
-                "eql" => Inst::Eql(reg1, reg2),
+                "add" => Inst::Add(reg2),
+                "mul" => Inst::Mul,
+                "div" => Inst::Div(reg2),
+                "mod" => Inst::Mod,
+                "eql" => Inst::Eql,
                 _ => unreachable!(),
             });
             return Ok(());
         } else if let Some(segment) = opl.captures(block) {
-            let reg1 = segment[2].chars().next().unwrap();
+            let _reg1 = segment[2].chars().next().unwrap();
             let val = Opr::Lit(line_parser::to_isize(&segment[3])?);
             self.line.push(match &segment[1] {
-                "add" => Inst::Add(reg1, val),
-                "mul" => Inst::Mul(reg1, val),
-                "div" => Inst::Div(reg1, val),
-                "mod" => Inst::Mod(reg1, val),
-                "eql" => Inst::Eql(reg1, val),
+                "add" => Inst::Add(val),
+                "mul" => Inst::Mul,
+                "div" => Inst::Div(val),
+                "mod" => Inst::Mod,
+                "eql" => Inst::Eql,
                 _ => unreachable!(),
             });
             return Ok(());
@@ -235,7 +234,7 @@ impl Puzzle {
     fn build(&self) -> Vec<(isize, isize, isize)> {
         let mut jit: Vec<(isize, isize, isize)> = Vec::new();
         for (i, l) in self.line.iter().enumerate() {
-            if matches!(l, Inst::Inp(_)) {
+            if matches!(l, Inst::Inp) {
                 // /*
                 // print!("{:>3}: ", i);
                 // for j in i..i + 18 {
@@ -273,9 +272,9 @@ impl Puzzle {
                 // }
                 // println!();
                 // */
-                if let Inst::Div(_, Opr::Lit(a1)) = self.line[i + 4] {
-                    if let Inst::Add(_, Opr::Lit(a2)) = self.line[i + 5] {
-                        if let Inst::Add(_, Opr::Lit(a3)) = self.line[i + 15] {
+                if let Inst::Div(Opr::Lit(a1)) = self.line[i + 4] {
+                    if let Inst::Add(Opr::Lit(a2)) = self.line[i + 5] {
+                        if let Inst::Add(Opr::Lit(a3)) = self.line[i + 15] {
                             // println!("{:>3},{:>3},{:>3}", a1, a2, a3);
                             jit.push((a1, a2, a3));
                         }
