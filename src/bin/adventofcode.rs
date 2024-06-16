@@ -30,6 +30,9 @@ use {
 
 pub fn main() {
     let config = ConfigAoC::parse();
+    if config.day.is_none() || 25 < config.day.unwrap() {
+        panic!("no day");
+    }
     if config.bench {
         bench(config);
     } else {

@@ -8,7 +8,12 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive pkgs.cargo-watch pkgs.tokei ];
+        packages = [
+          pkgs.bashInteractive
+          pkgs.cargo-watch
+          pkgs.lldb_18
+          pkgs.tokei
+        ];
       };
     });
 }
