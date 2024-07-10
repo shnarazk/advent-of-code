@@ -6,6 +6,6 @@ arrays combinators formatting io kernel math math.parser prettyprint
 sequences splitting unicode ;
 IN: aoc
 
-: run-aoc ( -- ) day01 ;
+: run-aoc ( -- ) [ day01 ] benchmark 1000000.0 / pprint ;
 
 MAIN: run-aoc

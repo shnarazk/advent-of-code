@@ -1,7 +1,7 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2022 Your name.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: advent-of-code-2023 combinators formatting io kernel
+USING: advent-of-code-2023 arrays combinators formatting io kernel
        math math.parser prettyprint sequences splitting unicode ;
 IN: advent-of-code-2023.day01
 
@@ -16,17 +16,18 @@ IN: advent-of-code-2023.day01
 ;
 
 : transform ( substring -- letter )
+    " " append
   {
-    { [ dup "" = ] [ drop CHAR: A ] }
-    { [ dup " " append 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
-    { [ dup " " append 0 "two"   swapd subseq-starts-at? ] [ drop CHAR: 2 ] }
-    { [ dup " " append 0 "three" swapd subseq-starts-at? ] [ drop CHAR: 3 ] }
-    { [ dup " " append 0 "four"  swapd subseq-starts-at? ] [ drop CHAR: 4 ] }
-    { [ dup " " append 0 "five"  swapd subseq-starts-at? ] [ drop CHAR: 5 ] }
-    { [ dup " " append 0 "six"   swapd subseq-starts-at? ] [ drop CHAR: 6 ] }
-    { [ dup " " append 0 "seven" swapd subseq-starts-at? ] [ drop CHAR: 7 ] }
-    { [ dup " " append 0 "eight" swapd subseq-starts-at? ] [ drop CHAR: 8 ] }
-    { [ dup " " append 0 "nine"  swapd subseq-starts-at? ] [ drop CHAR: 9 ] }
+    { [ dup " " = ] [ drop CHAR: A ] }
+    { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
+    { [ dup 0 "two"   swapd subseq-starts-at? ] [ drop CHAR: 2 ] }
+    { [ dup 0 "three" swapd subseq-starts-at? ] [ drop CHAR: 3 ] }
+    { [ dup 0 "four"  swapd subseq-starts-at? ] [ drop CHAR: 4 ] }
+    { [ dup 0 "five"  swapd subseq-starts-at? ] [ drop CHAR: 5 ] }
+    { [ dup 0 "six"   swapd subseq-starts-at? ] [ drop CHAR: 6 ] }
+    { [ dup 0 "seven" swapd subseq-starts-at? ] [ drop CHAR: 7 ] }
+    { [ dup 0 "eight" swapd subseq-starts-at? ] [ drop CHAR: 8 ] }
+    { [ dup 0 "nine"  swapd subseq-starts-at? ] [ drop CHAR: 9 ] }
     [ first ]
   }
   cond
