@@ -1,10 +1,11 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2022 Your name.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: advent-of-code-2023 arrays combinators formatting io
-kernel math math.parser prettyprint sequences splitting unicode ;
-IN: test
+USING: advent-of-code-2023 combinators formatting io kernel
+       math math.parser prettyprint sequences splitting unicode ;
+IN: advent-of-code-2023.day01
 
+<PRIVATE
 : split-line ( string -- lines ) "\n" split [ "" = ] reject ;
 
 : part1/line ( line -- number )
@@ -42,6 +43,8 @@ IN: test
 
 : part1 ( data -- number ) split-line [ part1/line ] map sum ;
 : part2 ( data -- number ) split-line [ part2/line ] map sum ;
+
+PRIVATE>
 
 : day01 ( -- ) 1 day>data [ part1 ] [ part2 ] bi [ pprint "" print ] bi@ ;
 
