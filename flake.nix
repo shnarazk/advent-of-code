@@ -12,6 +12,8 @@
           pkgs.bashInteractive
           pkgs.cargo-watch
           pkgs.lldb_18
+          pkgs.libiconv
+          pkgs.samply
           pkgs.tokei
         ];
       };
