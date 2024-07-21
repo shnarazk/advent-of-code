@@ -45,8 +45,8 @@ instance : Inhabited Circuit where
   default := Circuit.x
 
 instance : ToString Circuit where
-  toString s :=
-  match s with
+  toString c :=
+  match c with
   | .v => "|"
   | .h => "-"
   | .l => "L"
