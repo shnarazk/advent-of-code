@@ -4,13 +4,11 @@ defaultTargets = ["aoc"]
 
 [[require]]
 name = "batteries"
-git = "https://github.com/leanprover-community/batteries"
-rev = "main"
+scope = "leanprover-community"
 
 [[require]]
 name = "aesop"
-git = "https://github.com/leanprover-community/aesop"
-rev = "master"
+scope = "leanprover-community"
 
 [[lean_lib]]
 name = "AoC"
