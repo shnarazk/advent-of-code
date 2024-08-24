@@ -1,4 +1,5 @@
-import «AoC»
+-- import «AoC»
+import «AoC2023»
 
 def main (args : List String) : IO Unit := do
   let extra := args.get? 1

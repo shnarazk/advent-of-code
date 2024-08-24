@@ -13,6 +13,9 @@ scope = "leanprover-community"
 [[lean_lib]]
 name = "AoC"
 
+[[lean_lib]]
+name = "AoC2023"
+
 [[lean_exe]]
 name = "aoc"
 root = "Main"
