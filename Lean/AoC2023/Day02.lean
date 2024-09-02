@@ -4,19 +4,19 @@ import «AoC».Basic
 namespace Day02
 open Accumulation
 
-def toHashMap (source : String) : Batteries.HashMap String Nat :=
+def toHashMap (source : String) : Std.HashMap String Nat :=
   List.foldl
     (fun hash items =>
       List.foldl
         (fun hash assoc =>
           let (l, n) := association assoc
-          match hash.find? l with
+          match hash.get? l with
           | some n' => hash.insert l $ max n n'
           | none    => hash.insert l n)
         hash
         items
     )
-    (Batteries.HashMap.empty.insert "«id»" id)
+    (Std.HashMap.empty.insert "«id»" id)
     items_in_bags
   where
     id := ((List.getD (source.split (. == ':')) 0 "-1").drop 5).trim.toNat!
@@ -33,8 +33,8 @@ namespace Part1
 
 def evaluate (line : String) : Nat :=
   let hash := toHashMap line
-  if hash.findD "red" 0 ≤ 12 && hash.findD "green" 0 ≤ 13 && hash.findD "blue" 0 ≤ 14
-  then hash.find! "«id»"
+  if hash.getD "red" 0 ≤ 12 && hash.getD "green" 0 ≤ 13 && hash.getD "blue" 0 ≤ 14
+  then hash.get! "«id»"
   else 0
 
 def solve (lines : Array String) : Nat := lines.map evaluate |> sum
@@ -45,7 +45,7 @@ namespace Part2
 
 def evaluate (line : String) : Nat :=
   let hash := toHashMap line
-  (hash.findD "red" 0) * (hash.findD "green" 0) * (hash.findD "blue" 0)
+  (hash.getD "red" 0) * (hash.getD "green" 0) * (hash.getD "blue" 0)
 
 def solve (lines : Array String) : Nat := lines.map evaluate |> sum
 
