@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -18,7 +18,9 @@ instance : ToString Data where
   toString s := s!"\"{String.intercalate "" (Array.map toString s.pattern).toList}\" :: {s.rule}\n"
 
 namespace parser
-open Lean.Parsec AoCParser
+open AoCParser
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 def line_parser := do
   let pattern ← many1 (pchar '.' <|> pchar '#' <|> pchar '?') <* whitespaces

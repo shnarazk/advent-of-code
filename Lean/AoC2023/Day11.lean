@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -27,7 +27,9 @@ instance : ToString Data where
 end Data
 
 namespace parser
-open Lean.Parsec AoCParser
+open AoCParser
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 def pcell := (pchar '.' *> return false) <|> (pchar '#' *> return true)
 def parser := sepBy1 (many1 pcell) eol

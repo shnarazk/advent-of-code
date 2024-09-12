@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -12,13 +12,15 @@ structure Hand where
 deriving Inhabited, Repr
 
 namespace parser
-open Lean Parsec AoCParser
+open Lean AoCParser
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 def card := digit <|> pchar 'A' <|> pchar 'K' <|> pchar 'Q' <|> pchar 'J' <|> pchar 'T'
 
 def cards := many1 card <* whitespaces
 
-def line : Parsec Hand := (return Hand.hand) <*> cards <*> number
+def line : Parser Hand := (return Hand.hand) <*> cards <*> number
 
 def parser := sepBy1 line eol
 

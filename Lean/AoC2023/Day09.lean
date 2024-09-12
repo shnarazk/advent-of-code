@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -7,7 +7,8 @@ namespace Day09
 open Std Accumulation
 
 namespace parser
-open Lean.Parsec AoCParser
+open AoCParser
+open Std.Internal.Parsec.String
 
 def parser := sepBy1 (sepBy1 number_signed (pchar ' ')) eol
 

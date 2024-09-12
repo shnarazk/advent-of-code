@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -12,7 +12,8 @@ structure Puzzle where
   branches : HashMap String (String × String)
 
 namespace parser
-open Lean.Parsec AoCParser
+open AoCParser
+open Std.Internal.Parsec.String
 
 def ppath := alphabets
 def pbranch := do

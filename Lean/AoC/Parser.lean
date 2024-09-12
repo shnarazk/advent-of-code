@@ -1,35 +1,38 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 
 namespace AoCParser
-open Lean Parsec
+open Lean
+open Std.Internal
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 /--
 end of line
 --/
-def eol : Parsec Unit := pchar '\n' *> return ()
+def eol : Parser Unit := pchar '\n' *> return ()
 
-def sepBy1 (p : Parsec α) (s : Parsec β) : Parsec (Array α) := do
+def sepBy1 (p : Parser α) (s : Parser β) : Parser (Array α) := do
   manyCore (attempt (s *> p)) #[←p]
 
 /--
 a sequence of space or TAB
 --/
-def whitespaces : Parsec Unit := many1 (pchar ' ' <|> pchar '\t') *> return ()
+def whitespaces : Parser Unit := many1 (pchar ' ' <|> pchar '\t') *> return ()
 
 /--
 an optional sequence of space or TAB
 --/
-def whitespaces? : Parsec Unit := many (pchar ' ' <|> pchar '\t') *> return ()
+def whitespaces? : Parser Unit := many (pchar ' ' <|> pchar '\t') *> return ()
 
 /--
 [A-Za-z]+
 --/
 def alphabets := many1Chars asciiLetter
 
-def separator (ch : Char)  : Parsec Unit := many1 (pchar ch) *> return ()
+def separator (ch : Char)  : Parser Unit := many1 (pchar ch) *> return ()
 
-def separator₀ (ch : Char)  : Parsec Unit := optional (many (pchar ch)) *> return ()
+def separator₀ (ch : Char)  : Parser Unit := optional (many (pchar ch)) *> return ()
 
 /--
 a `Nat`
@@ -53,7 +56,7 @@ def number_m := do
 
 def number_signed := number_m <|> number_p
 
--- #eval Parsec.run number_signed "-21, 8,"
+-- #eval Parser.run number_signed "-21, 8,"
 
 namespace test
 
@@ -73,8 +76,8 @@ def parsed (_source : String) : Nat := 0
 
 end test
 
-def parse (parser : Parsec α) (source : String) : Option α :=
-  match Parsec.run parser source with
+def parse (parser : Parser α) (source : String) : Option α :=
+  match Parser.run parser source with
   | Except.ok r    => some r
   | Except.error _ => none
 

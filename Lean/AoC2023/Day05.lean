@@ -1,7 +1,7 @@
 import Batteries
 import «AoC».Basic
 import «AoC».Parser
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 
 namespace Day05
 
@@ -24,7 +24,8 @@ instance : ToString Range where
   toString r := s!"({r.dest},{r.source},{r.span})"
 
 namespace parser
-open Lean Parsec AoCParser
+open Lean Parser AoCParser
+open Std.Internal.Parsec.String
 
 def pseeds := pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
 
@@ -47,7 +48,7 @@ def pmap := sepBy1 range eol
 -- #eval Parsec.run pmap "88 18 7\n18 25 70"
 
 -- def parser : Parsec Range := (plabel *> range)
-def parser : Parsec ((Array Nat) × (Array (Array Range))) := do
+def parser : Parser ((Array Nat) × (Array (Array Range))) := do
   let ss ← pseeds
   let ms ← sepBy1 (plabel *> pmap) (pstring "\n\n")
   return (ss, ms)

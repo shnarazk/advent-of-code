@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -85,7 +85,9 @@ def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   (now, both2 trans now diff)
 
 namespace parser
-open Lean.Parsec AoCParser
+open AoCParser
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 def cell := pchar '|'
     <|> pchar '-'

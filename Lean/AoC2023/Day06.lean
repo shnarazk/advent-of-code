@@ -1,5 +1,5 @@
 import Batteries
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -34,7 +34,8 @@ def evaluate (r : Race) : Nat :=
 end Race
 
 namespace parser
-open Lean Parsec AoCParser
+open Lean Parser AoCParser
+open Std.Internal.Parsec.String
 
 def numbers := sepBy1 number whitespaces
 
@@ -43,14 +44,14 @@ def pdist := pstring "Distance:" *> whitespaces *> numbers
 
 -- #eval Parsec.run ptime "Time:     7 15  30"
 
-def parser : Parsec (List Race) := do
+def parser : Parser (List Race) := do
   let t ← ptime <* eol
   let d ← pdist
   let m := List.transpose [t.toList, d.toList]
   return (List.map (fun r => Race.new (r.get! 0) (r.get! 1)) m)
 
 def parse (data : String) :=
-  match Parsec.run parser data with
+  match Parser.run parser data with
   | Except.ok ret  => some ret
   | Except.error _ => none
 
