@@ -1,6 +1,7 @@
 name = "AoC"
 testRunner = "Benchmark"
 defaultTargets = ["aoc"]
+version = "0.1.0"
 
 [[require]]
 name = "batteries"
