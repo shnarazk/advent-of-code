@@ -1,47 +1,45 @@
+import Batteries
 import Std
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
-namespace Day??
+namespace Y20XX.DayXX
 open Std Accumulation CoP
 
---structure Data where
---  new ::
---deriving Repr
--- instance : ToString Data where
---   toString s := s!"[{s._beg},{s._end}]"
+def year : Nat := 2024
+def day : Nat := 1
+
+structure Input where
+deriving BEq, Repr
+-- instance : ToString Input where toString s := s!""
 
 namespace parser
-open Lean.Parsec AoCParser
 
-def parser := sepBy1 number whitespaces
+open AoCParser
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
+
+def parse : Parser Input := return Input.mk
 
 end parser
 
-namespace part1
+namespace Part1
 
-def solve (_data : Data) : Nat := 0
+def solve (_ : Input) : Nat := 0
 
-end part1
+end Part1
 
-namespace part2
+namespace Part2
 
-def evaluate (_line : Data) : Nat := 0
+def solve (_ : Input) : Nat := 0
 
--- #eval evaluate ""
+end Part2
 
-def solve (data : Array Data) : IO Nat := do
-  return sum $ data.map evaluate
+protected def solve (alt : Option String): IO Answers := do
+  if let some d := AoCParser.parse parser.parse (← dataOf year day alt)
+  then return (s!"{Part1.solve d}", s!"{Part2.solve d}")
+  else return ("parse error", "")
 
-end part2
-
-end Day??
-
-def day?? (ext : Option String) : IO Answers := do
-  let data ← dataOf 2023 ?? ext
-  let _lines ← linesOf 2023 ?? ext
-  if let some d := AoCParser.parse Day??.parser.parser data
-    then return (s!"{← Day??.part1.solve data}", s!"←{← Day??.part2.solve lines}")
-    else return ("parse error", "")
+end Y20XX.DayXX
