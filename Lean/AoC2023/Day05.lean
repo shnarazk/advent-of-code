@@ -3,7 +3,7 @@ import «AoC».Basic
 import «AoC».Parser
 import Std.Internal.Parsec
 
-namespace Day05
+namespace Y2023.Day05
 
 structure ClosedSpan where
   new ::
@@ -115,9 +115,9 @@ def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.minimum? |>.getD 0
 
-end Day05
-
-def day05 (ext : Option String) : IO Answers := do
-  if let some (s, m) := AoCParser.parse Day05.parser.parser (← dataOf 2023 5 ext)
-  then return (s!"{Day05.Part1.solve s m}", s!"{Day05.Part2.solve s m}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some (s, m) := AoCParser.parse Y2023.Day05.parser.parser (← dataOf 2023 5 ext)
+  then return (s!"{Y2023.Day05.Part1.solve s m}", s!"{Y2023.Day05.Part2.solve s m}")
   else return ("parse error", "")
+
+end Y2023.Day05

@@ -3,7 +3,7 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
-namespace Day08
+namespace Y2023.Day08
 open Batteries
 
 structure Puzzle where
@@ -64,10 +64,10 @@ def analyze (p : Puzzle) : Nat :=
 
 def Part2.solve (p: Puzzle) : Nat:= analyze p
 
-end Day08
-
-def day08 (ext : Option String) : IO Answers := do
-  if let some p := AoCParser.parse Day08.parser.parser (← dataOf 2023 8 ext)
-  then return (s!"{Day08.Part1.solve p}", s!"{Day08.Part2.solve p}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some p := AoCParser.parse Y2023.Day08.parser.parser (← dataOf 2023 8 ext)
+  then return (s!"{Y2023.Day08.Part1.solve p}", s!"{Y2023.Day08.Part2.solve p}")
   else return ("parse error", "")
+
+end Y2023.Day08
 

@@ -5,39 +5,42 @@
 import Aesop
 import Batteries
 import «AoC».Combinator
-import «AoC2023».Day01
-import «AoC2023».Day02
-import «AoC2023».Day03
-import «AoC2023».Day04
-import «AoC2023».Day05
-import «AoC2023».Day06
-import «AoC2023».Day07
-import «AoC2023».Day08
-import «AoC2023».Day09
-import «AoC2023».Day10
-import «AoC2023».Day11
-import «AoC2023».Day12
+import «AoC2023»
+import «AoC2024»
 
-def lastDay := 12
+def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
+  let f ← dataFileName year day extra
+  let ans ← match year with
+    | 2023 =>
+      if h : day - 1 < AoC2023.solvedDays
+        then
+          let ans ← Aesop.time <| AoC2023.solve day h extra
+          pure (some (ans))
+        else
+          do pure none
+    | 2024 =>
+      if h : day - 1 < AoC2024.solvedDays
+        then
+          let res ← Aesop.time <| AoC2024.solve day h extra
+          pure (some (res))
+        else
+          do pure none
+    | _ => do pure none
+  match ans with
+    | some (results, time) => do
+      IO.println s!"{color.blue}- {f}{color.reset}: {time.printAsMillis}{color.reset}"
+      IO.println s!"{color.green}  => {results.fst}, {results.snd}{color.reset}"
+    | _ => do return
 
-theorem DayIsNotZero: 12 > 0 := by simp
-
-def solved : List (Fin 12) := List.range lastDay |>.map (Fin.ofNat' · DayIsNotZero)
-
-def run (day : Fin 12) (extra : Option String) : IO Unit := do
-  let f ← dataFileName 2023 (1 + day) extra
-  let (results, time) ← match day with
-    |  0 => Aesop.time <| day01 extra
-    |  1 => Aesop.time <| day02 extra
-    |  2 => Aesop.time <| day03 extra
-    |  3 => Aesop.time <| day04 extra
-    |  4 => Aesop.time <| day05 extra
-    |  5 => Aesop.time <| day06 extra
-    |  6 => Aesop.time <| day07 extra
-    |  7 => Aesop.time <| day08 extra
-    |  8 => Aesop.time <| day09 extra
-    |  9 => Aesop.time <| day10 extra
-    | 10 => Aesop.time <| day11 extra
-    | 11 => Aesop.time <| day12 extra
-  IO.println s!"{color.blue}- {f}{color.reset}: {time.printAsMillis}{color.reset}"
-  IO.println s!"{color.green}  => {results.fst}, {results.snd}{color.reset}"
+def aoc_driver (args : List String) : IO Unit := do
+  let extra := args.get? 2
+  match (args.get? 0).map (·.toNat!) with
+  | some year => do
+      let solved := match year with
+        | 2023 => List.range AoC2023.solvedDays
+        | 2024 => List.range AoC2024.solvedDays
+        | _ => []
+      match (args.get? 1).map (·.toNat!) with
+        | some day => run year day extra
+        | none     => let _ ← do (solved.mapM (run year · extra))
+  | none => return

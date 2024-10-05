@@ -1,7 +1,7 @@
 import Batteries
 import «AoC».Basic
 
-namespace Day03
+namespace Y2023.Day03
 open Accumulation
 
 structure Number where
@@ -69,9 +69,9 @@ def Part2.solve (lines : Array String) : IO Nat := do
     ([] : List Nat)
   return sum gears
 
-end Day03
-
-def day03 (ext : Option String) : IO Answers := do
+protected def solve (ext : Option String) : IO Answers := do
   let lines ← linesOf 2023 3 ext
-  return (s!"{← Day03.Part1.solve lines}", s!"{← Day03.Part2.solve lines}")
+  return (s!"{← Y2023.Day03.Part1.solve lines}", s!"{← Y2023.Day03.Part2.solve lines}")
+
+end Y2023.Day03
 

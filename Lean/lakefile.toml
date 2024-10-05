@@ -16,6 +16,9 @@ name = "AoC"
 [[lean_lib]]
 name = "AoC2023"
 
+[[lean_lib]]
+name = "AoC2024"
+
 [[lean_exe]]
 name = "aoc"
 root = "Main"

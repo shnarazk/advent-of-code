@@ -4,7 +4,7 @@ import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
-namespace Day10
+namespace Y2023.Day10
 open Std CiCL CoP
 
 def Pos : Type := Nat × Nat
@@ -234,9 +234,9 @@ def solve (m: Mat1 Circuit) : Nat :=
 
 end part2
 
-end Day10
-
-def day10 (ext : Option String) : IO Answers := do
-  if let some (some m) := AoCParser.parse Day10.parser.parser (← dataOf 2023 10 ext)
-  then return (s!"{Day10.part1.solve m}", s!"{Day10.part2.solve m}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some (some m) := AoCParser.parse Y2023.Day10.parser.parser (← dataOf 2023 10 ext)
+  then return (s!"{Y2023.Day10.part1.solve m}", s!"{Y2023.Day10.part2.solve m}")
   else return ("parse error", "")
+
+end Y2023.Day10

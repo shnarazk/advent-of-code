@@ -3,7 +3,7 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
-namespace Day07
+namespace Y2023.Day07
 
 structure Hand where
   hand ::
@@ -140,9 +140,9 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-end Day07
-
-def day07 (ext : Option String) : IO Answers := do
-  if let some d := AoCParser.parse Day07.parser.parser (← dataOf 2023 7 ext)
-  then return (s!"{Day07.solve1 d}", s!"{Day07.solve2 d}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some d := AoCParser.parse Y2023.Day07.parser.parser (← dataOf 2023 7 ext)
+  then return (s!"{Y2023.Day07.solve1 d}", s!"{Y2023.Day07.solve2 d}")
   else return ("parse error", "")
+
+end Y2023.Day07

@@ -3,7 +3,7 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
-namespace Day09
+namespace Y2023.Day09
 open Std Accumulation
 
 namespace parser
@@ -57,9 +57,9 @@ def solve (d : Array (Array Int)) : Nat :=
 
 end Part2
 
-end Day09
-
-def day09 (ext : Option String) : IO Answers := do
-  if let some d := AoCParser.parse Day09.parser.parser (← dataOf 2023 9 ext)
-  then return (s!"{Day09.Part1.solve d}", s!"{Day09.Part2.solve d}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some d := AoCParser.parse Y2023.Day09.parser.parser (← dataOf 2023 9 ext)
+  then return (s!"{Y2023.Day09.Part1.solve d}", s!"{Y2023.Day09.Part2.solve d}")
   else return ("parse error", "")
+
+end Y2023.Day09

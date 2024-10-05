@@ -5,7 +5,7 @@ import «AoC».Combinator
 import «AoC».Parser
 
 open Accumulation
-namespace Day12
+namespace Y2023.Day12
 open Batteries CoP
 
 structure Data where
@@ -103,10 +103,10 @@ def Part2.evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-end Day12
-
-def day12 (ext : Option String) : IO Answers := do
-  if let some cs := AoCParser.parse Day12.parser.parser (← dataOf 2023 12 ext)
-  then return (s!"{sum $ cs.map Day12.Part1.evaluate}", s!"{sum $ cs.map Day12.Part2.evaluate}")
+protected def solve (ext : Option String) : IO Answers := do
+  if let some cs := AoCParser.parse Y2023.Day12.parser.parser (← dataOf 2023 12 ext)
+  then return (s!"{sum $ cs.map Y2023.Day12.Part1.evaluate}", s!"{sum $ cs.map Y2023.Day12.Part2.evaluate}")
   else return ("parse error", "")
+
+end Y2023.Day12
 

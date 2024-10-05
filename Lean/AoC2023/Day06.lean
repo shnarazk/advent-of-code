@@ -3,7 +3,7 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
-namespace Day06
+namespace Y2023.Day06
 open Accumulation
 
 structure Race where
@@ -70,8 +70,8 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 
-end Day06
-
-def day06 (ext : Option String): IO Answers := do
+protected def solve (ext : Option String): IO Answers := do
   let data ← dataOf 2023 6 ext
-  return (Day06.Part1.solve data, s!"{Day06.Part2.solve data}")
+  return (Y2023.Day06.Part1.solve data, s!"{Y2023.Day06.Part2.solve data}")
+
+end Y2023.Day06

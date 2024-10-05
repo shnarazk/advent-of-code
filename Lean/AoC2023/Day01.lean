@@ -1,7 +1,7 @@
 import Batteries
 import «AoC».Basic
 
-namespace Day01
+namespace Y2023.Day01
 open Accumulation
 
 namespace Part1
@@ -36,8 +36,10 @@ def solve (lines : Array String) : Nat :=
     |> sum
 
 end Part2
-end Day01
 
-def day01 (alt : Option String): IO Answers := do
+protected def solve(alt : Option String): IO Answers := do
   let lines ← linesOf 2023 1 alt
-  return (s!"{Day01.Part1.solve lines}", s!"{Day01.Part2.solve lines}")
+  return (s!"{Y2023.Day01.Part1.solve lines}", s!"{Y2023.Day01.Part2.solve lines}")
+
+end Y2023.Day01
+

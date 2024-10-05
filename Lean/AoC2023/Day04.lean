@@ -1,7 +1,7 @@
 import Batteries
 import «AoC».Basic
 
-namespace Day04
+namespace Y2023.Day04
 open Accumulation
 
 def parsed (source : String) : List Nat × List Nat :=
@@ -53,8 +53,8 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-end Day04
-
-def day04 (ext : Option String) : IO Answers := do
+protected def solve (ext : Option String) : IO Answers := do
   let lines ← linesOf 2023 4 ext
-  return (s!"{Day04.Part1.solve lines}", s!"{Day04.Part2.solve lines}")
+  return (s!"{Y2023.Day04.Part1.solve lines}", s!"{Y2023.Day04.Part2.solve lines}")
+
+end Y2023.Day04
