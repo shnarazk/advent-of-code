@@ -78,8 +78,7 @@ impl AdventOfCode for Puzzle {
         };
         let comp_fill = 2 * self.reachable(&self.line);
         dbg!(nrepeat, fullfilled, remaining_time, comp_fill);
-        #[cfg(debug)]
-        println!("Maxmum:  {}", self.max_fill(fullfilled));
+        // println!("Maxmum:  {}", self.max_fill(fullfilled));
         build_mirrors(shift(
             &self.line,
             (self.start.0 as isize, self.start.1 as isize),
@@ -186,7 +185,7 @@ impl Puzzle {
             .map(|v| v.iter().filter(|n| **n == 2).count())
             .sum()
     }
-    #[cfg(debug)]
+    #[allow(dead_code)]
     fn max_fill(&self, fullfilled: usize) -> usize {
         (LIMIT + 1).pow(2)
             - fullfilled

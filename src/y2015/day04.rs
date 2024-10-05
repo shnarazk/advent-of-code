@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         for i in 0.. {
             let mut hasher = Md5::new();
-            hasher.update(&format!("{}{}", self.line, i));
+            hasher.update(format!("{}{}", self.line, i));
             let d = hasher.finalize();
             if d[0] == 0 && d[1] == 0 && d[2] < 16 {
                 return i;
@@ -30,7 +30,7 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         for i in 0.. {
             let mut hasher = Md5::new();
-            hasher.update(&format!("{}{}", self.line, i));
+            hasher.update(format!("{}{}", self.line, i));
             if hasher.finalize().iter().take(3).all(|n| *n == 0) {
                 return i;
             }
