@@ -49,7 +49,7 @@ def unique (a : Array α) [BEq α] [Hashable α] : Array α :=
   let hash := Array.foldl (·.insert ·) (Std.HashSet.empty : Std.HashSet α) a
   hash.toArray
 
-#eval unique #[1, 0, 2, 1, 3, 2]
+-- #eval unique #[1, 0, 2, 1, 3, 2]
 
 class Accumulation (α : Type) where
   sum    : α → Nat
@@ -73,14 +73,14 @@ instance : Accumulation (Array Int) where
 
 open Accumulation
 
-#eval Accumulation.sum [1, 3, 5]
-#eval sum [1, 3, 5]
-#eval product [1, 3, 5]
+-- #eval Accumulation.sum [1, 3, 5]
+-- #eval sum [1, 3, 5]
+-- #eval product [1, 3, 5]
 
 def List.enumerate (a : List α) : List (Nat × α) := List.zip (List.range a.length) a
 
-#eval [2, 4, 5].enumerate
+-- #eval [2, 4, 5].enumerate
 
 def Array.enumerate (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
 
-#eval #[2, 4, 5].enumerate
+-- #eval #[2, 4, 5].enumerate

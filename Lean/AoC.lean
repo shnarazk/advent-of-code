@@ -5,23 +5,23 @@
 import Aesop
 import Batteries
 import «AoC».Combinator
-import «AoC2023»
-import «AoC2024»
+import «Y2023»
+import «Y2024»
 
 def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
   let f ← dataFileName year day extra
   let ans ← match year with
     | 2023 =>
-      if h : day - 1 < AoC2023.solvedDays
+      if h : day - 1 < Y2023.solvedDays
         then
-          let ans ← Aesop.time <| AoC2023.solve day h extra
+          let ans ← Aesop.time <| Y2023.solve day h extra
           pure (some (ans))
         else
           do pure none
     | 2024 =>
-      if h : day - 1 < AoC2024.solvedDays
+      if h : day - 1 < Y2024.solvedDays
         then
-          let res ← Aesop.time <| AoC2024.solve day h extra
+          let res ← Aesop.time <| Y2024.solve day h extra
           pure (some (res))
         else
           do pure none
@@ -37,10 +37,12 @@ def aoc_driver (args : List String) : IO Unit := do
   match (args.get? 0).map (·.toNat!) with
   | some year => do
       let solved := match year with
-        | 2023 => List.range AoC2023.solvedDays
-        | 2024 => List.range AoC2024.solvedDays
+        | 2023 => List.range Y2023.solvedDays
+        | 2024 => List.range Y2024.solvedDays
         | _ => []
       match (args.get? 1).map (·.toNat!) with
         | some day => run year day extra
         | none     => let _ ← do (solved.mapM (run year · extra))
   | none => return
+
+def main (args : List String) : IO Unit := do aoc_driver args
