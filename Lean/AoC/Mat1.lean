@@ -14,9 +14,9 @@ namespace Mat1
 return an optional new instance of Mat1 of an array
 -/
 def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option (Mat1 α) :=
-  if h : vec.size > 0
+  if h : vec.size ≠ 0
   then
-    have : NeZero vec.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
+    have : NeZero vec.size := by simp [neZero_iff, h]
     ({width := w, vector := vec, neZero := this } : Mat1 α) |> some
   else none
 
@@ -36,18 +36,17 @@ def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat)
   0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
 
 def get? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Option α :=
-  if self.validIndex? i j then self.get i j |> some else none
+ if self.validIndex? i j then self.get i j |> some else none
 
 /--
 set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
   let ix := i * self.width + j
-  let v := self.vector.set (@Fin.ofNat' self.vector.size self.neZero ix) val
-  if h : v.size > 0
-  then
-    have : NeZero v.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
-   ({width := self.width, vector := v, neZero := this } : Mat1 α)
+  let v := self.vector.set! ix val
+  if h : v.size ≠ 0 then
+    have : NeZero v.size := by simp [neZero_iff, h]
+    { self with vector := v, neZero := this }
   else self
 
 -- def x := new #[true, false, true, false] 2
@@ -68,9 +67,9 @@ modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 def modify {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
   let ix := i * self.width + j
   let v := self.vector.modify ix f
-  if h : v.size > 0
+  if h : v.size ≠ 0
   then
-    have : NeZero v.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
+    have : NeZero v.size := by simp [neZero_iff, h]
     ({width := self.width, vector := v, neZero := this } : Mat1 α)
   else self
 
@@ -102,9 +101,9 @@ def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
   let f := i * mat.width
   let t := (i + 1) * mat.width
   let sa := mat.vector.toSubarray f t
-  if h : sa.size > 0
+  if h : sa.size ≠ 0
   then
-    have : NeZero sa.size := by apply neZero_iff.mpr ; exact Nat.not_eq_zero_of_lt h
+    have : NeZero sa.size := by simp [neZero_iff, h]
     match findIdxOnSubarray sa (Fin.ofNat' sa.size (t - f - 1)) (Fin.ofNat' sa.size 1) pred with
     | some j => some (i, j)
     | none => none
