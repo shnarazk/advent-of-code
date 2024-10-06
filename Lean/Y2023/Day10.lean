@@ -201,16 +201,22 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate_h (args : Map × HashSet Pos) : Map :=
-  if args.2.isEmpty
-  then args.1
+partial def propagate_h (visited : Map) (to_visit : HashSet Pos) : Map :=
+  if to_visit.isEmpty
+  then visited
   else
-    (args.2.fold
-      (fun lh p ↦ (makeNeighbors args.1.size p).foldl
-        (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
-        lh)
-      (args.1, HashSet.empty args.1.countElements))
-    |> propagate_h
+    let size := visited.size
+    (to_visit.fold
+      (fun mh p ↦ if mh.fst.checked p
+        then
+          mh
+        else
+          (makeNeighbors size p).foldl
+            (fun lh q ↦ if lh.fst.checked q || lh.snd.contains q then lh else (lh.fst, lh.snd.insert q))
+            (mh.fst.set p false, mh.snd)
+      )
+      (visited, HashSet.empty (visited.countElements / 8)))
+    |> uncurry propagate_h
 
 partial def propagate_l : Map × List Pos → Map
   | (linked, []) => linked
@@ -229,8 +235,8 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-  -- let a_map := propagate_h (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
-  let a_map := propagate_l (Map.of (Pos.double sp) loop, [(0, 0)])
+  let a_map := propagate_h (Map.of (Pos.double sp) loop) (HashSet.empty.insert (0, 0))
+  -- let a_map := propagate_l (Map.of (Pos.double sp) loop, [(0, 0)])
   List.range sp.fst
     |>.foldl (fun count y ↦
       List.range sp.snd
