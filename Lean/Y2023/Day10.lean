@@ -26,7 +26,9 @@ def makeNeighbors (size s : Pos) : List Pos :=
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-def makeVecs (size start : Pos) : List (Pos × Pos) := makeNeighbors size start |>.map ((start, ·))
+def makeVecs (size start : Pos) : List (Pos × Pos) :=
+  makeNeighbors size start
+    |>.map ((start, ·))
 
 -- #eval makeVecs (10, 10) (2, 2)
 
@@ -86,23 +88,30 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def cell := pchar '|'
-    <|> pchar '-'
-    <|> pchar 'L'
-    <|> pchar 'J'
-    <|> pchar '7'
-    <|> pchar 'F'
-    <|> pchar '.'
-    <|> pchar 'S'
+  <|> pchar '-'
+  <|> pchar 'L'
+  <|> pchar 'J'
+  <|> pchar '7'
+  <|> pchar 'F'
+  <|> pchar '.'
+  <|> pchar 'S'
 
-def pcircuit := (return Circuit.ofChar) <*> cell
-
-def parser := (return Mat1.of2DMatrix) <*> many (many pcircuit <* eol)
+def parse := AoCParser.parse parser
+  where
+    pcircuit := (return Circuit.ofChar) <*> cell
+    parser := (return Mat1.of2DMatrix) <*> many (many pcircuit <* eol)
 
 end parser
 
 namespace part1
 
-def loop_len (self : Mat1 Circuit) (limit : Nat) (start : Pos) (len : Nat) (vec : Pos × Pos) : Nat :=
+def loop_len
+    (self : Mat1 Circuit)
+    (limit : Nat)
+    (start : Pos)
+    (len : Nat)
+    (vec : Pos × Pos)
+    : Nat :=
   match limit with
   | 0        => 0
   | lim' + 1 =>
@@ -131,7 +140,7 @@ namespace Map
 -- #eval #[1, 2].isEmpty
 -- #check @Fin.ofNat' 10 3
 
-def countElements (size: Pos) : Nat := size.fst * size.snd
+def countElements (self: Map) : Nat := self.size.fst * self.size.snd
 
 @[inline]
 def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
@@ -146,7 +155,7 @@ def set (self : Map) (p : Pos) (b : Bool) : Map :=
 def of (size : Pos) (locs : List Pos) : Map :=
   locs.foldl
     (fun map pos => Map.set map pos false)
-    (Map.mk size (Array.mkArray (countElements size) none))
+    (Map.mk size (Array.mkArray (size.fst * size.snd) none))
 
 end Map
 
@@ -161,7 +170,12 @@ open Std
   5. count the unmarked cells
 -/
 
-def mkLoop (self : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (vec : Pos × Pos)
+def mkLoop
+    (self : Mat1 Circuit)
+    (limit : Nat)
+    (start : Pos)
+    (path : List Pos)
+    (vec : Pos × Pos)
     : List Pos :=
   match limit with
   | 0        => []
@@ -172,8 +186,7 @@ def mkLoop (self : Mat1 Circuit) (limit : Nat) (start : Pos) (path : List Pos) (
     else mkLoop self lim' start (path ++ [v'.fst]) v'
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
-  let p' := Pos.double p
-  let q' := Pos.double q
+  let (p', q') := both Pos.double (p, q)
   ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
 
 -- #eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
@@ -188,7 +201,7 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate0 (args : Map × HashSet Pos) : Map :=
+partial def propagate_hss (args : Map × HashSet Pos) : Map :=
   if args.2.isEmpty
   then args.1
   else
@@ -196,29 +209,18 @@ partial def propagate0 (args : Map × HashSet Pos) : Map :=
       (fun lh p ↦ (makeNeighbors args.1.size p).foldl
         (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
         lh)
-      (args.1, HashSet.empty 100000))
-    |> propagate0
+      (args.1, HashSet.empty args.1.countElements))
+    |> propagate_hss
 
-partial def propagate (linked : Map) (toVisit : HashSet Pos) : Map :=
-  if toVisit.isEmpty
-  then linked
-  else
-    toVisit.fold
-      (fun lh p ↦ (makeNeighbors linked.size p).foldl
-        (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
-        lh)
-      (linked, (HashSet.empty 100000 : HashSet Pos))
-    |> uncurry propagate
-
-partial def propagate_old : Map × List Pos → Map
+partial def propagate_lst : Map × List Pos → Map
   | (linked, []) => linked
   | (linked, toVisit) =>
-    toVisit.map (makeNeighbors linked.size)
+    toVisit.map (makeNeighbors linked.size ·)
       |>.join
       |>.foldl
-        (fun lt e => if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
+        (fun lt e ↦ if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
         (linked, [])
-      |> propagate_old
+      |> propagate_lst
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
@@ -227,9 +229,8 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  -- let a_map := propagate0 (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
-  -- let a_map := propagate (Map.of (Pos.double sp) loop) (HashSet.empty.insert (0, 0))
-  let a_map := propagate_old (Map.of (Pos.double sp) loop,  [(0, 0)])
+  -- let a_map := propagate_hss (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
+  let a_map := propagate_lst (Map.of (Pos.double sp) loop, [(0, 0)])
   List.range sp.fst
     |>.foldl (fun count y =>
       List.range sp.snd
@@ -243,7 +244,7 @@ def solve (m: Mat1 Circuit) : Nat :=
 end part2
 
 protected def solve (ext : Option String) : IO Answers := do
-  if let some (some m) := AoCParser.parse parser.parser (← dataOf 2023 10 ext)
+  if let some (some m) := parser.parse (← dataOf 2023 10 ext)
   then return (s!"{part1.solve m}", s!"{part2.solve m}")
   else return ("parse error", "")
 
