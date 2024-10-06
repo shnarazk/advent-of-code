@@ -127,40 +127,52 @@ def solve (m : Mat1 Circuit) : Nat :=
 
 end part1
 
-structure Map where
-  size : Pos
-  cells : Array (Option Bool)
-deriving BEq
-
-instance : Inhabited Map where
-  default := Map.mk (0, 0) #[]
-
-namespace Map
-
--- #eval #[1, 2].isEmpty
--- #check @Fin.ofNat' 10 3
-
-def countElements (self: Map) : Nat := self.size.fst * self.size.snd
-
-@[inline]
-def index (self : Map) (p : Pos) : Nat := p.fst * self.size.snd + p.snd
-
-@[inline]
-def checked (self : Map) (p : Pos) : Bool := self.cells.get! (Map.index self p) != none
-
-@[inline]
-def set (self : Map) (p : Pos) (b : Bool) : Map :=
-  { self with cells := self.cells.set! (self.index p) (some b) }
-
-def of (size : Pos) (locs : List Pos) : Map :=
-  locs.foldl
-    (fun map pos ↦ Map.set map pos false)
-    (Map.mk size (Array.mkArray (size.fst * size.snd) none))
-
-end Map
-
 namespace part2
 open Std
+
+inductive PropagateState where
+  | Wall       : PropagateState
+  | Propagated : PropagateState
+  | ToExpand   : PropagateState
+  | Unknown    : PropagateState
+deriving BEq, Repr
+
+instance : Inhabited PropagateState where default := .Unknown
+
+@[inline]
+def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
+
+def map_of (size : Pos) (locs : List Pos) : Array PropagateState :=
+  locs.foldl
+    (fun map pos ↦ map.set! (index size pos) PropagateState.Wall)
+    (Array.mkArray (size.fst * size.snd) PropagateState.Unknown)
+
+def expand (self : Array PropagateState) (size : Pos) (p : Pos) : Array PropagateState :=
+  makeNeighbors size p
+    |>.foldl
+      (fun m q ↦ match m.get! (index size q) with
+        | PropagateState.Unknown => m.set! (index size q) PropagateState.ToExpand
+        | _ => m
+      )
+      (self.set! (index size p) PropagateState.Propagated)
+
+partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState :=
+  let r := List.range size.fst
+    |>.foldl
+      (fun mm y ↦
+        (List.range size.snd).foldl
+          (fun mm x ↦
+            if m.get! (index size (y, x)) == .ToExpand
+            then (expand mm.fst size (y, x), true)
+            else mm)
+          mm
+      )
+      (m, false)
+  if r.snd then loop r.fst size else r.fst
+
+def propagate (self : Array PropagateState) (size : Pos) : Array PropagateState := loop s size
+  where
+    s := self.set! (index size (0, 0)) .ToExpand
 
 /-!
   1. pick the looping route
@@ -199,35 +211,6 @@ def scaleUp : List Pos → List Pos
   | p :: []     => [Pos.double p]
   | p :: q :: l => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l)
 
--- #eval makeNeighbors (10, 10) (0, 0)
-
-partial def propagate_h (visited : Map) (to_visit : HashSet Pos) : Map :=
-  if to_visit.isEmpty
-  then visited
-  else
-    let size := visited.size
-    (to_visit.fold
-      (fun mh p ↦ if mh.fst.checked p
-        then
-          mh
-        else
-          (makeNeighbors size p).foldl
-            (fun lh q ↦ if lh.fst.checked q || lh.snd.contains q then lh else (lh.fst, lh.snd.insert q))
-            (mh.fst.set p false, mh.snd)
-      )
-      (visited, HashSet.empty (visited.countElements / 8)))
-    |> uncurry propagate_h
-
-partial def propagate_l : Map × List Pos → Map
-  | (linked, []) => linked
-  | (linked, toVisit) =>
-    toVisit.map (makeNeighbors linked.size ·)
-      |>.join
-      |>.foldl
-        (fun lt e ↦ if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
-        (linked, [])
-      |> propagate_l
-
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
   let sp := m.shape
@@ -235,17 +218,15 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-  let a_map := propagate_h (Map.of (Pos.double sp) loop) (HashSet.empty.insert (0, 0))
-  -- let a_map := propagate_l (Map.of (Pos.double sp) loop, [(0, 0)])
+    let size := Pos.double sp
+  let a_map := propagate (map_of size loop) size
   List.range sp.fst
-    |>.foldl (fun count y ↦
+    |>.foldl (fun sum y ↦
       List.range sp.snd
-        |>.filter (fun x ↦ !a_map.checked (Pos.double (y, x)))
+        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (index size (Pos.double (y, x))))
         |>.length
-        |> (· + count))
+        |> (· + sum))
       0
-
--- #eval List.range 9
 
 end part2
 
