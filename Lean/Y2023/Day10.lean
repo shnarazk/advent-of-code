@@ -114,7 +114,7 @@ def loop_len (self : Mat1 Circuit) (limit : Nat) (start : Pos) (len : Nat) (vec 
 def solve (m : Mat1 Circuit) : Nat :=
   makeVecs m.shape (startPosition m)
     |>.map (loop_len m m.size (startPosition m) 0 .)
-    |>.maximum? |>.getD 0 |> (· / 2)
+    |>.max? |>.getD 0 |> (· / 2)
 
 end part1
 

@@ -113,7 +113,7 @@ def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSp
 def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans := pairs seeds.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
   let spans' : List ClosedSpan := tp2 spans rule
-  spans'.map (·._beg) |>.minimum? |>.getD 0
+  spans'.map (·._beg) |>.min? |>.getD 0
 
 protected def solve (ext : Option String) : IO Answers := do
   if let some (s, m) := AoCParser.parse Y2023.Day05.parser.parser (← dataOf 2023 5 ext)

@@ -3,7 +3,7 @@ import Init.Data.Array.Subarray
 structure Mat1 (α : Type) [BEq α] [Inhabited α] where
   width  : Nat
   vector : Array α
-  nonZero : vector.size > 0
+  neZero : NeZero vector.size
 deriving Repr
 
 instance [ToString α] [BEq α] [Inhabited α] : ToString (Mat1 α) where
@@ -15,7 +15,9 @@ return an optional new instance of Mat1 of an array
 -/
 def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option (Mat1 α) :=
   if h : vec.size > 0
-  then ({width := w, vector := vec, nonZero := h } : Mat1 α) |> some
+  then
+    have : NeZero vec.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
+    ({width := w, vector := vec, neZero := this } : Mat1 α) |> some
   else none
 
 /--
@@ -28,7 +30,7 @@ def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Opti
 return the `(i,j)`-th element of Mat1 instance
 -/
 def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
-  self.vector.get (Fin.ofNat' (i * self.width + j) self.nonZero)
+  self.vector.get (@Fin.ofNat' self.vector.size self.neZero (i * self.width + j))
 
 def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
   0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
@@ -41,9 +43,11 @@ set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
   let ix := i * self.width + j
-  let v := self.vector.set (Fin.ofNat' ix self.nonZero) val
-  if h : v.size > 0  -- I don't know how to reuse self.nonZero
-  then ({width := self.width, vector := v, nonZero := h } : Mat1 α)
+  let v := self.vector.set (@Fin.ofNat' self.vector.size self.neZero ix) val
+  if h : v.size > 0
+  then
+    have : NeZero v.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
+   ({width := self.width, vector := v, neZero := this } : Mat1 α)
   else self
 
 -- def x := new #[true, false, true, false] 2
@@ -63,9 +67,11 @@ modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def modify {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
   let ix := i * self.width + j
-  let v := self.vector.modify (Fin.ofNat' ix self.nonZero) f
-  if h : v.size > 0  -- I don't know how to reuse self.nonZero
-  then ({width := self.width, vector := v, nonZero := h } : Mat1 α)
+  let v := self.vector.modify ix f
+  if h : v.size > 0
+  then
+    have : NeZero v.size := by rw [neZero_iff] ; exact Nat.not_eq_zero_of_lt h
+    ({width := self.width, vector := v, neZero := this } : Mat1 α)
   else self
 
 /--
@@ -98,7 +104,8 @@ def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
   let sa := mat.vector.toSubarray f t
   if h : sa.size > 0
   then
-    match findIdxOnSubarray sa (Fin.ofNat' (t - f - 1) h) (Fin.ofNat' 1 h) pred with
+    have : NeZero sa.size := by apply neZero_iff.mpr ; exact Nat.not_eq_zero_of_lt h
+    match findIdxOnSubarray sa (Fin.ofNat' sa.size (t - f - 1)) (Fin.ofNat' sa.size 1) pred with
     | some j => some (i, j)
     | none => none
   else none
