@@ -13,7 +13,7 @@ deriving BEq, Hashable, Repr, ToString
 instance : Inhabited Pos where default := (0, 0)
 instance : ToString Pos where toString s := s!"P({s.fst}, {s.snd})"
 
-def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
+def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j ↦ i < j) a b
 
 def Pos.double : Pos → Pos := both (· * 2)
 
@@ -72,13 +72,13 @@ def startPosition (self : Mat1 Circuit) : Pos :=
 
 def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, now) := vec
-  let (dy, dx)   := both2 (fun x y => Int.ofNat x - Int.ofNat y) now pre
-  let trans      := fun x y => Int.ofNat x + y |>.toNat
+  let (dy, dx)   := both2 (fun x y ↦ Int.ofNat x - Int.ofNat y) now pre
+  let trans      := fun x y ↦ Int.ofNat x + y |>.toNat
   let diff := match uncurry mat.get? now with
   | some .v => ( dy,   0)
   | some .h => (  0,  dx)
-  | some .l => ( dx,  dy) -- | some .k => ( dx,  dy)
-  | some .j => (-dx, -dy) -- | some .f => (-dx, -dy)
+  | some .l => ( dx,  dy)
+  | some .j => (-dx, -dy)
   |       _ => (  0,   0)
   (now, both2 trans now diff)
 
@@ -154,7 +154,7 @@ def set (self : Map) (p : Pos) (b : Bool) : Map :=
 
 def of (size : Pos) (locs : List Pos) : Map :=
   locs.foldl
-    (fun map pos => Map.set map pos false)
+    (fun map pos ↦ Map.set map pos false)
     (Map.mk size (Array.mkArray (size.fst * size.snd) none))
 
 end Map
@@ -201,7 +201,7 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate_hss (args : Map × HashSet Pos) : Map :=
+partial def propagate_h (args : Map × HashSet Pos) : Map :=
   if args.2.isEmpty
   then args.1
   else
@@ -210,9 +210,9 @@ partial def propagate_hss (args : Map × HashSet Pos) : Map :=
         (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
         lh)
       (args.1, HashSet.empty args.1.countElements))
-    |> propagate_hss
+    |> propagate_h
 
-partial def propagate_lst : Map × List Pos → Map
+partial def propagate_l : Map × List Pos → Map
   | (linked, []) => linked
   | (linked, toVisit) =>
     toVisit.map (makeNeighbors linked.size ·)
@@ -220,21 +220,21 @@ partial def propagate_lst : Map × List Pos → Map
       |>.foldl
         (fun lt e ↦ if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
         (linked, [])
-      |> propagate_lst
+      |> propagate_l
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
   let sp := m.shape
   let loop := makeVecs sp st
     |>.map (mkLoop m m.size st [st] .)
-    |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
+    |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-  -- let a_map := propagate_hss (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
-  let a_map := propagate_lst (Map.of (Pos.double sp) loop, [(0, 0)])
+  -- let a_map := propagate_h (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
+  let a_map := propagate_l (Map.of (Pos.double sp) loop, [(0, 0)])
   List.range sp.fst
-    |>.foldl (fun count y =>
+    |>.foldl (fun count y ↦
       List.range sp.snd
-        |>.filter (fun x => !a_map.checked (Pos.double (y, x)))
+        |>.filter (fun x ↦ !a_map.checked (Pos.double (y, x)))
         |>.length
         |> (· + count))
       0
