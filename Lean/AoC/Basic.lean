@@ -1,10 +1,18 @@
 import Lean
 import «AoC».Mat1
 
+structure AocProblem where
+  year : Nat
+  day : Nat
+  validYear : 2000 < year
+  validDay : 1 ≤ day ∧ day ≤ 25
+deriving BEq, Repr
+instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
+
 def Answers := String × String
 
 /--
-Build and retrun a data filename
+Build and return a data filename
 -/
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
   let aoc_dir ← IO.getEnv "AOC_DIR"
@@ -14,6 +22,9 @@ def dataFileName (year day : Nat) (ext : Option String): IO String := do
   | none     => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}.txt"
 
 -- #eval dataFileName 2023 2 none
+
+def AocProblem.fileName (self : AocProblem) (ext : Option String) : IO String :=
+  dataFileName self.year self.day ext
 
 def readData (datafilename : String) : IO String := do
      IO.FS.readFile datafilename

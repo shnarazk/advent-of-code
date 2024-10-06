@@ -6,6 +6,7 @@ import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y20XX.DayXX
+
 open Std Accumulation CoP
 
 def year : Nat := 2024
