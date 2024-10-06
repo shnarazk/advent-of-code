@@ -4,9 +4,12 @@
 -- import Mathlib.Data.Real.Basic
 import Aesop
 import Batteries
+import «AoC».Basic
+import «AoC».Color
 import «AoC».Combinator
 import «Y2023»
 import «Y2024»
+open AoC
 
 def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
   let f ← dataFileName year day extra
@@ -28,8 +31,8 @@ def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
     | _ => do pure none
   match ans with
     | some (results, time) => do
-      IO.println s!"{color.blue}- {f}{color.reset}: {time.printAsMillis}{color.reset}"
-      IO.println s!"{color.green}  => {results.fst}, {results.snd}{color.reset}"
+      IO.println s!"{Color.blue}- {f}{Color.reset}: {time.printAsMillis}{Color.reset}"
+      IO.println s!"{Color.green}  => {results.fst}, {results.snd}{Color.reset}"
     | _ => do return
 
 def aoc_driver (args : List String) : IO Unit := do

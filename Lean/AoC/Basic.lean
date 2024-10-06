@@ -1,16 +1,7 @@
 import Lean
 import «AoC».Mat1
 
-structure AocProblem where
-  year : Nat
-  day : Nat
-  validYear : 2000 < year
-  validDay : 1 ≤ day ∧ day ≤ 25
-deriving BEq, Repr
-instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
-
-def Answers := String × String
-
+-- namespace FileIO
 /--
 Build and return a data filename
 -/
@@ -21,14 +12,11 @@ def dataFileName (year day : Nat) (ext : Option String): IO String := do
   | some ext => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}-{ext}.txt"
   | none     => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}.txt"
 
--- #eval dataFileName 2023 2 none
-
-def AocProblem.fileName (self : AocProblem) (ext : Option String) : IO String :=
-  dataFileName self.year self.day ext
 
 def readData (datafilename : String) : IO String := do
      IO.FS.readFile datafilename
 
+-- #eval dataFileName 2023 2 none
 /--
 return file contents as String
 -/
@@ -44,14 +32,30 @@ return file contents as Array String
 def linesOf (year day : Nat) (ext : Option String): IO (Array String) :=
   dataFileName year day ext >>= readLines
 
-def color.red     : String := "\x1B[001m\x1B[031m"
-def color.green   : String := "\x1B[001m\x1B[032m"
-def color.blue    : String := "\x1B[001m\x1B[034m"
-def color.magenta : String := "\x1B[001m\x1B[035m"
-def color.cyan    : String := "\x1B[001m\x1B[036m"
-def color.reset   : String := "\x1B[000m"
-def color.revert  : String := "\x1B[1A\x1B[1G\x1B[1K"
-def color.reverse : String := "\x1B[001m\x1B[07m"
+-- end FileIO
+
+def Answers := String × String
+
+structure AocProblem where
+  year : Nat
+  day : Nat
+  validYear : 2000 < year
+  validDay : 1 ≤ day ∧ day ≤ 25
+deriving BEq, Repr
+instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
+
+namespace AocProblem
+
+def fileName (self : AocProblem) (ext : Option String) : IO String :=
+  dataFileName self.year self.day ext
+
+def getData (self : AocProblem) (ext : Option String) : IO String :=
+  dataFileName self.year self.day ext >>= readData
+
+def getLines (self : AocProblem) (ext : Option String) : IO (Array String) :=
+  dataFileName self.year self.day ext >>= readLines
+
+end AocProblem
 
 /--
 Return an array consisting of elements in `a`
