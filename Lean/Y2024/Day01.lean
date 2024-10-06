@@ -21,7 +21,9 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def parse : Parser Input := return Input.mk
+def parse : String → Option Input := AoCParser.parse parser
+  where
+    parser : Parser Input := return Input.mk
 
 end parser
 
@@ -38,7 +40,7 @@ def solve (_ : Input) : Nat := 0
 end Part2
 
 protected def solve (alt : Option String): IO Answers := do
-  if let some d := AoCParser.parse parser.parse (← dataOf year day alt)
+  if let some d := parser.parse (← dataOf year day alt)
   then return (s!"{Part1.solve d}", s!"{Part2.solve d}")
   else return ("parse error", "")
 
