@@ -5,10 +5,13 @@ import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2023.Day10
-open Std CiCL CoP
+open CiCL CoP
 
 def Pos : Type := Nat × Nat
-deriving BEq, Repr, ToString
+deriving BEq, Hashable, Repr, ToString
+
+instance : Inhabited Pos where default := (0, 0)
+instance : ToString Pos where toString s := s!"P({s.fst}, {s.snd})"
 
 def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j => i < j) a b
 
@@ -27,16 +30,11 @@ def makeVecs (size start : Pos) : List (Pos × Pos) := makeNeighbors size start 
 
 -- #eval makeVecs (10, 10) (2, 2)
 
-instance : ToString Pos where
-  toString s := s!"P({s.fst}, {s.snd})"
-
 inductive Circuit where
   | v : Circuit
   | h : Circuit
   | l : Circuit
   | j : Circuit
-  -- | k : Circuit
-  -- | f : Circuit
   | s : Circuit
   | x : Circuit
 deriving BEq, Repr
@@ -51,8 +49,6 @@ instance : ToString Circuit where
   | .h => "-"
   | .l => "L"
   | .j => "J"
-  -- | .k => "7"
-  -- | .f => "F"
   | .s => "S"
   | _  => " "
 
@@ -100,7 +96,7 @@ def cell := pchar '|'
 
 def pcircuit := (return Circuit.ofChar) <*> cell
 
-def parser := (return Mat1.of2DMatrix) <*>many (many pcircuit <* eol)
+def parser := (return Mat1.of2DMatrix) <*> many (many pcircuit <* eol)
 
 end parser
 
@@ -123,9 +119,12 @@ def solve (m : Mat1 Circuit) : Nat :=
 end part1
 
 structure Map where
-  new ::
   size : Pos
   cells : Array (Option Bool)
+deriving BEq
+
+instance : Inhabited Map where
+  default := Map.mk (0, 0) #[]
 
 namespace Map
 
@@ -142,17 +141,17 @@ def checked (self : Map) (p : Pos) : Bool := self.cells.get! (Map.index self p) 
 
 @[inline]
 def set (self : Map) (p : Pos) (b : Bool) : Map :=
-  { self with cells := self.cells.set! (Map.index self p) (some b) }
+  { self with cells := self.cells.set! (self.index p) (some b) }
 
 def of (size : Pos) (locs : List Pos) : Map :=
   locs.foldl
     (fun map pos => Map.set map pos false)
-    (Map.new size (Array.mkArray (countElements size) none))
+    (Map.mk size (Array.mkArray (countElements size) none))
 
 end Map
 
 namespace part2
-open Lean Data
+open Std
 
 /-!
   1. pick the looping route
@@ -189,30 +188,37 @@ def scaleUp : List Pos → List Pos
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
-partial def propagate (linked : Map) (toVisit : List Pos) : Map :=
-  match toVisit with
-  | [] => linked
-  | _ =>
+partial def propagate0 (args : Map × HashSet Pos) : Map :=
+  if args.2.isEmpty
+  then args.1
+  else
+    (args.2.fold
+      (fun lh p ↦ (makeNeighbors args.1.size p).foldl
+        (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
+        lh)
+      (args.1, HashSet.empty 100000))
+    |> propagate0
+
+partial def propagate (linked : Map) (toVisit : HashSet Pos) : Map :=
+  if toVisit.isEmpty
+  then linked
+  else
+    toVisit.fold
+      (fun lh p ↦ (makeNeighbors linked.size p).foldl
+        (fun lh q ↦ if lh.fst.checked q then lh else (lh.fst.set q false, lh.snd.insert q))
+        lh)
+      (linked, (HashSet.empty 100000 : HashSet Pos))
+    |> uncurry propagate
+
+partial def propagate_old : Map × List Pos → Map
+  | (linked, []) => linked
+  | (linked, toVisit) =>
     toVisit.map (makeNeighbors linked.size)
       |>.join
       |>.foldl
         (fun lt e => if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
         (linked, [])
-      |> uncurry propagate
-
--- def propagate (limit : Nat) (linked : Map) (toVisit : List Pos) : Map :=
---   match limit with
---   | 0       => linked
---   | lim + 1 =>
---   match toVisit with
---   | [] => linked
---   | _ =>
---     toVisit.map (makeNeighbors linked.size)
---       |>.join
---       |>.foldl
---         (fun lt e => if lt.fst.checked e then lt else (lt.fst.set e false, e :: lt.snd))
---         (linked, [])
---       |> uncurry (propagate lim)
+      |> propagate_old
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
@@ -221,11 +227,13 @@ def solve (m: Mat1 Circuit) : Nat :=
     |>.map (mkLoop m m.size st [st] .)
     |>.foldl (fun best cand => if best.length < cand.length then cand else best) []
     |> scaleUp
-  let map := propagate (Map.of (Pos.double sp) loop) [(0, 0)]
+  -- let a_map := propagate0 (Map.of (Pos.double sp) loop, HashSet.empty.insert (0, 0))
+  -- let a_map := propagate (Map.of (Pos.double sp) loop) (HashSet.empty.insert (0, 0))
+  let a_map := propagate_old (Map.of (Pos.double sp) loop,  [(0, 0)])
   List.range sp.fst
     |>.foldl (fun count y =>
       List.range sp.snd
-        |>.filter (fun x => !map.checked (Pos.double (y, x)))
+        |>.filter (fun x => !a_map.checked (Pos.double (y, x)))
         |>.length
         |> (· + count))
       0
@@ -235,8 +243,8 @@ def solve (m: Mat1 Circuit) : Nat :=
 end part2
 
 protected def solve (ext : Option String) : IO Answers := do
-  if let some (some m) := AoCParser.parse Y2023.Day10.parser.parser (← dataOf 2023 10 ext)
-  then return (s!"{Y2023.Day10.part1.solve m}", s!"{Y2023.Day10.part2.solve m}")
+  if let some (some m) := AoCParser.parse parser.parser (← dataOf 2023 10 ext)
+  then return (s!"{part1.solve m}", s!"{part2.solve m}")
   else return ("parse error", "")
 
 end Y2023.Day10
