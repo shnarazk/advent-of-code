@@ -18,17 +18,15 @@ def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j ↦ i < j) a
 def Pos.double : Pos → Pos := both (· * 2)
 
 -- #eval Pos.double ((3, 4) : Pos)
--- #eval Pos.double ((3, 5) : Pos)
 
 def makeNeighbors (size s : Pos) : List Pos :=
-  [(s.fst + 1, s.snd + 0), (s.fst - 1, s.snd + 0), (s.fst + 0, s.snd + 1), (s.fst + 0, s.snd - 1)]
+  [(s.fst + 1, s.snd), (s.fst - 1, s.snd), (s.fst, s.snd + 1), (s.fst, s.snd - 1)]
     |>.filter (Pos.lt · size)
 
 -- #eval makeNeighbors (10, 10) (0, 0)
 
 def makeVecs (size start : Pos) : List (Pos × Pos) :=
-  makeNeighbors size start
-    |>.map ((start, ·))
+  (makeNeighbors size start).map ((start, ·))
 
 -- #eval makeVecs (10, 10) (2, 2)
 
@@ -41,8 +39,7 @@ inductive Circuit where
   | x : Circuit
 deriving BEq, Repr
 
-instance : Inhabited Circuit where
-  default := Circuit.x
+instance : Inhabited Circuit where default := Circuit.x
 
 instance : ToString Circuit where
   toString c :=
@@ -117,8 +114,8 @@ def loop_len
   | lim' + 1 =>
     let v' := dest self vec
     if v'.fst == v'.snd
-    then if v'.snd == start then len + 1 else 0
-    else loop_len self lim' start (len + 1) v'
+      then if v'.snd == start then len + 1 else 0
+      else loop_len self lim' start (len + 1) v'
 
 def solve (m : Mat1 Circuit) : Nat :=
   makeVecs m.shape (startPosition m)
@@ -141,6 +138,13 @@ instance : Inhabited PropagateState where default := .Unknown
 
 @[inline]
 def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
+def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
+
+#eval index' (10, 10) 10
+#eval index' (10, 10) 15
+
+lemma index_index'_is_id (size : Pos) (p : Pos) : index' size (index size p) = p := by
+  sorry
 
 def map_of (size : Pos) (locs : List Pos) : Array PropagateState :=
   locs.foldl
@@ -151,10 +155,10 @@ def expand (self : Array PropagateState) (size : Pos) (p : Pos) : Array Propagat
   makeNeighbors size p
     |>.foldl
       (fun m q ↦ match m.get! (index size q) with
-        | PropagateState.Unknown => m.set! (index size q) PropagateState.ToExpand
+        | .Unknown => m.set! (index size q) .ToExpand
         | _ => m
       )
-      (self.set! (index size p) PropagateState.Propagated)
+      (self.set! (index size p) .Propagated)
 
 partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState :=
   let r := List.range size.fst
@@ -163,8 +167,8 @@ partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState 
         (List.range size.snd).foldl
           (fun mm x ↦
             if m.get! (index size (y, x)) == .ToExpand
-            then (expand mm.fst size (y, x), true)
-            else mm)
+              then (expand mm.fst size (y, x), true)
+              else mm)
           mm
       )
       (m, false)
@@ -194,8 +198,8 @@ def mkLoop
   | lim' + 1 =>
     let v' := dest self vec
     if v'.fst == v'.snd
-    then if v'.snd == start then path ++ [v'.fst] else []
-    else mkLoop self lim' start (path ++ [v'.fst]) v'
+      then if v'.snd == start then path ++ [v'.fst] else []
+      else mkLoop self lim' start (path ++ [v'.fst]) v'
 
 def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
   let (p', q') := both Pos.double (p, q)
@@ -208,21 +212,21 @@ This generates a list of dupicated nodes.
 -/
 def scaleUp : List Pos → List Pos
   | []          => []
-  | p :: []     => [Pos.double p]
-  | p :: q :: l => [Pos.double p, Pos.interpolate p q] ++ scaleUp (q :: l)
+  | p :: []     => [p.double]
+  | p :: q :: l => [p.double, Pos.interpolate p q] ++ scaleUp (q :: l)
 
 def solve (m: Mat1 Circuit) : Nat :=
   let st := startPosition m
-  let sp := m.shape
-  let loop := makeVecs sp st
-    |>.map (mkLoop m m.size st [st] .)
+  let shape := m.shape
+  let loop := makeVecs shape st
+    |>.map (mkLoop m m.size st [st] ·)
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-    let size := Pos.double sp
+  let size := Pos.double shape
   let a_map := propagate (map_of size loop) size
-  List.range sp.fst
+  List.range shape.fst
     |>.foldl (fun sum y ↦
-      List.range sp.snd
+      List.range shape.snd
         |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (index size (Pos.double (y, x))))
         |>.length
         |> (· + sum))
