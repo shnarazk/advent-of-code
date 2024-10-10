@@ -4,11 +4,15 @@ defaultTargets = ["aoc"]
 version = "0.1.0"
 
 [[require]]
+name = "aesop"
+scope = "leanprover-community"
+
+[[require]]
 name = "batteries"
 scope = "leanprover-community"
 
 [[require]]
-name = "aesop"
+name = "mathlib"
 scope = "leanprover-community"
 
 [[lean_lib]]

@@ -1,4 +1,5 @@
 import Batteries
+import Mathlib.Tactic
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
@@ -8,22 +9,33 @@ namespace Y2023.Day10
 open CiCL CoP
 
 def Pos : Type := Nat × Nat
-deriving BEq, Hashable, Repr, ToString
+deriving BEq, Hashable, Repr
+def Pos.mk (y x : Nat) := (y, x)
 
-instance : Inhabited Pos where default := (0, 0)
-instance : ToString Pos where toString s := s!"P({s.fst}, {s.snd})"
+instance : Inhabited Pos where default := Pos.mk 0 0
+instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
 
-def Pos.lt (a : Pos) (b : Pos) : Bool := join and <| both2 (fun i j ↦ i < j) a b
+def Pos.lt (a : Pos) (b : Pos) : Bool := a.1 < b.1 && a.2 < b.2
+def Pos.double (a : Pos) : Pos := (2 * a.1, 2 * a.2)
 
-def Pos.double : Pos → Pos := both (· * 2)
+#eval Pos.double <| Pos.mk 2 3
 
--- #eval Pos.double ((3, 4) : Pos)
+#eval [true, false, true].filterMap (fun i => if i then some i else none)
 
 def makeNeighbors (size s : Pos) : List Pos :=
-  [(s.fst + 1, s.snd), (s.fst - 1, s.snd), (s.fst, s.snd + 1), (s.fst, s.snd - 1)]
-    |>.filter (Pos.lt · size)
+  [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
+    |>.filterMap
+      (fun d => if
+        !( s.1 == 0      && d.fst == .lt
+        || s.1 == size.1 && d.fst == .gt
+        || s.2 == 0      && d.snd == .lt
+        || s.2 == size.2 && d.snd == .gt)
+        then some (Pos.mk
+          (match d.fst with | .lt => s.1 - 1 | .eq => s.1 | .gt => s.1 + 1)
+          (match d.snd with | .lt => s.2 - 1 | .eq => s.2 | .gt => s.2 + 1))
+        else none)
 
--- #eval makeNeighbors (10, 10) (0, 0)
+#eval makeNeighbors (Pos.mk 10 10) (Pos.mk 0 0)
 
 def makeVecs (size start : Pos) : List (Pos × Pos) :=
   (makeNeighbors size start).map ((start, ·))
@@ -65,7 +77,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
 -- #eval (Circuit.ofChar 'f') |> toString
 
 def startPosition (self : Mat1 Circuit) : Pos :=
-  self.findIdx? (· == Circuit.s) |>.getD (0, 0)
+  self.findIdx? (· == Circuit.s) |>.getD (Pos.mk 0 0)
 
 def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
   let (pre, now) := vec
@@ -143,8 +155,33 @@ def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
 #eval index' (10, 10) 10
 #eval index' (10, 10) 15
 
-lemma index_index'_is_id (size : Pos) (p : Pos) : index' size (index size p) = p := by
-  sorry
+theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p.lt size → index' size (index size p) = p := by
+  intro p Q
+  simp [Pos.lt] at Q
+  rcases Q with ⟨Q1, Q2⟩
+  simp [index, index']
+  have X : (p.1 * size.2 + p.2) / size.2 = p.1 := by
+    have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
+    have D2 : (p.1 * size.2) / size.2 = p.1 := by exact Nat.mul_div_left p.1 h
+    calc (p.1 * size.2 + p.2) / size.2
+      = p.1 * size.2 / size.2 + p.2 / size.2 := by rw [Nat.add_div_of_dvd_right D1]
+      _ = p.1 + p.2 / size.2 := by rw [D2]
+      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q2]
+      _ = p.1 := by simp
+  have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
+    have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
+    have D2 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
+    have D3 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
+    have D4 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
+      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D2]
+      _ = p.2 % size.2 := by simp
+      _ < size.2 := by exact D3
+    calc (p.1 * size.2 + p.2) % size.2
+      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D4
+      _ = p.2 % size.2 := by simp [D2]
+      _ = p.2 := by exact Nat.mod_eq_of_lt Q2
+  rw [X, Y]
+  rfl
 
 def map_of (size : Pos) (locs : List Pos) : Array PropagateState :=
   locs.foldl
