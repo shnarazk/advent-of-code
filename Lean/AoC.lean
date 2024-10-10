@@ -45,7 +45,7 @@ def aoc_driver (args : List String) : IO Unit := do
         | _ => []
       match (args.get? 1).map (·.toNat!) with
         | some day => run year day extra
-        | none     => let _ ← do (solved.mapM (run year · extra))
+        | none     => let _ ← do (solved.mapM (fun d ↦ run year (d + 1) extra))
   | none => return
 
 def main (args : List String) : IO Unit := do aoc_driver args
