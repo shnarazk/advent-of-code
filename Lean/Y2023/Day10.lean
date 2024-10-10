@@ -154,9 +154,8 @@ instance : Inhabited PropagateState where default := .Unknown
 
 @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
 @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
-
-#eval index' (10, 10) 10
-#eval index' (10, 10) 15
+-- #eval index' (10, 10) 10
+-- #eval index' (10, 10) 15
 
 theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p.lt size → index' size (index size p) = p := by
   intro p Q
@@ -202,7 +201,7 @@ def expand (self : Array PropagateState) (size : Pos) (n : Nat) : Array Propagat
 /-
 - Switch to 1D scan from 28 scan
 -/
-#eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
+-- #eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
 
 partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState :=
   let r := m.foldl
@@ -211,20 +210,6 @@ partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState 
       else (i + 1, m, u))
     (0, m, false)
   if r.snd.snd then loop r.snd.fst size else r.snd.fst
-
-/- partial def loop' (m : Array PropagateState) (size : Pos) : Array PropagateState :=
-  let r := List.range size.fst
-    |>.foldl
-      (fun mm y ↦
-        (List.range size.snd).foldl
-          (fun mm x ↦
-            if m.get! (index size (y, x)) == .ToExpand
-              then mm -- (expand mm.fst size (y, x), true)
-              else mm)
-          mm
-      )
-      (m, false)
-  if r.snd then loop' r.fst size else r.fst -/
 
 def propagate (self : Array PropagateState) (size : Pos) : Array PropagateState := loop s size
   where
