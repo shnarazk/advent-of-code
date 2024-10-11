@@ -37,9 +37,9 @@ def makeNeighbors (size s : Pos) : List Pos :=
           (match d.snd with | .lt => s.2 - 1 | .eq => s.2 | .gt => s.2 + 1))
         else none)
 
-#eval makeNeighbors (Pos.mk 10 10) (Pos.mk 0 0)
-#eval makeNeighbors (Pos.mk 10 10) (Pos.mk 9 7)
-#eval makeNeighbors (Pos.mk 10 10) (Pos.mk 10 10)
+-- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 0 0)
+-- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 9 7)
+-- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 10 10)
 
 def makeVecs (size start : Pos) : List (Pos × Pos) :=
   (makeNeighbors size start).map ((start, ·))
@@ -169,16 +169,15 @@ theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size
       _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q.right]
       _ = p.1 := by simp
   have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
-    have _D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
-    have D2 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
-    have D3 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
-    have D4 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
-      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D2]
+    have D1 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
+    have D2 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
+    have D3 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
+      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D1]
       _ = p.2 % size.2 := by simp
-      _ < size.2 := by exact D3
+      _ < size.2 := by exact D2
     calc (p.1 * size.2 + p.2) % size.2
-      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D4
-      _ = p.2 % size.2 := by simp [D2]
+      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D3
+      _ = p.2 % size.2 := by simp [D1]
       _ = p.2 := by exact Nat.mod_eq_of_lt Q.right
   rw [X, Y]
   rfl
@@ -203,9 +202,8 @@ def expand (self : Array PropagateState) (size : Pos) (n : Nat) : Array Propagat
 
 partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState :=
   let r := m.foldl
-    (fun (i, m, u) p ↦ if p == PropagateState.ToExpand
-      then (i + 1, expand m size i, true)
-      else (i + 1, m, u))
+    (fun (i, m, u) p ↦ (
+      i + 1, if p == PropagateState.ToExpand then (expand m size i, true) else (m, u)))
     (0, m, false)
   if r.snd.snd then loop r.snd.fst size else r.snd.fst
 
