@@ -1,4 +1,3 @@
-import Batteries
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
@@ -6,11 +5,13 @@ import «AoC».Parser
 namespace Y2023.Day06
 open Accumulation
 
+def date := AocProblem.new 2023 6
+
 structure Race where
   new::
   time : Nat
   dist : Nat
-deriving Repr
+deriving BEq, Repr
 
 namespace Race
 
@@ -70,8 +71,11 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 
-protected def solve (ext : Option String): IO Answers := do
-  let data ← dataOf 2023 6 ext
-  return (Y2023.Day06.Part1.solve data, s!"{Y2023.Day06.Part2.solve data}")
+def solve (ext : Option String): IO AocProblem := do
+  let data ← date.getData ext
+  return { date with
+    answers := some (
+      Part1.solve data,
+      s!"{Y2023.Day06.Part2.solve data}") }
 
 end Y2023.Day06

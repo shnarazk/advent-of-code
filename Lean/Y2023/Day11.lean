@@ -1,14 +1,13 @@
-import Batteries
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
--- set_option maxHeartbeats 500000
-
 namespace Y2023.Day11
 open CoP
 open Std
+
+def date := AocProblem.new 2023 11
 
 structure Data where
   new   ::
@@ -32,7 +31,7 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def pcell := (pchar '.' *> return false) <|> (pchar '#' *> return true)
-def parser := sepBy1 (many1 pcell) eol
+def parse := AoCParser.parse $ sepBy1 (many1 pcell) eol
 
 end parser
 
@@ -75,9 +74,12 @@ def Part2.solve (d: Array (Array Bool)) : Nat :=
   let trans_x : List Nat := expand (m.map (·.snd)) range.snd scaling
   sum_of_dist $ m.map (fun (y, x) => (trans_y[y]!, trans_x[x]!))
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some d := AoCParser.parse Y2023.Day11.parser.parser (← dataOf 2023 11 ext)
-  then return (s!"{Y2023.Day11.Part1.solve d}", s!"{Y2023.Day11.Part2.solve d}")
-  else return ("parse error", "")
+protected def solve (ext : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData ext)
+  then return { date with
+    answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
+  else
+    IO.println "Parse error at Y2023.Day11"
+    return date
 
 end Y2023.Day11

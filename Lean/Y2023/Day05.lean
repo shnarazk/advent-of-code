@@ -1,15 +1,15 @@
-import Batteries
 import «AoC».Basic
 import «AoC».Parser
 import Std.Internal.Parsec
 
 namespace Y2023.Day05
 
+def date := AocProblem.new 2023 5
+
 structure ClosedSpan where
-  new ::
   _beg : Nat
   _end : Nat
-deriving Repr
+deriving BEq, Repr
 
 instance : ToString ClosedSpan where
   toString s := s!"[{s._beg},{s._end}]"
@@ -46,14 +46,15 @@ def pmap := sepBy1 range eol
 
 -- #eval Parsec.run pmap "88 18 7"
 -- #eval Parsec.run pmap "88 18 7\n18 25 70"
-
 -- def parser : Parsec Range := (plabel *> range)
-def parser : Parser ((Array Nat) × (Array (Array Range))) := do
-  let ss ← pseeds
-  let ms ← sepBy1 (plabel *> pmap) (pstring "\n\n")
-  return (ss, ms)
-
 -- #eval Parsec.run parser "seeds: 2 5\n\na-to-b map:\n88 18 7"
+
+def parse := AoCParser.parse parser
+  where
+    parser : Parser ((Array Nat) × (Array (Array Range))) := do
+      let ss ← pseeds
+      let ms ← sepBy1 (plabel *> pmap) (pstring "\n\n")
+      return (ss, ms)
 
 end parser
 
@@ -88,12 +89,12 @@ def transpose_span (span : ClosedSpan) (range : Range)
   let e : Nat := Nat.min span._end (range.source + range.span - 1)
   if (b ≤ e : Bool)
   then
-    (some (ClosedSpan.new (range.dest + b - range.source) (range.dest + e - range.source)),
+    (some (ClosedSpan.mk (range.dest + b - range.source) (range.dest + e - range.source)),
         match (span._beg < b : Bool), (e < span._end : Bool) with
         | false, false => []
-        | false, true  => [ClosedSpan.new (e + 1) span._end]
-        | true,  false => [ClosedSpan.new span._beg (b - 1)]
-        | true,  true  => [ClosedSpan.new span._beg (b - 1), ClosedSpan.new (e + 1) span._end])
+        | false, true  => [ClosedSpan.mk (e + 1) span._end]
+        | true,  false => [ClosedSpan.mk span._beg (b - 1)]
+        | true,  true  => [ClosedSpan.mk span._beg (b - 1), ClosedSpan.mk (e + 1) span._end])
   else (none, [span])
 
 def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSpan :=
@@ -111,13 +112,18 @@ def tp2 (spans : List ClosedSpan) (stages : Array (Array Range)) : List ClosedSp
     (stages : Array (Array Range))
 
 def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
-  let spans := pairs seeds.toList |>.map (fun (b, e) => ClosedSpan.new b (b + e))
+  let spans := pairs seeds.toList |>.map (fun (b, e) => ClosedSpan.mk b (b + e))
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.min? |>.getD 0
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some (s, m) := AoCParser.parse Y2023.Day05.parser.parser (← dataOf 2023 5 ext)
-  then return (s!"{Y2023.Day05.Part1.solve s m}", s!"{Y2023.Day05.Part2.solve s m}")
-  else return ("parse error", "")
+protected def solve (ext : Option String) : IO AocProblem := do
+  if let some (s, m) := parser.parse (← date.getData ext)
+  then return { date with
+    answers := some (
+      s!"{Part1.solve s m}",
+      s!"{Part2.solve s m}") }
+  else
+    IO.println "parse error at Y2023.Day05"
+    return date
 
 end Y2023.Day05

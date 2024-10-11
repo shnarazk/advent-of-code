@@ -267,9 +267,12 @@ def solve (m: Mat1 Circuit) : Nat :=
 
 end part2
 
-protected def solve (alt : Option String) : IO Answers := do
+def solve (alt : Option String) : IO AocProblem := do
   if let some (some m) := parser.parse (← date.getData alt)
-  then return (s!"{part1.solve m}", s!"{part2.solve m}")
-  else return ("parse error", "")
+  then return { date with
+    answers := some (s!"{part1.solve m}", s!"{part2.solve m}") }
+  else
+    IO.println "Parse error at Y2023.Day10"
+    return date
 
 end Y2023.Day10

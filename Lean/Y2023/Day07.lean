@@ -1,15 +1,16 @@
-import Batteries
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
 namespace Y2023.Day07
 
+def date := AocProblem.new 2023 7
+
 structure Hand where
   hand ::
   cards : Array Char
   bid   : Nat
-deriving Inhabited, Repr
+deriving BEq, Inhabited, Repr
 
 namespace parser
 open Lean AoCParser
@@ -22,7 +23,7 @@ def cards := many1 card <* whitespaces
 
 def line : Parser Hand := (return Hand.hand) <*> cards <*> number
 
-def parser := sepBy1 line eol
+def parse := AoCParser.parse $ sepBy1 line eol
 
 end parser
 
@@ -140,9 +141,12 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some d := AoCParser.parse Y2023.Day07.parser.parser (← dataOf 2023 7 ext)
-  then return (s!"{Y2023.Day07.solve1 d}", s!"{Y2023.Day07.solve2 d}")
-  else return ("parse error", "")
+protected def solve (ext : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData ext)
+  then return { date with
+    answers := some (s!"{solve1 d}", s!"{solve2 d}") }
+  else
+    IO.println "Parse error at Y2023.Day07"
+    return date
 
 end Y2023.Day07

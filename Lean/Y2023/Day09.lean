@@ -1,4 +1,3 @@
-import Batteries
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
@@ -6,11 +5,15 @@ import «AoC».Parser
 namespace Y2023.Day09
 open Std Accumulation
 
+def date := AocProblem.new 2023 9
+
 namespace parser
 open AoCParser
 open Std.Internal.Parsec.String
 
-def parser := sepBy1 (sepBy1 number_signed (pchar ' ')) eol
+def parse := AoCParser.parse parser
+  where
+    parser := sepBy1 (sepBy1 number_signed (pchar ' ')) eol
 
 end parser
 
@@ -57,9 +60,12 @@ def solve (d : Array (Array Int)) : Nat :=
 
 end Part2
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some d := AoCParser.parse Y2023.Day09.parser.parser (← dataOf 2023 9 ext)
-  then return (s!"{Y2023.Day09.Part1.solve d}", s!"{Y2023.Day09.Part2.solve d}")
-  else return ("parse error", "")
+def solve (ext : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData ext)
+  then return { date with
+    answers := ( s!"{Part1.solve d}", s!"{Part2.solve d}") }
+  else
+    IO.println "Parse error at Y2023.Day09"
+    return date
 
 end Y2023.Day09

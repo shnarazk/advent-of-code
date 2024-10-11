@@ -1,10 +1,11 @@
-import Batteries
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
 namespace Y2023.Day08
 open Batteries
+
+def date := AocProblem.new 2023 8
 
 structure Puzzle where
   new ::
@@ -29,6 +30,8 @@ def parser := do
     (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
     HashMap.empty
   return Puzzle.new path.toList hash
+
+def parse := AoCParser.parse parser
 
 end parser
 
@@ -64,10 +67,14 @@ def analyze (p : Puzzle) : Nat :=
 
 def Part2.solve (p: Puzzle) : Nat:= analyze p
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some p := AoCParser.parse Y2023.Day08.parser.parser (← dataOf 2023 8 ext)
-  then return (s!"{Y2023.Day08.Part1.solve p}", s!"{Y2023.Day08.Part2.solve p}")
-  else return ("parse error", "")
+def solve (ext : Option String) : IO AocProblem := do
+  if let some p := parser.parse (← date.getData ext)
+  then return { date with
+    answers := some (
+      s!"{Part1.solve p}",
+      s!"{Part2.solve p}") }
+  else
+    IO.println "parse error at Y2023.Day08"
+    return date
 
 end Y2023.Day08
-

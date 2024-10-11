@@ -1,8 +1,9 @@
-import Batteries
 import «AoC».Basic
 
 namespace Y2023.Day03
 open Accumulation
+
+def date : AocProblem := AocProblem.new 2023 3
 
 structure Number where
   new ::
@@ -51,14 +52,14 @@ def to_numbers (lines : Array String) : List Number :=
     ((0, []) : Int × List Number)
   |>.snd
 
-def Part1.solve (lines : Array String) : IO Nat := do
+def Part1.solve (lines : Array String) : Nat :=
   let cands := symbols lines
   let nums  := to_numbers lines
   let part_number := nums.filter
       (fun num => cands.any (fun (y, x) => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en))
-  return part_number.map (·.val) |> sum
+  part_number.map (·.val) |> sum
 
-def Part2.solve (lines : Array String) : IO Nat := do
+def Part2.solve (lines : Array String) : Nat :=
   let cands := asterisks lines
   let nums  := to_numbers lines
   let gears := cands.foldl
@@ -67,11 +68,13 @@ def Part2.solve (lines : Array String) : IO Nat := do
         (fun num => (num.row - y).natAbs ≤ 1 && num.beg ≤ x && x ≤ num.en)
       if neighbors.length == 2 then neighbors.map (·.val) |> product |> (acc ++ [·]) else acc)
     ([] : List Nat)
-  return sum gears
+  sum gears
 
-protected def solve (ext : Option String) : IO Answers := do
-  let lines ← linesOf 2023 3 ext
-  return (s!"{← Y2023.Day03.Part1.solve lines}", s!"{← Y2023.Day03.Part2.solve lines}")
+protected def solve (ext : Option String) : IO AocProblem := do
+  let lines ← date.getLines ext
+  return { date with
+    answers := some (
+      s!"{Y2023.Day03.Part1.solve lines}",
+      s!"{Y2023.Day03.Part2.solve lines}") }
 
 end Y2023.Day03
-

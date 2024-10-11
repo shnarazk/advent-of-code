@@ -1,4 +1,3 @@
--- import Batteries
 import «AoC».Basic
 
 namespace Y2023.Day01
@@ -41,7 +40,9 @@ end Part2
 
 protected def solve (alt : Option String): IO AocProblem:= do
   let lines ← date.getLines alt
-  return { date with answers := some (s!"{Part1.solve lines}", s!"{Part2.solve lines}") }
+  return { date with
+    answers := some (
+      s!"{Part1.solve lines}",
+      s!"{Part2.solve lines}") }
 
 end Y2023.Day01
-

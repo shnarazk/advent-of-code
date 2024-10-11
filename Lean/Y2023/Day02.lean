@@ -1,8 +1,9 @@
-import Batteries
 import «AoC».Basic
 
 namespace Y2023.Day02
 open Accumulation
+
+def date : AocProblem := AocProblem.new 2023 2
 
 def toHashMap (source : String) : Std.HashMap String Nat :=
   List.foldl
@@ -51,8 +52,12 @@ def solve (lines : Array String) : Nat := lines.map evaluate |> sum
 
 end Part2
 
-protected def solve (ext : Option String) : IO Answers := do
-  let lines ← linesOf 2023 2 ext
-  return (s!"{Y2023.Day02.Part1.solve lines}", s!"{Y2023.Day02.Part2.solve lines}")
+protected def solve (ext : Option String) : IO AocProblem := do
+  let lines ← date.getLines ext
+  return {
+    date with
+      answers := some (
+        s!"{Y2023.Day02.Part1.solve lines}",
+        s!"{Y2023.Day02.Part2.solve lines}") }
 
 end Y2023.Day02

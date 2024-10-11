@@ -1,18 +1,18 @@
-import Batteries
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
-open Accumulation
 namespace Y2023.Day12
+open Accumulation
 open Batteries CoP
+
+def date := AocProblem.new 2023 12
 
 structure Data where
   new ::
   pattern : Array Char
   rule    : Array Nat
-deriving Repr
+deriving BEq, Repr
 
 instance : ToString Data where
   toString s := s!"\"{String.intercalate "" (Array.map toString s.pattern).toList}\" :: {s.rule}\n"
@@ -27,7 +27,7 @@ def line_parser := do
   let rule    ← sepBy1 number (pchar ',')
   return Data.new pattern rule
 
-def parser := sepBy1 line_parser eol
+def parse := AoCParser.parse $ sepBy1 line_parser eol
 
 end parser
 
@@ -103,10 +103,14 @@ def Part2.evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some cs := AoCParser.parse Y2023.Day12.parser.parser (← dataOf 2023 12 ext)
-  then return (s!"{sum $ cs.map Y2023.Day12.Part1.evaluate}", s!"{sum $ cs.map Y2023.Day12.Part2.evaluate}")
-  else return ("parse error", "")
+def solve (ext : Option String) : IO AocProblem := do
+  if let some cs := parser.parse (← date.getData ext)
+  then return { date with
+    answers := some (
+      s!"{sum $ cs.map Part1.evaluate}",
+      s!"{sum $ cs.map Part2.evaluate}") }
+  else
+    IO.println "Parse error at Y2024Day12"
+    return date
 
 end Y2023.Day12
-

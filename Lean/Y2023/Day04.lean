@@ -1,8 +1,9 @@
-import Batteries
 import «AoC».Basic
 
 namespace Y2023.Day04
 open Accumulation
+
+def date : AocProblem := AocProblem.new 2023 4
 
 def parsed (source : String) : List Nat × List Nat :=
   (toNats targets, toNats cands)
@@ -53,8 +54,11 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-protected def solve (ext : Option String) : IO Answers := do
-  let lines ← linesOf 2023 4 ext
-  return (s!"{Y2023.Day04.Part1.solve lines}", s!"{Y2023.Day04.Part2.solve lines}")
+protected def solve (ext : Option String) : IO AocProblem := do
+  let lines ← date.getLines ext
+  return { date with
+    answers := some (
+      s!"{Y2023.Day04.Part1.solve lines}",
+      s!"{Y2023.Day04.Part2.solve lines}") }
 
 end Y2023.Day04
