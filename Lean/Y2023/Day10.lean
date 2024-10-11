@@ -8,19 +8,19 @@ import «AoC».Parser
 namespace Y2023.Day10
 open CiCL CoP
 
+def date : AocProblem := AocProblem.mk 2023 10 (by omega) (by omega)
+
 def Pos : Type := Nat × Nat
 deriving BEq, Hashable, Repr
 def Pos.mk (y x : Nat) := (y, x)
 
 instance : Inhabited Pos where default := Pos.mk 0 0
 instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
+instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
 
-def Pos.lt (a : Pos) (b : Pos) : Bool := a.1 < b.1 && a.2 < b.2
 def Pos.double (a : Pos) : Pos := (2 * a.1, 2 * a.2)
-
-#eval Pos.double <| Pos.mk 2 3
-
-#eval [true, false, true].filterMap (fun i => if i then some i else none)
+example (y x : Nat) : Pos.mk (2 * y) (2 * x) = Pos.double (Pos.mk y x) := by
+  simp [Pos.mk, Pos.double]
 
 def makeNeighbors (size s : Pos) : List Pos :=
   [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
@@ -157,18 +157,16 @@ instance : Inhabited PropagateState where default := .Unknown
 -- #eval index' (10, 10) 10
 -- #eval index' (10, 10) 15
 
-theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p.lt size → index' size (index size p) = p := by
+theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size → index' size (index size p) = p := by
   intro p Q
-  simp [Pos.lt] at Q
-  rcases Q with ⟨_Q1, Q2⟩
-  simp [index, index']
+  dsimp [index, index']
   have X : (p.1 * size.2 + p.2) / size.2 = p.1 := by
     have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
     have D2 : (p.1 * size.2) / size.2 = p.1 := by exact Nat.mul_div_left p.1 h
     calc (p.1 * size.2 + p.2) / size.2
       = p.1 * size.2 / size.2 + p.2 / size.2 := by rw [Nat.add_div_of_dvd_right D1]
       _ = p.1 + p.2 / size.2 := by rw [D2]
-      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q2]
+      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q.right]
       _ = p.1 := by simp
   have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
     have _D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
@@ -181,7 +179,7 @@ theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p.lt siz
     calc (p.1 * size.2 + p.2) % size.2
       = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D4
       _ = p.2 % size.2 := by simp [D2]
-      _ = p.2 := by exact Nat.mod_eq_of_lt Q2
+      _ = p.2 := by exact Nat.mod_eq_of_lt Q.right
   rw [X, Y]
   rfl
 
@@ -271,8 +269,8 @@ def solve (m: Mat1 Circuit) : Nat :=
 
 end part2
 
-protected def solve (ext : Option String) : IO Answers := do
-  if let some (some m) := parser.parse (← dataOf 2023 10 ext)
+protected def solve (alt : Option String) : IO Answers := do
+  if let some (some m) := parser.parse (← date.getData alt)
   then return (s!"{part1.solve m}", s!"{part2.solve m}")
   else return ("parse error", "")
 
