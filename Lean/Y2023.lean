@@ -1,42 +1,43 @@
 -- This module serves as the root of the `Y` library.
+import «AoC».Basic
 import «Y2023».Day01
-import «Y2023».Day01
-import «Y2023».Day02
-import «Y2023».Day03
-import «Y2023».Day04
-import «Y2023».Day05
-import «Y2023».Day06
-import «Y2023».Day07
-import «Y2023».Day08
-import «Y2023».Day09
-import «Y2023».Day10
-import «Y2023».Day11
-import «Y2023».Day12
+-- import «Y2023».Day01
+-- import «Y2023».Day02
+-- import «Y2023».Day03
+-- import «Y2023».Day04
+-- import «Y2023».Day05
+-- import «Y2023».Day06
+-- import «Y2023».Day07
+-- import «Y2023».Day08
+-- import «Y2023».Day09
+-- import «Y2023».Day10
+-- import «Y2023».Day11
+-- import «Y2023».Day12
 
 namespace Y2023
 
 def solvers := [
   Y2023.Day01.solve,
-  Y2023.Day02.solve,
-  Y2023.Day03.solve,
-  Y2023.Day04.solve,
-  Y2023.Day05.solve,
-  Y2023.Day06.solve,
-  Y2023.Day07.solve,
-  Y2023.Day08.solve,
-  Y2023.Day09.solve,
-  Y2023.Day10.solve,
-  Y2023.Day11.solve,
-  Y2023.Day12.solve,
+  -- Y2023.Day02.solve,
+  -- Y2023.Day03.solve,
+  -- Y2023.Day04.solve,
+  -- Y2023.Day05.solve,
+  -- Y2023.Day06.solve,
+  -- Y2023.Day07.solve,
+  -- Y2023.Day08.solve,
+  -- Y2023.Day09.solve,
+  -- Y2023.Day10.solve,
+  -- Y2023.Day11.solve,
+  -- Y2023.Day12.solve,
 ]
 
 def there_are_solvers : 0 < solvers.length := by
-  have count : solvers.length = 12 := by exact rfl
+  have count : solvers.length = 1 := by exact rfl
   simp [count]
 
 protected def solvedDays : Nat := solvers.length
 
-protected def solve (n: Nat) (option: Option String) : IO Answers :=
+protected def solve (n: Nat) (option: Option String) : IO AocProblem :=
   do
     let day := min solvers.length n
     have h : day - 1 < solvers.length := by
