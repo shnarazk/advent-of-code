@@ -45,14 +45,26 @@ structure AocProblem where
 deriving BEq, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
-#check AocProblem.mk 2024 8 (by simp)
+-- #check AocProblem.mk 2024 8 (by simp)
+
 namespace AocProblem
-def new (y₀ d₀ : Nat) : AocProblem :=
-  let y := if 2000 < y₀ then y₀ else 2001
-  let d := if 1 < d₀ then if d₀ ≤ 25 then d₀ else 1 else 1
-  have valid_year : 2000 < y := by sorry
-  have valid_day : 1 ≤ d ∧ d ≤ 25 := by sorry
-  AocProblem.mk y d valid_year valid_day none none
+def new (year day : Nat) : AocProblem :=
+  have valid_year : 2000 < max year 2001 := by
+    have : 2001 ≤ max year 2001 := by exact Nat.le_max_right year 2001
+    exact this
+  have valid_day : 1 ≤ min (max day 1) 25 ∧ min (max day 1) 25 ≤ 25 := by
+    constructor
+    {
+      have : 1 ≤ max day 1 := by exact Nat.le_max_right day 1
+      have H : 1 ≤ 25 := by exact Nat.lt_of_sub_eq_succ rfl
+      have : 1 ≤ min (max day 1) 25 := by exact Nat.le_min_of_le_of_le this H
+      exact this
+    }
+    {
+      have : min (max day 1) 25 ≤ 25 := by exact Nat.min_le_right (max day 1) 25
+      exact this
+    }
+  AocProblem.mk (max year 2001) (min (max day 1) 25) valid_year valid_day none none
 
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext
