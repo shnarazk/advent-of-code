@@ -60,10 +60,7 @@ def new (year day : Nat) : AocProblem :=
       have : 1 ≤ min (max day 1) 25 := by exact Nat.le_min_of_le_of_le this H
       exact this
     }
-    {
-      have : min (max day 1) 25 ≤ 25 := by exact Nat.min_le_right (max day 1) 25
-      exact this
-    }
+    { exact Nat.min_le_right (max day 1) 25 }
   AocProblem.mk (max year 2001) (min (max day 1) 25) valid_year valid_day none none
 
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
