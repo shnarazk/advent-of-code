@@ -15,7 +15,7 @@ import «Y2023».Day12
 
 namespace Y2023
 
-protected def solvers := [
+def solvers := [
   Y2023.Day01.solve,
   Y2023.Day02.solve,
   Y2023.Day03.solve,
@@ -30,9 +30,37 @@ protected def solvers := [
   Y2023.Day12.solve,
 ]
 
-def solvedDays : Nat := Y2023.solvers.length
+def there_are_solvers : 0 < solvers.length := by
+  have count : solvers.length = 12 := by exact rfl
+  simp [count]
 
-def solve (n: Nat) (h: (n - 1) < Y2023.solvers.length) (options: Option String) : IO Answers :=
+protected def solvedDays : Nat := solvers.length
+
+protected def solve (n: Nat) (option: Option String) : IO Answers :=
   do
-    let solver := Y2023.solvers.get (Fin.mk (n - 1) h) 
-    solver options
+    let day := min solvers.length n
+    have h : day - 1 < solvers.length := by
+      have day_def : day = min solvers.length n := by exact rfl
+      by_cases choice : solvers.length ≤ n
+      {
+          have : min solvers.length n = solvers.length := by
+            exact Nat.min_eq_left choice
+          rw [this] at day_def
+          simp [day_def]
+          exact there_are_solvers
+      }
+      {
+
+        have H : solvers.length > n := by exact Nat.gt_of_not_le choice
+        have H' : n ≤ solvers.length := by exact Nat.le_of_not_ge choice
+        have : min solvers.length n = n := by exact Nat.min_eq_right H'
+        simp [this] at day_def
+        rw [day_def]
+        by_cases n0 : n = 0
+        { simp [n0] ; exact there_are_solvers }
+        {
+          have N1 : n - 1 < n := by exact Nat.sub_one_lt n0
+          exact Nat.lt_trans N1 H
+        }
+      }
+    solvers.get (Fin.mk (day - 1) h) |> (· option)

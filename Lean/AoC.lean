@@ -11,24 +11,21 @@ import «Y2023»
 import «Y2024»
 open AoC
 
+def events
+    : Batteries.AssocList Nat (Nat × (Nat → Option String → IO Answers))
+  := Batteries.AssocList.nil
+    |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
+    |>.cons 2024 (Y2024.solvedDays, Y2024.solve)
+-- #check events.find? 2023
+
 def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
   let f ← dataFileName year day extra
-  let ans ← match year with
-    | 2023 =>
-      if h : day - 1 < Y2023.solvedDays
-        then
-          let ans ← Aesop.time <| Y2023.solve day h extra
-          pure (some (ans))
-        else
-          do pure none
-    | 2024 =>
-      if h : day - 1 < Y2024.solvedDays
-        then
-          let res ← Aesop.time <| Y2024.solve day h extra
-          pure (some (res))
-        else
-          do pure none
-    | _ => do pure none
+  let ans ← match events.find? year with
+    | some (days, solver) =>
+       if day ≤ days
+        then pure $ some (← Aesop.time <| solver day extra)
+        else do pure none
+    | none => do pure none
   match ans with
     | some (results, time) => do
       IO.println s!"{Color.blue}- {f}{Color.reset}: {time.printAsMillis}{Color.reset}"

@@ -81,7 +81,7 @@ instance : Lean.ToJson AocProblem where
       ⟨"part2", Lean.ToJson.toJson s.part2⟩,
     ]
 
-#eval Lean.ToJson.toJson (AocProblem.new 2024 10)
+-- #eval Lean.ToJson.toJson (AocProblem.new 2024 10)
 end AocProblem
 
 /--
