@@ -1,6 +1,5 @@
 import Lean
 import «AoC».Mat1
-
 -- namespace FileIO
 /--
 Build and return a data filename
@@ -41,10 +40,19 @@ structure AocProblem where
   day : Nat
   validYear : 2000 < year
   validDay : 1 ≤ day ∧ day ≤ 25
+  part1: Option (String × Float) := none
+  part2: Option (String × Float) := none
 deriving BEq, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
+#check AocProblem.mk 2024 8 (by simp)
 namespace AocProblem
+def new (y₀ d₀ : Nat) : AocProblem :=
+  let y := if 2000 < y₀ then y₀ else 2001
+  let d := if 1 < d₀ then if d₀ ≤ 25 then d₀ else 1 else 1
+  have valid_year : 2000 < y := by sorry
+  have valid_day : 1 ≤ d ∧ d ≤ 25 := by sorry
+  AocProblem.mk y d valid_year valid_day none none
 
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext

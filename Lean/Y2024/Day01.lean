@@ -8,7 +8,7 @@ import «AoC».Parser
 namespace Y2024.Day01
 open Accumulation
 
-def date : AocProblem := AocProblem.mk 2024 1 (by omega) (by omega)
+def date : AocProblem := AocProblem.new 2024 1
 
 structure Input where
 deriving BEq, Repr

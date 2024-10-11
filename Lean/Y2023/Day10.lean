@@ -8,7 +8,7 @@ import «AoC».Parser
 namespace Y2023.Day10
 open CiCL CoP
 
-def date : AocProblem := AocProblem.mk 2023 10 (by omega) (by omega)
+def date : AocProblem := AocProblem.new 2023 10
 
 def Pos : Type := Nat × Nat
 deriving BEq, Hashable, Repr
