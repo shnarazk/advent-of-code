@@ -45,7 +45,7 @@ structure AocProblem where
 deriving BEq, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
--- #check AocProblem.mk 2024 8 (by simp)
+--#check AocProblem.mk 2024 8 (by simp)
 
 namespace AocProblem
 def new (year day : Nat) : AocProblem :=
@@ -75,6 +75,16 @@ def getData (self : AocProblem) (ext : Option String) : IO String :=
 def getLines (self : AocProblem) (ext : Option String) : IO (Array String) :=
   dataFileName self.year self.day ext >>= readLines
 
+instance : Lean.ToJson AocProblem where
+  toJson (s: AocProblem) :=
+    Lean.Json.mkObj $ ⟨"AoCProblem", "0.1"⟩ :: [
+      ⟨"year", Lean.ToJson.toJson s.year⟩,
+      ⟨"day", Lean.ToJson.toJson s.day⟩,
+      ⟨"part1", Lean.ToJson.toJson s.part1⟩,
+      ⟨"part2", Lean.ToJson.toJson s.part2⟩,
+    ]
+
+#eval Lean.ToJson.toJson (AocProblem.new 2024 10)
 end AocProblem
 
 /--
