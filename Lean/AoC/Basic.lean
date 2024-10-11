@@ -1,5 +1,6 @@
 import Lean
-import «AoC».Mat1
+import Aesop
+-- import «AoC».Mat1
 -- namespace FileIO
 /--
 Build and return a data filename
@@ -40,8 +41,8 @@ structure AocProblem where
   day : Nat
   validYear : 2000 < year
   validDay : 1 ≤ day ∧ day ≤ 25
-  part1: Option (String × Float) := none
-  part2: Option (String × Float) := none
+  answers: Option (String × String) := none
+  time: Float := 0
 deriving BEq, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
@@ -61,7 +62,13 @@ def new (year day : Nat) : AocProblem :=
       exact this
     }
     { exact Nat.min_le_right (max day 1) 25 }
-  AocProblem.mk (max year 2001) (min (max day 1) 25) valid_year valid_day none none
+  AocProblem.mk
+    (max year 2001)
+    (min (max day 1) 25)
+    valid_year
+    valid_day
+    none
+    0
 
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext
@@ -77,8 +84,7 @@ instance : Lean.ToJson AocProblem where
     Lean.Json.mkObj $ ⟨"AoCProblem", "0.1"⟩ :: [
       ⟨"year", Lean.ToJson.toJson s.year⟩,
       ⟨"day", Lean.ToJson.toJson s.day⟩,
-      ⟨"part1", Lean.ToJson.toJson s.part1⟩,
-      ⟨"part2", Lean.ToJson.toJson s.part2⟩,
+      ⟨"time", Lean.ToJson.toJson s.time⟩,
     ]
 
 -- #eval Lean.ToJson.toJson (AocProblem.new 2024 10)

@@ -1,8 +1,9 @@
+import «AoC».Basic
 import «Y2024».Day01
 
 namespace Y2024
 
-def solvers : List (Option String → IO Answers) := [
+def solvers : List (Option String → IO AocProblem) := [
   Day01.solve,
 ]
 
@@ -12,7 +13,7 @@ def there_are_solvers : 0 < solvers.length := by
 
 protected def solvedDays : Nat := solvers.length
 
-protected def solve (n: Nat) (option: Option String) : IO Answers :=
+protected def solve (n: Nat) (option: Option String) : IO AocProblem :=
   do
     let day := min solvers.length n
     have h : day - 1 < solvers.length := by
