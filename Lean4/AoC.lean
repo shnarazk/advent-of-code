@@ -25,9 +25,12 @@ def formatFloat (f : Float) (precision : Nat) : String :=
   let digits := max 1 rounded.abs |>.log10 |>.floor |>(· + 1)
     |>.toUInt16 |>.toNat
   rounded.toString ++ s!"/{digits}"
-    |>.take (digits + if f < 0 then 4 else 3)
+    |>.take (digits + precision + if f < 0 then 2 else 1)
 
 -- #eval formatFloat 123.456789 2  -- Outputs "123.46"
+-- #eval formatFloat 123.456789 4  -- Outputs "-123.4568"
+-- #eval formatFloat (-123.456789) 2  -- Outputs "123.46"
+-- #eval formatFloat (-123.456789) 4  -- Outputs "-123.4568"
 
 def String.up_to_depth (depth : Nat) (s : String) (sep : Char := '/') : String :=
   s.split (· == sep)
