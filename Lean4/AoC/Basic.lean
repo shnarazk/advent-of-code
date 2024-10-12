@@ -84,7 +84,7 @@ def getLines (self : AocProblem) (ext : Option String) : IO (Array String) :=
 
 instance : Lean.ToJson AocProblem where
   toJson (s: AocProblem) :=
-    Lean.Json.mkObj $ ⟨"AoCProblem", "0.1"⟩ :: [
+    Lean.Json.mkObj [
       ⟨"year", Lean.ToJson.toJson s.year⟩,
       ⟨"day", Lean.ToJson.toJson s.day⟩,
       ⟨"time", Lean.ToJson.toJson s.time⟩,

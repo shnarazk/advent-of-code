@@ -71,7 +71,7 @@ def benchmark_driver (year : Nat) : IO Unit := do
   let results ← List.range solved |>.mapM (fun d ↦ run year (d + 1) none)
   let json := results.filterMap (·) |>.map (·.toJson)
   -- IO.println s!"{results.filterMap (·) |>.map (·.toJson)}"
-  let filename := System.mkFilePath [s!"execution-time-{year}.json"]
+  let filename := System.mkFilePath [s!"execution_time_{year}.json"]
   IO.FS.writeFile filename s!"{json}"
   IO.println s!"dumped to '{filename}'"
   return ()
