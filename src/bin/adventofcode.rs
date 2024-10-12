@@ -17,6 +17,7 @@ use adventofcode::y2021;
 use adventofcode::y2022;
 #[cfg(feature = "y2023")]
 use adventofcode::y2023;
+use serde::Serialize;
 
 use {
     adventofcode::{
@@ -30,7 +31,7 @@ use {
 
 pub fn main() {
     let config = ConfigAoC::parse();
-    if config.day.is_none() || 25 < config.day.unwrap() {
+    if (config.day.is_none() || 25 < config.day.unwrap()) && !config.bench {
         panic!("no day");
     }
     if config.bench {
@@ -77,9 +78,16 @@ fn run_solver(mut config: ConfigAoC) {
     );
 }
 
+#[derive(Serialize)]
+struct ResultData {
+    year: usize,
+    day: usize,
+    time: f64,
+}
 fn bench(config: ConfigAoC) {
     let results = (1..26)
         .map(|day| {
+            let year = config.year;
             let mut config = config.clone();
             config.day = Some(day);
             let beg = Instant::now();
@@ -112,7 +120,12 @@ fn bench(config: ConfigAoC) {
                 (end - beg).as_secs_f64() * 1000.0,
                 color::RESET,
             ));
-            (day, (end - beg).as_secs_f64() * 1000.0)
+            // (day, (end - beg).as_secs_f64() * 1000.0)
+            ResultData {
+                year,
+                day,
+                time: (end - beg).as_secs_f64() * 1000.0,
+            }
         })
         .collect::<Vec<_>>();
     let output = format!("{}/{}/execution_time.json", JSON_DUMP_DIR, config.year);
@@ -128,12 +141,12 @@ fn bench(config: ConfigAoC) {
     };
     println!("|   day |    time |");
     println!("|------:|--------:|");
-    for (day, time) in results.iter() {
-        println!("| day{:<2} | {:>7.1} |", day, time);
+    for result in results.iter() {
+        println!("| day{:<2} | {:>7.1} |", result.day, result.time);
     }
     println!(
         "| y{} | {:>7.1} |",
         config.year,
-        results.iter().map(|p| p.1).sum::<f64>()
+        results.iter().map(|r| r.time).sum::<f64>()
     );
 }
