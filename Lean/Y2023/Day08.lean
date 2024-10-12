@@ -65,6 +65,6 @@ def analyze (p : Puzzle) : Nat :=
 
 def Part2.solve (p: Puzzle) : Nat:= analyze p
 
-def solve := AocProblem.new 2023 8 |>.build parser.parse Part1.solve Part2.solve
+def solve := AocProblem.config 2023 8 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day08

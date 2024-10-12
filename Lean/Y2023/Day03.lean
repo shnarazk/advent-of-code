@@ -68,7 +68,7 @@ def Part2.solve (lines : Array String) : Nat :=
     ([] : List Nat)
   sum gears
 
-def solve := AocProblem.new 2023 3
-  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
+def solve := AocProblem.config 2023 3
+  (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 
 end Y2023.Day03

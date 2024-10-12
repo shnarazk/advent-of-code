@@ -265,6 +265,6 @@ def solve (m: Mat1 Circuit) : Nat :=
 
 end part2
 
-def solve := AocProblem.new 2023 10 |>.build (parser.parse · |>.join) part1.solve part2.solve
+def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part2.solve
 
 end Y2023.Day10

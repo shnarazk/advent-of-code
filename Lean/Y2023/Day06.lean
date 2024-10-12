@@ -69,6 +69,6 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 
-def solve := AocProblem.new 2023 6 |>.build some Part1.solve Part2.solve
+def solve := AocProblem.config 2023 6 some Part1.solve Part2.solve
 
 end Y2023.Day06

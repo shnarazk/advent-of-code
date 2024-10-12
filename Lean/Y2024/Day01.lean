@@ -35,6 +35,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.new 2024 1 |>.build parser.parse Part1.solve Part2.solve
+def solve := AocProblem.config 2024 1 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day01

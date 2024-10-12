@@ -58,6 +58,6 @@ def solve (d : Array (Array Int)) : Nat :=
 
 end Part2
 
-def solve := AocProblem.new 2023 9 |>.build parser.parse Part1.solve Part2.solve
+def solve := AocProblem.config 2023 9 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day09

@@ -139,6 +139,6 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-def solve := AocProblem.new 2023 7 |>.build parser.parse solve1 solve2
+def solve := AocProblem.config 2023 7 parser.parse solve1 solve2
 
 end Y2023.Day07

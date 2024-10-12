@@ -36,7 +36,7 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-def solve := AocProblem.new 2023 1
-  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
+def solve := AocProblem.config 2023 1
+  (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 
 end Y2023.Day01

@@ -101,7 +101,7 @@ def Part2.evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-def solve := AocProblem.new 2023 12 |>.build parser.parse
+def solve := AocProblem.config 2023 12 parser.parse
     (·.map Part1.evaluate |> sum)
     (·.map Part2.evaluate |> sum)
 

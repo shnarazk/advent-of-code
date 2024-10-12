@@ -50,7 +50,7 @@ def solve (lines : Array String) : Nat := lines.map evaluate |> sum
 
 end Part2
 
-def solve := AocProblem.new 2023 2
-  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
+def solve := AocProblem.config 2023 2
+  (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 
 end Y2023.Day02

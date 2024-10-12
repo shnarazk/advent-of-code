@@ -108,6 +108,14 @@ def build {α β γ : Type} [ToString β] [ToString γ]
     input_name := (← self.fileName alt)
     answers := none }
 
+def config {α β γ : Type} [ToString β] [ToString γ]
+    (year day : Nat)
+    (parser : String → Option α)
+    (solve₁ : α → β) (solve₂ : α → γ)
+    (alt : Option String)
+    : IO AocProblem := do
+  AocProblem.new year day |>.build parser solve₁ solve₂ alt
+
 end AocProblem
 
 /--

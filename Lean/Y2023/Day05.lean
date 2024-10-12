@@ -116,7 +116,7 @@ def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.min? |>.getD 0
 
-def solve := AocProblem.new 2023 5
-  |>.build parser.parse (uncurry Part1.solve) (uncurry Part2.solve)
+def solve := AocProblem.config 2023 5
+  parser.parse (uncurry Part1.solve) (uncurry Part2.solve)
 
 end Y2023.Day05
