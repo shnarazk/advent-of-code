@@ -66,7 +66,11 @@ def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit :
 def benchmark_driver (year : Nat) : IO Unit := do
   let solved := events.find? year |>.map (·.fst) |>.getD 1
   let results ← List.range solved |>.mapM (fun d ↦ run year (d + 1) none)
-  IO.println s!"{results.filterMap (·) |>.map (·.toJson)}"
+  let json := results.filterMap (·) |>.map (·.toJson)
+  -- IO.println s!"{results.filterMap (·) |>.map (·.toJson)}"
+  let filename := System.mkFilePath [s!"execution-time-{year}.json"]
+  IO.FS.writeFile filename s!"{json}"
+  IO.println s!"dumped to '{filename}'"
   return ()
 
 def aocCmd (p : Parsed) : IO UInt32 := do
@@ -81,7 +85,7 @@ def aocCmd (p : Parsed) : IO UInt32 := do
   return 0
 
 def aoc : Cmd := `[Cli|
-  aoc VIA aocCmd ; ["0.4.0"]
+  aoc VIA aocCmd ; ["0.5.1"]
   "Run Advent-of-Code codes in Lean4"
 
   FLAGS:

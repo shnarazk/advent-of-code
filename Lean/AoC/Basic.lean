@@ -1,10 +1,10 @@
 import Lean
 import Aesop
--- import «AoC».Mat1
--- namespace FileIO
+
 /--
 Build and return a data filename
 -/
+
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
   let aoc_dir ← IO.getEnv "AOC_DIR"
   let d := ("0" ++ s!"{day}").takeRight 2
@@ -14,9 +14,10 @@ def dataFileName (year day : Nat) (ext : Option String): IO String := do
 
 
 def readData (datafilename : String) : IO String := do
-     IO.FS.readFile datafilename
+   IO.FS.readFile datafilename
 
 -- #eval dataFileName 2023 2 none
+
 /--
 return file contents as String
 -/
