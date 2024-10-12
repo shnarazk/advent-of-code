@@ -7,8 +7,6 @@ import «AoC».Parser
 namespace Y2024.Day01
 open Accumulation
 
-def date : AocProblem := AocProblem.new 2024 1
-
 structure Input where
 deriving BEq, Repr
 -- instance : ToString Input where toString s := s!""
@@ -37,11 +35,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-protected def solve (alt : Option String): IO AocProblem:= do
-  if let some d := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
-  else return { date with answers := none }
+def solve := AocProblem.new 2024 1 |>.build parser.parse Part1.solve Part2.solve
 
 end Y2024.Day01

@@ -3,8 +3,6 @@ import «AoC».Basic
 namespace Y2023.Day02
 open Accumulation
 
-def date : AocProblem := AocProblem.new 2023 2
-
 def toHashMap (source : String) : Std.HashMap String Nat :=
   List.foldl
     (fun hash items =>
@@ -52,11 +50,7 @@ def solve (lines : Array String) : Nat := lines.map evaluate |> sum
 
 end Part2
 
-def solve (alt : Option String) : IO AocProblem := do
-  let lines ← date.getLines alt
-  return {
-    date with
-      input_name := (← date.fileName alt)
-      answers := some ( s!"{Part1.solve lines}", s!"{Part2.solve lines}") }
+def solve := AocProblem.new 2023 2
+  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 
 end Y2023.Day02

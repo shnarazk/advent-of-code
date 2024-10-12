@@ -5,8 +5,6 @@ import «AoC».Parser
 namespace Y2023.Day08
 open Batteries
 
-def date := AocProblem.new 2023 8
-
 structure Puzzle where
   new ::
   path     : List Char
@@ -67,13 +65,6 @@ def analyze (p : Puzzle) : Nat :=
 
 def Part2.solve (p: Puzzle) : Nat:= analyze p
 
-def solve (alt : Option String) : IO AocProblem := do
-  if let some p := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some (s!"{Part1.solve p}", s!"{Part2.solve p}") }
-  else
-    IO.println "parse error at Y2023.Day08"
-    return date
+def solve := AocProblem.new 2023 8 |>.build parser.parse Part1.solve Part2.solve
 
 end Y2023.Day08

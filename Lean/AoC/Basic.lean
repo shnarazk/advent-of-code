@@ -93,6 +93,20 @@ instance : Lean.ToJson AocProblem where
 
 def toJson (self : AocProblem) : Lean.Json := Lean.ToJson.toJson self
 
+def build {α β γ : Type} [ToString β] [ToString γ]
+    (self : AocProblem)
+    (parser : String → Option α)
+    (solve₁ : α → β) (solve₂ : α → γ)
+    (alt : Option String)
+    : IO AocProblem := do
+  if let some d := parser (← self.getData alt)
+  then return { self with
+    input_name := (← self.fileName alt)
+    answers := some (s!"{solve₁ d}", s!"{solve₂ d}") }
+  else return { self with
+    input_name := (← self.fileName alt)
+    answers := none }
+
 end AocProblem
 
 /--

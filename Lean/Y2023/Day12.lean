@@ -6,8 +6,6 @@ namespace Y2023.Day12
 open Accumulation
 open Batteries CoP
 
-def date := AocProblem.new 2023 12
-
 structure Data where
   new ::
   pattern : Array Char
@@ -103,15 +101,8 @@ def Part2.evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-def solve (alt : Option String) : IO AocProblem := do
-  if let some cs := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some (
-      s!"{sum $ cs.map Part1.evaluate}",
-      s!"{sum $ cs.map Part2.evaluate}") }
-  else
-    IO.println "Parse error at Y2024Day12"
-    return date
+def solve := AocProblem.new 2023 12 |>.build parser.parse
+    (·.map Part1.evaluate |> sum)
+    (·.map Part2.evaluate |> sum)
 
 end Y2023.Day12

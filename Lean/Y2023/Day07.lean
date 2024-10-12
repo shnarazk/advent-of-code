@@ -4,8 +4,6 @@ import «AoC».Parser
 
 namespace Y2023.Day07
 
-def date := AocProblem.new 2023 7
-
 structure Hand where
   hand ::
   cards : Array Char
@@ -141,13 +139,6 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-protected def solve (alt : Option String) : IO AocProblem := do
-  if let some d := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some (s!"{solve1 d}", s!"{solve2 d}") }
-  else
-    IO.println "Parse error at Y2023.Day07"
-    return date
+def solve := AocProblem.new 2023 7 |>.build parser.parse solve1 solve2
 
 end Y2023.Day07

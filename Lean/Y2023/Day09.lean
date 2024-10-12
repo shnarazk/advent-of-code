@@ -5,8 +5,6 @@ import «AoC».Parser
 namespace Y2023.Day09
 open Std Accumulation
 
-def date := AocProblem.new 2023 9
-
 namespace parser
 open AoCParser
 open Std.Internal.Parsec.String
@@ -60,13 +58,6 @@ def solve (d : Array (Array Int)) : Nat :=
 
 end Part2
 
-def solve (alt : Option String) : IO AocProblem := do
-  if let some d := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := ( s!"{Part1.solve d}", s!"{Part2.solve d}") }
-  else
-    IO.println "Parse error at Y2023.Day09"
-    return date
+def solve := AocProblem.new 2023 9 |>.build parser.parse Part1.solve Part2.solve
 
 end Y2023.Day09

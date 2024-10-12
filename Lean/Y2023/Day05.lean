@@ -1,10 +1,10 @@
 import «AoC».Basic
+import «AoC».Combinator
 import «AoC».Parser
 import Std.Internal.Parsec
 
 namespace Y2023.Day05
-
-def date := AocProblem.new 2023 5
+open CiCL
 
 structure ClosedSpan where
   _beg : Nat
@@ -116,13 +116,7 @@ def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.min? |>.getD 0
 
-protected def solve (alt : Option String) : IO AocProblem := do
-  if let some (s, m) := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some ( s!"{Part1.solve s m}", s!"{Part2.solve s m}") }
-  else
-    IO.println "parse error at Y2023.Day05"
-    return date
+def solve := AocProblem.new 2023 5
+  |>.build parser.parse (uncurry Part1.solve) (uncurry Part2.solve)
 
 end Y2023.Day05

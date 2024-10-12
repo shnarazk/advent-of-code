@@ -3,8 +3,6 @@ import «AoC».Basic
 namespace Y2023.Day04
 open Accumulation
 
-def date : AocProblem := AocProblem.new 2023 4
-
 def parsed (source : String) : List Nat × List Nat :=
   (toNats targets, toNats cands)
   where
@@ -54,12 +52,7 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-protected def solve (alt : Option String) : IO AocProblem := do
-  let lines ← date.getLines alt
-  return { date with
-    input_name := (← date.fileName alt)
-    answers := some (
-      s!"{Y2023.Day04.Part1.solve lines}",
-      s!"{Y2023.Day04.Part2.solve lines}") }
+def solve := AocProblem.new 2023 4
+  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |> some) Part1.solve Part2.solve
 
 end Y2023.Day04

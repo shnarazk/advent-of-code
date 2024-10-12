@@ -8,8 +8,6 @@ import «AoC».Parser
 namespace Y2023.Day10
 open CiCL CoP
 
-def date : AocProblem := AocProblem.new 2023 10
-
 def Pos : Type := Nat × Nat
 deriving BEq, Hashable, Repr
 def Pos.mk (y x : Nat) := (y, x)
@@ -267,13 +265,6 @@ def solve (m: Mat1 Circuit) : Nat :=
 
 end part2
 
-def solve (alt : Option String) : IO AocProblem := do
-  if let some (some m) := parser.parse (← date.getData alt)
-  then return { date with
-    input_name := (← date.fileName alt)
-    answers := some (s!"{part1.solve m}", s!"{part2.solve m}") }
-  else
-    IO.println "Parse error at Y2023.Day10"
-    return date
+def solve := AocProblem.new 2023 10 |>.build (parser.parse · |>.join) part1.solve part2.solve
 
 end Y2023.Day10

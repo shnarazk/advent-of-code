@@ -3,8 +3,6 @@ import «AoC».Basic
 namespace Y2023.Day03
 open Accumulation
 
-def date : AocProblem := AocProblem.new 2023 3
-
 structure Number where
   new ::
   row : Int
@@ -70,10 +68,7 @@ def Part2.solve (lines : Array String) : Nat :=
     ([] : List Nat)
   sum gears
 
-def solve (alt : Option String) : IO AocProblem := do
-  let lines ← date.getLines alt
-  return { date with
-    input_name := (← date.fileName alt)
-    answers := some ( s!"{Part1.solve lines}", s!"{Part2.solve lines}") }
+def solve := AocProblem.new 2023 3
+  |>.build (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 
 end Y2023.Day03

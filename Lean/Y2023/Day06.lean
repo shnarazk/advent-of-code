@@ -5,8 +5,6 @@ import «AoC».Parser
 namespace Y2023.Day06
 open Accumulation
 
-def date := AocProblem.new 2023 6
-
 structure Race where
   new::
   time : Nat
@@ -71,10 +69,6 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 
-def solve (alt : Option String): IO AocProblem := do
-  let data ← date.getData alt
-  return { date with
-    input_name := (← date.fileName alt)
-    answers := some (Part1.solve data, s!"{Y2023.Day06.Part2.solve data}") }
+def solve := AocProblem.new 2023 6 |>.build some Part1.solve Part2.solve
 
 end Y2023.Day06
