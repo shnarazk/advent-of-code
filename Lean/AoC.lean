@@ -2,12 +2,15 @@
 -- Import modules here that should be built as part of the library.
 import Aesop
 import Batteries
+import Cli
 import «AoC».Basic
 import «AoC».Color
 import «AoC».Combinator
 import «Y2023»
 import «Y2024»
+
 open AoC
+open Cli
 
 def events
     : Batteries.AssocList Nat (Nat × (Nat → Option String → IO AocProblem))
@@ -35,9 +38,15 @@ def String.up_to_depth (depth : Nat) (s : String) (sep : Char := '/') : String :
 
 -- #eval "/a_a_a/bab/ccc/dadd/eeee/ff.g".up_to_depth 3
 
-def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
-  let f ← dataFileName year day extra
-  let ans ← match events.find? year with
+def AocProblem.show (self : AocProblem) : IO Unit :=
+  match self.answers, self.time with
+    | some ans, time => do
+      IO.println s!"{Color.blue}- {self.input_name.up_to_depth 4}{Color.reset}: {formatFloat time 2}{Color.reset} msec"
+      IO.println s!"{Color.green}  => {ans.1}, {ans.2}{Color.reset}"
+    | _, _ => do return
+
+def run (year: Nat) (day : Nat) (extra : Option String) : IO (Option AocProblem) := do
+  match events.find? year with
     | some (days, solver) =>
        if day ≤ days
         then
@@ -45,21 +54,51 @@ def run (year: Nat) (day : Nat) (extra : Option String) : IO Unit := do
           do pure (some { res with time := (Float.ofNat time.nanos) / 1000000.0 })
         else do pure none
     | none => do pure none
-  match ans with
-    | some ans => match ans.answers, ans.time with
-        | some ans, time =>
-          IO.println s!"{Color.blue}- {f.up_to_depth 4}{Color.reset}: {formatFloat time 2}{Color.reset} msec"
-          IO.println s!"{Color.green}  => {ans.1}, {ans.2}{Color.reset}"
-        | _, _ => do return
-    | none     => IO.println s!"Configuration error at AoC.run"
 
-def aoc_driver (args : List String) : IO Unit := do
-  let extra := args.get? 2
-  if let some year := (args.get? 0).map (·.toNat!)
-    then
-      let solved := events.find? year |>.map (·.fst) |>.getD 1
-      match (args.get? 1).map (·.toNat!) with
-        | some day => run year day extra
-        | none     => (List.range solved |>.mapM (fun d ↦ run year (d + 1) extra)) *> pure ()
+def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit := do
+  let solved := events.find? year |>.map (·.fst) |>.getD 1
+  let results ← match days.size with
+    | 0 => (List.range solved |>.mapM (fun d ↦ run year (d + 1) alt))
+    | _ => days.toList.mapM (fun day ↦ run year day alt)
+  let _ ← results.filterMap (·) |>.mapM (·.show)
+  return ()
 
-def main (args : List String) : IO Unit := do aoc_driver args
+def benchmark_driver (year : Nat) : IO Unit := do
+  let solved := events.find? year |>.map (·.fst) |>.getD 1
+  let results ← List.range solved |>.mapM (fun d ↦ run year (d + 1) none)
+  IO.println s!"{results.filterMap (·) |>.map (·.toJson)}"
+  return ()
+
+def aocCmd (p : Parsed) : IO UInt32 := do
+  let year : Nat := p.flag! "year" |>.as! Nat
+  let benchmark : Bool := p.hasFlag "benchmark"
+  let days : Array Nat := if benchmark then #[] else p.variableArgsAs! Nat
+  let alt : Option String := if p.hasFlag "alt"
+    then p.flag! "alt" |>.as! String |>(some ·)
+    else none
+  -- let _ ← IO.println s!"day:{days}, year:{year}, benchmark:{benchmark}, alt:{alt}"
+  if benchmark then benchmark_driver year else aoc_driver year days alt
+  return 0
+
+def aoc : Cmd := `[Cli|
+  aoc VIA aocCmd ; ["0.4.0"]
+  "Run Advent-of-Code codes in Lean4"
+
+  FLAGS:
+    y, year : Nat   ; "Set target year"
+    a, alt : String ; "Run on a file which name ends with '-ALT.txt'"
+    b, benchmark    ; "Run in benchmark mode, that dumps a JSON file"
+
+  ARGS:
+    ...day : Nat    ; "Set target days"
+
+  EXTENSIONS:
+    author "Author: shnarazk";
+    defaultValues! #[("year", "2024")]
+]
+
+-- def main (args : List String) : IO Unit := do aoc_driver args
+
+def main (args : List String) : IO UInt32 := aoc.validate args
+
+-- #eval main <| "--year 2024 5".splitOn " "

@@ -9,8 +9,7 @@ namespace Y20XX.DayXX
 
 open Std Accumulation CoP
 
-def year : Nat := 2024
-def day : Nat := 1
+def date := AocProblem.new 2024 1
 
 structure Input where
 deriving BEq, Repr
@@ -40,9 +39,13 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-protected def solve (alt : Option String): IO Answers := do
-  if let some d := parser.parse (← dataOf year day alt)
-  then return (s!"{Part1.solve d}", s!"{Part2.solve d}")
-  else return ("parse error", "")
+protected def solve (alt : Option String): IO AocProblem := do
+  if let some d := parser.parse (← date.getData alt)
+  then return { date with
+    input_name := (← date.fileName alt)
+    answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
+  else
+    IO.println "Parse error in Y202XDay00"
+    return date
 
 end Y20XX.DayXX

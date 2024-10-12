@@ -54,9 +54,10 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-protected def solve (ext : Option String) : IO AocProblem := do
-  let lines ← date.getLines ext
+protected def solve (alt : Option String) : IO AocProblem := do
+  let lines ← date.getLines alt
   return { date with
+    input_name := (← date.fileName alt)
     answers := some (
       s!"{Y2023.Day04.Part1.solve lines}",
       s!"{Y2023.Day04.Part2.solve lines}") }

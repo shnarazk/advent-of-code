@@ -71,11 +71,10 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 
-def solve (ext : Option String): IO AocProblem := do
-  let data ← date.getData ext
+def solve (alt : Option String): IO AocProblem := do
+  let data ← date.getData alt
   return { date with
-    answers := some (
-      Part1.solve data,
-      s!"{Y2023.Day06.Part2.solve data}") }
+    input_name := (← date.fileName alt)
+    answers := some (Part1.solve data, s!"{Y2023.Day06.Part2.solve data}") }
 
 end Y2023.Day06

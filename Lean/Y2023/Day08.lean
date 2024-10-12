@@ -67,12 +67,11 @@ def analyze (p : Puzzle) : Nat :=
 
 def Part2.solve (p: Puzzle) : Nat:= analyze p
 
-def solve (ext : Option String) : IO AocProblem := do
-  if let some p := parser.parse (← date.getData ext)
+def solve (alt : Option String) : IO AocProblem := do
+  if let some p := parser.parse (← date.getData alt)
   then return { date with
-    answers := some (
-      s!"{Part1.solve p}",
-      s!"{Part2.solve p}") }
+    input_name := (← date.fileName alt)
+    answers := some (s!"{Part1.solve p}", s!"{Part2.solve p}") }
   else
     IO.println "parse error at Y2023.Day08"
     return date

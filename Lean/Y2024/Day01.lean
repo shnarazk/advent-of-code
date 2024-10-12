@@ -39,8 +39,9 @@ end Part2
 
 protected def solve (alt : Option String): IO AocProblem:= do
   if let some d := parser.parse (← date.getData alt)
-  then return {
-    date with answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
+  then return { date with
+    input_name := (← date.fileName alt)
+    answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
   else return { date with answers := none }
 
 end Y2024.Day01

@@ -60,9 +60,10 @@ def solve (d : Array (Array Int)) : Nat :=
 
 end Part2
 
-def solve (ext : Option String) : IO AocProblem := do
-  if let some d := parser.parse (← date.getData ext)
+def solve (alt : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData alt)
   then return { date with
+    input_name := (← date.fileName alt)
     answers := ( s!"{Part1.solve d}", s!"{Part2.solve d}") }
   else
     IO.println "Parse error at Y2023.Day09"

@@ -51,7 +51,6 @@ protected def solve (n: Nat) (option: Option String) : IO AocProblem :=
           -- exact Nat.lt_add_one (solvers.length - 1)
       }
       {
-
         have H : solvers.length > n := by exact Nat.gt_of_not_le choice
         have H' : n ≤ solvers.length := by exact Nat.le_of_not_ge choice
         have : min solvers.length n = n := by exact Nat.min_eq_right H'

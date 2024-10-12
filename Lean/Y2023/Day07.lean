@@ -141,9 +141,10 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-protected def solve (ext : Option String) : IO AocProblem := do
-  if let some d := parser.parse (← date.getData ext)
+protected def solve (alt : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData alt)
   then return { date with
+    input_name := (← date.fileName alt)
     answers := some (s!"{solve1 d}", s!"{solve2 d}") }
   else
     IO.println "Parse error at Y2023.Day07"

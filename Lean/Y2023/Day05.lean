@@ -116,12 +116,11 @@ def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.min? |>.getD 0
 
-protected def solve (ext : Option String) : IO AocProblem := do
-  if let some (s, m) := parser.parse (← date.getData ext)
+protected def solve (alt : Option String) : IO AocProblem := do
+  if let some (s, m) := parser.parse (← date.getData alt)
   then return { date with
-    answers := some (
-      s!"{Part1.solve s m}",
-      s!"{Part2.solve s m}") }
+    input_name := (← date.fileName alt)
+    answers := some ( s!"{Part1.solve s m}", s!"{Part2.solve s m}") }
   else
     IO.println "parse error at Y2023.Day05"
     return date

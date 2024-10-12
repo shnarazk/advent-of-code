@@ -41,6 +41,7 @@ end Part2
 protected def solve (alt : Option String): IO AocProblem:= do
   let lines ← date.getLines alt
   return { date with
+    input_name := (← date.fileName alt)
     answers := some (
       s!"{Part1.solve lines}",
       s!"{Part2.solve lines}") }

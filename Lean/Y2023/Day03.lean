@@ -70,11 +70,10 @@ def Part2.solve (lines : Array String) : Nat :=
     ([] : List Nat)
   sum gears
 
-protected def solve (ext : Option String) : IO AocProblem := do
-  let lines ← date.getLines ext
+def solve (alt : Option String) : IO AocProblem := do
+  let lines ← date.getLines alt
   return { date with
-    answers := some (
-      s!"{Y2023.Day03.Part1.solve lines}",
-      s!"{Y2023.Day03.Part2.solve lines}") }
+    input_name := (← date.fileName alt)
+    answers := some ( s!"{Part1.solve lines}", s!"{Part2.solve lines}") }
 
 end Y2023.Day03

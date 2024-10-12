@@ -74,9 +74,10 @@ def Part2.solve (d: Array (Array Bool)) : Nat :=
   let trans_x : List Nat := expand (m.map (·.snd)) range.snd scaling
   sum_of_dist $ m.map (fun (y, x) => (trans_y[y]!, trans_x[x]!))
 
-protected def solve (ext : Option String) : IO AocProblem := do
-  if let some d := parser.parse (← date.getData ext)
+protected def solve (alt : Option String) : IO AocProblem := do
+  if let some d := parser.parse (← date.getData alt)
   then return { date with
+    input_name := (← date.fileName alt)
     answers := some (s!"{Part1.solve d}", s!"{Part2.solve d}") }
   else
     IO.println "Parse error at Y2023.Day11"

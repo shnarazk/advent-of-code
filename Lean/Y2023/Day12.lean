@@ -103,9 +103,10 @@ def Part2.evaluate (conf : Data) : Nat :=
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
   |>.snd
 
-def solve (ext : Option String) : IO AocProblem := do
-  if let some cs := parser.parse (← date.getData ext)
+def solve (alt : Option String) : IO AocProblem := do
+  if let some cs := parser.parse (← date.getData alt)
   then return { date with
+    input_name := (← date.fileName alt)
     answers := some (
       s!"{sum $ cs.map Part1.evaluate}",
       s!"{sum $ cs.map Part2.evaluate}") }

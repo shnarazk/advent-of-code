@@ -41,6 +41,7 @@ structure AocProblem where
   day : Nat
   validYear : 2000 < year
   validDay : 1 ≤ day ∧ day ≤ 25
+  input_name : String
   answers: Option (String × String) := none
   time: Float := 0
 deriving BEq, Repr
@@ -67,6 +68,7 @@ def new (year day : Nat) : AocProblem :=
     (min (max day 1) 25)
     valid_year
     valid_day
+    ""
     none
     0
 
@@ -88,6 +90,9 @@ instance : Lean.ToJson AocProblem where
     ]
 
 -- #eval Lean.ToJson.toJson (AocProblem.new 2024 10)
+
+def toJson (self : AocProblem) : Lean.Json := Lean.ToJson.toJson self
+
 end AocProblem
 
 /--

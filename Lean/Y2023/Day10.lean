@@ -270,6 +270,7 @@ end part2
 def solve (alt : Option String) : IO AocProblem := do
   if let some (some m) := parser.parse (← date.getData alt)
   then return { date with
+    input_name := (← date.fileName alt)
     answers := some (s!"{part1.solve m}", s!"{part2.solve m}") }
   else
     IO.println "Parse error at Y2023.Day10"
