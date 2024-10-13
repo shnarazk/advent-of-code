@@ -1,4 +1,5 @@
 -- import Init.Data.Array.Subarray
+import mathlib.Tactic
 import Std.Data.HashMap
 
 /-
@@ -57,10 +58,16 @@ instance : HDiv Dim2 Int Dim2 where
 private def Dim2.lt (a b : Dim2) := a.1 < b.1 ∧ a.2 < b.2
 instance : LT Dim2 where lt := Dim2.lt
 
+private def Dim2.le (a b : Dim2) := a.1 ≤ b.1 ∧ a.2 ≤ b.2
+instance : LE Dim2 where le := Dim2.le
+
 example : Dim2.mk 3 (-2) = ({ x := -2, y := 3 } : Dim2) := by rfl
 example : ((3, 5) : Dim2) = Dim2.mk 3 5 := by rfl
 example : (((3 : Int), (5 : Int)) : Dim2) = Dim2.mk 3 5 := by rfl
 example : ((-2, -2) : Dim2) < ((5, 4) : Dim2) := by
+  simp
+  constructor <;> simp
+example : ((-2, (4 : Int)) : Dim2) ≤ ((5, 4) : Dim2) := by
   simp
   constructor <;> simp
 
@@ -95,9 +102,22 @@ structure Plane (α : Type) [BEq α] [Hashable α] [Inhabited α] where
   mapping : Std.HashMap Dim2 α
 deriving Repr
 
+/-
+instance (α : Type) [BEq α] [Hashable α] [Inhabited α] [LE α] [LE (Dim2 × α)]
+    : BEq (Plane α) where
+    beq a b := BEq.beq a.mapping.toArray b.mapping.toArray
+-/
+
 instance {α : Type} [BEq α] [Hashable α] [Inhabited α] :
     Inhabited (Plane α) where
   default := Plane.mk Std.HashMap.empty
+
+def Plane.empty {α : Type} [BEq α] [Hashable α] [Inhabited α]
+    (capacity : optParam Nat 8) : Plane α :=
+  { mapping := Std.HashMap.empty capacity }
+
+example : (Plane.empty : Plane Nat) = (default : Plane Nat) := by
+  simp [default, Plane.empty]
 
 def Plane.get {α : Type} [BEq α] [Hashable α] [Inhabited α]
     (self : Plane α) (p : Dim2) : α :=
@@ -107,6 +127,10 @@ def Plane.set {α : Type} [BEq α] [Hashable α] [Inhabited α]
     (self : Plane α) (p : Dim2) (a : α) : Plane α :=
   { self with mapping := self.mapping.insert (AsDim2.asDim2 p) a }
 
+def Plane.modify {α : Type} [BEq α] [Hashable α] [Inhabited α]
+    (self : Plane α) (p : Dim2) (f : α → α) : Plane α :=
+  { self with mapping := self.mapping.insert p (f (self.mapping.get! p)) }
+
 example [BEq α] [Hashable α] [Inhabited α]
     (p : Plane α) (y x : Nat) (a : α) :
     p.set (Dim2.mk y x) a = p.set (y, x) a := by simp
@@ -114,6 +138,7 @@ example [BEq α] [Hashable α] [Inhabited α]
 example [BEq α] [Hashable α] [Inhabited α]
     (p : Plane α) (q : Dim2) (a : α) : (p.set q a).get q = a  := by
   simp [default, Plane.set, AsDim2.asDim2, Plane.get]
+
 
 /-
 # A Presentation of bounded 2D spaces
@@ -129,49 +154,66 @@ structure BoundedPlane (α : Type) [BEq α] [Inhabited α] where
   validShape : shape.area = vector.size
 deriving Repr
 
+instance (α : Type) [BEq α] [Inhabited α]: BEq (BoundedPlane α) where
+  beq a b := a.shape == b.shape && a.vector == b.vector
+
 instance [ToString α] [BEq α] [Inhabited α] : ToString (BoundedPlane α) where
   toString bp := s!"{bp.shape}{toString bp.vector}"
 
 namespace BoundedPlane
 
-/--
-return an optional new instance of Mat1 of an array
+/-
+return a new BoundedPlane
 -/
-def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option (Mat1 α) :=
-  if h : vec.size ≠ 0
-  then
-    have : NeZero vec.size := by simp [neZero_iff, h]
-    ({width := w, vector := vec, neZero := this } : Mat1 α) |> some
-  else none
+def new {α : Type} [BEq α] [Inhabited α]
+    (g : Dim2) (vec : Array α) (h : g.area = vec.size): BoundedPlane α :=
+  BoundedPlane.mk g vec h
 
 /--
 return an optional new instance of Mat1 of an 2D array
 -/
-def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Option (Mat1 α) :=
-  new (m.foldl Array.append #[]) (m.getD 1 #[]).size
+def of2DMatrix {α : Type} [BEq α] [Inhabited α]
+  (a : Array (Array α)) (h w : Nat) : BoundedPlane α :=
+  match h, w with
+  | 0, _ | _, 0 =>
+    let d := Dim2.mk 0 0
+    BoundedPlane.mk d #[] (by rfl : d.area = #[].size)
+  | _, _ =>
+    let v : Array α := a.foldl Array.append #[]
+    if hw : h * w = v.size then
+      BoundedPlane.mk (Dim2.mk h w) v hw
+    else
+      let d := Dim2.mk 0 0
+      BoundedPlane.mk d #[] (by rfl : d.area = #[].size)
 
 /--
 return the `(i,j)`-th element of Mat1 instance
 -/
-def get {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : α :=
-  self.vector.get (@Fin.ofNat' self.vector.size self.neZero (i * self.width + j))
+def get {α : Type} [BEq α] [Inhabited α]
+    (self : BoundedPlane α) (i j : Nat) : α :=
+  if h : 0 < self.vector.size then
+    have : NeZero self.vector.size := by exact NeZero.of_pos h
+    self.vector.get (Fin.ofNat' self.vector.size (i * self.shape.x.toNat + j))
+  else
+    default
 
-def validIndex? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Bool :=
-  0 < i && i < self.width && 0 < j && j * self.width < self.vector.size
+def validIndex? {α : Type} [BEq α] [Inhabited α]
+    (self : BoundedPlane α) (i j : Nat) : Bool :=
+  0 ≤ i && i < self.shape.y && 0 ≤ j && j < self.shape.x
 
-def get? {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) : Option α :=
- if self.validIndex? i j then self.get i j |> some else none
+def getD {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (i j : Nat) : α :=
+ if self.validIndex? i j then self.get i j else default
 
 /--
 set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def set {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (val : α) : Mat1 α :=
-  let ix := i * self.width + j
+def set {α : Type} [BEq α] [Inhabited α]
+    (self : BoundedPlane α) (i j : Nat) (val : α) : BoundedPlane α :=
+  let ix := i * self.shape.x.toNat + j
   let v := self.vector.set! ix val
-  if h : v.size ≠ 0 then
-    have : NeZero v.size := by simp [neZero_iff, h]
-    { self with vector := v, neZero := this }
-  else self
+  if h : self.shape.area = v.size
+    then BoundedPlane.new self.shape v h
+    else self
 
 -- def x := new #[true, false, true, false] 2
 -- def y := of2DMatrix #[#[1,2,3], #[4,5,6]]
