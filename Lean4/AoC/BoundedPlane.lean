@@ -1,4 +1,6 @@
 import Init.Data.Array.Subarray
+import Std.Data.HashSet
+import Std.Data.HashSet.Lemmas
 
 /-
  Index to designate a point in infinite 2D space
@@ -12,6 +14,10 @@ instance : Coe (Nat × Nat) Dim2 where coe p := Dim2.mk ↑p.1 ↑p.2
 instance : Coe (Int × Int) Dim2 where coe p := Dim2.mk p.1 p.2
 instance : Inhabited Dim2 where default := Dim2.mk 0 0
 instance : ToString Dim2 where toString s := s!"2D({s.1}, {s.2})"
+instance : EquivBEq Dim2 where
+  symm := by intro a b h ; sorry
+  trans:= by intro a b h ; sorry
+  refl := by sorry
 
 instance : HAdd Dim2 Dim2 Dim2 where
   hAdd (a b : Dim2) := Dim2.mk (a.y + b.y) (a.x + b.x)
@@ -40,6 +46,13 @@ example : ((-2, -2) : Dim2) < ((5, 4) : Dim2) := by
   simp
   constructor <;> simp
 
+class AsDim2 (α : Type) where
+  asDim2 : α → Dim2
+
+instance : AsDim2 Dim2 where asDim2 := (·)
+instance : AsDim2 (Int × Int) where asDim2 := Coe.coe
+instance : AsDim2 (Nat × Nat) where asDim2 := Coe.coe
+
 namespace Dim2
 
 def area (a : Dim2) : Nat := (a.y * a.x).toNat
@@ -53,7 +66,46 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 end Dim2
 
 namespace TwoDimentionalVector
+open Std.HashMap Dim2
 
+variable (α : Type)
+
+/-
+# A Presentation of infinite 2D space
+-/
+structure Plane (α : Type) [BEq α] [Hashable α] [Inhabited α] where
+  mapping : Std.HashMap Dim2 α
+deriving Repr
+
+instance {α : Type} [BEq α] [Hashable α] [Inhabited α] :
+    Inhabited (Plane α) where
+  default := Plane.mk Std.HashMap.empty
+
+def Plane.get {α : Type} [BEq α] [Hashable α] [Inhabited α]
+    (self : Plane α) (p : Dim2) : α :=
+  self.mapping.getD (AsDim2.asDim2 p) (default : α)
+
+def Plane.set {α : Type} [BEq α] [Hashable α] [Inhabited α]
+    (self : Plane α) (p : Dim2) (a : α) : Plane α :=
+  { self with mapping := self.mapping.insert (AsDim2.asDim2 p) a }
+
+#check (default : Plane Nat).get (Dim2.mk 3 3)
+#check (default : Plane Nat).set (Dim2.mk 3 3) 10
+#check (default : Plane Nat).set ((0 : Nat), (0 : Nat)) (1 : Nat)
+#check (default : Plane Nat).get ((0 : Int), (0 : Int))
+#check ((default : Plane Nat).set ((0 : Int), (0 : Int)) (1 : Nat)).get ((0 :Int), (0 : Int))
+example : ((default : Plane Nat).set (Dim2.mk 0 0) 1).get (Dim2.mk 0 0) = (1 : Nat) := by
+  simp [default]
+  simp [Plane.set]
+  simp [AsDim2.asDim2]
+  simp [Plane.get]
+  simp [AsDim2.asDim2]
+  -- have h1 :
+  rw [Std.HashMap.getD_insert]
+  sorry
+/-
+# A Presentation of bounded 3D space
+-/
 structure BoundedPlane (α : Type) [BEq α] [Inhabited α] where
   shape  : Dim2
   vector : Array α
