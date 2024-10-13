@@ -21,7 +21,7 @@ def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option 
   else none
 
 /--
-return an optional new instacne of Mat1 of an 2D array
+return an optional new instance of Mat1 of an 2D array
 -/
 def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Option (Mat1 α) :=
   new (m.foldl Array.append #[]) (m.getD 1 #[]).size

@@ -1,5 +1,6 @@
 import Init.Data.Array.Subarray
-import Std.Data.HashSet
+import Std.Data.HashMap
+import Std.Data.HashMap.Lemmas
 import Std.Data.HashSet.Lemmas
 
 /-
@@ -8,16 +9,35 @@ import Std.Data.HashSet.Lemmas
 structure Dim2 where
   y : Int
   x : Int
-deriving BEq, Hashable, Repr
+deriving Repr
+instance : BEq Dim2 where
+  beq a b := a.y == b.y && a.x == b.x
+instance : Hashable Dim2 where
+  hash a := hash (a.y, a.x)
 
 instance : Coe (Nat × Nat) Dim2 where coe p := Dim2.mk ↑p.1 ↑p.2
 instance : Coe (Int × Int) Dim2 where coe p := Dim2.mk p.1 p.2
 instance : Inhabited Dim2 where default := Dim2.mk 0 0
 instance : ToString Dim2 where toString s := s!"2D({s.1}, {s.2})"
+instance : LawfulBEq Dim2 where
+  eq_of_beq {a b} (h : a.y == b.y && a.x == b.x):= by
+    cases a; cases b
+    simp at h
+    simp
+    exact h
+  rfl {a} := by simp [BEq.beq]
+
+instance : LawfulHashable Dim2 where
+  hash_eq := by
+    intro a b H
+    cases a; cases b
+    simp at H
+    simp [H]
+
 instance : EquivBEq Dim2 where
-  symm := by intro a b h ; sorry
-  trans:= by intro a b h ; sorry
-  refl := by sorry
+  symm := by intro a b h ; exact BEq.symm h
+  trans:= by intro a b h ; exact PartialEquivBEq.trans
+  refl := by intro a ; exact beq_iff_eq.mpr rfl
 
 instance : HAdd Dim2 Dim2 Dim2 where
   hAdd (a b : Dim2) := Dim2.mk (a.y + b.y) (a.x + b.x)
@@ -100,9 +120,6 @@ example : ((default : Plane Nat).set (Dim2.mk 0 0) 1).get (Dim2.mk 0 0) = (1 : N
   simp [AsDim2.asDim2]
   simp [Plane.get]
   simp [AsDim2.asDim2]
-  -- have h1 :
-  rw [Std.HashMap.getD_insert]
-  sorry
 /-
 # A Presentation of bounded 3D space
 -/
@@ -128,7 +145,7 @@ def new {α : Type} [BEq α] [Inhabited α] (vec : Array α) (w : Nat) : Option 
   else none
 
 /--
-return an optional new instacne of Mat1 of an 2D array
+return an optional new instance of Mat1 of an 2D array
 -/
 def of2DMatrix {α : Type} [BEq α] [Inhabited α] (m : Array (Array α)) : Option (Mat1 α) :=
   new (m.foldl Array.append #[]) (m.getD 1 #[]).size
