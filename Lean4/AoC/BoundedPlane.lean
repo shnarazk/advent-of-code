@@ -1,10 +1,8 @@
-import Init.Data.Array.Subarray
+-- import Init.Data.Array.Subarray
 import Std.Data.HashMap
-import Std.Data.HashMap.Lemmas
-import Std.Data.HashSet.Lemmas
 
 /-
- Index to designate a point in infinite 2D space
+# An index to point a posiition in an infinite 2D space
 -/
 structure Dim2 where
   y : Int
@@ -109,24 +107,25 @@ def Plane.set {α : Type} [BEq α] [Hashable α] [Inhabited α]
     (self : Plane α) (p : Dim2) (a : α) : Plane α :=
   { self with mapping := self.mapping.insert (AsDim2.asDim2 p) a }
 
-#check (default : Plane Nat).get (Dim2.mk 3 3)
-#check (default : Plane Nat).set (Dim2.mk 3 3) 10
-#check (default : Plane Nat).set ((0 : Nat), (0 : Nat)) (1 : Nat)
-#check (default : Plane Nat).get ((0 : Int), (0 : Int))
-#check ((default : Plane Nat).set ((0 : Int), (0 : Int)) (1 : Nat)).get ((0 :Int), (0 : Int))
-example : ((default : Plane Nat).set (Dim2.mk 0 0) 1).get (Dim2.mk 0 0) = (1 : Nat) := by
-  simp [default]
-  simp [Plane.set]
-  simp [AsDim2.asDim2]
-  simp [Plane.get]
-  simp [AsDim2.asDim2]
+example [BEq α] [Hashable α] [Inhabited α]
+    (p : Plane α) (y x : Nat) (a : α) :
+    p.set (Dim2.mk y x) a = p.set (y, x) a := by simp
+
+example [BEq α] [Hashable α] [Inhabited α]
+    (p : Plane α) (q : Dim2) (a : α) : (p.set q a).get q = a  := by
+  simp [default, Plane.set, AsDim2.asDim2, Plane.get]
+
 /-
-# A Presentation of bounded 3D space
+# A Presentation of bounded 2D spaces
+
+Note: this implementation accept zero space for now.
+And It returns the `default` by `·.get (0, 0)`
+
 -/
 structure BoundedPlane (α : Type) [BEq α] [Inhabited α] where
   shape  : Dim2
   vector : Array α
-  neZero : shape ≠ default ∧ NeZero vector.size
+  -- neZero : shape ≠ default ∧ NeZero vector.size
   validShape : shape.area = vector.size
 deriving Repr
 
@@ -134,6 +133,7 @@ instance [ToString α] [BEq α] [Inhabited α] : ToString (BoundedPlane α) wher
   toString bp := s!"{bp.shape}{toString bp.vector}"
 
 namespace BoundedPlane
+
 /--
 return an optional new instance of Mat1 of an array
 -/
