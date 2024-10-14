@@ -88,6 +88,12 @@ def double (a : Dim2) : Dim2 := Dim2.mk (2 * a.1) (2 * a.2)
 example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
   simp [Dim2.mk, Dim2.double]
 
+def index (frame self : Dim2) : Nat :=
+  self.y.toNat * frame.x.toNat + self.x.toNat
+
+def index' (frame : Dim2) (n : Nat) : Dim2 :=
+  Dim2.mk (n / frame.x) (n % frame.x)
+
 end Dim2
 
 namespace TwoDimentionalVector
@@ -190,26 +196,26 @@ def of2DMatrix {α : Type} [BEq α] [Inhabited α]
 return the `(i,j)`-th element of Mat1 instance
 -/
 def get {α : Type} [BEq α] [Inhabited α]
-    (self : BoundedPlane α) (i j : Nat) : α :=
+    (self : BoundedPlane α) (p : Dim2) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
-    self.vector.get (Fin.ofNat' self.vector.size (i * self.shape.x.toNat + j))
+    self.vector.get (Fin.ofNat' self.vector.size (self.shape.index p))
   else
     default
 
 def validIndex? {α : Type} [BEq α] [Inhabited α]
-    (self : BoundedPlane α) (i j : Nat) : Bool :=
-  0 ≤ i && i < self.shape.y && 0 ≤ j && j < self.shape.x
+    (self : BoundedPlane α) (p : Dim2) : Bool :=
+  0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
-def getD {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (i j : Nat) : α :=
- if self.validIndex? i j then self.get i j else default
+def getD {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (p : Dim2) : α :=
+ if self.validIndex? p then self.get p else default
 
 /--
 set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def set {α : Type} [BEq α] [Inhabited α]
-    (self : BoundedPlane α) (i j : Nat) (val : α) : BoundedPlane α :=
-  let ix := i * self.shape.x.toNat + j
+    (self : BoundedPlane α) (p : Dim2) (val : α) : BoundedPlane α :=
+  let ix := self.shape.index p
   let v := self.vector.set! ix val
   if h : self.shape.area = v.size
     then BoundedPlane.new self.shape v h
@@ -230,21 +236,21 @@ def set {α : Type} [BEq α] [Inhabited α]
 /--
 modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def modify {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i j : Nat) (f : α → α) : Mat1 α :=
-  let ix := i * self.width + j
+def modify {α : Type} [BEq α] [Inhabited α]
+  (self : BoundedPlane α) (p : Dim2) (f : α → α) : BoundedPlane α :=
+  let ix := self.shape.index p
   let v := self.vector.modify ix f
-  if h : v.size ≠ 0
-  then
-    have : NeZero v.size := by simp [neZero_iff, h]
-    ({width := self.width, vector := v, neZero := this } : Mat1 α)
-  else self
+  if h : self.shape.area = v.size then
+    ({ shape := self.shape, vector := v, validShape := h } : BoundedPlane α)
+  else
+    self
 
 /--
 search an element that satisfies the predicate and return indices or none
 -/
-def findIdx? {α : Type} [BEq α] [Inhabited α] (mat : Mat1 α) (f : α → Bool) : Option (Nat × Nat) :=
-  match mat.vector.findIdx? f with
-  | some i => some (i / mat.width, i % mat.width)
+def findIdx? {α : Type} [BEq α] [Inhabited α] (p : BoundedPlane α) (f : α → Bool) : Option Dim2 :=
+  match p.vector.findIdx? f with
+  | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdx? (· == 6) else none
@@ -263,10 +269,10 @@ private partial def findIdxOnSubarray {α : Type} [BEq α] [Inhabited α]
 search an element in a specific row
 -/
 def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
-    (mat : Mat1 α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
-  let f := i * mat.width
-  let t := (i + 1) * mat.width
-  let sa := mat.vector.toSubarray f t
+    (p : BoundedPlane α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
+  let f := i * p.shape.x.toNat
+  let t := (i + 1) * p.shape.x.toNat
+  let sa := p.vector.toSubarray f t
   if h : sa.size ≠ 0
   then
     have : NeZero sa.size := by simp [neZero_iff, h]
@@ -277,28 +283,28 @@ def findIdxInRow? {α : Type} [BEq α] [Inhabited α]
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
-def foldl {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : β → α → β) (init : β) : β :=
+def foldl {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
 def foldlRows {α : Type} [BEq α] [Inhabited α]
-    (self : Mat1 α) (f : β → α → β) (init : β ): Array β :=
-  Array.range (self.vector.size / self.width)
-    |> .map (fun i => self.vector.toSubarray i (i + self.width)
+    (self : BoundedPlane α) (f : β → α → β) (init : β ): Array β :=
+  Array.range (self.vector.size / self.shape.x.toNat)
+    |> .map (fun i => self.vector.toSubarray i (i + self.shape.x.toNat)
       |> Array.ofSubarray
       |>.foldl f init)
 
-def mapRows {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (f : Array α → β) :  Array β :=
-  Array.range (self.vector.size / self.width)
-    |> .map (fun i => self.vector.toSubarray i (i + self.width) |> Array.ofSubarray |> f)
+def mapRows {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (f : Array α → β) :  Array β :=
+  Array.range (self.vector.size / self.shape.x.toNat)
+    |> .map (fun i => self.vector.toSubarray i (i + self.shape.x.toNat) |> Array.ofSubarray |> f)
 
-def row {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Subarray α :=
-  let j := i % (self.vector.size % self.width)
-  let f := j * self.width
-  let t := f + self.width
+def row {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (i : Nat) : Subarray α :=
+  let j : Nat := i % (self.vector.size % self.shape.x.toNat)
+  let f : Nat := j * self.shape.x.toNat
+  let t := f + self.shape.x.toNat
   self.vector.toSubarray f t
 
-def column {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) (i : Nat) : Array α :=
-  Array.range (self.vector.size / self.width) |> .map (self.get · i)
+def column {α : Type} [BEq α] [Inhabited α] (self : BoundedPlane α) (j : Nat) : Array α :=
+  Array.range self.shape.y.toNat |>.map (fun i ↦ self.get (↑(i, j) : Dim2))
 
 -- def shape {α : Type} [BEq α] [Inhabited α] (self : Mat1 α) : Nat × Nat :=
 --   (self.vector.size / self.width, self.width)
