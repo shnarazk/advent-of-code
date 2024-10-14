@@ -1,7 +1,7 @@
 name = "AoC"
 testRunner = "Benchmark"
 defaultTargets = ["aoc"]
-version = "0.5.2"
+version = "0.6.0"
 
 [[require]]
 name = "aesop"
@@ -31,3 +31,7 @@ name = "Y2024"
 [[lean_exe]]
 name = "aoc"
 root = "AoC"
+
+[[lean_exe]]
+name = "lint"
+srcDir = "scripts"

@@ -91,7 +91,7 @@ def aocCmd (p : Parsed) : IO UInt32 := do
   return 0
 
 def aoc : Cmd := `[Cli|
-  aoc VIA aocCmd ; ["0.5.2"]
+  aoc VIA aocCmd ; ["0.6.0"]
   "Run Advent-of-Code codes in Lean4"
 
   FLAGS:
