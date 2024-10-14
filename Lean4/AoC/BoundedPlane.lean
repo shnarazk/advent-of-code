@@ -55,6 +55,8 @@ instance : HMul Dim2 Int Dim2 where
 instance : HDiv Dim2 Int Dim2 where
   hDiv (a : Dim2) (c : Int) := Dim2.mk (a.y / c) (a.x / c)
 
+example : (Dim2.mk 3 7) * (8 : Int) = Dim2.mk 24 56 := by rfl
+
 private def Dim2.lt (a b : Dim2) := a.1 < b.1 ∧ a.2 < b.2
 instance : LT Dim2 where lt := Dim2.lt
 
@@ -79,6 +81,31 @@ instance : AsDim2 (Int × Int) where asDim2 := Coe.coe
 instance : AsDim2 (Nat × Nat) where asDim2 := Coe.coe
 
 namespace Dim2
+instance : AddMonoid Dim2 where
+  zero := Dim2.mk 0 0
+  add := HAdd.hAdd
+  add_assoc a b c := by
+    simp [HAdd.hAdd]
+    constructor
+    { exact add_assoc (a.y) (b.y) (c.y) }
+    { exact add_assoc (a.x) (b.x) (c.x) }
+  zero_add a := by
+    simp [HAdd.hAdd]
+    sorry
+  add_zero a := by
+    sorry
+  nsmul (n : Nat) (a : Dim2) := Dim2.mk (n * a.y) (n * a.x)
+  nsmul_zero := by simp ; rfl
+  nsmul_succ := by
+    intro n a
+    simp [Dim2.mk]
+    sorry
+-- instance : AddGroup Dim2 where
+--  neg a := Dim2.mk (-a.y) (-a.x)
+--  zsmul n a := Dim2.mk (n * a.y) (n * a.x)
+--  neg_add_cancel a := by
+--    simp [HAdd.hAdd, neg_add_cancel]
+--    sorry
 
 def area (a : Dim2) : Nat := (a.y * a.x).toNat
 example : ((5, 4) : Dim2).area = 20 := by rfl
@@ -152,7 +179,8 @@ structure BoundedPlane (α : Type) [BEq α] where
   shape  : Dim2
   vector : Array α
   -- neZero : shape ≠ default ∧ NeZero vector.size
-  validShape : shape.area = vector.size
+  validShape: 0 ≤ shape
+  validArea : shape.area = vector.size
 deriving Repr
 
 instance (α : Type) [BEq α] : BEq (BoundedPlane α) where
@@ -167,25 +195,30 @@ namespace BoundedPlane
 - return a new BoundedPlane
 -/
 def new {α : Type} [BEq α]
-    (g : Dim2) (vec : Array α) (h : g.area = vec.size): BoundedPlane α :=
-  BoundedPlane.mk g vec h
+    (g : Dim2) (vec : Array α) (h1 : 0 ≤ g) (h2 : g.area = vec.size): BoundedPlane α :=
+  BoundedPlane.mk g vec h1 h2
 
 /--
 - return a new instance of BoundedPlane by converting from an 2D array
 -/
 def of2DMatrix {α : Type} [BEq α]
   (a : Array (Array α)) (h w : Nat) : BoundedPlane α :=
+  have zero_def : (0 : Dim2) = { y := 0, x := 0 } := by rfl
   match h, w with
   | 0, _ | _, 0 =>
     let d := Dim2.mk 0 0
-    BoundedPlane.mk d #[] (by rfl : d.area = #[].size)
+    have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
+    BoundedPlane.mk d #[] this (by rfl : d.area = #[].size)
   | _, _ =>
     let v : Array α := a.foldl Array.append #[]
     if hw : h * w = v.size then
-      BoundedPlane.mk (Dim2.mk h w) v hw
+      let d := Dim2.mk h w
+      have : 0 ≤ d := by rw [zero_def] ; constructor <;> simp
+      BoundedPlane.mk (Dim2.mk h w) v this hw
     else
       let d := Dim2.mk 0 0
-      BoundedPlane.mk d #[] (by rfl : d.area = #[].size)
+      have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
+      BoundedPlane.mk d #[] this (by rfl : d.area = #[].size)
 
 /--
 - return the `(i,j)`-th element of Mat1 instance
@@ -210,7 +243,7 @@ def set {α : Type} [BEq α]
   let ix := self.shape.index p
   let v := self.vector.set! ix val
   if h : self.shape.area = v.size
-    then BoundedPlane.new self.shape v h
+    then BoundedPlane.new self.shape v self.validShape h
     else self
 
 -- def x := new #[true, false, true, false] 2
