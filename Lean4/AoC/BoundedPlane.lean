@@ -1,9 +1,9 @@
 -- import Init.Data.Array.Subarray
-import mathlib.Tactic
+import Mathlib.Tactic
 import Std.Data.HashMap
 
-/-
-# An index to point a posiition in an infinite 2D space
+/--
+### An index to point a posiition in an infinite 2D space
 -/
 structure Dim2 where
   y : Int
@@ -50,8 +50,8 @@ instance : HDiv Dim2 Int Dim2 where
   hDiv (a : Dim2) (c : Int) := Dim2.mk (a.y / c) (a.x / c)
 
 example : (8 : Int) + (Dim2.mk 3 1) = Dim2.mk 11 9  := by rfl
-lemma dim2_zero_add (p : Dim2) : (0 : Int) + p = p  := by simp [HAdd.hAdd] ; simp [Add.add]
-lemma dim2_add_zero (p : Dim2) : p + (0 : Int) = p  := by simp [HAdd.hAdd] ; simp [Add.add]
+lemma dim2_zero_add (p : Dim2) : (0 : Int) + p = p  := by simp [(· + ·)] ; simp [Add.add]
+lemma dim2_add_zero (p : Dim2) : p + (0 : Int) = p  := by simp [(· + ·)] ; simp [Add.add]
 example : (Dim2.mk 3 7) * (8 : Int) = Dim2.mk 24 56 := by rfl
 
 private def Dim2.lt (a b : Dim2) := a.1 < b.1 ∧ a.2 < b.2
@@ -140,35 +140,35 @@ end Dim2
 namespace TwoDimentionalVector
 open Std.HashMap Dim2
 
-variable (α : Type)
+variable {α : Type}
 
-/-
-# A Presentation of infinite 2D space
+/--
+### A Presentation of infinite 2D space
 -/
 structure Plane (α : Type) [BEq α] [Hashable α] where
   mapping : Std.HashMap Dim2 α
 -- deriving Repr
 
-instance {α : Type} [BEq α] [Hashable α] :
+instance [BEq α] [Hashable α] :
     Inhabited (Plane α) where default := Plane.mk Std.HashMap.empty
 
 -- instance : Lean.MetaEval Dim2 where eval env options x bool := do IO String
 
-def Plane.empty {α : Type} [BEq α] [Hashable α]
+def Plane.empty [BEq α] [Hashable α]
     (capacity : optParam Nat 8) : Plane α :=
   { mapping := Std.HashMap.empty capacity }
 
 example : (Plane.empty : Plane Nat) = (default : Plane Nat) := by simp [default, Plane.empty]
 
-def Plane.get {α : Type} [BEq α] [Hashable α]
+def Plane.get [BEq α] [Hashable α]
     (self : Plane α) (p : Dim2) (default : α) : α :=
   self.mapping.getD (AsDim2.asDim2 p) (default : α)
 
-def Plane.set {α : Type} [BEq α] [Hashable α]
+def Plane.set [BEq α] [Hashable α]
     (self : Plane α) (p : Dim2) (a : α) : Plane α :=
   { self with mapping := self.mapping.insert (AsDim2.asDim2 p) a }
 
-def Plane.modify {α : Type} [BEq α] [Hashable α]
+def Plane.modify [BEq α] [Hashable α]
     (self : Plane α) (p : Dim2) (f : α → α) (default : α): Plane α :=
   { self with
     mapping := self.mapping.insert p (f (self.mapping.getD p default)) }
@@ -180,8 +180,8 @@ example [BEq α] [Hashable α] (p : Plane α) (q : Dim2) (a default : α) :
       (p.set q a).get q default = a  := by
   simp [Plane.set, AsDim2.asDim2, Plane.get]
 
-/-
-# A Presentation of bounded 2D spaces
+/--
+### A Presentation of bounded 2D spaces
 
 Note: this implementation accept zero space for now.
 And It returns the `default` by `·.get (0, 0)`
@@ -195,7 +195,7 @@ structure BoundedPlane (α : Type) [BEq α] where
   validArea : shape.area = vector.size
 deriving Repr
 
-instance (α : Type) [BEq α] : BEq (BoundedPlane α) where
+instance [BEq α] : BEq (BoundedPlane α) where
   beq a b := a.shape == b.shape && a.vector == b.vector
 
 instance [ToString α] [BEq α] : ToString (BoundedPlane α) where
@@ -203,17 +203,17 @@ instance [ToString α] [BEq α] : ToString (BoundedPlane α) where
 
 namespace BoundedPlane
 
-/-
+/--
 - return a new BoundedPlane
 -/
-def new {α : Type} [BEq α]
+def new [BEq α]
     (g : Dim2) (vec : Array α) (h1 : 0 ≤ g) (h2 : g.area = vec.size): BoundedPlane α :=
   BoundedPlane.mk g vec h1 h2
 
 /--
 - return a new instance of BoundedPlane by converting from an 2D array
 -/
-def of2DMatrix {α : Type} [BEq α]
+def of2DMatrix [BEq α]
   (a : Array (Array α)) : BoundedPlane α :=
   have zero_def : (0 : Dim2) = { y := 0, x := 0 } := by rfl
   have h : Nat := a.size
@@ -238,7 +238,7 @@ def of2DMatrix {α : Type} [BEq α]
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
-def get {α : Type} [BEq α]
+def get [BEq α]
     (self : BoundedPlane α) (p : Dim2) (default : α) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
@@ -246,14 +246,14 @@ def get {α : Type} [BEq α]
   else
     default
 
-def validIndex? {α : Type} [BEq α]
+def validIndex? [BEq α]
     (self : BoundedPlane α) (p : Dim2) : Bool :=
   0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def set {α : Type} [BEq α]
+def set [BEq α]
     (self : BoundedPlane α) (p : Dim2) (val : α) : BoundedPlane α :=
   let ix := self.shape.index p
   let v := self.vector.set! ix val
@@ -264,19 +264,19 @@ def set {α : Type} [BEq α]
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def modify {α : Type} [BEq α]
+def modify [BEq α]
   (self : BoundedPlane α) (p : Dim2) (f : α → α) (default : α) : BoundedPlane α :=
   self.set p <| f <| self.get p default
 
 /--
 - search an element that satisfies the predicate and return indices or none
 -/
-def findIdx? {α : Type} [BEq α] (p : BoundedPlane α) (f : α → Bool) : Option Dim2 :=
+def findIdx? [BEq α] (p : BoundedPlane α) (f : α → Bool) : Option Dim2 :=
   match p.vector.findIdx? f with
   | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
 
-private partial def findIdxOnSubarray {α : Type} [BEq α]
+private partial def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=
   if pred (sa.get limit)
@@ -289,7 +289,7 @@ private partial def findIdxOnSubarray {α : Type} [BEq α]
 /--
 - search an element in a specific row
 -/
-def findIdxInRow? {α : Type} [BEq α]
+def findIdxInRow? [BEq α]
     (p : BoundedPlane α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * p.shape.x.toNat
   let t := (i + 1) * p.shape.x.toNat
@@ -304,10 +304,10 @@ def findIdxInRow? {α : Type} [BEq α]
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
-def foldl {α β : Type} [BEq α] (self : BoundedPlane α) (f : β → α → β) (init : β) : β :=
+def foldl {β : Type} [BEq α] (self : BoundedPlane α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
-def foldlRows {α β : Type} [BEq α]
+def foldlRows {β : Type} [BEq α]
     (self : BoundedPlane α) (f : β → α → β) (init : β) : Array β :=
   Array.range self.shape.y.toNat
     |> .map (fun i =>
@@ -315,23 +315,22 @@ def foldlRows {α β : Type} [BEq α]
         |> Array.ofSubarray
         |>.foldl f init)
 
-def mapRows {α β : Type} [BEq α]
+def mapRows {β : Type} [BEq α]
     (self : BoundedPlane α) (f : Array α → β) :  Array β :=
   Array.range (self.vector.size / self.shape.x.toNat)
     |> .map (fun i => self.vector.toSubarray i (i + self.shape.x.toNat) |> Array.ofSubarray |> f)
 
-def row {α : Type} [BEq α] (self : BoundedPlane α) (i : Nat) : Subarray α :=
+def row [BEq α] (self : BoundedPlane α) (i : Nat) : Subarray α :=
   let j : Nat := i % (self.vector.size % self.shape.x.toNat)
   let f : Nat := j * self.shape.x.toNat
   let t := f + self.shape.x.toNat
   self.vector.toSubarray f t
 
-def column {α : Type} [BEq α] (self : BoundedPlane α) (j : Nat) (default : α) : Array α :=
+def column [BEq α] (self : BoundedPlane α) (j : Nat) (default : α) : Array α :=
   Array.range self.shape.y.toNat
     |>.map (fun i ↦ self.get (↑(i, j) : Dim2) default)
 
-def area {α : Type} [BEq α] (self : BoundedPlane α) : Nat :=
-  self.shape.area
+def area [BEq α] (self : BoundedPlane α) : Nat := self.shape.area
 
 end BoundedPlane
 
