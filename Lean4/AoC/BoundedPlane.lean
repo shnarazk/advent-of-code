@@ -151,11 +151,13 @@ variable (α : Type)
 -/
 structure Plane (α : Type) [BEq α] [Hashable α] where
   mapping : Std.HashMap Dim2 α
-deriving Repr
+-- deriving Repr
 
 instance {α : Type} [BEq α] [Hashable α] :
     Inhabited (Plane α) where
   default := Plane.mk Std.HashMap.empty
+
+-- instance : Lean.MetaEval Dim2 where eval env options x bool := do IO String
 
 def Plane.empty {α : Type} [BEq α] [Hashable α]
     (capacity : optParam Nat 8) : Plane α :=
@@ -217,14 +219,17 @@ def new {α : Type} [BEq α]
 - return a new instance of BoundedPlane by converting from an 2D array
 -/
 def of2DMatrix {α : Type} [BEq α]
-  (a : Array (Array α)) (h w : Nat) : BoundedPlane α :=
+  (a : Array (Array α)) : BoundedPlane α :=
   have zero_def : (0 : Dim2) = { y := 0, x := 0 } := by rfl
-  match h, w with
-  | 0, _ | _, 0 =>
+  have h : Nat := a.size
+  match h with
+  | 0 =>
     let d := Dim2.mk 0 0
     have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
     BoundedPlane.mk d #[] this (by rfl : d.area = #[].size)
-  | _, _ =>
+  | _ =>
+    let total : Nat := a.foldl (fun acc vec ↦ acc + vec.size) 0
+    let w := total / h
     let v : Array α := a.foldl Array.append #[]
     if hw : h * w = v.size then
       let d := Dim2.mk h w
@@ -313,7 +318,7 @@ def findIdxInRow? {α : Type} [BEq α]
     match findIdxOnSubarray sa (Fin.ofNat' sa.size (t - f - 1)) (Fin.ofNat' sa.size 1) pred with
     | some j => some (i, j)
     | none => none
- else
+  else
     none
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
@@ -349,18 +354,28 @@ def area {α : Type} [BEq α] (self : BoundedPlane α) : Nat :=
 
 end BoundedPlane
 
--- def x := Mat1.new #[true, false, true, false] 2
--- def y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]]
+def d := Dim2.mk 2 2
+lemma zero_le_two : 0 ≤ d := by
+  have : 0 = Dim2.mk 0 0 := by rfl
+  simp [this, d]
+  simp [(· ≤ ·)]
+  simp [Dim2.le]
 
--- #eval x
--- #check x
--- #eval y
--- #check y
--- #check get
+def v := #[true, false, true, false]
 
--- #eval x.get 0 0
--- #eval y.get 0 1
--- #eval y.get 100 100
+def x := BoundedPlane.new d v zero_le_two (by rfl : d.area = v.size)
+def y := BoundedPlane.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
+
+#check x
+#eval x
+#check y
+#eval y
+#check BoundedPlane.get
+#check x.get
+
+#eval x.get (Dim2.mk 0 0) false
+#eval y.get (0, 1) 808
+#eval y.get (100, 100) (-1)
 
 -- #eval x.set 0 0 false
 -- #eval y.set 1 1 10000
