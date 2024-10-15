@@ -19,33 +19,35 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def maze_line := do
-  let v ← many1 ((pchar '.').orElse fun _ ↦ pchar '#') <* many (pchar '\n')
+  let v ← many1 ((pchar '.').orElse fun _ ↦ pchar '#') <* eol
   return v.map (· == '#')
 
--- #eval AoCParser.parse maze_line "##.#.#"
+def maze := many1 maze_line >>= pure ∘ BoundedPlane.of2DMatrix
 
-def maze := many1 maze_line >>= fun m ↦ return BoundedPlane.of2DMatrix m
-
-#eval AoCParser.parse maze "##.#.#\n#....#"
-
-def parse : String → Option Input := AoCParser.parse parser
+def parse : String → Option (Array (BoundedPlane Bool)) :=
+  AoCParser.parse parser
   where
-    parser : Parser Input := return Input.mk
+    parser := sepBy1 maze eol
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Array (BoundedPlane Bool)) : Nat := 0
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Array (BoundedPlane Bool)) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2023 13 parser.parse Part1.solve Part2.solve
+def solve := AocProblem.config 2023 13
+  (fun x ↦
+    let y := parser.parse x ;
+    dbgTrace s!"- parse result: {y.map (·.size)}" (fun _ ↦ y))
+  Part1.solve
+  Part2.solve
 
 end Y2023.Day13
