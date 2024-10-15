@@ -77,7 +77,7 @@ instance : AddMonoid Dim2 where
   zero := default -- Dim2.mk 0 0
   add a b := Dim2.mk (a.y + b.y) (a.x + b.x)
   add_assoc a b c := by
-    simp [HAdd.hAdd, dim2_add_dim2]
+    simp [(· + ·), dim2_add_dim2]
     constructor
     { exact add_assoc (a.y) (b.y) (c.y) }
     { exact add_assoc (a.x) (b.x) (c.x) }
@@ -85,11 +85,7 @@ instance : AddMonoid Dim2 where
   add_zero := by exact dim2_add_zero
   nsmul (n : Nat) (a : Dim2) := Dim2.mk (n * a.y) (n * a.x)
   nsmul_zero := by simp ; rfl
-  nsmul_succ := by
-    intro n a
-    simp [Dim2.mk]
-    group
-    rfl
+  nsmul_succ := by intro n a ; simp [Dim2.mk] ; group ; rfl
 
 instance : SubNegMonoid Dim2 where
   neg a := Dim2.mk (-a.y) (-a.x)
@@ -120,7 +116,7 @@ instance : AddCommMonoid Dim2 where
 
 instance : AddGroup Dim2 where
   neg_add_cancel a := by
-    simp [HAdd.hAdd]
+    simp [(· + · )]
     simp [Add.add]
     rw [add_comm] -- , SubNegMonoid.sub_eq_add_neg]
     have cancel_y : (-a).y = -(a.y) := by exact rfl
@@ -154,8 +150,7 @@ structure Plane (α : Type) [BEq α] [Hashable α] where
 -- deriving Repr
 
 instance {α : Type} [BEq α] [Hashable α] :
-    Inhabited (Plane α) where
-  default := Plane.mk Std.HashMap.empty
+    Inhabited (Plane α) where default := Plane.mk Std.HashMap.empty
 
 -- instance : Lean.MetaEval Dim2 where eval env options x bool := do IO String
 
@@ -266,18 +261,6 @@ def set {α : Type} [BEq α]
     then BoundedPlane.new self.shape v self.validShape h
     else self
 
--- def x := new #[true, false, true, false] 2
--- def y := of2DMatrix #[#[1,2,3], #[4,5,6]]
-
--- #eval x
--- #check x
--- #eval y
--- #check y
--- #check get
-
--- #eval get x 0 0
--- #eval get y 0 1
-
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
@@ -292,8 +275,6 @@ def findIdx? {α : Type} [BEq α] (p : BoundedPlane α) (f : α → Bool) : Opti
   match p.vector.findIdx? f with
   | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
-
--- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdx? (· == 6) else none
 
 private partial def findIdxOnSubarray {α : Type} [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
@@ -377,5 +358,5 @@ def y := BoundedPlane.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 #eval y.get (0, 1) 808
 #eval y.get (100, 100) (-1)
 
--- #eval x.set 0 0 false
--- #eval y.set 1 1 10000
+#eval x.set (0, 0) false
+#eval y.set (1, 1) 10000
