@@ -147,12 +147,10 @@ variable {α : Type}
 -/
 structure Plane (α : Type) [BEq α] [Hashable α] where
   mapping : Std.HashMap Dim2 α
--- deriving Repr
+deriving Repr
 
 instance [BEq α] [Hashable α] :
     Inhabited (Plane α) where default := Plane.mk Std.HashMap.empty
-
--- instance : Lean.MetaEval Dim2 where eval env options x bool := do IO String
 
 def Plane.empty [BEq α] [Hashable α]
     (capacity : optParam Nat 8) : Plane α :=
@@ -185,7 +183,6 @@ example [BEq α] [Hashable α] (p : Plane α) (q : Dim2) (a default : α) :
 
 Note: this implementation accept zero space for now.
 And It returns the `default` by `·.get (0, 0)`
-
 -/
 structure BoundedPlane (α : Type) [BEq α] where
   shape  : Dim2
@@ -346,16 +343,16 @@ def v := #[true, false, true, false]
 def x := BoundedPlane.new d v zero_le_two (by rfl : d.area = v.size)
 def y := BoundedPlane.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
-#check x
-#eval x
-#check y
-#eval y
-#check BoundedPlane.get
-#check x.get
+-- #check x
+-- #eval x
+-- #check y
+-- #eval y
+-- #check BoundedPlane.get
+-- #check x.get
 
-#eval x.get (Dim2.mk 0 0) false
-#eval y.get (0, 1) 808
-#eval y.get (100, 100) (-1)
+-- #eval x.get (Dim2.mk 0 0) false
+-- #eval y.get (0, 1) 808
+-- #eval y.get (100, 100) (-1)
 
-#eval x.set (0, 0) false
-#eval y.set (1, 1) 10000
+-- #eval x.set (0, 0) false
+-- #eval y.set (1, 1) 10000
