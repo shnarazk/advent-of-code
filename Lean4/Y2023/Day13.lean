@@ -1,7 +1,7 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
-import «AoC».BoundedPlane
+import «AoC».Rect
 
 namespace Y2023.Day13
 
@@ -22,9 +22,9 @@ def maze_line := do
   let v ← many1 ((pchar '.').orElse fun _ ↦ pchar '#') <* eol
   return v.map (· == '#')
 
-def maze := many1 maze_line >>= pure ∘ BoundedPlane.of2DMatrix
+def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
 
-def parse : String → Option (Array (BoundedPlane Bool)) :=
+def parse : String → Option (Array (Rect Bool)) :=
   AoCParser.parse parser
   where
     parser := sepBy1 maze eol
@@ -33,10 +33,10 @@ end parser
 
 namespace Part1
 
-def solve (pls : Array (BoundedPlane Bool)) : Nat :=
+def solve (pls : Array (Rect Bool)) : Nat :=
   pls.map evaluate |> sum
   where
-    evaluate (p : BoundedPlane Bool) : Nat :=
+    evaluate (p : Rect Bool) : Nat :=
       0
      -- List.range p.shape.y.toNat ** List.range p.shape.y.toNat
      --  |>.map
@@ -45,7 +45,7 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Array (BoundedPlane Bool)) : Nat := 0
+def solve (_ : Array (Rect Bool)) : Nat := 0
 
 end Part2
 

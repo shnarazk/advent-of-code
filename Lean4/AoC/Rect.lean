@@ -240,7 +240,7 @@ example [BEq α] [Hashable α] (p : Plane α) (q : Dim2) (a default : α) :
 Note: this implementation accept zero space for now.
 And It returns the `default` by `·.get (0, 0)`
 -/
-structure BoundedPlane (α : Type) [BEq α] where
+structure Rect (α : Type) [BEq α] where
   shape  : Dim2
   vector : Array α
   -- neZero : shape ≠ default ∧ NeZero vector.size
@@ -248,33 +248,33 @@ structure BoundedPlane (α : Type) [BEq α] where
   validArea : shape.area = vector.size
 deriving Repr
 
-instance [BEq α] : BEq (BoundedPlane α) where
+instance [BEq α] : BEq (Rect α) where
   beq a b := a.shape == b.shape && a.vector == b.vector
 
-instance [ToString α] [BEq α] : ToString (BoundedPlane α) where
+instance [ToString α] [BEq α] : ToString (Rect α) where
   toString bp := s!"{bp.shape}{toString bp.vector}"
 
-namespace BoundedPlane
+namespace Rect
 
 /--
-- return a new BoundedPlane
+- return a new Rect
 -/
 def new [BEq α]
-    (g : Dim2) (vec : Array α) (h1 : 0 ≤ g) (h2 : g.area = vec.size): BoundedPlane α :=
-  BoundedPlane.mk g vec h1 h2
+    (g : Dim2) (vec : Array α) (h1 : 0 ≤ g) (h2 : g.area = vec.size): Rect α :=
+  Rect.mk g vec h1 h2
 
 /--
-- return a new instance of BoundedPlane by converting from an 2D array
+- return a new instance of Rect by converting from an 2D array
 -/
 def of2DMatrix [BEq α]
-  (a : Array (Array α)) : BoundedPlane α :=
+  (a : Array (Array α)) : Rect α :=
   have zero_def : (0 : Dim2) = { y := 0, x := 0 } := by rfl
   have h : Nat := a.size
   match h with
   | 0 =>
     let d := Dim2.mk 0 0
     have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
-    BoundedPlane.mk d #[] this (by rfl : d.area = #[].size)
+    Rect.mk d #[] this (by rfl : d.area = #[].size)
   | _ =>
     let total : Nat := a.foldl (fun acc vec ↦ acc + vec.size) 0
     let w := total / h
@@ -282,17 +282,17 @@ def of2DMatrix [BEq α]
     if hw : h * w = v.size then
       let d := Dim2.mk h w
       have : 0 ≤ d := by rw [zero_def] ; constructor <;> simp
-      BoundedPlane.mk (Dim2.mk h w) v this hw
+      Rect.mk (Dim2.mk h w) v this hw
     else
       let d := Dim2.mk 0 0
       have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
-      BoundedPlane.mk d #[] this (by rfl : d.area = #[].size)
+      Rect.mk d #[] this (by rfl : d.area = #[].size)
 
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
 def get [BEq α]
-    (self : BoundedPlane α) (p : Dim2) (default : α) : α :=
+    (self : Rect α) (p : Dim2) (default : α) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
     self.vector.get (Fin.ofNat' self.vector.size (self.shape.index p))
@@ -300,31 +300,31 @@ def get [BEq α]
     default
 
 def validIndex? [BEq α]
-    (self : BoundedPlane α) (p : Dim2) : Bool :=
+    (self : Rect α) (p : Dim2) : Bool :=
   0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def set [BEq α]
-    (self : BoundedPlane α) (p : Dim2) (val : α) : BoundedPlane α :=
+    (self : Rect α) (p : Dim2) (val : α) : Rect α :=
   let ix := self.shape.index p
   let v := self.vector.set! ix val
   if h : self.shape.area = v.size
-    then BoundedPlane.new self.shape v self.validShape h
+    then Rect.new self.shape v self.validShape h
     else self
 
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
 def modify [BEq α]
-  (self : BoundedPlane α) (p : Dim2) (f : α → α) (default : α) : BoundedPlane α :=
+  (self : Rect α) (p : Dim2) (f : α → α) (default : α) : Rect α :=
   self.set p <| f <| self.get p default
 
 /--
 - search an element that satisfies the predicate and return indices or none
 -/
-def findIdx? [BEq α] (p : BoundedPlane α) (f : α → Bool) : Option Dim2 :=
+def findIdx? [BEq α] (p : Rect α) (f : α → Bool) : Option Dim2 :=
   match p.vector.findIdx? f with
   | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
@@ -343,7 +343,7 @@ private partial def findIdxOnSubarray [BEq α]
 - search an element in a specific row
 -/
 def findIdxInRow? [BEq α]
-    (p : BoundedPlane α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
+    (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * p.shape.x.toNat
   let t := (i + 1) * p.shape.x.toNat
   let sa := p.vector.toSubarray f t
@@ -357,11 +357,11 @@ def findIdxInRow? [BEq α]
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
-def foldl {β : Type} [BEq α] (self : BoundedPlane α) (f : β → α → β) (init : β) : β :=
+def foldl {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
 def foldlRows {β : Type} [BEq α]
-    (self : BoundedPlane α) (f : β → α → β) (init : β) : Array β :=
+    (self : Rect α) (f : β → α → β) (init : β) : Array β :=
   Array.range self.shape.y.toNat
     |> .map (fun i =>
       self.vector.toSubarray i (i + self.shape.x.toNat)
@@ -369,23 +369,23 @@ def foldlRows {β : Type} [BEq α]
         |>.foldl f init)
 
 def mapRows {β : Type} [BEq α]
-    (self : BoundedPlane α) (f : Array α → β) :  Array β :=
+    (self : Rect α) (f : Array α → β) :  Array β :=
   Array.range (self.vector.size / self.shape.x.toNat)
     |> .map (fun i => self.vector.toSubarray i (i + self.shape.x.toNat) |> Array.ofSubarray |> f)
 
-def row [BEq α] (self : BoundedPlane α) (i : Nat) : Subarray α :=
+def row [BEq α] (self : Rect α) (i : Nat) : Subarray α :=
   let j : Nat := i % (self.vector.size % self.shape.x.toNat)
   let f : Nat := j * self.shape.x.toNat
   let t := f + self.shape.x.toNat
   self.vector.toSubarray f t
 
-def column [BEq α] (self : BoundedPlane α) (j : Nat) (default : α) : Array α :=
+def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
   Array.range self.shape.y.toNat
     |>.map (fun i ↦ self.get (↑(i, j) : Dim2) default)
 
-def area [BEq α] (self : BoundedPlane α) : Nat := self.shape.area
+def area [BEq α] (self : Rect α) : Nat := self.shape.area
 
-end BoundedPlane
+end Rect
 
 def d := Dim2.mk 2 2
 lemma zero_le_two : 0 ≤ d := by
@@ -396,14 +396,14 @@ lemma zero_le_two : 0 ≤ d := by
 
 def v := #[true, false, true, false]
 
-def x := BoundedPlane.new d v zero_le_two (by rfl : d.area = v.size)
-def y := BoundedPlane.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
+def x := Rect.new d v zero_le_two (by rfl : d.area = v.size)
+def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
 -- #check x
 -- #eval x
 -- #check y
 -- #eval y
--- #check BoundedPlane.get
+-- #check Rect.get
 -- #check x.get
 
 -- #eval x.get (Dim2.mk 0 0) false
