@@ -18,12 +18,19 @@ import Batteries
 }
 -/
 namespace CiCL -- Combinators in Combinatory Logic
+
 @[inline]
 def I (a : α) := a
 @[inline]
 def K (a : α) (_b : β) := a
 @[inline]
 def S (x : α → β → γ) (y : α → β) (z : α) := x z (y z)
+def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
+
+end CiCL
+
+namespace BQN
+
 @[inline]
 def before (y : α → β) (x : β → α → γ) (z : α) : γ := x (y z) z
 @[inline]
@@ -31,16 +38,19 @@ def after (x : α → β → γ) (y : α → β) (z : α) : γ := x z (y z)
 @[inline]
 def train (x : α → β) (z : β → γ → ε) (y : α → γ) (a : α) : ε := z (x a) (y a)
 @[inline]
-def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
 
-infix:80    " ⊸ " => before
-infixl:80   " ⟜ " => after
+infixr:80 " ⊸ " => before
+infixr:80 " ⟜ " => after
 
-notation:80 " ◀️ " lhs:80 " | " mhs:80 " | " rhs:80 " ▶️ " => train lhs mhs rhs
+notation:60 " ⎊" lhs:60 "‿" mhs:60 "‿" rhs:60 => train lhs mhs rhs
+notation:100 "¯" val => (- val)
 
-end CiCL
+-- #eval 4 + ¯80
+
+end BQN
 
 namespace CoP -- combinators on pair
+
 @[inline]
 def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)
 @[inline]
