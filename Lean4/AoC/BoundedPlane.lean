@@ -168,6 +168,7 @@ lemma range_range_eq_mul {α : Type} (n m : Nat) (f : Nat × Nat → α) :
         rw [List.range.loop]
         sorry
       }
+    sorry
   }
 
 example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
@@ -175,10 +176,7 @@ example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
   have : ∀ y : Nat, ∀ x : Nat, (Dim2.mk y x).area = (Dim2.mk y x).toList.length := by
     intro y x
     induction' y with y₀ hy
-    {
-      simp [Dim2.area]
-      simp [Dim2.toList]
-    }
+    { simp [Dim2.area] ; simp [Dim2.toList] }
     {
       simp [Dim2.area] at *
       simp [add_mul]
@@ -187,19 +185,10 @@ example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
           (↑i * ↑j + (↑k : Int)).toNat = ((↑i : Int) * ↑j).toNat + k := by rfl
       simp [toInt_add_toInt]
       simp [Dim2.toList]
-
       simp [toInt_toNAt_cancel] at *
       sorry
     }
   rw [toList]
-  rw [range_length_eq_self p.x.toNat]
-  -- have : p.area = (p.y * p.x).toNat := by exact rfl
-  -- rw [this] at P
-  -- simp [LE.le] at P
-  -- rw [Dim2.le] at P
-  -- obtain ⟨A, B⟩ := P
-  simp at *
-  have : p.area = p.y.toNat * p.x.toNat := by sorry
   sorry
 
 end Dim2
