@@ -33,7 +33,13 @@ end parser
 
 namespace Part1
 
-def solve (_ : Array (BoundedPlane Bool)) : Nat := 0
+def solve (pls : Array (BoundedPlane Bool)) : Nat :=
+  pls.map evaluate |> sum
+  where
+    evaluate (p : BoundedPlane Bool) : Nat :=
+      0
+     -- List.range p.shape.y.toNat ** List.range p.shape.y.toNat
+     --  |>.map
 
 end Part1
 

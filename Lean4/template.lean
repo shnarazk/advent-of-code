@@ -18,7 +18,6 @@ namespace parser
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
-open CiCL
 
 def parse : String → Option Input := AoCParser.parse parser
   where
