@@ -140,13 +140,64 @@ def toList (base : Dim2) : List Dim2 :=
       (fun y ↦ (List.range base.x.toNat).map (y, ·))
     |>.join
 
+lemma length_is_invariant_under_map {α β : Type} (l : List α) (f : α → β) :
+    l.length = (l.map f).length := by
+  induction' l with _ ln _
+  { simp }
+  { simp [(· :: ·)] }
+
+lemma range_length_eq_self {α : Type} (n : Nat) (f : Nat → α) : n = ((List.range n).map f).length := by
+  induction' n with n₀ _ ih <;> simp
+
+lemma range_range_eq_mul {α : Type} (n m : Nat) (f : Nat × Nat → α) :
+    ((List.range n).map (fun i ↦ (List.range m).map f)).length = n := by
+  induction' n with n₀ ih
+  { simp }
+  {
+    have induction_on_range (n : Nat) : List.range (n + 1) = List.range n ++ [n] := by
+      induction' n with n₀ ih2 ih3
+      { simp ; rfl }
+      {
+        rw [List.range] at ih2
+        -- nth_rewrite 1 [List.range]
+        nth_rewrite 2 [List.range]
+        rw [ih2]
+        rw [List.append_assoc]
+        simp
+        rw [List.range]
+        rw [List.range.loop]
+        sorry
+      }
+  }
+
 example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
-  intro P
-  have : 0 = Dim2.mk 0 0 := by exact rfl
-  rw [this] at P
-  simp [LE.le] at P
-  rw [Dim2.le] at P
-  obtain ⟨A, B⟩ := P
+  intro q
+  have : ∀ y : Nat, ∀ x : Nat, (Dim2.mk y x).area = (Dim2.mk y x).toList.length := by
+    intro y x
+    induction' y with y₀ hy
+    {
+      simp [Dim2.area]
+      simp [Dim2.toList]
+    }
+    {
+      simp [Dim2.area] at *
+      simp [add_mul]
+      have toInt_toNAt_cancel (n : Nat) : (↑n : Int).toNat = n := by rfl
+      have toInt_add_toInt (i j k : Nat) :
+          (↑i * ↑j + (↑k : Int)).toNat = ((↑i : Int) * ↑j).toNat + k := by rfl
+      simp [toInt_add_toInt]
+      simp [Dim2.toList]
+
+      simp [toInt_toNAt_cancel] at *
+      sorry
+    }
+  rw [toList]
+  rw [range_length_eq_self p.x.toNat]
+  -- have : p.area = (p.y * p.x).toNat := by exact rfl
+  -- rw [this] at P
+  -- simp [LE.le] at P
+  -- rw [Dim2.le] at P
+  -- obtain ⟨A, B⟩ := P
   simp at *
   have : p.area = p.y.toNat * p.x.toNat := by sorry
   sorry
