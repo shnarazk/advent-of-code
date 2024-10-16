@@ -19,32 +19,51 @@ import Batteries
 -/
 namespace CiCL -- Combinators in Combinatory Logic
 
+/--
+- Identity: λa. a
+-/
 @[inline]
 def I (a : α) := a
+
+/--
+- Constant: λa b. a
+-/
 @[inline]
 def K (a : α) (_b : β) := a
+
+/--
+- Before/After: λa b c. (a c) (b c)
+-/
 @[inline]
-def S (x : α → β → γ) (y : α → β) (z : α) := x z (y z)
+def S (a : α → β → γ) (b : α → β) (c : α) := a c (b c)
 def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
 
 end CiCL
 
 namespace BQN
 
+/--
+g ⟜ f = λa. g (f a) a
+-/
 @[inline]
-def before (y : α → β) (x : β → α → γ) (z : α) : γ := x (y z) z
+def before (g : β → α → γ) (f : α → β) (a : α) : γ := g (f a) a
+infixr:80 " ⟜ " => before
+
+/--
+f ⊸ g = λa. g a (f a)
+-/
 @[inline]
-def after (x : α → β → γ) (y : α → β) (z : α) : γ := x z (y z)
+def after (f : α → β) (g :α → β → γ) (a : α) : γ := g a (f a)
+infixr:80 " ⊸ " => after
+
+/--
+Three train
+-/
 @[inline]
 def train (x : α → β) (z : β → γ → ε) (y : α → γ) (a : α) : ε := z (x a) (y a)
-@[inline]
-
-infixr:80 " ⊸ " => before
-infixr:80 " ⟜ " => after
-
 notation:60 " ⎊" lhs:60 "‿" mhs:60 "‿" rhs:60 => train lhs mhs rhs
-notation:100 "¯" val => (- val)
 
+notation:100 "¯" val => (- val)
 -- #eval 4 + ¯80
 
 end BQN
