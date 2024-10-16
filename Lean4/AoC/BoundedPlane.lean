@@ -135,6 +135,22 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 def index (frame self : Dim2) : Nat := self.y.toNat * frame.x.toNat + self.x.toNat
 def index' (frame : Dim2) (n : Nat) : Dim2 := Dim2.mk (n / frame.x) (n % frame.x)
 
+def toList (base : Dim2) : List Dim2 :=
+  (List.range base.y.toNat).map
+      (fun y ↦ (List.range base.x.toNat).map (y, ·))
+    |>.join
+
+example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
+  intro P
+  have : 0 = Dim2.mk 0 0 := by exact rfl
+  rw [this] at P
+  simp [LE.le] at P
+  rw [Dim2.le] at P
+  obtain ⟨A, B⟩ := P
+  simp at *
+  have : p.area = p.y.toNat * p.x.toNat := by sorry
+  sorry
+
 end Dim2
 
 namespace TwoDimentionalVector
