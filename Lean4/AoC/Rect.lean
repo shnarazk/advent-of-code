@@ -142,16 +142,41 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 def index (frame self : Dim2) : Nat := self.y.toNat * frame.x.toNat + self.x.toNat
 def index' (frame : Dim2) (n : Nat) : Dim2 := Dim2.mk (n / frame.x) (n % frame.x)
 
+/--
+This is identitcal to `List.range`. But it is much much simple to prove something.
+-/
+def range_list : Nat → List Nat
+  | 0 => []
+  | n + 1 => range_list n ++ [n]
+
 def toList (base : Dim2) : List Dim2 :=
-  (List.range base.y.toNat).map
-      (fun y ↦ (List.range base.x.toNat).map (y, ·))
-    |>.join
+  (range_list base.y.toNat).foldl
+      (fun acc y ↦ acc ++ (range_list base.x.toNat).map (Dim2.mk y ·))
+      []
 
 lemma length_is_invariant_under_map {α β : Type} (l : List α) (f : α → β) :
     l.length = (l.map f).length := by
   induction' l with _ ln _
   { simp }
   { simp [(· :: ·)] }
+
+lemma map_induction {α β : Type} (a : α) (l : List α) (f : α → β) :
+    List.map f (l ++ [a]) = List.map f l ++ [f a] := by simp
+
+-- lemma append_length_eq_add_length {α : Type} (a b : List α) :
+--     (a ++ b).length = a.length + b.length := by exact List.length_append a b
+
+lemma range_list_generates_same_lenth_list {α : Type} (n : Nat) (f : Nat → α)
+: ((range_list n).map f).length = n := by
+  induction' n with n₀ ih
+  { simp [range_list] }
+  {
+    rw [range_list]
+    rw [map_induction]
+    rw [List.length_append]
+    rw [ih]
+    simp [List.length]
+  }
 
 lemma range_length_eq_self {α : Type} (n : Nat) (f : Nat → α) : n = ((List.range n).map f).length := by
   induction' n with n₀ _ ih <;> simp
