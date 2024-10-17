@@ -5,23 +5,6 @@ import «AoC».Rect
 
 def dbg {α : Type} [ToString α] (a : α) : α := dbgTrace s!"{a}" (fun _ ↦ a)
 
-namespace Option
-
-/--
-- `(some "abc").mapOr (·.length) 99 => 3`
-- `none.mapOr (·.length) 99 => 99`
-
-`map_or` is already used for a prep
--/
-def mapOr {α β : Type} : (Option α) → (f : α → β) → (default : β) → β
-  | (some a), f, _ => f a
-  | none, _, default => default
-
-end Option
-
--- #eval some "abc" |>.mapOr (·.length) 99
--- #eval none |>.mapOr (·.length) 99
-
 namespace Dim2
 
 def cutsₕ (g : Dim2) : List Nat := List.range g.y.toNat |>.drop 1
@@ -63,29 +46,7 @@ def mirroredᵥ (p : Dim2) (v : Nat) : Option Dim2 :=
 
 -- #eval r99.mirroredᵥ (Dim2.mk 4 5) 4
 
-def cutₕ (n : Nat) : Option Nat :=
-  -- 対応するものがなければ `true`
-  if r.shape.toList.all (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false = r.get · false) true) then
-    some (n * 100)
-  else
-    none
-
--- #eval r99.cutₕ 1
--- #eval r99.get (Dim2.mk 1 1) true = r99.get (Dim2.mk 1 2) true
-
-def cutᵥ (n : Nat) : Option Nat :=
-  if r.shape.toList.all (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false = r.get · false) true) then
-    some n
-  else
-    none
-
 -- #eval r99.cutᵥ 1
-
-def find_cutₕ : Nat := r.shape.cutsₕ.foldl (fun acc k ↦ r.cutₕ k |>.mapOr (· + acc) acc) 0
-def find_cutᵥ : Nat := r.shape.cutsᵥ.foldl (fun acc k ↦ r.cutᵥ k |>.mapOr (· + acc) acc) 0
-def evaluate : Nat := r.find_cutₕ + r.find_cutᵥ
-
--- #eval r99.evaluate
 
 end TwoDimensionalVector.Rect
 
@@ -114,7 +75,31 @@ end parser
 
 namespace Part1
 
-def solve (pls : Array (Rect Bool)) : Nat := pls.map (·.evaluate) |> sum
+variable (r : Rect Bool)
+
+def cutₕ (n : Nat) : Option Nat :=
+  -- 対応するものがなければ `true`
+  if r.shape.toList.all (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false = r.get · false) true) then
+    some (n * 100)
+  else
+    none
+
+-- #eval r99.cutₕ 1
+-- #eval r99.get (Dim2.mk 1 1) true = r99.get (Dim2.mk 1 2) true
+
+def cutᵥ (n : Nat) : Option Nat :=
+  if r.shape.toList.all (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false = r.get · false) true) then
+    some n
+  else
+    none
+
+def find_cutₕ : Nat := r.shape.cutsₕ.map (cutₕ r ·) |> sum
+def find_cutᵥ : Nat := r.shape.cutsᵥ.map (cutᵥ r ·) |> sum
+def evaluate : Nat := find_cutₕ r + find_cutᵥ r
+
+-- #eval r99.evaluate
+
+def solve (pls : Array (Rect Bool)) : Nat := pls.map evaluate |> sum
 
 end Part1
 

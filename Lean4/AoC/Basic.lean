@@ -176,3 +176,20 @@ def List.enumerate (a : List α) : List (Nat × α) := List.zip (List.range a.le
 def Array.enumerate (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
 
 -- #eval #[2, 4, 5].enumerate
+
+namespace Option
+
+/--
+- `(some "abc").mapOr (·.length) 99 => 3`
+- `none.mapOr (·.length) 99 => 99`
+
+`map_or` is already used for a prep
+-/
+def mapOr {α β : Type} : (Option α) → (f : α → β) → (default : β) → β
+  | (some a), f, _ => f a
+  | none, _, default => default
+
+-- #eval some "abc" |>.mapOr (·.length) 99
+-- #eval none |>.mapOr (·.length) 99
+
+end Option
