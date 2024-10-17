@@ -135,17 +135,33 @@ instance : Accumulation (List Nat) where
   sum     a := a.foldl Nat.add 0
   product a := a.foldl Nat.mul 1
 
+instance : Accumulation (List (Option Nat)) where
+  sum     a := a.filterMap (·) |>.foldl Nat.add 0
+  product a := a.filterMap (·) |>.foldl Nat.mul 1
+
 instance : Accumulation (List Int) where
-  sum     a := Int.toNat <| a.foldl Int.add 0
-  product a := Int.toNat <| a.foldl Int.mul 1
+  sum     a := a.foldl Int.add 0 |>.toNat
+  product a := a.foldl Int.mul 1 |>.toNat
+
+instance : Accumulation (List (Option Int)) where
+  sum     a := a.filterMap (·) |>.foldl Int.add 0 |>.toNat
+  product a := a.filterMap (·) |>.foldl Int.mul 1 |>.toNat
 
 instance : Accumulation (Array Nat) where
   sum     a := a.foldl Nat.add 0
   product a := a.foldl Nat.mul 1
 
+instance : Accumulation (Array (Option Nat)) where
+  sum     a := a.filterMap (·) |>.foldl Nat.add 0
+  product a := a.filterMap (·) |>.foldl Nat.mul 1
+
 instance : Accumulation (Array Int) where
-  sum     a := Int.toNat <| a.foldl Int.add 0
-  product a := Int.toNat <| a.foldl Int.mul 1
+  sum     a := a.foldl Int.add 0 |>.toNat
+  product a := a.foldl Int.mul 1 |>.toNat
+
+instance : Accumulation (Array (Option Int)) where
+  sum     a := a.filterMap (·) |>.foldl Int.add 0 |>.toNat
+  product a := a.filterMap (·) |>.foldl Int.mul 1 |>.toNat
 
 open Accumulation
 

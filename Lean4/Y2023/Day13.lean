@@ -134,10 +134,8 @@ def smudgedᵥ (r : Rect Bool) (n : Nat) : Option Nat :=
   else
     none
 
-def find_smudgedₕ : Nat :=
-  r.shape.cutsₕ.foldl (fun acc k ↦ smudgedₕ r k |>.mapOr (· + acc) acc) 0
-def find_smudgedᵥ : Nat :=
-  r.shape.cutsᵥ.foldl (fun acc k ↦ smudgedᵥ r k |>.mapOr (· + acc) acc) 0
+def find_smudgedₕ : Nat := r.shape.cutsₕ.map (smudgedₕ r ·) |> sum
+def find_smudgedᵥ : Nat := r.shape.cutsᵥ.map (smudgedᵥ r ·) |> sum
 def evaluate : Nat := find_smudgedₕ r + find_smudgedᵥ r
 
 def solve (pls : Array (Rect Bool)) : Nat := pls.map evaluate |> sum
