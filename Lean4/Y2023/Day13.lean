@@ -27,7 +27,8 @@ namespace Dim2
 def cutsₕ (g : Dim2) : List Nat := List.range g.y.toNat |>.drop 1
 def cutsᵥ (g : Dim2) : List Nat := List.range g.x.toNat |>.drop 1
 
--- #eval (Dim2.mk 3 1).cutsₕ
+#eval (Dim2.mk 4 2).cutsₕ
+#eval (Dim2.mk 4 2).cutsᵥ
 
 end Dim2
 
@@ -41,14 +42,14 @@ def mirroredₕ (p : Dim2) (h : Nat) : Option Dim2 :=
     if y' < r.shape.y then some { p with y := y' } else none
   else
     let y' := p.y - h
-    if h < y' then none else some { p with y := h - y' - 1 }
+    if h < y' + 1 then none else some { p with y := h - y' - 1 }
 
-def r99 := Rect.ofDim2 (Dim2.mk 9 9) (by simp [NonNegDim]) false
+def r99 := Rect.ofDim2 (Dim2.mk 5 6) (by simp [NonNegDim]) false
 def p := Dim2.mk 1 5
 -- #eval r99.mirroredₕ p 2
 -- #eval if let some q := r99.mirroredₕ p 2 then r99.mirroredₕ q 2 else none
 
--- #eval mirrored_horizontally r99 (Dim2.mk 4 5) 4
+#eval mirroredₕ r99 (Dim2.mk 4 5) 2
 
 def mirroredᵥ (p : Dim2) (v : Nat) : Option Dim2 :=
   if p.x < v then
@@ -56,7 +57,7 @@ def mirroredᵥ (p : Dim2) (v : Nat) : Option Dim2 :=
     if x' < r.shape.x then some { p with x := x' } else none
   else
     let x' := p.x - v
-    if v < x' then none else some { p with x := v - x' - 1 }
+    if v < x' + 1 then none else some { p with x := v - x' - 1 }
 
 -- #eval r99.mirroredᵥ (Dim2.mk 4 5) 4
 
