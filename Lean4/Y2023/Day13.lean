@@ -27,8 +27,8 @@ namespace Dim2
 def cutsₕ (g : Dim2) : List Nat := List.range g.y.toNat |>.drop 1
 def cutsᵥ (g : Dim2) : List Nat := List.range g.x.toNat |>.drop 1
 
-#eval (Dim2.mk 4 2).cutsₕ
-#eval (Dim2.mk 4 2).cutsᵥ
+-- #eval (Dim2.mk 4 2).cutsₕ
+-- #eval (Dim2.mk 4 2).cutsᵥ
 
 end Dim2
 
@@ -48,9 +48,11 @@ def r99 := Rect.ofDim2 (Dim2.mk 5 6) (by simp [NonNegDim]) false
 def p := Dim2.mk 1 5
 -- #eval r99.mirroredₕ p 2
 -- #eval if let some q := r99.mirroredₕ p 2 then r99.mirroredₕ q 2 else none
+-- #eval mirroredₕ r99 (Dim2.mk 4 5) 2
 
-#eval mirroredₕ r99 (Dim2.mk 4 5) 2
-
+/--
+Return optinal Dim2 that locates on the mirrored position.
+-/
 def mirroredᵥ (p : Dim2) (v : Nat) : Option Dim2 :=
   if p.x < v then
     let x' := v + v - p.x - 1
@@ -118,7 +120,27 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Array (Rect Bool)) : Nat := 0
+variable (r : Rect Bool)
+
+def smudgedₕ (n : Nat) : Option Nat :=
+  if r.shape.toList.map (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false != r.get · false) false) |>.filter (·) |> (·.length = 2) then
+    some (n * 100)
+  else
+    none
+
+def smudgedᵥ (r : Rect Bool) (n : Nat) : Option Nat :=
+  if r.shape.toList.map (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false != r.get · false) false) |>.filter (·) |> (·.length = 2) then
+    some n
+  else
+    none
+
+def find_smudgedₕ : Nat :=
+  r.shape.cutsₕ.foldl (fun acc k ↦ smudgedₕ r k |>.mapOr (· + acc) acc) 0
+def find_smudgedᵥ : Nat :=
+  r.shape.cutsᵥ.foldl (fun acc k ↦ smudgedᵥ r k |>.mapOr (· + acc) acc) 0
+def evaluate : Nat := find_smudgedₕ r + find_smudgedᵥ r
+
+def solve (pls : Array (Rect Bool)) : Nat := pls.map evaluate |> sum
 
 end Part2
 
