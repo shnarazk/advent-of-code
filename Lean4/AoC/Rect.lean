@@ -72,8 +72,9 @@ instance : AsDim2 Dim2 where asDim2        := (·)
 instance : AsDim2 (Int × Int) where asDim2 := Coe.coe
 instance : AsDim2 (Nat × Nat) where asDim2 := Coe.coe
 
-def NonNegDim (d : Dim2) := 0 ≤ d.y && 0 ≤ d.x
-example : NonNegDim (Dim2.mk 1 1) := by rfl
+def NonNegDim (d : Dim2) := 0 ≤ d.y ∧ 0 ≤ d.x
+
+example : NonNegDim (Dim2.mk 1 1) := by simp [NonNegDim]
 -- #check NonNegDim (Dim2.mk 1 1)
 -- #eval if _ : NonNegDim (Dim2.mk (-1) (-1)) then "OK" else "No"
 
@@ -403,8 +404,9 @@ end Rect
 
 def d := Dim2.mk 2 2
 def v := #[true, false, true, false]
+example : NonNegDim d := by simp [NonNegDim, d]
 
-def x := Rect.new d v (by rfl : NonNegDim d) (by rfl : d.area = v.size)
+def x := Rect.new d v (by simp [NonNegDim, d]) (by rfl : d.area = v.size)
 def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
 -- #check x

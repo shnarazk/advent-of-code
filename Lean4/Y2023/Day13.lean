@@ -13,7 +13,7 @@ def mirrored_horizontally (frame : Rect Bool) (p : Dim2) (h : Nat) : Option Dim2
     let y' := p.y - h
     if h < y' then none else some { p with y := h - y' - 1 }
 
-def r99 := Rect.ofDim2 (Dim2.mk 9 9) (by rfl : NonNegDim (Dim2.mk 2 3)) false
+def r99 := Rect.ofDim2 (Dim2.mk 9 9) (by simp [NonNegDim]) false
 #eval r99.mirrored_horizontally (Dim2.mk 1 5) 2
 
 -- #eval mirrored_horizontally r99 (Dim2.mk 4 5) 4
