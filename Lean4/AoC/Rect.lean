@@ -72,7 +72,13 @@ instance : AsDim2 Dim2 where asDim2        := (·)
 instance : AsDim2 (Int × Int) where asDim2 := Coe.coe
 instance : AsDim2 (Nat × Nat) where asDim2 := Coe.coe
 
+def NonNegDim (d : Dim2) := 0 ≤ d.y && 0 ≤ d.x
+example : NonNegDim (Dim2.mk 1 1) := by rfl
+-- #check NonNegDim (Dim2.mk 1 1)
+-- #eval if _ : NonNegDim (Dim2.mk (-1) (-1)) then "OK" else "No"
+
 namespace Dim2
+
 instance : AddMonoid Dim2 where
   zero := default -- Dim2.mk 0 0
   add a b := Dim2.mk (a.y + b.y) (a.x + b.x)
@@ -193,7 +199,8 @@ example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
 
 end Dim2
 
-namespace TwoDimentionalVector
+namespace TwoDimensionalVector
+
 open Std.HashMap Dim2
 
 variable {α : Type}
@@ -244,7 +251,7 @@ structure Rect (α : Type) [BEq α] where
   shape  : Dim2
   vector : Array α
   -- neZero : shape ≠ default ∧ NeZero vector.size
-  validShape: 0 ≤ shape
+  validShape: NonNegDim shape
   validArea : shape.area = vector.size
 deriving Repr
 
@@ -260,20 +267,27 @@ namespace Rect
 - return a new Rect
 -/
 def new [BEq α]
-    (g : Dim2) (vec : Array α) (h1 : 0 ≤ g) (h2 : g.area = vec.size): Rect α :=
+    (g : Dim2) (vec : Array α) (h1 : NonNegDim g) (h2 : g.area = vec.size): Rect α :=
   Rect.mk g vec h1 h2
+
+/--
+- return a new instance fitting to the given Dim2
+-/
+def ofDim2 [BEq α] (g : Dim2) (h : NonNegDim g) (default : α) : Rect α :=
+  let v := Array.mkArray (g.area) default
+  have p : v.size = g.area := by exact Array.size_mkArray g.area default
+  Rect.mk g v h (symm p)
 
 /--
 - return a new instance of Rect by converting from an 2D array
 -/
 def of2DMatrix [BEq α]
   (a : Array (Array α)) : Rect α :=
-  have zero_def : (0 : Dim2) = { y := 0, x := 0 } := by rfl
   have h : Nat := a.size
   match h with
   | 0 =>
     let d := Dim2.mk 0 0
-    have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
+    have : NonNegDim d := by simp [NonNegDim]
     Rect.mk d #[] this (by rfl : d.area = #[].size)
   | _ =>
     let total : Nat := a.foldl (fun acc vec ↦ acc + vec.size) 0
@@ -281,11 +295,11 @@ def of2DMatrix [BEq α]
     let v : Array α := a.foldl Array.append #[]
     if hw : h * w = v.size then
       let d := Dim2.mk h w
-      have : 0 ≤ d := by rw [zero_def] ; constructor <;> simp
-      Rect.mk (Dim2.mk h w) v this hw
+      have : NonNegDim d := by simp [NonNegDim]
+      Rect.mk d v this hw
     else
       let d := Dim2.mk 0 0
-      have : 0 ≤ d := by rw [zero_def] ; constructor <;> rfl
+      have : NonNegDim d := by simp [NonNegDim]
       Rect.mk d #[] this (by rfl : d.area = #[].size)
 
 /--
@@ -388,15 +402,9 @@ def area [BEq α] (self : Rect α) : Nat := self.shape.area
 end Rect
 
 def d := Dim2.mk 2 2
-lemma zero_le_two : 0 ≤ d := by
-  have : 0 = Dim2.mk 0 0 := by rfl
-  simp [this, d]
-  simp [(· ≤ ·)]
-  simp [Dim2.le]
-
 def v := #[true, false, true, false]
 
-def x := Rect.new d v zero_le_two (by rfl : d.area = v.size)
+def x := Rect.new d v (by rfl : NonNegDim d) (by rfl : d.area = v.size)
 def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
 -- #check x
@@ -412,3 +420,5 @@ def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
 -- #eval x.set (0, 0) false
 -- #eval y.set (1, 1) 10000
+
+end TwoDimensionalVector
