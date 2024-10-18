@@ -149,25 +149,87 @@ def range_list : Nat → List Nat
   | 0 => []
   | n + 1 => range_list n ++ [n]
 
+def join' {α : Type} : List (List α) → List α
+  | [] => []
+  | a :: l => a ++ join' l
+
+def cartesian_product (y x : Nat) : List (Nat × Nat) :=
+  let rec embedded (y : Nat) (x : Nat) :=
+    match x with
+    | 0      => []
+    | x' + 1 => embedded y x' ++ [(y, x')]
+  match y with
+  | 0      => []
+  | y' + 1 => cartesian_product y' x ++ embedded y' x
+
+#eval cartesian_product 3 2
+#eval cartesian_product 4 0
+#eval cartesian_product 0 3
+
+lemma cartesian_product_covers_dim2nat (y x : Nat) :
+    ∀ i : Nat, ∀ j : Nat, i < y → j < x → List.contains (cartesian_product y x) (i, j) == true := by
+  intro i j Hy Hx
+  simp [List.contains]
+  induction' y with y hy
+  { contradiction }
+  {
+    simp [cartesian_product]
+    by_cases ih: i = y
+    {
+      right
+      rw [ih]
+      rw [cartesian_product.embedded.eq_def]
+      induction' x with x hx
+      { simp ; exact Nat.not_succ_le_zero j Hx }
+      {
+        simp
+        by_cases J : j < x
+        {
+          simp [ih] at *
+          left
+          obtain AA := hx J
+
+        }
+      }
+
+    }
+    {
+      have : i ≤ y := by exact Nat.le_of_lt_succ Hy
+      have : i < y := by exact Nat.lt_of_le_of_ne this ih
+      exact Or.symm (Or.inr (hy this))
+    }
+  }
+
 def toList (base : Dim2) : List Dim2 :=
-  (range_list base.y.toNat).foldl
-      (fun acc y ↦ acc ++ (range_list base.x.toNat).map (Dim2.mk y ·))
-      []
+  join'
+    (List.map
+      (fun y ↦ (range_list base.x.toNat).map (Dim2.mk y ·))
+      (range_list base.y.toNat))
 
 lemma length_is_invariant_under_map {α β : Type} (l : List α) (f : α → β) :
-    l.length = (l.map f).length := by
-  induction' l with _ ln _
-  { simp }
-  { simp [(· :: ·)] }
+    List.length l = (List.map f l).length := by
+  induction' l with _ ln _ ; { simp } ; { simp [(· :: ·)] }
 
 lemma map_induction {α β : Type} (a : α) (l : List α) (f : α → β) :
-    List.map f (l ++ [a]) = List.map f l ++ [f a] := by simp
+  List.map f (l ++ [a]) = List.map f l ++ [f a] := by simp
 
--- lemma append_length_eq_add_length {α : Type} (a b : List α) :
---     (a ++ b).length = a.length + b.length := by exact List.length_append a b
+lemma append_length {α : Type} (a b : List α) :
+    (a ++ b).length = a.length + b.length := by
+  simp [(· ++ ·)] ; simp [Append.append]
+
+lemma length_is_invariant_under_join' {α : Type} (l : List (List α)) :
+    (List.map List.length l).sum = (join' l).length := by
+  induction' l with l₀ l ih
+  { simp [join'] }
+  {
+    simp [map_induction]
+    rw [ih]
+    rw [←append_length]
+    simp [join']
+  }
 
 lemma range_list_generates_same_lenth_list {α : Type} (n : Nat) (f : Nat → α)
-: ((range_list n).map f).length = n := by
+: (List.map f (range_list n)).length = n := by
   induction' n with n₀ ih
   { simp [range_list] }
   {
@@ -178,8 +240,17 @@ lemma range_list_generates_same_lenth_list {α : Type} (n : Nat) (f : Nat → α
     simp [List.length]
   }
 
-lemma range_length_eq_self {α : Type} (n : Nat) (f : Nat → α) : n = ((List.range n).map f).length := by
-  induction' n with n₀ _ ih <;> simp
+lemma length_is_invariant_under_join'' {α : Type} (l : List (List α)) :
+    (join' l).length = (List.map List.length l).sum := by
+  induction' l with l₀ l ih ; { simp [join'] } ; { simp [join'] ; exact ih }
+
+lemma to_list_length_is_invariant {α : Type} (p : Dim2) : p.toList.length = p.area := by
+  rw [toList]
+  rw [length_is_invariant_under_join'']
+  sorry
+
+-- lemma range_length_eq_self {α : Type} (n : Nat) (f : Nat → α) :
+--    n = ((List.range n).map f).length := by induction' n with n₀ _ ih <;> simp
 
 lemma range_range_eq_mul {α : Type} (n m : Nat) (f : Nat × Nat → α) :
     ((List.range n).map (fun i ↦ (List.range m).map f)).length = n := by
