@@ -207,11 +207,13 @@ lemma range_index_index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).len
   rw [this]
   simp [range_list]
 
--- ここまでOK
-
 lemma range_index_eq_index (n : Nat) (h : n < (range_list (n + 1)).length) : (range_list (n + 1))[n] = n := by
-  -- getElemとlengthの関係に関するtheoremが必要
-  sorry
+  simp [range_list]
+  have h' : ¬n < (range_list n).length := by rw [range_list_length_is_n] ; simp
+  rw [List.getElem_append n h]
+  simp [h']
+
+-- ここまでOK
 
 /-
 lemma range_index_eq_index' (n i : Nat) (h : i < (range_list (n + 1)).length) :
