@@ -157,57 +157,63 @@ lemma range_list_length_is_n (n : Nat) : (range_list n).length = n := by
 
 lemma zero_lt_range_list_length : ∀ n : Nat, 0 < (range_list (n + 1)).length := by
   intro n
-  induction' n with n₀ ih
+  induction' n with n₀ _
   { simp ; rw [range_list] ; simp }
   { rw [range_list] ; rw [List.length_append] ; simp }
 
+/--
+これが使いたかった。h₂はどうしても消せない。
+-/
 lemma getElem_append' (l l' : List α) (n : Nat) (h₁ : n < l.length) (h₂ : n < (l ++ l').length) :
     (l ++ l')[n] = l[n] := by
   simp [List.getElem_append, h₁]
 
+/-
+さらにrange_listに特化させたもの。帰納法用。
+-/
 lemma range_list_induction
     (n i : Nat)
-    (h₁ : i < (range_list (n + 1)).length)
-    (h₂ : i < (range_list ((n + 1) + 1)).length) : (range_list ((n + 1) + 1))[i] = (range_list (n + 1))[i] := by
-  have : (range_list (n + 1 + 1))[i] = (range_list (n + 1) ++ [n + 1])[i] := by exact rfl
+    (h₁ : i < (range_list n).length)
+    (h₂ : i < (range_list (n + 1)).length) :
+    (range_list (n + 1))[i] = (range_list n)[i] := by
+  have : (range_list (n + 1))[i] = (range_list n ++ [n])[i] := by exact rfl
   rw [this]
   rw [getElem_append']
 
--- ここまでOK
-
-lemma rangel_list_eq_index (n i k : Nat) (h : i < n) (h₁ : i < (range_list (n + k)).length) (h₂ : i < (range_list n).length) :
+lemma range_list_trim (n k i : Nat) (h₁ : i < (range_list (n + k)).length) (h₂ : i < (range_list n).length) :
     (range_list (n + k))[i] = (range_list n)[i] := by
-
-  sorry
-
-
-lemma index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) : (range_list (n + 1))[0] = 0 := by
-  induction' n with n₀ ih
+  induction' k with k₀ ih
   { simp }
   {
-    simp [range_list.eq_def (n₀ + 1)] -- (n₀ + 1)]
-    rw [getElem_append' (range_list n₀) [n₀, n₀ + 1]]
-
-    have : (range_list (n₀ + 1 + 1)).get! 0 = (range_list (n₀ + 1)).get! 0 := by
-      by_contra!
-      rw [ih] at this
-      have (n : Nat) : ∀ k : Nat, ∀ i : Nat, i ≤ n → (range_list n + 1)). =
-      have (n : Nat) : (range_list (n + 1)).get! 0 = 0 := by
-        induction' n with n₀ IH
-        { simp }
-        {
-          rw [range_list]
-
-        }
-
+    simp [←Nat.add_assoc]
+    have h1 : i < (range_list (n + k₀)).length := by
+      rw [range_list_length_is_n] at h₂
+      rw [range_list_length_is_n]
+      exact Nat.lt_add_right k₀ h₂
+    have h2 : i < (range_list (n + k₀ + 1)).length := by
+      rw [range_list_length_is_n] at h₂
+      rw [range_list_length_is_n]
+      have h2 : i < n + k₀ := by exact Nat.lt_add_right k₀ h₂
+      exact Nat.lt_add_right 1 h2
+    rw [range_list_induction (n + k₀) i h1 h2]
+    apply ih
   }
+
+lemma index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) :
+    (range_list (n + 1))[0] = 0 := by
+  have : (range_list (n + 1))[0] = (range_list 1)[0] := by
+    simp [add_comm n 1]
+    rw [range_list_trim 1 n 0]
+  rw [this]
+  simp [range_list]
+
+-- ここまでOK
 
 lemma index_eq_value (n : Nat) : ∀ i : Nat, i < n + 1 → (range_list (n + 1)).get! i = i := by
   intro i ih
   induction' i with i₀ H
-  {
-
-  }
+  { sorry }
+  { sorry }
 
 lemma range_list_n1_contains_n (n : Nat) : n ∈ range_list (n + 1) := by
   rw [range_list.eq_def] ; simp
