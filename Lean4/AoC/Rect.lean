@@ -142,12 +142,148 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 def index (frame self : Dim2) : Nat := self.y.toNat * frame.x.toNat + self.x.toNat
 def index' (frame : Dim2) (n : Nat) : Dim2 := Dim2.mk (n / frame.x) (n % frame.x)
 
+open Nat
 /--
 This is identitcal to `List.range`. But it is much much simple to prove something.
 -/
 def range_list : Nat → List Nat
   | 0 => []
   | n + 1 => range_list n ++ [n]
+
+lemma range_list_length_is_n (n : Nat) : (range_list n).length = n := by
+  induction' n with n h
+  { rw [range_list] ; simp }
+  { rw [range_list] ; rw [List.length_append] ; simp ; exact h }
+
+lemma zero_lt_range_list_length : ∀ n : Nat, 0 < (range_list (n + 1)).length := by
+  intro n
+  induction' n with n₀ ih
+  { simp ; rw [range_list] ; simp }
+  { rw [range_list] ; rw [List.length_append] ; simp }
+
+lemma getElem_append' (l l' : List α) (n : Nat) (h₁ : n < l.length) (h₂ : n < (l ++ l').length) :
+    (l ++ l')[n] = l[n] := by
+  simp [List.getElem_append, h₁]
+
+lemma range_list_induction
+    (n i : Nat)
+    (h₁ : i < (range_list (n + 1)).length)
+    (h₂ : i < (range_list ((n + 1) + 1)).length) : (range_list ((n + 1) + 1))[i] = (range_list (n + 1))[i] := by
+  have : (range_list (n + 1 + 1))[i] = (range_list (n + 1) ++ [n + 1])[i] := by exact rfl
+  rw [this]
+  rw [getElem_append']
+
+-- ここまでOK
+
+lemma rangel_list_eq_index (n i k : Nat) (h : i < n) (h₁ : i < (range_list (n + k)).length) (h₂ : i < (range_list n).length) :
+    (range_list (n + k))[i] = (range_list n)[i] := by
+
+  sorry
+
+
+lemma index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) : (range_list (n + 1))[0] = 0 := by
+  induction' n with n₀ ih
+  { simp }
+  {
+    simp [range_list.eq_def (n₀ + 1)] -- (n₀ + 1)]
+    rw [getElem_append' (range_list n₀) [n₀, n₀ + 1]]
+
+    have : (range_list (n₀ + 1 + 1)).get! 0 = (range_list (n₀ + 1)).get! 0 := by
+      by_contra!
+      rw [ih] at this
+      have (n : Nat) : ∀ k : Nat, ∀ i : Nat, i ≤ n → (range_list n + 1)). =
+      have (n : Nat) : (range_list (n + 1)).get! 0 = 0 := by
+        induction' n with n₀ IH
+        { simp }
+        {
+          rw [range_list]
+
+        }
+
+  }
+
+lemma index_eq_value (n : Nat) : ∀ i : Nat, i < n + 1 → (range_list (n + 1)).get! i = i := by
+  intro i ih
+  induction' i with i₀ H
+  {
+
+  }
+
+lemma range_list_n1_contains_n (n : Nat) : n ∈ range_list (n + 1) := by
+  rw [range_list.eq_def] ; simp
+
+lemma range_list_length_is_invariant (n : Nat) : (range_list n).length = n := by
+  induction' n with n0 ih ; { simp } ; { simp [range_list, ih] }
+
+lemma index_reduction {α : Type} [Inhabited α] (l l' : List α) :
+    ∀ i : Nat, i < l'.length → (l ++ l')[l.length + i]! = l'[i]! := by
+  intro i ih
+  induction' i with i₀ h
+  {
+    simp ; sorry
+  }
+  sorry
+
+lemma append_range_list_get_nth (n : Nat) (l : List Nat) : ∀ k : Nat,
+    (range_list n ++ l)[n + k]! = l[k]! := by
+  intro k
+  induction' k with k₀ ih
+  {
+    simp
+    apply?
+  }
+  sorry
+
+lemma last_of_range_list (n : Nat) : (range_list (n + 1))[n]! = n := by
+  induction' n with n' ih
+  { simp }
+  {
+    simp [range_list]
+    have (a : List Nat) : a ++ [n', n' + 1] = (a ++ [n']) ++ [n' + 1] := by
+      exact List.append_cons a n' [n' + 1]
+    rw [this]
+    rw [←range_list]
+    have zero_is_null : range_list 0 = [] := by exact rfl
+    simp only [zero_is_null]
+
+  }
+
+lemma append_length {α : Type} (a b : List α) :
+    (a ++ b).length = a.length + b.length := by
+  simp [(· ++ ·)] ; simp [Append.append]
+
+lemma n_at_range_list_is_n (n : Nat) : ∀ k : Nat, (range_list (n + 1 + k)).get! n = n := by
+  intro k
+  induction' k with k₀ ih
+  {
+    simp
+    have : List.length (range_list n) = n := by
+      induction' n with n0 ih
+      { simp }
+      {
+        rw [range_list]
+        rw [append_length]
+        rw [range_list_length_is_invariant]
+        simp
+      }
+    have : (range_list n ++ [n])[n]! = [n][0] := by
+      induction' n with n0 ih
+      { simp }
+      {
+        simp
+
+      }
+    }
+
+lemma range_list_is_accumlative (n m : Nat) : n < m → ∀ k ∈ range_list (n + 1), k ∈ range_list (m + 1) := by
+  intro ih k
+
+
+
+lemma range_list_contain_of_lt_n (n : Nat) : ∀ i : Nat, i < n → i ∈ range_list n := by
+  rintro i h
+  sorry
+
 
 def join' {α : Type} : List (List α) → List α
   | [] => []
