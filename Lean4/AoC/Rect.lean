@@ -199,7 +199,7 @@ lemma range_list_trim (n k i : Nat) (h₁ : i < (range_list (n + k)).length) (h�
     apply ih
   }
 
-lemma index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) :
+lemma range_index_index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) :
     (range_list (n + 1))[0] = 0 := by
   have : (range_list (n + 1))[0] = (range_list 1)[0] := by
     simp [add_comm n 1]
@@ -208,6 +208,32 @@ lemma index_zero_eq_zero (n : Nat) (h : 0 < (range_list (n + 1)).length) :
   simp [range_list]
 
 -- ここまでOK
+
+lemma range_index_eq_index (n : Nat) (h : n < (range_list (n + 1)).length) : (range_list (n + 1))[n] = n := by
+  -- getElemとlengthの関係に関するtheoremが必要
+  sorry
+
+/-
+lemma range_index_eq_index' (n i : Nat) (h : i < (range_list (n + 1)).length) :
+    (range_list (n + 1))[i] = i := by
+  simp [range_list]
+
+  have h_1 : i < (range_list (i + 1)).length := by sorry
+  have : (range_list (n + 1))[i] = (range_list (i + 1))[i] := by
+    have : i < n := by sorry
+    have : n + 1 = i + 1 + (n - i) := by
+      symm
+      rw [add_comm i]
+      rw [add_assoc]
+      rw []
+      rw [add_comm i]
+      rw?
+
+    rw [range_list_trim (i + 1) (n - i) i  _ _ _]
+
+  rw [this]
+  simp [range_list]
+-/
 
 lemma index_eq_value (n : Nat) : ∀ i : Nat, i < n + 1 → (range_list (n + 1)).get! i = i := by
   intro i ih
@@ -219,7 +245,7 @@ lemma range_list_n1_contains_n (n : Nat) : n ∈ range_list (n + 1) := by
   rw [range_list.eq_def] ; simp
 
 lemma range_list_length_is_invariant (n : Nat) : (range_list n).length = n := by
-  induction' n with n0 ih ; { simp } ; { simp [range_list, ih] }
+  induction' n with n0 ih ; { simp [range_list] } ; { simp [range_list, ih] }
 
 lemma index_reduction {α : Type} [Inhabited α] (l l' : List α) :
     ∀ i : Nat, i < l'.length → (l ++ l')[l.length + i]! = l'[i]! := by
@@ -240,6 +266,7 @@ lemma append_range_list_get_nth (n : Nat) (l : List Nat) : ∀ k : Nat,
   }
   sorry
 
+/-
 lemma last_of_range_list (n : Nat) : (range_list (n + 1))[n]! = n := by
   induction' n with n' ih
   { simp }
@@ -253,7 +280,9 @@ lemma last_of_range_list (n : Nat) : (range_list (n + 1))[n]! = n := by
     simp only [zero_is_null]
 
   }
+-/
 
+/-
 lemma append_length {α : Type} (a b : List α) :
     (a ++ b).length = a.length + b.length := by
   simp [(· ++ ·)] ; simp [Append.append]
@@ -289,7 +318,7 @@ lemma range_list_is_accumlative (n m : Nat) : n < m → ∀ k ∈ range_list (n 
 lemma range_list_contain_of_lt_n (n : Nat) : ∀ i : Nat, i < n → i ∈ range_list n := by
   rintro i h
   sorry
-
+-/
 
 def join' {α : Type} : List (List α) → List α
   | [] => []
@@ -304,6 +333,7 @@ def cartesian_product (y x : Nat) : List (Nat × Nat) :=
   | 0      => []
   | y' + 1 => cartesian_product y' x ++ embedded y' x
 
+/-
 #eval cartesian_product 3 2
 #eval cartesian_product 4 0
 #eval cartesian_product 0 3
@@ -341,6 +371,7 @@ lemma cartesian_product_covers_dim2nat (y x : Nat) :
       exact Or.symm (Or.inr (hy this))
     }
   }
+-/
 
 def toList (base : Dim2) : List Dim2 :=
   join'
@@ -348,6 +379,7 @@ def toList (base : Dim2) : List Dim2 :=
       (fun y ↦ (range_list base.x.toNat).map (Dim2.mk y ·))
       (range_list base.y.toNat))
 
+/-
 lemma length_is_invariant_under_map {α β : Type} (l : List α) (f : α → β) :
     List.length l = (List.map f l).length := by
   induction' l with _ ln _ ; { simp } ; { simp [(· :: ·)] }
@@ -435,6 +467,7 @@ example (p : Dim2) : 0 ≤ p → p.area = p.toList.length := by
     }
   rw [toList]
   sorry
+-/
 
 end Dim2
 
