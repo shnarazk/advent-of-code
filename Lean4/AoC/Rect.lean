@@ -221,27 +221,24 @@ lemma range_list_n1_contains_n (n : Nat) : n ∈ range_list (n + 1) := by
 lemma range_list_length_is_invariant (n : Nat) : (range_list n).length = n := by
   induction' n with n0 ih ; { simp [range_list] } ; { simp [range_list, ih] }
 
-lemma append_range_list_get_nth (n : Nat) (l : List Nat) (k : Nat) (h₀ : 0 < l.length) (h₁ : k < l.length) (h₂ : n + k < (range_list n ++ l).length):
+lemma append_range_list_get_nth (n : Nat) (l : List Nat) (k : Nat) (h₁ : k < l.length) (h₂ : n + k < (range_list n ++ l).length):
     (range_list n ++ l)[n + k] = l[k] := by
-  have h0 : n = (range_list n).length := by exact Eq.symm (range_list_length_is_n n)
-  have h1 : n < (range_list n ++ l).length := by
-    rw [List.length_append]
-    rw [←h0]
-    exact Nat.lt_add_of_pos_right h₀
+  have h1 : n = (range_list n).length := by exact Eq.symm (range_list_length_is_n n)
   have h2 : n + k ≥ (range_list n).length := by
-    rw [←h0]
+    rw [←h1]
     exact Nat.le_add_right n k
   have h2' : ¬ n + k < (range_list n).length := by exact Nat.not_lt.mpr h2
   rw [@List.getElem_append Nat (range_list n) l (n + k) h₂]
   simp [h2']
   have : n + k - (range_list n).length = k := by
-    exact Eq.symm (Nat.eq_sub_of_add_eq' (congrFun (congrArg HAdd.hAdd (symm h0)) k))
+    exact Eq.symm (Nat.eq_sub_of_add_eq' (congrFun (congrArg HAdd.hAdd (symm h1)) k))
   simp [this]
 
 def join' {α : Type} : List (List α) → List α
   | [] => []
   | a :: l => a ++ join' l
 
+/-
 def cartesian_product (y x : Nat) : List (Nat × Nat) :=
   let rec embedded (y : Nat) (x : Nat) :=
     match x with
@@ -251,51 +248,23 @@ def cartesian_product (y x : Nat) : List (Nat × Nat) :=
   | 0      => []
   | y' + 1 => cartesian_product y' x ++ embedded y' x
 
-/-
 #eval cartesian_product 3 2
 #eval cartesian_product 4 0
 #eval cartesian_product 0 3
-
-lemma cartesian_product_covers_dim2nat (y x : Nat) :
-    ∀ i : Nat, ∀ j : Nat, i < y → j < x → List.contains (cartesian_product y x) (i, j) == true := by
-  intro i j Hy Hx
-  simp [List.contains]
-  induction' y with y hy
-  { contradiction }
-  {
-    simp [cartesian_product]
-    by_cases ih: i = y
-    {
-      right
-      rw [ih]
-      rw [cartesian_product.embedded.eq_def]
-      induction' x with x hx
-      { simp ; exact Nat.not_succ_le_zero j Hx }
-      {
-        simp
-        by_cases J : j < x
-        {
-          simp [ih] at *
-          left
-          obtain AA := hx J
-
-        }
-      }
-    }
-    {
-      have : i ≤ y := by exact Nat.le_of_lt_succ Hy
-      have : i < y := by exact Nat.lt_of_le_of_ne this ih
-      exact Or.symm (Or.inr (hy this))
-    }
-  }
 -/
+
+/-
 def toList (p : Dim2) : List (Dim2):=
   let rl := range_list p.y.toNat
   List.join (List.map (fun y ↦ (range_list p.x.toNat).map (Dim2.mk y ·)) rl)
+-/
 
 def toList' (p : Nat × Nat) : List (Nat × Nat):=
   let rl := range_list p.1
   List.join (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
+
+def toList (p : Dim2) : List (Dim2) :=
+  (toList' (p.y.toNat, p.x.toNat)).map (fun q ↦ (Dim2.mk q.1 q.2))
 
 lemma map_length_map_cancel {α β : Type} (l : List α) (f : α → List β) :
     List.map List.length (List.map f l) = List.map (List.length ∘ f) l := by
@@ -328,7 +297,33 @@ lemma toList'_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
     simp
   }
 
--- あと一歩！
+lemma int_congr_nat (a b : Nat) : Int.ofNat a = Int.ofNat b → a = b := by exact Int.ofNat_inj.mp
+lemma to_int_to_nat_eq_cancel (a : Nat) : (Int.ofNat a).toNat = a := by exact rfl
+lemma ofNat_add_toNat_eq_ofNat_add (a b : Nat) : (Int.ofNat (a + b)).toNat = a + b := by exact rfl
+lemma coerce_add1 (a : Nat) (b : Int) (h : 0 ≤ b) : Int.ofNat a + (b + 1) = Int.ofNat (a + 1) + b := by
+  sorry
+lemma coerce_add (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a + b).toNat = a + b.toNat := by
+  sorry
+lemma coerce_mul (a : Nat) (b : Int) : (Int.ofNat a * b).toNat = a * b.toNat := by
+  sorry
+
+lemma int_mul_int_eq_nat_mul_nat : ∀ y x : Int, 0 ≤ y → 0 ≤ x → y.toNat * x.toNat = (y * x).toNat := by
+  intro y x hy hx
+  sorry
+
+lemma toList_congr_toList' : ∀ p : Dim2, 0 ≤ p → (toList p).length = p.area := by
+  intro p P
+  rw [toList]
+  rw [List.length_map]
+  rw [toList'_length]
+  rw [Dim2.area]
+  simp
+  simp [LE.le] at P
+  rw [Dim2.le] at P
+  rcases P with ⟨P₁, P₂⟩
+  rw [int_mul_int_eq_nat_mul_nat]
+  exact P₁
+  exact P₂
 
 end Dim2
 
