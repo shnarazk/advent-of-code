@@ -238,60 +238,6 @@ lemma append_range_list_get_nth (n : Nat) (l : List Nat) (k : Nat) (h₀ : 0 < l
     exact Eq.symm (Nat.eq_sub_of_add_eq' (congrFun (congrArg HAdd.hAdd (symm h0)) k))
   simp [this]
 
-/-
-lemma last_of_range_list (n : Nat) : (range_list (n + 1))[n]! = n := by
-  induction' n with n' ih
-  { simp }
-  {
-    simp [range_list]
-    have (a : List Nat) : a ++ [n', n' + 1] = (a ++ [n']) ++ [n' + 1] := by
-      exact List.append_cons a n' [n' + 1]
-    rw [this]
-    rw [←range_list]
-    have zero_is_null : range_list 0 = [] := by exact rfl
-    simp only [zero_is_null]
-
-  }
--/
-
-/-
-lemma append_length {α : Type} (a b : List α) :
-    (a ++ b).length = a.length + b.length := by
-  simp [(· ++ ·)] ; simp [Append.append]
-
-lemma n_at_range_list_is_n (n : Nat) : ∀ k : Nat, (range_list (n + 1 + k)).get! n = n := by
-  intro k
-  induction' k with k₀ ih
-  {
-    simp
-    have : List.length (range_list n) = n := by
-      induction' n with n0 ih
-      { simp }
-      {
-        rw [range_list]
-        rw [append_length]
-        rw [range_list_length_is_invariant]
-        simp
-      }
-    have : (range_list n ++ [n])[n]! = [n][0] := by
-      induction' n with n0 ih
-      { simp }
-      {
-        simp
-
-      }
-    }
-
-lemma range_list_is_accumlative (n m : Nat) : n < m → ∀ k ∈ range_list (n + 1), k ∈ range_list (m + 1) := by
-  intro ih k
-
-
-
-lemma range_list_contain_of_lt_n (n : Nat) : ∀ i : Nat, i < n → i ∈ range_list n := by
-  rintro i h
-  sorry
--/
-
 def join' {α : Type} : List (List α) → List α
   | [] => []
   | a :: l => a ++ join' l
@@ -335,7 +281,6 @@ lemma cartesian_product_covers_dim2nat (y x : Nat) :
 
         }
       }
-
     }
     {
       have : i ≤ y := by exact Nat.le_of_lt_succ Hy
