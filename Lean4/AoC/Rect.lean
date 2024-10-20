@@ -289,12 +289,27 @@ lemma cartesian_product_covers_dim2nat (y x : Nat) :
     }
   }
 -/
+def toList (p : Dim2) : List (Dim2):=
+  let rl := range_list p.y.toNat
+  List.join (List.map (fun y ↦ (range_list p.x.toNat).map (Dim2.mk y ·)) rl)
 
-def toList (base : Dim2) : List Dim2 :=
-  join'
-    (List.map
-      (fun y ↦ (range_list base.x.toNat).map (Dim2.mk y ·))
-      (range_list base.y.toNat))
+def toList' (p : Nat × Nat) : List (Nat × Nat):=
+  let rl := range_list p.1
+  List.join (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
+
+lemma map_length_map_cancel {α β : Type} (l : List α) (f : α → List β) :
+    List.map List.length (List.map f l) = List.map (List.length ∘ f) l := by
+  exact List.map_map List.length f l
+
+lemma cp_length (x y : Nat) :
+    List.length ((fun (y : Nat) ↦ (range_list x).map (y, ·)) y) = (range_list x).length := by
+  simp
+
+lemma toList_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
+  simp only [toList', List.join]
+  rw [List.length_join]
+  simp
+  sorry
 
 /-
 lemma length_is_invariant_under_map {α β : Type} (l : List α) (f : α → β) :
