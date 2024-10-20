@@ -300,18 +300,48 @@ lemma toList'_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
 lemma int_congr_nat (a b : Nat) : Int.ofNat a = Int.ofNat b → a = b := by exact Int.ofNat_inj.mp
 lemma to_int_to_nat_eq_cancel (a : Nat) : (Int.ofNat a).toNat = a := by exact rfl
 lemma ofNat_add_toNat_eq_ofNat_add (a b : Nat) : (Int.ofNat (a + b)).toNat = a + b := by exact rfl
-lemma coerce_add1 (a : Nat) (b : Int) (h : 0 ≤ b) : Int.ofNat a + (b + 1) = Int.ofNat (a + 1) + b := by
-  sorry
+lemma coerce_add1 (a : Nat) (b : Int) : Int.ofNat a + (b + 1) = Int.ofNat (a + 1) + b := by
+  rw [add_comm _ 1]
+  rw [←add_assoc]
+  exact rfl
+
 lemma coerce_add (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a + b).toNat = a + b.toNat := by
-  sorry
-lemma coerce_mul (a : Nat) (b : Int) : (Int.ofNat a * b).toNat = a * b.toNat := by
-  sorry
+  have ha : 0 ≤ Int.ofNat a := by exact Int.zero_le_ofNat a
+  rw [Int.toNat_add ha h]
+  exact rfl
+
+lemma coerce_mul (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a * b).toNat = a * b.toNat := by
+  induction' a with a ih
+  { simp }
+  {
+    have : Int.ofNat (a + 1) = Int.ofNat a + 1 := by exact rfl
+    rw [this]
+    rw [add_mul]
+    have h1 : 0 ≤ Int.ofNat a * b := by
+      have h1₁ : 0 ≤ Int.ofNat a := by exact Int.zero_le_ofNat a
+      exact Int.mul_nonneg h1₁ h
+    have h2 : 0 ≤ 1 * b := by
+      rw [one_mul]
+      exact h
+    rw [Int.toNat_add h1 h2]
+    rw [ih]
+    simp
+    nth_rewrite 2 [←one_mul b.toNat]
+    rw [←add_mul]
+  }
 
 lemma int_mul_int_eq_nat_mul_nat : ∀ y x : Int, 0 ≤ y → 0 ≤ x → y.toNat * x.toNat = (y * x).toNat := by
   intro y x hy hx
-  sorry
+  induction' y with y y'
+  { simp ; rw [←coerce_mul y x hx] ; rfl }
+  {
+    simp
+    have : Int.negSucc y' < 0 := by exact Int.negSucc_lt_zero y'
+    have : Int.negSucc y' * x ≤ 0 := by exact le_imp_le_of_lt_imp_lt (fun _ => this) hy
+    exact Eq.symm ((fun {n} => Int.toNat_eq_zero.mpr) this)
+  }
 
-lemma toList_congr_toList' : ∀ p : Dim2, 0 ≤ p → (toList p).length = p.area := by
+lemma toList_length_eq_size : ∀ p : Dim2, 0 ≤ p → (toList p).length = p.area := by
   intro p P
   rw [toList]
   rw [List.length_map]
