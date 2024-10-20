@@ -215,58 +215,28 @@ lemma range_index_eq_index (n : Nat) (h : n < (range_list (n + 1)).length) : (ra
 
 -- ここまでOK
 
-/-
-lemma range_index_eq_index' (n i : Nat) (h : i < (range_list (n + 1)).length) :
-    (range_list (n + 1))[i] = i := by
-  simp [range_list]
-
-  have h_1 : i < (range_list (i + 1)).length := by sorry
-  have : (range_list (n + 1))[i] = (range_list (i + 1))[i] := by
-    have : i < n := by sorry
-    have : n + 1 = i + 1 + (n - i) := by
-      symm
-      rw [add_comm i]
-      rw [add_assoc]
-      rw []
-      rw [add_comm i]
-      rw?
-
-    rw [range_list_trim (i + 1) (n - i) i  _ _ _]
-
-  rw [this]
-  simp [range_list]
--/
-
-lemma index_eq_value (n : Nat) : ∀ i : Nat, i < n + 1 → (range_list (n + 1)).get! i = i := by
-  intro i ih
-  induction' i with i₀ H
-  { sorry }
-  { sorry }
-
 lemma range_list_n1_contains_n (n : Nat) : n ∈ range_list (n + 1) := by
   rw [range_list.eq_def] ; simp
 
 lemma range_list_length_is_invariant (n : Nat) : (range_list n).length = n := by
   induction' n with n0 ih ; { simp [range_list] } ; { simp [range_list, ih] }
 
-lemma index_reduction {α : Type} [Inhabited α] (l l' : List α) :
-    ∀ i : Nat, i < l'.length → (l ++ l')[l.length + i]! = l'[i]! := by
-  intro i ih
-  induction' i with i₀ h
-  {
-    simp ; sorry
-  }
-  sorry
-
-lemma append_range_list_get_nth (n : Nat) (l : List Nat) : ∀ k : Nat,
-    (range_list n ++ l)[n + k]! = l[k]! := by
-  intro k
-  induction' k with k₀ ih
-  {
-    simp
-    apply?
-  }
-  sorry
+lemma append_range_list_get_nth (n : Nat) (l : List Nat) (k : Nat) (h₀ : 0 < l.length) (h₁ : k < l.length) (h₂ : n + k < (range_list n ++ l).length):
+    (range_list n ++ l)[n + k] = l[k] := by
+  have h0 : n = (range_list n).length := by exact Eq.symm (range_list_length_is_n n)
+  have h1 : n < (range_list n ++ l).length := by
+    rw [List.length_append]
+    rw [←h0]
+    exact Nat.lt_add_of_pos_right h₀
+  have h2 : n + k ≥ (range_list n).length := by
+    rw [←h0]
+    exact Nat.le_add_right n k
+  have h2' : ¬ n + k < (range_list n).length := by exact Nat.not_lt.mpr h2
+  rw [@List.getElem_append Nat (range_list n) l (n + k) h₂]
+  simp [h2']
+  have : n + k - (range_list n).length = k := by
+    exact Eq.symm (Nat.eq_sub_of_add_eq' (congrFun (congrArg HAdd.hAdd (symm h0)) k))
+  simp [this]
 
 /-
 lemma last_of_range_list (n : Nat) : (range_list (n + 1))[n]! = n := by
