@@ -3,8 +3,6 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect
 
-def dbg {α : Type} [ToString α] (a : α) : α := dbgTrace s!"{a}" (fun _ ↦ a)
-
 namespace Dim2
 
 def cutsₕ (g : Dim2) : List Nat := List.range g.y.toNat |>.drop 1

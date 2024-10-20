@@ -1,6 +1,9 @@
 import Lean
 import Aesop
 
+def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
+  dbgTrace s!"{label}: {a}" (fun _ ↦ a)
+
 /--
 Build and return a data filename
 -/
