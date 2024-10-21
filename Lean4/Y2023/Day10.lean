@@ -2,44 +2,43 @@ import Mathlib.Tactic
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
-import «AoC».Mat1
+-- import «AoC».Mat1
+import «AoC».Rect
 import «AoC».Parser
 
 namespace Y2023.Day10
-open CiCL CoP
+open CiCL CoP TwoDimensionalVector
 
-def Pos : Type := Nat × Nat
-deriving BEq, Hashable, Repr
-def Pos.mk (y x : Nat) := (y, x)
+-- def Pos : Type := Nat × Nat
+-- deriving BEq, Hashable, Repr
+-- def Pos.mk (y x : Nat) := (y, x)
+-- instance : Inhabited Pos where default := Pos.mk 0 0
+-- instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
+-- instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
 
-instance : Inhabited Pos where default := Pos.mk 0 0
-instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
-instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
+-- def Pos.double (a : Pos) : Pos := (2 * a.1, 2 * a.2)
+-- example (y x : Nat) : Pos.mk (2 * y) (2 * x) = Pos.double (Pos.mk y x) := by simp [Pos.mk, Pos.double]
 
-def Pos.double (a : Pos) : Pos := (2 * a.1, 2 * a.2)
-example (y x : Nat) : Pos.mk (2 * y) (2 * x) = Pos.double (Pos.mk y x) := by
-  simp [Pos.mk, Pos.double]
-
-def makeNeighbors (size s : Pos) : List Pos :=
+def makeNeighbors (size s : Dim2) : List Dim2 :=
   [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
     |>.filterMap
       (fun d => if
-        !( (s.1    == 0       && d.fst == .lt)
-        || (size.1 ≤ s.1 + 1  && d.fst == .gt)
-        ||  size.1 < s.1 + 1
-        || (s.2    == 0       && d.snd == .lt)
-        || (size.2 = s.2 + 1  && d.snd == .gt)
-        ||  size.2 < s.2 + 1)
-        then some (Pos.mk
-          (match d.fst with | .lt => s.1 - 1 | .eq => s.1 | .gt => s.1 + 1)
-          (match d.snd with | .lt => s.2 - 1 | .eq => s.2 | .gt => s.2 + 1))
+        !( (s.y    == 0       && d.fst == .lt)
+        || (size.y ≤ s.y + 1  && d.fst == .gt)
+        ||  size.y < s.y + 1
+        || (s.x    == 0       && d.snd == .lt)
+        || (size.x = s.x + 1  && d.snd == .gt)
+        ||  size.x < s.x + 1)
+        then some (Dim2.mk
+          (match d.fst with | .lt => s.y - 1 | .eq => s.y | .gt => s.y + 1)
+          (match d.snd with | .lt => s.x - 1 | .eq => s.x | .gt => s.x + 1))
         else none)
 
 -- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 0 0)
 -- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 9 7)
 -- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 10 10)
 
-def makeVecs (size start : Pos) : List (Pos × Pos) :=
+def makeVecs (size start : Dim2) : List (Dim2 × Dim2) :=
   (makeNeighbors size start).map ((start, ·))
 
 -- #eval makeVecs (10, 10) (2, 2)
@@ -78,20 +77,23 @@ def Circuit.ofChar (c : Char) : Circuit :=
 
 -- #eval (Circuit.ofChar 'f') |> toString
 
-def startPosition (self : Mat1 Circuit) : Pos :=
-  self.findIdx? (· == Circuit.s) |>.getD (Pos.mk 0 0)
+def startPosition (self : Rect Circuit) : Dim2 :=
+  self.findPosition? (· == Circuit.s) |>.unwrapOr (Dim2.mk 0 0)
 
-def dest (mat : Mat1 Circuit) (vec : Pos × Pos) : Pos × Pos :=
+def dest (mat : Rect Circuit) (vec : Dim2 × Dim2) : Dim2 × Dim2 :=
   let (pre, now) := vec
-  let (dy, dx)   := both2 (fun x y ↦ Int.ofNat x - Int.ofNat y) now pre
-  let trans      := fun x y ↦ Int.ofNat x + y |>.toNat
-  let diff := match uncurry mat.get? now with
-  | some .v => ( dy,   0)
-  | some .h => (  0,  dx)
-  | some .l => ( dx,  dy)
-  | some .j => (-dx, -dy)
-  |       _ => (  0,   0)
-  (now, both2 trans now diff)
+  let diff := now - pre
+  let dy := diff.y
+  let dx := diff.x
+  -- let (dy, dx)   := both2 (fun x y ↦ Int.ofNat x - Int.ofNat y) now pre
+  -- let trans      := fun x y ↦ Int.ofNat x + y |>.toNat
+  let diff := match mat.get? now with
+  | some .v => Dim2.mk dy   0
+  | some .h => Dim2.mk  0  dx
+  | some .l => Dim2.mk dx  dy
+  | some .j => Dim2.mk (-dx) (-dy)
+  |       _ => Dim2.mk  0   0
+  (now, now + diff)
 
 namespace parser
 open AoCParser
@@ -110,18 +112,18 @@ def cell := pchar '|'
 def parse := AoCParser.parse parser
   where
     pcircuit := (return Circuit.ofChar) <*> cell
-    parser := (return Mat1.of2DMatrix) <*> many (many pcircuit <* eol)
+    parser := (return Rect.of2DMatrix) <*> many (many pcircuit <* eol)
 
 end parser
 
 namespace part1
 
 def loop_len
-    (self : Mat1 Circuit)
+    (self : Rect Circuit)
     (limit : Nat)
-    (start : Pos)
+    (start : Dim2)
     (len : Nat)
-    (vec : Pos × Pos)
+    (vec : Dim2 × Dim2)
     : Nat :=
   match limit with
   | 0        => 0
@@ -131,15 +133,22 @@ def loop_len
       then if v'.snd == start then len + 1 else 0
       else loop_len self lim' start (len + 1) v'
 
-def solve (m : Mat1 Circuit) : Nat :=
+def solve (m : Rect Circuit) : Nat :=
   makeVecs m.shape (startPosition m)
-    |>.map (loop_len m m.size (startPosition m) 0 .)
+    |>.map (loop_len m m.area (startPosition m) 0 .)
     |>.max? |>.getD 0 |> (· / 2)
 
 end part1
 
 namespace part2
 open Std
+/-
+def Pos : Type := Nat × Nat
+deriving BEq, Hashable, Repr
+def Pos.mk (y x : Nat) := (y, x)
+instance : Inhabited Pos where default := Pos.mk 0 0
+instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
+instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
 
 inductive PropagateState where
   | Wall       : PropagateState
@@ -218,7 +227,7 @@ def propagate (self : Array PropagateState) (size : Pos) : Array PropagateState 
 -/
 
 def mkLoop
-    (self : Mat1 Circuit)
+    (self : Rect Circuit)
     (limit : Nat)
     (start : Pos)
     (path : List Pos)
@@ -246,7 +255,7 @@ def scaleUp : List Pos → List Pos
   | p :: []     => [p.double]
   | p :: q :: l => [p.double, Pos.interpolate p q] ++ scaleUp (q :: l)
 
-def solve (m: Mat1 Circuit) : Nat :=
+def solve (m: Rect Circuit) : Nat :=
   let st := startPosition m
   let shape := m.shape
   let loop := makeVecs shape st
@@ -262,9 +271,9 @@ def solve (m: Mat1 Circuit) : Nat :=
         |>.length
         |> (· + sum))
       0
-
+-/
 end part2
 
-def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part2.solve
+def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part1.solve
 
 end Y2023.Day10
