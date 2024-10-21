@@ -13,6 +13,7 @@ import «Y2023».Day10
 import «Y2023».Day11
 import «Y2023».Day12
 import «Y2023».Day13
+import «Y2023».Day14
 
 namespace Y2023
 
@@ -30,10 +31,11 @@ def solvers := [
   Y2023.Day11.solve,
   Y2023.Day12.solve,
   Y2023.Day13.solve,
+  Y2023.Day14.solve,
 ]
 
 def there_are_solvers : 0 < solvers.length := by
-  have count : solvers.length = 13 := by exact rfl
+  have count : solvers.length = 14 := by exact rfl
   simp [count]
 
 protected def solvedDays : Nat := solvers.length
