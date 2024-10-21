@@ -142,7 +142,7 @@ end part1
 
 namespace part2
 open Std
-/-
+
 def Pos : Type := Nat × Nat
 deriving BEq, Hashable, Repr
 def Pos.mk (y x : Nat) := (y, x)
@@ -189,16 +189,31 @@ theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size
   rw [X, Y]
   rfl
 
-def map_of (size : Pos) (locs : List Pos) : Array PropagateState :=
+def map_of (size : Dim2) (locs : List Dim2) : Array PropagateState :=
   locs.foldl
-    (fun map pos ↦ map.set! (index size pos) PropagateState.Wall)
-    (Array.mkArray (size.fst * size.snd) PropagateState.Unknown)
+    (fun map pos ↦ map.set! (size.index pos) PropagateState.Wall)
+    (Array.mkArray (size.y.toNat * size.x.toNat) PropagateState.Unknown)
 
-def expand (self : Array PropagateState) (size : Pos) (n : Nat) : Array PropagateState :=
-  makeNeighbors size (index' size n)
+def makeNeighborsₚ (size s : Pos) : List Pos :=
+  [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
+    |>.filterMap
+      (fun d => if
+        !( (s.1    == 0       && d.fst == .lt)
+        || (size.1 ≤ s.1 + 1  && d.fst == .gt)
+        ||  size.1 < s.1 + 1
+        || (s.2    == 0       && d.snd == .lt)
+        || (size.2 = s.2 + 1  && d.snd == .gt)
+        ||  size.2 < s.2 + 1)
+        then some (Pos.mk
+          (match d.fst with | .lt => s.1 - 1 | .eq => s.1 | .gt => s.1 + 1)
+          (match d.snd with | .lt => s.2 - 1 | .eq => s.2 | .gt => s.2 + 1))
+        else none)
+
+def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array PropagateState :=
+  makeNeighbors size (size.index' n)
     |>.foldl
-      (fun m q ↦ match m.get! (index size q) with
-        | .Unknown => m.set! (index size q) .ToExpand
+      (fun m q ↦ match m.get! (size.index q) with
+        | .Unknown => m.set! (size.index q) .ToExpand
         | _ => m)
       (self.set! n .Propagated)
 
@@ -207,16 +222,16 @@ def expand (self : Array PropagateState) (size : Pos) (n : Nat) : Array Propagat
 -/
 -- #eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
 
-partial def loop (m : Array PropagateState) (size : Pos) : Array PropagateState :=
+partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState :=
   let r := m.foldl
     (fun (i, m, u) p ↦ (
       i + 1, if p == PropagateState.ToExpand then (expand m size i, true) else (m, u)))
     (0, m, false)
   if r.snd.snd then loop r.snd.fst size else r.snd.fst
 
-def propagate (self : Array PropagateState) (size : Pos) : Array PropagateState := loop s size
+def propagate (self : Array PropagateState) (size : Dim2) : Array PropagateState := loop s size
   where
-    s := self.set! (index size (0, 0)) .ToExpand
+    s := self.set! (size.index (0, 0)) .ToExpand
 
 /-!
   1. pick the looping route
@@ -229,28 +244,28 @@ def propagate (self : Array PropagateState) (size : Pos) : Array PropagateState 
 def mkLoop
     (self : Rect Circuit)
     (limit : Nat)
-    (start : Pos)
-    (path : List Pos)
-    (vec : Pos × Pos)
-    : List Pos :=
+    (start : Dim2)
+    (path : List Dim2)
+    (vec : Dim2 × Dim2)
+    : List Dim2 :=
   match limit with
   | 0        => []
   | lim' + 1 =>
-    let v' := dest self vec
+    let v' : Dim2 × Dim2 := dest self vec
     if v'.fst == v'.snd
       then if v'.snd == start then path ++ [v'.fst] else []
       else mkLoop self lim' start (path ++ [v'.fst]) v'
 
-def Pos.interpolate (p : Pos) (q : Pos) : Pos :=
-  let (p', q') := both Pos.double (p, q)
-  ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
+def Pos.interpolate (p : Dim2) (q : Dim2) : Dim2 :=
+  let (p', q') := both Dim2.double (p, q)
+  ((p'.y + q'.y) / 2, (p'.x + q'.x) / 2)
 
 -- #eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
 
 /--
 This generates a list of dupicated nodes.
 -/
-def scaleUp : List Pos → List Pos
+def scaleUp : List Dim2 → List Dim2
   | []          => []
   | p :: []     => [p.double]
   | p :: q :: l => [p.double, Pos.interpolate p q] ++ scaleUp (q :: l)
@@ -259,21 +274,21 @@ def solve (m: Rect Circuit) : Nat :=
   let st := startPosition m
   let shape := m.shape
   let loop := makeVecs shape st
-    |>.map (mkLoop m m.size st [st] ·)
+    |>.map (mkLoop m m.area st [st] ·)
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-  let size := Pos.double shape
+  let size := Dim2.double shape
   let a_map := propagate (map_of size loop) size
-  List.range shape.fst
+  List.range shape.y.toNat
     |>.foldl (fun sum y ↦
-      List.range shape.snd
-        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (index size (Pos.double (y, x))))
+      List.range shape.x.toNat
+        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (size.index (Dim2.mk y x).double))
         |>.length
         |> (· + sum))
       0
--/
+
 end part2
 
-def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part1.solve
+def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part2.solve
 
 end Y2023.Day10
