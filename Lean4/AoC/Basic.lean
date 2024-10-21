@@ -189,10 +189,20 @@ namespace Option
 `map_or` is already used for a prep
 -/
 def mapOr {α β : Type} : (Option α) → (f : α → β) → (default : β) → β
-  | (some a), f, _ => f a
+  | some a, f, _ => f a
   | none, _, default => default
 
 -- #eval some "abc" |>.mapOr (·.length) 99
 -- #eval none |>.mapOr (·.length) 99
+
+/--
+- (some "abc").unwrapOr "." => "abc"
+- none.unwrapOr "." => "."
+
+imported from Rust
+-/
+def unwrapOr {α : Type} : (Option α) → (default : α) → α
+  | some a, _ => a
+  | none , df => df
 
 end Option
