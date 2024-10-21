@@ -131,6 +131,8 @@ instance : AddGroup Dim2 where
     simp [cancel_y, cancel_x]
     exact rfl
 
+def toNat (self : Dim2) : Nat × Nat := (self.y.toNat, self.x.toNat)
+
 def area (a : Dim2) : Nat := (a.y * a.x).toNat
 example : ((5, 4) : Dim2).area = 20 := by rfl
 
@@ -473,6 +475,14 @@ def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
     |>.map (fun i ↦ self.get (↑(i, j) : Dim2) default)
 
 def area [BEq α] (self : Rect α) : Nat := self.shape.area
+
+-- @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
+@[inline] def toIndex {α : Type} [BEq α] (frame : Rect α) (p : Dim2) : Nat :=
+  p.y.toNat * frame.shape.x.toNat + p.x.toNat
+
+-- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
+@[inline] def ofIndex {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Dim2 :=
+  Dim2.mk (n / frame.shape.x.toNat) (n % frame.shape.x.toNat)
 
 end Rect
 
