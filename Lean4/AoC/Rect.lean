@@ -144,6 +144,33 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 def index (frame self : Dim2) : Nat := self.y.toNat * frame.x.toNat + self.x.toNat
 def index' (frame : Dim2) (n : Nat) : Dim2 := Dim2.mk (n / frame.x) (n % frame.x)
 
+/-
+theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size → index' size (index size p) = p := by
+  intro p Q
+  dsimp [index, index']
+  have X : (p.1 * size.2 + p.2) / size.2 = p.1 := by
+    have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
+    have D2 : (p.1 * size.2) / size.2 = p.1 := by exact Nat.mul_div_left p.1 h
+    calc (p.1 * size.2 + p.2) / size.2
+      = p.1 * size.2 / size.2 + p.2 / size.2 := by rw [Nat.add_div_of_dvd_right D1]
+      _ = p.1 + p.2 / size.2 := by rw [D2]
+      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q.right]
+      _ = p.1 := by simp
+  have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
+    have D1 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
+    have D2 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
+    have D3 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
+      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D1]
+      _ = p.2 % size.2 := by simp
+      _ < size.2 := by exact D2
+    calc (p.1 * size.2 + p.2) % size.2
+      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D3
+      _ = p.2 % size.2 := by simp [D1]
+      _ = p.2 := by exact Nat.mod_eq_of_lt Q.right
+  rw [X, Y]
+  rfl
+-/
+
 open Nat
 
 /--

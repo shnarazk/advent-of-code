@@ -2,22 +2,11 @@ import Mathlib.Tactic
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
--- import «AoC».Mat1
 import «AoC».Rect
 import «AoC».Parser
 
 namespace Y2023.Day10
 open CiCL CoP TwoDimensionalVector
-
--- def Pos : Type := Nat × Nat
--- deriving BEq, Hashable, Repr
--- def Pos.mk (y x : Nat) := (y, x)
--- instance : Inhabited Pos where default := Pos.mk 0 0
--- instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
--- instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
-
--- def Pos.double (a : Pos) : Pos := (2 * a.1, 2 * a.2)
--- example (y x : Nat) : Pos.mk (2 * y) (2 * x) = Pos.double (Pos.mk y x) := by simp [Pos.mk, Pos.double]
 
 def makeNeighbors (size s : Dim2) : List Dim2 :=
   [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
@@ -33,10 +22,6 @@ def makeNeighbors (size s : Dim2) : List Dim2 :=
           (match d.fst with | .lt => s.y - 1 | .eq => s.y | .gt => s.y + 1)
           (match d.snd with | .lt => s.x - 1 | .eq => s.x | .gt => s.x + 1))
         else none)
-
--- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 0 0)
--- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 9 7)
--- #eval makeNeighbors (Pos.mk 10 10) (Pos.mk 10 10)
 
 def makeVecs (size start : Dim2) : List (Dim2 × Dim2) :=
   (makeNeighbors size start).map ((start, ·))
@@ -85,8 +70,6 @@ def dest (mat : Rect Circuit) (vec : Dim2 × Dim2) : Dim2 × Dim2 :=
   let diff := now - pre
   let dy := diff.y
   let dx := diff.x
-  -- let (dy, dx)   := both2 (fun x y ↦ Int.ofNat x - Int.ofNat y) now pre
-  -- let trans      := fun x y ↦ Int.ofNat x + y |>.toNat
   let diff := match mat.get? now with
   | some .v => Dim2.mk dy   0
   | some .h => Dim2.mk  0  dx
@@ -141,14 +124,6 @@ def solve (m : Rect Circuit) : Nat :=
 end part1
 
 namespace part2
-open Std
-
-def Pos : Type := Nat × Nat
-deriving BEq, Hashable, Repr
-def Pos.mk (y x : Nat) := (y, x)
-instance : Inhabited Pos where default := Pos.mk 0 0
-instance : ToString Pos where toString s := s!"P({s.1}, {s.2})"
-instance : LT Pos where lt (a b : Pos) := a.1 < b.1 ∧ a.2 < b.2
 
 inductive PropagateState where
   | Wall       : PropagateState
@@ -159,55 +134,10 @@ deriving BEq, Repr
 
 instance : Inhabited PropagateState where default := .Unknown
 
-@[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
-@[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
--- #eval index' (10, 10) 10
--- #eval index' (10, 10) 15
-
-theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size → index' size (index size p) = p := by
-  intro p Q
-  dsimp [index, index']
-  have X : (p.1 * size.2 + p.2) / size.2 = p.1 := by
-    have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
-    have D2 : (p.1 * size.2) / size.2 = p.1 := by exact Nat.mul_div_left p.1 h
-    calc (p.1 * size.2 + p.2) / size.2
-      = p.1 * size.2 / size.2 + p.2 / size.2 := by rw [Nat.add_div_of_dvd_right D1]
-      _ = p.1 + p.2 / size.2 := by rw [D2]
-      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q.right]
-      _ = p.1 := by simp
-  have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
-    have D1 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
-    have D2 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
-    have D3 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
-      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D1]
-      _ = p.2 % size.2 := by simp
-      _ < size.2 := by exact D2
-    calc (p.1 * size.2 + p.2) % size.2
-      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D3
-      _ = p.2 % size.2 := by simp [D1]
-      _ = p.2 := by exact Nat.mod_eq_of_lt Q.right
-  rw [X, Y]
-  rfl
-
 def map_of (size : Dim2) (locs : List Dim2) : Array PropagateState :=
   locs.foldl
     (fun map pos ↦ map.set! (size.index pos) PropagateState.Wall)
     (Array.mkArray (size.y.toNat * size.x.toNat) PropagateState.Unknown)
-
-def makeNeighborsₚ (size s : Pos) : List Pos :=
-  [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
-    |>.filterMap
-      (fun d => if
-        !( (s.1    == 0       && d.fst == .lt)
-        || (size.1 ≤ s.1 + 1  && d.fst == .gt)
-        ||  size.1 < s.1 + 1
-        || (s.2    == 0       && d.snd == .lt)
-        || (size.2 = s.2 + 1  && d.snd == .gt)
-        ||  size.2 < s.2 + 1)
-        then some (Pos.mk
-          (match d.fst with | .lt => s.1 - 1 | .eq => s.1 | .gt => s.1 + 1)
-          (match d.snd with | .lt => s.2 - 1 | .eq => s.2 | .gt => s.2 + 1))
-        else none)
 
 def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array PropagateState :=
   makeNeighbors size (size.index' n)
@@ -219,9 +149,8 @@ def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array Propaga
 
 /-
 - Switch to 1D scan from 28 scan
--/
 -- #eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
-
+-/
 partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState :=
   let r := m.foldl
     (fun (i, m, u) p ↦ (
@@ -232,14 +161,6 @@ partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState
 def propagate (self : Array PropagateState) (size : Dim2) : Array PropagateState := loop s size
   where
     s := self.set! (size.index (0, 0)) .ToExpand
-
-/-!
-  1. pick the looping route
-  2. double the scale
-  3. draw the loop
-  4. run propagation
-  5. count the unmarked cells
--/
 
 def mkLoop
     (self : Rect Circuit)
@@ -256,7 +177,7 @@ def mkLoop
       then if v'.snd == start then path ++ [v'.fst] else []
       else mkLoop self lim' start (path ++ [v'.fst]) v'
 
-def Pos.interpolate (p : Dim2) (q : Dim2) : Dim2 :=
+def interpolate (p : Dim2) (q : Dim2) : Dim2 :=
   let (p', q') := both Dim2.double (p, q)
   ((p'.y + q'.y) / 2, (p'.x + q'.x) / 2)
 
@@ -268,8 +189,15 @@ This generates a list of dupicated nodes.
 def scaleUp : List Dim2 → List Dim2
   | []          => []
   | p :: []     => [p.double]
-  | p :: q :: l => [p.double, Pos.interpolate p q] ++ scaleUp (q :: l)
+  | p :: q :: l => [p.double, interpolate p q] ++ scaleUp (q :: l)
 
+/-!
+  1. pick the looping route
+  2. double the scale
+  3. draw the loop
+  4. run propagation
+  5. count the unmarked cells
+-/
 def solve (m: Rect Circuit) : Nat :=
   let st := startPosition m
   let shape := m.shape
