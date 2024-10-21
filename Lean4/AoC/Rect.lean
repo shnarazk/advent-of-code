@@ -385,6 +385,13 @@ def validIndex? [BEq α]
     (self : Rect α) (p : Dim2) : Bool :=
   0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
+def get? [BEq α] [Inhabited α]
+    (self : Rect α) (p : Dim2) : Option α :=
+  if self.validIndex? p then
+    self.get p default |> some
+  else
+    none
+
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
@@ -406,7 +413,7 @@ def modify [BEq α]
 /--
 - search an element that satisfies the predicate and return indices or none
 -/
-def findIdx? [BEq α] (p : Rect α) (f : α → Bool) : Option Dim2 :=
+def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Dim2 :=
   match p.vector.findIdx? f with
   | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
