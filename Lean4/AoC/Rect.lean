@@ -2,6 +2,8 @@
 import Mathlib.Tactic
 import Std.Data.HashMap
 
+namespace TwoDimensionalVector
+
 /--
 ### An index to point a posiition in an infinite 2D space
 -/
@@ -299,8 +301,6 @@ lemma toList_length_eq_area : ∀ p : Dim2, 0 ≤ p → (toList p).length = p.ar
   exact P₂
 
 end Dim2
-
-namespace TwoDimensionalVector
 
 open Std.HashMap Dim2
 

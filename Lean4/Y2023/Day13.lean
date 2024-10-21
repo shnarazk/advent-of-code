@@ -3,7 +3,7 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect
 
-namespace Dim2
+namespace TwoDimensionalVector.Dim2
 
 def cutsₕ (g : Dim2) : List Nat := List.range g.y.toNat |>.drop 1
 def cutsᵥ (g : Dim2) : List Nat := List.range g.x.toNat |>.drop 1
@@ -11,7 +11,7 @@ def cutsᵥ (g : Dim2) : List Nat := List.range g.x.toNat |>.drop 1
 -- #eval (Dim2.mk 4 2).cutsₕ
 -- #eval (Dim2.mk 4 2).cutsᵥ
 
-end Dim2
+end TwoDimensionalVector.Dim2
 
 namespace TwoDimensionalVector.Rect
 
