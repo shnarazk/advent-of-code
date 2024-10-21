@@ -144,32 +144,36 @@ example (y x : Nat) : Dim2.mk (2 * y) (2 * x) = Dim2.double (Dim2.mk y x) := by
 def index (frame self : Dim2) : Nat := self.y.toNat * frame.x.toNat + self.x.toNat
 def index' (frame : Dim2) (n : Nat) : Dim2 := Dim2.mk (n / frame.x) (n % frame.x)
 
-/-
-theorem index_index'_is_id (size : Pos) (h : 0 < size.2) : ∀ p : Pos, p < size → index' size (index size p) = p := by
-  intro p Q
+theorem index_index'_is_id (size : Dim2) (h : 0 < size.x) : ∀ p : Dim2, 0 ≤ p → p < size → index' size (index size p) = p := by
+  intro p ⟨Qy', Qx'⟩ PS
   dsimp [index, index']
-  have X : (p.1 * size.2 + p.2) / size.2 = p.1 := by
-    have D1 : size.2 ∣ (p.1 * size.2) := by exact Nat.dvd_mul_left size.2 p.1
-    have D2 : (p.1 * size.2) / size.2 = p.1 := by exact Nat.mul_div_left p.1 h
-    calc (p.1 * size.2 + p.2) / size.2
-      = p.1 * size.2 / size.2 + p.2 / size.2 := by rw [Nat.add_div_of_dvd_right D1]
-      _ = p.1 + p.2 / size.2 := by rw [D2]
-      _ = p.1 + 0 := by rw [Nat.div_eq_of_lt Q.right]
-      _ = p.1 := by simp
-  have Y : (p.1 * size.2 + p.2) % size.2 = p.2 := by
-    have D1 : (p.1 * size.2) % size.2 = 0 := by exact Nat.mul_mod_left p.1 size.2
-    have D2 : p.2 % size.2 < size.2 := by exact Nat.mod_lt p.2 h
-    have D3 : p.1 * size.2 % size.2 + p.2 % size.2 < size.2 := by
-      calc p.1 * size.2 % size.2 + p.2 % size.2 = 0 + p.2 % size.2 := by rw [D1]
-      _ = p.2 % size.2 := by simp
-      _ < size.2 := by exact D2
-    calc (p.1 * size.2 + p.2) % size.2
-      = (p.1 * size.2) % size.2 + p.2 % size.2 := by exact Nat.add_mod_of_add_mod_lt D3
-      _ = p.2 % size.2 := by simp [D1]
-      _ = p.2 := by exact Nat.mod_eq_of_lt Q.right
+  simp
+  have Qy : (0 : Int) ≤ p.y := by exact Qy'
+  have Qx : (0 : Int) ≤ p.x := by exact Qx'
+  have Py : max p.y 0 = p.y := by exact Int.max_eq_left Qy
+  have Px : max p.x 0 = p.x := by exact Int.max_eq_left Qx
+  have Sx : max size.x 0 = size.x := by exact max_eq_left_of_lt h
+  have Sx' : 0 ≠ size.x := by exact Int.ne_of_lt h
+  rcases PS with ⟨_, PSx⟩
+  simp [Py, Px, Sx]
+  have X : (p.y * size.x + p.x) / size.x = p.y := by
+    have D1 : size.x ∣ (p.y * size.x) := by exact Int.dvd_mul_left p.y size.x
+    have D2 : (p.y * size.x) / size.x = p.y := by
+      rw [Int.mul_ediv_cancel p.y (id (Ne.symm Sx'))]
+    calc (p.y * size.x + p.x) / size.x
+      = p.y * size.x / size.x + p.x / size.x := by rw [Int.add_ediv_of_dvd_left D1]
+      _ = p.y + p.x / size.x := by rw [D2]
+      _ = p.y + 0 := by rw [Int.ediv_eq_zero_of_lt Qx' PSx]
+      _ = p.y := by simp
+  have Y : (p.y * size.x + p.x) % size.x = p.x := by
+    have mod_cancel (a b c : Int) : (a * c + b) % c = b % c := by
+      have : a * c % c = 0 := by exact Int.mul_emod_left a c
+      rw [@Int.emod_eq_emod_iff_emod_sub_eq_zero]
+      simp
+    calc (p.y * size.x + p.x) % size.x
+      _ = p.x % size.x := by rw [mod_cancel p.y p.x size.x]
+      _ = p.x := by exact Int.emod_eq_of_lt Qx PSx
   rw [X, Y]
-  rfl
--/
 
 open Nat
 
