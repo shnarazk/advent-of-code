@@ -1,7 +1,7 @@
 name = "AoC"
 testRunner = "Benchmark"
 defaultTargets = ["aoc"]
-version = "0.6.0"
+version = "0.6.1"
 
 [[require]]
 name = "aesop"

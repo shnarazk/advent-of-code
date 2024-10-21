@@ -55,8 +55,12 @@ def run (year: Nat) (day : Nat) (extra : Option String) : IO (Option AocProblem)
         then
           let (res, time) ← Aesop.time <| solver day extra
           do pure (some { res with time := (Float.ofNat time.nanos) / 1000000.0 })
-        else do pure none
-    | none => do pure none
+        else do
+          IO.println s!"{Color.red}Y{year} day{day} has not been solved!{Color.reset}"
+          pure none
+    | none => do
+       IO.println s!"{Color.red}Year {year} is not a valid year!{Color.reset}"
+       pure none
 
 def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit := do
   let solved := events.find? year |>.map (·.fst) |>.getD 1
@@ -91,7 +95,7 @@ def aocCmd (p : Parsed) : IO UInt32 := do
   return 0
 
 def aoc : Cmd := `[Cli|
-  aoc VIA aocCmd ; ["0.6.0"]
+  aoc VIA aocCmd ; ["0.6.1"]
   "Run Advent-of-Code codes in Lean4"
 
   FLAGS:
