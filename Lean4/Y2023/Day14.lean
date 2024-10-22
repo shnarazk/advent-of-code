@@ -66,6 +66,19 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
       self
   | _ => dbg "?" self
 
+def evaluate (self : Rect Kind) : Nat :=
+  let height : Nat := self.shape.y.toNat
+  (List.range self.shape.y.toNat).foldl
+    (fun c y ↦
+      (List.range self.shape.x.toNat).foldl
+        (fun c x ↦
+          match self.get (Dim2.mk (Int.ofNat y) (Int.ofNat x)) Kind.Empty with
+          | Kind.Round => c + height - y
+          | Kind.Cube  => c
+          | Kind.Empty => c)
+        c)
+    (0 : Nat)
+
 end TwoDimensionalVector.Rect
 
 namespace Y2023.Day14
@@ -79,7 +92,7 @@ def cell := pchar 'O' <|> pchar '#' <|> pchar '.'
 
 def maze_line := do
   let v ← many1 cell <* eol
-  return (dbg "line" v).map (match · with | 'O' => Kind.Round | '#' => Kind.Cube | _ => Kind.Empty)
+  return  v.map (match · with | 'O' => Kind.Round | '#' => Kind.Cube | _ => Kind.Empty)
 
 def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
 
@@ -92,24 +105,17 @@ end parser
 namespace Part1
 open TwoDimensionalVector.Rect
 
-def solve (as: Array (Rect Kind)) : Nat :=
-  if let some a := dbg "array" as[0]? then
-    let b := dbg "rotate" $ a.pullUp Dir.N
-    b.area
-  else
-    0
+def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) |>sum
 
 end Part1
 
 namespace Part2
+open TwoDimensionalVector.Rect
 
 def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2023 14
-  ((dbg "parsed") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2023 14 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day14
