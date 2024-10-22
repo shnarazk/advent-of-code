@@ -359,8 +359,25 @@ deriving Repr
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.shape == b.shape && a.vector == b.vector
 
+private def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
+  if l.length = 0 then
+    ([] : List (List α))
+  else
+    if n < l.length then
+      (l.take n) :: fold_n n (l.drop n) h
+    else
+      ([l] : List (List α))
+
+-- #eval fold_n 3 #[0, 2, 3, 10, 12, 19, 20, 22, 23].toList (by simp)
+
+def Rect.to2Dmatrix {α : Type} [BEq α] (self : Rect α) : List (List α) :=
+  let w : Nat := self.shape.x.toNat
+  if h : 0 < w then fold_n w self.vector.toList h else []
+
 instance [ToString α] [BEq α] : ToString (Rect α) where
-  toString bp := s!"{bp.shape}{toString bp.vector}"
+  toString self :=
+    let ll := self.to2Dmatrix
+    ll.map (fun l ↦ s!"{toString l}\n") |> String.join |> (String.append "\n" ·)
 
 namespace Rect
 

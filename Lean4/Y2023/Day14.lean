@@ -88,8 +88,14 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse parser
 end parser
 
 namespace Part1
+open TwoDimensionalVector.Rect
 
-def solve (_ : Input) : Nat := 0
+def solve (as: Array (Rect Kind)) : Nat :=
+  if let some a := dbg "array" as[0]? then
+    let b := dbg "rotate" $ a.pullUp Dir.N
+    b.area
+  else
+    0
 
 end Part1
 
