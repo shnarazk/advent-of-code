@@ -47,22 +47,24 @@ def Dir.to_dim2 (self : Dir) : Dim2 :=
 
 namespace TwoDimensionalVector.Rect
 
+-- notation:50 lhs " _ " rhs => Dim2.mk lhs rhs
+-- #eval 30 _ 40
+
 def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
   match dir with
   | .N =>
     (List.range self.shape.x.toNat).foldl
-      (fun (m, filled) y ↦
+      (fun m x ↦
         (List.range self.shape.y.toNat).foldl
-          (fun (m, filled) x ↦
-            match self.get (Dim2.mk y x) Kind.Empty with
-            | Kind.Round => (m.swap (Dim2.mk filled x) (Dim2.mk y x), filled + 1)
-            | Kind.Cube  => (m, y)
-            | Kind.Empty => (m, filled))
-          (m, filled)
-        )
-      (self, 0)
-    |>.fst
-  | _ => self
+          (fun (m, empty) y ↦
+            match m.get (Dim2.mk y x) Kind.Empty with
+            | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty + 1)
+            | Kind.Cube  => (m, y + 1)
+            | Kind.Empty => (m, empty))
+          (m, 0)
+        |>.fst)
+      self
+  | _ => dbg "?" self
 
 end TwoDimensionalVector.Rect
 

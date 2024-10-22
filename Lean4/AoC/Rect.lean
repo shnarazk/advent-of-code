@@ -451,7 +451,7 @@ def validIndex? [BEq α]
   let v := self.vector.set! ix val
   if h : self.shape.area = v.size
     then Rect.new self.shape v self.validShape h
-    else self
+    else dbgTrace "invalid" (fun _ ↦ self)
 
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
@@ -464,7 +464,16 @@ def validIndex? [BEq α]
   (self : Rect α) (p q : Dim2) : Rect α :=
   let a := self.get p default
   let b := self.get q default
-  self.set q a |>.set q b
+  self.set p b |>.set q a
+
+-- def r := Rect.of2DMatrix #[#[0,1], #[2,4]]
+-- #eval r
+-- #eval r.set (Dim2.mk 1 1) 100
+-- #eval r.modify (Dim2.mk 1 1) (· + 20) 0
+-- #eval r.get (Dim2.mk 0 0) 77
+-- #eval r.get (Dim2.mk 1 1) 88
+-- #eval r.swap (Dim2.mk 0 0) (Dim2.mk 1 1)
+
 /--
 - search an element that satisfies the predicate and return indices or none
 -/
