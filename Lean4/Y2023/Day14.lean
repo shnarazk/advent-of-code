@@ -1,20 +1,20 @@
 import Std
+import Mathlib.Algebra.Order.Group.Unbundled.Abs
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect
-
-namespace Y2023.Day14
-
 open Std Accumulation CiCL BQN
 open TwoDimensionalVector
 
 inductive Kind where
   | Round : Kind
   | Cube  : Kind
-  | Empty : Kind 
-deriving BEq, Repr
+  | Empty : Kind
+deriving BEq, Repr, Hashable
+
+instance : Inhabited Kind where default := .Empty
 
 instance : ToString Kind where
   toString : Kind → String
@@ -22,6 +22,51 @@ instance : ToString Kind where
   | Kind.Cube  => "#"
   | Kind.Empty => "."
 
+inductive Dir where
+  | N : Dir
+  | E : Dir
+  | S : Dir
+  | W : Dir
+deriving BEq, Repr
+
+def Dir.rotate (self : Dir) : Dir :=
+  match self with
+  | .N => .E
+  | .E => .S
+  | .S => .W
+  | .W => .N
+
+def Dir.to_dim2 (self : Dir) : Dim2 :=
+  match self with
+  | .N => Dim2.mk 0 1
+  | .E => Dim2.mk 1 0
+  | .S => Dim2.mk 0 (-1)
+  | .W => Dim2.mk (-1) 0
+
+#eval Dir.N.rotate.rotate.rotate.rotate
+
+namespace TwoDimensionalVector.Rect
+
+def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
+  match dir with
+  | .N =>
+    (List.range self.shape.x.toNat).foldl
+      (fun (m, filled) y ↦
+        (List.range self.shape.y.toNat).foldl
+          (fun (m, filled) x ↦
+            match self.get (Dim2.mk y x) Kind.Empty with
+            | Kind.Round => (m.swap (Dim2.mk filled x) (Dim2.mk y x), filled + 1)
+            | Kind.Cube  => (m, y)
+            | Kind.Empty => (m, filled))
+          (m, filled)
+        )
+      (self, 0)
+    |>.fst
+  | _ => self
+
+end TwoDimensionalVector.Rect
+
+namespace Y2023.Day14
 namespace parser
 
 open AoCParser

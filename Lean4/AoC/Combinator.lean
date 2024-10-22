@@ -63,8 +63,8 @@ Three train
 def train (x : α → β) (z : β → γ → ε) (y : α → γ) (a : α) : ε := z (x a) (y a)
 notation:60 " ⎊" lhs:60 "‿" mhs:60 "‿" rhs:60 => train lhs mhs rhs
 
-notation:100 "¯" val => (- val)
--- #eval 4 + ¯80
+-- notation:100 " ¯" val => (- val)
+-- #eval (· + (1 : Int)) ¯8
 
 end BQN
 

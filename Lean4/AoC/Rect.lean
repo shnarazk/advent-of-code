@@ -406,7 +406,7 @@ def of2DMatrix [BEq α]
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
-def get [BEq α]
+@[inline] def get [BEq α]
     (self : Rect α) (p : Dim2) (default : α) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
@@ -418,7 +418,7 @@ def validIndex? [BEq α]
     (self : Rect α) (p : Dim2) : Bool :=
   0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
-def get? [BEq α] [Inhabited α]
+@[inline] def get? [BEq α] [Inhabited α]
     (self : Rect α) (p : Dim2) : Option α :=
   if self.validIndex? p then
     self.get p default |> some
@@ -428,7 +428,7 @@ def get? [BEq α] [Inhabited α]
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def set [BEq α]
+@[inline] def set [BEq α]
     (self : Rect α) (p : Dim2) (val : α) : Rect α :=
   let ix := self.shape.index p
   let v := self.vector.set! ix val
@@ -439,10 +439,15 @@ def set [BEq α]
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-def modify [BEq α]
+@[inline] def modify [BEq α]
   (self : Rect α) (p : Dim2) (f : α → α) (default : α) : Rect α :=
   self.set p <| f <| self.get p default
 
+@[inline] def swap [BEq α] [Inhabited α]
+  (self : Rect α) (p q : Dim2) : Rect α :=
+  let a := self.get p default
+  let b := self.get q default
+  self.set q a |>.set q b
 /--
 - search an element that satisfies the predicate and return indices or none
 -/
