@@ -64,7 +64,44 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           (m, 0)
         |>.fst)
       self
-  | _ => dbg "?" self
+   | .S =>
+    (List.range self.shape.x.toNat).foldl
+        (fun m x ↦
+          (List.range self.shape.y.toNat|>.reverse).foldl
+            (fun (m, empty) y ↦
+              match m.get (Dim2.mk y x) Kind.Empty with
+              | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty - 1)
+              | Kind.Cube  => (m, y - 1)
+              | Kind.Empty => (m, empty))
+            (m, self.shape.y.toNat)
+          |>.fst)
+        self
+    | .E =>
+      (List.range self.shape.y.toNat).foldl
+        (fun m y ↦
+          (List.range self.shape.x.toNat).foldl
+            (fun (m, empty) x ↦
+              match m.get (Dim2.mk y x) Kind.Empty with
+              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty + 1)
+              | Kind.Cube  => (m, x + 1)
+              | Kind.Empty => (m, empty))
+            (m, 0)
+          |>.fst)
+        self
+    | .W =>
+      (List.range self.shape.y.toNat).foldl
+        (fun m y ↦
+          (List.range self.shape.x.toNat |>.reverse).foldl
+            (fun (m, empty) x ↦
+              match m.get (Dim2.mk y x) Kind.Empty with
+              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty - 1)
+              | Kind.Cube  => (m, x - 1)
+              | Kind.Empty => (m, empty))
+            (m, self.shape.x.toNat)
+          |>.fst)
+        self
+
+def rotate : Rect Kind → Rect Kind := [.N, .E, .S, .W].foldl (·.pullUp ·)
 
 def evaluate (self : Rect Kind) : Nat :=
   let height : Nat := self.shape.y.toNat
@@ -110,9 +147,18 @@ def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) 
 end Part1
 
 namespace Part2
+open Std.HashMap
 open TwoDimensionalVector.Rect
 
-def solve (_ : Input) : Nat := 0
+-- FIXME: WIP
+private def loopTo' (memory : Std.HashMap (Rect Kind) Int) (r : Rect Kind) (n : Nat)
+    : Rect Kind :=
+  r
+
+def loopTo (self : Rect Kind) (n : Nat) : Nat :=
+  loopTo' Std.HashMap.empty self n |>.evaluate
+
+def solve (as : Array (Rect Kind)) : Nat := as.map (loopTo · 100000000) |> sum
 
 end Part2
 

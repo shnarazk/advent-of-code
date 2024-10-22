@@ -354,7 +354,7 @@ structure Rect (α : Type) [BEq α] where
   -- neZero : shape ≠ default ∧ NeZero vector.size
   validShape: NonNegDim shape
   validArea : shape.area = vector.size
-deriving Repr
+deriving Hashable, Repr
 
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.shape == b.shape && a.vector == b.vector
