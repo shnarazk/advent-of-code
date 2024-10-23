@@ -37,20 +37,6 @@ instance : ToString Dir where
       | .S => "S"
       | .W => "W"
 
-def Dir.rotate (self : Dir) : Dir :=
-  match self with
-  | .N => .E
-  | .E => .S
-  | .S => .W
-  | .W => .N
-
-def Dir.to_dim2 (self : Dir) : Dim2 :=
-  match self with
-  | .N => Dim2.mk 0 1
-  | .E => Dim2.mk 1 0
-  | .S => Dim2.mk 0 (-1)
-  | .W => Dim2.mk (-1) 0
-
 -- #eval Dir.N.rotate.rotate.rotate.rotate
 
 namespace TwoDimensionalVector.Rect
@@ -59,11 +45,13 @@ namespace TwoDimensionalVector.Rect
 -- #eval 30 _ 40
 
 def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
+  let height : Nat := self.shape.y.toNat
+  let width : Nat := self.shape.x.toNat
   match dir with
   | .N =>
-    (List.range self.shape.x.toNat).foldl
+    (List.range width).foldl
       (fun m x ↦
-        (List.range self.shape.y.toNat).foldl
+        (List.range height).foldl
           (fun (m, empty) y ↦
             match m.get (Dim2.mk y x) Kind.Empty with
             | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty + 1)
@@ -73,9 +61,9 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         |>.fst)
       self
    | .S =>
-    (List.range self.shape.x.toNat).foldl
+    (List.range width).foldl
         (fun m x ↦
-          (List.range self.shape.y.toNat|>.reverse).foldl
+          (List.range height|>.reverse).foldl
             (fun (m, empty) y ↦
               match m.get (Dim2.mk y x) Kind.Empty with
               | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty - 1)
@@ -85,9 +73,9 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           |>.fst)
         self
     | .E =>
-      (List.range self.shape.y.toNat).foldl
+      (List.range height).foldl
         (fun m y ↦
-          (List.range self.shape.x.toNat |>.reverse).foldl
+          (List.range width |>.reverse).foldl
             (fun (m, empty) x ↦
               match m.get (Dim2.mk y x) Kind.Empty with
               | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty - 1)
@@ -97,9 +85,9 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           |>.fst)
         self
     | .W =>
-      (List.range self.shape.y.toNat).foldl
+      (List.range height).foldl
         (fun m y ↦
-          (List.range self.shape.x.toNat).foldl
+          (List.range width).foldl
             (fun (m, empty) x ↦
               match m.get (Dim2.mk y x) Kind.Empty with
               | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty + 1)
@@ -172,7 +160,7 @@ private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kin
       if let some goal := memory.toList.find? (fun kv ↦ kv.snd == target) then
         goal.fst
       else
-        dbg "Unreachable" self
+        dbg "Unreachable" next
     else
       loopTo' next n (memory.insert next i') i'
 termination_by n - i
