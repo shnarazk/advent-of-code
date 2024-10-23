@@ -29,6 +29,14 @@ inductive Dir where
   | W : Dir
 deriving BEq, Repr
 
+instance : ToString Dir where
+  toString s :=
+    match s with
+      | .N => "N"
+      | .E => "E"
+      | .S => "S"
+      | .W => "W"
+
 def Dir.rotate (self : Dir) : Dir :=
   match self with
   | .N => .E
@@ -43,7 +51,7 @@ def Dir.to_dim2 (self : Dir) : Dim2 :=
   | .S => Dim2.mk 0 (-1)
   | .W => Dim2.mk (-1) 0
 
-#eval Dir.N.rotate.rotate.rotate.rotate
+-- #eval Dir.N.rotate.rotate.rotate.rotate
 
 namespace TwoDimensionalVector.Rect
 
@@ -73,10 +81,22 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
               | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty - 1)
               | Kind.Cube  => (m, y - 1)
               | Kind.Empty => (m, empty))
-            (m, self.shape.y.toNat)
+            (m, self.shape.y.toNat - 1)
           |>.fst)
         self
     | .E =>
+      (List.range self.shape.y.toNat).foldl
+        (fun m y ↦
+          (List.range self.shape.x.toNat |>.reverse).foldl
+            (fun (m, empty) x ↦
+              match m.get (Dim2.mk y x) Kind.Empty with
+              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty - 1)
+              | Kind.Cube  => (m, x - 1)
+              | Kind.Empty => (m, empty))
+            (m, self.shape.x.toNat - 1)
+          |>.fst)
+        self
+    | .W =>
       (List.range self.shape.y.toNat).foldl
         (fun m y ↦
           (List.range self.shape.x.toNat).foldl
@@ -88,20 +108,9 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
             (m, 0)
           |>.fst)
         self
-    | .W =>
-      (List.range self.shape.y.toNat).foldl
-        (fun m y ↦
-          (List.range self.shape.x.toNat |>.reverse).foldl
-            (fun (m, empty) x ↦
-              match m.get (Dim2.mk y x) Kind.Empty with
-              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty - 1)
-              | Kind.Cube  => (m, x - 1)
-              | Kind.Empty => (m, empty))
-            (m, self.shape.x.toNat)
-          |>.fst)
-        self
 
-def rotate : Rect Kind → Rect Kind := [.N, .E, .S, .W].foldl (·.pullUp ·)
+def spin : Rect Kind → Rect Kind := [.N, .W, .S, .E].foldl (·.pullUp ·)
+-- #eval [Dir.N, .W, .S, .E].foldl (fun acc x ↦ s!"{acc} => {x}") ""
 
 def evaluate (self : Rect Kind) : Nat :=
   let height : Nat := self.shape.y.toNat
@@ -150,15 +159,28 @@ namespace Part2
 open Std.HashMap
 open TwoDimensionalVector.Rect
 
--- FIXME: WIP
-private def loopTo' (memory : Std.HashMap (Rect Kind) Int) (r : Rect Kind) (n : Nat)
-    : Rect Kind :=
-  r
+private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kind) Int) (i : Nat) : Rect Kind :=
+  if n ≤ i then
+    self
+  else
+    let next : Rect Kind := self.spin
+    let i' := i + 1
+    if let some start := memory[next]? then
+      let loopLength := i' - start
+      let target := (n - start) % (dbg s!"start:{start},loop:{loopLength}" loopLength) + start
+      if let some goal := memory.toList.find? (fun kv ↦ kv.snd == target) then
+        goal.fst
+      else
+        dbg "Unreachable" self
+    else
+      loopTo' next n (memory.insert next i') i'
+termination_by n - i
 
 def loopTo (self : Rect Kind) (n : Nat) : Nat :=
-  loopTo' Std.HashMap.empty self n |>.evaluate
+  loopTo' self n Std.HashMap.empty 0 |>.evaluate
 
 def solve (as : Array (Rect Kind)) : Nat := as.map (loopTo · 100000000) |> sum
+-- def solve (as : Array (Rect Kind)) : Nat := as.map (fun m ↦ m.spin|>.spin|>(dbg "spin2" ·)|>.evaluate) |> sum
 
 end Part2
 
