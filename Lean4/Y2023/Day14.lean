@@ -159,7 +159,8 @@ namespace Part2
 open Std.HashMap
 open TwoDimensionalVector.Rect
 
-private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kind) Int) (i : Nat) : Rect Kind :=
+private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kind) Int) (i : Nat)
+    : Rect Kind :=
   if n ≤ i then
     self
   else
@@ -167,7 +168,7 @@ private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kin
     let i' := i + 1
     if let some start := memory[next]? then
       let loopLength := i' - start
-      let target := (n - start) % (dbg s!"start:{start},loop:{loopLength}" loopLength) + start
+      let target := (n - start) % loopLength + start
       if let some goal := memory.toList.find? (fun kv ↦ kv.snd == target) then
         goal.fst
       else
@@ -176,11 +177,9 @@ private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kin
       loopTo' next n (memory.insert next i') i'
 termination_by n - i
 
-def loopTo (self : Rect Kind) (n : Nat) : Nat :=
-  loopTo' self n Std.HashMap.empty 0 |>.evaluate
+def loopTo (self : Rect Kind) (n : Nat) : Nat := loopTo' self n Std.HashMap.empty 0 |>.evaluate
 
-def solve (as : Array (Rect Kind)) : Nat := as.map (loopTo · 100000000) |> sum
--- def solve (as : Array (Rect Kind)) : Nat := as.map (fun m ↦ m.spin|>.spin|>(dbg "spin2" ·)|>.evaluate) |> sum
+def solve (as : Array (Rect Kind)) : Nat := as.map (loopTo · 1000000000) |> sum
 
 end Part2
 
