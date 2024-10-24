@@ -36,6 +36,14 @@ def K (a : α) (_b : β) := a
 -/
 @[inline]
 def S (a : α → β → γ) (b : α → β) (c : α) := a c (b c)
+
+/--
+- Swap λf a b. f b a
+-/
+@[inline]
+def C (f : α → β → γ) (b : β) (a : α) : γ := f a b
+
+@[inline]
 def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
 
 end CiCL
