@@ -4,9 +4,9 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
-import «AoC».Rect
+import «AoC».Rect64
 open Std Accumulation CiCL BQN
-open TwoDimensionalVector
+open TwoDimensionalVector64
 
 inductive Kind where
   | Round : Kind
@@ -39,22 +39,24 @@ instance : ToString Dir where
 
 -- #eval Dir.N.rotate.rotate.rotate.rotate
 
-namespace TwoDimensionalVector.Rect
+namespace TwoDimensionalVector64.Rect
 
 -- notation:50 lhs " _ " rhs => Dim2.mk lhs rhs
 -- #eval 30 _ 40
 
 def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
-  let height : Nat := self.shape.y.toNat
-  let width : Nat := self.shape.x.toNat
+  let height : Nat := self.vector.size / self.width.toNat
+  let width : Nat := self.width.toNat
   match dir with
   | .N =>
     (List.range width).foldl
-      (fun m x ↦
+      (fun m xi ↦
+        let x := xi.toUInt64
         (List.range height).foldl
-          (fun (m, empty) y ↦
-            match m.get (Dim2.mk y x) Kind.Empty with
-            | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty + 1)
+          (fun (m, empty) yi ↦
+            let y := yi.toUInt64
+            match m.get y x Kind.Empty with
+            | Kind.Round => (m.swap (empty, x) (y, x), empty + 1)
             | Kind.Cube  => (m, y + 1)
             | Kind.Empty => (m, empty))
           (m, 0)
@@ -62,35 +64,41 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
       self
    | .S =>
     (List.range width).foldl
-        (fun m x ↦
+        (fun m xi ↦
+          let x := xi.toUInt64
           (List.range height|>.reverse).foldl
-            (fun (m, empty) y ↦
-              match m.get (Dim2.mk y x) Kind.Empty with
-              | Kind.Round => (m.swap (Dim2.mk empty x) (Dim2.mk y x), empty - 1)
+            (fun (m, empty) yi ↦
+              let y :=yi.toUInt64
+              match m.get y x Kind.Empty with
+              | Kind.Round => (m.swap (empty, x) (y, x), empty - 1)
               | Kind.Cube  => (m, y - 1)
               | Kind.Empty => (m, empty))
-            (m, self.shape.y.toNat - 1)
+            (m, self.width - 1)
           |>.fst)
         self
     | .E =>
       (List.range height).foldl
-        (fun m y ↦
+        (fun m yi ↦
+          let y := yi.toUInt64
           (List.range width |>.reverse).foldl
-            (fun (m, empty) x ↦
-              match m.get (Dim2.mk y x) Kind.Empty with
-              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty - 1)
+            (fun (m, empty) xi ↦
+              let x := xi.toUInt64
+              match m.get y x Kind.Empty with
+              | Kind.Round => (m.swap (y, empty) (y, x), empty - 1)
               | Kind.Cube  => (m, x - 1)
               | Kind.Empty => (m, empty))
-            (m, self.shape.x.toNat - 1)
+            (m, self.width - 1)
           |>.fst)
         self
     | .W =>
       (List.range height).foldl
-        (fun m y ↦
+        (fun m yi ↦
+          let y := yi.toUInt64
           (List.range width).foldl
-            (fun (m, empty) x ↦
-              match m.get (Dim2.mk y x) Kind.Empty with
-              | Kind.Round => (m.swap (Dim2.mk y empty) (Dim2.mk y x), empty + 1)
+            (fun (m, empty) xi ↦
+              let x := xi.toUInt64
+              match m.get y x Kind.Empty with
+              | Kind.Round => (m.swap (y, empty) (y, x), empty + 1)
               | Kind.Cube  => (m, x + 1)
               | Kind.Empty => (m, empty))
             (m, 0)
@@ -101,19 +109,20 @@ def spin : Rect Kind → Rect Kind := [.N, .W, .S, .E].foldl (·.pullUp ·)
 -- #eval [Dir.N, .W, .S, .E].foldl (fun acc x ↦ s!"{acc} => {x}") ""
 
 def evaluate (self : Rect Kind) : Nat :=
-  let height : Nat := self.shape.y.toNat
-  (List.range self.shape.y.toNat).foldl
+  let height : Nat := self.vector.size / self.width.toNat
+  (List.range height).foldl
     (fun c y ↦
-      (List.range self.shape.x.toNat).foldl
-        (fun c x ↦
-          match self.get (Dim2.mk (Int.ofNat y) (Int.ofNat x)) Kind.Empty with
+      (List.range self.width.toNat).foldl
+        (fun c xi ↦
+          let x := xi.toUInt64
+          match self.get y.toUInt64 x Kind.Empty with
           | Kind.Round => c + height - y
           | Kind.Cube  => c
           | Kind.Empty => c)
         c)
     (0 : Nat)
 
-end TwoDimensionalVector.Rect
+end TwoDimensionalVector64.Rect
 
 namespace Y2023.Day14
 namespace parser
@@ -137,7 +146,7 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse parser
 end parser
 
 namespace Part1
-open TwoDimensionalVector.Rect
+open TwoDimensionalVector64.Rect
 
 def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) |>sum
 
@@ -145,7 +154,7 @@ end Part1
 
 namespace Part2
 open Std.HashMap
-open TwoDimensionalVector.Rect
+open TwoDimensionalVector64.Rect
 
 private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kind) Int) (i : Nat)
     : Rect Kind :=
