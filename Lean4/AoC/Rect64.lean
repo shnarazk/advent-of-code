@@ -2,7 +2,7 @@
 import Mathlib.Tactic
 import Std.Data.HashMap
 
-namespace TwoDimensionalVector
+namespace TwoDimensionalVector64
 
 def NonNegDim (d : UInt64 × UInt64) := 0 ≤ d.fst ∧ 0 ≤ d.snd
 
@@ -206,4 +206,4 @@ def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 -- #eval x.set (0, 0) false
 -- #eval y.set (1, 1) 10000
 
-end TwoDimensionalVector
+end TwoDimensionalVector64
