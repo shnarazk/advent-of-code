@@ -8,7 +8,7 @@ import «AoC».Parser
 namespace Y2023.Day10
 open CiCL CoP TwoDimensionalVector64
 
-def Dim2 := UInt64 × UInt64
+abbrev Dim2 := UInt64 × UInt64
 
 def makeNeighbors (size s : Dim2) : List Dim2 :=
   [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
