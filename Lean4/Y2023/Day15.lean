@@ -3,16 +3,12 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2023.Day15
 
 open Std Accumulation CiCL
 
-structure Input where
-deriving BEq, Repr
-
-instance : ToString Input where toString _ := s!""
+abbrev Input := Array (Array Char)
 
 namespace parser
 
@@ -20,15 +16,22 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def parse : String → Option Input := AoCParser.parse parser
-  where
-    parser : Parser Input := return Input.mk
+def segments := sepBy1
+  (many1 (satisfy (!",\n".contains ·)))
+  (satisfy (",\n".contains ·))
+
+def parse : String → Option Input := AoCParser.parse segments
+
+-- #eval parse "abc,de=,cko"
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (data : Input) : Nat :=
+  data.map (fun chars ↦ chars.foldl
+    (fun current c ↦ current + c.val.toNat |> (· * 17) |> (· % 256)) 0)
+  |> sum
 
 end Part1
 
@@ -38,9 +41,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2023 15
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2023 15 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day15
