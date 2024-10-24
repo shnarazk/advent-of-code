@@ -1,12 +1,10 @@
-import Std
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2023.Day15
 
-open Std Accumulation CiCL
+open Accumulation
 
 abbrev Input := Array (Array Char)
 
@@ -31,11 +29,7 @@ def parse_box : String → Option (String × Nat) := AoCParser.parse p
       return (label, val)
 -- #eval parse_box "ab=85"
 
-def parse_ers : String → Option String := AoCParser.parse p
-  where
-    p := do
-      let label ← alphabets <* pchar '-'
-      return label
+def parse_ers : String → Option String := AoCParser.parse (alphabets <* pchar '-')
 -- #eval parse_ers "ab-"
 
 end parser
@@ -51,21 +45,13 @@ end Part1
 
 namespace Part2
 
-def windows2 {α : Type} (l : List α) : List (α × α) :=
-  match l with
-  | [] => []
-  | k :: v :: l' => (k, v) :: windows2 l'
-  | e => dbgTrace s!"unreachable: {e.length}" (fun _ => [])
--- #eval windows2 "abcdefgh".toList
-
--- #eval String.mk #['a', 'c'].toList
-
 /- We need `push-tail` operetion -/
 abbrev AssocList := List (String × Nat)
 
 def assoc_insert (al : AssocList) (tag : String) (val : Nat) : AssocList :=
   let (l, found) := al.foldr
-    (fun (k, v) (l, found) ↦ if k == tag then ((k, val) :: l, true) else ((k, v) :: l, found))
+    (fun (k, v) (l, found) ↦
+      if k == tag then ((k, val) :: l, true) else ((k, v) :: l, found))
     ([], false)
   if found then l else al ++ [(tag, val)]
 
@@ -85,9 +71,7 @@ def solve (data : Input) : Nat :=
       (Array.mkArray 256 [])
     |>.foldl
         (fun (acc, index) al ↦
-          al.foldl
-              (fun (acc, i) (_, val) ↦ (acc + index * i * val, i + 1))
-              (acc, 1)
+          al.foldl (fun (acc, i) (_, val) ↦ (acc + index * i * val, i + 1)) (acc, 1)
             |>(·.fst, index + 1))
         (0, 1)
     |>.fst
