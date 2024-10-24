@@ -1,11 +1,12 @@
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
 namespace Y2023.Day09
-open Std Accumulation
+
+open Accumulation
 
 namespace parser
+
 open AoCParser
 open Std.Internal.Parsec.String
 
@@ -30,9 +31,10 @@ def evaluate_ (n : Nat) (a : List Int) : Int :=
   | 0 => 0
   | n' + 1 =>
     let diff : List Int := windows₂ a |>.map (fun (a, b) => b - a)
-    if diff.all (· == 0)
-    then a.getLast!
-    else (evaluate_ n' diff) + a.getLast!
+    if diff.all (· == 0) then
+      a.getLast!
+    else
+      (evaluate_ n' diff) + a.getLast!
 
 def evaluate (a : Array Int) : Int := evaluate_ a.size a.toList
 

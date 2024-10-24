@@ -1,12 +1,11 @@
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
 namespace Y2023.Day08
+
 open Batteries
 
 structure Puzzle where
-  new ::
   path     : List Char
   branches : HashMap String (String × String)
 
@@ -27,7 +26,7 @@ def parser := do
   let hash := branches.foldl
     (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
     HashMap.empty
-  return Puzzle.new path.toList hash
+  return Puzzle.mk path.toList hash
 
 def parse := AoCParser.parse parser
 
@@ -48,8 +47,8 @@ def trace₂ (puzzle : Puzzle) (limit : Nat) (step : Nat) (pos : String) : Nat :
   match limit with
   | 0 => 0
   | lim + 1 =>
-    if pos.endsWith "Z"
-    then step
+    if pos.endsWith "Z" then
+      step
     else
       let (left, right) := puzzle.branches.find! pos
       let dir := puzzle.path[step % puzzle.path.length]!

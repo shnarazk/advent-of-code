@@ -1,6 +1,7 @@
 import «AoC».Basic
 
 namespace Y2023.Day04
+
 open Accumulation
 
 def parsed (source : String) : List Nat × List Nat :=
@@ -43,12 +44,10 @@ def evaluate (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)
     let found   := line.snd.filter (line.fst.contains ·)
     let num     := counts.get! n
     let counts' := (List.iota found.length).foldr (fun k c => c.modify (n + k) (. + num)) counts
-    evaluate (n+1) counts' table'
+    evaluate (n + 1) counts' table'
 
 def solve (lines : Array String) : Nat :=
-  let table  := lines.toList.map parsed
-  let counts := Array.mkArray lines.size 1
-  evaluate 0 counts table
+  evaluate 0 (Array.mkArray lines.size 1) (lines.toList.map parsed)
 
 end Part2
 

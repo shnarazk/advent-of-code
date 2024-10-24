@@ -50,7 +50,7 @@ end TwoDimensionalVector.Rect
 
 namespace Y2023.Day13
 
-open Std Accumulation CoP CiCL
+open Accumulation CoP CiCL
 open TwoDimensionalVector
 
 namespace parser
@@ -127,10 +127,6 @@ end Part2
 
 -- #eval (some #[3, 5]).map (·.shrink 1)
 
-def solve := AocProblem.config 2023 13
-  parser.parse
-  -- ((·.map ((⎊toString‿dbgTrace‿K) ∘ (·.shrink 1))) ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2023 13 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day13

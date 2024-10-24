@@ -3,11 +3,11 @@ import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2023.Day12
+
 open Accumulation
 open Batteries CoP
 
 structure Data where
-  new ::
   pattern : Array Char
   rule    : Array Nat
 deriving BEq, Repr
@@ -16,6 +16,7 @@ instance : ToString Data where
   toString s := s!"\"{String.intercalate "" (Array.map toString s.pattern).toList}\" :: {s.rule}\n"
 
 namespace parser
+
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
@@ -23,7 +24,7 @@ open Std.Internal.Parsec.String
 def line_parser := do
   let pattern ← many1 (pchar '.' <|> pchar '#' <|> pchar '?') <* whitespaces
   let rule    ← sepBy1 number (pchar ',')
-  return Data.new pattern rule
+  return Data.mk pattern rule
 
 def parse := AoCParser.parse $ sepBy1 line_parser eol
 
@@ -99,7 +100,7 @@ def Part2.evaluate (conf : Data) : Nat :=
   let r := conf.rule.toList
   let rule := [r, r, r, r, r].join
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
-  |>.snd
+    |>.snd
 
 def solve := AocProblem.config 2023 12 parser.parse
     (·.map Part1.evaluate |> sum)

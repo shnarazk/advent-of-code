@@ -1,4 +1,3 @@
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -11,16 +10,14 @@ structure Hand where
 deriving BEq, Inhabited, Repr
 
 namespace parser
+
 open Lean AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def card := digit <|> pchar 'A' <|> pchar 'K' <|> pchar 'Q' <|> pchar 'J' <|> pchar 'T'
-
 def cards := many1 card <* whitespaces
-
 def line : Parser Hand := (return Hand.hand) <*> cards <*> number
-
 def parse := AoCParser.parse $ sepBy1 line eol
 
 end parser
@@ -60,8 +57,7 @@ def order₁ : Char -> Nat
 
 -- #eval order₁ 'A'
 
-def orderOf (order : Char -> Nat) (h : Hand) : Array Nat :=
-  Array.map order h.cards
+def orderOf (order : Char -> Nat) (h : Hand) : Array Nat := Array.map order h.cards
 
 def evaluation (h : Hand) : (Nat × List Nat) × Nat :=
   let ord := orderOf order₁ h |> Array.toList
@@ -94,10 +90,8 @@ def solve1 (d : Array Hand) : Nat :=
     match compare a.fst.fst b.fst.fst, compareList a.fst.snd b.fst.snd with
     | Ordering.eq, ord => ord == Ordering.lt
     | ord, _ => ord == Ordering.lt)
-  let winnings := o.foldl
-      (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1))
-      (0, 1)
-  winnings.fst
+  o.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1)
+    |>.fst
 
 def order₂ : Char -> Nat
   | 'A' => 14

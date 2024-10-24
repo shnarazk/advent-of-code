@@ -1,6 +1,7 @@
 import «AoC».Basic
 
 namespace Y2023.Day02
+
 open Accumulation
 
 def toHashMap (source : String) : Std.HashMap String Nat :=

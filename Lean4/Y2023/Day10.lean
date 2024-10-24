@@ -1,11 +1,11 @@
 import Mathlib.Tactic
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Rect64
 import «AoC».Parser
 
 namespace Y2023.Day10
+
 open CiCL CoP TwoDimensionalVector64
 
 abbrev Dim2 := UInt64 × UInt64
@@ -43,13 +43,13 @@ instance : Inhabited Circuit where default := Circuit.x
 
 instance : ToString Circuit where
   toString c :=
-  match c with
-  | .v => "|"
-  | .h => "-"
-  | .l => "L"
-  | .j => "J"
-  | .s => "S"
-  | _  => " "
+    match c with
+    | .v => "|"
+    | .h => "-"
+    | .l => "L"
+    | .j => "J"
+    | .s => "S"
+    | _  => " "
 
 def Circuit.ofChar (c : Char) : Circuit :=
   match c with
@@ -72,14 +72,15 @@ def dest (mat : Rect Circuit) (vec : Dim2 × Dim2) : Dim2 × Dim2 :=
   let dy := now.fst - pre.fst
   let dx := now.snd - pre.snd
   let diff := match mat.get? now.fst now.snd with
-  | some .v => (now.fst + dy, now.snd)
-  | some .h => (now.fst     , now.snd + dx)
-  | some .l => (now.fst + dx, now.snd + dy)
-  | some .j => (now.fst - dx, now.snd - dy)
-  |       _ => now
+    | some .v => (now.fst + dy, now.snd)
+    | some .h => (now.fst     , now.snd + dx)
+    | some .l => (now.fst + dx, now.snd + dy)
+    | some .j => (now.fst - dx, now.snd - dy)
+    |       _ => now
   (now, diff)
 
 namespace parser
+
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
@@ -159,7 +160,8 @@ partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState
     (0, m, false)
   if r.snd.snd then loop r.snd.fst size else r.snd.fst
 
-def propagate (self : Array PropagateState) (size : Dim2) : Array PropagateState := loop s size
+def propagate (self : Array PropagateState) (size : Dim2) : Array PropagateState :=
+  loop s size
   where
     s := self.set! 0 .ToExpand
 

@@ -1,4 +1,3 @@
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Parser
 
@@ -33,11 +32,11 @@ def evaluate (r : Race) : Nat :=
 end Race
 
 namespace parser
+
 open Lean Parser AoCParser
 open Std.Internal.Parsec.String
 
 def numbers := sepBy1 number whitespaces
-
 def ptime := pstring "Time:" *> whitespaces *> numbers
 def pdist := pstring "Distance:" *> whitespaces *> numbers
 
@@ -59,13 +58,17 @@ def parse (data : String) :=
 end parser
 
 def Part1.solve (data : String) : String :=
-  if let some races := parser.parse data
-  then s!"{races.map Race.evaluate|> product}"
-  else "parse error"
+  if let some races := parser.parse data then
+    s!"{races.map Race.evaluate|> product}"
+  else
+    "parse error"
 
 def Part2.solve (data : String) : Nat :=
   let x := (data.split (. == '\n')).map (fun l =>
-    List.foldl (fun n d => n * 10 + d.toNat - '0'.toNat) 0 (l.toList.filter Char.isDigit))
+      List.foldl
+          (fun n d => n * 10 + d.toNat - '0'.toNat)
+          0
+          (l.toList.filter Char.isDigit))
   let r := Race.new (x.get! 0) (x.get! 1)
   r.evaluate
 

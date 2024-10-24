@@ -1,11 +1,9 @@
-import Std
-import Mathlib.Algebra.Order.Group.Unbundled.Abs
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
-open Std Accumulation CiCL BQN
+
+open Accumulation CiCL BQN
 open TwoDimensionalVector64
 
 inductive Kind where
@@ -18,9 +16,9 @@ instance : Inhabited Kind where default := .Empty
 
 instance : ToString Kind where
   toString : Kind → String
-  | Kind.Round => "O"
-  | Kind.Cube  => "#"
-  | Kind.Empty => "."
+    | Kind.Round => "O"
+    | Kind.Cube  => "#"
+    | Kind.Empty => "."
 
 inductive Dir where
   | N : Dir
@@ -125,6 +123,7 @@ def evaluate (self : Rect Kind) : Nat :=
 end TwoDimensionalVector64.Rect
 
 namespace Y2023.Day14
+
 namespace parser
 
 open AoCParser
@@ -146,6 +145,7 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse parser
 end parser
 
 namespace Part1
+
 open TwoDimensionalVector64.Rect
 
 def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) |>sum
@@ -153,6 +153,7 @@ def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) 
 end Part1
 
 namespace Part2
+
 open Std.HashMap
 open TwoDimensionalVector64.Rect
 

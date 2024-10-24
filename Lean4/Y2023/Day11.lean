@@ -1,14 +1,13 @@
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2023.Day11
+
 open CoP
 open Std
 
 structure Data where
-  new   ::
   size  : Nat × Nat
   array : Array Bool
 deriving Repr
@@ -24,6 +23,7 @@ instance : ToString Data where
 end Data
 
 namespace parser
+
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
