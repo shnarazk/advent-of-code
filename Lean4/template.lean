@@ -3,6 +3,7 @@ import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
+-- import «AoC».Rect64
 
 namespace Y20XX.DayXX
 
@@ -37,8 +38,8 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2024 11
-  ((train toString dbgTrace K) ∘ parser.parse)
+def solve := AocProblem.config 20XX XX
+  ((dbg "parsed as ") ∘ parser.parse)
   Part1.solve
   Part2.solve
 
