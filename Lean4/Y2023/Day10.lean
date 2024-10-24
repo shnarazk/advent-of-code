@@ -2,25 +2,27 @@ import Mathlib.Tactic
 import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
-import «AoC».Rect
+import «AoC».Rect64
 import «AoC».Parser
 
 namespace Y2023.Day10
-open CiCL CoP TwoDimensionalVector
+open CiCL CoP TwoDimensionalVector64
+
+def Dim2 := UInt64 × UInt64
 
 def makeNeighbors (size s : Dim2) : List Dim2 :=
   [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
     |>.filterMap
       (fun d => if
-        !( (s.y    == 0       && d.fst == .lt)
-        || (size.y ≤ s.y + 1  && d.fst == .gt)
-        ||  size.y < s.y + 1
-        || (s.x    == 0       && d.snd == .lt)
-        || (size.x = s.x + 1  && d.snd == .gt)
-        ||  size.x < s.x + 1)
-        then some (Dim2.mk
-          (match d.fst with | .lt => s.y - 1 | .eq => s.y | .gt => s.y + 1)
-          (match d.snd with | .lt => s.x - 1 | .eq => s.x | .gt => s.x + 1))
+        !( (s.fst    == 0         && d.fst == .lt)
+        || (size.fst ≤ s.fst + 1  && d.fst == .gt)
+        ||  size.fst < s.fst + 1
+        || (s.snd    == 0         && d.snd == .lt)
+        || (size.snd = s.snd + 1  && d.snd == .gt)
+        ||  size.snd < s.snd + 1)
+        then some (
+          (match d.fst with | .lt => s.fst - 1 | .eq => s.fst | .gt => s.fst + 1),
+          (match d.snd with | .lt => s.snd - 1 | .eq => s.snd | .gt => s.snd + 1))
         else none)
 
 def makeVecs (size start : Dim2) : List (Dim2 × Dim2) :=
@@ -63,20 +65,19 @@ def Circuit.ofChar (c : Char) : Circuit :=
 -- #eval (Circuit.ofChar 'f') |> toString
 
 def startPosition (self : Rect Circuit) : Dim2 :=
-  self.findPosition? (· == Circuit.s) |>.unwrapOr (Dim2.mk 0 0)
+  self.findPosition? (· == Circuit.s) |>.unwrapOr (0, 0)
 
 def dest (mat : Rect Circuit) (vec : Dim2 × Dim2) : Dim2 × Dim2 :=
   let (pre, now) := vec
-  let diff := now - pre
-  let dy := diff.y
-  let dx := diff.x
-  let diff := match mat.get? now with
-  | some .v => Dim2.mk dy   0
-  | some .h => Dim2.mk  0  dx
-  | some .l => Dim2.mk dx  dy
-  | some .j => Dim2.mk (-dx) (-dy)
-  |       _ => Dim2.mk  0   0
-  (now, now + diff)
+  let dy := now.fst - pre.fst
+  let dx := now.snd - pre.snd
+  let diff := match mat.get? now.fst now.snd with
+  | some .v => (now.fst + dy, now.snd)
+  | some .h => (now.fst     , now.snd + dx)
+  | some .l => (now.fst + dx, now.snd + dy)
+  | some .j => (now.fst - dx, now.snd - dy)
+  |       _ => now
+  (now, diff)
 
 namespace parser
 open AoCParser
@@ -112,12 +113,12 @@ def loop_len
   | 0        => 0
   | lim' + 1 =>
     let v' := dest self vec
-    if v'.fst == v'.snd
-      then if v'.snd == start then len + 1 else 0
+    if v'.fst.fst == v'.snd.fst && v'.fst.snd == v'.snd.snd
+      then if v'.snd.fst == start.fst && v'.snd.snd == start.snd then len + 1 else 0
       else loop_len self lim' start (len + 1) v'
 
 def solve (m : Rect Circuit) : Nat :=
-  makeVecs m.shape (startPosition m)
+  makeVecs (m.vector.size.toUInt64 / m.width, m.width) (startPosition m)
     |>.map (loop_len m m.area (startPosition m) 0 .)
     |>.max? |>.getD 0 |> (· / 2)
 
@@ -136,14 +137,14 @@ instance : Inhabited PropagateState where default := .Unknown
 
 def map_of (size : Dim2) (locs : List Dim2) : Array PropagateState :=
   locs.foldl
-    (fun map pos ↦ map.set! (size.index pos) PropagateState.Wall)
-    (Array.mkArray (size.y.toNat * size.x.toNat) PropagateState.Unknown)
+    (fun map pos ↦ map.set! (size.snd * pos.fst + pos.snd).toNat PropagateState.Wall)
+    (Array.mkArray (size.fst.toNat * size.snd.toNat) PropagateState.Unknown)
 
 def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array PropagateState :=
-  makeNeighbors size (size.index' n)
+  makeNeighbors size (n.toUInt64 / size.snd,  n.toUInt64 % size.snd)
     |>.foldl
-      (fun m q ↦ match m.get! (size.index q) with
-        | .Unknown => m.set! (size.index q) .ToExpand
+      (fun m q ↦ match m.get! (size.snd * q.fst + q.snd).toNat with
+        | .Unknown => m.set! (size.snd * q.fst + q.snd).toNat .ToExpand
         | _ => m)
       (self.set! n .Propagated)
 
@@ -160,7 +161,7 @@ partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState
 
 def propagate (self : Array PropagateState) (size : Dim2) : Array PropagateState := loop s size
   where
-    s := self.set! (size.index (0, 0)) .ToExpand
+    s := self.set! 0 .ToExpand
 
 def mkLoop
     (self : Rect Circuit)
@@ -173,13 +174,13 @@ def mkLoop
   | 0        => []
   | lim' + 1 =>
     let v' : Dim2 × Dim2 := dest self vec
-    if v'.fst == v'.snd
-      then if v'.snd == start then path ++ [v'.fst] else []
+    if v'.fst.fst == v'.snd.fst && v'.fst.snd == v'.snd.snd
+      then if v'.snd.fst == start.fst && v'.snd.snd == start.snd then path ++ [v'.fst] else []
       else mkLoop self lim' start (path ++ [v'.fst]) v'
 
 def interpolate (p : Dim2) (q : Dim2) : Dim2 :=
-  let (p', q') := both Dim2.double (p, q)
-  ((p'.y + q'.y) / 2, (p'.x + q'.x) / 2)
+  let (p', q') := both (fun d ↦ (d.fst * 2, d.snd * 2)) (p, q)
+  ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
 
 -- #eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
 
@@ -188,8 +189,8 @@ This generates a list of dupicated nodes.
 -/
 def scaleUp : List Dim2 → List Dim2
   | []          => []
-  | p :: []     => [p.double]
-  | p :: q :: l => [p.double, interpolate p q] ++ scaleUp (q :: l)
+  | p :: []     => [(p.fst * 2, p.snd * 2)]
+  | p :: q :: l => ([(p.fst * 2, p.snd * 2), interpolate p q] : List Dim2) ++ scaleUp (q :: l)
 
 /-!
   1. pick the looping route
@@ -200,17 +201,17 @@ def scaleUp : List Dim2 → List Dim2
 -/
 def solve (m: Rect Circuit) : Nat :=
   let st := startPosition m
-  let shape := m.shape
+  let shape := (m.vector.size.toUInt64 / m.width, m.width)
   let loop := makeVecs shape st
     |>.map (mkLoop m m.area st [st] ·)
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-  let size := Dim2.double shape
+  let size : Dim2 := (shape.fst * 2, shape.snd * 2)
   let a_map := propagate (map_of size loop) size
-  List.range shape.y.toNat
+  List.range shape.fst.toNat
     |>.foldl (fun sum y ↦
-      List.range shape.x.toNat
-        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (size.index (Dim2.mk y x).double))
+      List.range shape.snd.toNat
+        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (size.snd.toNat * y * 2 + x * 2))
         |>.length
         |> (· + sum))
       0
