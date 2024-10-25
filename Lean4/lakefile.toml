@@ -31,6 +31,8 @@ name = "Y2024"
 [[lean_exe]]
 name = "aoc"
 root = "AoC"
+moreLinkArgs = ["-O3", "-UNDEBUG"]
+buildType = "release"
 
 [[lean_exe]]
 name = "lint"
