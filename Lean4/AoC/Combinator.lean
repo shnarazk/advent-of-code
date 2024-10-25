@@ -32,16 +32,55 @@ def I (a : α) := a
 def K (a : α) (_b : β) := a
 
 /--
-- Before/After: λa b c. (a c) (b c)
+- Dyandic application
 -/
 @[inline]
-def S (a : α → β → γ) (b : α → β) (c : α) := a c (b c)
+def W (f : α → α → β) (a : α) := f a a
 
 /--
 - Swap λf a b. f b a
 -/
 @[inline]
 def C (f : α → β → γ) (b : β) (a : α) : γ := f a b
+
+@[inline]
+def B (f : β → γ) (g : α → β) (a : α) := f (g a)
+
+/--
+- Monadic After: λa b c. (a c) (b c)
+-/
+@[inline]
+def S (f : α → β → γ) (b : α → β) (a : α) := f a (b a)
+
+/--
+- Dyadic After
+-/
+@[inline]
+def D (f : α → γ → δ) (a : α) (g : β → γ) (b : β) := f a (g b)
+
+@[inline]
+def B₁ (f : γ → δ) (g : α → β → γ) (a : α) (b :β) := f (g a b)
+
+/--
+- Psi
+-/
+def Ψ (f : β → β → γ) (g : α → β) (a b : α) := f (g a) (g b)
+
+/--
+- Phi
+-/
+def Φ (f : β → δ → ε) (g : α → β) (h : α → δ) (a : α) := f (g a) (h a)
+
+def D₂ (f : γ → δ → ε) (g : α → γ) (h : β → δ) (a : α) (b : β) := f (g a) (h b)
+
+def E (f : α → δ → ε) (a : α) (g : β → γ → δ) (b : β) (c : γ) := f a (g b c)
+
+/--
+- Dyadic 3-train
+-/
+def Φ₁ (f : γ → γ → δ) (g h : α → β → γ) (a : α) (b : β) := f (g a b) (h a b)
+
+def E' (f : γ → ζ → η) (g : α → β → γ) (h : δ → ε → ζ) (a : α) (b : β) (c : δ) (d : ε) := f (g a b) (h c d)
 
 @[inline]
 def uncurry (f : α → β → γ) : (α × β) → γ := fun (a, b) => f a b
