@@ -1,5 +1,3 @@
-import Std
-import Std.Internal.Parsec
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -7,7 +5,7 @@ import «AoC».Parser
 
 namespace Y20XX.DayXX
 
-open Std Accumulation CiCL
+open Accumulation CiCL
 
 structure Input where
 deriving BEq, Repr
