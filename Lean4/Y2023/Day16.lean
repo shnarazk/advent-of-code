@@ -33,8 +33,6 @@ instance : ToString (Rect Kind) where
 
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
--- #eval [some 3, none, some 2] |>.filterMap I
-
 def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
   let k := r.get pos.fst pos.snd Kind.E
   let w := r.width - 1
@@ -91,8 +89,6 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (sepBy1 maz
 
 end parser
 
-namespace Part1
-
 def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
   visited.toList.foldl (fun r (p, _) ↦ r.set p.fst p.snd Kind.P) self
 
@@ -111,19 +107,31 @@ partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_v
         (visited, [])
       |> uncurry (traverse r)
 
+def evaluate (r : Rect Kind) (start : (Dim2 × Dir)): Nat :=
+  traverse r Std.HashSet.empty [start]
+    |>.vector
+    |>.filter (· == Kind.P)
+    |>.size
+
+namespace Part1
+
 def solve (rs : Array (Rect Kind)) : Nat :=
-  rs.map (
-      traverse · Std.HashSet.empty [((0, 0), Dir.E)]
-      |>.vector
-      |>.filter (· == Kind.P)
-      |>.size)
-    |> sum
+  rs.map (evaluate · ((0, 0), Dir.E)) |> sum
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Array (Rect Kind)) : Nat := 0
+def maximize (r : Rect Kind) : Nat :=
+  let w := r.width
+  let h := r.height
+  let n := range_list w |>.map (fun (x : UInt64) ↦ (((0 : UInt64), x), Dir.S))
+  let s := range_list w |>.map (fun (x : UInt64) ↦ ((h - 1, x), Dir.N))
+  let e := range_list h |>.map (fun (y : UInt64) ↦ ((y, (0 : UInt64)), Dir.S))
+  let w := range_list h |>.map (fun (y : UInt64) ↦ ((y, w - 1), Dir.S))
+  (n ++ s ++ e ++ w).map (evaluate r ·) |>.max? |>.unwrapOr 0
+
+def solve (rs : Array (Rect Kind)) : Nat := rs.map maximize |> sum
 
 end Part2
 
