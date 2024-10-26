@@ -4,6 +4,8 @@ import Std.Data.HashMap
 
 namespace TwoDimensionalVector64
 
+abbrev Dim2 := UInt64 × UInt64
+
 def NonNegDim (d : UInt64 × UInt64) := 0 ≤ d.fst ∧ 0 ≤ d.snd
 
 partial def range_list (n : UInt64) : List UInt64 :=
@@ -13,7 +15,7 @@ partial def range_list (n : UInt64) : List UInt64 :=
     let n' := n - 1
     range_list n' ++ [n']
 
-def toList' (p : UInt64 × UInt64) : List (UInt64 × UInt64):=
+def toList' (p : Dim2) : List Dim2 :=
   let rl := range_list p.1
   List.join (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
 
@@ -56,6 +58,12 @@ instance [ToString α] [BEq α] : ToString (Rect α) where
     ll.map (fun l ↦ s!"{toString l}\n") |> String.join |> (String.append "\n" ·)
 
 namespace Rect
+
+/-
+- return the height
+-/
+@[inline]
+def height [BEq α] (self : Rect α) : UInt64 := self.vector.size.toUInt64 / self.width
 
 /--
 - return a new instance fitting to the given Dim2
