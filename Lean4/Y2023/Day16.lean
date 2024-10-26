@@ -13,9 +13,7 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
 
 namespace Y2023.Day16
 
-inductive Kind where
-| V | H | S | B | E | P
-deriving BEq, Hashable, Repr
+inductive Kind where | V | H | S | B | E | P deriving BEq, Hashable, Repr
 
 instance : ToString Kind where
   toString : Kind → String
@@ -33,9 +31,7 @@ instance : ToString (Rect Kind) where
       |>String.join
       |>("\n" ++ ·)
 
-inductive Dir where
-| N | E | S | W
-deriving BEq, Hashable, Repr
+inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
 -- #eval [some 3, none, some 2] |>.filterMap I
 
@@ -90,21 +86,15 @@ def cell := do
     | _   => Kind.E
 
 def maze_line := many1 cell <* eol
-
 def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
-
-def parse : String → Option (Array (Rect Kind)) := AoCParser.parse parser
-  where
-    parser := sepBy1 maze eol
+def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (sepBy1 maze eol)
 
 end parser
 
 namespace Part1
 
 def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
-  visited.toList.foldl
-    (fun r (p, _) ↦ r.set p.fst p.snd Kind.P)
-    self
+  visited.toList.foldl (fun r (p, _) ↦ r.set p.fst p.snd Kind.P) self
 
 partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
     : Rect Kind :=
@@ -116,9 +106,8 @@ partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_v
           if v.contains posDir then
             (v, t)
           else
-            let v' := v.insert posDir
             let l := uncurry (propagate r) posDir |>.filter (!t.contains ·)
-            (v', l++t))
+            (v.insert posDir, l ++ t))
         (visited, [])
       |> uncurry (traverse r)
 
