@@ -14,7 +14,7 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
 namespace Y2023.Day16
 
 inductive Kind where
-| V | H | S | B | E
+| V | H | S | B | E | P
 deriving BEq, Hashable, Repr
 
 instance : ToString Kind where
@@ -24,12 +24,14 @@ instance : ToString Kind where
     | .S => "/"
     | .B => "\\"
     | .E => "."
+    | .P => "ω"
 
 instance : ToString (Rect Kind) where
   toString (r : Rect Kind) : String :=
     r.to2Dmatrix.map (fun l ↦ l.map toString |> String.join)
       |>.map (· ++ "\n")
       |>String.join
+      |>("\n" ++ ·)
 
 inductive Dir where
 | N | E | S | W
@@ -39,12 +41,12 @@ deriving BEq, Hashable, Repr
 
 def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
   let k := r.get pos.fst pos.snd Kind.E
-  let w := r.width
-  let h := r.height
-  let go_n := (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), dir))
-  let go_e := (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), dir))
-  let go_s := (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), dir))
-  let go_w := (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), dir))
+  let w := r.width - 1
+  let h := r.height - 1
+  let go_n := (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), Dir.N))
+  let go_e := (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), Dir.E))
+  let go_s := (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), Dir.S))
+  let go_w := (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), Dir.W))
   match dir, k with
     | Dir.N, Kind.V => [go_n]       |>.filterMap I
     | Dir.N, Kind.H => [go_e, go_w] |>.filterMap I
@@ -69,6 +71,8 @@ def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
     | Dir.W, Kind.S => [go_s]       |>.filterMap I
     | Dir.W, Kind.B => [go_n]       |>.filterMap I
     | Dir.W, Kind.E => [go_w]       |>.filterMap I
+
+    | _, Kind.P => []
 
 namespace parser
 
@@ -97,21 +101,34 @@ end parser
 
 namespace Part1
 
+def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
+  visited.toList.foldl
+    (fun r (p, _) ↦ r.set p.fst p.snd Kind.P)
+    self
+
 partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
-    : Std.HashSet (Dim2 × Dir) :=
+    : Rect Kind :=
   if to_visit.isEmpty then
-    dbgTrace s!"{visited.toList |>.map (·.fst)}" (K visited)
+    injectTrace r visited
   else
     to_visit.foldl
         (fun (v, t) posDir ↦
-          let v' := v.insert posDir
-          let l := uncurry (propagate r) posDir |>.filter (!t.contains ·)
-          (v', l++t))
+          if v.contains posDir then
+            (v, t)
+          else
+            let v' := v.insert posDir
+            let l := uncurry (propagate r) posDir |>.filter (!t.contains ·)
+            (v', l++t))
         (visited, [])
       |> uncurry (traverse r)
 
 def solve (rs : Array (Rect Kind)) : Nat :=
-  rs.map (traverse · Std.HashSet.empty [((0, 0), Dir.E)] |>.size) |> sum
+  rs.map (
+      traverse · Std.HashSet.empty [((0, 0), Dir.E)]
+      |>.vector
+      |>.filter (· == Kind.P)
+      |>.size)
+    |> sum
 
 end Part1
 
@@ -121,9 +138,6 @@ def solve (_ : Array (Rect Kind)) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2023 16
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2023 16 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day16
