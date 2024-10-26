@@ -3,9 +3,15 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
 
-namespace Y2023.Day16
-
 open Accumulation CiCL TwoDimensionalVector64
+
+def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
+  match self with
+  | true  => some (f ())
+  | false => none
+-- #eval true.map (K 3)
+
+namespace Y2023.Day16
 
 inductive Kind where
 | V | H | S | B | E
@@ -20,10 +26,43 @@ instance : ToString Kind where
     | .E => "."
 
 instance : ToString (Rect Kind) where
-  toString (r :Rect Kind) : String :=
+  toString (r : Rect Kind) : String :=
     r.to2Dmatrix.map (fun l ↦ l.map toString |> String.join)
       |>.map (· ++ "\n")
       |>String.join
+
+inductive Dir where
+| N | E | S | W
+deriving BEq, Repr
+
+def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : Option (Dim2 × Dir) :=
+  let k := r.get pos.fst pos.snd Kind.E
+  let w := r.width
+  let h := r.height
+  match dir, k with
+    | Dir.N, Kind.V => some (pos, dir)
+    | Dir.N, Kind.H => some (pos, dir)
+    | Dir.N, Kind.S => some (pos, dir)
+    | Dir.N, Kind.B => some (pos, dir)
+    | Dir.N, Kind.E => (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), dir))
+
+    | Dir.E, Kind.V => some (pos, dir)
+    | Dir.E, Kind.H => some (pos, dir)
+    | Dir.E, Kind.S => some (pos, dir)
+    | Dir.E, Kind.B => some (pos, dir)
+    | Dir.E, Kind.E => (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), dir))
+
+    | Dir.S, Kind.V => some (pos, dir)
+    | Dir.S, Kind.H => some (pos, dir)
+    | Dir.S, Kind.S => some (pos, dir)
+    | Dir.S, Kind.B => some (pos, dir)
+    | Dir.S, Kind.E => (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), dir))
+
+    | Dir.W, Kind.V => some (pos, dir)
+    | Dir.W, Kind.H => some (pos, dir)
+    | Dir.W, Kind.S => some (pos, dir)
+    | Dir.W, Kind.B => some (pos, dir)
+    | Dir.W, Kind.E => (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), dir))
 
 namespace parser
 
