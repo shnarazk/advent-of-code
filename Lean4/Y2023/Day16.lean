@@ -15,7 +15,7 @@ namespace Y2023.Day16
 
 inductive Kind where
 | V | H | S | B | E
-deriving BEq, Repr
+deriving BEq, Hashable, Repr
 
 instance : ToString Kind where
   toString : Kind → String
@@ -33,36 +33,42 @@ instance : ToString (Rect Kind) where
 
 inductive Dir where
 | N | E | S | W
-deriving BEq, Repr
+deriving BEq, Hashable, Repr
 
-def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : Option (Dim2 × Dir) :=
+-- #eval [some 3, none, some 2] |>.filterMap I
+
+def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
   let k := r.get pos.fst pos.snd Kind.E
   let w := r.width
   let h := r.height
+  let go_n := (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), dir))
+  let go_e := (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), dir))
+  let go_s := (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), dir))
+  let go_w := (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), dir))
   match dir, k with
-    | Dir.N, Kind.V => some (pos, dir)
-    | Dir.N, Kind.H => some (pos, dir)
-    | Dir.N, Kind.S => some (pos, dir)
-    | Dir.N, Kind.B => some (pos, dir)
-    | Dir.N, Kind.E => (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), dir))
+    | Dir.N, Kind.V => [go_n]       |>.filterMap I
+    | Dir.N, Kind.H => [go_e, go_w] |>.filterMap I
+    | Dir.N, Kind.S => [go_e]       |>.filterMap I
+    | Dir.N, Kind.B => [go_w]       |>.filterMap I
+    | Dir.N, Kind.E => [go_n]       |>.filterMap I
 
-    | Dir.E, Kind.V => some (pos, dir)
-    | Dir.E, Kind.H => some (pos, dir)
-    | Dir.E, Kind.S => some (pos, dir)
-    | Dir.E, Kind.B => some (pos, dir)
-    | Dir.E, Kind.E => (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), dir))
+    | Dir.E, Kind.V => [go_n, go_s] |>.filterMap I
+    | Dir.E, Kind.H => [go_e]       |>.filterMap I
+    | Dir.E, Kind.S => [go_n]       |>.filterMap I
+    | Dir.E, Kind.B => [go_s]       |>.filterMap I
+    | Dir.E, Kind.E => [go_e]       |>.filterMap I
 
-    | Dir.S, Kind.V => some (pos, dir)
-    | Dir.S, Kind.H => some (pos, dir)
-    | Dir.S, Kind.S => some (pos, dir)
-    | Dir.S, Kind.B => some (pos, dir)
-    | Dir.S, Kind.E => (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), dir))
+    | Dir.S, Kind.V => [go_s]       |>.filterMap I
+    | Dir.S, Kind.H => [go_e, go_w] |>.filterMap I
+    | Dir.S, Kind.S => [go_w]       |>.filterMap I
+    | Dir.S, Kind.B => [go_e]       |>.filterMap I
+    | Dir.S, Kind.E => [go_s]       |>.filterMap I
 
-    | Dir.W, Kind.V => some (pos, dir)
-    | Dir.W, Kind.H => some (pos, dir)
-    | Dir.W, Kind.S => some (pos, dir)
-    | Dir.W, Kind.B => some (pos, dir)
-    | Dir.W, Kind.E => (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), dir))
+    | Dir.W, Kind.V => [go_n, go_s] |>.filterMap I
+    | Dir.W, Kind.H => [go_w]       |>.filterMap I
+    | Dir.W, Kind.S => [go_s]       |>.filterMap I
+    | Dir.W, Kind.B => [go_n]       |>.filterMap I
+    | Dir.W, Kind.E => [go_w]       |>.filterMap I
 
 namespace parser
 
@@ -91,7 +97,21 @@ end parser
 
 namespace Part1
 
-def solve (_ : Array (Rect Kind)) : Nat := 0
+partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
+    : Std.HashSet (Dim2 × Dir) :=
+  if to_visit.isEmpty then
+    dbgTrace s!"{visited.toList |>.map (·.fst)}" (K visited)
+  else
+    to_visit.foldl
+        (fun (v, t) posDir ↦
+          let v' := v.insert posDir
+          let l := uncurry (propagate r) posDir |>.filter (!t.contains ·)
+          (v', l++t))
+        (visited, [])
+      |> uncurry (traverse r)
+
+def solve (rs : Array (Rect Kind)) : Nat :=
+  rs.map (traverse · Std.HashSet.empty [((0, 0), Dir.E)] |>.size) |> sum
 
 end Part1
 
