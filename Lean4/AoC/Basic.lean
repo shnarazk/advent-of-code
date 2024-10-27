@@ -206,3 +206,9 @@ def unwrapOr {α : Type} : (Option α) → (default : α) → α
   | none , df => df
 
 end Option
+
+def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
+  match self with
+  | true  => some (f ())
+  | false => none
+-- #eval true.map (K 3)
