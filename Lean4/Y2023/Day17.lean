@@ -36,22 +36,26 @@ Composition : location × total cost × direction × steps toward the current di
 abbrev State := Dim2 × Nat × Dir × Nat
 
 def next_states (r : Rect Nat) (state : State) : List State :=
-  let (pos, dir, turn) := state
+  let (pos, cost, dir, turn) := state
   let h := r.height
   let w := r.width
   let limit := 2
   let go_n (t : Nat) := (t < limit && 0 < pos.fst).map
-      (K ((pos.fst - 1, pos.snd), Dir.N, t))
+      (fun _ ↦ let p := (pos.fst - 1, pos.snd)
+          (p, cost + r.get p.fst p.snd 0, Dir.N, t))
   let go_s (t : Nat) := (t < limit && pos.fst < h - 1).map
-      (K ((pos.fst + 1, pos.snd), Dir.S, t))
+      (fun _ ↦ let p := (pos.fst + 1, pos.snd)
+          (p, cost + r.get p.fst p.snd 0, Dir.S, t))
   let go_w (t : Nat) := (t < limit && 0 < pos.snd    ).map
-      (K ((pos.fst, pos.snd - 1), Dir.W, t))
+      (fun _ ↦ let p := (pos.fst, pos.snd - 1)
+          (p, cost + r.get p.fst p.snd 0, Dir.W, t))
   let go_e (t : Nat) := (t < limit && pos.snd < w - 1).map
-      (K ((pos.fst, pos.snd + 1), Dir.E, t))
+      (fun _ ↦ let p := (pos.fst, pos.snd + 1)
+          (p, cost + r.get p.fst p.snd 0, Dir.E, t))
   match dir with
   | .N => [go_n (turn + 1), go_e 0, go_w 0] |>.filterMap I
-  | .E => [go_e (turn + 1), go_n 0, go_s 0] |>.filterMap I
-  | .S => [go_s (turn + 1), go_w 0, go_e 0] |>.filterMap I
+  | .E => [go_e (turn + 1), go_s 0, go_n 0] |>.filterMap I
+  | .S => [go_s (turn + 1), go_e 0, go_w 0] |>.filterMap I
   | .W => [go_w (turn + 1), go_s 0, go_n 0] |>.filterMap I
 
 namespace Part1
@@ -59,19 +63,25 @@ namespace Part1
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find (r : Rect Nat) (goal : Dim2) (vt : Std.HashSet State × List State) : Nat :=
+partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashSet State × List State) : Nat :=
   let (visited, to_visit) := vt
   match to_visit with
-  | [] => r.get (r.height - 1) r.width 0
-  | (pos, _dist) :: to_visit' =>
+  | [] => thr
+  | state@(pos, cost, _, _) :: to_visit' =>
     if pos == goal then
-      0
+      if cost < thr then
+        find r goal (dbg "new cost" cost) (visited, to_visit)
+      else
+          find r goal thr (visited, to_visit)
+    else if thr <= cost || visited.contains state  then
+      find r goal thr (visited, to_visit)
     else
-      let _w := r.get pos.fst pos.snd 0
-      let visited' := visited
-      find r goal (visited', to_visit' ++ [])
+      let states := next_states r state |>.filter (fun s ↦ !visited.contains s)
+      find r goal thr (visited.insert state, states ++ to_visit')
 
-def solve (r : Rect Nat) : Nat := 0
+def solve (r : Rect Nat) : Nat :=
+  find r (r.height - 1, r.width - 1) 1000000
+      (Std.HashSet.empty, [((0, 0), 0, Dir.E, 0)])
 
 end Part1
 
