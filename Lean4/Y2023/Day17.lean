@@ -1,3 +1,4 @@
+import Batteries.Data.BinaryHeap
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -63,41 +64,40 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   | .S => [go_s (state.steps + 1), go_e 1, go_w 1] |>.filterMap I
   | .W => [go_w (state.steps + 1), go_s 1, go_n 1] |>.filterMap I
 
+abbrev BinaryHeap := Batteries.BinaryHeap State
+
 namespace Part1
 
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashMap (Dim2 × Dir) (Nat × Nat) × List State) : Nat :=
-  let (visited, to_visit) := vt
-  let path_len := 10 * (r.height + r.width)
-  match to_visit with
-  | [] => thr
-  | state :: to_visit' =>
+partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
+    (visited : Std.HashMap (Dim2 × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
+  if let (some state, to_visit') := to_visit.extractMax then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
       state.cost
-      /- if state.cost < thr then
-        find r goal (dbg "new cost" state.cost) (visited, to_visit')
-      else
-        find r goal thr (visited, to_visit')
-      -/
     else
       let recorded := visited.getD (state.pos, state.dir) (100000, 10)
       let not_covered := state.cost < recorded.fst || state.steps < recorded.snd
       if thr <= state.cost || !not_covered then
-        find r goal thr (visited, to_visit')
+        find r goal thr visited to_visit'
       else
         let states := next_states r state
             |>.filter (fun s ↦
                 let recorded := visited.getD (s.pos, s.dir) (100000, 10)
-                true || s.cost < recorded.fst || s.steps < recorded.snd)
-        find r goal thr (visited.insert (state.pos, state.dir) (state.cost, state.steps),
-          (states ++ to_visit').mergeSort
-            (fun (a b : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd) < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
+                s.cost < recorded.fst || s.steps < recorded.snd)
+        find r goal thr
+          (visited.insert (state.pos, state.dir) (state.cost, state.steps))
+          (states.foldl (·.insert ·) to_visit')
+  else
+    thr
 
 def solve (r : Rect Nat) : Nat :=
-  find r (r.height - 1, r.width - 1) 1000000
-      (Std.HashMap.empty, [State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0])
+  let path_len := 10 * (r.height + r.width)
+  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.empty
+    (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
+      (fun (b a : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd)
+        < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
 
 end Part1
 
