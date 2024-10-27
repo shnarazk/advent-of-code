@@ -37,21 +37,21 @@ abbrev State := Dim2 × Nat × Dir × Nat
 
 def next_states (r : Rect Nat) (state : State) : List State :=
   let (pos, cost, dir, turn) := state
-  let h := r.height
-  let w := r.width
-  let limit := 2
+  let h := r.height - 1
+  let w := r.width - 1
+  let limit := 3
   let go_n (t : Nat) := (t < limit && 0 < pos.fst).map
       (fun _ ↦ let p := (pos.fst - 1, pos.snd)
-          (p, cost + r.get p.fst p.snd 0, Dir.N, t))
-  let go_s (t : Nat) := (t < limit && pos.fst < h - 1).map
+          (p, cost + r.get p.fst p.snd 1, Dir.N, t))
+  let go_s (t : Nat) := (t < limit && pos.fst < h).map
       (fun _ ↦ let p := (pos.fst + 1, pos.snd)
-          (p, cost + r.get p.fst p.snd 0, Dir.S, t))
-  let go_w (t : Nat) := (t < limit && 0 < pos.snd    ).map
+          (p, cost + r.get p.fst p.snd 1, Dir.S, t))
+  let go_w (t : Nat) := (t < limit && 0 < pos.snd).map
       (fun _ ↦ let p := (pos.fst, pos.snd - 1)
-          (p, cost + r.get p.fst p.snd 0, Dir.W, t))
-  let go_e (t : Nat) := (t < limit && pos.snd < w - 1).map
+          (p, cost + r.get p.fst p.snd 1, Dir.W, t))
+  let go_e (t : Nat) := (t < limit && pos.snd < w).map
       (fun _ ↦ let p := (pos.fst, pos.snd + 1)
-          (p, cost + r.get p.fst p.snd 0, Dir.E, t))
+          (p, cost + r.get p.fst p.snd 1, Dir.E, t))
   match dir with
   | .N => [go_n (turn + 1), go_e 0, go_w 0] |>.filterMap I
   | .E => [go_e (turn + 1), go_s 0, go_n 0] |>.filterMap I
@@ -68,16 +68,21 @@ partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashSet Stat
   match to_visit with
   | [] => thr
   | state@(pos, cost, _, _) :: to_visit' =>
-    if pos == goal then
+    if pos.fst == goal.fst && pos.snd == goal.snd then
       if cost < thr then
-        find r goal (dbg "new cost" cost) (visited, to_visit)
+        find r goal (dbg "new cost" cost) (visited, to_visit')
       else
-          find r goal thr (visited, to_visit)
-    else if thr <= cost || visited.contains state  then
-      find r goal thr (visited, to_visit)
+        find r goal thr (visited, to_visit')
+    else if thr <= cost || visited.contains state then
+      find r goal thr (visited, to_visit')
     else
       let states := next_states r state |>.filter (fun s ↦ !visited.contains s)
-      find r goal thr (visited.insert state, states ++ to_visit')
+      find r goal thr (visited.insert state,
+        (states ++ to_visit').mergeSort
+          (fun (a b : State) ↦ a.fst.fst + a.fst.snd > b.fst.fst + b.fst.snd))
+
+example : ((0, 0), 10, Dir.N, 5).snd.fst = 10 := by rfl
+#check List.mergeSort' (fun (a b : State) ↦ a.fst.fst + a.fst.snd > b.fst.fst + a.fst.snd)
 
 def solve (r : Rect Nat) : Nat :=
   find r (r.height - 1, r.width - 1) 1000000
