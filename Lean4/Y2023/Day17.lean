@@ -75,10 +75,12 @@ partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashMap (Dim
   | [] => thr
   | state :: to_visit' =>
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
-      if state.cost < thr then
+      state.cost
+      /- if state.cost < thr then
         find r goal (dbg "new cost" state.cost) (visited, to_visit')
       else
         find r goal thr (visited, to_visit')
+      -/
     else
       let recorded := visited.getD (state.pos, state.dir) (100000, 10)
       let not_covered := state.cost < recorded.fst || state.steps < recorded.snd
