@@ -33,60 +33,69 @@ end parser
 /--
 Composition : location × total cost × direction × steps toward the current direction
 -/
-abbrev State := Dim2 × Nat × Dir × Nat
+-- abbrev State := Dim2 × Nat × Dir × Nat
+structure State where
+  pos   : Dim2
+  dir   : Dir
+  cost  : Nat
+  steps : Nat
+  deriving BEq, Hashable
 
 def next_states (r : Rect Nat) (state : State) : List State :=
-  let (pos, cost, dir, turn) := state
   let h := r.height - 1
   let w := r.width - 1
   let limit := 3
-  let go_n (t : Nat) := (t < limit && 0 < pos.fst).map
-      (fun _ ↦ let p := (pos.fst - 1, pos.snd)
-          (p, cost + r.get p.fst p.snd 1, Dir.N, t))
-  let go_s (t : Nat) := (t < limit && pos.fst < h).map
-      (fun _ ↦ let p := (pos.fst + 1, pos.snd)
-          (p, cost + r.get p.fst p.snd 1, Dir.S, t))
-  let go_w (t : Nat) := (t < limit && 0 < pos.snd).map
-      (fun _ ↦ let p := (pos.fst, pos.snd - 1)
-          (p, cost + r.get p.fst p.snd 1, Dir.W, t))
-  let go_e (t : Nat) := (t < limit && pos.snd < w).map
-      (fun _ ↦ let p := (pos.fst, pos.snd + 1)
-          (p, cost + r.get p.fst p.snd 1, Dir.E, t))
-  match dir with
-  | .N => [go_n (turn + 1), go_e 0, go_w 0] |>.filterMap I
-  | .E => [go_e (turn + 1), go_s 0, go_n 0] |>.filterMap I
-  | .S => [go_s (turn + 1), go_e 0, go_w 0] |>.filterMap I
-  | .W => [go_w (turn + 1), go_s 0, go_n 0] |>.filterMap I
+  let go_n (t : Nat) := (t ≤ limit && 0 < state.pos.fst).map
+      (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
+          State.mk p Dir.N (state.cost + r.get p.fst p.snd 1) t)
+  let go_s (t : Nat) := (t ≤ limit && state.pos.fst < h).map
+      (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
+          State.mk p Dir.S (state.cost + r.get p.fst p.snd 1) t)
+  let go_w (t : Nat) := (t ≤ limit && 0 < state.pos.snd).map
+      (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
+          State.mk p Dir.W (state.cost + r.get p.fst p.snd 1) t)
+  let go_e (t : Nat) := (t ≤ limit && state.pos.snd < w).map
+      (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
+          State.mk p Dir.E (state.cost + r.get p.fst p.snd 1) t)
+  match state.dir with
+  | .N => [go_n (state.steps + 1), go_e 1, go_w 1] |>.filterMap I
+  | .E => [go_e (state.steps + 1), go_s 1, go_n 1] |>.filterMap I
+  | .S => [go_s (state.steps + 1), go_e 1, go_w 1] |>.filterMap I
+  | .W => [go_w (state.steps + 1), go_s 1, go_n 1] |>.filterMap I
 
 namespace Part1
 
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashSet State × List State) : Nat :=
+partial def find (r : Rect Nat) (goal : Dim2) (thr : Nat) (vt : Std.HashMap (Dim2 × Dir) (Nat × Nat) × List State) : Nat :=
   let (visited, to_visit) := vt
+  let path_len := 10 * (r.height + r.width)
   match to_visit with
   | [] => thr
-  | state@(pos, cost, _, _) :: to_visit' =>
-    if pos.fst == goal.fst && pos.snd == goal.snd then
-      if cost < thr then
-        find r goal (dbg "new cost" cost) (visited, to_visit')
+  | state :: to_visit' =>
+    if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
+      if state.cost < thr then
+        find r goal (dbg "new cost" state.cost) (visited, to_visit')
       else
         find r goal thr (visited, to_visit')
-    else if thr <= cost || visited.contains state then
-      find r goal thr (visited, to_visit')
     else
-      let states := next_states r state |>.filter (fun s ↦ !visited.contains s)
-      find r goal thr (visited.insert state,
-        (states ++ to_visit').mergeSort
-          (fun (a b : State) ↦ a.fst.fst + a.fst.snd > b.fst.fst + b.fst.snd))
-
-example : ((0, 0), 10, Dir.N, 5).snd.fst = 10 := by rfl
-#check List.mergeSort' (fun (a b : State) ↦ a.fst.fst + a.fst.snd > b.fst.fst + a.fst.snd)
+      let recorded := visited.getD (state.pos, state.dir) (100000, 10)
+      let not_covered := state.cost < recorded.fst || state.steps < recorded.snd
+      if thr <= state.cost || !not_covered then
+        find r goal thr (visited, to_visit')
+      else
+        let states := next_states r state
+            |>.filter (fun s ↦
+                let recorded := visited.getD (s.pos, s.dir) (100000, 10)
+                true || s.cost < recorded.fst || s.steps < recorded.snd)
+        find r goal thr (visited.insert (state.pos, state.dir) (state.cost, state.steps),
+          (states ++ to_visit').mergeSort
+            (fun (a b : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd) < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
 
 def solve (r : Rect Nat) : Nat :=
   find r (r.height - 1, r.width - 1) 1000000
-      (Std.HashSet.empty, [((0, 0), 0, Dir.E, 0)])
+      (Std.HashMap.empty, [State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0])
 
 end Part1
 
