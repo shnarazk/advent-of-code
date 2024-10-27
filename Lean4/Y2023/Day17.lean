@@ -30,7 +30,10 @@ def parse : String → Option (Rect Nat) := AoCParser.parse parse
 
 end parser
 
-abbrev State := Dim2 × Dir × Nat
+/--
+Composition : location × total cost × direction × steps toward the current direction
+-/
+abbrev State := Dim2 × Nat × Dir × Nat
 
 def next_states (r : Rect Nat) (state : State) : List State :=
   let (pos, dir, turn) := state
@@ -56,13 +59,17 @@ namespace Part1
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find (r : Rect Nat) (vt : Std.HashSet State × List State) : Nat :=
+partial def find (r : Rect Nat) (goal : Dim2) (vt : Std.HashSet State × List State) : Nat :=
   let (visited, to_visit) := vt
   match to_visit with
   | [] => r.get (r.height - 1) r.width 0
   | (pos, _dist) :: to_visit' =>
-    let _w := r.get pos.fst pos.snd 0
-    find r (visited, to_visit')
+    if pos == goal then
+      0
+    else
+      let _w := r.get pos.fst pos.snd 0
+      let visited' := visited
+      find r goal (visited', to_visit' ++ [])
 
 def solve (r : Rect Nat) : Nat := 0
 
