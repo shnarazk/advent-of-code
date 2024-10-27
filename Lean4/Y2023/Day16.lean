@@ -5,12 +5,6 @@ import «AoC».Rect64
 
 open Accumulation CiCL TwoDimensionalVector64
 
-def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
-  match self with
-  | true  => some (f ())
-  | false => none
--- #eval true.map (K 3)
-
 namespace Y2023.Day16
 
 inductive Kind where | V | H | S | B | E | P deriving BEq, Hashable, Repr
