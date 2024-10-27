@@ -20,13 +20,6 @@ instance : ToString Kind where
     | Kind.Cube  => "#"
     | Kind.Empty => "."
 
-inductive Dir where
-  | N : Dir
-  | E : Dir
-  | S : Dir
-  | W : Dir
-deriving BEq, Repr
-
 instance : ToString Dir where
   toString s :=
     match s with
