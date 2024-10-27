@@ -30,18 +30,29 @@ def parse : String → Option (Rect Nat) := AoCParser.parse parse
 
 end parser
 
-abbrev State := Dim2 × Nat
+abbrev State := Dim2 × Dir × Nat
 
-def next_positions (r : Rect Nat) (pos : Dim2) (turn : Nat) : List State :=
+def next_states (r : Rect Nat) (state : State) : List State :=
+  let (pos, dir, turn) := state
   let h := r.height
   let w := r.width
-  let go_n := (0 < pos.fst     : Bool).map (K ((pos.fst - 1, pos.snd), turn + 1))
-  let go_s := (pos.fst < h - 1 : Bool).map (K ((pos.fst + 1, pos.snd), turn + 1))
-  let go_w := (0 < pos.snd     : Bool).map (K ((pos.fst, pos.snd - 1), turn + 1))
-  let go_e := (pos.snd < w - 1 : Bool).map (K ((pos.fst, pos.snd + 1), turn + 1))
-  []
+  let limit := 2
+  let go_n (t : Nat) := (t < limit && 0 < pos.fst).map
+      (K ((pos.fst - 1, pos.snd), Dir.N, t))
+  let go_s (t : Nat) := (t < limit && pos.fst < h - 1).map
+      (K ((pos.fst + 1, pos.snd), Dir.S, t))
+  let go_w (t : Nat) := (t < limit && 0 < pos.snd    ).map
+      (K ((pos.fst, pos.snd - 1), Dir.W, t))
+  let go_e (t : Nat) := (t < limit && pos.snd < w - 1).map
+      (K ((pos.fst, pos.snd + 1), Dir.E, t))
+  match dir with
+  | .N => [go_n (turn + 1), go_e 0, go_w 0] |>.filterMap I
+  | .E => [go_e (turn + 1), go_n 0, go_s 0] |>.filterMap I
+  | .S => [go_s (turn + 1), go_w 0, go_e 0] |>.filterMap I
+  | .W => [go_w (turn + 1), go_s 0, go_n 0] |>.filterMap I
 
 namespace Part1
+
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
