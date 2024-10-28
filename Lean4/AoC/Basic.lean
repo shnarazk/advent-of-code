@@ -180,6 +180,9 @@ def Array.enumerate (a : Array α) : Array (Nat × α) := Array.zip (Array.range
 
 -- #eval #[2, 4, 5].enumerate
 
+def String.enumerate (a : String) : List (Nat × Char) :=
+  List.zip (List.range a.length) a.toList
+
 namespace Option
 
 /--
