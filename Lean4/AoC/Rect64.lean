@@ -6,6 +6,13 @@ namespace TwoDimensionalVector64
 
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
+instance : ToString Dir where
+  toString s := match s with
+    | .N => "N"
+    | .E => "E"
+    | .S => "S"
+    | .W => "W"
+
 abbrev Dim2 := UInt64 × UInt64
 
 def NonNegDim (d : UInt64 × UInt64) := 0 ≤ d.fst ∧ 0 ≤ d.snd
