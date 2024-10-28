@@ -8,9 +8,12 @@ namespace Y2023.Day18
 open Accumulation CiCL
 
 structure Input where
+  dir : Char
+  length : Nat
+  colorCode : Nat
 deriving BEq, Repr
 
-instance : ToString Input where toString _ := s!""
+instance : ToString Input where toString s := s!"{s.colorCode}"
 
 namespace parser
 
@@ -18,21 +21,33 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def parse : String → Option Input := AoCParser.parse parser
+def line := do
+  let dist ← (pchar 'U' <|> pchar 'D' <|> pchar 'L' <|> pchar 'R') <* whitespaces
+  let num ← number <* pstring " (#"
+  let hexs ← many1 (satisfy (fun c ↦ ('0' ≤ c && c ≤ '9') || ('a' ≤ c && c ≤ 'f')))
+  let _ ← pchar ')'
+  return (Input.mk
+      dist
+      num
+      (hexs.map (fun c ↦ ("0123456789abcdef".enumerate.find? (Prod.snd · == c)) |>.mapOr (·.fst) 0)
+        |>.foldl (fun (acc v : Nat) ↦ acc * 16 + v) 0))
+-- #check ['o'].map (fun c ↦ "-yo".enumerate.find? (·.snd == c) |>.mapOr (·.fst) 0)
+
+def parse : String → Option (Array Input) := AoCParser.parse parser
   where
-    parser : Parser Input := return Input.mk
+    parser : Parser (Array Input) := sepBy1 line eol
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Array Input) : Nat := 0
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Array Input) : Nat := 0
 
 end Part2
 
