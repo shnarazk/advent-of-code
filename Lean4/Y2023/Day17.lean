@@ -135,23 +135,24 @@ variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
 partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
-    (visited : Std.HashMap (Dim2 × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
+    (visited : Std.HashMap (Dim2 × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
+    (to_visit :BinaryHeap f) : Nat :=
   if let (some state, to_visit') := to_visit.extractMax then
-    if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
-      state.cost
+    if state.pos.fst == goal.fst && state.pos.snd == goal.snd && limitₛ ≤ state.steps then
+      if limitₛ ≤ state.steps then
+        state.cost
+      else
+        find r goal thr visited to_visit'
     else
-      let recorded := visited.getD (state.pos, state.dir) (100000, 10)
-      let not_covered := state.cost < recorded.fst || state.steps < recorded.snd
-      if thr <= state.cost || !not_covered then
+      let costᵣ := visited.getD (state.pos, state.dir, state.steps) 100000
+      if thr <= state.cost || costᵣ <= state.cost then
         find r goal thr visited to_visit'
       else
         let states := next_states r state
-            |>.filter (fun s ↦
-                let recorded := visited.getD (s.pos, s.dir) (100000, 10)
-                s.cost < recorded.fst || s.steps < recorded.snd)
+            |>.filter (fun s ↦ s.cost < visited.getD (s.pos, s.dir, s.steps) 100000)
         find r goal thr
-          (visited.insert (state.pos, state.dir) (state.cost, state.steps))
-          ((dbg "" states).foldl (·.insert ·) to_visit')
+          (visited.insert (state.pos, state.dir, state.steps) state.cost)
+          (states.foldl (·.insert ·) to_visit')
   else
     thr
 
