@@ -38,14 +38,18 @@ structure State where
   steps : Nat
   deriving BEq, Hashable
 
+instance : ToString State where
+  toString s := s!"<({s.pos.fst}, {s.pos.snd}){s.dir} c:{s.cost} #{s.steps}>"
+
 abbrev BinaryHeap := Batteries.BinaryHeap State
 
 namespace Part1
 
+def limit := 3
+
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
-  let limit := 3
   let go_n (t : Nat) := (t ≤ limit && 0 < state.pos.fst).map
       (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
           State.mk p Dir.N (state.cost + r.get p.fst p.snd 1) t)
@@ -59,10 +63,10 @@ def next_states (r : Rect Nat) (state : State) : List State :=
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
           State.mk p Dir.E (state.cost + r.get p.fst p.snd 1) t)
   match state.dir with
-  | .N => [go_n (state.steps + 1), go_e 1, go_w 1] |>.filterMap I
-  | .E => [go_e (state.steps + 1), go_s 1, go_n 1] |>.filterMap I
-  | .S => [go_s (state.steps + 1), go_e 1, go_w 1] |>.filterMap I
-  | .W => [go_w (state.steps + 1), go_s 1, go_n 1] |>.filterMap I
+  | .N => [go_n (state.steps + 1), go_e 1, go_w 1].filterMap I
+  | .E => [go_e (state.steps + 1), go_s 1, go_n 1].filterMap I
+  | .S => [go_s (state.steps + 1), go_e 1, go_w 1].filterMap I
+  | .W => [go_w (state.steps + 1), go_s 1, go_n 1].filterMap I
 
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
@@ -99,32 +103,33 @@ end Part1
 
 namespace Part2
 
+def limitₗ := 10
+def limitₛ := 4
+
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
-  let limitₗ := 10
-  let limitₛ := 2
   let go_n (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ t) && t ≤ limitₗ && 0 < state.pos.fst).map
+    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.fst).map
       (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
           State.mk p Dir.N (state.cost + r.get p.fst p.snd 1) t)
   let go_s (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ t) && t ≤ limitₗ && state.pos.fst < h).map
+    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h).map
       (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
           State.mk p Dir.S (state.cost + r.get p.fst p.snd 1) t)
   let go_w (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ t) && t ≤ limitₗ && 0 < state.pos.snd).map
+    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
           State.mk p Dir.W (state.cost + r.get p.fst p.snd 1) t)
   let go_e (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ t) && t ≤ limitₗ && state.pos.snd < w).map
+    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
           State.mk p Dir.E (state.cost + r.get p.fst p.snd 1) t)
   match state.dir with
-  | .N => [go_n false (state.steps + 1), go_e true 1, go_w true 1] |>.filterMap I
-  | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1] |>.filterMap I
-  | .S => [go_s false (state.steps + 1), go_e true 1, go_w true 1] |>.filterMap I
-  | .W => [go_w false (state.steps + 1), go_s true 1, go_n true 1] |>.filterMap I
+  | .N => [go_n false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
+  | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
+  | .S => [go_s false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
+  | .W => [go_w false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
 
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
@@ -146,7 +151,7 @@ partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (th
                 s.cost < recorded.fst || s.steps < recorded.snd)
         find r goal thr
           (visited.insert (state.pos, state.dir) (state.cost, state.steps))
-          (states.foldl (·.insert ·) to_visit')
+          ((dbg "" states).foldl (·.insert ·) to_visit')
   else
     thr
 
