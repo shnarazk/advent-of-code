@@ -33,6 +33,7 @@ $ lake exe aoc -y YEAR -b
 |  13 |           |             |          |     50.7 |
 |  14 |           |             |          |    104.7 |
 |  15 |           |             |          |      3.8 |
-|  16 |           |             |          |      5.4 |
+|  16 |           |             |          |    898.7 |
+|  17 |           |             |          |   1159.1 |
 
 Note: `*` for algorithmic breaking changes
