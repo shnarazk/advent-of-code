@@ -65,7 +65,7 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
           none)
   dbg s!"{cands}" cands[0]!
 
-#eval true.map (K (3 : Nat))
+-- #eval true.map (K (3 : Nat))
 
 partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
   match to_visit with
@@ -118,7 +118,47 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Array Input) : Nat := 0
+abbrev HashMap := Std.HashMap
+
+/-
+Convert a world to the compact one.
+return area matrix, index to y position in the original world, and index to x
+-/
+def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Nat) × (Array Nat) :=
+  let ys : Array Nat := w₁.foldl (fun l i ↦
+      match l with
+        | last :: _ => match i.dir with
+          | Direction.D => (last.fst + i.length, true) :: l
+          | Direction.U => (last.fst - i.length, false) :: l
+          | _ => l
+        | [] => [])
+      [(0, false)]
+    |>.toArray
+    |>.map (fun (n, b) ↦ if b then n + 1 else n)
+    |> unique
+    |>.heapSort (· < ·)
+  let xs : Array Nat := w₁.foldl (fun l i ↦
+      match l with
+        | last :: _ => match i.dir with
+          | Direction.R => (last.fst + i.length, true) :: l
+          | Direction.L => (last.fst - i.length, false) :: l
+          | _ => l
+        | [] => [])
+      [(0, false)]
+    |>.toArray
+    |>.map (fun (n, b) ↦ if b then n + 1 else n)
+    |> unique
+    |>.heapSort (· < ·)
+
+  let h₂ := ys.size
+  let w₂ := xs.size
+
+  let r₂ := Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 1
+  (r₂, ys, xs)
+
+-- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
+
+def solve (_a : Array Input) : Nat := 0
 
 end Part2
 
