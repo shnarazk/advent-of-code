@@ -123,28 +123,30 @@ abbrev HashMap := Std.HashMap
 /-
 Convert a world to the compact one.
 return area matrix, index to y position in the original world, and index to x
+
+FIXME: it should also build the map, by another loop on w₁.
 -/
-def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Nat) × (Array Nat) :=
-  let ys : Array Nat := w₁.foldl (fun l i ↦
+def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Int) × (Array Int) :=
+  let ys : Array Int := w₁.foldl (fun l i ↦
       match l with
         | last :: _ => match i.dir with
-          | Direction.D => (last.fst + i.length, true) :: l
-          | Direction.U => (last.fst - i.length, false) :: l
+          | Direction.D => ((last.fst : Int) + (i.length : Int), true) :: l
+          | Direction.U => ((last.fst : Int) - (i.length : Int), false) :: l
           | _ => l
         | [] => [])
-      [(0, false)]
+      [((0 : Int), false)]
     |>.toArray
     |>.map (fun (n, b) ↦ if b then n + 1 else n)
     |> unique
     |>.heapSort (· < ·)
-  let xs : Array Nat := w₁.foldl (fun l i ↦
+  let xs : Array Int := w₁.foldl (fun l i ↦
       match l with
         | last :: _ => match i.dir with
-          | Direction.R => (last.fst + i.length, true) :: l
-          | Direction.L => (last.fst - i.length, false) :: l
+          | Direction.R => ((last.fst : Int) + (i.length : Int), true) :: l
+          | Direction.L => ((last.fst : Int) - (i.length : Int), false) :: l
           | _ => l
         | [] => [])
-      [(0, false)]
+      [((0 : Int), false)]
     |>.toArray
     |>.map (fun (n, b) ↦ if b then n + 1 else n)
     |> unique
@@ -152,9 +154,15 @@ def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Nat) × (Array Nat) :=
 
   let h₂ := ys.size
   let w₂ := xs.size
-
-  let r₂ := Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 1
-  (r₂, ys, xs)
+  let r₂ := (List.range h₂).dropLast.toArray.map
+      (fun y ↦
+        (List.range w₂).dropLast.toArray.map
+          (fun x ↦
+            if h : y + 1 < h₂ ∧ x + 1 < w₂ then
+              ((ys[y + 1]'h.left - ys[y]) * (xs[x + 1]'h.right - xs[x])).toNat
+            else
+              0))
+  (Rect.of2DMatrix r₂, ys, xs)
 
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
