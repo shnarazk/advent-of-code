@@ -57,21 +57,45 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
       |>.filterMap (fun y ↦
         let b := List.range width.toNat
             |>.filter (fun x ↦ r.get y.toUInt64 x.toUInt64 0 == 1)
-        if h : 2 = b.length then
-          have H1 : 1 < b.length := by simp [←h]
-          have H0 : 0 < b.length := by exact Nat.zero_lt_of_lt H1
+        if h : b.length = 2 then
+          have H1 : 1 < b.length := by simp [h]
+          have H0 : 0 < b.length := by simp [h]
           if 1 < b[1]'H1 - b[0]'H0 then some (y, (b[1] + b[0]) / 2) else none
         else
           none)
   dbg s!"{cands}" cands[0]!
 
+#eval true.map (K (3 : Nat))
+
+partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
+  match to_visit with
+  | [] => r
+  | pos :: to_visit' =>
+    let h := (r.height - 1).toNat
+    let w := (r.width - 1).toNat
+    match r.get pos.fst.toUInt64 pos.snd.toUInt64 1 with
+    | 0 =>
+      let r' := r.set pos.fst.toUInt64 pos.snd.toUInt64 1
+      let to_u := (0 < pos.fst : Bool).map (K (pos.fst - 1, pos.snd))
+      let to_d := (pos.fst < h : Bool).map (K (pos.fst + 1, pos.snd))
+      let to_l := (0 < pos.snd : Bool).map (K (pos.fst, pos.snd - 1))
+      let to_r := (pos.snd < w : Bool).map (K (pos.fst, pos.snd + 1))
+      let nexts := [to_u, to_d, to_l, to_r].filterMap I
+        |>.filter (fun p ↦ r'.get p.fst.toUInt64 p.snd.toUInt64 1 = 0)
+      fill r' (nexts ++ to_visit')
+    | _ =>
+      fill r to_visit'
+
 def solve (l : Array Input) : Nat :=
+  -- shift axis to escape negative index
   let heightₚ := l.filter (·.dir == .D) |>.map (·.length) |> sum
   let heightₘ := l.filter (·.dir == .U) |>.map (·.length) |> sum
   let widthₚ  := l.filter (·.dir == .R) |>.map (·.length) |> sum
   let widthₘ  := l.filter (·.dir == .L) |>.map (·.length) |> sum
-  let width := widthₚ.max  widthₘ |>(· + 1)
-  let height := heightₚ.max heightₘ |>(· + 1)
+  let height := heightₚ + heightₘ |>(· + 1)
+  let offset_h := height / 4
+  let width := widthₚ + widthₘ |>(· + 1)
+  let offset_w := width / 4
   let r := l.foldl
       (fun (pos, r) input ↦
         (List.range input.length).foldl
@@ -81,13 +105,14 @@ def solve (l : Array Input) : Nat :=
             | .R => (pos.fst, pos.snd + 1)
             | .D => (pos.fst + 1, pos.snd)
             | .L => (pos.fst, pos.snd - 1)
-          (p, r.set p.fst p.snd 1))
+          (p, r.set (p.fst + offset_h).toUInt64 (p.snd + offset_w).toUInt64 1))
           (pos, r)
       )
-      ((0, 0), Rect.ofDim2 height.toUInt64 width.toUInt64 0)
+      ((offset_h, offset_w), Rect.ofDim2 (height + offset_h).toUInt64 (width + offset_w).toUInt64 0)
     |>.snd
-  dbg s!"h: {height}, w: {width}: {r}" <| find_inner_point r
-    |>(fun p ↦ p.fst + p.snd)
+  let start := find_inner_point r
+  let r' := fill r [start]
+  r'.vector.filter (· == 1) |>.size
 
 end Part1
 
