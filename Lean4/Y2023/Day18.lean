@@ -126,7 +126,7 @@ return area matrix, index to y position in the original world, and index to x
 
 FIXME: it should also build the map, by another loop on w₁.
 -/
-def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Int) × (Array Int) :=
+def toCompact (w₁ : Array Input) : (Rect Nat) × (Rect Nat) × (Array Int) × (Array Int) :=
   let ys : Array Int := w₁.foldl (fun l i ↦
       match l with
         | last :: _ => match i.dir with
@@ -162,7 +162,24 @@ def toCompact (w₁ : Array Input) : (Rect Nat) × (Array Int) × (Array Int) :=
               ((ys[y + 1]'h.left - ys[y]) * (xs[x + 1]'h.right - xs[x])).toNat
             else
               0))
-  (Rect.of2DMatrix r₂, ys, xs)
+  let m₂ := w₁.foldl
+      (fun (r, p) i ↦
+        let y' := match i.dir with
+          | Direction.U => p.fst - 1
+          | Direction.D => p.fst + 1
+          | _ => p.fst
+        let x' := match i.dir with
+          | Direction.L => p.snd - 1
+          | Direction.R => p.snd + 1
+          | _ => p.snd
+        let y'' := if i.dir == Direction.D then y' + 1 else y'
+        let x'' := if i.dir == Direction.R then x' + 1 else x'
+        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y'') |>.mapOr (·.fst) 1 |>(· - 1)
+        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x'') |>.mapOr (·.fst) 1 |>(· - 1)
+        (r.set y₂.toUInt64 x₂.toUInt64 1, (y', x')))
+      (Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 0, (0, 0))
+    |>.fst
+  (m₂, Rect.of2DMatrix r₂, ys, xs)
 
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
