@@ -162,25 +162,23 @@ def toCompact (w₁ : Array Input) : (Rect Nat) × (Rect Nat) × (Array Int) × 
               0))
   let zero_y := ys.enumerate.find? (fun iy ↦ iy.snd == 0) |>.mapOr (·.fst) 0
   let zero_x := xs.enumerate.find? (fun ix ↦ ix.snd == 0) |>.mapOr (·.fst) 0
-  let m₂ := w₁.foldl
-      (fun (r, p) i ↦
-        let y' := match i.dir with
-          | Direction.U => p.fst - i.length
-          | Direction.D => p.fst + i.length
-          | _ => p.fst
-        let x' := match i.dir with
-          | Direction.L => p.snd - i.length
-          | Direction.R => p.snd + i.length
-          | _ => p.snd
-        let y'' := if i.dir == Direction.D then y' + 1 else y'
-        let x'' := if i.dir == Direction.R then x' + 1 else x'
-        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y'') |>.mapOr (·.fst) 1 |>(· - 1)
-        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x'') |>.mapOr (·.fst) 1 |>(· - 1)
-        (r.set y₂.toUInt64 x₂.toUInt64 1, (y', x')))
-      (Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 0, ((zero_y : Int), (zero_x : Int)))
+  let m₂ := path.foldl
+      (fun (r, lastPos) (pos, oend) ↦
+        let y := if oend.fst then pos.fst + 1 else pos.fst
+        let x := if oend.snd then pos.snd + 1 else pos.snd
+        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y) |>.mapOr (·.fst) 1 |>(· - 1)
+        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x) |>.mapOr (·.fst) 1 |>(· - 1)
+        let r' := if lastPos.snd == x₂ then
+          List.range' (lastPos.fst.min y₂) ((lastPos.fst.max y₂) - (lastPos.fst.min y₂))
+            |>.foldl (fun r y ↦ r.set y.toUInt64 x₂.toUInt64 1) r
+        else
+          List.range' (lastPos.snd.min x₂) ((lastPos.snd.max x₂) - (lastPos.snd.min x₂))
+            |>.foldl (fun r x ↦ r.set y₂.toUInt64 x.toUInt64 1) r
+        (r', (y₂, x₂)))
+      (Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 0, (zero_y, zero_x))
     |>.fst
   (Rect.of2DMatrix area₂, m₂, ys, xs)
-
+-- #eval List.range' 3 5
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
 def solve (ai : Array Input) : Nat :=
