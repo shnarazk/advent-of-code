@@ -35,6 +35,40 @@ deriving BEq
 
 instance : ToString Input where toString s := s!"{s.colorCode}"
 
+def find_inner_point (r : Rect Nat) : Nat × Nat :=
+  let height := r.height
+  let width := r.width
+  let cands := List.range height.toNat
+      |>.filterMap (fun y ↦
+        let b := List.range width.toNat
+            |>.filter (fun x ↦ r.get y.toUInt64 x.toUInt64 0 == 1)
+        if h : b.length = 2 then
+          have H1 : 1 < b.length := by simp [h]
+          have H0 : 0 < b.length := by simp [h]
+          if 1 < b[1]'H1 - b[0]'H0 then some (y, (b[1] + b[0]) / 2) else none
+        else
+          none)
+  dbg s!"{cands}" cands[0]!
+
+partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
+  match to_visit with
+  | [] => r
+  | pos :: to_visit' =>
+    let h := (r.height - 1).toNat
+    let w := (r.width - 1).toNat
+    match r.get pos.fst.toUInt64 pos.snd.toUInt64 1 with
+    | 0 =>
+      let r' := r.set pos.fst.toUInt64 pos.snd.toUInt64 1
+      let to_u := (0 < pos.fst : Bool).map (K (pos.fst - 1, pos.snd))
+      let to_d := (pos.fst < h : Bool).map (K (pos.fst + 1, pos.snd))
+      let to_l := (0 < pos.snd : Bool).map (K (pos.fst, pos.snd - 1))
+      let to_r := (pos.snd < w : Bool).map (K (pos.fst, pos.snd + 1))
+      let nexts := [to_u, to_d, to_l, to_r].filterMap I
+        |>.filter (fun p ↦ r'.get p.fst.toUInt64 p.snd.toUInt64 1 = 0)
+      fill r' (nexts ++ to_visit')
+    | _ =>
+      fill r to_visit'
+
 namespace parser
 
 open AoCParser
@@ -66,41 +100,7 @@ end parser
 
 namespace Part1
 
-def find_inner_point (r : Rect Nat) : Nat × Nat :=
-  let height := r.height
-  let width := r.width
-  let cands := List.range height.toNat
-      |>.filterMap (fun y ↦
-        let b := List.range width.toNat
-            |>.filter (fun x ↦ r.get y.toUInt64 x.toUInt64 0 == 1)
-        if h : b.length = 2 then
-          have H1 : 1 < b.length := by simp [h]
-          have H0 : 0 < b.length := by simp [h]
-          if 1 < b[1]'H1 - b[0]'H0 then some (y, (b[1] + b[0]) / 2) else none
-        else
-          none)
-  dbg s!"{cands}" cands[0]!
-
 -- #eval true.map (K (3 : Nat))
-
-partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
-  match to_visit with
-  | [] => r
-  | pos :: to_visit' =>
-    let h := (r.height - 1).toNat
-    let w := (r.width - 1).toNat
-    match r.get pos.fst.toUInt64 pos.snd.toUInt64 1 with
-    | 0 =>
-      let r' := r.set pos.fst.toUInt64 pos.snd.toUInt64 1
-      let to_u := (0 < pos.fst : Bool).map (K (pos.fst - 1, pos.snd))
-      let to_d := (pos.fst < h : Bool).map (K (pos.fst + 1, pos.snd))
-      let to_l := (0 < pos.snd : Bool).map (K (pos.fst, pos.snd - 1))
-      let to_r := (pos.snd < w : Bool).map (K (pos.fst, pos.snd + 1))
-      let nexts := [to_u, to_d, to_l, to_r].filterMap I
-        |>.filter (fun p ↦ r'.get p.fst.toUInt64 p.snd.toUInt64 1 = 0)
-      fill r' (nexts ++ to_visit')
-    | _ =>
-      fill r to_visit'
 
 def solve (l : Array Input) : Nat :=
   -- shift axis to escape negative index
@@ -194,8 +194,8 @@ def toParityMap (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
       else
         fromTo' (2 * y₁') (2 * y₂')
           |>.foldl (fun r y ↦ r.set y.toUInt64 (2 * x₁'.toUInt64) 1) r)
-    (Rect.ofDim2 (2 * ys.size.toUInt64 - 1) (2 * xs.size.toUInt64 - 1) 0)
-  (dm, ys, xs)
+    (Rect.ofDim2 (2 * ys.size.toUInt64 + 2) (2 * xs.size.toUInt64 + 2) 0)
+  (dm, dbg "ys" ys, dbg "xs" xs)
 -- #eval List.range' 3 (5 - 3)
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
@@ -216,8 +216,7 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
             | none, Direction.L => (total, some (x, x))
             | none, Direction.R => (total, some (x, x))
             | none, Direction.U => (total, some (x, x))
-            | none, Direction.D => (total, some (x, x))
-          )
+            | none, Direction.D => (total, some (x, x)))
           ((0 : Nat), (none : Option (Int × Int)))
         |> (fun (total, beg) ↦ if let some (b, e) := beg then total + (e - b + 1).toNat else total)
       let lastHeight : Nat := (y - last_y).toNat
@@ -231,7 +230,33 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
 
 def solve (path : Array Input) : Nat :=
   let (area, ys, xs) := toParityMap path
-  dbg s!"area: {area} ys: {ys}, sx: {xs}" 0
+  let filled := fill area [dbg "start" $ find_inner_point area]
+  -- convert units
+  let width := filled.width / 2
+  let height := dbg "h" $ filled.height / 2
+  let total := List.range height.toNat
+    |>.foldl (fun acc y ↦
+        List.range width.toNat
+            |>.foldl
+              (fun acc x ↦
+                if filled.get? (2 * y).toUInt64 (2 * x).toUInt64 == some 1 then
+                  let area := match
+                      filled.get? (2 * y + 1).toUInt64 (2 * x).toUInt64 == some 1,
+                      filled.get? (2 * y).toUInt64 (2 * x + 1).toUInt64 == some 1,
+                      filled.get? (2 * y + 1).toUInt64 (2 * x + 1).toUInt64 == some 1 with
+                    | true,  true,  true  => (ys[y + 1]! - ys[y]!) * (xs[x + 1]! - xs[x]!)
+                    | true,  true,  false => (ys[y + 1]! - ys[y]!) + (xs[x + 1]! - xs[x]!) - 1
+                    | true,  false, false => ys[y + 1]! - ys[y]!
+                    | false, true,  false => xs[x + 1]! - xs[x]!
+                    | false, false, false => 1
+                    | _, _, _ => dbg "impossible" 0
+                  acc + area.toNat
+                else
+                  acc)
+              acc)
+      0
+  -- dbg s!"ys: {ys}, xs: {xs}\nfilled: {filled}" total
+  total
 
 end Part2
 
