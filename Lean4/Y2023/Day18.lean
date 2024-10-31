@@ -165,15 +165,12 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
   | l :: r' =>
       let y : Int := (l[0]?.mapOr (·.snd.fst) last_y)
       let lastHeight : Nat := (y - last_y).toNat
-      let windows3 := List.zip l <| List.zip l.tail.dropLast l.tail.tail
-      let line_sum : Int := windows3.map
-          (fun (prev, curr, next) ↦ match prev.fst, curr.fst, next.fst with
-            | _, .U,  _ | _, .D,  _ => 1
-            | _, .L,  _ => prev.snd.snd - curr.snd.snd
-            | _, .R,  _ => curr.snd.snd - next.snd.snd)
+      let windows2 := List.zip l.dropLast l.tail
+      let line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
+        |>.enumerate
+        |>.filter (fun p ↦ p.fst % 2 == 0)
+        |>.map (·.snd)
         |> sum
-        |> (· + (l.head?.mapOr (·.snd.snd) 0))
-        |> (· + (l.getLast?.mapOr (·.snd.snd) 0))
       scanLine (total + last_line_sum * lastHeight) (dbg "line_sum" line_sum.toNat) y r'
 
 def solve (ai : Array Input) : Nat :=
