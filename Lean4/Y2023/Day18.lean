@@ -3,6 +3,15 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
 
+def List.windows2 {α : Type} (l : List α) : List (α × α) :=
+  List.zip l.dropLast l.tail
+example : (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
+def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
+  let l := a.toList
+  List.zip l.dropLast l.tail
+example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
 namespace Y2023.Day18
 
 open Accumulation CiCL
@@ -127,55 +136,102 @@ namespace Part2
 
 abbrev HashMap := Std.HashMap
 
+def fromTo' (b e : Nat) : List Nat :=
+  let b' := b.min e
+  let e' := b.max e
+  List.range' b' (e' - b' + 1)
+
 /-
 Convert a world to the compact one.
 return area matrix, path grid, index to y position in the original world, and index to x
 
 FIXME: it should also build the map, by another loop on w₁.
 -/
-def toParityMap (w₁ : Array Input) : (Rect (Option (Direction × (Int × Int)))) :=
-  let path : Array ((Int × Int) × Direction) := w₁.foldl
-      (fun (l, last) i ↦
-        let pos := match i.dir with
-        | Direction.D => ((last.fst : Int) + (i.length : Int), last.snd)
-        | Direction.U => ((last.fst : Int) - (i.length : Int), last.snd)
-        | Direction.R => (last.fst, (last.snd : Int) + (i.length : Int))
-        | Direction.L => (last.fst, (last.snd : Int) - (i.length : Int))
-        ((pos, i.dir) :: l, pos))
+def axisTranslation (path : Array Input) : Array Int × Array Int :=
+  let path : Array ((Int × Int) × Direction) := path.foldl
+      (fun (l, now) i ↦
+        let next := match i.dir with
+        | Direction.D => ((now.fst : Int) + (i.length : Int), now.snd)
+        | Direction.U => ((now.fst : Int) - (i.length : Int), now.snd)
+        | Direction.R => (now.fst, (now.snd : Int) + (i.length : Int))
+        | Direction.L => (now.fst, (now.snd : Int) - (i.length : Int))
+        ((now, i.dir) :: l, next))
       ([], (0, 0))
     |>.fst
+    |> (((0,0), Direction.R) :: ·)
     |>.toArray
+    |>.reverse
   let ys : Array Int := path.map (·.fst.fst) |> unique |>.heapSort (· < ·)
   let xs : Array Int := path.map (·.fst.snd) |> unique |>.heapSort (· < ·)
-  path.foldl
-      (fun r ((y₁, x₁), dir) ↦
-        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
-        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
-        r.set y₂.toUInt64 x₂.toUInt64 (some (dir, ys[y₂]!, xs[x₂]!)))
-      (Rect.ofDim2 ys.size.toUInt64 xs.size.toUInt64 none)
+  (ys, xs)
+
+def toParityMap (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
+  let path : Array (Int × Int) := w₁.foldl
+      (fun (l, now) i ↦
+        let next := match i.dir with
+        | Direction.D => ((now.fst : Int) + (i.length : Int), now.snd)
+        | Direction.U => ((now.fst : Int) - (i.length : Int), now.snd)
+        | Direction.R => (now.fst, (now.snd : Int) + (i.length : Int))
+        | Direction.L => (now.fst, (now.snd : Int) - (i.length : Int))
+        (now  :: l, next))
+      ([], (0, 0))
+    |>.fst
+    |> ((0,0) :: ·)
+    |>.toArray
+    |>.reverse
+  let ys : Array Int := path.map (·.fst) |> unique |>.heapSort (· < ·)
+  let xs : Array Int := path.map (·.snd) |> unique |>.heapSort (· < ·)
+  -- doubled map
+  let dm := path.windows2.foldl
+    (fun r ((y₁, x₁), (y₂, x₂)) ↦
+      let y₁' : Nat := ys.enumerate.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
+      let x₁' : Nat := xs.enumerate.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
+      let y₂' : Nat := ys.enumerate.find? (fun iy ↦ iy.snd == y₂) |>.mapOr (·.fst) 0
+      let x₂' : Nat := xs.enumerate.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
+      if y₁' == y₂' then
+        fromTo' (2 * x₁') (2 * x₂')
+          |>.foldl (fun r x ↦ r.set (2 * y₁'.toUInt64) x.toUInt64 1) r
+      else
+        fromTo' (2 * y₁') (2 * y₂')
+          |>.foldl (fun r y ↦ r.set y.toUInt64 (2 * x₁'.toUInt64) 1) r)
+    (Rect.ofDim2 (2 * ys.size.toUInt64 - 1) (2 * xs.size.toUInt64 - 1) 0)
+  (dm, ys, xs)
 -- #eval List.range' 3 (5 - 3)
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
 -- #eval [(5 : Int), 8, 9].head (by simp)
 --- #eval List.zip [0, 1, 3, 4].dropLast [0, 1, 3, 4].tail
-#eval List.zip [0, 1, 2, 3, 4] <| List.zip [0, 1, 2, 3, 4].tail.dropLast [0, 1, 2, 3, 4].tail.tail
+-- #eval List.zip [0, 1, 2, 3, 4] <| List.zip [0, 1, 2, 3, 4].tail.dropLast [0, 1, 2, 3, 4].tail.tail
 def scanLine (total last_line_sum : Nat) (last_y : Int) :
     (List (List (Direction × Int × Int))) → Nat
   | [] => total + last_line_sum
   | l :: r' =>
       let y : Int := (l[0]?.mapOr (·.snd.fst) last_y)
+      let line_total := (dbg "l" l).foldl
+          (fun (total, beg) (dir, _, x) ↦ match beg, dir with
+            | some (start, _), Direction.R => (total, some (start, x))
+            | some (start, _), Direction.L => (total, some (start, x))
+            | some (start, _), Direction.U => (total + (x - start).toNat + 1, none)
+            | some (start, _), Direction.D => (total + (x - start).toNat + 1, none)
+            | none, Direction.L => (total, some (x, x))
+            | none, Direction.R => (total, some (x, x))
+            | none, Direction.U => (total, some (x, x))
+            | none, Direction.D => (total, some (x, x))
+          )
+          ((0 : Nat), (none : Option (Int × Int)))
+        |> (fun (total, beg) ↦ if let some (b, e) := beg then total + (e - b + 1).toNat else total)
       let lastHeight : Nat := (y - last_y).toNat
       let windows2 := List.zip l.dropLast l.tail
-      let line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
+      let _line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
         |>.enumerate
         |>.filter (fun p ↦ p.fst % 2 == 0)
         |>.map (·.snd)
         |> sum
-      scanLine (total + last_line_sum * lastHeight) (dbg "line_sum" line_sum.toNat) y r'
+      scanLine (total + last_line_sum * lastHeight) (dbg "line_total" line_total) y r'
 
-def solve (ai : Array Input) : Nat :=
-  let area := toParityMap ai |>.to2Dmatrix |>.map (fun l ↦ l.filterMap I)
-  dbg s!"area: {area}" <| scanLine 0 0 0 area
+def solve (path : Array Input) : Nat :=
+  let (area, ys, xs) := toParityMap path
+  dbg s!"area: {area} ys: {ys}, sx: {xs}" 0
 
 end Part2
 
