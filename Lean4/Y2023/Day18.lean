@@ -3,22 +3,12 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
 
-def List.windows2 {α : Type} (l : List α) : List (α × α) :=
-  List.zip l.dropLast l.tail
-example : (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
-
-def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
-  let l := a.toList
-  List.zip l.dropLast l.tail
-example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
-
 namespace Y2023.Day18
 
 open Accumulation CiCL
 open TwoDimensionalVector64
 
-inductive Direction where | U | D | R | L
-deriving BEq
+inductive Direction where | U | D | R | L deriving BEq
 
 instance : ToString Direction where
   toString
@@ -84,7 +74,7 @@ def decode_hex (str : Array Char) : Direction × Nat :=
       | some '3' => Direction.U
       | _ => dbg "Parse error" Direction.U,
     hex.map
-        (fun c ↦ ("0123456789abcdef".enumerate.find? (Prod.snd · == c)).mapOr (·.fst) 0)
+        (fun c ↦ ("0123456789abcdef".enum.find? (Prod.snd · == c)).mapOr (·.fst) 0)
       |>.foldl (fun (acc v : Nat) ↦ acc * 16 + v) 0)
 
 example : decode_hex "70c710".toList.toArray = (Direction.R, 461937) := by rfl
@@ -173,10 +163,10 @@ def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
   -- doubled map
   let dm := path.windows2.foldl
     (fun r ((y₁, x₁), (y₂, x₂)) ↦
-      let y₁' : Nat := ys.enumerate.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
-      let x₁' : Nat := xs.enumerate.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
-      let y₂' : Nat := ys.enumerate.find? (fun iy ↦ iy.snd == y₂) |>.mapOr (·.fst) 0
-      let x₂' : Nat := xs.enumerate.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
+      let y₁' : Nat := ys.enum.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
+      let x₁' : Nat := xs.enum.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
+      let y₂' : Nat := ys.enum.find? (fun iy ↦ iy.snd == y₂) |>.mapOr (·.fst) 0
+      let x₂' : Nat := xs.enum.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
       if y₁' == y₂' then
         fromTo' (2 * x₁') (2 * x₂')
           |>.foldl (fun r x ↦ r.set (2 * y₁'.toUInt64) x.toUInt64 1) r
@@ -211,7 +201,7 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
       let lastHeight : Nat := (y - last_y).toNat
       let windows2 := List.zip l.dropLast l.tail
       let _line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
-        |>.enumerate
+        |>.enum
         |>.filter (fun p ↦ p.fst % 2 == 0)
         |>.map (·.snd)
         |> sum

@@ -172,16 +172,26 @@ open Accumulation
 -- #eval sum [1, 3, 5]
 -- #eval product [1, 3, 5]
 
-def List.enumerate (a : List α) : List (Nat × α) := List.zip (List.range a.length) a
-
+@[deprecated "Use the native `List.enum` instead of enumerate"]
+def List.enumerate (a : List α) : List (Nat × α) := a.enum
+-- List.zip (List.range a.length) a
+-- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
 
-def Array.enumerate (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
+def Array.enum (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
 
--- #eval #[2, 4, 5].enumerate
+example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
 
-def String.enumerate (a : String) : List (Nat × Char) :=
+@[deprecated "Use `Array.enum` instead of 'Array.enumerate`"]
+alias Array.enumerate := Array.enum
+
+-- #eval #[2, 4, 5].enum
+
+def String.enum (a : String) : List (Nat × Char) :=
   List.zip (List.range a.length) a.toList
+
+@[deprecated "Use `String.enum` instead of 'String.enumerate`"]
+alias String.enumerate := String.enum
 
 namespace Option
 
@@ -215,3 +225,18 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
   | true  => some (f ())
   | false => none
 -- #eval true.map (K 3)
+
+/--
+Do the same with `windows(2)` in Rust
+-/
+def List.windows2 {α : Type} (l : List α) : List (α × α) :=
+  List.zip l.dropLast l.tail
+example : (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
+/--
+Do the same with `windows(2)` in Rust
+-/
+def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
+  let l := a.toList
+  List.zip l.dropLast l.tail
+example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
