@@ -11,6 +11,13 @@ open TwoDimensionalVector64
 inductive Direction where | U | D | R | L
 deriving BEq
 
+instance : ToString Direction where
+  toString
+  | .U => "↑"
+  | .D => "↓"
+  | .R => "→"
+  | .L => "←"
+
 structure Input where
   dir : Direction
   length : Nat
@@ -126,89 +133,32 @@ return area matrix, path grid, index to y position in the original world, and in
 
 FIXME: it should also build the map, by another loop on w₁.
 -/
-def toCompact (w₁ : Array Input) : (Rect Nat) × (Rect Nat) × (Array Int) × (Array Int) :=
-  let path := w₁.foldl
-      (fun l i ↦
-        match l with
-          | (last, oend) :: _ => match i.dir with
-            | Direction.D =>
-              (((last.fst : Int) + (i.length : Int), last.snd), (true, oend.snd)) :: l
-            | Direction.U =>
-              (((last.fst : Int) - (i.length : Int), last.snd), (false, oend.snd)) :: l
-            | Direction.R =>
-              ((last.fst, (last.snd : Int) + (i.length : Int)), (oend.fst, true)) :: l
-            | Direction.L=>
-              ((last.fst, (last.snd : Int) - (i.length : Int)), (oend.fst, false)) :: l
-          | [] => [])
-      [((0, 0), (false, false))]
-  let ys : Array Int := path.toArray
-      |>.map (fun ((y, _), (oy, _)) ↦ if oy then y + 1 else y)
-      |> unique
-      |>.heapSort (· < ·)
-  let xs : Array Int := path.toArray
-      |>.map (fun ((_, x), (_, ox)) ↦ if ox then x + 1 else x)
-      |> unique
-      |>.heapSort (· < ·)
-
-  let h₂ := ys.size
-  let w₂ := xs.size
-  let area₂ := (List.range h₂).dropLast.toArray.map
-      (fun y ↦
-        (List.range w₂).dropLast.toArray.map
-          (fun x ↦
-            if h : y + 1 < h₂ ∧ x + 1 < w₂ then
-              ((ys[y + 1]'h.left - ys[y]) * (xs[x + 1]'h.right - xs[x])).toNat
-            else
-              0))
-  let zero_y := ys.enumerate.find? (fun iy ↦ iy.snd == 0) |>.mapOr (·.fst) 0
-  let zero_x := xs.enumerate.find? (fun ix ↦ ix.snd == 0) |>.mapOr (·.fst) 0
-  let m₂ := path.foldl
-      (fun (r, lastPos) (pos, oend) ↦
-        let y := if oend.fst then pos.fst + 1 else pos.fst
-        let x := if oend.snd then pos.snd + 1 else pos.snd
-        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y) |>.mapOr (·.fst) 1 |>(· - 1)
-        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x) |>.mapOr (·.fst) 1 |>(· - 1)
-        let r' := if lastPos.snd == x₂ then
-          List.range' (lastPos.fst.min y₂) ((lastPos.fst.max y₂) - (lastPos.fst.min y₂))
-            |>.foldl (fun r y ↦ r.set y.toUInt64 x₂.toUInt64 1) r
-        else
-          List.range' (lastPos.snd.min x₂) ((lastPos.snd.max x₂) - (lastPos.snd.min x₂))
-            |>.foldl (fun r x ↦ r.set y₂.toUInt64 x.toUInt64 1) r
-        (r', (y₂, x₂)))
-      (Rect.ofDim2 h₂.toUInt64 w₂.toUInt64 0, (zero_y, zero_x))
+def toParityMap (w₁ : Array Input) : (Rect (Option (Direction × (Int × Int)))) :=
+  let path : Array ((Int × Int) × Direction) := w₁.foldl
+      (fun (l, last) i ↦
+        let pos := match i.dir with
+        | Direction.D => ((last.fst : Int) + (i.length : Int), last.snd)
+        | Direction.U => ((last.fst : Int) - (i.length : Int), last.snd)
+        | Direction.R => (last.fst, (last.snd : Int) + (i.length : Int))
+        | Direction.L => (last.fst, (last.snd : Int) - (i.length : Int))
+        ((pos, i.dir) :: l, pos))
+      ([], (0, 0))
     |>.fst
-  (Rect.of2DMatrix area₂, m₂, ys, xs)
--- #eval List.range' 3 5
+    |>.toArray
+  let ys : Array Int := path.map (·.fst.fst) |> unique |>.heapSort (· < ·)
+  let xs : Array Int := path.map (·.fst.snd) |> unique |>.heapSort (· < ·)
+  path.foldl
+      (fun r ((y₁, x₁), dir) ↦
+        let y₂ := ys.enumerate.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
+        let x₂ := xs.enumerate.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
+        r.set y₂.toUInt64 x₂.toUInt64 (some (dir, ys[y₂]!, xs[x₂]!)))
+      (Rect.ofDim2 ys.size.toUInt64 xs.size.toUInt64 none)
+-- #eval List.range' 3 (5 - 3)
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
 def solve (ai : Array Input) : Nat :=
-  -- shift axis to escape negative index
-  let (area, path, yi, xi) := toCompact ai
-  let heightₚ := ai.filter (·.dir == .D) |>.map (·.length) |> sum
-  let heightₘ := ai.filter (·.dir == .U) |>.map (·.length) |> sum
-  let widthₚ  := ai.filter (·.dir == .R) |>.map (·.length) |> sum
-  let widthₘ  := ai.filter (·.dir == .L) |>.map (·.length) |> sum
-  let _height := heightₚ + heightₘ |>(· + 1)
-  let _width := widthₚ + widthₘ |>(· + 1)
-  /- let r := ai.foldl
-      (fun (pos, r) input ↦
-        (List.range input.length).foldl
-          (fun (pos, r) _ ↦
-          let p := match input.dir with
-            | .U => (pos.fst - 1, pos.snd)
-            | .R => (pos.fst, pos.snd + 1)
-            | .D => (pos.fst + 1, pos.snd)
-            | .L => (pos.fst, pos.snd - 1)
-          (p, r.set (p.fst + offset_h).toUInt64 (p.snd + offset_w).toUInt64 1))
-          (pos, r)
-      )
-      ((offset_h, offset_w), Rect.ofDim2 (height + offset_h).toUInt64 (width + offset_w).toUInt64 0)
-    |>.snd
-    -/
-  -- let start := find_inner_point r
-  -- let r' := fill r [start]
-  -- r'.vector.filter (· == 1) |>.size
-  dbg s!"area: {area} path: {path}: y:{yi}, x:{xi}" 0
+  let area := toParityMap ai
+  dbg s!"area: {area}" 0
 
 end Part2
 
