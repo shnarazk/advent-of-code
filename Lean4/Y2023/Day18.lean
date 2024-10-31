@@ -30,7 +30,7 @@ instance : ToString Direction where
 structure Input where
   dir : Direction
   length : Nat
-  colorCode : Nat
+  colorCode : Direction × Nat
 deriving BEq
 
 instance : ToString Input where toString s := s!"{s.colorCode}"
@@ -48,7 +48,7 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
           if 1 < b[1]'H1 - b[0]'H0 then some (y, (b[1] + b[0]) / 2) else none
         else
           none)
-  dbg s!"{cands}" cands[0]!
+  cands[0]!
 
 partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
   match to_visit with
@@ -75,6 +75,20 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def decode_hex (str : Array Char) : Direction × Nat :=
+  let (hex, dir) := str.toList.splitAt 5
+  (match dir.head? with
+      | some '0' => Direction.R
+      | some '1' => Direction.D
+      | some '2' => Direction.L
+      | some '3' => Direction.U
+      | _ => dbg "Parse error" Direction.U,
+    hex.map
+        (fun c ↦ ("0123456789abcdef".enumerate.find? (Prod.snd · == c)).mapOr (·.fst) 0)
+      |>.foldl (fun (acc v : Nat) ↦ acc * 16 + v) 0)
+
+example : decode_hex "70c710".toList.toArray = (Direction.R, 461937) := by rfl
+
 def line := do
   let dist ← (
           (pchar 'U' *> return Direction.U)
@@ -85,12 +99,7 @@ def line := do
   let num ← number <* pstring " (#"
   let hexs ← many1 (satisfy (fun c ↦ ('0' ≤ c && c ≤ '9') || ('a' ≤ c && c ≤ 'f')))
   let _ ← pchar ')'
-  return (Input.mk
-      dist
-      num
-      (hexs.map
-          (fun c ↦ ("0123456789abcdef".enumerate.find? (Prod.snd · == c)).mapOr (·.fst) 0)
-        |>.foldl (fun (acc v : Nat) ↦ acc * 16 + v) 0))
+  return Input.mk dist num (decode_hex hexs)
 
 def parse : String → Option (Array Input) := AoCParser.parse parser
   where
@@ -142,30 +151,10 @@ def fromTo' (b e : Nat) : List Nat :=
   List.range' b' (e' - b' + 1)
 
 /-
-Convert a world to the compact one.
-return area matrix, path grid, index to y position in the original world, and index to x
-
-FIXME: it should also build the map, by another loop on w₁.
+Convert a world to a uniform compact one.
+return area matrix, index to y position in the original world, and index to x
 -/
-def axisTranslation (path : Array Input) : Array Int × Array Int :=
-  let path : Array ((Int × Int) × Direction) := path.foldl
-      (fun (l, now) i ↦
-        let next := match i.dir with
-        | Direction.D => ((now.fst : Int) + (i.length : Int), now.snd)
-        | Direction.U => ((now.fst : Int) - (i.length : Int), now.snd)
-        | Direction.R => (now.fst, (now.snd : Int) + (i.length : Int))
-        | Direction.L => (now.fst, (now.snd : Int) - (i.length : Int))
-        ((now, i.dir) :: l, next))
-      ([], (0, 0))
-    |>.fst
-    |> (((0,0), Direction.R) :: ·)
-    |>.toArray
-    |>.reverse
-  let ys : Array Int := path.map (·.fst.fst) |> unique |>.heapSort (· < ·)
-  let xs : Array Int := path.map (·.fst.snd) |> unique |>.heapSort (· < ·)
-  (ys, xs)
-
-def toParityMap (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
+def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
   let path : Array (Int × Int) := w₁.foldl
       (fun (l, now) i ↦
         let next := match i.dir with
@@ -195,7 +184,7 @@ def toParityMap (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
         fromTo' (2 * y₁') (2 * y₂')
           |>.foldl (fun r y ↦ r.set y.toUInt64 (2 * x₁'.toUInt64) 1) r)
     (Rect.ofDim2 (2 * ys.size.toUInt64 + 2) (2 * xs.size.toUInt64 + 2) 0)
-  (dm, dbg "ys" ys, dbg "xs" xs)
+  (dm, ys, xs)
 -- #eval List.range' 3 (5 - 3)
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
@@ -207,7 +196,7 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
   | [] => total + last_line_sum
   | l :: r' =>
       let y : Int := (l[0]?.mapOr (·.snd.fst) last_y)
-      let line_total := (dbg "l" l).foldl
+      let line_total := l.foldl
           (fun (total, beg) (dir, _, x) ↦ match beg, dir with
             | some (start, _), Direction.R => (total, some (start, x))
             | some (start, _), Direction.L => (total, some (start, x))
@@ -226,14 +215,15 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
         |>.filter (fun p ↦ p.fst % 2 == 0)
         |>.map (·.snd)
         |> sum
-      scanLine (total + last_line_sum * lastHeight) (dbg "line_total" line_total) y r'
+      scanLine (total + last_line_sum * lastHeight) line_total y r'
 
-def solve (path : Array Input) : Nat :=
-  let (area, ys, xs) := toParityMap path
-  let filled := fill area [dbg "start" $ find_inner_point area]
+def solve (path' : Array Input) : Nat :=
+  let path := path'.map (fun p ↦ Input.mk p.colorCode.fst p.colorCode.snd p.colorCode)
+  let (area, ys, xs) := transform path
+  let filled := fill area [find_inner_point area]
   -- convert units
   let width := filled.width / 2
-  let height := dbg "h" $ filled.height / 2
+  let height := filled.height / 2
   let total := List.range height.toNat
     |>.foldl (fun acc y ↦
         List.range width.toNat
