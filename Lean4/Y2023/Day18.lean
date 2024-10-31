@@ -156,9 +156,29 @@ def toParityMap (w₁ : Array Input) : (Rect (Option (Direction × (Int × Int))
 -- #eval List.range' 3 (5 - 3)
 -- #eval [(5, 8), (3,6), (8, 1), (0, 3)].map (·.fst) |>.mergeSort
 
+-- #eval [(5 : Int), 8, 9].head (by simp)
+--- #eval List.zip [0, 1, 3, 4].dropLast [0, 1, 3, 4].tail
+#eval List.zip [0, 1, 2, 3, 4] <| List.zip [0, 1, 2, 3, 4].tail.dropLast [0, 1, 2, 3, 4].tail.tail
+def scanLine (total last_line_sum : Nat) (last_y : Int) :
+    (List (List (Direction × Int × Int))) → Nat
+  | [] => total + last_line_sum
+  | l :: r' =>
+      let y : Int := (l[0]?.mapOr (·.snd.fst) last_y)
+      let lastHeight : Nat := (y - last_y).toNat
+      let windows3 := List.zip l <| List.zip l.tail.dropLast l.tail.tail
+      let line_sum : Int := windows3.map
+          (fun (prev, curr, next) ↦ match prev.fst, curr.fst, next.fst with
+            | _, .U,  _ | _, .D,  _ => 1
+            | _, .L,  _ => prev.snd.snd - curr.snd.snd
+            | _, .R,  _ => curr.snd.snd - next.snd.snd)
+        |> sum
+        |> (· + (l.head?.mapOr (·.snd.snd) 0))
+        |> (· + (l.getLast?.mapOr (·.snd.snd) 0))
+      scanLine (total + last_line_sum * lastHeight) (dbg "line_sum" line_sum.toNat) y r'
+
 def solve (ai : Array Input) : Nat :=
-  let area := toParityMap ai
-  dbg s!"area: {area}" 0
+  let area := toParityMap ai |>.to2Dmatrix |>.map (fun l ↦ l.filterMap I)
+  dbg s!"area: {area}" <| scanLine 0 0 0 area
 
 end Part2
 
