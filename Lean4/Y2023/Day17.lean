@@ -25,9 +25,9 @@ def line : Parser (Array Nat) := do
   return l.map (fun (c : Char) ↦ (c.val - '0'.val).toNat)
 
 def matrix := many1 line
-def parse : String → Option (Rect Nat) := AoCParser.parse parse
+def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
   where
-    parse := pure ∘ Rect.of2DMatrix =<< matrix
+    parse₁ := pure ∘ Rect.of2DMatrix =<< matrix
 
 end parser
 

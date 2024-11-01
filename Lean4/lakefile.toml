@@ -13,7 +13,7 @@ scope = "leanprover-community"
 
 [[require]]
 name = "Cli"
-scope = "leanprover-community"
+scope = "leanprover"
 
 [[require]]
 name = "mathlib"

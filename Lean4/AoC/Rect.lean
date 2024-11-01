@@ -249,14 +249,9 @@ lemma toList'_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
   rw [List.length_join]
   simp [cp_length₁]
   rw [range_list_length_is_n]
-  induction' p.1 with p1 ih
+  induction' p.1 with p1 _
   { simp [range_list] }
-  {
-    rw [range_list]
-    simp
-    rw [ih, add_mul]
-    simp
-  }
+  { simp ; exact range_list_length_is_n p.2 }
 
 lemma coerce_add (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a + b).toNat = a + b.toNat := by
   have ha : 0 ≤ Int.ofNat a := by exact Int.zero_le_ofNat a
