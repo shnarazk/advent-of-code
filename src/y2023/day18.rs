@@ -5,6 +5,7 @@ use {
         geometric::{Dim2, GeometricMath},
     },
     itertools::Itertools,
+    serde::Serialize,
     std::collections::{BinaryHeap, HashMap, HashSet},
 };
 
@@ -214,5 +215,96 @@ impl AdventOfCode for Puzzle {
             }
         }
         amount
+    }
+    fn serialize(&self) -> Option<String> {
+        let mut amount = 0;
+        let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();
+        let mut pos = (0, 0);
+        let mut pre: Dim2<isize>;
+        let mut corner0: Dim2<isize> = pos;
+        let mut corner1: Dim2<isize> = pos;
+        let mut dicy: HashSet<isize> = HashSet::new();
+        let mut dicx: HashSet<isize> = HashSet::new();
+        dicy.insert(0);
+        dicx.insert(0);
+        dbg!(self.line2.len());
+        for (dir, dist) in self.line2.iter() {
+            pos.0 += dir.0 * (*dist as isize);
+            pos.1 += dir.1 * (*dist as isize);
+            dicy.insert(pos.0);
+            dicx.insert(pos.1);
+            amount += dist;
+        }
+        let converty: HashMap<isize, isize> = dicy
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (*v, i as isize))
+            .collect::<HashMap<isize, isize>>();
+        let convertx: HashMap<isize, isize> = dicx
+            .iter()
+            .sorted()
+            .enumerate()
+            .map(|(i, v)| (*v, i as isize))
+            .collect::<HashMap<isize, isize>>();
+        pos = (0, 0);
+        pre = (
+            2 * *converty.get(&0).unwrap(),
+            2 * *convertx.get(&0).unwrap(),
+        );
+        for (dir, dist) in self.line2.iter() {
+            pos.0 += dir.0 * (*dist as isize);
+            pos.1 += dir.1 * (*dist as isize);
+            let p = (
+                2 * *converty.get(&pos.0).unwrap(),
+                2 * *convertx.get(&pos.1).unwrap(),
+            );
+            match dir {
+                (1, 0) => {
+                    for y in pre.0..=p.0 {
+                        map.insert((y, p.1), 1);
+                    }
+                }
+                (-1, 0) => {
+                    for y in p.0..=pre.0 {
+                        map.insert((y, p.1), 1);
+                    }
+                }
+                (0, 1) => {
+                    for x in pre.1..=p.1 {
+                        map.insert((p.0, x), 1);
+                    }
+                }
+                (0, -1) => {
+                    for x in p.1..=pre.1 {
+                        map.insert((p.0, x), 1);
+                    }
+                }
+                _ => unreachable!(),
+            }
+
+            corner0.0 = p.0.min(corner0.0);
+            corner0.1 = p.1.min(corner0.1);
+            corner1.0 = p.0.max(corner1.0);
+            corner1.1 = p.1.max(corner1.1);
+            pre = p;
+        }
+        corner0.0 -= 2;
+        corner0.1 -= 2;
+        corner1.0 += 2;
+        corner1.1 += 2;
+
+        let a = (0..corner1.0 - corner0.0)
+            .map(|y| {
+                (0..corner1.1 - corner0.1)
+                    .map(|x| *map.get(&(y + corner0.0, x + corner0.1)).unwrap_or(&0))
+                    .collect::<Vec<usize>>()
+            })
+            .collect::<Vec<_>>();
+        #[derive(Debug, Default, Eq, PartialEq, Serialize)]
+        struct Dump {
+            map: Vec<Vec<usize>>,
+        }
+        serde_json::to_string(&Dump { map: a }).ok()
     }
 }
