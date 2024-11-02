@@ -151,17 +151,23 @@ partial def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Targ
             if let some (index, _) := #["x", "m", "a", "s"].enum.find? (·.snd == rule.label) then
               match rule.op with
                 | Operator.Lt =>
-                    if rule.num ≤ cond[index]!.snd then
+                    if rule.num ≤ cond[index]!.fst then
                       (total, cond)
                     else
-                      (total + collectPositives rules ( cond ) rule.action,
-                        cond.set! index (cond[index]!.fst, cond[index]!.snd.min (rule.num - 1)))
+                      (total +
+                          collectPositives rules
+                              (cond.set! index (cond[index]!.fst, cond[index]!.snd.min (rule.num - 1)))
+                              rule.action,
+                        cond.set! index (cond[index]!.fst.max rule.num, cond[index]!.snd))
                 | Operator.Gt =>
                     if cond[index]!.snd ≤ rule.num then
                       (total, cond)
                     else
-                      (total + collectPositives rules ( cond ) rule.action,
-                        cond.set! index (cond[index]!.fst.min (rule.num + 1), cond[index]!.snd))
+                      (total +
+                          collectPositives rules
+                              (cond.set! index (cond[index]!.fst.max (rule.num + 1), cond[index]!.snd) )
+                              rule.action,
+                        cond.set! index (cond[index]!.fst, cond[index]!.snd.min rule.num))
             else
               (total, range))
           (0, range)
