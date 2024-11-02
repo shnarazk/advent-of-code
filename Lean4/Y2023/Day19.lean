@@ -77,7 +77,7 @@ def prule := do
   let target := Target.new conc
   return Decl.mk var op num target
 -- #eval AoCParser.parse prule "a<2006:qkq"
-#eval AoCParser.parse prule "a<80:R"
+-- #eval AoCParser.parse prule "a<80:R"
 
 def pdecl := do
   let label ← alphabets <* pchar '{'
@@ -110,8 +110,7 @@ end parser
 
 namespace Part1
 
-partial def execute (rules : Rules) (setting : Setting) (label : Target) : Option Nat :=
- match label with
+partial def execute (rules : Rules) (setting : Setting) : Target → Option Nat
   | Target.Accept => some <| setting.values.foldl (· + ·) 0
   | Target.Reject => some 0
   | Target.Chain label =>
@@ -120,13 +119,11 @@ partial def execute (rules : Rules) (setting : Setting) (label : Target) : Optio
           (fun state (decl : Decl) ↦ match state with
             | some _ => state
             | none =>
-              let result : Bool := match setting.get? decl.label, decl.op with
-                | some val, .Lt => val < decl.num
-                | some val, .Gt => val > decl.num
-                | _, _ => false
-              if result then
-                execute rules setting decl.action
-              else none
+              (match setting.get? decl.label, decl.op with
+                  | some val, .Lt => (val < decl.num : Bool)
+                  | some val, .Gt => val > decl.num
+                  | _, _ => (false : Bool))
+              |>.then (K $ execute rules setting decl.action)
           )
           none
       if result.isSome then
@@ -138,15 +135,7 @@ partial def execute (rules : Rules) (setting : Setting) (label : Target) : Optio
 
 def solve (input : Rules × Array Setting) : Nat :=
   let (rules, settings) := input
-  settings.map (execute rules · (Target.Chain "in"))
-    |>.filterMap I
-    |> sum
-/-  if let some label_in := rules.get? "in" then
-    dbg s!"got: {label_in}" $ execute rules settings[0]! (Target.Chain "in")
-    |>.mapOr I 0
-  else
-    dbg s!"{rules |>.toList}, setting{settings.map (·.toList)}" 0
--/
+  settings.map (execute rules · (Target.Chain "in")) |>.filterMap I |> sum
 
 end Part1
 

@@ -226,6 +226,11 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
   | false => none
 -- #eval true.map (K 3)
 
+def Bool.then {α : Type} (self : Bool) (f : Unit → Option α) : Option α :=
+  match self with
+  | true  => f ()
+  | false => none
+
 /--
 Do the same with `windows(2)` in Rust
 -/
