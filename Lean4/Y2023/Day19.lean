@@ -29,27 +29,37 @@ def Target.new : String → Target
   | "!" => Target.Reject
   | s   => Target.Chain s
 
-structure Rule where
-  var    : String
+/--
+A composition of var op num => action
+-/
+structure Decl where
+  label   : String
   op     : Operator
   num    : Nat
   action : Target
 deriving BEq
 
-instance : ToString Rule where
-  toString r := s!"{r.var}{r.op}{r.num}:{r.action}"
+instance : ToString Decl where
+  toString r := s!"{r.label}{r.op}{r.num}:{r.action}"
 
-structure Decl where
+/--
+composition of label : rules* default
+-/
+structure Rule where
   label : String
-  rules : Array Rule
+  rules : Array Decl
   default_rule : Target
 deriving BEq
 
-instance : ToString Decl where
+instance : ToString Rule where
   toString d := s!"{d.label}\{{d.rules},{d.default_rule}}"
 
-def makeInstruction (a : Array Decl) : (HashMap String Decl) :=
+abbrev Rules := HashMap String Rule
+
+def makeInstruction (a : Array Rule) : Rules :=
   a.foldl (fun h d ↦ h.insert d.label d) HashMap.empty
+
+abbrev Setting := HashMap String Nat
 
 namespace parser
 
@@ -65,14 +75,14 @@ def prule := do
   let conc ← pstring "R" <|> pstring "A" <|> alphabets
   let op := if op' == '<' then Operator.Lt else Operator.Gt
   let target := Target.new conc
-  return Rule.mk var op num target
+  return Decl.mk var op num target
 -- #eval AoCParser.parse prule "a<2006:qkq"
 
 def pdecl := do
   let label ← alphabets <* pchar '{'
   let rules ← sepBy1 prule (pchar ',') <* pchar ','
   let drule ← alphabets <* pchar '}'
-  return Decl.mk label rules (Target.new drule)
+  return Rule.mk label rules (Target.new drule)
 -- #eval AoCParser.parse pdecl "rfg{s<537:gd,x>2440:R,A}"
 
 def prating := do
@@ -86,7 +96,7 @@ def pratings := do
   return h
 -- #eval AoCParser.parse (sepBy1 pratings eol) "{x=768,m=2655}\n{x=167,m=44}"
 
-def parse : String → Option (HashMap String Decl × Array (HashMap String Nat)) := AoCParser.parse parser
+def parse : String → Option (Rules × Array Setting) := AoCParser.parse parser
  where
     parser := do
       let d ← sepBy1 pdecl eol <* eol
@@ -99,18 +109,48 @@ end parser
 
 namespace Part1
 
-def solve (input : HashMap String Decl × Array (HashMap String Nat)) : Nat :=
-  let (decls, ratings) := input
-  if let some label_in := decls.get? "in" then
-    dbg s!"got: {label_in}" 0
+partial def execute (rules : Rules) (setting : Setting) (label : Target) : Option Nat :=
+ match label with
+  | Target.Accept => some <| dbg "val: " <| setting.values.foldl (· + ·) 0
+  | Target.Reject => none
+  | Target.Chain label =>
+    if let some decl := rules.get? label then
+      let result := decl.rules.foldl
+          (fun state (decl : Decl) ↦ match state with
+            | some _ => state
+            | none =>
+              let result : Bool := match setting.get? decl.label, decl.op with
+                | some val, Operator.Lt => val < decl.num
+                | some val, Operator.Gt => val > decl.num
+                | _,_ => false
+              if result then
+                execute rules setting decl.action
+              else none
+          )
+          none
+      if result.isSome then
+        result
+      else
+        execute rules setting decl.default_rule
+    else
+      none
+
+def solve (input : Rules × Array Setting) : Nat :=
+  let (rules, settings) := input
+  settings.map (execute rules · (Target.Chain "in"))
+    |> sum
+/-  if let some label_in := rules.get? "in" then
+    dbg s!"got: {label_in}" $ execute rules settings[0]! (Target.Chain "in")
+    |>.mapOr I 0
   else
-    dbg s!"{decls |>.toList}, rating{ratings.map (·.toList)}" 0
+    dbg s!"{rules |>.toList}, setting{settings.map (·.toList)}" 0
+-/
 
 end Part1
 
 namespace Part2
 
-def solve (_input : HashMap String Decl × Array (HashMap String Nat)) : Nat :=
+def solve (_input : Rules × Array Setting) : Nat :=
   0
 
 end Part2
