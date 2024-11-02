@@ -126,10 +126,7 @@ partial def execute (rules : Rules) (setting : Setting) : Target → Option Nat
               |>.then (K $ execute rules setting decl.action)
           )
           none
-      if result.isSome then
-        result
-      else
-        execute rules setting decl.default_rule
+      if result.isSome then result else execute rules setting decl.default_rule
     else
       none
 
@@ -171,16 +168,12 @@ partial def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Targ
             else
               (total, range))
           (0, range)
-        |> (fun (total, cond_for_default) ↦
-            total + collectPositives rules cond_for_default rule.default_rule)
+        |> (fun (total, remains) ↦ total + collectPositives rules remains rule.default_rule)
     else
       0
 
 def solve (input : Rules × Array Setting) : Nat :=
-  collectPositives
-    input.fst
-    #[(1, 4000), (1, 4000), (1, 4000), (1, 4000)]
-    (Target.Chain "in")
+  collectPositives input.fst #[(1, 4000), (1, 4000), (1, 4000), (1, 4000)] (Target.Chain "in")
 
 end Part2
 
