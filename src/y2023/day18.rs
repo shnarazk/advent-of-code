@@ -294,10 +294,10 @@ impl AdventOfCode for Puzzle {
         corner1.0 += 2;
         corner1.1 += 2;
 
-        let a = (0..corner1.0 - corner0.0)
+        let a = (corner0.0..corner1.0)
             .map(|y| {
-                (0..corner1.1 - corner0.1)
-                    .map(|x| *map.get(&(y + corner0.0, x + corner0.1)).unwrap_or(&0))
+                (corner0.1..corner1.1)
+                    .map(|x| *map.get(&(y, x)).unwrap_or(&0))
                     .collect::<Vec<usize>>()
             })
             .collect::<Vec<_>>();
