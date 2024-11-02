@@ -20,13 +20,13 @@ deriving BEq
 
 instance : ToString Target where
   toString : Target → String
-    | .Accept  => "A"
-    | .Reject  => "R"
+    | .Accept  => "Accept"
+    | .Reject  => "Reject"
     | .Chain l => l
 
 def Target.new : String → Target
   | "A" => Target.Accept
-  | "!" => Target.Reject
+  | "R" => Target.Reject
   | s   => Target.Chain s
 
 /--
@@ -77,6 +77,7 @@ def prule := do
   let target := Target.new conc
   return Decl.mk var op num target
 -- #eval AoCParser.parse prule "a<2006:qkq"
+#eval AoCParser.parse prule "a<80:R"
 
 def pdecl := do
   let label ← alphabets <* pchar '{'
@@ -111,8 +112,8 @@ namespace Part1
 
 partial def execute (rules : Rules) (setting : Setting) (label : Target) : Option Nat :=
  match label with
-  | Target.Accept => some <| dbg "val: " <| setting.values.foldl (· + ·) 0
-  | Target.Reject => none
+  | Target.Accept => some <| setting.values.foldl (· + ·) 0
+  | Target.Reject => some 0
   | Target.Chain label =>
     if let some decl := rules.get? label then
       let result := decl.rules.foldl
@@ -120,9 +121,9 @@ partial def execute (rules : Rules) (setting : Setting) (label : Target) : Optio
             | some _ => state
             | none =>
               let result : Bool := match setting.get? decl.label, decl.op with
-                | some val, Operator.Lt => val < decl.num
-                | some val, Operator.Gt => val > decl.num
-                | _,_ => false
+                | some val, .Lt => val < decl.num
+                | some val, .Gt => val > decl.num
+                | _, _ => false
               if result then
                 execute rules setting decl.action
               else none
@@ -138,6 +139,7 @@ partial def execute (rules : Rules) (setting : Setting) (label : Target) : Optio
 def solve (input : Rules × Array Setting) : Nat :=
   let (rules, settings) := input
   settings.map (execute rules · (Target.Chain "in"))
+    |>.filterMap I
     |> sum
 /-  if let some label_in := rules.get? "in" then
     dbg s!"got: {label_in}" $ execute rules settings[0]! (Target.Chain "in")
