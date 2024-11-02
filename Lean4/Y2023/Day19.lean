@@ -1,22 +1,38 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2023.Day19
 
-open Accumulation CiCL
+open Accumulation CiCL Std
 
 inductive Operator where | Lt | Gt deriving BEq
 
 instance : ToString Operator where
   toString : Operator → String | .Lt => "<" | .Gt => ">"
 
+inductive Target where
+  | Accept
+  | Reject
+  | Chain (s : String)
+deriving BEq
+
+instance : ToString Target where
+  toString : Target → String
+    | .Accept  => "A"
+    | .Reject  => "R"
+    | .Chain l => l
+
+def Target.new : String → Target
+  | "A" => Target.Accept
+  | "!" => Target.Reject
+  | s   => Target.Chain s
+
 structure Rule where
-  var : String
-  op : Operator
-  num : Nat
-  action : String
+  var    : String
+  op     : Operator
+  num    : Nat
+  action : Target
 deriving BEq
 
 instance : ToString Rule where
@@ -24,12 +40,15 @@ instance : ToString Rule where
 
 structure Decl where
   label : String
-  rules : List Rule
-  default_rule : String
+  rules : Array Rule
+  default_rule : Target
 deriving BEq
 
 instance : ToString Decl where
   toString d := s!"{d.label}\{{d.rules},{d.default_rule}}"
+
+def makeInstruction (a : Array Decl) : (HashMap String Decl) :=
+  a.foldl (fun h d ↦ h.insert d.label d) HashMap.empty
 
 namespace parser
 
@@ -39,24 +58,32 @@ open Std.Internal.Parsec.String
 
 def prule := do
   let var ← alphabets
-  let op ← pchar '<' <|> pchar '>'
+  let op' ← pchar '<' <|> pchar '>'
   let num ← number <* pchar ':'
   let conc ← pstring "R" <|> pstring "A" <|> alphabets
-  return Rule.mk var (if op == '<' then Operator.Lt else Operator.Gt) num conc
-
+  let op := if op' == '<' then Operator.Lt else Operator.Gt
+  let target := Target.new conc
+  return Rule.mk var op num target
 -- #eval AoCParser.parse prule "a<2006:qkq"
+
+def pdecl := do
+  let label ← alphabets <* pchar '{'
+  let rules ← sepBy1 prule (pchar ',') <* pchar ','
+  let drule ← alphabets <* pchar '}'
+  return Decl.mk label rules (Target.new drule)
+-- #eval AoCParser.parse pdecl "rfg{s<537:gd,x>2440:R,A}"
 
 def parse : String → Option (Array Decl) := AoCParser.parse parser
   where
-    parser : Parser (Array Decl):= return #[Decl.mk "aa" [] "A"]
-
--- #eval parse "a<2006:qkq"
+    parser : Parser (Array Decl):= sepBy1 pdecl eol
+-- #eval parse "rfg{s<537:gd,x>2440:R,A}\nqs{s>3448:A,lnx}"
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (a : Array Decl) : Nat :=
+ dbg s!"{makeInstruction a |>.toList}" 0
 
 end Part1
 
