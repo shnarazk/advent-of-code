@@ -141,8 +141,40 @@ end Part1
 
 namespace Part2
 
-def solve (_input : Rules × Array Setting) : Nat :=
-  0
+partial def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Target → Nat
+  | Target.Accept => range.map (fun (b, e) ↦ e - b + 1) |> product
+  | Target.Reject => 0
+  | Target.Chain label =>
+    if let some rule := rules.get? label then
+      rule.rules.foldl
+          (fun (total, (cond : Array (Nat × Nat))) rule ↦
+            if let some (index, _) := #["x", "m", "a", "s"].enum.find? (·.snd == rule.label) then
+              match rule.op with
+                | Operator.Lt =>
+                    if rule.num ≤ cond[index]!.snd then
+                      (total, cond)
+                    else
+                      (total + collectPositives rules ( cond ) rule.action,
+                        cond.set! index (cond[index]!.fst, cond[index]!.snd.min (rule.num - 1)))
+                | Operator.Gt =>
+                    if cond[index]!.snd ≤ rule.num then
+                      (total, cond)
+                    else
+                      (total + collectPositives rules ( cond ) rule.action,
+                        cond.set! index (cond[index]!.fst.min (rule.num + 1), cond[index]!.snd))
+            else
+              (total, range))
+          (0, range)
+        |> (fun (total, cond_for_default) ↦
+            total + collectPositives rules cond_for_default rule.default_rule)
+    else
+      0
+
+def solve (input : Rules × Array Setting) : Nat :=
+  collectPositives
+    input.fst
+    #[(1, 4000), (1, 4000), (1, 4000), (1, 4000)]
+    (Target.Chain "in")
 
 end Part2
 
