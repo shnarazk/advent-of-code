@@ -174,6 +174,13 @@ end Part1
 
 namespace Part2
 
+/-
+`rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
+So we need the cycle lengths of each input module states.
+By using Chinese remain theorem, we can get the answer.
+It is implemented as `Nat.chineseRemainder'` in Mathlib.Data.Nat.ModEq.
+- {m n a b : ℕ} (h : a ≡ b [MOD n.gcd m]) : { k // k ≡ a [MOD n] ∧ k ≡ b [MOD m] }
+-/
 def solve (a : Array Rule) : Nat :=
   let c := dbg "circuit" $ Circuit.new a
   dbg s!"{c.pulse_h}" 0
