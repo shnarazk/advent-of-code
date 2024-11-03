@@ -42,7 +42,7 @@ def Mdl.label : Mdl → Label
 def Mdl.pulse : Mdl → (Label × Bool) → Mdl × Option (Label × Bool)
   | Mdl.Broadcaster,           _ => (Mdl.Broadcaster     , some ("", false))
   | Mdl.FlipFlop l b, (_, false) => (Mdl.FlipFlop l !b   , some (l, !b))
-  | Mdl.FlipFlop l b,  (_, true) => (Mdl.FlipFlop l b    , none) 
+  | Mdl.FlipFlop l b,  (_, true) => (Mdl.FlipFlop l b    , none)
   | Mdl.Conjunction l s, (l', b) =>
      let s' := s.insert l' b      ; (Mdl.Conjunction l s', some (l, !s'.values.all I))
 -- #eval (Mdl.FlipFlop "ff" false).pulse ("a", false)
@@ -60,23 +60,70 @@ structure Rule where
 instance : ToString Rule where
   toString r := s!"{r.module} -> {r.dests}"
 
-abbrev Circuit := HashMap Label (Mdl × Array Label)
- 
+structure Pulse where
+  source : Label
+  dest   : Label
+  value  : Bool
+deriving BEq
+
+instance : Inhabited Pulse where
+  default := Pulse.mk "" "" false
+
+structure Circuit where
+  circuit : HashMap Label (Mdl × Array Label)
+  out_l : Nat
+  out_h : Nat
+
 def Circuit.new (rules : Array Rule) : Circuit :=
   rules.foldl
-    (fun c r => 
+    (fun c r =>
        r.dests.foldl
-         (fun c destLabel => 
-           if let some target := c.get? destLabel then
-             c.insert destLabel (r.module.link target.fst, target.snd)
-           else
-             c
+          (fun c destLabel =>
+            if let some target := c.circuit.get? destLabel then
+              { c with
+                circuit := c.circuit.insert
+                    destLabel
+                    (r.module.link target.fst, target.snd)
+              }
+            else
+              c
           )
          c
     )
-    (rules.foldl (fun c r => c.insert r.module.label (r.module, r.dests)) HashMap.empty)
+    (rules.foldl
+      (fun c r => { c with
+          circuit := c.circuit.insert r.module.label (r.module, r.dests)})
+      (Circuit.mk HashMap.empty 0 0))
 
-instance : ToString Circuit where toString self := self.toList.toString
+abbrev Queue := Std.Queue Pulse
+
+def Circuit.propagate (self : Circuit) (queue : Queue) (pulse : Pulse): Circuit × Queue :=
+  if let some (m, dests) := self.circuit.get? pulse.dest then
+    let (m', output) := m.pulse (pulse.source, pulse.value)
+    (
+      if dests.contains "output" then
+        match output with
+          | none => { self with circuit := self.circuit.insert m.label (m', dests) }
+          | some (_, false) =>
+            { self with
+              circuit := self.circuit.insert m.label (m', dests)
+              out_l := self.out_l + 1 }
+          | some (_, true) =>
+            { self with
+              circuit := self.circuit.insert m.label (m', dests)
+              out_h := self.out_h + 1 }
+      else
+        { self with circuit := self.circuit.insert m.label (m', dests) },
+     if let some (label, value) := output then
+        dests.foldl (fun q dest ↦
+            if dest != "output" then q.enqueue (Pulse.mk label dest value) else q)
+          queue
+      else
+        queue)
+  else
+    (self, queue)
+
+instance : ToString Circuit where toString self := s!"{self.out_l}:{self.out_h}\n{self.circuit.toList.toString}"
 
 namespace parser
 
@@ -119,9 +166,20 @@ end parser
 
 namespace Part1
 
+partial def runUpto (circuit : Circuit) (queue : Queue) : (n : Nat) → Circuit
+  | 0 => circuit
+  | n + 1 =>
+    if let some (pulse, q') := queue.dequeue? then
+      let next := circuit.propagate q' pulse
+      runUpto next.fst next.snd (n + 1)
+    else
+      runUpto circuit (queue.enqueue (default : Pulse)) n
+
 def solve (a : Array Rule) : Nat :=
   let c := Circuit.new a
-  dbg s!"{c}" 0
+  let q := Queue.empty.enqueue (default : Pulse)
+  let c' := runUpto c q 4000
+  dbg s!"{c}" $ c'.out_l * c'.out_h
 
 end Part1
 
