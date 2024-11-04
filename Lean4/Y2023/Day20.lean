@@ -23,8 +23,8 @@ inductive Mdl where
 instance : Hashable Mdl where
   hash
   | Mdl.Broadcaster => 0
-  | Mdl.FlipFlop l b => (hash l) + (hash b)
-  | Mdl.Conjunction l s => (hash l) + (hash s.toList)
+  | Mdl.FlipFlop l b => hash (l, b)
+  | Mdl.Conjunction l s => hash (l, s.toList)
 
 instance : BEq Mdl where
   beq : Mdl → Mdl → Bool
@@ -86,7 +86,7 @@ structure Circuit where
   pulse_l : Nat
   pulse_h : Nat
 
-def Circuit.hashed (self : Circuit) (l : List Bool) : List Mdl × List Bool :=
+def Circuit.toHashable (self : Circuit) (l : List Bool) : List Mdl × List Bool :=
   (self.circuit.toList.mergeSort (·.fst < ·.fst) |>.map (·.snd.fst), l)
 
 def Circuit.get (self : Circuit) (lebel : Label) : Option Node := self.circuit.get? lebel
@@ -199,7 +199,9 @@ def run_pulse (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs :
         else
           { circuit with pulse_l := circuit.pulse_l + 1 }
       if pulse.dest = dest_port then
+        -- let next := c'.propagate q' pulse
         run_pulse c' q' dest_port (outputs ++ [pulse.value]) n
+        -- run_pulse next.fst next.snd dest_port (outputs ++ [pulse.value]) n
       else
         let next := c'.propagate q' pulse
         run_pulse next.fst next.snd dest_port outputs n
@@ -227,24 +229,25 @@ def subcircuit (circuit : Circuit) (root : Label) : Circuit :=
 abbrev CircuitState := List Mdl × List Bool
 -- instance : Hashable CircuitState where hash c := hash c.fst
 
-def LOOP_LIMIT := 10000
+def LOOP_LIMIT := 5000
 
-partial def findLoop' (circuit : Circuit) (port : Label) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
-  let queue := Queue.empty.enqueue (default : Pulse)
-  let next : (Circuit × List Bool) := run_pulse circuit queue port [] LOOP_LIMIT
-  let h : List Mdl × List Bool := next.fst.hashed next.snd
-  if next.snd.getLast? == some true then
-    if let some nstage := history.get? h then
-      (nstage, n % (n - nstage))
-    else
-      let h' := history.insert h n
-      findLoop' next.fst port h' (n + 1)
+partial def findLoop' (port : Label) (circuit : Circuit) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
+  if LOOP_LIMIT < n then
+    dbg s!"n:{n} h:{history.size}" (0, 0)
   else
-    let h' := history.insert h n
-    findLoop' next.fst port h' (n + 1)
+    let queue := Queue.empty.enqueue (default : Pulse)
+    let next : (Circuit × List Bool) := run_pulse circuit queue port [] LOOP_LIMIT
+    let h : List Mdl × List Bool := next.fst.toHashable next.snd
+    if next.snd.getLast? == some true then
+      if let some nstage := history.get? h then
+        (nstage, n % (n - nstage))
+      else
+        findLoop' port next.fst (history.insert h n) (n + 1)
+    else
+      findLoop' port next.fst (history.insert h n) (n + 1)
 
-def findLoop (_circuit : Circuit) : Nat × Nat :=
-  (0, 0)
+def findLoop (circuit : Circuit) (port : Label): Nat × Nat :=
+  findLoop' port circuit HashMap.empty 1
 /-
 `rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
 So we need the cycle lengths of each input module states.
@@ -253,19 +256,43 @@ It is implemented as `Nat.chineseRemainder'` in Mathlib.Data.Nat.ModEq.
 - {m n a b : ℕ} (h : a ≡ b [MOD n.gcd m]) : { k // k ≡ a [MOD n] ∧ k ≡ b [MOD m] }
 -/
 -- #eval Nat.chineseRemainder (by rfl : (21 : Nat).Coprime 19) 4 5
-def crt (m n a b : Nat) : Nat := if h : m.Coprime n then Nat.chineseRemainder h a b else 0
+def crt (m n a b : Nat) : Nat :=
+  if h : m.Coprime n then
+    let c := Nat.chineseRemainder h a b
+    if c == (0 : Nat) then m.lcm n else c
+  else dbg s!"crt {m} {n} {a} {b} =>" $ m + a
 -- #eval crt 21 17 4 5
+-- #eval (277 - 4) / 21
+-- #eval 21 * 13 + 4
+-- #eval 17 * 16 + 5
+-- #eval 13 * 16
+-- #eval 277 % (13 * 16)
 -- example : (crt 21 17 4 5) = 277 := by sorry
+#eval crt 10002 10001 0 0
+-- #eval (10002 : Nat).lcm 10001
 
 def solve (a : Array Rule) : Nat :=
   let c := Circuit.new a
   if let some (lname, _) := c.circuit.toList.find? (fun (_, n) ↦ n.snd.contains "rx") then
-    let targets := c.circuit.toList.filter (fun (_, n) ↦ n.snd.contains lname)
-    let subcircuits : List Circuit := (dbg "4" targets).map (subcircuit c ·.fst)
-    dbg s!"get rx: {subcircuits.map (·.circuit.size)}" 0
+    let targets := c.circuit.toList.filter (fun (_, n) ↦ n.snd.contains lname) |>.map (·.fst)
+    let subcircuits : List (Label × Circuit) := (dbg "4" targets).map (fun l ↦ (l, subcircuit c l))
+    let lengths : List (Nat × Nat) := subcircuits.map (fun (l, c) ↦ findLoop (dbg s!"search {lname} in" c) lname)
+    (dbg "legnths" lengths).tail.foldl (fun (m, a) (n, b) ↦
+          if m.Coprime n then
+            let tmp := dbg "crt" $ crt m n a b
+            let m' := (tmp - a) / m
+            let n' := (tmp - b) / n
+            dbg s!"crt':{m'}:{n'}" (m' * n', tmp % (m' * n'))
+          else
+            dbg s!"dividable {m} {n} crt:{crt m n a b}" (m, a))
+        (lengths[0]!)
+      |> (fun (a, b) ↦ dbg s!"get rx: {lengths}" a + b)
   else
     0
+#eval (19 : Nat).Coprime 5
+#eval (100030002 : Nat).Coprime 10012
 
+#eval [2, 5, 8].tail
 end Part2
 
 def solve := AocProblem.config 2023 20 parser.parse Part1.solve Part2.solve
