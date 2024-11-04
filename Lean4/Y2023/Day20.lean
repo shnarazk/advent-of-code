@@ -51,11 +51,7 @@ def Mdl.pulse : Mdl → (Label × Bool) → Mdl × Option (Label × Bool)
   | Mdl.FlipFlop l b, (_, false) => (Mdl.FlipFlop l !b   , some (l, !b))
   | Mdl.FlipFlop l b,  (_, true) => (Mdl.FlipFlop l b    , none)
   | Mdl.Conjunction l s, (l', b) =>
-     let s' := s.insert l' b      ;
-     if !s'.values.all I && ["nh", "dr", "xm", "tr"].contains l then
-      (Mdl.Conjunction (dbg "Fire Conj" l) s', some (l, !s'.values.all I))
-     else
-      (Mdl.Conjunction l s', some (l, !s'.values.all I))
+     let s' := s.insert l' b      ; (Mdl.Conjunction l s', some (l, !s'.values.all I))
 -- #eval (Mdl.FlipFlop "ff" false).pulse ("a", false)
 
 def Mdl.link : Mdl → Mdl → Mdl
@@ -135,7 +131,7 @@ We need to rewrite to use a decreasing counter explicitly.
 -/
 private partial def run_pulse' (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) (limit : Nat) : Circuit × List Bool :=
   match limit with
-  | 0 => dbg "run_pulse reaches the limit" (circuit, outputs)
+  | 0 => (circuit, outputs)
   | n + 1 =>
     if let some (pulse, q') := queue.dequeue? then
      let c' := if pulse.value then
@@ -237,8 +233,8 @@ partial def findLoop' (dest : Label) (circuit : Circuit) (history : HashMap Circ
     let h : CircuitState := next.fst.toHashable next.snd
     -- if next.snd.getLast? == some true then
     if next.snd.contains true then
-      if let some nstage := dbg "found" $ history.get? (dbg "state" h) then
-        dbg s!"==> {next.snd}" (nstage, n % (n - nstage))
+      if let some nstage := history.get? h then
+        (nstage, n % (n - nstage))
       else
         findLoop' dest next.fst (history.insert h n) (n + 1)
     else
@@ -277,18 +273,18 @@ def solve (a : Array Rule) : Nat :=
   let c := Circuit.new a
   if let some (lname, _) := c.circuit.toList.find? (fun (_, n) ↦ n.snd.contains "rx") then
     let targets := c.circuit.toList.filter (fun (_, n) ↦ n.snd.contains lname) |>.map (·.fst)
-    let subcircuits : List (Label × Circuit) := (dbg "4 target modules = " targets).map (fun l ↦ (l, subcircuit c l))
-    let lengths : List (Nat × Nat) := subcircuits.map (fun (_, c) ↦ findLoop (dbg s!"search {lname} in" c) lname)
-    (dbg s!"last_module:{c.get lname},legnths" lengths).tail.foldl (fun (m, a) (n, b) ↦
+    let subcircuits : List (Label × Circuit) := targets.map (fun l ↦ (l, subcircuit c l))
+    let lengths : List (Nat × Nat) := subcircuits.map (fun (_, c) ↦ findLoop c lname)
+    lengths.tail.foldl (fun (m, a) (n, b) ↦
           if m.Coprime n then
-            let tmp := dbg "crt" $ crt m n a b
+            let tmp := crt m n a b
             let m' := (tmp - a) / m
             let n' := (tmp - b) / n
-            dbg s!"crt':{m'}:{n'}" (m' * n', tmp % (m' * n'))
+            (m' * n', tmp % (m' * n'))
           else
-            dbg s!"dividable {m} {n} crt:{crt m n a b}" (m, a))
+            (m, a))
         (lengths[0]!)
-      |> (fun (a, b) ↦ dbg s!"get rx: {lengths}" a + b)
+      |> (fun (a, b) ↦ a + b)
   else
     0
 -- #eval (19 : Nat).Coprime 5
