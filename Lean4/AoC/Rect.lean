@@ -229,7 +229,7 @@ def join' {α : Type} : List (List α) → List α
 
 def toList' (p : Nat × Nat) : List (Nat × Nat):=
   let rl := range_list p.1
-  List.join (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
+  List.flatten (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
 
 /-
 def toList (p : Dim2) : List (Dim2):=
@@ -245,8 +245,8 @@ lemma cp_length₁ (x : Nat) :
   exact rfl
 
 lemma toList'_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
-  simp only [toList', List.join]
-  rw [List.length_join]
+  simp only [toList', List.flatten]
+  rw [List.length_flatten]
   simp [cp_length₁]
   rw [range_list_length_is_n]
   induction' p.1 with p1 _
