@@ -98,7 +98,7 @@ def Part2.evaluate (conf : Data) : Nat :=
   let p := Array.foldl (fun s c => s.push c) "" conf.pattern
   let pattern := String.intercalate "?" [p, p, p, p, p]
   let r := conf.rule.toList
-  let rule := [r, r, r, r, r].join
+  let rule := [r, r, r, r, r].flatten
   match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
     |>.snd
 
