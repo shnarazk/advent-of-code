@@ -72,38 +72,40 @@ instance : Inhabited Pulse where
 instance : ToString Pulse where
   toString p := s!"{p.source} -{if p.value then "high" else "low"}-> {p.dest}"
 
+abbrev Node := Mdl × Array Label
+
 structure Circuit where
-  circuit : HashMap Label (Mdl × Array Label)
+  circuit : HashMap Label Node
   pulse_l : Nat
   pulse_h : Nat
-  out_l : Nat
-  out_h : Nat
+
+def Circuit.get (self : Circuit) (lebel : Label) : Option Node := self.circuit.get? lebel
+
+def Circuit.insert (self : Circuit) (label : Label) (node : Node) :=
+  { self with circuit := self.circuit.insert label node }
 
 def Circuit.new (rules : Array Rule) : Circuit :=
   rules.foldl
     (fun c r ↦
       r.dests.foldl
         (fun c dest ↦
-          if let some (Mdl.Conjunction l s, d') := c.circuit.get? dest then
-            { c with
-              circuit := c.circuit.insert dest (Mdl.Conjunction l (s.insert r.module.label false), d') }
+          if let some (Mdl.Conjunction l s, d') := c.get dest then
+            c.insert dest (Mdl.Conjunction l (s.insert r.module.label false), d')
           else
             c
         )
-        c
-      )
+        c)
     (rules.foldl
-      (fun c r => { c with
-          circuit := c.circuit.insert r.module.label (r.module, r.dests)})
-      (Circuit.mk HashMap.empty 0 0 0 0))
+      (fun c r => c.insert r.module.label (r.module, r.dests))
+      (Circuit.mk HashMap.empty 0 0))
 
 abbrev Queue := Std.Queue Pulse
 
 def Circuit.propagate (self : Circuit) (queue : Queue) (pulse : Pulse): Circuit × Queue :=
-  if let some (m, dests) := self.circuit.get? pulse.dest then
+  if let some (m, dests) := self.get pulse.dest then
     let (m', output) := m.pulse (pulse.source, pulse.value)
     (
-      { self with circuit := self.circuit.insert m.label (m', dests) },
+      self.insert m.label (m', dests),
       if let some (label, value) := output then
         dests.foldl (fun q dest ↦ q.enqueue (Pulse.mk label dest value)) queue
       else
@@ -111,7 +113,7 @@ def Circuit.propagate (self : Circuit) (queue : Queue) (pulse : Pulse): Circuit 
   else
     (self, queue)
 
-instance : ToString Circuit where toString self := s!"{self.out_l}:{self.out_h}\n{self.circuit.toList.toString}"
+instance : ToString Circuit where toString self := s!"{self.pulse_l}:{self.pulse_h}\n{self.circuit.toList.toString}"
 
 namespace parser
 
@@ -174,6 +176,24 @@ end Part1
 
 namespace Part2
 
+partial def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
+    List Label → HashMap Label Node
+  | [] => visited
+  | root :: to_visit =>
+    let senders : List (Label × Node) := circuit.circuit.toList.filter
+        (fun (_, node) ↦ node.snd.contains root)
+    subcircuit'
+      circuit
+      (if let some r := circuit.get root then visited.insert root r else visited)
+      (senders.foldl
+        (fun l ln ↦ if visited.contains ln.fst || l.contains ln.fst then l else ln.fst :: l) to_visit)
+
+/-
+Return a subcircuit consisted of all modules to compute root's value.
+-/
+def subcircuit (circuit : Circuit) (root : Label) : Circuit :=
+  Circuit.mk (subcircuit' circuit HashMap.empty [root]) 0 0
+
 /-
 `rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
 So we need the cycle lengths of each input module states.
@@ -182,8 +202,13 @@ It is implemented as `Nat.chineseRemainder'` in Mathlib.Data.Nat.ModEq.
 - {m n a b : ℕ} (h : a ≡ b [MOD n.gcd m]) : { k // k ≡ a [MOD n] ∧ k ≡ b [MOD m] }
 -/
 def solve (a : Array Rule) : Nat :=
-  let c := dbg "circuit" $ Circuit.new a
-  dbg s!"{c.pulse_h}" 0
+  let c := Circuit.new a
+  if let some (lname, _) := c.circuit.toList.find? (fun (_, n) ↦ n.snd.contains "rx") then
+    let targets := c.circuit.toList.filter (fun (_, n) ↦ n.snd.contains lname)
+    let subcircuits : List Circuit := (dbg "4" targets).map (subcircuit c ·.fst)
+    dbg s!"get rx: {subcircuits.map (·.circuit.size)}" 0
+  else
+    0
 
 end Part2
 
