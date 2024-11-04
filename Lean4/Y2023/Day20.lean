@@ -20,6 +20,12 @@ inductive Mdl where
   | FlipFlop (label : Label) (state : Bool)
   | Conjunction (label : Label) (state : HashMap Label Bool)
 
+instance : Hashable Mdl where
+  hash
+  | Mdl.Broadcaster => 0
+  | Mdl.FlipFlop l b => (hash l) + (hash b)
+  | Mdl.Conjunction l s => (hash l) + (hash s.toList)
+
 instance : BEq Mdl where
   beq : Mdl → Mdl → Bool
   | .Broadcaster     , .Broadcaster      => true
@@ -79,6 +85,9 @@ structure Circuit where
   circuit : HashMap Label Node
   pulse_l : Nat
   pulse_h : Nat
+
+def Circuit.hashed (self : Circuit) (l : List Bool) : List Mdl × List Bool :=
+  (self.circuit.toList.mergeSort (·.fst < ·.fst) |>.map (·.snd.fst), l)
 
 def Circuit.get (self : Circuit) (lebel : Label) : Option Node := self.circuit.get? lebel
 
@@ -177,6 +186,26 @@ end Part1
 
 namespace Part2
 
+/-
+Caveat: `partial` is not a silver-bullet.
+We need to rewrite to use a decreasing counter explicitly.
+-/
+def run_pulse (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) : Nat → Circuit × List Bool
+  | 0 => (circuit, outputs)
+  | n + 1 =>
+    if let some (pulse, q') := queue.dequeue? then
+     let c' := if pulse.value then
+          { circuit with pulse_h := circuit.pulse_h + 1 }
+        else
+          { circuit with pulse_l := circuit.pulse_l + 1 }
+      if pulse.dest = dest_port then
+        run_pulse c' q' dest_port (outputs ++ [pulse.value]) n
+      else
+        let next := c'.propagate q' pulse
+        run_pulse next.fst next.snd dest_port outputs n
+    else
+      (circuit, outputs)
+
 partial def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
     List Label → HashMap Label Node
   | [] => visited
@@ -195,6 +224,27 @@ Return a subcircuit consisted of all modules to compute root's value.
 def subcircuit (circuit : Circuit) (root : Label) : Circuit :=
   Circuit.mk (subcircuit' circuit HashMap.empty [root]) 0 0
 
+abbrev CircuitState := List Mdl × List Bool
+-- instance : Hashable CircuitState where hash c := hash c.fst
+
+def LOOP_LIMIT := 10000
+
+partial def findLoop' (circuit : Circuit) (port : Label) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
+  let queue := Queue.empty.enqueue (default : Pulse)
+  let next : (Circuit × List Bool) := run_pulse circuit queue port [] LOOP_LIMIT
+  let h : List Mdl × List Bool := next.fst.hashed next.snd
+  if next.snd.getLast? == some true then
+    if let some nstage := history.get? h then
+      (nstage, n % (n - nstage))
+    else
+      let h' := history.insert h n
+      findLoop' next.fst port h' (n + 1)
+  else
+    let h' := history.insert h n
+    findLoop' next.fst port h' (n + 1)
+
+def findLoop (_circuit : Circuit) : Nat × Nat :=
+  (0, 0)
 /-
 `rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
 So we need the cycle lengths of each input module states.
