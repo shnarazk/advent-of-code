@@ -1,3 +1,4 @@
+import Mathlib.Data.Nat.ModEq
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
@@ -201,6 +202,11 @@ By using Chinese remain theorem, we can get the answer.
 It is implemented as `Nat.chineseRemainder'` in Mathlib.Data.Nat.ModEq.
 - {m n a b : ℕ} (h : a ≡ b [MOD n.gcd m]) : { k // k ≡ a [MOD n] ∧ k ≡ b [MOD m] }
 -/
+-- #eval Nat.chineseRemainder (by rfl : (21 : Nat).Coprime 19) 4 5
+def crt (m n a b : Nat) : Nat := if h : m.Coprime n then Nat.chineseRemainder h a b else 0
+-- #eval crt 21 17 4 5
+-- example : (crt 21 17 4 5) = 277 := by sorry
+
 def solve (a : Array Rule) : Nat :=
   let c := Circuit.new a
   if let some (lname, _) := c.circuit.toList.find? (fun (_, n) ↦ n.snd.contains "rx") then
