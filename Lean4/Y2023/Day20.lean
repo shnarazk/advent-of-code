@@ -51,7 +51,11 @@ def Mdl.pulse : Mdl → (Label × Bool) → Mdl × Option (Label × Bool)
   | Mdl.FlipFlop l b, (_, false) => (Mdl.FlipFlop l !b   , some (l, !b))
   | Mdl.FlipFlop l b,  (_, true) => (Mdl.FlipFlop l b    , none)
   | Mdl.Conjunction l s, (l', b) =>
-     let s' := s.insert l' b      ; (Mdl.Conjunction l s', some (l, !s'.values.all I))
+     let s' := s.insert l' b      ;
+     if !s'.values.all I && ["nh", "dr", "xm", "tr"].contains l then
+      (Mdl.Conjunction (dbg "Fire Conj" l) s', some (l, !s'.values.all I))
+     else
+      (Mdl.Conjunction l s', some (l, !s'.values.all I))
 -- #eval (Mdl.FlipFlop "ff" false).pulse ("a", false)
 
 def Mdl.link : Mdl → Mdl → Mdl
@@ -87,7 +91,7 @@ structure Circuit where
   pulse_h : Nat
 
 def Circuit.toHashable (self : Circuit) (l : List Bool) : List Mdl × List Bool :=
-  (self.circuit.toList.mergeSort (·.fst < ·.fst) |>.map (·.snd.fst), l)
+  (self.circuit.toList.mergeSort (fun a b ↦ a.fst < b.fst) |>.map (·.snd.fst), l)
 
 def Circuit.get (self : Circuit) (lebel : Label) : Option Node := self.circuit.get? lebel
 
@@ -124,6 +128,30 @@ def Circuit.propagate (self : Circuit) (queue : Queue) (pulse : Pulse): Circuit 
     (self, queue)
 
 instance : ToString Circuit where toString self := s!"{self.pulse_l}:{self.pulse_h}\n{self.circuit.toList.toString}"
+
+/-
+Caveat: `partial` is not a silver-bullet.
+We need to rewrite to use a decreasing counter explicitly.
+-/
+private partial def run_pulse' (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) (limit : Nat) : Circuit × List Bool :=
+  match limit with
+  | 0 => dbg "run_pulse reaches the limit" (circuit, outputs)
+  | n + 1 =>
+    if let some (pulse, q') := queue.dequeue? then
+     let c' := if pulse.value then
+          { circuit with pulse_h := circuit.pulse_h + 1 }
+        else
+          { circuit with pulse_l := circuit.pulse_l + 1 }
+      if pulse.dest = dest_port then
+        run_pulse' c' q' dest_port (outputs ++ [pulse.value]) (n + 1)
+      else
+        let (c'', q'') := c'.propagate q' pulse
+        run_pulse' c'' q'' dest_port outputs n
+    else
+      (circuit, outputs)
+
+def Circuit.run_pulse (circuit : Circuit) (dest_port : Label) (limit : Nat := 1000) : Circuit × List Bool :=
+  run_pulse' circuit (Queue.empty.enqueue default) dest_port [] limit
 
 namespace parser
 
@@ -166,59 +194,30 @@ end parser
 
 namespace Part1
 
-partial def runUpto (circuit : Circuit) (queue : Queue) (n : Nat) : Circuit :=
-  if let some (pulse, q') := queue.dequeue? then
-    let c' := if pulse.value then
-        { circuit with pulse_h := circuit.pulse_h + 1 }
-      else
-        { circuit with pulse_l := circuit.pulse_l + 1 }
-    let next := c'.propagate q' pulse -- (dbg s!"{n}" pulse)
-    runUpto next.fst next.snd n
-  else match n with
-    | 0 => circuit
-    | n' + 1 => runUpto circuit (queue.enqueue (default : Pulse)) n'
+partial def runUpto (circuit : Circuit) : Nat → Circuit
+  | 0 => circuit
+  | n + 1 => circuit.run_pulse "output" |> (runUpto ·.fst n)
 
 def solve (a : Array Rule) : Nat :=
-  runUpto (Circuit.new a) (Queue.empty.enqueue (default : Pulse)) (1000 - 1)
-    |> (fun c ↦ c.pulse_l * c.pulse_h)
+  runUpto (Circuit.new a) 1000 |> (fun c ↦ c.pulse_l * c.pulse_h)
 
 end Part1
 
 namespace Part2
 
-/-
-Caveat: `partial` is not a silver-bullet.
-We need to rewrite to use a decreasing counter explicitly.
--/
-def run_pulse (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) : Nat → Circuit × List Bool
-  | 0 => (circuit, outputs)
-  | n + 1 =>
-    if let some (pulse, q') := queue.dequeue? then
-     let c' := if pulse.value then
-          { circuit with pulse_h := circuit.pulse_h + 1 }
-        else
-          { circuit with pulse_l := circuit.pulse_l + 1 }
-      if pulse.dest = dest_port then
-        -- let next := c'.propagate q' pulse
-        run_pulse c' q' dest_port (outputs ++ [pulse.value]) n
-        -- run_pulse next.fst next.snd dest_port (outputs ++ [pulse.value]) n
-      else
-        let next := c'.propagate q' pulse
-        run_pulse next.fst next.snd dest_port outputs n
-    else
-      (circuit, outputs)
-
 partial def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
     List Label → HashMap Label Node
   | [] => visited
   | root :: to_visit =>
-    let senders : List (Label × Node) := circuit.circuit.toList.filter
+    let senders : List Label := circuit.circuit.toList.filter
         (fun (_, node) ↦ node.snd.contains root)
+      |>.map (·.fst)
     subcircuit'
       circuit
       (if let some r := circuit.get root then visited.insert root r else visited)
       (senders.foldl
-        (fun l ln ↦ if visited.contains ln.fst || l.contains ln.fst then l else ln.fst :: l) to_visit)
+        (fun l lbl ↦ if visited.contains lbl || l.contains lbl then l else lbl :: l)
+        to_visit)
 
 /-
 Return a subcircuit consisted of all modules to compute root's value.
@@ -227,27 +226,30 @@ def subcircuit (circuit : Circuit) (root : Label) : Circuit :=
   Circuit.mk (subcircuit' circuit HashMap.empty [root]) 0 0
 
 abbrev CircuitState := List Mdl × List Bool
--- instance : Hashable CircuitState where hash c := hash c.fst
 
-def LOOP_LIMIT := 5000
+def LOOP_LIMIT := 8000
 
-partial def findLoop' (port : Label) (circuit : Circuit) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
+partial def findLoop' (dest : Label) (circuit : Circuit) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
   if LOOP_LIMIT < n then
-    dbg s!"n:{n} h:{history.size}" (0, 0)
+    dbg s!"findLoop' dest:{dest}, n:{n} h:{history.size}" (0, 0)
   else
-    let queue := Queue.empty.enqueue (default : Pulse)
-    let next : (Circuit × List Bool) := run_pulse circuit queue port [] LOOP_LIMIT
-    let h : List Mdl × List Bool := next.fst.toHashable next.snd
-    if next.snd.getLast? == some true then
-      if let some nstage := history.get? h then
-        (nstage, n % (n - nstage))
+    let next : (Circuit × List Bool) := circuit.run_pulse dest
+    let h : CircuitState := next.fst.toHashable next.snd
+    -- if next.snd.getLast? == some true then
+    if next.snd.contains true then
+      if let some nstage := dbg "found" $ history.get? (dbg "state" h) then
+        dbg s!"==> {next.snd}" (nstage, n % (n - nstage))
       else
-        findLoop' port next.fst (history.insert h n) (n + 1)
+        findLoop' dest next.fst (history.insert h n) (n + 1)
     else
-      findLoop' port next.fst (history.insert h n) (n + 1)
+      findLoop' dest next.fst (history.insert h n) (n + 1)
 
+/--
+return loop_length × intro_length
+-/
 def findLoop (circuit : Circuit) (port : Label): Nat × Nat :=
   findLoop' port circuit HashMap.empty 1
+
 /-
 `rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
 So we need the cycle lengths of each input module states.
@@ -268,16 +270,16 @@ def crt (m n a b : Nat) : Nat :=
 -- #eval 13 * 16
 -- #eval 277 % (13 * 16)
 -- example : (crt 21 17 4 5) = 277 := by sorry
-#eval crt 10002 10001 0 0
+-- #eval crt 10002 10001 0 0
 -- #eval (10002 : Nat).lcm 10001
 
 def solve (a : Array Rule) : Nat :=
   let c := Circuit.new a
   if let some (lname, _) := c.circuit.toList.find? (fun (_, n) ↦ n.snd.contains "rx") then
     let targets := c.circuit.toList.filter (fun (_, n) ↦ n.snd.contains lname) |>.map (·.fst)
-    let subcircuits : List (Label × Circuit) := (dbg "4" targets).map (fun l ↦ (l, subcircuit c l))
-    let lengths : List (Nat × Nat) := subcircuits.map (fun (l, c) ↦ findLoop (dbg s!"search {lname} in" c) lname)
-    (dbg "legnths" lengths).tail.foldl (fun (m, a) (n, b) ↦
+    let subcircuits : List (Label × Circuit) := (dbg "4 target modules = " targets).map (fun l ↦ (l, subcircuit c l))
+    let lengths : List (Nat × Nat) := subcircuits.map (fun (_, c) ↦ findLoop (dbg s!"search {lname} in" c) lname)
+    (dbg s!"last_module:{c.get lname},legnths" lengths).tail.foldl (fun (m, a) (n, b) ↦
           if m.Coprime n then
             let tmp := dbg "crt" $ crt m n a b
             let m' := (tmp - a) / m
@@ -289,10 +291,10 @@ def solve (a : Array Rule) : Nat :=
       |> (fun (a, b) ↦ dbg s!"get rx: {lengths}" a + b)
   else
     0
-#eval (19 : Nat).Coprime 5
-#eval (100030002 : Nat).Coprime 10012
+-- #eval (19 : Nat).Coprime 5
+-- #eval (100030002 : Nat).Coprime 10012
+-- #eval [2, 5, 8].tail
 
-#eval [2, 5, 8].tail
 end Part2
 
 def solve := AocProblem.config 2023 20 parser.parse Part1.solve Part2.solve
