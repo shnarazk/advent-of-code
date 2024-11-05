@@ -26,7 +26,7 @@ partial def range_list (n : UInt64) : List UInt64 :=
 
 def toList' (p : Dim2) : List Dim2 :=
   let rl := range_list p.1
-  List.join (List.map (fun y ↦ (range_list p.2).map (y, ·)) rl)
+  List.map (fun y ↦ (range_list p.2).map (y, ·)) rl |>.flatten
 
 open Std.HashMap
 
