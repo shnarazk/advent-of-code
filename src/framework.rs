@@ -17,8 +17,9 @@ pub struct ConfigAoC {
     #[arg(short, long)]
     pub bench: bool,
     /// Target year like 2023
-    #[arg(short, long, default_value_t = 2023)]
+    #[arg(short, long, default_value_t = 2024)]
     pub year: usize,
+    /// Target section, 0 is used for dumping a problem as JSON
     #[arg(short, long, default_value_t = 3)]
     pub part: usize,
     /// Target day like 1
