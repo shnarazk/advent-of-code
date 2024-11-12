@@ -245,3 +245,10 @@ def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
   let l := a.toList
   List.zip l.dropLast l.tail
 example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
+/-
+Is this the high-minus used in some dialects of APL?
+-/
+prefix:max "⁻" => Neg.neg
+example : 4 + ⁻2 = 2 := by rfl
+example : (· + ·) 1 ⁻8 = -7 := by rfl
