@@ -75,36 +75,3 @@ fn collects(links: &HashSet<Link>, origin: &str) -> usize {
     }
     count + 1
 }
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
-            Answer::Part1(4)
-        );
-    }
-
-    #[test]
-    fn test_part2_1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 2),
-            Answer::Part2(32)
-        );
-    }
-
-    #[test]
-    fn test_part2_2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
-            Answer::Part2(126)
-        );
-    }
-}

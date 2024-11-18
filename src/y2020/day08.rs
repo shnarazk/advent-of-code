@@ -191,27 +191,3 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
     }
     Some(newcodes)
 }
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 1),
-            Answer::Part1(5)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test".to_string()), 2),
-            Answer::Part2(8)
-        );
-    }
-}

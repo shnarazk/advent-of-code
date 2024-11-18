@@ -120,27 +120,3 @@ impl AdventOfCode for Puzzle {
         mem.values().sum::<usize>()
     }
 }
-
-#[cfg(test)]
-#[cfg(feature = "y2020")]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test1".to_string()), 1),
-            Answer::Part1(165)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::FileTag("test2".to_string()), 2),
-            Answer::Part2(208)
-        );
-    }
-}

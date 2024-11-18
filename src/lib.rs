@@ -36,6 +36,7 @@ macro_rules! regex {
 
 ///
 /// ```
+/// use adventofcode::progress;
 ///   for i in 0..100 {
 ///       progress!(i);
 ///       std::thread::sleep(std::time::Duration::from_millis(20));

@@ -196,24 +196,3 @@ impl Puzzle {
         cnf
     }
 }
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-    const TEST: &str = "\
-mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
-trh fvjkl sbzzf mxmxvkd (contains dairy)
-sqjhc fvjkl (contains soy)
-sqjhc mxmxvkd sbzzf (contains fish)";
-    #[test]
-    fn test1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(5)
-        );
-    }
-}

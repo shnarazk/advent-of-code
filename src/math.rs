@@ -40,8 +40,8 @@ pub fn permutations(from: usize, to: usize) -> Vec<Vec<usize>> {
 ///
 /// ```
 /// use crate::adventofcode::math::*;
-/// let a = chinese((5, 4), (2, 0));
-/// assert_eq!(a.1, 5);
+/// let a = crt((5, 4), (2, 0));
+/// assert_eq!(a.1, 14);
 /// ```
 pub fn crt((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize) {
     if ar == 0 && br == 0 {

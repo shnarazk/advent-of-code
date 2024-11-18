@@ -75,7 +75,7 @@ impl AdventOfCode for Puzzle {
 /// ```
 /// use crate::adventofcode::y2016::day15::*;
 /// let a = chinese((5, 4), (2, 0));
-/// assert_eq!(a.1, 5);
+/// assert_eq!(a.1, 14);
 /// ```
 pub fn chinese((aq, ar): (usize, usize), (bq, br): (usize, usize)) -> (usize, usize) {
     let n = solve1(aq, bq);

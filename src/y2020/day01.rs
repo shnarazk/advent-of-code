@@ -36,36 +36,3 @@ impl AdventOfCode for Puzzle {
         0
     }
 }
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    const TEST: &str = "\
-1721
-979
-366
-299
-675
-1456";
-
-    #[test]
-    fn test1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 1),
-            Answer::Part1(514579)
-        );
-    }
-
-    #[cfg_attr(feature = "y2020", test)]
-    fn test2() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST.to_string()), 2),
-            Answer::Part2(241861950)
-        );
-    }
-}

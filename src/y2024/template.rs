@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2015/day/>
+//! <https://adventofcode.com/2024/day/1>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -8,29 +8,36 @@ use {
         geometric::neighbors,
         line_parser, regex,
     },
-    regex::Regex,
+    serde::Serialize,
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<()>,
 }
 
-#[aoc(2015, 0)]
+// impl Default for Puzzle {
+//     fn default() -> Self {
+//         Puzzle { }
+//     }
+// }
+
+#[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
+    // fn header(&mut self, input: String) -> Result<String, ParseError> {
+    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
     //     let segment = parser.captures(input).ok_or(ParseError)?;
     //     for num in segment[1].split(',') {
     //         let _value = num.parse::<usize>()?;
     //     }
-    //     Ok(Some(segment[2].to_string()))
+    //     Ok(segment[2].to_string())
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
+        dbg!(block);
+        // let parser = regex!(r"^(\d+)$");
+        // let segment = parser.captures(block).ok_or(ParseError)?;
         // self.line.push(segment[1].parse::<_>());
         Ok(())
     }
@@ -38,9 +45,9 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        0
+        1
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        2
     }
 }

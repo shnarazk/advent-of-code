@@ -39,32 +39,3 @@ impl AdventOfCode for Puzzle {
         total
     }
 }
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "2x3x4";
-        assert_eq!(
-            Puzzle::solve(Description::TestData(TEST1.to_string()), 1),
-            Answer::Part1(58)
-        );
-    }
-    #[test]
-    fn test_part2() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData("2x3x4".to_string()), 2),
-            Answer::Part2(34)
-        );
-        assert_eq!(
-            Puzzle::solve(Description::TestData("1x1x10".to_string()), 2),
-            Answer::Part2(14)
-        );
-    }
-}

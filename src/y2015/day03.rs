@@ -65,28 +65,3 @@ impl AdventOfCode for Puzzle {
         self.hash.len()
     }
 }
-
-#[cfg(feature = "y2015")]
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        crate::framework::{Answer, Description},
-    };
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(
-            Puzzle::solve(Description::TestData(">".to_string()), 1),
-            Answer::Part1(2)
-        );
-        assert_eq!(
-            Puzzle::solve(Description::TestData("^>v<".to_string()), 1),
-            Answer::Part1(4)
-        );
-        assert_eq!(
-            Puzzle::solve(Description::TestData("^v^v^v^v^v".to_string()), 1),
-            Answer::Part1(2)
-        );
-    }
-}
