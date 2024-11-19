@@ -1,4 +1,4 @@
-//! data handling frmework
+//! data handling framework
 pub use aoc_macro::{aoc, aoc_at};
 use {
     crate::color,
@@ -24,7 +24,7 @@ pub struct ConfigAoC {
     pub part: usize,
     /// Target day like 1
     pub day: Option<usize>,
-    /// Extra data filename segment like "test1" for "input-dayXX-test1.txt"
+    /// Extra data filename segment like "test1" for "input-day##-test1.txt"
     pub alt: Option<String>,
     /// activate 'dump' function for JSON serialization
     #[arg(short, long)]
@@ -101,10 +101,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
-    /// delimeter between data blocks
+    /// delimiter between data blocks
     const DELIMITER: &'static str;
     /// An optional function to handle header section from the contents an input file.
-    /// It must return the remanis as `Ok(Some(remains as String))`.
+    /// It must return the remains as `Ok(Some(remains as String))`.
     /// ## A typical implementation example
     /// ```ignore
     /// fn header(&mut self, input: String) -> Result<String, ParseError> {
