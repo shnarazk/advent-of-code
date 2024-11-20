@@ -17,6 +17,8 @@ use adventofcode::y2021;
 use adventofcode::y2022;
 #[cfg(feature = "y2023")]
 use adventofcode::y2023;
+#[cfg(feature = "y2024")]
+use adventofcode::y2024;
 use serde::Serialize;
 
 use {
@@ -67,6 +69,8 @@ fn run_solver(mut config: ConfigAoC) {
         2022 => aoc_arms!(2022),
         #[cfg(feature = "y2023")]
         2023 => aoc_arms!(2023),
+        #[cfg(feature = "y2024")]
+        2024 => aoc_arms!(2024, 1),
         _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
