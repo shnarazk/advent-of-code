@@ -1,0 +1,26 @@
+// Static tasks configuration.
+//
+// Example:
+[
+  {
+    "label": "AoC run",
+    "command": "cargo run --",
+    "args": ["${ZED_FILENAME:3:2}"],
+    // "env": { "foo": "bar" },
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
+  },
+  {
+    "label": "AoC test on 0",
+    "command": "cargo run --",
+    "args": ["${ZED_FILENAME:3:2}", "0"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
+  }
+]
