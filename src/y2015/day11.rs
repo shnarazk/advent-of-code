@@ -64,6 +64,6 @@ impl AdventOfCode for Puzzle {
         while !valid(&next_one) {
             increment(&mut next_one);
         }
-        return next_one.iter().collect::<String>();
+        next_one.iter().collect::<String>()
     }
 }

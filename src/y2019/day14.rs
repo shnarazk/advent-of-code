@@ -61,7 +61,7 @@ impl AdventOfCode for Puzzle {
                         extra.remove(k);
                     }
                 }
-                let num_repeat: usize = (amount + requires.amount - 1) / requires.amount;
+                let num_repeat: usize = amount.div_ceil(requires.amount);
                 for (name, amnt) in requires.requirements {
                     if name == "ORE" {
                         // println!("- {} ORE to produce {amount} {k}", amnt * num_repeat);
@@ -102,7 +102,7 @@ impl AdventOfCode for Puzzle {
                             extra.remove(k);
                         }
                     }
-                    let num_repeat: usize = (amount + requires.amount - 1) / requires.amount;
+                    let num_repeat: usize = amount.div_ceil(requires.amount);
                     for (name, amnt) in requires.requirements {
                         if name == "ORE" {
                             // println!("- {} ORE to produce {amount} {k}", amnt * num_repeat);

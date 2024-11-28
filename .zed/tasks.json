@@ -22,5 +22,15 @@
     "reveal": "always",
     "hide": "never",
     "shell": "system"
+  },
+  {
+    "label": "cargo clippy",
+    "command": "cargo clippy",
+    "args": [],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
   }
 ]
