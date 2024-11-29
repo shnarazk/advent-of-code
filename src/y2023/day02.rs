@@ -43,33 +43,11 @@ impl AdventOfCode for Puzzle {
         fn parse_line(block: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
             let (remain1, _num) = delimited(tag("Game "), digit1, tag(": "))(block)?;
             let (remain2, v) = separated_list1(tag("; "), parse_block)(remain1)?;
-            // dbg!(input);
             Ok((remain2, v))
         }
-        let _ = dbg!(parse_line(block));
-        let x = block
-            .split(": ")
-            .nth(1)
-            .unwrap()
-            .split(';')
-            .map(|set| {
-                let s = set
-                    .split(", ")
-                    .map(|b| {
-                        let c = b.trim().split(' ').collect::<Vec<_>>();
-                        match c[1] {
-                            "red" => (c[0].to_owned().parse::<usize>().unwrap(), 0, 0),
-                            "green" => (0, c[0].to_owned().parse::<usize>().unwrap(), 0),
-                            "blue" => (0, 0, c[0].to_owned().parse::<usize>().unwrap()),
-                            _ => panic!("cant"),
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                s.iter().fold((0, 0, 0), |acc, val| {
-                    (acc.0 + val.0, acc.1 + val.1, acc.2 + val.2)
-                })
-            })
-            .collect::<Vec<_>>();
+        let Ok((_, x)) = parse_line(block) else {
+            return Err(ParseError);
+        };
         let maxs = x.iter().fold((0, 0, 0), |acc, val| {
             (acc.0.max(val.0), acc.1.max(val.1), acc.2.max(val.2))
         });
