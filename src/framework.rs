@@ -136,7 +136,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     ///     Ok(())
     /// }
     /// ```
-    fn insert(&mut self, s: &str) -> Result<(), ParseError>;
+    #[allow(unused_variables)]
+    fn insert(&mut self, s: &str) -> Result<(), ParseError> {
+        Ok(())
+    }
     /// An optional function to wrap up initialization.
     /// ## A typical implementation example
     /// ```ignore

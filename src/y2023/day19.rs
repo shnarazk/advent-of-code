@@ -5,6 +5,14 @@ use {
         regex,
     },
     itertools::Itertools,
+    nom::{
+        branch::alt,
+        bytes::complete::tag,
+        character::complete::{alpha1, u64},
+        multi::many_till,
+        sequence::{preceded, terminated},
+        IResult,
+    },
     serde_json,
     std::collections::{HashMap, HashSet},
 };
@@ -26,6 +34,32 @@ pub struct Puzzle {
     settings: Vec<HashMap<Var, Val>>,
     reading_settings: bool,
     rating_settings: [HashSet<usize>; 4],
+}
+
+#[allow(dead_code)]
+fn parse_rule1(str: &str) -> IResult<&str, Rule> {
+    let (remain1, var_str) = alpha1(str)?;
+    let (remain2, op) = alt((tag("<"), tag(">")))(remain1)?;
+    let (remain3, val) = u64(remain2)?;
+    let (remain4, label) = preceded(tag(":"), alpha1)(remain3)?;
+    Ok((
+        remain4,
+        (
+            Some((
+                var_str.to_string(),
+                if op == "<" { Op::Less } else { Op::Greater },
+                val as usize,
+            )),
+            label.to_string(),
+        ),
+    ))
+}
+
+#[allow(dead_code)]
+fn parse_workflow(str: &str) -> IResult<&str, (Label, Vec<Rule>)> {
+    let (remain1, label) = terminated(alpha1, tag("{"))(str)?;
+    let (remain2, v) = many_till(parse_rule1, terminated(alpha1, tag("}")))(remain1)?;
+    Ok((remain2, (label.to_string(), v.0)))
 }
 
 #[aoc(2023, 19)]
