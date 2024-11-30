@@ -1,5 +1,14 @@
 //! <https://adventofcode.com/2023/day/2>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use {
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    nom::{
+        bytes::complete::tag,
+        character::complete::{alpha1, digit1, space1},
+        multi::separated_list1,
+        sequence::{delimited, terminated},
+        IResult,
+    },
+};
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -13,29 +22,32 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.index += 1;
-        let x = block
-            .split(": ")
-            .nth(1)
-            .unwrap()
-            .split(';')
-            .map(|set| {
-                let s = set
-                    .split(", ")
-                    .map(|b| {
-                        let c = b.trim().split(' ').collect::<Vec<_>>();
-                        match c[1] {
-                            "red" => (c[0].to_owned().parse::<usize>().unwrap(), 0, 0),
-                            "green" => (0, c[0].to_owned().parse::<usize>().unwrap(), 0),
-                            "blue" => (0, 0, c[0].to_owned().parse::<usize>().unwrap()),
-                            _ => panic!("cant"),
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                s.iter().fold((0, 0, 0), |acc, val| {
-                    (acc.0 + val.0, acc.1 + val.1, acc.2 + val.2)
-                })
-            })
-            .collect::<Vec<_>>();
+        fn parse_color(block: &str) -> IResult<&str, (String, usize)> {
+            let (remain1, value) = terminated(digit1, space1)(block)?;
+            let (remain2, color) = alpha1(remain1)?;
+            Ok((
+                remain2,
+                (color.to_string(), value.parse::<usize>().unwrap()),
+            ))
+        }
+        fn parse_block(block: &str) -> IResult<&str, (usize, usize, usize)> {
+            let (i, v) = separated_list1(tag(", "), parse_color)(block)?;
+            let v3 = v.iter().fold((0, 0, 0), |acc, c_v| match c_v.0.as_str() {
+                "red" => (c_v.1, acc.1, acc.2),
+                "green" => (acc.0, c_v.1, acc.2),
+                "blue" => (acc.0, acc.1, c_v.1),
+                _ => panic!("can't"),
+            });
+            Ok((i, v3))
+        }
+        fn parse_line(block: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
+            let (remain1, _num) = delimited(tag("Game "), digit1, tag(": "))(block)?;
+            let (remain2, v) = separated_list1(tag("; "), parse_block)(remain1)?;
+            Ok((remain2, v))
+        }
+        let Ok((_, x)) = parse_line(block) else {
+            return Err(ParseError);
+        };
         let maxs = x.iter().fold((0, 0, 0), |acc, val| {
             (acc.0.max(val.0), acc.1.max(val.1), acc.2.max(val.2))
         });
