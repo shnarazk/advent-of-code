@@ -1,11 +1,18 @@
 //! <https://adventofcode.com/2023/day/5>
-
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         line_parser,
     },
     itertools::Itertools,
+    nom::{
+        character::{
+            complete::{newline, space1, u64},
+            streaming::anychar,
+        },
+        multi::{many_till, separated_list1},
+        IResult,
+    },
 };
 
 // A half-open range implementation
@@ -21,19 +28,24 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut v = Vec::new();
-        for (i, line) in block.trim().split('\n').enumerate() {
-            if line.starts_with("seeds:") {
-                let vals = line.split(": ").nth(1).unwrap().trim();
-                self.seeds = line_parser::to_usizes(vals, ' ')?;
-                continue;
-            }
-            if i == 0 {
-                continue;
-            }
-            let t = line_parser::to_usizes(line, ' ')?;
-            v.push((t[0], t[1], t[1] + t[2]));
+        fn parse_block(str: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
+            let (remain1, _) = many_till(anychar, newline)(str)?;
+            let (remain2, v) = separated_list1(newline, separated_list1(space1, u64))(remain1)?;
+            Ok((
+                remain2,
+                v.iter()
+                    .map(|l| (l[0] as usize, l[1] as usize, (l[1] + l[2]) as usize))
+                    .collect::<Vec<_>>(),
+            ))
         }
+        if block.starts_with("seeds:") {
+            let vals = block.split(": ").nth(1).unwrap().trim();
+            self.seeds = line_parser::to_usizes(vals, ' ')?;
+            return Ok(());
+        }
+        let Ok((_, v)) = parse_block(block) else {
+            return Err(ParseError);
+        };
         self.line.push(v);
         Ok(())
     }
