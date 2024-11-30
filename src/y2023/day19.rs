@@ -1,15 +1,12 @@
 //! <https://adventofcode.com/2023/day/19>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     itertools::Itertools,
     nom::{
         branch::alt,
         bytes::complete::tag,
         character::complete::{alpha1, u64},
-        multi::many_till,
+        multi::{many1, many_till},
         sequence::{preceded, terminated},
         IResult,
     },
@@ -36,14 +33,14 @@ pub struct Puzzle {
     rating_settings: [HashSet<usize>; 4],
 }
 
-#[allow(dead_code)]
 fn parse_rule1(str: &str) -> IResult<&str, Rule> {
     let (remain1, var_str) = alpha1(str)?;
     let (remain2, op) = alt((tag("<"), tag(">")))(remain1)?;
     let (remain3, val) = u64(remain2)?;
     let (remain4, label) = preceded(tag(":"), alpha1)(remain3)?;
+    let (remain5, _) = tag(",")(remain4)?;
     Ok((
-        remain4,
+        remain5,
         (
             Some((
                 var_str.to_string(),
@@ -55,70 +52,69 @@ fn parse_rule1(str: &str) -> IResult<&str, Rule> {
     ))
 }
 
-#[allow(dead_code)]
 fn parse_workflow(str: &str) -> IResult<&str, (Label, Vec<Rule>)> {
     let (remain1, label) = terminated(alpha1, tag("{"))(str)?;
-    let (remain2, v) = many_till(parse_rule1, terminated(alpha1, tag("}")))(remain1)?;
-    Ok((remain2, (label.to_string(), v.0)))
+    let (remain2, (mut v, last_label)) =
+        many_till(parse_rule1, terminated(alpha1, tag("}\n")))(remain1)?;
+    v.push((None, last_label.to_string()));
+    Ok((remain2, (label.to_string(), v)))
+}
+
+fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
+    let (remain1, x) = preceded(tag("{x="), u64)(str)?;
+    let (remain2, m) = preceded(tag(",m="), u64)(remain1)?;
+    let (remain3, a) = preceded(tag(",a="), u64)(remain2)?;
+    let (remain4, s) = preceded(tag(",s="), u64)(remain3)?;
+    let (remain5, _) = tag("}\n")(remain4)?;
+    Ok((
+        remain5,
+        vec![
+            ("x".to_string(), x as usize),
+            ("m".to_string(), m as usize),
+            ("a".to_string(), a as usize),
+            ("s".to_string(), s as usize),
+        ],
+    ))
 }
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let rule_parser = regex!(r"^([A-Za-z]+)\{(.+)\}$");
-        let assign_parser = regex!(r"^\{(.+)\}$");
-        if let Some(segment) = rule_parser.captures(block) {
-            let name = segment[1].to_string();
-            let v = segment[2]
-                .split(',')
-                .map(|pat| {
-                    if pat.contains(':') {
-                        let cond_and_label = pat.split(':').collect::<Vec<_>>();
-                        let parser2 = regex!(r"^([A-Za-z]+)(>|<)(\d+)$");
-                        let cov = parser2.captures(cond_and_label[0]).unwrap();
-                        let var: Var = cov[1].to_string();
-                        let var_index = match &cov[1] {
-                            "x" => 0,
-                            "m" => 1,
-                            "a" => 2,
-                            "s" => 3,
-                            _ => unimplemented!(),
-                        };
-                        let val = cov[3].parse::<usize>().unwrap();
-                        let op: Op = match &cov[2] {
-                            "<" => {
-                                self.rating_settings[var_index].insert(val);
-                                Op::Less
-                            }
-                            ">" => {
-                                self.rating_settings[var_index].insert(val + 1);
-                                Op::Greater
-                            }
-                            _ => unreachable!(),
-                        };
-                        let label = cond_and_label[1].to_string();
-                        (Some((var, op, val)), label)
+    fn header(&mut self, input: String) -> Result<String, ParseError> {
+        let Ok((remain1, (workflows, _))) = many_till(parse_workflow, tag("\n"))(input.as_str())
+        else {
+            return Err(ParseError);
+        };
+        self.rules = workflows
+            .iter()
+            .cloned()
+            .collect::<HashMap<Label, Vec<Rule>>>();
+        for (_, rules) in self.rules.iter() {
+            for rule in rules.iter() {
+                if let Some((label, op, val)) = &rule.0 {
+                    let var_index = match label.as_str() {
+                        "x" => 0,
+                        "m" => 1,
+                        "a" => 2,
+                        "s" => 3,
+                        _ => unimplemented!(),
+                    };
+                    if Op::Less == *op {
+                        self.rating_settings[var_index].insert(*val);
                     } else {
-                        let label = pat.to_string();
-                        (None, label)
+                        self.rating_settings[var_index].insert(*val + 1);
                     }
-                })
-                .collect::<Vec<_>>();
-            self.rules.insert(name, v);
-        } else if let Some(segment) = assign_parser.captures(block) {
-            let v = segment[1]
-                .split(',')
-                .map(|a| {
-                    let exp = a.split('=').collect::<Vec<_>>();
-                    (exp[0].to_string(), exp[1].parse::<usize>().unwrap())
-                })
-                .collect::<HashMap<_, _>>();
-            self.settings.push(v);
-        } else {
-            panic!();
+                }
+            }
         }
-        Ok(())
+        let Ok((_, settings)) = many1(parse_setting)(remain1) else {
+            return Err(ParseError);
+        };
+        self.settings = settings
+            .iter()
+            .map(|v| v.iter().cloned().collect())
+            .collect::<Vec<HashMap<Var, Val>>>();
+        Ok(input)
     }
     fn end_of_data(&mut self) {
         for i in 0..4 {
