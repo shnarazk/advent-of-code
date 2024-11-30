@@ -6,10 +6,7 @@ use {
     },
     itertools::Itertools,
     nom::{
-        character::{
-            complete::{newline, space1, u64},
-            streaming::anychar,
-        },
+        character::complete::{anychar, newline, space1, u64},
         multi::{many_till, separated_list1},
         IResult,
     },
