@@ -2,7 +2,14 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        math, regex,
+        math,
+    },
+    nom::{
+        bytes::complete::tag,
+        character::complete::{alphanumeric1, newline},
+        multi::separated_list1,
+        sequence::terminated,
+        IResult,
     },
     std::collections::HashMap,
 };
@@ -13,21 +20,41 @@ pub struct Puzzle {
     line: HashMap<String, (String, String)>,
 }
 
+fn parse_header(input: &str) -> IResult<&str, String> {
+    let (remain1, label) = terminated(alphanumeric1, tag("\n\n"))(input)?;
+    Ok((remain1, label.to_string()))
+}
+
+// fn parse(str: &str) -> IResult<&str, Data>;
+fn parse_block(input: &str) -> IResult<&str, (String, (String, String))> {
+    let (remain1, label) = terminated(alphanumeric1, tag(" = ("))(input)?;
+    let (remain2, child1) = terminated(alphanumeric1, tag(", "))(remain1)?;
+    let (remain3, child2) = terminated(alphanumeric1, tag(")"))(remain2)?;
+    Ok((
+        remain3,
+        (label.to_string(), (child1.to_string(), child2.to_string())),
+    ))
+}
+
 #[aoc(2023, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn header(&mut self, input: String) -> Result<String, ParseError> {
-        let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-        let segment = parser.captures(&input).ok_or(ParseError)?;
-        self.head = segment[1].chars().collect::<Vec<_>>();
-        Ok(segment[2].to_string())
+        let str = input.as_str();
+        let Ok((remain1, label)) = parse_header(str) else {
+            return Err(ParseError);
+        };
+        self.head = label.chars().collect::<Vec<_>>();
+        let Ok((remain2, v)) = separated_list1(newline, parse_block)(remain1) else {
+            return Err(ParseError);
+        };
+        self.line = v
+            .iter()
+            .cloned()
+            .collect::<HashMap<String, (String, String)>>();
+        Ok(remain2.to_string())
     }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let b = block.bytes().collect::<Vec<_>>();
-        let s1 = String::from_utf8(b[0..3].to_vec()).unwrap();
-        let s2 = String::from_utf8(b[7..10].to_vec()).unwrap();
-        let s3 = String::from_utf8(b[12..15].to_vec()).unwrap();
-        self.line.insert(s1, (s2, s3));
+    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
