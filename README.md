@@ -8,6 +8,12 @@
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
 
+## ongoing 2024
+
+* [calendar](https://adventofcode.com/2024)
+
+![](https://github.com/user-attachments/assets/0f35d486-3b28-4fde-b75b-4d7b3851540d)
+
 ## 2023 completed
 
 * [calendar](https://adventofcode.com/2023)
