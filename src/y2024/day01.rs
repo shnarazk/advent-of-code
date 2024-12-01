@@ -54,6 +54,14 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>())
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut hash: HashMap<usize, usize> = HashMap::new();
+        for i in self.line.iter().map(|p| p.1 as usize) {
+            *hash.entry(i).or_default() += 1;
+        }
+        self.line
+            .iter()
+            .map(|p| p.0 as usize)
+            .map(|i| i * hash.get(&i).unwrap_or(&0))
+            .sum::<usize>()
     }
 }
