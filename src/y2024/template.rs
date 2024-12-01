@@ -39,6 +39,7 @@ impl AdventOfCode for Puzzle {
     //     for num in segment[1].split(',') {
     //         let _value = num.parse::<usize>()?;
     //     }
+    //     // Ok("".to_string())
     //     Ok(segment[2].to_string())
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {

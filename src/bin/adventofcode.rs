@@ -70,7 +70,7 @@ fn run_solver(mut config: ConfigAoC) {
         #[cfg(feature = "y2023")]
         2023 => aoc_arms!(2023),
         #[cfg(feature = "y2024")]
-        2024 => aoc_arms!(2024, 1),
+        2024 => aoc_arms!(2024, 5),
         _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
