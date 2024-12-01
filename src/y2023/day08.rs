@@ -39,20 +39,20 @@ fn parse_block(input: &str) -> IResult<&str, (String, (String, String))> {
 #[aoc(2023, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let str = input.as_str();
         let Ok((remain1, label)) = parse_header(str) else {
             return Err(ParseError);
         };
         self.head = label.chars().collect::<Vec<_>>();
-        let Ok((remain2, v)) = separated_list1(newline, parse_block)(remain1) else {
+        let Ok((_, v)) = separated_list1(newline, parse_block)(remain1) else {
             return Err(ParseError);
         };
         self.line = v
             .iter()
             .cloned()
             .collect::<HashMap<String, (String, String)>>();
-        Ok(remain2.to_string())
+        Ok("".to_string())
     }
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())

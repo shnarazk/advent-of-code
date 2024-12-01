@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn header(&mut self, buffer: String) -> Result<String, ParseError> {
+    fn parse(&mut self, buffer: String) -> Result<String, ParseError> {
         let mut iter = buffer.split("\n\n");
         let rules = iter.next().unwrap();
         if let Some(block) = iter.next() {

@@ -18,7 +18,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let mut num_stack = 0;
         let parser = regex!(r"^((.+\n)+)\n((.+\n)+)$");
         let segment = parser.captures(&input).ok_or(ParseError)?;
@@ -61,7 +61,9 @@ impl AdventOfCode for Puzzle {
         let Puzzle { line, stacks } = self;
         for (amount, from, to) in line.iter() {
             for _ in 0..*amount {
-                let Some(x) = stacks.get_mut(from).unwrap().pop() else { panic!();};
+                let Some(x) = stacks.get_mut(from).unwrap().pop() else {
+                    panic!();
+                };
                 stacks.get_mut(to).unwrap().push(x);
             }
             // dbg!(&stacks);
@@ -75,7 +77,9 @@ impl AdventOfCode for Puzzle {
         for (amount, from, to) in line.iter() {
             let mut tmp = Vec::new();
             for _ in 0..*amount {
-                let Some(x) = stacks.get_mut(from).unwrap().pop() else { panic!();};
+                let Some(x) = stacks.get_mut(from).unwrap().pop() else {
+                    panic!();
+                };
                 tmp.push(x);
             }
             while let Some(x) = tmp.pop() {

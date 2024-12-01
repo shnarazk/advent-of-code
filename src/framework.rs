@@ -102,9 +102,10 @@ pub trait AdventOfCode: fmt::Debug + Default {
     const YEAR: usize;
     const DAY: usize;
     /// delimiter between data blocks
-    const DELIMITER: &'static str;
-    /// An optional function to handle header section from the contents an input file.
-    /// It must return the remains as `Ok(Some(remains as String))`.
+    const DELIMITER: &'static str = "\n";
+    /// An optional function to parse all from the contents an input file.
+    /// It must return the remains as `Ok(remains as String)`.
+    /// In particular, it returns `Ok("")` if it parsed everything.
     /// ## A typical implementation example
     /// ```ignore
     /// fn header(&mut self, input: String) -> Result<String, ParseError> {
@@ -116,7 +117,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     ///     Ok(Some(segment[2].to_string()))
     /// }
     /// ```
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         Ok(input)
     }
     /// called by getting a new data block
@@ -174,13 +175,15 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn parse(config: ConfigAoC) -> Result<Self, ParseError> {
+    fn run(config: ConfigAoC) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(config)?;
-        let remains = instance.header(contents)?;
-        for block in remains.split(Self::DELIMITER) {
-            if !block.is_empty() {
-                instance.insert(block)?;
+        let remains = instance.parse(contents)?;
+        if !remains.is_empty() {
+            for block in remains.split(Self::DELIMITER) {
+                if !block.is_empty() {
+                    instance.insert(block)?;
+                }
             }
         }
         instance.end_of_data();
@@ -241,7 +244,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
         match config.part {
             0 => {
                 assert!(config.serialize);
-                Self::parse(config).expect(&parse_error).dump();
+                Self::run(config).expect(&parse_error).dump();
                 Answer::Dump
             }
             1 => {
@@ -253,7 +256,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::parse(config).expect(&parse_error).part1())
+                Answer::Part1(Self::run(config).expect(&parse_error).part1())
             }
             2 => {
                 println!(
@@ -264,7 +267,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::parse(config).expect(&parse_error).part2())
+                Answer::Part2(Self::run(config).expect(&parse_error).part2())
             }
             3 => {
                 println!(
@@ -275,8 +278,8 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                let ans1 = Self::parse(config.clone()).expect(&parse_error).part1();
-                let ans2 = Self::parse(config).expect(&parse_error).part2();
+                let ans1 = Self::run(config.clone()).expect(&parse_error).part1();
+                let ans2 = Self::run(config).expect(&parse_error).part2();
                 Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,

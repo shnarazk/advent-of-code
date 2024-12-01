@@ -79,8 +79,7 @@ fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let Ok((remain1, (workflows, _))) = many_till(parse_workflow, tag("\n"))(input.as_str())
         else {
             return Err(ParseError);
@@ -114,7 +113,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|v| v.iter().cloned().collect())
             .collect::<Vec<HashMap<Var, Val>>>();
-        Ok(input)
+        Ok("".to_string())
     }
     fn end_of_data(&mut self) {
         for i in 0..4 {
