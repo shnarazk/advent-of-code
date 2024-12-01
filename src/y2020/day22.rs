@@ -62,7 +62,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    fn header(&mut self, buffer: String) -> Result<String, ParseError> {
+    fn parse(&mut self, buffer: String) -> Result<String, ParseError> {
         let mut iter = buffer.split(Self::DELIMITER);
         if let Some(text) = iter.next() {
             if let Some(element) = parse(text) {

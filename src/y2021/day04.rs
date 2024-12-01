@@ -48,7 +48,7 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
 #[aoc(2021, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
         let segment = parser.captures(&input).ok_or(ParseError)?;
         for num in segment[1].split(',') {

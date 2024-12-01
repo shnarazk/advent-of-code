@@ -16,7 +16,7 @@ pub struct Puzzle {
 #[aoc(2018, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let parser = regex!(r"^initial state: (.+)\n\n((.|\n)+)$");
         let segment = parser.captures(&input).ok_or(ParseError)?;
         self.line = segment[1].chars().map(|c| c == '#').collect::<Vec<bool>>();

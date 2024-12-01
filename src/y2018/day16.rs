@@ -22,7 +22,7 @@ pub struct Puzzle {
 #[aoc(2018, 16)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn header(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.input_mode = 0;
         let mut segment = input.split("\n\n\n\n");
         let rules = segment.next().ok_or(ParseError)?;

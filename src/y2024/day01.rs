@@ -33,12 +33,13 @@ pub struct Puzzle {
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
+    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
     //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
     //     let segment = parser.captures(input).ok_or(ParseError)?;
     //     for num in segment[1].split(',') {
     //         let _value = num.parse::<usize>()?;
     //     }
+    //     // Ok("")
     //     Ok(segment[2].to_string())
     // }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
