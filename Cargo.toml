@@ -9,7 +9,6 @@ rust-version = "1.83"
 [dependencies]
 aoc_macro = { version = "^0.2", path = "aoc_macro" }
 clap = { version = "^4.5", features = ["derive"] }
-combine = { version = "^4.6", optional = true }
 itertools = { version = "^0.13", optional = true }
 md-5 = { version = "0.10", optional = true }
 nom = { version = "^7.1", optional = true, features = ["alloc"] }
