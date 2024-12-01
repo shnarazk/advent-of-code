@@ -1,5 +1,15 @@
 //! misc implementations of string-to-object parsers
 
+#![cfg(any(
+    feature = "y2022",
+    feature = "y2021",
+    feature = "y2020",
+    feature = "y2019",
+    feature = "y2018",
+    feature = "y2017",
+    feature = "y2016",
+    feature = "y2015",
+))]
 use crate::{framework::ParseError, regex};
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.

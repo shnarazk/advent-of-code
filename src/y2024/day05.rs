@@ -6,7 +6,6 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
     },
     nom::{
         bytes::complete::{tag, take},
