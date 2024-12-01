@@ -45,9 +45,10 @@ impl AdventOfCode for Puzzle {
             let (remain2, v) = separated_list1(tag("; "), parse_block)(remain1)?;
             Ok((remain2, v))
         }
-        let Ok((_, x)) = parse_line(block) else {
-            return Err(ParseError);
-        };
+        let (_, x) = parse_line(block)?;
+        // let Ok((_, x)) = parse_line(block) else {
+        //     return Err(ParseError);
+        // };
         let maxs = x.iter().fold((0, 0, 0), |acc, val| {
             (acc.0.max(val.0), acc.1.max(val.1), acc.2.max(val.2))
         });

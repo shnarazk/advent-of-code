@@ -40,9 +40,7 @@ impl AdventOfCode for Puzzle {
             self.seeds = line_parser::to_usizes(vals, ' ')?;
             return Ok(());
         }
-        let Ok((_, v)) = parse_block(block) else {
-            return Err(ParseError);
-        };
+        let (_, v) = parse_block(block)?;
         self.line.push(v);
         Ok(())
     }

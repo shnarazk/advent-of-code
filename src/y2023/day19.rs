@@ -80,10 +80,7 @@ fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let Ok((remain1, (workflows, _))) = many_till(parse_workflow, tag("\n"))(input.as_str())
-        else {
-            return Err(ParseError);
-        };
+        let (remain1, (workflows, _)) = many_till(parse_workflow, tag("\n"))(input.as_str())?;
         self.rules = workflows
             .iter()
             .cloned()
@@ -106,9 +103,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        let Ok((_, settings)) = many1(parse_setting)(remain1) else {
-            return Err(ParseError);
-        };
+        let (_, settings) = many1(parse_setting)(remain1)?;
         self.settings = settings
             .iter()
             .map(|v| v.iter().cloned().collect())

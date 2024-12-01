@@ -41,13 +41,9 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let str = input.as_str();
-        let Ok((remain1, label)) = parse_header(str) else {
-            return Err(ParseError);
-        };
+        let (remain1, label) = parse_header(str)?;
         self.head = label.chars().collect::<Vec<_>>();
-        let Ok((_, v)) = separated_list1(newline, parse_block)(remain1) else {
-            return Err(ParseError);
-        };
+        let (_, v) = separated_list1(newline, parse_block)(remain1)?;
         self.line = v
             .iter()
             .cloned()
