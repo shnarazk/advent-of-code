@@ -3,7 +3,7 @@ pub use aoc_macro::{aoc, aoc_at};
 use {
     crate::color,
     clap::Parser,
-    once_cell::sync::OnceCell,
+    std::sync::OnceLock,
     std::{fmt, fs::File, io::prelude::*},
 };
 
@@ -49,7 +49,7 @@ impl ConfigAoC {
     }
 }
 
-static CONFIG: OnceCell<ConfigAoC> = OnceCell::new();
+static CONFIG: OnceLock<ConfigAoC> = OnceLock::new();
 
 /// IT MUST BE UNDER THE HOOD
 #[derive(Debug, Eq, PartialEq)]
