@@ -1,18 +1,11 @@
 //! <https://adventofcode.com/2024/day/1>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        line_parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    itertools::Itertools,
     nom::{
-        bytes::complete::{tag, take},
-        character::complete::{alpha1, alphanumeric1, anychar, digit1, newline, space1, u64},
-        multi::{many1, many_till, separated_list1},
-        sequence::{pair, separated_pair, terminated, tuple},
+        character::complete::{newline, space1, u64},
+        multi::many1,
+        sequence::{pair, terminated},
         IResult,
     },
     serde::Serialize,
@@ -31,7 +24,6 @@ fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
 
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let str = input.as_str();
         let Ok((_remain1, v)) = parse(str) else {
@@ -41,17 +33,15 @@ impl AdventOfCode for Puzzle {
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut l = self.line.iter().map(|p| p.0).collect::<Vec<u64>>();
-        let mut r = self.line.iter().map(|p| p.1).collect::<Vec<u64>>();
-        l.sort();
-        r.sort();
-        dbg!(l
-            .iter()
+        let l = self.line.iter().map(|p| p.0).sorted().collect::<Vec<u64>>();
+        let r = self.line.iter().map(|p| p.1).sorted().collect::<Vec<u64>>();
+
+        l.iter()
             .zip(r.iter())
             .collect::<Vec<_>>()
             .iter()
             .map(|(a, b)| a.abs_diff(**b) as usize)
-            .sum::<usize>())
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut hash: HashMap<usize, usize> = HashMap::new();
