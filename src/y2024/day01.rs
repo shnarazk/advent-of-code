@@ -18,8 +18,7 @@ pub struct Puzzle {
 }
 
 fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
-    let (remain1, v) = many1(pair(terminated(u64, space1), terminated(u64, newline)))(str)?;
-    Ok((remain1, v))
+    many1(pair(terminated(u64, space1), terminated(u64, newline)))(str)
 }
 
 #[aoc(2024, 1)]
