@@ -25,11 +25,7 @@ fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let str = input.as_str();
-        let Ok((_remain1, v)) = parse(str) else {
-            return Err(ParseError);
-        };
-        self.line = v;
+        self.line = parse(input.as_str())?.1;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {

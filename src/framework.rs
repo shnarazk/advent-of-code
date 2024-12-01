@@ -87,6 +87,12 @@ impl std::convert::From<std::num::ParseIntError> for ParseError {
     }
 }
 
+impl<T> std::convert::From<nom::Err<T>> for ParseError {
+    fn from(_: nom::Err<T>) -> Self {
+        ParseError
+    }
+}
+
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "End of Stream")
