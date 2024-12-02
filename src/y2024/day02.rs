@@ -1,21 +1,13 @@
 //! <https://adventofcode.com/2024/day/2>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     nom::{
-        bytes::complete::{tag, take},
-        character::complete::{alpha1, alphanumeric1, anychar, digit1, newline, space1, u64},
-        multi::{many1, many_till, separated_list1},
-        sequence::{separated_pair, terminated, tuple},
+        character::complete::{newline, space1, u64},
+        multi::{many1, separated_list1},
+        sequence::terminated,
         IResult,
     },
     serde::Serialize,
-    std::collections::HashMap,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
