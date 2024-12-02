@@ -19,51 +19,33 @@ fn parse_line(str: &str) -> IResult<&str, Vec<u64>> {
     separated_list1(space1, u64)(str)
 }
 
+fn satisfy(lvls: &[u64]) -> bool {
+    (lvls.windows(2).all(|v| v[0] < v[1]) || lvls.windows(2).all(|v| v[0] > v[1]))
+        && lvls.windows(2).all(|v| {
+            let d = v[0].abs_diff(v[1]);
+            1 <= d && d <= 3
+        })
+}
+
 #[aoc(2024, 2)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (_, v): (&str, Vec<Vec<u64>>) = many1(terminated(parse_line, newline))(input.as_str())?;
-        self.line = v;
+        self.line = many1(terminated(parse_line, newline))(input.as_str())?.1;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line
-            .iter()
-            .filter(|levels| {
-                (levels.windows(2).all(|v| v[0] < v[1]) || levels.windows(2).all(|v| v[0] > v[1]))
-                    && levels.windows(2).all(|v| {
-                        let d = v[0].abs_diff(v[1]);
-                        1 <= d && d <= 3
-                    })
-            })
-            .count()
+        self.line.iter().filter(|l| satisfy(*l)).count()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
             .filter(|ls| {
-                if (ls.windows(2).all(|v| v[0] < v[1]) || ls.windows(2).all(|v| v[0] > v[1]))
-                    && ls.windows(2).all(|v| {
-                        let d = v[0].abs_diff(v[1]);
-                        1 <= d && d <= 3
+                satisfy(*ls)
+                    || (0..ls.len()).any(|i| {
+                        let mut levels = (*ls).clone();
+                        levels.remove(i);
+                        satisfy(&levels)
                     })
-                {
-                    return true;
-                }
-                for (i, _) in ls.iter().enumerate() {
-                    let mut levels = (*ls).clone();
-                    levels.remove(i);
-                    if (levels.windows(2).all(|v| v[0] < v[1])
-                        || levels.windows(2).all(|v| v[0] > v[1]))
-                        && levels.windows(2).all(|v| {
-                            let d = v[0].abs_diff(v[1]);
-                            1 <= d && d <= 3
-                        })
-                    {
-                        return true;
-                    }
-                }
-                false
             })
             .count()
     }
