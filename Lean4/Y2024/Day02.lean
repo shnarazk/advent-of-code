@@ -29,9 +29,6 @@ def parse : String → Option Input := AoCParser.parse parser
 
 end parser
 
-namespace Part1
-open CiCL
-
 def abs_diff (a b : Nat) : Nat :=
   if a < b
     then b - a
@@ -40,12 +37,14 @@ def abs_diff (a b : Nat) : Nat :=
 def between (a : Nat) (b : Nat × Nat): Bool :=
   b.1 ≤ a && a ≤ b.2
 
-def solve (input : Input) : Nat :=
-  input.line.filter (fun (levels : Array Nat) ↦
-      (levels.windows2.all (uncurry (· < ·))
-        || levels.windows2.all (uncurry (· > ·)))
-      && levels.windows2.all (fun (a, b) ↦ between (abs_diff a b) (1, 3)))
-    |>.size
+def satisfy (levels : Array Nat) : Bool :=
+  (levels.windows2.all (CiCL.uncurry (· < ·))
+    || levels.windows2.all (CiCL.uncurry (· > ·)))
+    && levels.windows2.all (fun (a, b) ↦ between (abs_diff a b) (1, 3))
+
+namespace Part1
+
+def solve (input : Input) : Nat := input.line.filter satisfy |>.size
 
 end Part1
 
@@ -53,8 +52,9 @@ namespace Part2
 
 open Std
 
-def solve (_input : Input) : Nat :=
-   0
+def solve (input : Input) : Nat :=
+  -- input.line.filter (fun (l : Array Nat) => )
+  0
 
 end Part2
 
