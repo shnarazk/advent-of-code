@@ -121,7 +121,7 @@ def validIndex? [BEq α] (self : Rect α) (y x : UInt64) : Bool :=
 @[inline] def swap [BEq α] [Inhabited α]
   (self : Rect α) (p q : UInt64 × UInt64) : Rect α :=
   { self with
-    vector := self.vector.swapIfInBounds
+    vector := self.vector.swap!
       (self.width * p.fst + p.snd).toNat
       (self.width * q.fst + q.snd).toNat }
 
