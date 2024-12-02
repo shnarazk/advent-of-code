@@ -8,7 +8,7 @@
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
 
-## ongoing 2024
+## Ongoing 2024
 
 * [calendar](https://adventofcode.com/2024)
 
