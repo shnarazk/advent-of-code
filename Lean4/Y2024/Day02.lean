@@ -5,7 +5,6 @@ import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2024.Day02
-open Accumulation
 
 structure Input where
   line : Array (Array Nat) deriving BEq, Repr
@@ -29,10 +28,7 @@ def parse : String → Option Input := AoCParser.parse parser
 
 end parser
 
-def abs_diff (a b : Nat) : Nat :=
-  if a < b
-    then b - a
-    else a - b
+def abs_diff (a b : Nat) : Nat := if a < b then b - a else a - b
 
 def between (a : Nat) (b : Nat × Nat): Bool :=
   b.1 ≤ a && a ≤ b.2
@@ -50,12 +46,9 @@ end Part1
 
 namespace Part2
 
-open Std
--- #eval List.range 3
-
 def solve (input : Input) : Nat :=
   input.line.filter (fun (l : Array Nat) ↦
-      (satisfy l || (List.range l.size |>.map (l.eraseIdx! ·) |>.any satisfy)))
+      (satisfy l || (List.range l.size |>.map l.eraseIdx! |>.any satisfy)))
     |>.size
 
 end Part2
