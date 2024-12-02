@@ -172,7 +172,7 @@ open Accumulation
 -- #eval sum [1, 3, 5]
 -- #eval product [1, 3, 5]
 
-@[deprecated "Use the native `List.enum` instead of enumerate"]
+@[deprecated "Use the native `List.enum` instead of enumerate" (since := "2024-11-01")]
 def List.enumerate (a : List α) : List (Nat × α) := a.enum
 -- List.zip (List.range a.length) a
 -- #eval [2, 4, 5].enum
@@ -182,7 +182,7 @@ def Array.enum (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.si
 
 example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
 
-@[deprecated "Use `Array.enum` instead of 'Array.enumerate`"]
+@[deprecated "Use `Array.enum` instead of 'Array.enumerate`" (since := "2024-11-01")]
 alias Array.enumerate := Array.enum
 
 -- #eval #[2, 4, 5].enum
@@ -190,7 +190,7 @@ alias Array.enumerate := Array.enum
 def String.enum (a : String) : List (Nat × Char) :=
   List.zip (List.range a.length) a.toList
 
-@[deprecated "Use `String.enum` instead of 'String.enumerate`"]
+@[deprecated "Use `String.enum` instead of 'String.enumerate`" (since := "2024-11-01")]
 alias String.enumerate := String.enum
 
 namespace Option

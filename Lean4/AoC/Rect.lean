@@ -418,13 +418,9 @@ def of2DMatrix [BEq α]
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
-@[inline] def get [BEq α]
-    (self : Rect α) (p : Dim2) (default : α) : α :=
-  if h : 0 < self.vector.size then
-    have : NeZero self.vector.size := by exact NeZero.of_pos h
-    self.vector.get (Fin.ofNat' self.vector.size (self.shape.index p))
-  else
-    default
+@[inline] def get [BEq α] (self: Rect α) (p : Dim2) (default : α) : α :=
+  let index := self.shape.index p
+  self.vector.getD index default
 
 def validIndex? [BEq α]
     (self : Rect α) (p : Dim2) : Bool :=
