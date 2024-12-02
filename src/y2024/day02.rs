@@ -42,6 +42,14 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .filter(|ls| {
+                if (ls.windows(2).all(|v| v[0] < v[1]) || ls.windows(2).all(|v| v[0] > v[1]))
+                    && ls.windows(2).all(|v| {
+                        let d = v[0].abs_diff(v[1]);
+                        1 <= d && d <= 3
+                    })
+                {
+                    return true;
+                }
                 for (i, _) in ls.iter().enumerate() {
                     let mut levels = (*ls).clone();
                     levels.remove(i);
