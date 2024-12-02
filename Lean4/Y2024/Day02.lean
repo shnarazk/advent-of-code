@@ -51,10 +51,12 @@ end Part1
 namespace Part2
 
 open Std
+-- #eval List.range 3
 
 def solve (input : Input) : Nat :=
-  -- input.line.filter (fun (l : Array Nat) => )
-  0
+  input.line.filter (fun (l : Array Nat) ↦
+      (satisfy l || (List.range l.size |>.map (l.eraseIdx! ·) |>.any satisfy)))
+    |>.size
 
 end Part2
 
