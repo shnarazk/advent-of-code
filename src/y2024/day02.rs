@@ -47,6 +47,24 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .filter(|ls| {
+                for (i, _) in ls.iter().enumerate() {
+                    let mut levels = (*ls).clone();
+                    levels.remove(i);
+                    if (levels.windows(2).all(|v| v[0] < v[1])
+                        || levels.windows(2).all(|v| v[0] > v[1]))
+                        && levels.windows(2).all(|v| {
+                            let d = v[0].abs_diff(v[1]);
+                            1 <= d && d <= 3
+                        })
+                    {
+                        return true;
+                    }
+                }
+                false
+            })
+            .count()
     }
 }
