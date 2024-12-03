@@ -15,6 +15,9 @@ def eol : Parser Unit := pchar '\n' *> return ()
 def sepBy1 (p : Parser α) (s : Parser β) : Parser (Array α) := do
   manyCore (attempt (s *> p)) #[←p]
 
+def endBy (p : Parser α) (e : Parser β) : Parser (Array α) := do
+  manyCore (attempt p) #[←p] <* e
+
 /--
 a sequence of space or TAB
 --/
