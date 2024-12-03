@@ -63,14 +63,22 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat :=
-  input.map (fun i ↦ match i with | Inst.Mul (a, b) => dbg "ab:" (a * b) | _ => 0)
+  input.map (fun i ↦ match i with | Inst.Mul (a, b) => a * b | _ => 0)
     |> sum
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+def solve (input : Input) : Nat :=
+  input.foldl
+      (fun acc i ↦ match i, acc.1 with
+        | Inst.Do, _ => (true, acc.2)
+        | Inst.Dont, _ => (false, acc.2)
+        | Inst.Mul _, false => acc
+        | Inst.Mul (a, b), true => (true, acc.2 + a * b))
+      (true, 0)
+    |>.2
 
 end Part2
 
