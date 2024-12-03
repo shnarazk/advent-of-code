@@ -21,10 +21,9 @@ fn parse_line(str: &str) -> IResult<&str, Vec<u64>> {
 
 fn satisfy(lvls: &[u64]) -> bool {
     (lvls.windows(2).all(|v| v[0] < v[1]) || lvls.windows(2).all(|v| v[0] > v[1]))
-        && lvls.windows(2).all(|v| {
-            let d = v[0].abs_diff(v[1]);
-            1 <= d && d <= 3
-        })
+        && lvls
+            .windows(2)
+            .all(|v| (1..=3).contains(&v[0].abs_diff(v[1])))
 }
 
 #[aoc(2024, 2)]
@@ -34,13 +33,13 @@ impl AdventOfCode for Puzzle {
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.iter().filter(|l| satisfy(*l)).count()
+        self.line.iter().filter(|l| satisfy(l)).count()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
             .filter(|ls| {
-                satisfy(*ls)
+                satisfy(ls)
                     || (0..ls.len()).any(|i| {
                         let mut levels = (*ls).clone();
                         levels.remove(i);
