@@ -11,8 +11,8 @@ use {
     nom::{
         bytes::complete::{tag, take},
         character::complete::{alpha1, alphanumeric1, anychar, digit1, newline, u64},
-        multi::{many_till, separated_list1},
-        sequence::{separated_pair, terminated, tuple},
+        multi::{many1, many_till, separated_list1},
+        sequence::{pair, separated_pair, terminated, tuple},
         IResult,
     },
     serde::Serialize,
@@ -29,6 +29,8 @@ pub struct Puzzle {
 //         Puzzle { }
 //     }
 // }
+
+// fn parse(str: &mut str) -> IResult<&str, ()> {}
 
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
