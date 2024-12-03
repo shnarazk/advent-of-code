@@ -55,7 +55,7 @@ fn parse(str: &str) -> IResult<&str, Vec<Inst>> {
 #[aoc(2024, 3)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(input.as_str()).expect("parse error").1;
+        self.line = parse(input.as_str())?.1;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
