@@ -1,7 +1,6 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2024.Day03
 
@@ -12,6 +11,7 @@ inductive Inst
   | Dont
   | Mul (vals : Nat × Nat)
 deriving BEq, Repr
+
 instance : ToString Inst where
   toString
     | Inst.Do => "Do"
@@ -19,7 +19,6 @@ instance : ToString Inst where
     | Inst.Mul (a, b) => s!"({a}, {b})"
 
 abbrev Input := Array Inst
--- instance : ToString Input where toString s := s!"{s.size}"
 
 namespace parser
 
@@ -34,29 +33,28 @@ def parse_mul : Parser Inst := do
 -- #eval AoCParser.parse parse_pair "mul(3,5)"
 
 def parse_do : Parser Inst := pstring "do()" *> return Inst.Do
-#eval AoCParser.parse parse_do "do()o"
+-- #eval AoCParser.parse parse_do "do()o"
 
 def parse_dont : Parser Inst := pstring "don't()" *> return Inst.Dont
-#eval AoCParser.parse parse_dont "don't()do"
+-- #eval AoCParser.parse parse_dont "don't()do"
 
 def parse_inst : Parser Inst := orElse (attempt parse_mul) (fun _ ↦ orElse parse_do (fun _ ↦ parse_dont))
-#eval AoCParser.parse parse_inst "don't()"
+-- #eval AoCParser.parse parse_inst "don't()"
 
 def parse_inst' (n : Nat) : Parser Inst := do
   match n with
   | 0 => parse_inst
   | n + 1 => orElse parse_inst (fun _ ↦ any *> (parse_inst' n))
-#eval AoCParser.parse (parse_inst' 100) "xxmul(2,5)x"
-#eval AoCParser.parse (parse_inst' 100) "xdon't(]mul(1,2]mul(0,3)y"
+-- #eval AoCParser.parse (parse_inst' 100) "xxmul(2,5)x"
+-- #eval AoCParser.parse (parse_inst' 100) "xdon't(]mul(1,2]mul(0,3)y"
 
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser (Array Inst) := endBy (parse_inst' 100) (notFollowedBy (parse_inst' 100))
---    parser : Parser (Array Inst) := many (parse_inst' 100)
-#eval AoCParser.parse (many (pstring "ab")) "ababab "
+-- #eval AoCParser.parse (many (pstring "ab")) "ababab "
 -- #eval AoCParser.parse (many parse_inst') "xxdo()xdo()y"
-#eval parse "xxmul(1,2)   don't()mul(20,1)x"
-#eval parse "xmul(32,64)then(mul(11,8)mul(8,5))"
+-- #eval parse "xxmul(1,2)   don't()mul(20,1)x"
+-- #eval parse "xmul(32,64)then(mul(11,8)mul(8,5))"
 
 end parser
 
@@ -82,9 +80,6 @@ def solve (input : Input) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2024 03
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 03 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day03
