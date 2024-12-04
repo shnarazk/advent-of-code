@@ -53,16 +53,19 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.hash
             .iter()
-            .map(|(p, _)| {
+            .map(|(p, c)| {
+                if *c != 'X' {
+                    return 0;
+                }
                 STENCILS
                     .iter()
                     .filter(|offets| {
                         ['X', 'M', 'A', 'S']
                             .iter()
                             .zip(offets.iter())
-                            .all(|(c, x)| {
+                            .all(|(d, x)| {
                                 let q = (p.0 + x.0, p.1 + x.1);
-                                self.hash.get(&q) == Some(c)
+                                self.hash.get(&q) == Some(d)
                             })
                     })
                     .count()
