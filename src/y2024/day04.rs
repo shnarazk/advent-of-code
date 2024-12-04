@@ -10,7 +10,7 @@ use {
     nom::{
         bytes::complete::{tag, take},
         character::complete::{alpha1, alphanumeric1, anychar, digit1, newline, u64},
-        multi::{many_till, separated_list1},
+        multi::{many1, many_till, separated_list1},
         sequence::{separated_pair, terminated, tuple},
         IResult,
     },
@@ -20,33 +20,24 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<Vec<char>>,
 }
 
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
+fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
+    let (r, v) = separated_list1(newline, alpha1)(str)?;
+    Ok((
+        r,
+        v.iter()
+            .map(|v| v.chars().collect::<Vec<char>>())
+            .collect::<Vec<_>>(),
+    ))
+}
 
 #[aoc(2024, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     // Ok("".to_string())
-    //     Ok(segment[2].to_string())
-    // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        dbg!(block);
-        // let parser = regex!(r"^(\d+)$");
-        // let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(input.as_str())?.1;
+        Ok("".to_string())
     }
     fn end_of_data(&mut self) {
         dbg!(&self.line);
