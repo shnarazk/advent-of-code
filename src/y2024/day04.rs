@@ -17,7 +17,6 @@ use {
 pub struct Puzzle {
     line: Vec<Vec<char>>,
     hash: HashMap<(isize, isize), char>,
-    size: (usize, usize),
 }
 
 const STENCILS: [[(isize, isize); 4]; 8] = [
@@ -30,6 +29,8 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
     [(0, 0), (1, -1), (2, -2), (3, -3)],
     [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
 ];
+
+const STENCILS2: [[(isize, isize); 2]; 2] = [[(-1, -1), (-1, 1)], [(1, -1), (1, 1)]];
 
 fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
     let (r, v) = separated_list1(newline, alpha1)(str)?;
@@ -51,11 +52,8 @@ impl AdventOfCode for Puzzle {
         for (i, l) in self.line.iter().enumerate() {
             for (j, c) in l.iter().enumerate() {
                 self.hash.insert((i as isize, j as isize), *c);
-                self.size.1 = j + 1;
             }
-            self.size.0 = i + 1;
         }
-        dbg!(&self.size);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.hash
@@ -76,7 +74,22 @@ impl AdventOfCode for Puzzle {
             })
             .sum()
     }
-    fn part2(&mut self) -> Self::Output2 {
-        2
+    fn part2(&mut self) -> Self::Output1 {
+        self.hash
+            .iter()
+            .filter(|(p, c)| {
+                **c == 'A'
+                    && {
+                        let a = self.hash.get(&(p.0 - 1, p.1 - 1));
+                        let b = self.hash.get(&(p.0 + 1, p.1 + 1));
+                        [('M', 'S'), ('S', 'M')].contains(&(*a.unwrap_or(&' '), *b.unwrap_or(&' ')))
+                    }
+                    && {
+                        let a = self.hash.get(&(p.0 - 1, p.1 + 1));
+                        let b = self.hash.get(&(p.0 + 1, p.1 - 1));
+                        [('M', 'S'), ('S', 'M')].contains(&(*a.unwrap_or(&' '), *b.unwrap_or(&' ')))
+                    }
+            })
+            .count()
     }
 }
