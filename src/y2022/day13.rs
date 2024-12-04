@@ -1,11 +1,8 @@
 //! <https://adventofcode.com/2022/day/13>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
-        branch::alt, bytes::complete::tag, character::complete::digit1, multi::separated_list0,
-        IResult,
-    },
     std::cmp::Ordering,
+    winnow::{branch::alt, bytes::tag, character::digit1, multi::separated0, IResult},
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -21,7 +18,7 @@ fn parse_expr_num(input: &str) -> IResult<&str, Expr> {
 
 fn parse_expr_array(input: &str) -> IResult<&str, Expr> {
     let (v, _) = tag("[")(input)?;
-    let (e, b) = separated_list0(tag(","), parse_expr)(v)?;
+    let (e, b) = separated0(parse_expr, tag(","))(v)?;
     let (r, _) = tag("]")(e)?;
     Ok((r, Expr::Array(b)))
 }
