@@ -4,14 +4,14 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         math,
     },
-    nom::{
-        bytes::complete::tag,
-        character::complete::{alphanumeric1, newline},
-        multi::separated_list1,
+    std::collections::HashMap,
+    winnow::{
+        bytes::tag,
+        character::{alphanumeric1, newline},
+        multi::separated1,
         sequence::terminated,
         IResult,
     },
-    std::collections::HashMap,
 };
 
 #[derive(Debug, Default)]
@@ -43,7 +43,7 @@ impl AdventOfCode for Puzzle {
         let str = input.as_str();
         let (remain1, label) = parse_header(str)?;
         self.head = label.chars().collect::<Vec<_>>();
-        let (_, v) = separated_list1(newline, parse_block)(remain1)?;
+        let (_, v): (&str, Vec<_>) = separated1(parse_block, newline)(remain1)?;
         self.line = v
             .iter()
             .cloned()

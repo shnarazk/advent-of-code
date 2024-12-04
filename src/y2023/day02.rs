@@ -1,10 +1,10 @@
 //! <https://adventofcode.com/2023/day/2>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
-        bytes::complete::tag,
-        character::complete::{alpha1, digit1, space1},
-        multi::separated_list1,
+    winnow::{
+        bytes::tag,
+        character::{alpha1, digit1, space1},
+        multi::separated1,
         sequence::{delimited, terminated},
         IResult,
     },
@@ -31,7 +31,7 @@ impl AdventOfCode for Puzzle {
             ))
         }
         fn parse_block(block: &str) -> IResult<&str, (usize, usize, usize)> {
-            let (i, v) = separated_list1(tag(", "), parse_color)(block)?;
+            let (i, v): (&str, Vec<(String, usize)>) = separated1(parse_color, tag(", "))(block)?;
             let v3 = v.iter().fold((0, 0, 0), |acc, c_v| match c_v.0.as_str() {
                 "red" => (c_v.1, acc.1, acc.2),
                 "green" => (acc.0, c_v.1, acc.2),
@@ -42,7 +42,7 @@ impl AdventOfCode for Puzzle {
         }
         fn parse_line(block: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
             let (remain1, _num) = delimited(tag("Game "), digit1, tag(": "))(block)?;
-            let (remain2, v) = separated_list1(tag("; "), parse_block)(remain1)?;
+            let (remain2, v) = separated1(parse_block, tag("; "))(remain1)?;
             Ok((remain2, v))
         }
         let (_, x) = parse_line(block)?;

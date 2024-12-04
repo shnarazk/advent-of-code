@@ -34,14 +34,6 @@ pub struct Puzzle {
     rating_settings: [HashSet<usize>; 4],
 }
 
-/* fn u64<I, E: winnow::error::ParseError<I>>(input: I) -> IResult<I, u64, E>
-where
-    I: StreamIsPartial + winnow::stream::Stream,
-    <I as winnow::stream::Stream>::Token: winnow::stream::AsChar + Copy,
-{
-    dec_uint(input)
-} */
-
 fn parse_rule1(str: &str) -> IResult<&str, Rule> {
     let (remain1, var_str) = alpha1(str)?;
     let (remain2, op) = alt((tag("<"), tag(">")))(remain1)?;
@@ -89,6 +81,7 @@ fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        #[allow(clippy::type_complexity)]
         let (remain1, (workflows, _)): (&str, (Vec<(Label, Vec<Rule>)>, &str)) =
             many_till0(parse_workflow, tag("\n"))(input.as_str())?;
         self.rules = workflows

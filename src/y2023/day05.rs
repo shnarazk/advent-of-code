@@ -1,13 +1,11 @@
 //! <https://adventofcode.com/2023/day/5>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     itertools::Itertools,
-    nom::{
-        character::complete::{anychar, newline, space1, u64},
-        multi::{many_till, separated_list1},
+    winnow::{
+        character::{dec_uint, newline, not_line_ending, space1},
+        multi::separated1,
+        sequence::preceded,
         IResult,
     },
 };
@@ -21,13 +19,45 @@ pub struct Puzzle {
     line: Vec<Vec<(usize, usize, usize)>>,
 }
 
+fn u64<I, E: winnow::error::ParseError<I>>(input: I) -> IResult<I, u64, E>
+where
+    I: winnow::stream::StreamIsPartial + winnow::stream::Stream,
+    <I as winnow::stream::Stream>::Token: winnow::stream::AsChar + Copy,
+{
+    dec_uint(input)
+}
+
+fn parse_line<I, E: winnow::error::ParseError<I>>(str: I) -> IResult<I, Vec<u64>, E>
+where
+    I: winnow::stream::StreamIsPartial + winnow::stream::Stream,
+    <I as winnow::stream::Stream>::Token: winnow::stream::AsChar + Copy,
+{
+    separated1(u64, space1)(str)
+}
+
+fn parse_line_usize(str: &str) -> IResult<&str, Vec<usize>> {
+    let (remain1, v): (&str, Vec<u64>) = parse_line(str)?;
+    Ok((remain1, v.iter().map(|l| *l as usize).collect::<Vec<_>>()))
+}
+
+/* fn parse_block(str: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
+    let (remain1, _) = preceded(not_line_ending, newline)(str)?;
+    let (remain2, v): (&str, Vec<Vec<u64>>) = separated1(parse_line, newline)(remain1)?;
+    Ok((
+        remain2,
+        v.iter()
+            .map(|l| (l[0] as usize, l[1] as usize, (l[1] + l[2]) as usize))
+            .collect::<Vec<_>>(),
+    ))
+} */
+
 #[aoc(2023, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         fn parse_block(str: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
-            let (remain1, _) = many_till(anychar, newline)(str)?;
-            let (remain2, v) = separated_list1(newline, separated_list1(space1, u64))(remain1)?;
+            let (remain1, _) = preceded(not_line_ending, newline)(str)?;
+            let (remain2, v): (&str, Vec<Vec<u64>>) = separated1(parse_line, newline)(remain1)?;
             Ok((
                 remain2,
                 v.iter()
@@ -37,7 +67,7 @@ impl AdventOfCode for Puzzle {
         }
         if block.starts_with("seeds:") {
             let vals = block.split(": ").nth(1).unwrap().trim();
-            self.seeds = line_parser::to_usizes(vals, ' ')?;
+            self.seeds = parse_line_usize(vals).expect("error").1;
             return Ok(());
         }
         let (_, v) = parse_block(block)?;
