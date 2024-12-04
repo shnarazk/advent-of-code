@@ -53,10 +53,8 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.hash
             .iter()
-            .map(|(p, c)| {
-                if *c != 'X' {
-                    return 0;
-                }
+            .filter(|(_, c)| **c == 'X')
+            .map(|(p, _)| {
                 STENCILS
                     .iter()
                     .filter(|offets| {
@@ -72,9 +70,9 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output1 {
         self.hash
             .iter()
-            .filter(|(p, c)| {
-                **c == 'A'
-                    && {
+            .filter(|(_, c)| **c == 'A')
+            .filter(|(p, _)|
+                    {
                         let a = self.hash.get(&(p.0 - 1, p.1 - 1)).unwrap_or(&'P');
                         let b = self.hash.get(&(p.0 + 1, p.1 + 1)).unwrap_or(&'P');
                         *a.min(b) == 'M' && *a.max(b) == 'S'
@@ -84,7 +82,7 @@ impl AdventOfCode for Puzzle {
                         let b = self.hash.get(&(p.0 + 1, p.1 - 1)).unwrap_or(&'P');
                         *a.min(b) == 'M' && *a.max(b) == 'S'
                     }
-            })
+            )
             .count()
     }
 }
