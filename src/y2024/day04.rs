@@ -63,10 +63,7 @@ impl AdventOfCode for Puzzle {
                         ['X', 'M', 'A', 'S']
                             .iter()
                             .zip(offets.iter())
-                            .all(|(d, x)| {
-                                let q = (p.0 + x.0, p.1 + x.1);
-                                self.hash.get(&q) == Some(d)
-                            })
+                            .all(|(d, x)| self.hash.get(&(p.0 + x.0, p.1 + x.1)) == Some(d))
                     })
                     .count()
             })
