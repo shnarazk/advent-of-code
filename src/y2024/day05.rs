@@ -7,15 +7,16 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
     },
-    nom::{
-        bytes::complete::{tag, take},
-        character::complete::{alpha1, alphanumeric1, anychar, digit1, newline, u64},
-        multi::{many_till, separated_list1},
-        sequence::{separated_pair, terminated, tuple},
-        IResult,
-    },
     serde::Serialize,
     std::collections::HashMap,
+    winnow::{
+        bytes::any,
+        bytes::{tag, take},
+        character::{alpha1, alphanumeric1, dec_uint, digit1, newline},
+        multi::{many_till0, separated1},
+        sequence::{separated_pair, terminated},
+        IResult,
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

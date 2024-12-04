@@ -1,13 +1,13 @@
 //! <https://adventofcode.com/2024/day/4>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
-        character::complete::{alpha1, newline},
-        multi::separated_list1,
-        IResult,
-    },
     serde::Serialize,
     std::collections::HashMap,
+    winnow::{
+        character::{alpha1, newline},
+        multi::separated1,
+        IResult,
+    },
 };
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize)]
@@ -28,7 +28,7 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
 ];
 
 fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
-    let (r, v) = separated_list1(newline, alpha1)(str)?;
+    let (r, v): (&str, Vec<&str>) = separated1(alpha1, newline)(str)?;
     Ok((
         r,
         v.iter()

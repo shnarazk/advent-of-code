@@ -1,15 +1,15 @@
 //! <https://adventofcode.com/2024/day/3>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
+    serde::Serialize,
+    winnow::{
         branch::alt,
-        bytes::complete::tag,
-        character::complete::{anychar, u64},
+        bytes::{any, tag},
+        character::dec_uint,
         multi::many1,
-        sequence::{delimited, pair, preceded, terminated},
+        sequence::{delimited, preceded, terminated},
         IResult,
     },
-    serde::Serialize,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -35,8 +35,11 @@ fn parse_inst1(str: &str) -> IResult<&str, Inst> {
 }
 
 fn parse_inst2(str: &str) -> IResult<&str, Inst> {
-    let (remain, mul) =
-        delimited(tag("mul("), pair(terminated(u64, tag(",")), u64), tag(")"))(str)?;
+    let (remain, mul) = delimited(
+        tag("mul("),
+        (terminated(dec_uint, tag(",")), dec_uint),
+        tag(")"),
+    )(str)?;
     Ok((remain, Inst::Mul(mul.0, mul.1)))
 }
 
@@ -45,7 +48,7 @@ fn parse_inst(str: &str) -> IResult<&str, Inst> {
 }
 
 fn parse_aux(str: &str) -> IResult<&str, Inst> {
-    alt((parse_inst, preceded(anychar, parse_aux)))(str)
+    alt((parse_inst, preceded(any, parse_aux)))(str)
 }
 
 fn parse(str: &str) -> IResult<&str, Vec<Inst>> {
