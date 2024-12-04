@@ -1,7 +1,4 @@
 //! <https://adventofcode.com/2024/day/4>
-// #![allow(dead_code)]
-// #![allow(unused_imports)]
-// #![allow(unused_variables)]
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     nom::{
@@ -29,8 +26,6 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
     [(0, 0), (1, -1), (2, -2), (3, -3)],
     [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
 ];
-
-const STENCILS2: [[(isize, isize); 2]; 2] = [[(-1, -1), (-1, 1)], [(1, -1), (1, 1)]];
 
 fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
     let (r, v) = separated_list1(newline, alpha1)(str)?;
@@ -80,14 +75,14 @@ impl AdventOfCode for Puzzle {
             .filter(|(p, c)| {
                 **c == 'A'
                     && {
-                        let a = self.hash.get(&(p.0 - 1, p.1 - 1));
-                        let b = self.hash.get(&(p.0 + 1, p.1 + 1));
-                        [('M', 'S'), ('S', 'M')].contains(&(*a.unwrap_or(&' '), *b.unwrap_or(&' ')))
+                        let a = self.hash.get(&(p.0 - 1, p.1 - 1)).unwrap_or(&'P');
+                        let b = self.hash.get(&(p.0 + 1, p.1 + 1)).unwrap_or(&'P');
+                        *a.min(b) == 'M' && *a.max(b) == 'S'
                     }
                     && {
-                        let a = self.hash.get(&(p.0 - 1, p.1 + 1));
-                        let b = self.hash.get(&(p.0 + 1, p.1 - 1));
-                        [('M', 'S'), ('S', 'M')].contains(&(*a.unwrap_or(&' '), *b.unwrap_or(&' ')))
+                        let a = self.hash.get(&(p.0 - 1, p.1 + 1)).unwrap_or(&'P');
+                        let b = self.hash.get(&(p.0 + 1, p.1 - 1)).unwrap_or(&'P');
+                        *a.min(b) == 'M' && *a.max(b) == 'S'
                     }
             })
             .count()
