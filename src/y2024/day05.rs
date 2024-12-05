@@ -65,7 +65,7 @@ impl AdventOfCode for Puzzle {
                 self.rules.iter().all(|(a, b)| {
                     let i = occurs.get(a);
                     let j = occurs.get(b);
-                    i == None || j == None || i < j
+                    i.is_none() || j.is_none() || i < j
                 })
             })
             .map(|v| v[v.len() / 2])
@@ -83,7 +83,7 @@ impl AdventOfCode for Puzzle {
                 !self.rules.iter().all(|(a, b)| {
                     let i = occurs.get(a);
                     let j = occurs.get(b);
-                    i == None || j == None || i < j
+                    i.is_none() || j.is_none() || i < j
                 })
             })
             .map(|v| {
@@ -107,11 +107,11 @@ fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> 
         .collect::<HashSet<usize>>();
     let mut cands = lowers
         .iter()
-        .filter(|x| !uppers.contains(&x))
+        .filter(|x| !uppers.contains(x))
         .cloned()
         .collect::<Vec<_>>();
     if cands.is_empty() {
-        return lowers.iter().cloned().collect::<Vec<_>>();
+        lowers.iter().cloned().collect::<Vec<_>>()
     } else {
         assert_eq!(1, cands.len());
         cands.truncate(1);
