@@ -5,8 +5,8 @@ use {
     std::collections::HashMap,
     winnow::{
         ascii::{alpha1, newline},
-        multi::separated1,
-        IResult, Parser,
+        combinator::separated,
+        PResult, Parser,
     },
 };
 
@@ -27,20 +27,17 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
     [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
 ];
 
-fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
-    let (r, v): (&str, Vec<&str>) = separated1(alpha1, newline).parse_next(str)?;
-    Ok((
-        r,
-        v.iter()
-            .map(|v| v.chars().collect::<Vec<char>>())
-            .collect::<Vec<_>>(),
-    ))
+fn parse(str: &mut &str) -> PResult<Vec<Vec<char>>> {
+    let v: Vec<&str> = separated(1.., alpha1, newline).parse_next(str)?;
+    Ok(v.iter()
+        .map(|v| v.chars().collect::<Vec<char>>())
+        .collect::<Vec<_>>())
 }
 
 #[aoc(2024, 4)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(input.as_str())?.1;
+        self.line = parse(&mut input.as_str())?;
         Ok("".to_string())
     }
     fn end_of_data(&mut self) {

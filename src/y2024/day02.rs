@@ -4,10 +4,8 @@ use {
     serde::Serialize,
     winnow::{
         ascii::{dec_uint, newline, space1},
-        combinator::repeat,
-        multi::separated1,
-        sequence::terminated,
-        IResult, Parser,
+        combinator::{repeat, separated, terminated},
+        PResult, Parser,
     },
 };
 
@@ -16,10 +14,8 @@ pub struct Puzzle {
     line: Vec<Vec<u64>>,
 }
 
-fn parse_line(str: &str) -> IResult<&str, Vec<u64>> {
-    let (r, v): (&str, Vec<u64>) =
-        separated1(dec_uint::<&str, u64, winnow::error::Error<&str>>, space1).parse_next(str)?;
-    Ok((r, v))
+fn parse_line(str: &mut &str) -> PResult<Vec<u64>> {
+    separated(1.., dec_uint::<&str, u64, _>, space1).parse_next(str)
 }
 
 fn satisfy(lvls: &[u64]) -> bool {
@@ -32,9 +28,7 @@ fn satisfy(lvls: &[u64]) -> bool {
 #[aoc(2024, 2)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = repeat(0.., terminated(parse_line, newline))
-            .parse_next(input.as_str())?
-            .1;
+        self.line = repeat(0.., terminated(parse_line, newline)).parse_next(&mut input.as_str())?;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {

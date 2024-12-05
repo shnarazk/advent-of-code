@@ -6,11 +6,8 @@ use {
     std::collections::HashMap,
     winnow::{
         ascii::{dec_uint, newline, space1},
-        combinator::repeat,
-        // multi::many1,
-        sequence::terminated,
-        IResult,
-        Parser,
+        combinator::{repeat, terminated},
+        PResult, Parser,
     },
 };
 
@@ -19,7 +16,7 @@ pub struct Puzzle {
     line: Vec<(u64, u64)>,
 }
 
-fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
+fn parse(str: &mut &str) -> PResult<Vec<(u64, u64)>> {
     repeat(
         0..,
         (terminated(dec_uint, space1), terminated(dec_uint, newline)),
@@ -30,7 +27,7 @@ fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(input.as_str())?.1;
+        self.line = parse(&mut input.as_str())?;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
