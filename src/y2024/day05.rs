@@ -11,12 +11,9 @@ use {
     std::collections::HashMap,
     winnow::{
         ascii::{alpha1, alphanumeric1, dec_uint, digit1, newline},
-        bytes::any,
-        bytes::{tag, take},
-        combinator::repeat_till0,
-        multi::separated1,
-        sequence::{separated_pair, terminated},
-        IResult,
+        combinator::{repeat_till, separated, separated_pair, terminated},
+        token::{any, literal, take},
+        PResult,
     },
 };
 
