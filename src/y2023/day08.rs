@@ -6,11 +6,11 @@ use {
     },
     std::collections::HashMap,
     winnow::{
+        ascii::{alphanumeric1, newline},
         bytes::tag,
-        character::{alphanumeric1, newline},
         multi::separated1,
         sequence::terminated,
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -21,15 +21,15 @@ pub struct Puzzle {
 }
 
 fn parse_header(input: &str) -> IResult<&str, String> {
-    let (remain1, label) = terminated(alphanumeric1, tag("\n\n"))(input)?;
+    let (remain1, label) = terminated(alphanumeric1, tag("\n\n")).parse_next(input)?;
     Ok((remain1, label.to_string()))
 }
 
 // fn parse(str: &str) -> IResult<&str, Data>;
 fn parse_block(input: &str) -> IResult<&str, (String, (String, String))> {
-    let (remain1, label) = terminated(alphanumeric1, tag(" = ("))(input)?;
-    let (remain2, child1) = terminated(alphanumeric1, tag(", "))(remain1)?;
-    let (remain3, child2) = terminated(alphanumeric1, tag(")"))(remain2)?;
+    let (remain1, label) = terminated(alphanumeric1, tag(" = (")).parse_next(input)?;
+    let (remain2, child1) = terminated(alphanumeric1, tag(", ")).parse_next(remain1)?;
+    let (remain3, child2) = terminated(alphanumeric1, tag(")")).parse_next(remain2)?;
     Ok((
         remain3,
         (label.to_string(), (child1.to_string(), child2.to_string())),
@@ -43,7 +43,7 @@ impl AdventOfCode for Puzzle {
         let str = input.as_str();
         let (remain1, label) = parse_header(str)?;
         self.head = label.chars().collect::<Vec<_>>();
-        let (_, v): (&str, Vec<_>) = separated1(parse_block, newline)(remain1)?;
+        let (_, v): (&str, Vec<_>) = separated1(parse_block, newline).parse_next(remain1)?;
         self.line = v
             .iter()
             .cloned()

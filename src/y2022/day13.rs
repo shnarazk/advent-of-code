@@ -2,7 +2,7 @@
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     std::cmp::Ordering,
-    winnow::{branch::alt, bytes::tag, character::digit1, multi::separated0, IResult},
+    winnow::{ascii::dec_uint, branch::alt, bytes::tag, multi::separated0, IResult, Parser},
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -12,19 +12,19 @@ enum Expr {
 }
 
 fn parse_expr_num(input: &str) -> IResult<&str, Expr> {
-    let (a, b) = digit1(input)?;
-    Ok((a, Expr::Num(b.parse::<usize>().unwrap())))
+    let (a, b): (&str, u64) = dec_uint.parse_next(input)?;
+    Ok((a, Expr::Num(b as usize)))
 }
 
 fn parse_expr_array(input: &str) -> IResult<&str, Expr> {
-    let (v, _) = tag("[")(input)?;
-    let (e, b) = separated0(parse_expr, tag(","))(v)?;
-    let (r, _) = tag("]")(e)?;
+    let (v, _) = tag("[").parse_next(input)?;
+    let (e, b) = separated0(parse_expr, tag(",")).parse_next(v)?;
+    let (r, _) = tag("]").parse_next(e)?;
     Ok((r, Expr::Array(b)))
 }
 
 fn parse_expr(input: &str) -> IResult<&str, Expr> {
-    alt((parse_expr_array, parse_expr_num))(input)
+    alt((parse_expr_array, parse_expr_num)).parse_next(input)
 }
 
 impl PartialOrd for Expr {

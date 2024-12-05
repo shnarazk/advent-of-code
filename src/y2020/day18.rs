@@ -2,10 +2,10 @@
 use {
     crate::framework::{aoc_at, AdventOfCode, ParseError},
     winnow::{
+        ascii::dec_int,
         branch::alt,
         bytes::{one_of, tag},
-        character::dec_int,
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
 
 impl Expr {
     fn parse1(input: &str) -> Option<Expr> {
-        if let Ok((remain, opr1)) = alt((a_term, a_number))(input.trim_start()) {
+        if let Ok((remain, opr1)) = alt((a_term, a_number)).parse_next(input.trim_start()) {
             if let Ok((_, (op, opr2))) = a_modifier(remain.trim_start()) {
                 Some(Expr::BIOP(op, Box::new(opr1), Box::new(opr2)))
             } else {
@@ -122,12 +122,12 @@ impl Expr {
 }
 
 fn a_number(input: &str) -> IResult<&str, Expr> {
-    let (remain, num): (&str, i64) = dec_int(input)?;
+    let (remain, num): (&str, i64) = dec_int.parse_next(input)?;
     Ok((remain, Expr::NUM(num as isize)))
 }
 
 fn an_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+*-/")(input)?;
+    let (remain, op) = one_of("+*-/").parse_next(input)?;
     Ok((
         remain,
         match op {
@@ -141,14 +141,14 @@ fn an_operator(input: &str) -> IResult<&str, Op> {
 }
 
 fn a_term(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = tag("(")(input)?;
-    let (remain, term) = an_expr(remain)?;
-    let (remain, _) = tag(")")(remain)?;
+    let (remain, _) = tag("(").parse_next(input)?;
+    let (remain, term) = an_expr.parse_next(remain)?;
+    let (remain, _) = tag(")").parse_next(remain)?;
     Ok((remain, Expr::TERM(Box::new(term))))
 }
 
 fn an_expr(input: &str) -> IResult<&str, Expr> {
-    let (remain, opr1) = alt((a_term, a_number))(input.trim_start())?;
+    let (remain, opr1) = alt((a_term, a_number)).parse_next(input.trim_start())?;
     if let Ok((remain, (op, opr2))) = a_modifier(remain.trim_start()) {
         Ok((
             remain.trim_start(),
@@ -168,14 +168,14 @@ fn a_modifier(str: &str) -> IResult<&str, (Op, Expr)> {
 // part 2
 
 fn subexpr(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = tag("(")(input)?;
+    let (remain, _) = tag("(").parse_next(input)?;
     let (remain, term) = an_expr2(remain)?;
-    let (remain, _) = tag(")")(remain)?;
+    let (remain, _) = tag(")").parse_next(remain)?;
     Ok((remain, Expr::TERM(Box::new(term))))
 }
 
 fn an_factor_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+-")(input)?;
+    let (remain, op) = one_of("+-").parse_next(input)?;
     Ok((
         remain,
         match op {
@@ -187,7 +187,7 @@ fn an_factor_operator(input: &str) -> IResult<&str, Op> {
 }
 
 fn an_term_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("*/")(input)?;
+    let (remain, op) = one_of("*/").parse_next(input)?;
     Ok((
         remain,
         match op {
@@ -199,7 +199,7 @@ fn an_term_operator(input: &str) -> IResult<&str, Op> {
 }
 
 fn factors(input: &str) -> IResult<&str, Expr> {
-    let (remain, l) = alt((subexpr, a_number))(input.trim_start())?;
+    let (remain, l) = alt((subexpr, a_number)).parse_next(input.trim_start())?;
     if let Ok((remain, op)) = an_factor_operator(remain.trim_start()) {
         let (remain, r) = factors(remain.trim_start())?;
         Ok((remain, Expr::BIOP(op, Box::new(l), Box::new(r))))

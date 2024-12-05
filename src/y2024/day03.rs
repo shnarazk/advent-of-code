@@ -3,12 +3,12 @@ use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
     winnow::{
+        ascii::dec_uint,
         branch::alt,
         bytes::{any, tag},
-        character::dec_uint,
-        multi::many1,
+        combinator::repeat,
         sequence::{delimited, preceded, terminated},
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -25,12 +25,12 @@ enum Inst {
 }
 
 fn parse_inst0(str: &str) -> IResult<&str, Inst> {
-    let (remain, _) = tag("do()")(str)?;
+    let (remain, _) = tag("do()").parse_next(str)?;
     Ok((remain, Inst::Do))
 }
 
 fn parse_inst1(str: &str) -> IResult<&str, Inst> {
-    let (remain, _) = tag("don't()")(str)?;
+    let (remain, _) = tag("don't()").parse_next(str)?;
     Ok((remain, Inst::Dont))
 }
 
@@ -39,20 +39,21 @@ fn parse_inst2(str: &str) -> IResult<&str, Inst> {
         tag("mul("),
         (terminated(dec_uint, tag(",")), dec_uint),
         tag(")"),
-    )(str)?;
+    )
+    .parse_next(str)?;
     Ok((remain, Inst::Mul(mul.0, mul.1)))
 }
 
 fn parse_inst(str: &str) -> IResult<&str, Inst> {
-    alt((parse_inst0, parse_inst1, parse_inst2))(str)
+    alt((parse_inst0, parse_inst1, parse_inst2)).parse_next(str)
 }
 
 fn parse_aux(str: &str) -> IResult<&str, Inst> {
-    alt((parse_inst, preceded(any, parse_aux)))(str)
+    alt((parse_inst, preceded(any, parse_aux))).parse_next(str)
 }
 
 fn parse(str: &str) -> IResult<&str, Vec<Inst>> {
-    many1(parse_aux)(str)
+    repeat(0.., parse_aux).parse_next(str)
 }
 
 #[aoc(2024, 3)]

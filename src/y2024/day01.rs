@@ -5,10 +5,12 @@ use {
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
-        character::{dec_uint, newline, space1},
-        multi::many1,
+        ascii::{dec_uint, newline, space1},
+        combinator::repeat,
+        // multi::many1,
         sequence::terminated,
         IResult,
+        Parser,
     },
 };
 
@@ -18,7 +20,11 @@ pub struct Puzzle {
 }
 
 fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
-    many1((terminated(dec_uint, space1), terminated(dec_uint, newline)))(str)
+    repeat(
+        0..,
+        (terminated(dec_uint, space1), terminated(dec_uint, newline)),
+    )
+    .parse_next(str)
 }
 
 #[aoc(2024, 1)]

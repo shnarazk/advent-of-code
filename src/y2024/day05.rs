@@ -10,10 +10,11 @@ use {
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
+        ascii::{alpha1, alphanumeric1, dec_uint, digit1, newline},
         bytes::any,
         bytes::{tag, take},
-        character::{alpha1, alphanumeric1, dec_uint, digit1, newline},
-        multi::{many_till0, separated1},
+        combinator::repeat_till0,
+        multi::separated1,
         sequence::{separated_pair, terminated},
         IResult,
     },

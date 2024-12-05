@@ -2,11 +2,11 @@
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     winnow::{
+        ascii::{alpha1, digit1, space1},
         bytes::tag,
-        character::{alpha1, digit1, space1},
         multi::separated1,
         sequence::{delimited, terminated},
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         self.index += 1;
         fn parse_color(block: &str) -> IResult<&str, (String, usize)> {
-            let (remain1, value) = terminated(digit1, space1)(block)?;
+            let (remain1, value) = terminated(digit1, space1).parse_next(block)?;
             let (remain2, color) = alpha1(remain1)?;
             Ok((
                 remain2,
@@ -31,7 +31,8 @@ impl AdventOfCode for Puzzle {
             ))
         }
         fn parse_block(block: &str) -> IResult<&str, (usize, usize, usize)> {
-            let (i, v): (&str, Vec<(String, usize)>) = separated1(parse_color, tag(", "))(block)?;
+            let (i, v): (&str, Vec<(String, usize)>) =
+                separated1(parse_color, tag(", ")).parse_next(block)?;
             let v3 = v.iter().fold((0, 0, 0), |acc, c_v| match c_v.0.as_str() {
                 "red" => (c_v.1, acc.1, acc.2),
                 "green" => (acc.0, c_v.1, acc.2),
@@ -41,8 +42,8 @@ impl AdventOfCode for Puzzle {
             Ok((i, v3))
         }
         fn parse_line(block: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
-            let (remain1, _num) = delimited(tag("Game "), digit1, tag(": "))(block)?;
-            let (remain2, v) = separated1(parse_block, tag("; "))(remain1)?;
+            let (remain1, _num) = delimited(tag("Game "), digit1, tag(": ")).parse_next(block)?;
+            let (remain2, v) = separated1(parse_block, tag("; ")).parse_next(remain1)?;
             Ok((remain2, v))
         }
         let (_, x) = parse_line(block)?;

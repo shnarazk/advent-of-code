@@ -5,13 +5,12 @@ use {
     serde_json,
     std::collections::{HashMap, HashSet},
     winnow::{
+        ascii::{alpha1, dec_uint},
         branch::alt,
         bytes::tag,
-        character::{alpha1, dec_uint},
-        multi::{many1, many_till0},
+        combinator::{repeat, repeat_till0},
         sequence::{preceded, terminated},
-        // stream::StreamIsPartial,
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -36,10 +35,10 @@ pub struct Puzzle {
 
 fn parse_rule1(str: &str) -> IResult<&str, Rule> {
     let (remain1, var_str) = alpha1(str)?;
-    let (remain2, op) = alt((tag("<"), tag(">")))(remain1)?;
-    let (remain3, val): (&str, u64) = dec_uint(remain2)?;
-    let (remain4, label) = preceded(tag(":"), alpha1)(remain3)?;
-    let (remain5, _) = tag(",")(remain4)?;
+    let (remain2, op) = alt((tag("<"), tag(">"))).parse_next(remain1)?;
+    let (remain3, val): (&str, u64) = dec_uint.parse_next(remain2)?;
+    let (remain4, label) = preceded(tag(":"), alpha1).parse_next(remain3)?;
+    let (remain5, _) = tag(",").parse_next(remain4)?;
     Ok((
         remain5,
         (
@@ -54,19 +53,19 @@ fn parse_rule1(str: &str) -> IResult<&str, Rule> {
 }
 
 fn parse_workflow(str: &str) -> IResult<&str, (Label, Vec<Rule>)> {
-    let (remain1, label) = terminated(alpha1, tag("{"))(str)?;
+    let (remain1, label) = terminated(alpha1, tag("{")).parse_next(str)?;
     let (remain2, (mut v, last_label)): (&str, (Vec<Rule>, &str)) =
-        many_till0(parse_rule1, terminated(alpha1, tag("}\n")))(remain1)?;
+        repeat_till0(parse_rule1, terminated(alpha1, tag("}\n"))).parse_next(remain1)?;
     v.push((None, last_label.to_string()));
     Ok((remain2, (label.to_string(), v)))
 }
 
 fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
-    let (remain1, x): (&str, u64) = preceded(tag("{x="), dec_uint)(str)?;
-    let (remain2, m): (&str, u64) = preceded(tag(",m="), dec_uint)(remain1)?;
-    let (remain3, a): (&str, u64) = preceded(tag(",a="), dec_uint)(remain2)?;
-    let (remain4, s): (&str, u64) = preceded(tag(",s="), dec_uint)(remain3)?;
-    let (remain5, _) = tag("}\n")(remain4)?;
+    let (remain1, x): (&str, u64) = preceded(tag("{x="), dec_uint).parse_next(str)?;
+    let (remain2, m): (&str, u64) = preceded(tag(",m="), dec_uint).parse_next(remain1)?;
+    let (remain3, a): (&str, u64) = preceded(tag(",a="), dec_uint).parse_next(remain2)?;
+    let (remain4, s): (&str, u64) = preceded(tag(",s="), dec_uint).parse_next(remain3)?;
+    let (remain5, _) = tag("}\n").parse_next(remain4)?;
     Ok((
         remain5,
         vec![
@@ -77,13 +76,16 @@ fn parse_setting(str: &str) -> IResult<&str, Vec<(String, usize)>> {
         ],
     ))
 }
+fn parse_settings(str: &str) -> IResult<&str, Vec<Vec<(String, usize)>>> {
+    repeat(0.., parse_setting).parse_next(str)
+}
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         #[allow(clippy::type_complexity)]
         let (remain1, (workflows, _)): (&str, (Vec<(Label, Vec<Rule>)>, &str)) =
-            many_till0(parse_workflow, tag("\n"))(input.as_str())?;
+            repeat_till0(parse_workflow, tag("\n")).parse_next(input.as_str())?;
         self.rules = workflows
             .iter()
             .cloned()
@@ -106,7 +108,8 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        let (_, settings): (&str, Vec<Vec<(Label, usize)>>) = many1(parse_setting)(remain1)?;
+        let (_, settings): (&str, Vec<Vec<(Label, usize)>>) = parse_settings(remain1)?;
+        // repeat(parse_setting).parse_next(remain1)?;
         self.settings = settings
             .iter()
             .map(|v| v.iter().cloned().collect())

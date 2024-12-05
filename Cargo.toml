@@ -15,7 +15,7 @@ regex = { version = "^1.11", optional = true }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = { version = "^1.0" }
 splr = { version = "^0.17", optional = true }
-winnow = { version = "0.3", optional = true }
+winnow = { version = "0.4", optional = true }
 
 [features]
 # default = ["y2020"]

@@ -4,9 +4,9 @@ use {
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
-        character::{alpha1, newline},
+        ascii::{alpha1, newline},
         multi::separated1,
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -28,7 +28,7 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
 ];
 
 fn parse(str: &str) -> IResult<&str, Vec<Vec<char>>> {
-    let (r, v): (&str, Vec<&str>) = separated1(alpha1, newline)(str)?;
+    let (r, v): (&str, Vec<&str>) = separated1(alpha1, newline).parse_next(str)?;
     Ok((
         r,
         v.iter()

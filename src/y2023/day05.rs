@@ -3,10 +3,10 @@ use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     itertools::Itertools,
     winnow::{
-        character::{dec_uint, newline, not_line_ending, space1},
+        ascii::{dec_uint, newline, not_line_ending, space1},
         multi::separated1,
         sequence::preceded,
-        IResult,
+        IResult, Parser,
     },
 };
 
@@ -32,7 +32,7 @@ where
     I: winnow::stream::StreamIsPartial + winnow::stream::Stream,
     <I as winnow::stream::Stream>::Token: winnow::stream::AsChar + Copy,
 {
-    separated1(u64, space1)(str)
+    separated1(u64, space1).parse_next(str)
 }
 
 fn parse_line_usize(str: &str) -> IResult<&str, Vec<usize>> {
@@ -56,8 +56,9 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         fn parse_block(str: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
-            let (remain1, _) = preceded(not_line_ending, newline)(str)?;
-            let (remain2, v): (&str, Vec<Vec<u64>>) = separated1(parse_line, newline)(remain1)?;
+            let (remain1, _) = preceded(not_line_ending, newline).parse_next(str)?;
+            let (remain2, v): (&str, Vec<Vec<u64>>) =
+                separated1(parse_line, newline).parse_next(remain1)?;
             Ok((
                 remain2,
                 v.iter()
