@@ -2,7 +2,12 @@
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     std::cmp::Ordering,
-    winnow::{ascii::dec_uint, branch::alt, bytes::tag, multi::separated0, IResult, Parser},
+    winnow::{
+        ascii::dec_uint,
+        combinator::{alt, separated},
+        token::literal,
+        PResult, Parser,
+    },
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -11,20 +16,20 @@ enum Expr {
     Array(Vec<Expr>),
 }
 
-fn parse_expr_num(input: &str) -> IResult<&str, Expr> {
-    let (a, b): (&str, u64) = dec_uint.parse_next(input)?;
-    Ok((a, Expr::Num(b as usize)))
+fn parse_expr_num(input: &mut &str) -> PResult<Expr> {
+    let a: u64 = dec_uint.parse_next(input)?;
+    Ok(Expr::Num(a as usize))
 }
 
-fn parse_expr_array(input: &str) -> IResult<&str, Expr> {
-    let (v, _) = tag("[").parse_next(input)?;
-    let (e, b) = separated0(parse_expr, tag(",")).parse_next(v)?;
-    let (r, _) = tag("]").parse_next(e)?;
-    Ok((r, Expr::Array(b)))
-}
-
-fn parse_expr(input: &str) -> IResult<&str, Expr> {
+fn parse_expr(input: &mut &str) -> PResult<Expr> {
     alt((parse_expr_array, parse_expr_num)).parse_next(input)
+}
+
+fn parse_expr_array(input: &mut &str) -> PResult<Expr> {
+    let _ = literal("[").parse_next(input)?;
+    let e = separated(0.., parse_expr, literal(",")).parse_next(input)?;
+    let _ = literal("]").parse_next(input)?;
+    Ok(Expr::Array(e))
 }
 
 impl PartialOrd for Expr {
@@ -71,10 +76,10 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut lines = block.split('\n');
+        let mut lines = block.split('\n').collect::<Vec<_>>();
         self.line.push((
-            parse_expr(lines.next().unwrap()).expect("!!!!").1,
-            parse_expr(lines.next().unwrap()).expect("!!!!").1,
+            parse_expr(&mut lines[0]).expect("!!!!"),
+            parse_expr(&mut lines[1]).expect("!!!!"),
         ));
         Ok(())
     }
