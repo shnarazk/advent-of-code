@@ -18,7 +18,7 @@ splr = { version = "^0.17", optional = true }
 winnow = { version = "0.5", optional = true }
 
 [features]
-default = ["y2024"]
+default = ["y2020"]
 # default = ["y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
 y2024 = ["itertools", "winnow"]
 y2023 = ["itertools", "regex", "winnow"]

@@ -2,10 +2,10 @@
 use {
     crate::framework::{aoc_at, AdventOfCode, ParseError},
     winnow::{
-        ascii::dec_int,
-        branch::alt,
-        bytes::{one_of, tag},
-        IResult, Parser,
+        ascii::{dec_int, space0},
+        combinator::alt,
+        token::{literal, one_of},
+        PResult, Parser,
     },
 };
 
@@ -43,12 +43,13 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> isize {
         let mut result = 0;
         for l in self.expr.iter() {
-            if let Some(e) = Expr::parse1(l) {
+            let p = &mut l.trim_start();
+            if let Some(e) = Expr::parse1(p) {
                 let x = e.traverse(Op::ADD, 0);
                 // dbg!((l, x));
                 result += x;
             } else {
-                panic!("{}", l);
+                panic!("{l} >> {p}");
             }
         }
         result
@@ -56,7 +57,8 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> isize {
         let mut result = 0;
         for l in self.expr.iter() {
-            if let Some(e) = Expr::parse2(l) {
+            let p = &mut l.trim_start();
+            if let Some(e) = Expr::parse2(p) {
                 let x = e.eval();
                 // dbg!((l, x));
                 result += x;
@@ -69,19 +71,21 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Expr {
-    fn parse1(input: &str) -> Option<Expr> {
-        if let Ok((remain, opr1)) = alt((a_term, a_number)).parse_next(input.trim_start()) {
-            if let Ok((_, (op, opr2))) = a_modifier(remain.trim_start()) {
+    fn parse1(input: &mut &str) -> Option<Expr> {
+        let input = &mut input.trim_start();
+        if let Ok(opr1) = alt((a_term, a_number)).parse_next(input) {
+            if let Ok((op, opr2)) = a_modifier(input) {
                 Some(Expr::BIOP(op, Box::new(opr1), Box::new(opr2)))
             } else {
                 Some(opr1)
             }
         } else {
+            dbg!(input);
             None
         }
     }
-    fn parse2(input: &str) -> Option<Expr> {
-        if let Ok((_, e)) = terms(input.trim_start()) {
+    fn parse2(input: &mut &str) -> Option<Expr> {
+        if let Ok(e) = terms(input) {
             Some(e)
         } else {
             None
@@ -121,103 +125,102 @@ impl Expr {
     }
 }
 
-fn a_number(input: &str) -> IResult<&str, Expr> {
-    let (remain, num): (&str, i64) = dec_int.parse_next(input)?;
-    Ok((remain, Expr::NUM(num as isize)))
+fn a_number(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let num: i64 = dec_int.parse_next(input)?;
+    Ok(Expr::NUM(num as isize))
 }
 
-fn an_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+*-/").parse_next(input)?;
-    Ok((
-        remain,
-        match op {
-            '+' => Op::ADD,
-            '*' => Op::MUL,
-            '-' => Op::SUB,
-            '/' => Op::DIV,
-            _ => panic!(""),
-        },
-    ))
+fn an_operator(input: &mut &str) -> PResult<Op> {
+    let _ = space0(input)?;
+    let op = one_of(['+', '*', '-', '/']).parse_next(input)?;
+    Ok(match op {
+        '+' => Op::ADD,
+        '*' => Op::MUL,
+        '-' => Op::SUB,
+        '/' => Op::DIV,
+        _ => panic!(""),
+    })
 }
 
-fn a_term(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = tag("(").parse_next(input)?;
-    let (remain, term) = an_expr.parse_next(remain)?;
-    let (remain, _) = tag(")").parse_next(remain)?;
-    Ok((remain, Expr::TERM(Box::new(term))))
+fn a_term(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let _ = literal("(").parse_next(input)?;
+    let term = an_expr.parse_next(input)?;
+    let _ = literal(")").parse_next(input)?;
+    Ok(Expr::TERM(Box::new(term)))
 }
 
-fn an_expr(input: &str) -> IResult<&str, Expr> {
-    let (remain, opr1) = alt((a_term, a_number)).parse_next(input.trim_start())?;
-    if let Ok((remain, (op, opr2))) = a_modifier(remain.trim_start()) {
-        Ok((
-            remain.trim_start(),
-            Expr::BIOP(op, Box::new(opr1), Box::new(opr2)),
-        ))
+fn an_expr(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let opr1 = alt((a_term, a_number)).parse_next(input)?;
+    if let Ok((op, opr2)) = a_modifier(input) {
+        Ok(Expr::BIOP(op, Box::new(opr1), Box::new(opr2)))
     } else {
-        Ok((remain, opr1))
+        Ok(opr1)
     }
 }
 
-fn a_modifier(str: &str) -> IResult<&str, (Op, Expr)> {
-    let (remain, op) = an_operator(str.trim_start())?;
-    let (remain, opr) = an_expr(remain.trim_start())?;
-    Ok((remain, (op, opr)))
+fn a_modifier(input: &mut &str) -> PResult<(Op, Expr)> {
+    let _ = space0(input)?;
+    let op = an_operator(input)?;
+    let opr = an_expr(input)?;
+    Ok((op, opr))
 }
 
 // part 2
 
-fn subexpr(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = tag("(").parse_next(input)?;
-    let (remain, term) = an_expr2(remain)?;
-    let (remain, _) = tag(")").parse_next(remain)?;
-    Ok((remain, Expr::TERM(Box::new(term))))
+fn subexpr(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let _ = literal("(").parse_next(input)?;
+    let term = an_expr2(input)?;
+    let _ = literal(")").parse_next(input)?;
+    Ok(Expr::TERM(Box::new(term)))
 }
 
-fn an_factor_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+-").parse_next(input)?;
-    Ok((
-        remain,
-        match op {
-            '+' => Op::ADD,
-            '-' => Op::SUB,
-            _ => unreachable!(""),
-        },
-    ))
+fn an_factor_operator(input: &mut &str) -> PResult<Op> {
+    let _ = space0(input)?;
+    let op = one_of(['+', '-']).parse_next(input)?;
+    Ok(match op {
+        '+' => Op::ADD,
+        '-' => Op::SUB,
+        _ => unreachable!(""),
+    })
 }
 
-fn an_term_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("*/").parse_next(input)?;
-    Ok((
-        remain,
-        match op {
-            '*' => Op::MUL,
-            '/' => Op::DIV,
-            _ => unreachable!(""),
-        },
-    ))
+fn an_term_operator(input: &mut &str) -> PResult<Op> {
+    let _ = space0(input)?;
+    let op = one_of(['*', '/']).parse_next(input)?;
+    Ok(match op {
+        '*' => Op::MUL,
+        '/' => Op::DIV,
+        _ => unreachable!(""),
+    })
 }
 
-fn factors(input: &str) -> IResult<&str, Expr> {
-    let (remain, l) = alt((subexpr, a_number)).parse_next(input.trim_start())?;
-    if let Ok((remain, op)) = an_factor_operator(remain.trim_start()) {
-        let (remain, r) = factors(remain.trim_start())?;
-        Ok((remain, Expr::BIOP(op, Box::new(l), Box::new(r))))
+fn factors(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let l = alt((subexpr, a_number)).parse_next(input)?;
+    if let Ok(op) = an_factor_operator(input) {
+        let r = factors(input)?;
+        Ok(Expr::BIOP(op, Box::new(l), Box::new(r)))
     } else {
-        Ok((remain, l))
+        Ok(l)
     }
 }
 
-fn terms(input: &str) -> IResult<&str, Expr> {
-    let (remain, l) = factors(input.trim_start())?;
-    if let Ok((remain, op)) = an_term_operator(remain.trim_start()) {
-        let (remain, r) = terms(remain.trim_start())?;
-        Ok((remain, Expr::BIOP(op, Box::new(l), Box::new(r))))
+fn terms(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    let l = factors(input)?;
+    if let Ok(op) = an_term_operator(input) {
+        let r = terms(input)?;
+        Ok(Expr::BIOP(op, Box::new(l), Box::new(r)))
     } else {
-        Ok((remain, l))
+        Ok(l)
     }
 }
 
-fn an_expr2(input: &str) -> IResult<&str, Expr> {
-    terms(input.trim_start())
+fn an_expr2(input: &mut &str) -> PResult<Expr> {
+    let _ = space0(input)?;
+    terms.parse_next(input)
 }
