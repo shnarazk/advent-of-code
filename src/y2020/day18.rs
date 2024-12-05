@@ -175,7 +175,7 @@ fn subexpr(input: &str) -> IResult<&str, Expr> {
 }
 
 fn an_factor_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+*-/")(input)?;
+    let (remain, op) = one_of("+-")(input)?;
     Ok((
         remain,
         match op {
@@ -187,7 +187,7 @@ fn an_factor_operator(input: &str) -> IResult<&str, Op> {
 }
 
 fn an_term_operator(input: &str) -> IResult<&str, Op> {
-    let (remain, op) = one_of("+*-/")(input)?;
+    let (remain, op) = one_of("*/")(input)?;
     Ok((
         remain,
         match op {
