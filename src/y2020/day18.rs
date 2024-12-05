@@ -1,7 +1,12 @@
 //! <https://adventofcode.com/2020/day/18>
 use {
     crate::framework::{aoc_at, AdventOfCode, ParseError},
-    nom::{branch::alt, character::complete::*, combinator::*, multi::many1, IResult},
+    winnow::{
+        branch::alt,
+        bytes::{one_of, tag},
+        character::dec_int,
+        IResult,
+    },
 };
 
 #[allow(clippy::upper_case_acronyms)]
@@ -117,25 +122,28 @@ impl Expr {
 }
 
 fn a_number(input: &str) -> IResult<&str, Expr> {
-    map_res(recognize(many1(one_of("0123456789"))), |out: &str| {
-        out.parse::<isize>().map(Expr::NUM)
-    })(input)
+    let (remain, num): (&str, i64) = dec_int(input)?;
+    Ok((remain, Expr::NUM(num as isize)))
 }
 
 fn an_operator(input: &str) -> IResult<&str, Op> {
-    map_res(one_of("+*-/"), |c: char| match c {
-        '+' => Ok(Op::ADD),
-        '*' => Ok(Op::MUL),
-        '-' => Ok(Op::SUB),
-        '/' => Ok(Op::DIV),
-        _ => Err(""),
-    })(input)
+    let (remain, op) = one_of("+*-/")(input)?;
+    Ok((
+        remain,
+        match op {
+            '+' => Op::ADD,
+            '*' => Op::MUL,
+            '-' => Op::SUB,
+            '/' => Op::DIV,
+            _ => panic!(""),
+        },
+    ))
 }
 
 fn a_term(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = char('(')(input)?;
+    let (remain, _) = tag("(")(input)?;
     let (remain, term) = an_expr(remain)?;
-    let (remain, _) = char(')')(remain)?;
+    let (remain, _) = tag(")")(remain)?;
     Ok((remain, Expr::TERM(Box::new(term))))
 }
 
@@ -160,30 +168,34 @@ fn a_modifier(str: &str) -> IResult<&str, (Op, Expr)> {
 // part 2
 
 fn subexpr(input: &str) -> IResult<&str, Expr> {
-    let (remain, _) = char('(')(input)?;
+    let (remain, _) = tag("(")(input)?;
     let (remain, term) = an_expr2(remain)?;
-    let (remain, _) = char(')')(remain)?;
+    let (remain, _) = tag(")")(remain)?;
     Ok((remain, Expr::TERM(Box::new(term))))
 }
 
 fn an_factor_operator(input: &str) -> IResult<&str, Op> {
-    map_res(one_of("+*-/"), |c: char| match c {
-        //        '*' => Ok(Op::MUL),
-        //        '/' => Ok(Op::DIV),
-        '+' => Ok(Op::ADD),
-        '-' => Ok(Op::SUB),
-        _ => Err(""),
-    })(input)
+    let (remain, op) = one_of("+*-/")(input)?;
+    Ok((
+        remain,
+        match op {
+            '+' => Op::ADD,
+            '-' => Op::SUB,
+            _ => unreachable!(""),
+        },
+    ))
 }
 
 fn an_term_operator(input: &str) -> IResult<&str, Op> {
-    map_res(one_of("+*-/"), |c: char| match c {
-        '*' => Ok(Op::MUL),
-        '/' => Ok(Op::DIV),
-        //        '+' => Ok(Op::ADD),
-        //        '-' => Ok(Op::SUB),
-        _ => Err(""),
-    })(input)
+    let (remain, op) = one_of("+*-/")(input)?;
+    Ok((
+        remain,
+        match op {
+            '*' => Op::MUL,
+            '/' => Op::DIV,
+            _ => unreachable!(""),
+        },
+    ))
 }
 
 fn factors(input: &str) -> IResult<&str, Expr> {
