@@ -80,6 +80,20 @@ def Input.xmas_wn (self : Input) (p : Int × Int) : Nat :=
       && self.plane.get? (p.1 - 3, p.2 - 3) == some 'S'
     |> asNat
 
+-- #eval ['z', 'c'].mergeSort
+def Input.mas_1 (self : Input) (p : Int × Int) : Bool :=
+  let o := self.plane.getD p 'P'
+  let a := self.plane.getD (p.1 - 1, p.2 - 1) 'P'
+  let b := self.plane.getD (p.1 + 1, p.2 + 1) 'P'
+  o == 'A' && [a, b].mergeSort == ['M', 'S']
+
+--
+def Input.mas_2 (self : Input) (p : Int × Int) : Bool :=
+  let o := self.plane.getD p 'P'
+  let a := self.plane.getD (p.1 - 1, p.2 + 1) 'P'
+  let b := self.plane.getD (p.1 + 1, p.2 - 1) 'P'
+  o == 'A' && [a, b].mergeSort == ['M', 'S']
+
 namespace parser
 
 open AoCParser
@@ -116,7 +130,8 @@ end Part1
 
 namespace Part2
 
-def solve (input : Input) : Nat := input.plane.toList.length
+def solve (input : Input) : Nat :=
+  input.plane.toList.filter (fun (p, _) ↦ input.mas_1 p && input.mas_2 p) |>.length
 
 end Part2
 
