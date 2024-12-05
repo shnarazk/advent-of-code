@@ -1,11 +1,13 @@
 //! <https://adventofcode.com/2022/day/13>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
-        branch::alt, bytes::complete::tag, character::complete::digit1, multi::separated_list0,
-        IResult,
-    },
     std::cmp::Ordering,
+    winnow::{
+        ascii::dec_uint,
+        combinator::{alt, separated},
+        token::literal,
+        PResult, Parser,
+    },
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -14,20 +16,20 @@ enum Expr {
     Array(Vec<Expr>),
 }
 
-fn parse_expr_num(input: &str) -> IResult<&str, Expr> {
-    let (a, b) = digit1(input)?;
-    Ok((a, Expr::Num(b.parse::<usize>().unwrap())))
+fn parse_expr_num(input: &mut &str) -> PResult<Expr> {
+    let a: u64 = dec_uint.parse_next(input)?;
+    Ok(Expr::Num(a as usize))
 }
 
-fn parse_expr_array(input: &str) -> IResult<&str, Expr> {
-    let (v, _) = tag("[")(input)?;
-    let (e, b) = separated_list0(tag(","), parse_expr)(v)?;
-    let (r, _) = tag("]")(e)?;
-    Ok((r, Expr::Array(b)))
+fn parse_expr(input: &mut &str) -> PResult<Expr> {
+    alt((parse_expr_array, parse_expr_num)).parse_next(input)
 }
 
-fn parse_expr(input: &str) -> IResult<&str, Expr> {
-    alt((parse_expr_array, parse_expr_num))(input)
+fn parse_expr_array(input: &mut &str) -> PResult<Expr> {
+    let _ = literal("[").parse_next(input)?;
+    let e = separated(0.., parse_expr, literal(",")).parse_next(input)?;
+    let _ = literal("]").parse_next(input)?;
+    Ok(Expr::Array(e))
 }
 
 impl PartialOrd for Expr {
@@ -74,10 +76,10 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut lines = block.split('\n');
+        let mut lines = block.split('\n').collect::<Vec<_>>();
         self.line.push((
-            parse_expr(lines.next().unwrap()).expect("!!!!").1,
-            parse_expr(lines.next().unwrap()).expect("!!!!").1,
+            parse_expr(&mut lines[0]).expect("!!!!"),
+            parse_expr(&mut lines[1]).expect("!!!!"),
         ));
         Ok(())
     }

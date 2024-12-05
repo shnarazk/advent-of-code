@@ -2,14 +2,13 @@
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     itertools::Itertools,
-    nom::{
-        character::complete::{newline, space1, u64},
-        multi::many1,
-        sequence::{pair, terminated},
-        IResult,
-    },
     serde::Serialize,
     std::collections::HashMap,
+    winnow::{
+        ascii::{dec_uint, newline, space1},
+        combinator::{repeat, terminated},
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -17,14 +16,18 @@ pub struct Puzzle {
     line: Vec<(u64, u64)>,
 }
 
-fn parse(str: &str) -> IResult<&str, Vec<(u64, u64)>> {
-    many1(pair(terminated(u64, space1), terminated(u64, newline)))(str)
+fn parse(str: &mut &str) -> PResult<Vec<(u64, u64)>> {
+    repeat(
+        0..,
+        (terminated(dec_uint, space1), terminated(dec_uint, newline)),
+    )
+    .parse_next(str)
 }
 
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(input.as_str())?.1;
+        self.line = parse(&mut input.as_str())?;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {

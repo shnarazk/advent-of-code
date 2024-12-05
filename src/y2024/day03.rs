@@ -1,15 +1,13 @@
 //! <https://adventofcode.com/2024/day/3>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
-    nom::{
-        branch::alt,
-        bytes::complete::tag,
-        character::complete::{anychar, u64},
-        multi::many1,
-        sequence::{delimited, pair, preceded, terminated},
-        IResult,
-    },
     serde::Serialize,
+    winnow::{
+        ascii::dec_uint,
+        combinator::{alt, delimited, preceded, repeat, terminated},
+        token::{any, literal},
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -24,38 +22,42 @@ enum Inst {
     Mul(u64, u64),
 }
 
-fn parse_inst0(str: &str) -> IResult<&str, Inst> {
-    let (remain, _) = tag("do()")(str)?;
-    Ok((remain, Inst::Do))
+fn parse_inst0(str: &mut &str) -> PResult<Inst> {
+    let _ = literal("do()").parse_next(str)?;
+    Ok(Inst::Do)
 }
 
-fn parse_inst1(str: &str) -> IResult<&str, Inst> {
-    let (remain, _) = tag("don't()")(str)?;
-    Ok((remain, Inst::Dont))
+fn parse_inst1(str: &mut &str) -> PResult<Inst> {
+    let _ = literal("don't()").parse_next(str)?;
+    Ok(Inst::Dont)
 }
 
-fn parse_inst2(str: &str) -> IResult<&str, Inst> {
-    let (remain, mul) =
-        delimited(tag("mul("), pair(terminated(u64, tag(",")), u64), tag(")"))(str)?;
-    Ok((remain, Inst::Mul(mul.0, mul.1)))
+fn parse_inst2(str: &mut &str) -> PResult<Inst> {
+    let mul = delimited(
+        literal("mul("),
+        (terminated(dec_uint, literal(",")), dec_uint),
+        literal(")"),
+    )
+    .parse_next(str)?;
+    Ok(Inst::Mul(mul.0, mul.1))
 }
 
-fn parse_inst(str: &str) -> IResult<&str, Inst> {
-    alt((parse_inst0, parse_inst1, parse_inst2))(str)
+fn parse_inst(str: &mut &str) -> PResult<Inst> {
+    alt((parse_inst0, parse_inst1, parse_inst2)).parse_next(str)
 }
 
-fn parse_aux(str: &str) -> IResult<&str, Inst> {
-    alt((parse_inst, preceded(anychar, parse_aux)))(str)
+fn parse_aux(str: &mut &str) -> PResult<Inst> {
+    alt((parse_inst, preceded(any, parse_aux))).parse_next(str)
 }
 
-fn parse(str: &str) -> IResult<&str, Vec<Inst>> {
-    many1(parse_aux)(str)
+fn parse(str: &mut &str) -> PResult<Vec<Inst>> {
+    repeat(0.., parse_aux).parse_next(str)
 }
 
 #[aoc(2024, 3)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(input.as_str())?.1;
+        self.line = parse(&mut input.as_str())?;
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {

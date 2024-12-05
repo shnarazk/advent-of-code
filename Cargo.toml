@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode"
-version = "0.24.0"
+version = "0.24.1"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
 default-run = "adventofcode"
@@ -11,20 +11,19 @@ aoc_macro = { version = "^0.2", path = "aoc_macro" }
 clap = { version = "^4.5", features = ["derive"] }
 itertools = { version = "^0.13", optional = true }
 md-5 = { version = "0.10", optional = true }
-nom = { version = "^7.1", optional = true, features = ["alloc"] }
 regex = { version = "^1.11", optional = true }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = { version = "^1.0" }
 splr = { version = "^0.17", optional = true }
+winnow = { version = "^0.6", optional = true }
 
 [features]
-default = ["y2024"]
-# default = ["y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
-y2024 = ["itertools", "nom"]
-y2023 = ["itertools", "nom"]
-y2022 = ["nom", "regex"]
-y2021 = ["regex"]
-y2020 = ["nom", "regex", "splr"]
+default = ["y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
+y2024 = ["itertools", "winnow"]
+y2023 = ["itertools", "regex", "winnow"]
+y2022 = ["regex", "winnow"]
+y2021 = ["itertools", "regex"]
+y2020 = ["regex", "splr", "winnow"]
 y2019 = ["regex"]
 y2018 = ["regex"]
 y2017 = ["regex"]

@@ -87,8 +87,9 @@ impl std::convert::From<std::num::ParseIntError> for ParseError {
     }
 }
 
-impl<T> std::convert::From<nom::Err<T>> for ParseError {
-    fn from(_: nom::Err<T>) -> Self {
+#[cfg(any(feature = "y2024", feature = "y2023",))]
+impl<T> std::convert::From<winnow::error::ErrMode<T>> for ParseError {
+    fn from(_: winnow::error::ErrMode<T>) -> Self {
         ParseError
     }
 }

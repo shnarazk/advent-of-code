@@ -4,14 +4,13 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         math,
     },
-    nom::{
-        bytes::complete::tag,
-        character::complete::{alphanumeric1, newline},
-        multi::separated_list1,
-        sequence::terminated,
-        IResult,
-    },
     std::collections::HashMap,
+    winnow::{
+        ascii::{alphanumeric1, newline},
+        combinator::{separated, terminated},
+        token::literal,
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default)]
@@ -20,30 +19,28 @@ pub struct Puzzle {
     line: HashMap<String, (String, String)>,
 }
 
-fn parse_header(input: &str) -> IResult<&str, String> {
-    let (remain1, label) = terminated(alphanumeric1, tag("\n\n"))(input)?;
-    Ok((remain1, label.to_string()))
+fn parse_header(input: &mut &str) -> PResult<String> {
+    let label = terminated(alphanumeric1, literal("\n\n")).parse_next(input)?;
+    Ok(label.to_string())
 }
 
 // fn parse(str: &str) -> IResult<&str, Data>;
-fn parse_block(input: &str) -> IResult<&str, (String, (String, String))> {
-    let (remain1, label) = terminated(alphanumeric1, tag(" = ("))(input)?;
-    let (remain2, child1) = terminated(alphanumeric1, tag(", "))(remain1)?;
-    let (remain3, child2) = terminated(alphanumeric1, tag(")"))(remain2)?;
-    Ok((
-        remain3,
-        (label.to_string(), (child1.to_string(), child2.to_string())),
-    ))
+fn parse_block(input: &mut &str) -> PResult<(String, (String, String))> {
+    let label = terminated(alphanumeric1, literal(" = (")).parse_next(input)?;
+    let child1 = terminated(alphanumeric1, literal(", ")).parse_next(input)?;
+    let child2 = terminated(alphanumeric1, literal(")")).parse_next(input)?;
+    Ok((label.to_string(), (child1.to_string(), child2.to_string())))
 }
 
 #[aoc(2023, 8)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let str = input.as_str();
-        let (remain1, label) = parse_header(str)?;
+        let str = &mut input.as_str();
+        let label = parse_header(str)?;
         self.head = label.chars().collect::<Vec<_>>();
-        let (_, v) = separated_list1(newline, parse_block)(remain1)?;
+        let v: Vec<(String, (String, String))> =
+            separated(1.., parse_block, newline).parse_next(str)?;
         self.line = v
             .iter()
             .cloned()
