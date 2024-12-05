@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2024/day/X>
+//! <https://adventofcode.com/2024/day/9>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -30,7 +30,7 @@ pub struct Puzzle {
 
 // fn parse(str: &muut &str) -> PResult<()> {}
 
-#[aoc(2024, X)]
+#[aoc(2024, 9)]
 impl AdventOfCode for Puzzle {
     // const DELIMITER: &'static str = "\n";
     // fn parse(&mut self, input: String) -> Result<String, ParseError> {
