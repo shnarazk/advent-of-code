@@ -1,18 +1,12 @@
 //! <https://adventofcode.com/2024/day/5>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
     std::collections::{HashMap, HashSet},
     winnow::{
-        ascii::{alpha1, alphanumeric1, dec_uint, digit1, newline},
-        combinator::{repeat_till, separated, separated_pair, terminated},
-        token::{any, literal, take},
+        ascii::{dec_uint, newline},
+        combinator::{repeat_till, separated},
+        token::literal,
         PResult, Parser,
     },
 };
@@ -60,11 +54,6 @@ impl AdventOfCode for Puzzle {
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let orders = self
-            .rules
-            .iter()
-            .cloned()
-            .collect::<HashSet<(usize, usize)>>();
         self.updates
             .iter()
             .filter(|v| {
@@ -83,11 +72,6 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let orders = self
-            .rules
-            .iter()
-            .cloned()
-            .collect::<HashSet<(usize, usize)>>();
         self.updates
             .iter()
             .filter(|v| {
@@ -103,7 +87,7 @@ impl AdventOfCode for Puzzle {
                 })
             })
             .map(|v| {
-                let w = dbg!(bubble_sort(&self.rules, (*v).clone()));
+                let w = bubble_sort(&self.rules, (*v).clone());
                 w[w.len() / 2]
             })
             .sum()
@@ -114,12 +98,12 @@ fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> 
     let uppers = rules
         .iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
-        .map(|(a, b)| *b)
+        .map(|(_, b)| *b)
         .collect::<HashSet<usize>>();
     let lowers = rules
         .iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
-        .map(|(a, b)| *a)
+        .map(|(a, _)| *a)
         .collect::<HashSet<usize>>();
     let mut cands = lowers
         .iter()
@@ -127,7 +111,6 @@ fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> 
         .cloned()
         .collect::<Vec<_>>();
     if cands.is_empty() {
-        dbg!(&lowers);
         return lowers.iter().cloned().collect::<Vec<_>>();
     } else {
         assert_eq!(1, cands.len());
