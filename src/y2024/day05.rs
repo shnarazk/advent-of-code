@@ -65,7 +65,6 @@ impl AdventOfCode for Puzzle {
             .iter()
             .cloned()
             .collect::<HashSet<(usize, usize)>>();
-        dbg!(&orders);
         self.updates
             .iter()
             .filter(|v| {
@@ -84,6 +83,60 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let orders = self
+            .rules
+            .iter()
+            .cloned()
+            .collect::<HashSet<(usize, usize)>>();
+        self.updates
+            .iter()
+            .filter(|v| {
+                let occurs = v
+                    .iter()
+                    .enumerate()
+                    .map(|(i, k)| (*k, i))
+                    .collect::<HashMap<usize, usize>>();
+                !self.rules.iter().all(|(a, b)| {
+                    let i = occurs.get(a);
+                    let j = occurs.get(b);
+                    i == None || j == None || i < j
+                })
+            })
+            .map(|v| {
+                let w = dbg!(bubble_sort(&self.rules, (*v).clone()));
+                w[w.len() / 2]
+            })
+            .sum()
+    }
+}
+
+fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> {
+    let uppers = rules
+        .iter()
+        .filter(|(a, b)| context.contains(a) && context.contains(b))
+        .map(|(a, b)| *b)
+        .collect::<HashSet<usize>>();
+    let lowers = rules
+        .iter()
+        .filter(|(a, b)| context.contains(a) && context.contains(b))
+        .map(|(a, b)| *a)
+        .collect::<HashSet<usize>>();
+    let mut cands = lowers
+        .iter()
+        .filter(|x| !uppers.contains(&x))
+        .cloned()
+        .collect::<Vec<_>>();
+    if cands.is_empty() {
+        dbg!(&lowers);
+        return lowers.iter().cloned().collect::<Vec<_>>();
+    } else {
+        assert_eq!(1, cands.len());
+        cands.truncate(1);
+        context.retain(|n| *n != cands[0]);
+        if !context.is_empty() {
+            let mut tmp = bubble_sort(rules, context);
+            cands.append(&mut tmp);
+        }
+        cands
     }
 }
