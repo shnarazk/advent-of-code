@@ -1,13 +1,14 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2024.Day04
 
 open Accumulation CiCL
+abbrev HashMap := Std.HashMap
 
 structure Input where
+  line: Array String
 deriving BEq, Repr
 
 instance : ToString Input where toString _ := s!""
@@ -18,9 +19,17 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def parse_line : Parser String := alphabets
+-- #eval AoCParser.parse alphabets "eocb\n"
+
+def parse_lines := sepBy1 parse_line eol
+-- #eval AoCParser.parse parse_lines "eocb\nABC\n"
+
 def parse : String → Option Input := AoCParser.parse parser
-  where
-    parser : Parser Input := return Input.mk
+  where parser := do
+    let v ← parse_lines
+    return Input.mk v
+-- #eval parse "ABC\nXYZ"
 
 end parser
 
