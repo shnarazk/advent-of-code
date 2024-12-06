@@ -59,7 +59,7 @@ end Part1
 
 namespace Part2
 
-partial def bubbleSort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
+partial def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
   let uppers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.2)
   let lowers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.1)
   let cands := lowers.filter (fun n ↦ !uppers.contains n)
@@ -67,7 +67,7 @@ partial def bubbleSort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
          |>.toArray
   match cands with
    | #[] => l
-    | #[top] => [top].append (bubbleSort rules (l.filter (· != top)))
+    | #[top] => [top].append (topologySort rules (l.filter (· != top)))
     | _ => panic! s!"impossible {cands}"
 
 def solve (input : Input) : Nat :=
@@ -78,7 +78,7 @@ def solve (input : Input) : Nat :=
           let i := occurs.get? a
           let j := occurs.get? b
           i == none || j == none || (i.unwrapOr 0) < (j.unwrapOr 0)))
-    |>.map (bubbleSort input.rules ·.toList)
+    |>.map (topologySort input.rules ·.toList)
     |>.map (fun l ↦ l[l.length / 2]!)
     |> sum
 
