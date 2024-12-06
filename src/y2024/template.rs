@@ -11,8 +11,8 @@ use {
     std::collections::HashMap,
     winnow::{
         ascii::{dec_uint, newline},
-        combinator::{repeat_till, separated},
-        token::literal,
+        combinator::{repeat, repeat_till, separated},
+        token::{literal, one_of},
         PResult, Parser,
     },
 };
@@ -28,7 +28,7 @@ pub struct Puzzle {
 //     }
 // }
 
-// fn parse(str: &muut &str) -> PResult<()> {}
+// fn parse(str: &mut &str) -> PResult<()> {}
 
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {

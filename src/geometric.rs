@@ -1,5 +1,7 @@
 //! misc functions about 2D/3D computation
 
+use serde::Serialize;
+
 pub trait GeometricMath {
     type BaseType;
     type Vector;
@@ -32,7 +34,7 @@ pub trait GeometricRotation {
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Direction {
     #[default]
     NORTH,
