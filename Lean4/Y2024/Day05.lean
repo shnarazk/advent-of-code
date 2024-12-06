@@ -59,7 +59,28 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+partial def bubbleSort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
+  let uppers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.2)
+  let lowers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.1)
+  let cands := lowers.filter (fun n ↦ !uppers.contains n)
+         |> (Std.HashSet.ofArray ·)
+         |>.toArray
+  match cands with
+   | #[] => l
+    | #[top] => [top].append (bubbleSort rules (l.filter (· != top)))
+    | _ => panic! s!"impossible {cands}"
+
+def solve (input : Input) : Nat :=
+  input.updates.toList.filter
+      (fun v ↦
+        let occurs := v.toList.enum.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
+        !input.rules.all (fun (a, b) ↦
+          let i := occurs.get? a
+          let j := occurs.get? b
+          i == none || j == none || (i.unwrapOr 0) < (j.unwrapOr 0)))
+    |>.map (bubbleSort input.rules ·.toList)
+    |>.map (fun l ↦ l[l.length / 2]!)
+    |> sum
 
 end Part2
 
