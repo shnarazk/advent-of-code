@@ -1,7 +1,4 @@
 //! <https://adventofcode.com/2024/day/6>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -10,9 +7,9 @@ use {
     serde::Serialize,
     std::collections::HashSet,
     winnow::{
-        ascii::{dec_uint, newline},
-        combinator::{repeat, repeat_till, separated},
-        token::{literal, one_of},
+        ascii::newline,
+        combinator::{repeat, separated},
+        token::one_of,
         PResult, Parser,
     },
 };
