@@ -48,11 +48,7 @@ pub struct Puzzle {
 impl Puzzle {
     fn next_pos(&mut self) -> Option<Vec2> {
         let p = self.guard.0.add(&self.guard.1.as_vec2());
-        if (0..self.size.0).contains(&p.0) && (0..self.size.1).contains(&p.1) {
-            Some(p)
-        } else {
-            None
-        }
+        ((0..self.size.0).contains(&p.0) && (0..self.size.1).contains(&p.1)).then_some(p)
     }
     fn turn(&mut self) {
         self.guard.1 = self.guard.1.turn_right();
@@ -129,12 +125,13 @@ impl AdventOfCode for Puzzle {
                 if self.hash.contains(&p) {
                     self.turn();
                     pos = self.next_pos();
-                    if let Some(p) = pos {
-                        if self.hash.contains(&p) {
-                            self.turn();
-                            pos = self.next_pos();
-                        }
-                    }
+                    // there's no chains of obstructions.
+                    // if let Some(p) = pos {
+                    //     if self.hash.contains(&p) {
+                    //         self.turn();
+                    //         pos = self.next_pos();
+                    //     }
+                    // }
                 }
             }
         }
@@ -145,12 +142,7 @@ impl AdventOfCode for Puzzle {
         me.part1();
         me.trail
             .iter()
-            .filter(|p| {
-                if self.guard.0 == **p {
-                    return false;
-                }
-                self.clone().is_loop(**p)
-            })
+            .filter(|p| self.guard.0 != **p && self.clone().is_loop(**p))
             .count()
     }
 }
