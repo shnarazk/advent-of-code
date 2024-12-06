@@ -5,7 +5,7 @@ use {
         geometric::*,
     },
     serde::Serialize,
-    std::collections::HashSet,
+    std::collections::{HashMap, HashSet},
     winnow::{
         ascii::newline,
         combinator::{repeat, separated},
@@ -36,10 +36,10 @@ fn kind_from(c: &char) -> Kind {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     mapping: Vec<Vec<char>>,
-    hash: HashSet<(isize, isize)>,
+    hash: HashSet<Vec2>,
     guard: (Vec2, Direction),
-    size: (isize, isize),
-    trail: HashSet<Vec2>,
+    size: Vec2,
+    trail: HashMap<Vec2, Option<(Vec2, Direction)>>,
 }
 
 impl Puzzle {
@@ -50,9 +50,10 @@ impl Puzzle {
     fn turn(&mut self) {
         self.guard.1 = self.guard.1.turn_right();
     }
-    fn is_loop(&mut self, pos: Vec2) -> bool {
+    fn is_loop(&mut self, pos: Vec2, pre: (Vec2, Direction)) -> bool {
         self.hash.insert(pos);
         let mut trail: HashSet<(Vec2, Direction)> = HashSet::new();
+        self.guard = pre;
         let mut pos = Some(self.guard.0);
         while let Some(p) = pos {
             self.guard.0 = p;
@@ -71,6 +72,7 @@ impl Puzzle {
                             pos = self.next_pos();
                         }
                     }
+                    // There is no possibility of U-shaped obstructions!
                 }
             }
         }
@@ -114,9 +116,9 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pos = Some(self.guard.0);
+        self.trail.insert(self.guard.0, None);
         while let Some(p) = pos {
             self.guard.0 = p;
-            self.trail.insert(self.guard.0);
             pos = self.next_pos();
             if let Some(p) = pos {
                 if self.hash.contains(&p) {
@@ -131,6 +133,11 @@ impl AdventOfCode for Puzzle {
                     // }
                 }
             }
+            if let Some(p) = pos {
+                if !self.trail.contains_key(&p) {
+                    self.trail.insert(p, Some(self.guard));
+                }
+            }
         }
         self.trail.len()
     }
@@ -139,7 +146,7 @@ impl AdventOfCode for Puzzle {
         me.part1();
         me.trail
             .iter()
-            .filter(|p| self.guard.0 != **p && self.clone().is_loop(**p))
+            .filter(|(p, pre)| pre.map_or(false, |pre| self.clone().is_loop(**p, pre)))
             .count()
     }
 }
