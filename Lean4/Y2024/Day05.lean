@@ -1,16 +1,17 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2024.Day05
 
 open Accumulation CiCL
 
 structure Input where
+  rules : Array (Nat × Nat)
+  updates : Array (Array Nat)
 deriving BEq, Repr
 
-instance : ToString Input where toString _ := s!""
+instance : ToString Input where toString self := s!"{self.rules.size}/{self.updates.size}"
 
 namespace parser
 
@@ -18,15 +19,41 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def prule := do
+  let a ← number <* pchar '|'
+  let b ← number
+  return (a,b)
+-- #eval AoCParser.parse prule "34|12"
+
+def prules := do endBy (prule <* eol) eol
+-- #eval AoCParser.parse prules "1|2\n3|5\n\n"
+
+def pupdate := do sepBy1 number (pchar ',')
+
+def pupdates := do sepBy1 pupdate eol
+-- #eval AoCParser.parse pupdates "1 2 4\n5 6 9\n4 2"
+
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := return Input.mk
+    parser : Parser Input := do
+      let rs ← prules
+      let us ← pupdates
+      return Input.mk rs us
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (input : Input) : Nat :=
+  input.updates.toList.filter
+      (fun v ↦
+        let occurs := v.toList.enum.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
+        input.rules.all (fun (a, b) ↦
+          let i := occurs.get? a
+          let j := occurs.get? b
+          i == none || j == none || (i.unwrapOr 0) < (j.unwrapOr 0)))
+    |>.map (fun l ↦ l[l.size / 2]!)
+    |> sum
 
 end Part1
 
@@ -36,9 +63,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2024 05
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 05 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day05
