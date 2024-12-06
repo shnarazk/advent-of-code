@@ -36,12 +36,13 @@ fn kind_from(c: &char) -> Kind {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     mapping: Vec<Vec<char>>,
     hash: HashSet<(isize, isize)>,
     guard: (Vec2, Direction),
     size: (isize, isize),
+    trail: HashSet<Vec2>,
 }
 
 impl Puzzle {
@@ -55,6 +56,32 @@ impl Puzzle {
     }
     fn turn(&mut self) {
         self.guard.1 = self.guard.1.turn_right();
+    }
+    fn is_loop(&mut self, pos: Vec2) -> bool {
+        self.hash.insert(pos);
+        let mut trail: HashSet<(Vec2, Direction)> = HashSet::new();
+        let mut pos = Some(self.guard.0);
+        while let Some(p) = pos {
+            self.guard.0 = p;
+            if trail.contains(&self.guard) {
+                return true;
+            }
+            trail.insert(self.guard);
+            pos = self.next_pos();
+            if let Some(p) = pos {
+                if self.hash.contains(&p) {
+                    self.turn();
+                    pos = self.next_pos();
+                    if let Some(p) = pos {
+                        if self.hash.contains(&p) {
+                            self.turn();
+                            pos = self.next_pos();
+                        }
+                    }
+                }
+            }
+        }
+        false
     }
 }
 
@@ -93,11 +120,10 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut trail: HashSet<Vec2> = HashSet::new();
         let mut pos = Some(self.guard.0);
         while let Some(p) = pos {
             self.guard.0 = p;
-            trail.insert(self.guard.0);
+            self.trail.insert(self.guard.0);
             pos = self.next_pos();
             if let Some(p) = pos {
                 if self.hash.contains(&p) {
@@ -112,9 +138,19 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        trail.len()
+        self.trail.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut me = self.clone();
+        me.part1();
+        me.trail
+            .iter()
+            .filter(|p| {
+                if self.guard.0 == **p {
+                    return false;
+                }
+                self.clone().is_loop(**p)
+            })
+            .count()
     }
 }
