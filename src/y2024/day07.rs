@@ -40,26 +40,45 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|(val, v)| if expands(v).contains(val) { *val } else { 0 })
+            .map(|(val, v)| {
+                if expands(v, *val).contains(val) {
+                    *val
+                } else {
+                    0
+                }
+            })
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            .map(|(val, v)| if expands2(v).contains(val) { *val } else { 0 })
+            .map(|(val, v)| {
+                if expands2(v, *val).contains(val) {
+                    *val
+                } else {
+                    0
+                }
+            })
             .sum()
     }
 }
 
-fn expands(vec: &[usize]) -> HashSet<usize> {
-    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
+fn expands(vec: &[usize], threshold: usize) -> HashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>, threshold: usize) -> HashSet<usize> {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
                 vec,
                 subs.iter()
-                    .flat_map(|x| [*x + a, *x * a])
+                    .flat_map(|x| {
+                        [*x + a, *x * a]
+                            .iter()
+                            .filter(|v| **v <= threshold)
+                            .cloned()
+                            .collect::<Vec<_>>()
+                    })
                     .collect::<HashSet<usize>>(),
+                threshold,
             )
         } else {
             subs
@@ -68,10 +87,10 @@ fn expands(vec: &[usize]) -> HashSet<usize> {
     let mut args: Vec<usize> = vec.to_vec();
     let mut temp: HashSet<usize> = HashSet::new();
     temp.insert(args.remove(0));
-    exp(args, temp)
+    exp(args, temp, threshold)
 }
 
-fn expands2(vec: &[usize]) -> HashSet<usize> {
+fn expands2(vec: &[usize], threshold: usize) -> HashSet<usize> {
     fn shift(a: usize, b: usize, b0: usize) -> usize {
         if b0 < 10 {
             a * 10 + b
@@ -79,14 +98,21 @@ fn expands2(vec: &[usize]) -> HashSet<usize> {
             shift(a * 10, b, b0 / 10)
         }
     }
-    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>, threshold: usize) -> HashSet<usize> {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
                 vec,
                 subs.iter()
-                    .flat_map(|x| [*x + a, *x * a, shift(*x, a, a)])
+                    .flat_map(|x| {
+                        [*x + a, *x * a, shift(*x, a, a)]
+                            .iter()
+                            .filter(|v| **v <= threshold)
+                            .cloned()
+                            .collect::<Vec<_>>()
+                    })
                     .collect::<HashSet<usize>>(),
+                threshold,
             )
         } else {
             subs
@@ -95,5 +121,5 @@ fn expands2(vec: &[usize]) -> HashSet<usize> {
     let mut args: Vec<usize> = vec.to_vec();
     let mut temp: HashSet<usize> = HashSet::new();
     temp.insert(args.remove(0));
-    exp(args, temp)
+    exp(args, temp, threshold)
 }
