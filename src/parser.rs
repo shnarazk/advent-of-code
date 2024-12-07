@@ -21,39 +21,25 @@ fn parse_usize(str: &mut &str) -> PResult<usize> {
 /// If delimiter is '\t', then the real delimiter becomes `&[' ', '\t', ',']`
 /// ```
 /// use adventofcode::{framework::ParseError, parser};
-/// assert_eq!(parser::to_usizes("0,1,8,9", ','), Ok(vec![0, 1, 8, 9]));
-/// assert_eq!(parser::to_usizes("100 200", ' '), Ok(vec![100, 200]));
-/// assert_eq!(parser::to_usizes("100  200  300", '\n'), Ok(vec![100, 200, 300]));
-/// assert_eq!(parser::to_usizes("100, 200   300", '\t'), Ok(vec![100, 200, 300]));
-/// assert_eq!(parser::to_usizes("", ','), Err(ParseError));
+/// assert_eq!(parser::to_usizes("0,1,8,9", &[',']), Ok(vec![0, 1, 8, 9]));
+/// assert_eq!(parser::to_usizes("100 200", &[' ']), Ok(vec![100, 200]));
+/// assert_eq!(parser::to_usizes("100  200  300", &[' ']), Ok(vec![100, 200, 300]));
+/// assert_eq!(parser::to_usizes("100, 200   300", &[',', ' ']), Ok(vec![100, 200, 300]));
+/// assert_eq!(parser::to_usizes("", &[',']), Err(ParseError));
 /// ```
-pub fn to_usizes(line: &str, delimiter: char) -> Result<Vec<usize>, ParseError> {
-    fn parse(s: &mut &str, delimiter: char) -> PResult<Vec<usize>> {
+pub fn to_usizes(line: &str, delimiters: &[char]) -> Result<Vec<usize>, ParseError> {
+    fn parse(s: &mut &str, delimiters: &[char]) -> PResult<Vec<usize>> {
         let _ = space0.parse_next(s)?;
-        match delimiter {
-            '\n' => Ok(separated(
-                1..,
-                parse_usize,
-                repeat(1.., one_of([' ', '\t'])).fold(|| (), |_, _| ()),
-            )
-            .parse_next(s)?),
-            '\t' => Ok(separated(
-                1..,
-                parse_usize,
-                repeat(1.., one_of([' ', '\t', ','])).fold(|| (), |_, _| ()),
-            )
-            .parse_next(s)?),
-            _ => Ok(separated(
-                1..,
-                parse_usize,
-                repeat(1.., one_of([delimiter])).fold(|| (), |_, _| ()),
-            )
-            .parse_next(s)?),
-        }
+        Ok(separated(
+            1..,
+            parse_usize,
+            repeat(1.., one_of(delimiters)).fold(|| (), |_, _| ()),
+        )
+        .parse_next(s)?)
     }
     let s = line.to_string();
     let p = &mut s.as_str();
-    Ok(parse(p, delimiter)?)
+    Ok(parse(p, delimiters)?)
 }
 
 /*
