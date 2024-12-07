@@ -4,7 +4,7 @@ use {
     crate::{
         // color,
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
         regex,
     },
     std::collections::HashMap,
@@ -33,8 +33,7 @@ impl AdventOfCode for Puzzle {
         Ok(data.to_string())
     }
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(line_parser::to_usizes_spliting_with(block, &[' ', ','])?);
+        self.line.push(parser::to_usizes(block, &[' ', ','])?);
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -74,19 +73,19 @@ impl Puzzle {
                 let parser = regex!(r"^Before: \[([0-9, ]+)\]$");
                 let segment = parser.captures(block).ok_or(ParseError)?;
                 debug_assert!(self.input_buffer.is_empty());
-                let v = line_parser::to_usizes_spliting_with(&segment[1], &[' ', ','])?;
+                let v = parser::to_usizes(&segment[1], &[' ', ','])?;
                 self.input_buffer.push([v[0], v[1], v[2], v[3]]);
                 self.input_mode = 1;
             }
             1 => {
-                let v = line_parser::to_usizes_spliting_with(block, &[' ', ','])?;
+                let v = parser::to_usizes(block, &[' ', ','])?;
                 self.input_buffer.push([v[0], v[1], v[2], v[3]]);
                 self.input_mode = 2;
             }
             2 => {
                 let parser = regex!(r"^After:  \[([0-9, ]+)\]$");
                 let segment = parser.captures(block).ok_or(ParseError)?;
-                let v = line_parser::to_usizes_spliting_with(&segment[1], &[' ', ','])?;
+                let v = parser::to_usizes(&segment[1], &[' ', ','])?;
                 let t2 = [v[0], v[1], v[2], v[3]];
                 let t1 = self.input_buffer.pop().unwrap();
                 let t0 = self.input_buffer.pop().unwrap();
