@@ -60,9 +60,6 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         let mut reg: [usize; 2] = [0, 0];
         let mut pc = 0;
@@ -79,22 +76,21 @@ impl AdventOfCode for Puzzle {
                     reg[*r as usize] += 1;
                 }
                 Inst::Jmp(o) => {
-                    pc += (o - 1) as usize;
+                    pc = (pc as isize + o - 1) as usize;
                 }
                 Inst::Jie(r, o) => {
                     if reg[*r as usize] % 2 == 0 {
-                        pc += (o - 1) as usize;
+                        pc = (pc as isize + o - 1) as usize;
                     }
                 }
                 Inst::Jio(r, o) => {
                     if reg[*r as usize] == 1 {
-                        pc += (o - 1) as usize;
+                        pc = (pc as isize + o - 1) as usize;
                     }
                 }
             }
             pc += 1;
         }
-        // dbg!(&reg);
         reg[1]
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -113,16 +109,16 @@ impl AdventOfCode for Puzzle {
                     reg[*r as usize] += 1;
                 }
                 Inst::Jmp(o) => {
-                    pc += (o - 1) as usize;
+                    pc = (pc as isize + o - 1) as usize;
                 }
                 Inst::Jie(r, o) => {
                     if reg[*r as usize] % 2 == 0 {
-                        pc += (o - 1) as usize;
+                        pc = (pc as isize + o - 1) as usize;
                     }
                 }
                 Inst::Jio(r, o) => {
                     if reg[*r as usize] == 1 {
-                        pc += (o - 1) as usize;
+                        pc = (pc as isize + o - 1) as usize;
                     }
                 }
             }
