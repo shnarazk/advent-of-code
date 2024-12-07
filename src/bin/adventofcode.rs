@@ -114,7 +114,9 @@ fn bench(config: ConfigAoC) {
                 2022 => aoc_arms!(2022),
                 #[cfg(feature = "y2023")]
                 2023 => aoc_arms!(2023),
-                _ => println!("invalid year: {}", config.year),
+                #[cfg(feature = "y2024")]
+                2024 => aoc_arms!(2024, 14),
+                _ => println!("invalid year for benchmark: {}", config.year),
             }
             let end = Instant::now();
             progress!(format!(
