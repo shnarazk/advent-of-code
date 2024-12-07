@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     std::{
         collections::{HashMap, VecDeque},
@@ -169,7 +169,7 @@ impl Add for Location {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = line_parser::to_isizes(block, ',')?;
+        self.line = parser::to_isizes(block, &[','])?;
         Ok(())
     }
     fn end_of_data(&mut self) {
