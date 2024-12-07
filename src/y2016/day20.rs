@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     std::collections::HashSet,
 };
@@ -16,7 +16,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let input = line_parser::to_usizes(block, '-')?;
+        let input = parser::to_usizes(block, &['-'])?;
         self.line.push((input[0], input[1]));
         Ok(())
     }

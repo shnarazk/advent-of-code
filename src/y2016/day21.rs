@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/21>
 use crate::{
     framework::{aoc_at, AdventOfCode, ParseError},
-    line_parser, regex,
+    parser, regex,
 };
 use std::collections::VecDeque;
 
@@ -32,8 +32,8 @@ impl AdventOfCode for Puzzle {
         let rule4 = regex!(r"move position (\d+) to position (\d+)");
         let rule5 = regex!(r"rotate based on position of letter ([[:alpha:]])");
         if let Some(segment) = rule0.captures(block) {
-            let arg1 = line_parser::to_usize(&segment[1])?;
-            let arg2 = line_parser::to_usize(&segment[2])?;
+            let arg1 = parser::to_usize(&segment[1])?;
+            let arg2 = parser::to_usize(&segment[2])?;
             self.line.push(OpCode::Swap0(arg1, arg2));
         }
         if let Some(segment) = rule1.captures(block) {
@@ -42,17 +42,17 @@ impl AdventOfCode for Puzzle {
             self.line.push(OpCode::Swap1(arg1 as u8, arg2 as u8));
         }
         if let Some(segment) = rule2.captures(block) {
-            let arg1 = line_parser::to_usize(&segment[1])?;
-            let arg2 = line_parser::to_usize(&segment[2])?;
+            let arg1 = parser::to_usize(&segment[1])?;
+            let arg2 = parser::to_usize(&segment[2])?;
             self.line.push(OpCode::Reverse(arg1, arg2));
         }
         if let Some(segment) = rule3.captures(block) {
-            let arg = line_parser::to_usize(&segment[2])?;
+            let arg = parser::to_usize(&segment[2])?;
             self.line.push(OpCode::Rotate0(segment[1] == *"right", arg));
         }
         if let Some(segment) = rule4.captures(block) {
-            let arg1 = line_parser::to_usize(&segment[1])?;
-            let arg2 = line_parser::to_usize(&segment[2])?;
+            let arg1 = parser::to_usize(&segment[1])?;
+            let arg2 = parser::to_usize(&segment[2])?;
             self.line.push(OpCode::Move(arg1, arg2));
         }
         if let Some(segment) = rule5.captures(block) {
