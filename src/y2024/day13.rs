@@ -28,7 +28,7 @@ pub struct Puzzle {
 //     }
 // }
 
-// fn parse(str: &muut &str) -> PResult<()> {}
+// fn parse(str: &mut &str) -> PResult<()> {}
 
 #[aoc(2024, 13)]
 impl AdventOfCode for Puzzle {

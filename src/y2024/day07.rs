@@ -8,9 +8,9 @@ use {
         geometric::neighbors,
     },
     serde::Serialize,
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
     winnow::{
-        ascii::{dec_uint, newline},
+        ascii::{dec_uint, newline, space1},
         combinator::{repeat_till, separated},
         token::literal,
         PResult, Parser,
@@ -19,7 +19,7 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(usize, Vec<usize>)>,
 }
 
 // impl Default for Puzzle {
@@ -28,34 +28,55 @@ pub struct Puzzle {
 //     }
 // }
 
-// fn parse(str: &muut &str) -> PResult<()> {}
+fn parse_usize(str: &mut &str) -> PResult<usize> {
+    let a: u64 = dec_uint.parse_next(str)?;
+    Ok(a as usize)
+}
+
+fn parse_line(str: &mut &str) -> PResult<(usize, Vec<usize>)> {
+    let (head, _): (u64, &str) = (dec_uint, ": ").parse_next(str)?;
+    let v: Vec<usize> = separated(1.., parse_usize, " ").parse_next(str)?;
+    Ok((head as usize, v))
+}
+
+fn parse(str: &mut &str) -> PResult<Vec<(usize, Vec<usize>)>> {
+    separated(1.., parse_line, newline).parse_next(str)
+}
 
 #[aoc(2024, 7)]
 impl AdventOfCode for Puzzle {
-    // const DELIMITER: &'static str = "\n";
-    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     // Ok("".to_string())
-    //     Ok(segment[2].to_string())
-    // }
-    // fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    //     dbg!(block);
-    //     // let parser = regex!(r"^(\d+)$");
-    //     // let segment = parser.captures(block).ok_or(ParseError)?;
-    //     // self.line.push(segment[1].parse::<_>());
-    //     Ok(())
-    // }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let p = &mut input.as_str();
+        self.line = parse(p)?;
+        Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        1
+        self.line
+            .iter()
+            .map(|(val, v)| if expands(v).contains(&val) { *val } else { 0 })
+            .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         2
     }
+}
+
+fn expands(vec: &[usize]) -> HashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
+        if let Some(&a) = vec.get(0) {
+            vec.remove(0);
+            exp(
+                vec,
+                subs.iter()
+                    .flat_map(|x| [a + *x, a * *x])
+                    .collect::<HashSet<usize>>(),
+            )
+        } else {
+            subs
+        }
+    }
+    let mut args: Vec<usize> = vec.to_vec();
+    let mut temp: HashSet<usize> = HashSet::new();
+    temp.insert(args.remove(0));
+    exp(args, temp)
 }
