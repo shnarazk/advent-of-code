@@ -26,8 +26,6 @@ pub mod y2023;
 pub mod y2024;
 
 #[cfg(any(
-    feature = "y2022",
-    feature = "y2021",
     feature = "y2020",
     feature = "y2019",
     feature = "y2018",
@@ -41,7 +39,8 @@ pub mod line_parser;
     feature = "y2024",
     feature = "y2023",
     feature = "y2022",
-    feature = "y2021"
+    feature = "y2021",
+    feature = "y2020",
 ))]
 pub mod parser;
 

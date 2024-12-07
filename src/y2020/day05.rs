@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/5>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, PartialEq)]
 pub struct Puzzle {
@@ -26,7 +23,7 @@ impl AdventOfCode for Puzzle {
         if block.is_empty() {
             return Ok(());
         }
-        let chs = line_parser::to_chars(block)?;
+        let chs = block.chars().collect::<Vec<char>>();
         let row = chs[..7]
             .iter()
             .map(|c| (*c == 'B') as usize)

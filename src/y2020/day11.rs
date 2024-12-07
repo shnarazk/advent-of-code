@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/11>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Puzzle {
@@ -14,7 +11,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.data.push(line_parser::to_chars(block)?);
+        self.data.push(block.chars().collect::<Vec<char>>());
         Ok(())
     }
     fn part1(&mut self) -> usize {
