@@ -1,18 +1,11 @@
 //! <https://adventofcode.com/2024/day/7>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
-    std::collections::{HashMap, HashSet},
+    std::collections::HashSet,
     winnow::{
-        ascii::{dec_uint, newline, space1},
-        combinator::{repeat_till, separated},
-        token::literal,
+        ascii::{dec_uint, newline},
+        combinator::separated,
         PResult, Parser,
     },
 };
@@ -21,12 +14,6 @@ use {
 pub struct Puzzle {
     line: Vec<(usize, Vec<usize>)>,
 }
-
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
 
 fn parse_usize(str: &mut &str) -> PResult<usize> {
     let a: u64 = dec_uint.parse_next(str)?;
@@ -53,20 +40,20 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|(val, v)| if expands(v).contains(&val) { *val } else { 0 })
+            .map(|(val, v)| if expands(v).contains(val) { *val } else { 0 })
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            .map(|(val, v)| if expands2(v).contains(&val) { *val } else { 0 })
+            .map(|(val, v)| if expands2(v).contains(val) { *val } else { 0 })
             .sum()
     }
 }
 
 fn expands(vec: &[usize]) -> HashSet<usize> {
     fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
-        if let Some(&a) = vec.get(0) {
+        if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
                 vec,
@@ -93,7 +80,7 @@ fn expands2(vec: &[usize]) -> HashSet<usize> {
         }
     }
     fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
-        if let Some(&a) = vec.get(0) {
+        if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
                 vec,

@@ -135,8 +135,8 @@ impl AdventOfCode for Puzzle {
                 }
             }
             if let Some(p) = pos {
-                if !self.trail.contains_key(&p) {
-                    self.trail.insert(p, Some(self.guard));
+                if let std::collections::hash_map::Entry::Vacant(e) = self.trail.entry(p) {
+                    e.insert(Some(self.guard));
                 }
             }
         }
