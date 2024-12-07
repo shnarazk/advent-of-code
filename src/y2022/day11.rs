@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2022/day/11>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    line_parser, regex,
+    parser, regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
         if let Some(segment) = parser.captures(block) {
             self.line.push(Monkey {
                 id: segment[1].parse::<usize>()?,
-                items: line_parser::to_usizes(&segment[2], '\t')?,
+                items: parser::to_usizes(&segment[2], &[' ', ','])?,
                 operation: (&segment[3] == "*", segment[4].parse::<usize>().ok()),
                 test: segment[5].parse::<usize>()?,
                 test_then: segment[6].parse::<usize>()?,
