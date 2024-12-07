@@ -15,8 +15,13 @@ pub fn parse_usize(str: &mut &str) -> PResult<usize> {
 }
 
 pub fn parse_isize(str: &mut &str) -> PResult<isize> {
+    let flag: Vec<char> = repeat(0.., '-').parse_next(str)?;
     let a: i64 = dec_int.parse_next(str)?;
-    Ok(a as isize)
+    Ok(if flag.len() % 2 == 0 {
+        a as isize
+    } else {
+        -(a as isize)
+    })
 }
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
@@ -45,34 +50,12 @@ pub fn to_usizes(line: &str, delimiters: &[char]) -> Result<Vec<usize>, ParseErr
     Ok(parse(p, delimiters)?)
 }
 
-/*
-/// Sprit and parse a line like '0, 1, 2, 3, 40' with delimiter `&[',', ' ']`.
-/// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_usizes_spliting_with("100  200  300", &[' ']), Ok(vec![100, 200, 300]));
-/// assert_eq!(line_parser::to_usizes_spliting_with("100, 200, 300", &[',', ' ']), Ok(vec![100, 200, 300]));
-/// ```
-pub fn to_usizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<usize>, ParseError> {
-    let result = line
-        .trim()
-        .split(delimiter)
-        .filter(|s| !s.is_empty())
-        .map(|n| n.parse::<usize>().expect("An invalid input as usize"))
-        .collect::<Vec<_>>();
-    if result.is_empty() {
-        Err(ParseError)
-    } else {
-        Ok(result)
-    }
-}
-*/
-
 /// parse a line like '312'
 /// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_isize("-0189"), Ok(-189));
-/// assert_eq!(line_parser::to_isize("0"), Ok(0));
-/// assert_eq!(line_parser::to_isize("448"), Ok(448));
+/// use adventofcode::{framework::ParseError, parser};
+/// assert_eq!(parser::to_usize("-189"), Err(ParseError));
+/// assert_eq!(parser::to_usize("0"), Ok(0));
+/// assert_eq!(parser::to_usize("448"), Ok(448));
 /// ```
 pub fn to_usize(line: &str) -> Result<usize, ParseError> {
     let s = line.to_string();
@@ -82,10 +65,10 @@ pub fn to_usize(line: &str) -> Result<usize, ParseError> {
 
 /// parse a line like '-312'
 /// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_isize("-0189"), Ok(-0189));
-/// assert_eq!(line_parser::to_isize("0"), Ok(0));
-/// assert_eq!(line_parser::to_isize("448"), Ok(448));
+/// use adventofcode::{framework::ParseError, parser};
+/// assert_eq!(parser::to_isize("-189"), Ok(-189));
+/// assert_eq!(parser::to_isize("0"), Ok(0));
+/// assert_eq!(parser::to_isize("448"), Ok(448));
 /// ```
 pub fn to_isize(line: &str) -> Result<isize, ParseError> {
     let s = line.to_string();
@@ -117,62 +100,12 @@ pub fn to_isizes(line: &str, delimiters: &[char]) -> Result<Vec<isize>, ParseErr
     Ok(parse(p, delimiters)?)
 }
 
-// pub fn to_isizes(line: &str, delimiter: char) -> Result<Vec<isize>, ParseError> {
-//     let result = match delimiter {
-//         '\n' => line
-//             .trim()
-//             .split(&[' ', '\t'])
-//             .filter(|s| !s.is_empty())
-//             .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
-//             .collect::<Vec<_>>(),
-//         '\t' => line
-//             .trim()
-//             .split(&[' ', '\t', ','])
-//             .filter(|s| !s.is_empty())
-//             .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
-//             .collect::<Vec<_>>(),
-//         _ => line
-//             .trim()
-//             .split(delimiter)
-//             .filter(|s| !s.is_empty())
-//             .map(|n| n.parse::<isize>().expect("An invalid input as isize"))
-//             .collect::<Vec<_>>(),
-//     };
-//     if result.is_empty() {
-//         Err(ParseError)
-//     } else {
-//         Ok(result)
-//     }
-// }
-
-/*
-/// Sprit and parse a line like '0, -1, 2, -3, 40' with delimiter `&[',', ' ']`.
-/// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_isizes_spliting_with("-1  2  -3", &[' ']), Ok(vec![-1, 2, -3]));
-/// assert_eq!(line_parser::to_isizes_spliting_with("-1, 2, -3", &[',', ' ']), Ok(vec![-1, 2, -3]));
-/// ```
-pub fn to_isizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<isize>, ParseError> {
-    let result = line
-        .trim()
-        .split(delimiter)
-        .filter(|s| !s.is_empty())
-        .map(|n| n.parse::<isize>().expect("An invalid input as usize"))
-        .collect::<Vec<_>>();
-    if result.is_empty() {
-        Err(ParseError)
-    } else {
-        Ok(result)
-    }
-}
-*/
-
 /// parse a line like '01234' after trimming it
 /// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_digits("0189"), Ok(vec![0, 1, 8, 9]));
-/// assert_eq!(line_parser::to_digits("0"), Ok(vec![0]));
-/// assert_eq!(line_parser::to_digits(""), Err(ParseError));
+/// use adventofcode::{framework::ParseError, parser};
+/// assert_eq!(parser::to_digits("0189"), Ok(vec![0, 1, 8, 9]));
+/// assert_eq!(parser::to_digits("0"), Ok(vec![0]));
+/// assert_eq!(parser::to_digits(""), Err(ParseError));
 /// ```
 pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
     fn parse(s: &mut &str) -> PResult<Vec<usize>> {
@@ -188,10 +121,10 @@ pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
 
 /// parse a line like '010101010' after trimming it
 /// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_binaries("0"), Ok(vec![false]));
-/// assert_eq!(line_parser::to_binaries("0011"), Ok(vec![false, false, true, true]));
-/// assert_eq!(line_parser::to_binaries(""), Err(ParseError));
+/// use adventofcode::{framework::ParseError, parser};
+/// assert_eq!(parser::to_binaries("0"), Ok(vec![false]));
+/// assert_eq!(parser::to_binaries("0011"), Ok(vec![false, false, true, true]));
+/// assert_eq!(parser::to_binaries(""), Err(ParseError));
 /// ```
 pub fn to_binaries(line: &str) -> Result<Vec<bool>, ParseError> {
     fn parse(s: &mut &str) -> PResult<Vec<bool>> {
@@ -202,16 +135,3 @@ pub fn to_binaries(line: &str) -> Result<Vec<bool>, ParseError> {
     let p = &mut s.as_str();
     Ok(parse(p)?)
 }
-
-/*
-/// parse a line like 'ewnswss' after trimming it
-/// ```
-/// use adventofcode::{framework::ParseError, line_parser};
-/// assert_eq!(line_parser::to_chars("0"), Ok(vec!['0']));
-/// assert_eq!(line_parser::to_chars("0aA-"), Ok(vec!['0', 'a', 'A', '-']));
-/// assert_eq!(line_parser::to_chars(""), Ok(vec![]));
-/// ```
-pub fn to_chars(line: &str) -> Result<Vec<char>, ParseError> {
-    Ok(line.trim().chars().collect::<Vec<_>>())
-}
-*/
