@@ -15,13 +15,8 @@ pub fn parse_usize(str: &mut &str) -> PResult<usize> {
 }
 
 pub fn parse_isize(str: &mut &str) -> PResult<isize> {
-    let flag: Vec<char> = repeat(0.., '-').parse_next(str)?;
     let a: i64 = dec_int.parse_next(str)?;
-    Ok(if flag.len() % 2 == 0 {
-        a as isize
-    } else {
-        -(a as isize)
-    })
+    Ok(a as isize)
 }
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
