@@ -57,7 +57,10 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .map(|(val, v)| if expands2(v).contains(&val) { *val } else { 0 })
+            .sum()
     }
 }
 
@@ -68,7 +71,34 @@ fn expands(vec: &[usize]) -> HashSet<usize> {
             exp(
                 vec,
                 subs.iter()
-                    .flat_map(|x| [a + *x, a * *x])
+                    .flat_map(|x| [*x + a, *x * a])
+                    .collect::<HashSet<usize>>(),
+            )
+        } else {
+            subs
+        }
+    }
+    let mut args: Vec<usize> = vec.to_vec();
+    let mut temp: HashSet<usize> = HashSet::new();
+    temp.insert(args.remove(0));
+    exp(args, temp)
+}
+
+fn expands2(vec: &[usize]) -> HashSet<usize> {
+    fn shift(a: usize, b: usize, b0: usize) -> usize {
+        if b0 < 10 {
+            a * 10 + b
+        } else {
+            shift(a * 10, b, b0 / 10)
+        }
+    }
+    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>) -> HashSet<usize> {
+        if let Some(&a) = vec.get(0) {
+            vec.remove(0);
+            exp(
+                vec,
+                subs.iter()
+                    .flat_map(|x| [*x + a, *x * a, shift(*x, a, a)])
                     .collect::<HashSet<usize>>(),
             )
         } else {
