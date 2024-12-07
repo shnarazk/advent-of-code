@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/15>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    line_parser, regex,
+    parser, regex,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -29,11 +29,11 @@ impl AdventOfCode for Puzzle {
         let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push(Ingredient {
             name: segment[1].to_string(),
-            capacity: line_parser::to_isize(&segment[2])?,
-            durability: line_parser::to_isize(&segment[3])?,
-            flavor: line_parser::to_isize(&segment[4])?,
-            texture: line_parser::to_isize(&segment[5])?,
-            calories: line_parser::to_isize(&segment[6])?,
+            capacity: parser::to_isize(&segment[2])?,
+            durability: parser::to_isize(&segment[3])?,
+            flavor: parser::to_isize(&segment[4])?,
+            texture: parser::to_isize(&segment[5])?,
+            calories: parser::to_isize(&segment[6])?,
         });
         Ok(())
     }

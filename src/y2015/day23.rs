@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/23>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    line_parser, regex,
+    parser, regex,
 };
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -30,29 +30,25 @@ impl AdventOfCode for Puzzle {
         let jie = regex!(r"^jie ([ab]), ([+-]?[0-9]+)$");
         let jio = regex!(r"^jio ([ab]), ([+-]?[0-9]+)$");
         if let Ok(segment) = hlf.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Hlf(
-                line_parser::to_chars(&segment[1])?[0] as u8 - b'a',
-            ));
-        } else if let Ok(segment) = tpl.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Tpl(
-                line_parser::to_chars(&segment[1])?[0] as u8 - b'a',
-            ));
-        } else if let Ok(segment) = inc.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Inc(
-                line_parser::to_chars(&segment[1])?[0] as u8 - b'a',
-            ));
-        } else if let Ok(segment) = jmp.captures(block).ok_or(ParseError) {
             self.line
-                .push(Inst::Jmp(line_parser::to_isize(&segment[1])?));
+                .push(Inst::Hlf(segment[1].chars().next().unwrap() as u8 - b'a'));
+        } else if let Ok(segment) = tpl.captures(block).ok_or(ParseError) {
+            self.line
+                .push(Inst::Tpl(segment[1].chars().next().unwrap() as u8 - b'a'));
+        } else if let Ok(segment) = inc.captures(block).ok_or(ParseError) {
+            self.line
+                .push(Inst::Inc(segment[1].chars().next().unwrap() as u8 - b'a'));
+        } else if let Ok(segment) = jmp.captures(block).ok_or(ParseError) {
+            self.line.push(Inst::Jmp(parser::to_isize(&segment[1])?));
         } else if let Ok(segment) = jie.captures(block).ok_or(ParseError) {
             self.line.push(Inst::Jie(
-                line_parser::to_chars(&segment[1])?[0] as u8 - b'a',
-                line_parser::to_isize(&segment[2])?,
+                segment[1].chars().next().unwrap() as u8 - b'a',
+                parser::to_isize(&segment[2])?,
             ));
         } else if let Ok(segment) = jio.captures(block).ok_or(ParseError) {
             self.line.push(Inst::Jio(
-                line_parser::to_chars(&segment[1])?[0] as u8 - b'a',
-                line_parser::to_isize(&segment[2])?,
+                segment[1].chars().next().unwrap() as u8 - b'a',
+                parser::to_isize(&segment[2])?,
             ));
         } else {
             // dbg!(block);

@@ -6,7 +6,7 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        line_parser, regex,
+        parser, regex,
     },
     regex::Regex,
     std::collections::HashMap,
