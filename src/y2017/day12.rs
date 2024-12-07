@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser, regex,
+        parser, regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -21,7 +21,7 @@ impl AdventOfCode for Puzzle {
         let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
             segment[1].parse::<usize>()?,
-            line_parser::to_usizes(&segment[2], '\t')?,
+            parser::to_usizes(&segment[2], &[' ', ','])?,
         ));
         Ok(())
     }

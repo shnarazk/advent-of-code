@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     std::fmt::Write,
 };
@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = line_parser::to_usizes(block, ',')?;
+        self.line = parser::to_usizes(block, &[','])?;
         self.strn = block.trim().to_string();
         Ok(())
     }
