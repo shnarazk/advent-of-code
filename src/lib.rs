@@ -26,16 +26,6 @@ pub mod y2023;
 #[cfg(feature = "y2024")]
 pub mod y2024;
 
-#[cfg(any(
-    feature = "y2020",
-    feature = "y2019",
-    feature = "y2018",
-    feature = "y2017",
-    feature = "y2016",
-    feature = "y2015",
-))]
-pub mod line_parser;
-
 pub use aoc_macro::aoc_arms;
 
 #[cfg(any(
