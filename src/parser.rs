@@ -30,12 +30,12 @@ fn parse_usize(str: &mut &str) -> PResult<usize> {
 pub fn to_usizes(line: &str, delimiters: &[char]) -> Result<Vec<usize>, ParseError> {
     fn parse(s: &mut &str, delimiters: &[char]) -> PResult<Vec<usize>> {
         let _ = space0.parse_next(s)?;
-        Ok(separated(
+        separated(
             1..,
             parse_usize,
             repeat(1.., one_of(delimiters)).fold(|| (), |_, _| ()),
         )
-        .parse_next(s)?)
+        .parse_next(s)
     }
     let s = line.to_string();
     let p = &mut s.as_str();

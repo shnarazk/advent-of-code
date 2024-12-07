@@ -3,7 +3,7 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::Dim3,
-        line_parser,
+        parser,
     },
     std::{cmp::Ordering, collections::HashMap},
 };
@@ -51,7 +51,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let v = block
             .split('~')
-            .map(|s| line_parser::to_usizes(s, ',').unwrap())
+            .map(|s| parser::to_usizes(s, &[',']).unwrap())
             .map(|v| (v[0], v[1], v[2]))
             .collect::<Vec<_>>();
         debug_assert!(v[0].0 <= v[1].0 && v[0].1 <= v[1].1 && v[0].2 <= v[1].2);

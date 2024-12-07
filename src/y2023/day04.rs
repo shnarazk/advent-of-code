@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/4>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
+    parser,
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         let mut vecs: [Vec<usize>; 2] = [Vec::new(), Vec::new()];
         for (i, segment) in block.split(':').nth(1).unwrap().split(" | ").enumerate() {
-            vecs[i] = line_parser::to_usizes(segment, ' ').unwrap();
+            vecs[i] = parser::to_usizes(segment, &[' ']).unwrap();
         }
         self.card.push(vecs);
         self.amount.push(1);

@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     std::{cmp::Ordering, collections::HashMap},
 };
@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
         let mut tuple = (Vec::new(), Vec::new());
         for (i, segment) in block.split(' ').enumerate() {
             if i == 1 {
-                let nums = line_parser::to_usizes(segment, ',').unwrap();
+                let nums = parser::to_usizes(segment, &[',']).unwrap();
                 tuple.1 = nums;
             } else {
                 let vals = segment
