@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser, regex,
+        parser, regex,
     },
     itertools::Itertools,
     std::collections::HashMap,
@@ -25,12 +25,12 @@ impl AdventOfCode for Puzzle {
         let segment = parser.captures(block).ok_or(ParseError)?;
         self.line.push((
             &segment[1] == "on",
-            line_parser::to_isize(&segment[2])?,
-            line_parser::to_isize(&segment[3])?,
-            line_parser::to_isize(&segment[4])?,
-            line_parser::to_isize(&segment[5])?,
-            line_parser::to_isize(&segment[6])?,
-            line_parser::to_isize(&segment[7])?,
+            parser::to_isize(&segment[2])?,
+            parser::to_isize(&segment[3])?,
+            parser::to_isize(&segment[4])?,
+            parser::to_isize(&segment[5])?,
+            parser::to_isize(&segment[6])?,
+            parser::to_isize(&segment[7])?,
         ));
         Ok(())
     }

@@ -1,10 +1,15 @@
 //! misc implementations of string-to-object parsers
 
-#![cfg(any(feature = "y2024", feature = "y2023", feature = "y2022"))]
+#![cfg(any(
+    feature = "y2024",
+    feature = "y2023",
+    feature = "y2022",
+    feature = "y2021"
+))]
 use {
     crate::framework::*,
     winnow::{
-        ascii::{dec_int, dec_uint, space0},
+        ascii::{dec_int, dec_uint, digit1, space0},
         combinator::{repeat, separated},
         token::one_of,
         PResult, Parser,
@@ -67,6 +72,7 @@ pub fn to_usizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<usi
         Ok(result)
     }
 }
+*/
 
 /// parse a line like '312'
 /// ```
@@ -76,11 +82,9 @@ pub fn to_usizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<usi
 /// assert_eq!(line_parser::to_isize("448"), Ok(448));
 /// ```
 pub fn to_usize(line: &str) -> Result<usize, ParseError> {
-    if line.starts_with('-') {
-        Ok(line.trim_matches('-').parse::<usize>()?)
-    } else {
-        Ok(line.parse::<usize>()?)
-    }
+    let s = line.to_string();
+    let p = &mut s.as_str();
+    Ok(parse_usize(p)?)
 }
 
 /// parse a line like '-312'
@@ -91,13 +95,10 @@ pub fn to_usize(line: &str) -> Result<usize, ParseError> {
 /// assert_eq!(line_parser::to_isize("448"), Ok(448));
 /// ```
 pub fn to_isize(line: &str) -> Result<isize, ParseError> {
-    if line.starts_with('-') {
-        Ok(-line.trim_matches('-').parse::<isize>()?)
-    } else {
-        Ok(line.parse::<isize>()?)
-    }
+    let s = line.to_string();
+    let p = &mut s.as_str();
+    Ok(parse_isize(p)?)
 }
-*/
 
 /// parse a line like '0,-1,2,-3,40' (delimiters == &[',']) after trimming it
 /// ```
@@ -171,6 +172,7 @@ pub fn to_isizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<isi
         Ok(result)
     }
 }
+*/
 
 /// parse a line like '01234' after trimming it
 /// ```
@@ -180,28 +182,15 @@ pub fn to_isizes_spliting_with(line: &str, delimiter: &[char]) -> Result<Vec<isi
 /// assert_eq!(line_parser::to_digits(""), Err(ParseError));
 /// ```
 pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
-    let result = line
-        .trim()
-        .chars()
-        .map(|n| match n {
-            '0' => 0,
-            '1' => 1,
-            '2' => 2,
-            '3' => 3,
-            '4' => 4,
-            '5' => 5,
-            '6' => 6,
-            '7' => 7,
-            '8' => 8,
-            '9' => 9,
-            _ => panic!("wrong digit"),
-        })
-        .collect::<Vec<usize>>();
-    if result.is_empty() {
-        Err(ParseError)
-    } else {
-        Ok(result)
+    fn parse(s: &mut &str) -> PResult<Vec<usize>> {
+        let n = digit1.parse_next(s)?;
+        Ok(n.chars()
+            .map(|n| (n as u8 - b'0') as usize)
+            .collect::<Vec<_>>())
     }
+    let s = line.to_string();
+    let p = &mut s.as_str();
+    Ok(parse(p)?)
 }
 
 /// parse a line like '010101010' after trimming it
@@ -212,11 +201,16 @@ pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
 /// assert_eq!(line_parser::to_binaries(""), Err(ParseError));
 /// ```
 pub fn to_binaries(line: &str) -> Result<Vec<bool>, ParseError> {
-    let parser = regex!(r"^[01]+$");
-    let segment = parser.captures(line.trim()).ok_or(ParseError)?;
-    Ok(segment[0].chars().map(|s| s == '1').collect::<Vec<bool>>())
+    fn parse(s: &mut &str) -> PResult<Vec<bool>> {
+        let v: Vec<char> = repeat(1.., one_of(&['0', '1'])).parse_next(s)?;
+        Ok(v.iter().map(|b| *b == '1').collect::<Vec<_>>())
+    }
+    let s = line.to_string();
+    let p = &mut s.as_str();
+    Ok(parse(p)?)
 }
 
+/*
 /// parse a line like 'ewnswss' after trimming it
 /// ```
 /// use adventofcode::{framework::ParseError, line_parser};

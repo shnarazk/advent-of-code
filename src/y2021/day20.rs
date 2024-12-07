@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/20>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    geometric, line_parser,
+    geometric,
 };
 
 #[derive(Debug, Default)]
@@ -20,9 +20,9 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             if first_block {
-                self.enhancer.append(&mut line_parser::to_chars(l)?);
+                self.enhancer.append(&mut l.chars().collect::<Vec<char>>());
             } else {
-                self.image.push(line_parser::to_chars(l)?);
+                self.image.push(l.chars().collect::<Vec<char>>());
             }
         }
         Ok(())

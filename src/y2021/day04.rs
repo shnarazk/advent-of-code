@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     regex::Regex,
     std::borrow::Cow,
@@ -62,7 +62,7 @@ impl AdventOfCode for Puzzle {
             if l.is_empty() {
                 break;
             }
-            vec.push(line_parser::to_usizes(l, ' ')?);
+            vec.push(parser::to_usizes(l, &[' '])?);
         }
         self.board.push(vec);
         Ok(())

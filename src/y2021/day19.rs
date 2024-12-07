@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser,
+        parser,
     },
     std::collections::HashMap,
 };
@@ -234,7 +234,7 @@ impl AdventOfCode for Puzzle {
             if line.is_empty() {
                 continue;
             }
-            let r = line_parser::to_isizes(line, ',')?;
+            let r = parser::to_isizes(line, &[','])?;
             if r.len() == 2 {
                 v.push([r[0], r[1], 0]);
             } else {

@@ -4,7 +4,7 @@ use {
     crate::{
         // color,
         framework::{aoc_at, AdventOfCode, ParseError},
-        line_parser,
+        parser,
         regex,
     },
     std::{cmp::Ordering, fmt, fmt::Write},
@@ -67,7 +67,7 @@ impl AdventOfCode for Puzzle {
             return Ok(());
         } else if let Some(segment) = opl.captures(block) {
             let _reg1 = segment[2].chars().next().unwrap();
-            let val = Opr::Lit(line_parser::to_isize(&segment[3])?);
+            let val = Opr::Lit(parser::to_isize(&segment[3])?);
             self.line.push(match &segment[1] {
                 "add" => Inst::Add(val),
                 "mul" => Inst::Mul,

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/16>
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
-    line_parser,
+    parser,
 };
 
 #[derive(Debug, Default)]
@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
         if block.chars().all(|c| ['0', '1'].contains(&c)) {
-            self.line.push(line_parser::to_binaries(block)?);
+            self.line.push(parser::to_binaries(block)?);
         } else {
             self.line.push(
                 block

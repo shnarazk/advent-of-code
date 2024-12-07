@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        line_parser, progress,
+        progress,
     },
     std::{
         cmp::Reverse,
@@ -119,7 +119,8 @@ const DIST_FROM_ROOM: [[usize; 7]; 4] = [
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.append(&mut line_parser::to_chars(block)?);
+        self.line
+            .append(&mut block.trim().chars().collect::<Vec<char>>());
         Ok(())
     }
     fn end_of_data(&mut self) {
