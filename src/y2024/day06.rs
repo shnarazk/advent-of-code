@@ -4,6 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
     },
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::{HashMap, HashSet},
     winnow::{
@@ -145,7 +146,7 @@ impl AdventOfCode for Puzzle {
         let mut me = self.clone();
         me.part1();
         me.trail
-            .iter()
+            .par_iter()
             .filter(|(p, pre)| pre.map_or(false, |pre| self.clone().is_loop(**p, pre)))
             .count()
     }
