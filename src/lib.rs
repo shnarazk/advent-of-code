@@ -3,6 +3,7 @@ pub mod color;
 pub mod framework;
 pub mod geometric;
 pub mod math;
+pub mod parser;
 
 #[cfg(feature = "y2015")]
 pub mod y2015;
@@ -34,15 +35,6 @@ pub mod y2024;
     feature = "y2015",
 ))]
 pub mod line_parser;
-
-#[cfg(any(
-    feature = "y2024",
-    feature = "y2023",
-    feature = "y2022",
-    feature = "y2021",
-    feature = "y2020",
-))]
-pub mod parser;
 
 pub use aoc_macro::aoc_arms;
 

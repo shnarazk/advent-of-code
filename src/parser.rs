@@ -1,12 +1,4 @@
 //! misc implementations of string-to-object parsers
-
-#![cfg(any(
-    feature = "y2024",
-    feature = "y2023",
-    feature = "y2022",
-    feature = "y2021",
-    feature = "y2020",
-))]
 use {
     crate::framework::*,
     winnow::{
