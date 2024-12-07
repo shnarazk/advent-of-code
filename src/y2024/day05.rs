@@ -1,6 +1,7 @@
 //! <https://adventofcode.com/2024/day/5>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::{HashMap, HashSet},
     winnow::{
@@ -55,7 +56,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.updates
-            .iter()
+            .par_iter()
             .filter(|v| {
                 let occurs = v
                     .iter()
@@ -73,7 +74,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.updates
-            .iter()
+            .par_iter()
             .filter(|v| {
                 let occurs = v
                     .iter()
@@ -87,26 +88,26 @@ impl AdventOfCode for Puzzle {
                 })
             })
             .map(|v| {
-                let w = bubble_sort(&self.rules, (*v).clone());
+                let w = topological_sort(&self.rules, (*v).clone());
                 w[w.len() / 2]
             })
             .sum()
     }
 }
 
-fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> {
+fn topological_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> {
     let uppers = rules
-        .iter()
+        .par_iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
         .map(|(_, b)| *b)
         .collect::<HashSet<usize>>();
     let lowers = rules
-        .iter()
+        .par_iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
         .map(|(a, _)| *a)
         .collect::<HashSet<usize>>();
     let mut cands = lowers
-        .iter()
+        .par_iter()
         .filter(|x| !uppers.contains(x))
         .cloned()
         .collect::<Vec<_>>();
@@ -117,7 +118,7 @@ fn bubble_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<usize> 
         cands.truncate(1);
         context.retain(|n| *n != cands[0]);
         if !context.is_empty() {
-            let mut tmp = bubble_sort(rules, context);
+            let mut tmp = topological_sort(rules, context);
             cands.append(&mut tmp);
         }
         cands

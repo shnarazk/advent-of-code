@@ -1,6 +1,7 @@
 //! <https://adventofcode.com/2024/day/4>
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
@@ -49,7 +50,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.hash
-            .iter()
+            .par_iter()
             .filter(|(_, c)| **c == 'X')
             .map(|(p, _)| {
                 STENCILS
@@ -66,7 +67,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output1 {
         self.hash
-            .iter()
+            .par_iter()
             .filter(|(_, c)| **c == 'A')
             .filter(|(p, _)|
                     {
