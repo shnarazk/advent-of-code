@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2024/day/7>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     serde::Serialize,
     std::collections::HashSet,
     winnow::{
@@ -13,11 +16,6 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<(usize, Vec<usize>)>,
-}
-
-fn parse_usize(str: &mut &str) -> PResult<usize> {
-    let a: u64 = dec_uint.parse_next(str)?;
-    Ok(a as usize)
 }
 
 fn parse_line(str: &mut &str) -> PResult<(usize, Vec<usize>)> {

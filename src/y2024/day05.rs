@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2024/day/5>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     rayon::prelude::*,
     serde::Serialize,
     std::collections::{HashMap, HashSet},
@@ -29,11 +32,6 @@ fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
 fn parse_rules(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
     let (v, _) = repeat_till(1.., parse_rule, newline).parse_next(str)?;
     Ok(v)
-}
-
-fn parse_usize(str: &mut &str) -> PResult<usize> {
-    let a: u64 = dec_uint.parse_next(str)?;
-    Ok(a as usize)
 }
 
 fn parse_update(str: &mut &str) -> PResult<Vec<usize>> {
