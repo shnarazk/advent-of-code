@@ -3,7 +3,7 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, Dim3},
-        line_parser,
+        parser,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -20,11 +20,11 @@ impl AdventOfCode for Puzzle {
         let b = block.split(" @ ").collect::<Vec<&str>>();
         self.line.push((
             {
-                let v = line_parser::to_isizes(b[0], '\t').unwrap();
+                let v = parser::to_isizes(b[0], &[' ', ',']).unwrap();
                 (v[0], v[1], v[2])
             },
             {
-                let v = line_parser::to_isizes(b[1], '\t').unwrap();
+                let v = parser::to_isizes(b[1], &[' ', ',']).unwrap();
                 (v[0], v[1], v[2])
             },
         ));
