@@ -3,7 +3,7 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
 
-abbrev Vec2 := (Int × Int)
+abbrev Vec2 := Int × Int
 
 namespace Y2024.Day06
 
@@ -17,12 +17,19 @@ inductive Dir
 deriving BEq, Repr
 
 namespace Dir
-def turn : Dir -> Dir
+def turn : Dir → Dir
   | Dir.N => Dir.E
   | Dir.E => Dir.S
   | Dir.S => Dir.W
   | Dir.W => Dir.N
-#eval Dir.E.turn
+-- #eval Dir.E.turn
+
+def asVec2 : Dir → Vec2
+  | Dir.N => (-1,  0)
+  | Dir.E => ( 0,  1)
+  | Dir.S => ( 1,  0)
+  | Dir.W => ( 0, -1)
+-- #eval (8, 5) + Dir.N.asVec2
 
 end Dir
 
@@ -38,13 +45,19 @@ instance : ToString Input where toString self := s!"{self.obstruction.toList}"
 
 namespace Input
 
-def turn (self : Input) : Input :=
-  { self with guardDir := self.guardDir.turn }
+def turn (self : Input) : Input := { self with guardDir := self.guardDir.turn }
+
+def moveTo (self : Input) (pos : Vec2) : Input := { self with guardPos := pos }
 
 def includes (self : Input) (pos : Vec2) : Option Vec2 :=
-  if 0 <= pos.1 && pos.1 < self.size.1 && 0 <= pos.2 && self.size.2 < pos.2
+  if 0 ≤ pos.1 && pos.1 < self.size.1 && 0 ≤ pos.2 && pos.2 < self.size.2
     then some pos
     else none
+
+def nextPos (self : Input) : Option Vec2 :=
+  self.includes <| self.guardPos + self.guardDir.asVec2
+
+def isLoop (_self : Input) (_pos : Vec2) : Bool := true
 
 end Input
 
@@ -77,7 +90,19 @@ end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+partial def traceMove (self : Input) (set : Std.HashSet Vec2) :=
+  let set' := set.insert self.guardPos
+  match self.nextPos with
+    | none   => set'.size
+    | some p =>
+      if self.obstruction.contains p
+      then
+        let self' := self.turn
+        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) set'
+      else
+        traceMove (self.moveTo p)      set'
+
+def solve (input : Input) : Nat := traceMove input Std.HashSet.empty
 
 end Part1
 
@@ -87,9 +112,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2024 06
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 06 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day06
