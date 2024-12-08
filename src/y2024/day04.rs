@@ -39,7 +39,7 @@ fn parse(str: &mut &str) -> PResult<Vec<Vec<char>>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (i, l) in self.line.iter().enumerate() {

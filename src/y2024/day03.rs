@@ -6,7 +6,7 @@ use {
     },
     serde::Serialize,
     winnow::{
-        combinator::{alt, delimited, preceded, repeat, terminated},
+        combinator::{alt, preceded, repeat, seq},
         token::any,
         PResult, Parser,
     },
@@ -25,19 +25,18 @@ enum Inst {
 }
 
 fn parse_inst0(str: &mut &str) -> PResult<Inst> {
-    let _ = "do()".parse_next(str)?;
-    Ok(Inst::Do)
+    "do()".map(|_| Inst::Do).parse_next(str)
 }
 
 fn parse_inst1(str: &mut &str) -> PResult<Inst> {
-    let _ = "don't()".parse_next(str)?;
-    Ok(Inst::Dont)
+    "don't()".map(|_| Inst::Dont).parse_next(str)
 }
 
 fn parse_inst2(str: &mut &str) -> PResult<Inst> {
-    let mul =
-        delimited("mul(", (terminated(parse_usize, ","), parse_usize), ")").parse_next(str)?;
-    Ok(Inst::Mul(mul.0, mul.1))
+    seq!(
+        _: "mul(", parse_usize, _: ",", parse_usize, _: ")")
+    .map(|(m1, m2)| Inst::Mul(m1, m2))
+    .parse_next(str)
 }
 
 fn parse_inst(str: &mut &str) -> PResult<Inst> {
@@ -56,7 +55,7 @@ fn parse(str: &mut &str) -> PResult<Vec<Inst>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().fold(0_usize, |accum, inst| match inst {

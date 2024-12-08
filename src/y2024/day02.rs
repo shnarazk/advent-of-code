@@ -32,7 +32,7 @@ fn satisfy(lvls: &[usize]) -> bool {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = repeat(0.., terminated(parse_line, newline)).parse_next(&mut input.as_str())?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().filter(|l| satisfy(l)).count()

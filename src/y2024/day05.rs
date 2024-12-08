@@ -29,18 +29,17 @@ fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
 }
 
 fn parse_rules(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
-    let (v, _) = repeat_till(1.., parse_rule, newline).parse_next(str)?;
-    Ok(v)
+    repeat_till(1.., parse_rule, newline)
+        .map(|(v, _)| v)
+        .parse_next(str)
 }
 
 fn parse_update(str: &mut &str) -> PResult<Vec<usize>> {
-    let v: Vec<usize> = separated(1.., parse_usize, ",").parse_next(str)?;
-    Ok(v)
+    separated(1.., parse_usize, ",").parse_next(str)
 }
 
 fn parse_updates(str: &mut &str) -> PResult<Vec<Vec<usize>>> {
-    let v = separated(1.., parse_update, newline).parse_next(str)?;
-    Ok(v)
+    separated(1.., parse_update, newline).parse_next(str)
 }
 
 #[aoc(2024, 5)]
@@ -49,7 +48,7 @@ impl AdventOfCode for Puzzle {
         let p = &mut input.as_str();
         self.rules = parse_rules(p)?;
         self.updates = parse_updates(p)?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.updates

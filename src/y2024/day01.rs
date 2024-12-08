@@ -9,7 +9,7 @@ use {
     std::collections::HashMap,
     winnow::{
         ascii::{dec_uint, newline, space1},
-        combinator::{repeat, terminated},
+        combinator::{repeat, seq},
         PResult, Parser,
     },
 };
@@ -20,21 +20,14 @@ pub struct Puzzle {
 }
 
 fn parse(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
-    repeat(
-        0..,
-        (
-            terminated(parse_usize, space1),
-            terminated(dec_uint, newline),
-        ),
-    )
-    .parse_next(str)
+    repeat(0.., seq!(parse_usize, _: space1, dec_uint, _: newline)).parse_next(str)
 }
 
 #[aoc(2024, 1)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let l = self

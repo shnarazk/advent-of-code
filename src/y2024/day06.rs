@@ -82,8 +82,7 @@ impl Puzzle {
 }
 
 fn parse_line(input: &mut &str) -> PResult<Vec<char>> {
-    let v = repeat(1.., one_of(['.', '#', '<', '^', '>', 'v'])).parse_next(input)?;
-    Ok(v)
+    repeat(1.., one_of(['.', '#', '<', '^', '>', 'v'])).parse_next(input)
 }
 
 fn parse(input: &mut &str) -> PResult<Vec<Vec<char>>> {
@@ -95,7 +94,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let str = &mut input.as_str();
         self.mapping = parse(str)?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (i, l) in self.mapping.iter().enumerate() {
