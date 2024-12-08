@@ -34,15 +34,13 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         for (i, l) in self.plane.iter().enumerate() {
-            for (j, c) in l.iter().enumerate() {
-                if *c != '.' {
-                    self.antenna.push(((i as isize, j as isize), *c));
+            for (j, &c) in l.iter().enumerate() {
+                if c != '.' {
+                    self.antenna.push(((i as isize, j as isize), c));
                 }
-                self.size.1 = j as isize + 1;
             }
-            self.size.0 = i as isize + 1;
         }
-        dbg!(self.antenna.len());
+        self.size = (self.plane.len() as isize, self.plane[0].len() as isize);
     }
     fn part1(&mut self) -> Self::Output1 {
         for (i, (p, f1)) in self.antenna.iter().enumerate() {
