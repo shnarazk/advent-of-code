@@ -4,6 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         parser::parse_usize,
     },
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::HashSet,
     winnow::{ascii::newline, combinator::separated, PResult, Parser},
@@ -33,7 +34,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
-            .iter()
+            .par_iter()
             .map(|(val, v)| {
                 if expands(v, *val).contains(val) {
                     *val
@@ -45,7 +46,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .iter()
+            .par_iter()
             .map(|(val, v)| {
                 if expands2(v, *val).contains(val) {
                     *val
