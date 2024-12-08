@@ -3,6 +3,8 @@ import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
 
+abbrev Vec2 := (Int × Int)
+
 namespace Y2024.Day06
 
 open Accumulation CiCL
@@ -14,15 +16,37 @@ inductive Dir
   | W
 deriving BEq, Repr
 
+namespace Dir
+def turn : Dir -> Dir
+  | Dir.N => Dir.E
+  | Dir.E => Dir.S
+  | Dir.S => Dir.W
+  | Dir.W => Dir.N
+#eval Dir.E.turn
+
+end Dir
+
 structure Input where
   line : Array (Array Char)
-  obstruction : Std.HashSet (Int × Int)
-  guardPos : (Int × Int)
+  obstruction : Std.HashSet Vec2
+  guardPos : Vec2
   guardDir : Dir
-  size: (Int × Int)
+  size: Vec2
 deriving BEq, Repr
 
 instance : ToString Input where toString self := s!"{self.obstruction.toList}"
+
+namespace Input
+
+def turn (self : Input) : Input :=
+  { self with guardDir := self.guardDir.turn }
+
+def includes (self : Input) (pos : Vec2) : Option Vec2 :=
+  if 0 <= pos.1 && pos.1 < self.size.1 && 0 <= pos.2 && self.size.2 < pos.2
+    then some pos
+    else none
+
+end Input
 
 namespace parser
 
