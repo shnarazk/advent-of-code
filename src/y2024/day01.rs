@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2024/day/1>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     itertools::Itertools,
     serde::Serialize,
     std::collections::HashMap,
@@ -13,13 +16,16 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
-    line: Vec<(u64, u64)>,
+    line: Vec<(usize, usize)>,
 }
 
-fn parse(str: &mut &str) -> PResult<Vec<(u64, u64)>> {
+fn parse(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
     repeat(
         0..,
-        (terminated(dec_uint, space1), terminated(dec_uint, newline)),
+        (
+            terminated(parse_usize, space1),
+            terminated(dec_uint, newline),
+        ),
     )
     .parse_next(str)
 }
@@ -31,8 +37,18 @@ impl AdventOfCode for Puzzle {
         Ok("".to_string())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let l = self.line.iter().map(|p| p.0).sorted().collect::<Vec<u64>>();
-        let r = self.line.iter().map(|p| p.1).sorted().collect::<Vec<u64>>();
+        let l = self
+            .line
+            .iter()
+            .map(|p| p.0)
+            .sorted()
+            .collect::<Vec<usize>>();
+        let r = self
+            .line
+            .iter()
+            .map(|p| p.1)
+            .sorted()
+            .collect::<Vec<usize>>();
 
         l.iter()
             .zip(r.iter())

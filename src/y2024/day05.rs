@@ -8,7 +8,7 @@ use {
     serde::Serialize,
     std::collections::{HashMap, HashSet},
     winnow::{
-        ascii::{dec_uint, newline},
+        ascii::newline,
         combinator::{repeat_till, separated},
         PResult, Parser,
     },
@@ -21,11 +21,11 @@ pub struct Puzzle {
 }
 
 fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
-    let a: u64 = dec_uint.parse_next(str)?;
+    let a: usize = parse_usize.parse_next(str)?;
     let _ = "|".parse_next(str)?;
-    let b: u64 = dec_uint.parse_next(str)?;
+    let b: usize = parse_usize.parse_next(str)?;
     let _ = newline.parse_next(str)?;
-    Ok((a as usize, b as usize))
+    Ok((a, b))
 }
 
 fn parse_rules(str: &mut &str) -> PResult<Vec<(usize, usize)>> {

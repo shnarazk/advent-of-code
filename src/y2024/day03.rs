@@ -1,9 +1,11 @@
 //! <https://adventofcode.com/2024/day/3>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     serde::Serialize,
     winnow::{
-        ascii::dec_uint,
         combinator::{alt, delimited, preceded, repeat, terminated},
         token::any,
         PResult, Parser,
@@ -19,7 +21,7 @@ pub struct Puzzle {
 enum Inst {
     Do,
     Dont,
-    Mul(u64, u64),
+    Mul(usize, usize),
 }
 
 fn parse_inst0(str: &mut &str) -> PResult<Inst> {
@@ -33,7 +35,8 @@ fn parse_inst1(str: &mut &str) -> PResult<Inst> {
 }
 
 fn parse_inst2(str: &mut &str) -> PResult<Inst> {
-    let mul = delimited("mul(", (terminated(dec_uint, ","), dec_uint), ")").parse_next(str)?;
+    let mul =
+        delimited("mul(", (terminated(parse_usize, ","), parse_usize), ")").parse_next(str)?;
     Ok(Inst::Mul(mul.0, mul.1))
 }
 
