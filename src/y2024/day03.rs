@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().fold(0_usize, |accum, inst| match inst {
-            Inst::Mul(a, b) => accum + (a * b) as usize,
+            Inst::Mul(a, b) => accum + a * b,
             _ => accum,
         })
     }
@@ -71,7 +71,7 @@ impl AdventOfCode for Puzzle {
                 (_, Inst::Do) => (true, accum.1),
                 (_, Inst::Dont) => (false, accum.1),
                 (false, _) => (false, accum.1),
-                (true, Inst::Mul(a, b)) => (true, accum.1 + (a * b) as usize),
+                (true, Inst::Mul(a, b)) => (true, accum.1 + a * b),
             })
             .1
     }

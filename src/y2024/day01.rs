@@ -54,17 +54,17 @@ impl AdventOfCode for Puzzle {
             .zip(r.iter())
             .collect::<Vec<_>>()
             .iter()
-            .map(|(a, b)| a.abs_diff(**b) as usize)
+            .map(|(a, b)| a.abs_diff(**b))
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut hash: HashMap<usize, usize> = HashMap::new();
-        for i in self.line.iter().map(|p| p.1 as usize) {
+        for i in self.line.iter().map(|p| p.1) {
             *hash.entry(i).or_default() += 1;
         }
         self.line
             .iter()
-            .map(|p| p.0 as usize)
+            .map(|p| p.0)
             .map(|i| i * hash.get(&i).unwrap_or(&0))
             .sum::<usize>()
     }

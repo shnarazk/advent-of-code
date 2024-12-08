@@ -25,17 +25,6 @@ fn parse_line(str: &mut &str) -> PResult<Vec<usize>> {
     separated(1.., parse_usize, space1).parse_next(str)
 }
 
-/* fn parse_block(str: &str) -> IResult<&str, Vec<(usize, usize, usize)>> {
-    let (remain1, _) = preceded(not_line_ending, newline)(str)?;
-    let (remain2, v): (&str, Vec<Vec<usize>>) = separated1(parse_line, newline)(remain1)?;
-    Ok((
-        remain2,
-        v.iter()
-            .map(|l| (l[0] as usize, l[1] as usize, (l[1] + l[2]) as usize))
-            .collect::<Vec<_>>(),
-    ))
-} */
-
 #[aoc(2023, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
@@ -44,7 +33,7 @@ impl AdventOfCode for Puzzle {
             let _ = preceded(till_line_ending, newline).parse_next(str)?;
             let v: Vec<Vec<usize>> = separated(1.., parse_line, newline).parse_next(str)?;
             Ok(v.iter()
-                .map(|l| (l[0] as usize, l[1] as usize, (l[1] + l[2]) as usize))
+                .map(|l| (l[0], l[1], (l[1] + l[2])))
                 .collect::<Vec<_>>())
         }
         if block.starts_with("seeds:") {
