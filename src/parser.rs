@@ -10,13 +10,11 @@ use {
 };
 
 pub fn parse_usize(str: &mut &str) -> PResult<usize> {
-    let a: u64 = dec_uint::<&str, u64, _>.parse_next(str)?;
-    Ok(a as usize)
+    dec_uint::<&str, usize, _>.parse_next(str)
 }
 
 pub fn parse_isize(str: &mut &str) -> PResult<isize> {
-    let a: i64 = dec_int::<&str, i64, _>.parse_next(str)?;
-    Ok(a as isize)
+    dec_int::<&str, isize, _>.parse_next(str)
 }
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
