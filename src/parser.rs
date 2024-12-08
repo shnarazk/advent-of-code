@@ -10,12 +10,12 @@ use {
 };
 
 pub fn parse_usize(str: &mut &str) -> PResult<usize> {
-    let a: u64 = dec_uint.parse_next(str)?;
+    let a: u64 = dec_uint::<&str, u64, _>.parse_next(str)?;
     Ok(a as usize)
 }
 
 pub fn parse_isize(str: &mut &str) -> PResult<isize> {
-    let a: i64 = dec_int.parse_next(str)?;
+    let a: i64 = dec_int::<&str, i64, _>.parse_next(str)?;
     Ok(a as isize)
 }
 

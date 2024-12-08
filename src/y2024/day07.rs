@@ -6,11 +6,7 @@ use {
     },
     serde::Serialize,
     std::collections::HashSet,
-    winnow::{
-        ascii::{dec_uint, newline},
-        combinator::separated,
-        PResult, Parser,
-    },
+    winnow::{ascii::newline, combinator::separated, PResult, Parser},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -19,9 +15,9 @@ pub struct Puzzle {
 }
 
 fn parse_line(str: &mut &str) -> PResult<(usize, Vec<usize>)> {
-    let (head, _): (u64, &str) = (dec_uint, ": ").parse_next(str)?;
+    let (head, _): (usize, &str) = (parse_usize, ": ").parse_next(str)?;
     let v: Vec<usize> = separated(1.., parse_usize, " ").parse_next(str)?;
-    Ok((head as usize, v))
+    Ok((head, v))
 }
 
 fn parse(str: &mut &str) -> PResult<Vec<(usize, Vec<usize>)>> {

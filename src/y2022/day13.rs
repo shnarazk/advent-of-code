@@ -1,9 +1,11 @@
 //! <https://adventofcode.com/2022/day/13>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     std::cmp::Ordering,
     winnow::{
-        ascii::dec_uint,
         combinator::{alt, separated},
         PResult, Parser,
     },
@@ -16,8 +18,8 @@ enum Expr {
 }
 
 fn parse_expr_num(input: &mut &str) -> PResult<Expr> {
-    let a: u64 = dec_uint.parse_next(input)?;
-    Ok(Expr::Num(a as usize))
+    let a: usize = parse_usize.parse_next(input)?;
+    Ok(Expr::Num(a))
 }
 
 fn parse_expr(input: &mut &str) -> PResult<Expr> {

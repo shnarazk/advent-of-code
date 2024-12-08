@@ -1,11 +1,14 @@
 //! <https://adventofcode.com/2023/day/19>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     itertools::Itertools,
     serde_json,
     std::collections::{HashMap, HashSet},
     winnow::{
-        ascii::{alpha1, dec_uint},
+        ascii::alpha1,
         combinator::{alt, preceded, repeat, repeat_till, terminated},
         PResult, Parser,
     },
@@ -33,7 +36,7 @@ pub struct Puzzle {
 fn parse_rule1(str: &mut &str) -> PResult<Rule> {
     let var_str = alpha1(str)?;
     let op = alt(("<", ">")).parse_next(str)?;
-    let val: u64 = dec_uint.parse_next(str)?;
+    let val: usize = parse_usize.parse_next(str)?;
     let label = preceded(":", alpha1).parse_next(str)?;
     let _ = ",".parse_next(str)?;
     Ok((
@@ -55,10 +58,10 @@ fn parse_workflow(str: &mut &str) -> PResult<(Label, Vec<Rule>)> {
 }
 
 fn parse_setting(str: &mut &str) -> PResult<Vec<(String, usize)>> {
-    let x: u64 = preceded("{x=", dec_uint).parse_next(str)?;
-    let m: u64 = preceded(",m=", dec_uint).parse_next(str)?;
-    let a: u64 = preceded(",a=", dec_uint).parse_next(str)?;
-    let s: u64 = preceded(",s=", dec_uint).parse_next(str)?;
+    let x: usize = preceded("{x=", parse_usize).parse_next(str)?;
+    let m: usize = preceded(",m=", parse_usize).parse_next(str)?;
+    let a: usize = preceded(",a=", parse_usize).parse_next(str)?;
+    let s: usize = preceded(",s=", parse_usize).parse_next(str)?;
     let _ = "}\n".parse_next(str)?;
     Ok(vec![
         ("x".to_string(), x as usize),

@@ -1,9 +1,12 @@
 //! <https://adventofcode.com/2024/day/2>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
     serde::Serialize,
     winnow::{
-        ascii::{dec_uint, newline, space1},
+        ascii::{newline, space1},
         combinator::{repeat, separated, terminated},
         PResult, Parser,
     },
@@ -11,14 +14,14 @@ use {
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
-    line: Vec<Vec<u64>>,
+    line: Vec<Vec<usize>>,
 }
 
-fn parse_line(str: &mut &str) -> PResult<Vec<u64>> {
-    separated(1.., dec_uint::<&str, u64, _>, space1).parse_next(str)
+fn parse_line(str: &mut &str) -> PResult<Vec<usize>> {
+    separated(1.., parse_usize, space1).parse_next(str)
 }
 
-fn satisfy(lvls: &[u64]) -> bool {
+fn satisfy(lvls: &[usize]) -> bool {
     (lvls.windows(2).all(|v| v[0] < v[1]) || lvls.windows(2).all(|v| v[0] > v[1]))
         && lvls
             .windows(2)
