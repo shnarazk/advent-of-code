@@ -4,7 +4,6 @@ use {
     winnow::{
         ascii::{alpha1, digit1, space1},
         combinator::{delimited, separated, terminated},
-        token::literal,
         PResult, Parser,
     },
 };
@@ -27,8 +26,7 @@ impl AdventOfCode for Puzzle {
             Ok((color.to_string(), value.parse::<usize>().unwrap()))
         }
         fn parse_block(block: &mut &str) -> PResult<(usize, usize, usize)> {
-            let v: Vec<(String, usize)> =
-                separated(1.., parse_color, literal(", ")).parse_next(block)?;
+            let v: Vec<(String, usize)> = separated(1.., parse_color, ", ").parse_next(block)?;
             let v3 = v.iter().fold((0, 0, 0), |acc, c_v| match c_v.0.as_str() {
                 "red" => (c_v.1, acc.1, acc.2),
                 "green" => (acc.0, c_v.1, acc.2),
@@ -38,8 +36,8 @@ impl AdventOfCode for Puzzle {
             Ok(v3)
         }
         fn parse_line(block: &mut &str) -> PResult<Vec<(usize, usize, usize)>> {
-            let _num = delimited(literal("Game "), digit1, literal(": ")).parse_next(block)?;
-            let v = separated(1.., parse_block, literal("; ")).parse_next(block)?;
+            let _num = delimited("Game ", digit1, ": ").parse_next(block)?;
+            let v = separated(1.., parse_block, "; ").parse_next(block)?;
             Ok(v)
         }
         let s = block.to_string();

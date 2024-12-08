@@ -5,7 +5,6 @@ use {
     winnow::{
         ascii::dec_uint,
         combinator::{alt, separated},
-        token::literal,
         PResult, Parser,
     },
 };
@@ -26,9 +25,9 @@ fn parse_expr(input: &mut &str) -> PResult<Expr> {
 }
 
 fn parse_expr_array(input: &mut &str) -> PResult<Expr> {
-    let _ = literal("[").parse_next(input)?;
-    let e = separated(0.., parse_expr, literal(",")).parse_next(input)?;
-    let _ = literal("]").parse_next(input)?;
+    let _ = "[".parse_next(input)?;
+    let e = separated(0.., parse_expr, ",").parse_next(input)?;
+    let _ = "]".parse_next(input)?;
     Ok(Expr::Array(e))
 }
 

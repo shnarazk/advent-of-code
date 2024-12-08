@@ -8,7 +8,6 @@ use {
     winnow::{
         ascii::{alphanumeric1, newline},
         combinator::{separated, terminated},
-        token::literal,
         PResult, Parser,
     },
 };
@@ -20,15 +19,15 @@ pub struct Puzzle {
 }
 
 fn parse_header(input: &mut &str) -> PResult<String> {
-    let label = terminated(alphanumeric1, literal("\n\n")).parse_next(input)?;
+    let label = terminated(alphanumeric1, "\n\n").parse_next(input)?;
     Ok(label.to_string())
 }
 
 // fn parse(str: &str) -> IResult<&str, Data>;
 fn parse_block(input: &mut &str) -> PResult<(String, (String, String))> {
-    let label = terminated(alphanumeric1, literal(" = (")).parse_next(input)?;
-    let child1 = terminated(alphanumeric1, literal(", ")).parse_next(input)?;
-    let child2 = terminated(alphanumeric1, literal(")")).parse_next(input)?;
+    let label = terminated(alphanumeric1, " = (").parse_next(input)?;
+    let child1 = terminated(alphanumeric1, ", ").parse_next(input)?;
+    let child2 = terminated(alphanumeric1, ")").parse_next(input)?;
     Ok((label.to_string(), (child1.to_string(), child2.to_string())))
 }
 

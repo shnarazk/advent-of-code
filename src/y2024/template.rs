@@ -6,13 +6,14 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
+        parser,
     },
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
-        ascii::{dec_uint, newline},
+        ascii::newline,
         combinator::{repeat, repeat_till, separated},
-        token::{literal, one_of},
+        token::one_of,
         PResult, Parser,
     },
 };
