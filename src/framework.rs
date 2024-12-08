@@ -109,18 +109,22 @@ pub trait AdventOfCode: fmt::Debug + Default {
     const DAY: usize;
     /// delimiter between data blocks
     const DELIMITER: &'static str = "\n";
+    /// A function used at the end of `parse` to declare to parse the input correctly
+    fn parsed() -> Result<String, ParseError> {
+        Ok("".to_string())
+    }
     /// An optional function to parse all from the contents an input file.
     /// It must return the remains as `Ok(remains as String)`.
     /// In particular, it returns `Ok("")` if it parsed everything.
     /// ## A typical implementation example
     /// ```ignore
-    /// fn header(&mut self, input: String) -> Result<String, ParseError> {
+    /// fn parse(&mut self, input: String) -> Result<String, ParseError> {
     ///     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
     ///     let segment = parser.captures(input).ok_or(ParseError)?;
     ///     for num in segment[1].split(',') {
     ///         self.settings.push(num.parse::<usize>()?);
     ///     }
-    ///     Ok(Some(segment[2].to_string()))
+    ///     self.parsed()
     /// }
     /// ```
     fn parse(&mut self, input: String) -> Result<String, ParseError> {

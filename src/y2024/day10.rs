@@ -35,20 +35,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     // const DELIMITER: &'static str = "\n";
     // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     // Ok("".to_string())
-    //     Ok(segment[2].to_string())
-    // }
-    // fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    //     dbg!(block);
-    //     // let parser = regex!(r"^(\d+)$");
-    //     // let segment = parser.captures(block).ok_or(ParseError)?;
-    //     // self.line.push(segment[1].parse::<_>());
-    //     Ok(())
+    //     let s = &mut input.as_str();
+    //     self.line = parse(s)?;
+    //     Self::parsed()
     // }
     fn end_of_data(&mut self) {
         dbg!(&self.line);

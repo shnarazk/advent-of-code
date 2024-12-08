@@ -29,7 +29,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let p = &mut input.as_str();
         self.line = parse(p)?;
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
