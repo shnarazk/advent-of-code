@@ -81,7 +81,7 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         for (i, (p, f1)) in self.antenna.iter().enumerate() {
             for (j, (q, f2)) in self.antenna.iter().enumerate() {
-                if i != j && f1 == f2 {
+                if i < j && f1 == f2 {
                     let d = q.sub(&p);
                     if let Some(a) = self.check_pos(p.sub(&d)) {
                         self.antinode.insert(a);
@@ -95,6 +95,35 @@ impl AdventOfCode for Puzzle {
         self.antinode.len()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        for (i, (p, f1)) in self.antenna.iter().enumerate() {
+            for (j, (q, f2)) in self.antenna.iter().enumerate() {
+                if i < j && f1 == f2 {
+                    let d0 = q.sub(&p);
+                    {
+                        let mut d = (0, 0);
+                        for i in 1.. {
+                            if let Some(a) = self.check_pos(p.sub(&d)) {
+                                self.antinode.insert(a);
+                                d = d.add(&d0);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    {
+                        let mut d = (0, 0);
+                        for i in 1.. {
+                            if let Some(b) = self.check_pos(q.add(&d)) {
+                                self.antinode.insert(b);
+                                d = d.add(&d0);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        self.antinode.len()
     }
 }
