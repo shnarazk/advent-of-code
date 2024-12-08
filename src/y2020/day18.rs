@@ -4,7 +4,7 @@ use {
     winnow::{
         ascii::{dec_int, space0},
         combinator::alt,
-        token::{literal, one_of},
+        token::one_of,
         PResult, Parser,
     },
 };
@@ -145,9 +145,9 @@ fn an_operator(input: &mut &str) -> PResult<Op> {
 
 fn a_term(input: &mut &str) -> PResult<Expr> {
     let _ = space0(input)?;
-    let _ = literal("(").parse_next(input)?;
+    let _ = "(".parse_next(input)?;
     let term = an_expr.parse_next(input)?;
-    let _ = literal(")").parse_next(input)?;
+    let _ = ")".parse_next(input)?;
     Ok(Expr::TERM(Box::new(term)))
 }
 
@@ -172,9 +172,9 @@ fn a_modifier(input: &mut &str) -> PResult<(Op, Expr)> {
 
 fn subexpr(input: &mut &str) -> PResult<Expr> {
     let _ = space0(input)?;
-    let _ = literal("(").parse_next(input)?;
+    let _ = "(".parse_next(input)?;
     let term = an_expr2(input)?;
-    let _ = literal(")").parse_next(input)?;
+    let _ = ")".parse_next(input)?;
     Ok(Expr::TERM(Box::new(term)))
 }
 

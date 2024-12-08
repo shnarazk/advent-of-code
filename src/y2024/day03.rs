@@ -5,7 +5,7 @@ use {
     winnow::{
         ascii::dec_uint,
         combinator::{alt, delimited, preceded, repeat, terminated},
-        token::{any, literal},
+        token::any,
         PResult, Parser,
     },
 };
@@ -23,22 +23,17 @@ enum Inst {
 }
 
 fn parse_inst0(str: &mut &str) -> PResult<Inst> {
-    let _ = literal("do()").parse_next(str)?;
+    let _ = "do()".parse_next(str)?;
     Ok(Inst::Do)
 }
 
 fn parse_inst1(str: &mut &str) -> PResult<Inst> {
-    let _ = literal("don't()").parse_next(str)?;
+    let _ = "don't()".parse_next(str)?;
     Ok(Inst::Dont)
 }
 
 fn parse_inst2(str: &mut &str) -> PResult<Inst> {
-    let mul = delimited(
-        literal("mul("),
-        (terminated(dec_uint, literal(",")), dec_uint),
-        literal(")"),
-    )
-    .parse_next(str)?;
+    let mul = delimited("mul(", (terminated(dec_uint, ","), dec_uint), ")").parse_next(str)?;
     Ok(Inst::Mul(mul.0, mul.1))
 }
 

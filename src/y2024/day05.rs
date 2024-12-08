@@ -10,7 +10,6 @@ use {
     winnow::{
         ascii::{dec_uint, newline},
         combinator::{repeat_till, separated},
-        token::literal,
         PResult, Parser,
     },
 };
@@ -23,7 +22,7 @@ pub struct Puzzle {
 
 fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
     let a: u64 = dec_uint.parse_next(str)?;
-    let _ = literal("|").parse_next(str)?;
+    let _ = "|".parse_next(str)?;
     let b: u64 = dec_uint.parse_next(str)?;
     let _ = newline.parse_next(str)?;
     Ok((a as usize, b as usize))
@@ -35,7 +34,7 @@ fn parse_rules(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
 }
 
 fn parse_update(str: &mut &str) -> PResult<Vec<usize>> {
-    let v: Vec<usize> = separated(1.., parse_usize, literal(",")).parse_next(str)?;
+    let v: Vec<usize> = separated(1.., parse_usize, ",").parse_next(str)?;
     Ok(v)
 }
 

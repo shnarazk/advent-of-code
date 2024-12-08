@@ -7,7 +7,6 @@ use {
     winnow::{
         ascii::{alpha1, dec_uint},
         combinator::{alt, preceded, repeat, repeat_till, terminated},
-        token::literal,
         PResult, Parser,
     },
 };
@@ -33,10 +32,10 @@ pub struct Puzzle {
 
 fn parse_rule1(str: &mut &str) -> PResult<Rule> {
     let var_str = alpha1(str)?;
-    let op = alt((literal("<"), literal(">"))).parse_next(str)?;
+    let op = alt(("<", ">")).parse_next(str)?;
     let val: u64 = dec_uint.parse_next(str)?;
-    let label = preceded(literal(":"), alpha1).parse_next(str)?;
-    let _ = literal(",").parse_next(str)?;
+    let label = preceded(":", alpha1).parse_next(str)?;
+    let _ = ",".parse_next(str)?;
     Ok((
         Some((
             var_str.to_string(),
@@ -48,19 +47,19 @@ fn parse_rule1(str: &mut &str) -> PResult<Rule> {
 }
 
 fn parse_workflow(str: &mut &str) -> PResult<(Label, Vec<Rule>)> {
-    let label = terminated(alpha1, literal("{")).parse_next(str)?;
+    let label = terminated(alpha1, "{").parse_next(str)?;
     let (mut v, last_label): (Vec<Rule>, &str) =
-        repeat_till(0.., parse_rule1, terminated(alpha1, literal("}\n"))).parse_next(str)?;
+        repeat_till(0.., parse_rule1, terminated(alpha1, "}\n")).parse_next(str)?;
     v.push((None, last_label.to_string()));
     Ok((label.to_string(), v))
 }
 
 fn parse_setting(str: &mut &str) -> PResult<Vec<(String, usize)>> {
-    let x: u64 = preceded(literal("{x="), dec_uint).parse_next(str)?;
-    let m: u64 = preceded(literal(",m="), dec_uint).parse_next(str)?;
-    let a: u64 = preceded(literal(",a="), dec_uint).parse_next(str)?;
-    let s: u64 = preceded(literal(",s="), dec_uint).parse_next(str)?;
-    let _ = literal("}\n").parse_next(str)?;
+    let x: u64 = preceded("{x=", dec_uint).parse_next(str)?;
+    let m: u64 = preceded(",m=", dec_uint).parse_next(str)?;
+    let a: u64 = preceded(",a=", dec_uint).parse_next(str)?;
+    let s: u64 = preceded(",s=", dec_uint).parse_next(str)?;
+    let _ = "}\n".parse_next(str)?;
     Ok(vec![
         ("x".to_string(), x as usize),
         ("m".to_string(), m as usize),
@@ -78,7 +77,7 @@ impl AdventOfCode for Puzzle {
         let p = &mut input.as_str();
         #[allow(clippy::type_complexity)]
         let (workflows, _): (Vec<(Label, Vec<Rule>)>, &str) =
-            repeat_till(0.., parse_workflow, literal("\n")).parse_next(p)?;
+            repeat_till(0.., parse_workflow, "\n").parse_next(p)?;
         self.rules = workflows
             .iter()
             .cloned()
