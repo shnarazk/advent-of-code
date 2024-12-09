@@ -10,7 +10,9 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<usize>,
+    // id to its length
     file: Vec<usize>,
+    // id to its length
     free: Vec<usize>,
 }
 
@@ -62,11 +64,11 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let len = self.line.iter().cloned().sum::<usize>();
         let mut tmp: Vec<Option<u32>> = vec![None; len];
-        let mut end: Vec<usize> = vec![0; self.file.len()];
+        let mut start_at: Vec<usize> = vec![0; self.file.len()];
         let mut p: usize = 0;
         for (i, n) in self.line.iter().enumerate() {
             if i % 2 == 0 {
-                end[i / 2] = p;
+                start_at[i / 2] = p;
             }
             let v = (i % 2 == 0).then_some(i as u32 / 2);
             for q in tmp.iter_mut().skip(p).take(*n) {
@@ -77,8 +79,11 @@ impl AdventOfCode for Puzzle {
         'next_file: for (id, &ln) in self.file.iter().enumerate().rev() {
             let mut left: Option<usize> = None;
             let mut right = 0;
-            while right < end[id] {
-                if tmp[right].is_none() {
+            while right < start_at[id] {
+                if let Some(l) = tmp[right] {
+                    left = None;
+                    right += self.file[l as usize];
+                } else {
                     if left.is_none() {
                         left = Some(right);
                     }
@@ -87,18 +92,14 @@ impl AdventOfCode for Puzzle {
                             for i in tmp.iter_mut().skip(l).take(ln) {
                                 *i = Some(id as u32);
                             }
-                            for i in tmp.iter_mut().take(len).skip(l + ln) {
-                                if *i == Some(id as u32) {
-                                    *i = None;
-                                }
+                            for i in tmp.iter_mut().skip(start_at[id]).take(self.file[id]) {
+                                *i = None;
                             }
                             continue 'next_file;
                         }
                     }
-                } else {
-                    left = None;
+                    right += 1;
                 }
-                right += 1;
             }
         }
         tmp.iter()
