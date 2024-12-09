@@ -79,6 +79,65 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let len = self.line.iter().cloned().sum::<usize>();
+        let mut tmp: Vec<Option<u32>> = vec![None; len];
+        let mut end: Vec<usize> = vec![0; self.file.len()];
+        let mut p: usize = 0;
+        for (i, n) in self.line.iter().enumerate() {
+            if i % 2 == 0 {
+                end[i / 2] = p;
+            }
+            let v = (i % 2 == 0).then_some(i as u32 / 2);
+            for q in p..p + n {
+                tmp[q] = v;
+            }
+            p += n;
+        }
+        let after = tmp
+            .iter()
+            .map(|p| p.map_or('.', |x| (b'0' + (x as u8)) as char))
+            .collect::<String>();
+        // println!("{after}");
+        'next_file: for (id, &ln) in self.file.iter().enumerate().rev() {
+            let mut left: Option<usize> = None;
+            let mut right = 0;
+            while right < end[id] {
+                if tmp[right].is_none() {
+                    if left.is_none() {
+                        left = Some(right);
+                    }
+                    if let Some(l) = left {
+                        if ln == right - l + 1 {
+                            for i in l..l + ln {
+                                tmp[i] = Some(id as u32);
+                            }
+                            for i in l + ln..len {
+                                if tmp[i] == Some(id as u32) {
+                                    tmp[i] = None;
+                                }
+                            }
+                            let after = tmp
+                                .iter()
+                                .map(|p| p.map_or('.', |x| (b'0' + (x as u8)) as char))
+                                .collect::<String>();
+                            // println!("{after}");
+                            continue 'next_file;
+                        }
+                    }
+                } else {
+                    left = None;
+                }
+                right += 1;
+            }
+        }
+        let after = tmp
+            .iter()
+            .map(|p| p.map_or('.', |x| (b'0' + (x as u8)) as char))
+            .collect::<String>();
+        // println!("{after}");
+        tmp.iter()
+            .enumerate()
+            .map(|(i, x)| x.map_or(0, |v| i * (v as usize)))
+            .sum()
     }
 }
