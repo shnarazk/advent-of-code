@@ -118,6 +118,9 @@ impl AdventOfCode for Puzzle {
         let mut pos = Some(self.guard.0);
         self.trail.insert(self.guard.0, None);
         while let Some(p) = pos {
+            if let std::collections::hash_map::Entry::Vacant(e) = self.trail.entry(p) {
+                e.insert(Some(self.guard));
+            }
             self.guard.0 = p;
             pos = self.next_pos();
             if let Some(p) = pos {
@@ -131,11 +134,6 @@ impl AdventOfCode for Puzzle {
                     //         pos = self.next_pos();
                     //     }
                     // }
-                }
-            }
-            if let Some(p) = pos {
-                if let std::collections::hash_map::Entry::Vacant(e) = self.trail.entry(p) {
-                    e.insert(Some(self.guard));
                 }
             }
         }
