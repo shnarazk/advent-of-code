@@ -10,9 +10,9 @@ use {
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<usize>,
-    // id to its length
+    /// id to its length
     file_len: Vec<usize>,
-    // id to its length
+    /// id to its length
     free_len: Vec<usize>,
 }
 
