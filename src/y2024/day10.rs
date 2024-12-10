@@ -30,18 +30,17 @@ impl Puzzle {
             from.neighbors4((0, 0), self.size).iter().for_each(|p| {
                 let l = *self.plane.get(p).unwrap();
                 if lvl + 1 == l {
-                    // println!("{p:?}: {l}");
                     self.aux1(accum, *p, l);
                 }
             });
         }
     }
-    fn count9(&self, from: Vec2) -> usize {
+    fn count9_1(&self, from: Vec2) -> usize {
         let mut result: HashSet<Vec2> = HashSet::new();
         self.aux1(&mut result, from, 0);
         result.len()
     }
-    fn aux2(&self, from: Vec2, lvl: usize) -> usize {
+    fn count9_2(&self, from: Vec2, lvl: usize) -> usize {
         if lvl == 9 {
             1
         } else {
@@ -50,16 +49,13 @@ impl Puzzle {
                 .map(|p| {
                     let l = *self.plane.get(p).unwrap();
                     if lvl + 1 == l {
-                        self.aux2(*p, l)
+                        self.count9_2(*p, l)
                     } else {
                         0
                     }
                 })
                 .sum::<usize>()
         }
-    }
-    fn count9_2(&self, from: Vec2) -> usize {
-        self.aux2(from, 0)
     }
 }
 
@@ -90,12 +86,11 @@ impl AdventOfCode for Puzzle {
         }
         self.size.0 = self.line.len() as isize;
         self.size.1 = self.line[0].len() as isize;
-        dbg!(&self.heads.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.heads.iter().map(|&h| self.count9(h)).sum()
+        self.heads.iter().map(|&h| self.count9_1(h)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.heads.iter().map(|&h| self.count9_2(h)).sum()
+        self.heads.iter().map(|&h| self.count9_2(h, 0)).sum()
     }
 }
