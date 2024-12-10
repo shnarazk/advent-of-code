@@ -9,6 +9,12 @@ use {
     },
 };
 
+pub fn parse_dec(s: &mut &str) -> PResult<usize> {
+    one_of(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+        .map(|c| (c as u8 - b'0') as usize)
+        .parse_next(s)
+}
+
 pub fn parse_usize(str: &mut &str) -> PResult<usize> {
     dec_uint::<&str, usize, _>.parse_next(str)
 }
