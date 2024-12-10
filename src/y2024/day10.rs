@@ -23,39 +23,58 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn aux1(&self, accum: &mut HashSet<Vec2>, from: Vec2, lvl: usize) {
+    fn aux1(
+        &self,
+        from: Vec2,
+        lvl: usize,
+        memo: &mut HashMap<Vec2, HashSet<Vec2>>,
+    ) -> HashSet<Vec2> {
+        if let Some(s) = memo.get(&from) {
+            return s.clone();
+        }
+        let mut set: HashSet<Vec2> = HashSet::new();
         if lvl == 9 {
-            accum.insert(from);
+            set.insert(from);
+            return set;
         } else {
             from.neighbors4((0, 0), self.size).iter().for_each(|p| {
                 let l = *self.plane.get(p).unwrap();
                 if lvl + 1 == l {
-                    self.aux1(accum, *p, l);
+                    let v = self.aux1(*p, l, memo);
+                    for &q in v.iter() {
+                        set.insert(q);
+                    }
                 }
             });
+            memo.insert(from, set.clone());
+            set
         }
     }
-    fn count9_1(&self, from: Vec2) -> usize {
-        let mut result: HashSet<Vec2> = HashSet::new();
-        self.aux1(&mut result, from, 0);
-        result.len()
+    fn count9_1(&self, from: Vec2, memo: &mut HashMap<Vec2, HashSet<Vec2>>) -> usize {
+        self.aux1(from, 0, memo).len()
     }
-    fn count9_2(&self, from: Vec2, lvl: usize) -> usize {
+    fn aux2(&self, from: Vec2, lvl: usize, memo: &mut HashMap<Vec2, usize>) -> usize {
+        if let Some(&n) = memo.get(&from) {
+            return n;
+        }
         if lvl == 9 {
-            1
+            memo.insert(from, 1);
+            return 1;
         } else {
-            from.neighbors4((0, 0), self.size)
-                .iter()
-                .map(|p| {
-                    let l = *self.plane.get(p).unwrap();
-                    if lvl + 1 == l {
-                        self.count9_2(*p, l)
-                    } else {
-                        0
-                    }
-                })
-                .sum::<usize>()
+            let mut count = 0;
+            from.neighbors4((0, 0), self.size).iter().for_each(|p| {
+                let l = *self.plane.get(p).unwrap();
+                if lvl + 1 == l {
+                    let x = self.aux2(*p, l, memo);
+                    count += x;
+                }
+            });
+            memo.insert(from, count);
+            count
         }
+    }
+    fn count9_2(&self, from: Vec2, memo: &mut HashMap<Vec2, usize>) -> usize {
+        self.aux2(from, 0, memo)
     }
 }
 
@@ -88,9 +107,17 @@ impl AdventOfCode for Puzzle {
         self.size.1 = self.line[0].len() as isize;
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.heads.iter().map(|&h| self.count9_1(h)).sum()
+        let mut memo: HashMap<Vec2, HashSet<Vec2>> = HashMap::new();
+        self.heads
+            .iter()
+            .map(|&h| self.count9_1(h, &mut memo))
+            .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.heads.iter().map(|&h| self.count9_2(h, 0)).sum()
+        let mut memo: HashMap<Vec2, usize> = HashMap::new();
+        self.heads
+            .iter()
+            .map(|&h| self.count9_2(h, &mut memo))
+            .sum()
     }
 }
