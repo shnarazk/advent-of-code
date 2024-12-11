@@ -8,6 +8,7 @@ use {
         geometric::neighbors,
         parser::parse_usize,
     },
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::HashMap,
     winnow::{

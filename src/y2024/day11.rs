@@ -4,6 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         parser,
     },
+    rayon::prelude::*,
     serde::Serialize,
     std::collections::HashMap,
 };
@@ -70,12 +71,12 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line.iter().map(|&n| num_edges(25, 0, n)).sum()
+        self.line.par_iter().map(|&n| num_edges(25, 0, n)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         let vals: HashMap<usize, usize> = self
             .line
-            .iter()
+            .par_iter()
             .map(|&n| (n, 1))
             .collect::<HashMap<usize, usize>>();
         num_edges2(75, 0, vals).values().sum()
