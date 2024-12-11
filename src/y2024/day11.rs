@@ -10,39 +10,49 @@ use {
     },
     serde::Serialize,
     std::collections::HashMap,
-    winnow::{
-        ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
-        token::one_of,
-        PResult, Parser,
-    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<usize>,
 }
 
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
+fn even_digits(n: usize) -> Option<(usize, usize)> {
+    fn aux(n: usize, digits: usize, origin: usize) -> Option<(usize, usize)> {
+        if n < 10 {
+            if digits % 2 == 0 {
+                let half = 10_usize.pow(digits as u32 / 2);
+                Some((origin / half, origin % half))
+            } else {
+                None
+            }
+        } else {
+            aux(n / 10, digits + 1, origin)
+        }
+    }
+    aux(n, 1, n)
+}
 
-// fn parse(str: &mut &str) -> PResult<()> {}
+fn num_edges(threshold: usize, depth: usize, val: usize) -> usize {
+    if depth == threshold {
+        1
+    } else if val == 0 {
+        num_edges(threshold, depth + 1, 1)
+    } else if let Some((l, r)) = even_digits(val) {
+        num_edges(threshold, depth + 1, l) + num_edges(threshold, depth + 1, r)
+    } else {
+        num_edges(threshold, depth + 1, val * 2024)
+    }
+}
 
 #[aoc(2024, 11)]
 impl AdventOfCode for Puzzle {
-    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     let s = &mut input.as_str();
-    //     self.line = parse(s)?;
-    //     Self::parsed()
-    // }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::to_usizes(input.as_str(), &[' ']).expect("ng");
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
-        1
+        self.line.iter().map(|&n| num_edges(25, 0, n)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
         2
