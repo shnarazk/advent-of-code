@@ -45,6 +45,28 @@ fn num_edges(threshold: usize, depth: usize, val: usize) -> usize {
     }
 }
 
+fn num_edges2(
+    threshold: usize,
+    depth: usize,
+    vals: HashMap<usize, usize>,
+) -> HashMap<usize, usize> {
+    if depth == threshold {
+        return vals;
+    }
+    let mut ret: HashMap<usize, usize> = HashMap::new();
+    for (&val, &count) in vals.iter() {
+        if val == 0 {
+            *ret.entry(1).or_default() += count;
+        } else if let Some((l, r)) = even_digits(val) {
+            *ret.entry(l).or_default() += count;
+            *ret.entry(r).or_default() += count;
+        } else {
+            *ret.entry(val * 2024).or_default() += count;
+        }
+    }
+    num_edges2(threshold, depth + 1, ret)
+}
+
 #[aoc(2024, 11)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
@@ -55,6 +77,11 @@ impl AdventOfCode for Puzzle {
         self.line.iter().map(|&n| num_edges(25, 0, n)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let vals: HashMap<usize, usize> = self
+            .line
+            .iter()
+            .map(|&n| (n, 1))
+            .collect::<HashMap<usize, usize>>();
+        num_edges2(75, 0, vals).values().sum()
     }
 }
