@@ -35,7 +35,6 @@ impl Puzzle {
         let mut set: HashSet<Vec2> = HashSet::new();
         if lvl == 9 {
             set.insert(from);
-            return set;
         } else {
             from.neighbors4((0, 0), self.size).iter().for_each(|p| {
                 let l = *self.plane.get(p).unwrap();
@@ -47,8 +46,8 @@ impl Puzzle {
                 }
             });
             memo.insert(from, set.clone());
-            set
         }
+        set
     }
     fn count9_1(&self, from: Vec2, memo: &mut HashMap<Vec2, HashSet<Vec2>>) -> usize {
         self.aux1(from, 0, memo).len()
@@ -59,7 +58,7 @@ impl Puzzle {
         }
         if lvl == 9 {
             memo.insert(from, 1);
-            return 1;
+            1
         } else {
             let mut count = 0;
             from.neighbors4((0, 0), self.size).iter().for_each(|p| {

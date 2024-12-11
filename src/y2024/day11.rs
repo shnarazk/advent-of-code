@@ -1,11 +1,7 @@
 //! <https://adventofcode.com/2024/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         parser,
     },
     serde::Serialize,
