@@ -5,10 +5,11 @@ use crate::geometric::*;
 /// # Examples
 ///
 /// ```
-/// use your_crate::geometry::{Vec2, Rect};
+/// use adventofcode::{geometric::Vec2, rect::Rect};
 ///
-/// let rect = Rect::new((3.0, 4.0), "Hello");
-/// assert_eq!(rect.get(&(1.0, 2.0)), Some(&"Hello"));
+/// let rect = Rect::new((3, 4), "Hello");
+/// assert_eq!(rect.get(&(1, 2)), Some(&"Hello"));
+/// assert_eq!(rect.get(&(8, -2)), None);
 /// ```
 pub struct Rect<T: Clone + Sized> {
     size: Vec2,
