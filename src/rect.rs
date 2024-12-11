@@ -7,9 +7,12 @@ use crate::geometric::*;
 /// ```
 /// use adventofcode::{geometric::Vec2, rect::Rect};
 ///
-/// let rect = Rect::new((3, 4), "Hello");
-/// assert_eq!(rect.get(&(1, 2)), Some(&"Hello"));
-/// assert_eq!(rect.get(&(8, -2)), None);
+/// let rect1 = Rect::new((3, 4), "Hello");
+/// assert_eq!(rect1.get(&(1, 2)), Some(&"Hello"));
+/// assert_eq!(rect1.get(&(8, -2)), None);
+/// let mut rect2: Rect<Option<bool>> = Rect::new((3, 4), None);
+/// rect2.set(&(0, 0), Some(true));
+/// assert_eq!(rect2.get(&(0, 0)), Some(&Some(true)));
 /// ```
 pub struct Rect<T: Clone + Sized> {
     size: Vec2,
