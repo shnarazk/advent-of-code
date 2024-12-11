@@ -4,6 +4,7 @@ pub mod framework;
 pub mod geometric;
 pub mod math;
 pub mod parser;
+pub mod rect;
 
 #[cfg(feature = "y2015")]
 pub mod y2015;
