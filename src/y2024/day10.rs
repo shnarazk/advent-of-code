@@ -4,6 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
         parser::parse_dec,
+        rect::Rect,
     },
     serde::Serialize,
     std::collections::{HashMap, HashSet},
@@ -52,12 +53,12 @@ impl Puzzle {
     fn count9_1(&self, from: Vec2, memo: &mut HashMap<Vec2, HashSet<Vec2>>) -> usize {
         self.aux1(from, 0, memo).len()
     }
-    fn aux2(&self, from: Vec2, lvl: usize, memo: &mut HashMap<Vec2, usize>) -> usize {
-        if let Some(&n) = memo.get(&from) {
-            return n;
+    fn aux2(&self, from: Vec2, lvl: usize, memo: &mut Rect<Option<usize>>) -> usize {
+        if let Some(Some(n)) = memo.get(&from) {
+            return *n;
         }
         if lvl == 9 {
-            memo.insert(from, 1);
+            memo[&from] = Some(1);
             1
         } else {
             let mut count = 0;
@@ -68,11 +69,11 @@ impl Puzzle {
                     count += x;
                 }
             });
-            memo.insert(from, count);
+            memo[&from] = Some(count);
             count
         }
     }
-    fn count9_2(&self, from: Vec2, memo: &mut HashMap<Vec2, usize>) -> usize {
+    fn count9_2(&self, from: Vec2, memo: &mut Rect<Option<usize>>) -> usize {
         self.aux2(from, 0, memo)
     }
 }
@@ -113,7 +114,7 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut memo: HashMap<Vec2, usize> = HashMap::new();
+        let mut memo: Rect<Option<usize>> = Rect::new(self.size, None);
         self.heads
             .iter()
             .map(|&h| self.count9_2(h, &mut memo))
