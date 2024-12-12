@@ -18,9 +18,10 @@ use {
 pub struct Puzzle {
     mapping: Rect<char>,
 }
+
 impl Puzzle {
     fn evaluate1_area(&self, accum: &mut Rect<bool>, pos: Vec2) -> usize {
-        if accum[&pos] {
+        if accum[pos] {
             return 0;
         };
         let Some(c) = self.mapping.get(&pos) else {
@@ -33,10 +34,10 @@ impl Puzzle {
         let mut v_segs: HashSet<Vec2> = HashSet::new();
         while let Some(p) = to_visid.pop() {
             if let Some(None) = r.get(&p) {
-                if self.mapping[&p] == *c {
+                if self.mapping[p] == *c {
                     count += 1;
-                    accum[&p] = true;
-                    r[&p] = Some(true);
+                    accum[p] = true;
+                    r[p] = Some(true);
 
                     if self.mapping.get(&(p.0 - 1, p.1)) != Some(c) {
                         h_segs.insert(p);
@@ -55,7 +56,7 @@ impl Puzzle {
                         to_visid.push(*q);
                     }
                 } else {
-                    r[&p] = Some(false);
+                    r[p] = Some(false);
                 }
             }
         }
@@ -63,7 +64,7 @@ impl Puzzle {
         count * (v_segs.len() + h_segs.len())
     }
     fn evaluate2_area(&self, accum: &mut Rect<bool>, pos: Vec2) -> usize {
-        if accum[&pos] {
+        if accum[pos] {
             return 0;
         };
         let Some(c) = self.mapping.get(&pos) else {
@@ -76,10 +77,10 @@ impl Puzzle {
         let mut v_segs: HashSet<(Vec2, bool)> = HashSet::new();
         while let Some(p) = to_visid.pop() {
             if let Some(None) = r.get(&p) {
-                if self.mapping[&p] == *c {
+                if self.mapping[p] == *c {
                     count += 1;
-                    accum[&p] = true;
-                    r[&p] = Some(true);
+                    accum[p] = true;
+                    r[p] = Some(true);
 
                     if self.mapping.get(&(p.0 - 1, p.1)) != Some(c) {
                         h_segs.insert((p, false));
@@ -98,7 +99,7 @@ impl Puzzle {
                         to_visid.push(*q);
                     }
                 } else {
-                    r[&p] = Some(false);
+                    r[p] = Some(false);
                 }
             }
         }
