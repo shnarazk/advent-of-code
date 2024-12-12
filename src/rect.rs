@@ -76,7 +76,7 @@ impl<T: Clone + Default + Sized> Rect<T> {
             len: self.vec.len(),
         }
     }
-    pub fn map<'a, U: Clone + Default + Sized>(&self, f: impl Fn(&T) -> U) -> Rect<U> {
+    pub fn map<U: Clone + Default + Sized>(&self, f: impl Fn(&T) -> U) -> Rect<U> {
         Rect {
             size: self.size,
             vec: self.vec.iter().map(f).collect::<Vec<U>>(),

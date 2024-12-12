@@ -113,8 +113,8 @@ impl Puzzle {
             },
         );
         let num_hseg: usize = hss
-            .into_iter()
-            .map(|(_, mut v)| {
+            .into_values()
+            .map(|mut v| {
                 v.sort();
                 let mut num = 1;
                 let mut end = v[0].0 + 1;
@@ -140,8 +140,8 @@ impl Puzzle {
             },
         );
         let num_vseg: usize = vss
-            .into_iter()
-            .map(|(_, mut v)| {
+            .into_values()
+            .map(|mut v| {
                 v.sort();
                 let mut num = 1;
                 let mut end = v[0].0 + 1;
