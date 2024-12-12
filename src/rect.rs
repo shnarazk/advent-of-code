@@ -120,10 +120,25 @@ impl<T: Clone + Default + Sized> Index<&Vec2> for Rect<T> {
     }
 }
 
+impl<T: Clone + Default + Sized> Index<Vec2> for Rect<T> {
+    type Output = T;
+    #[inline]
+    fn index(&self, i: Vec2) -> &Self::Output {
+        self.get(&i).unwrap()
+    }
+}
+
 impl<T: Clone + Default + Sized> IndexMut<&Vec2> for Rect<T> {
     #[inline]
     fn index_mut(&mut self, i: &Vec2) -> &mut Self::Output {
         self.get_mut(i).unwrap()
+    }
+}
+
+impl<T: Clone + Default + Sized> IndexMut<Vec2> for Rect<T> {
+    #[inline]
+    fn index_mut(&mut self, i: Vec2) -> &mut Self::Output {
+        self.get_mut(&i).unwrap()
     }
 }
 
@@ -135,6 +150,7 @@ mod test {
     fn test_index() {
         let r: Rect<bool> = Rect::new((10, 10), false);
         assert_eq!(r[&(0, 1)], false);
+        assert_eq!(r[(0, 1)], false);
     }
 
     #[test]
@@ -142,6 +158,8 @@ mod test {
         let mut r: Rect<bool> = Rect::new((10, 10), false);
         r[&(1, 1)] = true;
         assert_eq!(r[&(1, 1)], true);
+        r[(2, 2)] = true;
+        assert_eq!(r[(2, 2)], true);
     }
     #[test]
     fn test_sum() {
