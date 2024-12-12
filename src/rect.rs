@@ -50,7 +50,7 @@ impl<T: Clone + Sized> Rect<T> {
     #[inline]
     pub fn to_index(&self, index: &Vec2) -> Option<usize> {
         if (0..self.size.0).contains(&index.0) && (0..self.size.1).contains(&index.1) {
-            Some((index.0 * index.1) as usize)
+            Some((index.0 * self.size.1 + index.1) as usize)
         } else {
             None
         }
@@ -87,5 +87,21 @@ mod test {
         let mut r: Rect<bool> = Rect::new((10, 10), false);
         r[&(1, 1)] = true;
         assert_eq!(r[&(1, 1)], true);
+    }
+    #[test]
+    fn test_sum() {
+        let mut r: Rect<usize> = Rect::new((10, 10), 0);
+        for i in 0..10 {
+            for j in 0..10 {
+                r[&(i, j)] = i as usize;
+            }
+        }
+        let mut count = 0;
+        for i in 0..10 {
+            for j in 0..10 {
+                count += r[&(i, j)];
+            }
+        }
+        assert_eq!(count, 450);
     }
 }
