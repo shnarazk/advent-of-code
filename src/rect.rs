@@ -78,13 +78,13 @@ mod test {
 
     #[test]
     fn test_index() {
-        let r: Rect<bool> = Rect::new((10_isize, 10_isize), false);
+        let r: Rect<bool> = Rect::new((10, 10), false);
         assert_eq!(r[&(0, 1)], false);
     }
 
     #[test]
     fn test_index_mut() {
-        let mut r: Rect<bool> = Rect::new((10_isize, 10_isize), false);
+        let mut r: Rect<bool> = Rect::new((10, 10), false);
         r[&(1, 1)] = true;
         assert_eq!(r[&(1, 1)], true);
     }
