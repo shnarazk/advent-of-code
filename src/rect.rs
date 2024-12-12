@@ -1,5 +1,6 @@
 use {
     crate::geometric::*,
+    serde::Serialize,
     std::ops::{Index, IndexMut},
 };
 
@@ -21,16 +22,23 @@ use {
 /// }
 /// assert_eq!(rect2.get(&(1, 1)), Some(&Some(false)));
 /// ```
-pub struct Rect<T: Clone + Sized> {
+#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+pub struct Rect<T: Clone + Default + Sized> {
     size: Vec2,
     vec: Vec<T>,
 }
 
-impl<T: Clone + Sized> Rect<T> {
+impl<T: Clone + Default + Sized> Rect<T> {
     pub fn new(size: Vec2, default: T) -> Rect<T> {
         Rect {
             size,
             vec: vec![default; (size.0.max(0) * size.1.max(0)) as usize],
+        }
+    }
+    pub fn from_vec(v: Vec<Vec<T>>) -> Rect<T> {
+        Rect {
+            size: (v.len() as isize, v[0].len() as isize),
+            vec: v.into_iter().flatten().collect::<Vec<T>>(),
         }
     }
     #[inline]
@@ -55,9 +63,56 @@ impl<T: Clone + Sized> Rect<T> {
             None
         }
     }
+    pub fn size(&self) -> (isize, isize) {
+        self.size
+    }
+    pub fn iter(&self) -> Vec2Iter<T> {
+        Vec2Iter {
+            vec: &self.vec,
+            max_j: self.size.1,
+            i: 0,
+            j: 0,
+            index: 0,
+            len: self.vec.len(),
+        }
+    }
+    pub fn map<'a, U: Clone + Default + Sized>(&self, f: impl Fn(&T) -> U) -> Rect<U> {
+        Rect {
+            size: self.size,
+            vec: self.vec.iter().map(f).collect::<Vec<U>>(),
+        }
+    }
 }
 
-impl<T: Clone + Sized> Index<&Vec2> for Rect<T> {
+pub struct Vec2Iter<'a, T> {
+    vec: &'a Vec<T>,
+    max_j: isize,
+    i: isize,
+    j: isize,
+    index: usize,
+    len: usize,
+}
+
+impl<'a, T> Iterator for Vec2Iter<'a, T> {
+    type Item = ((isize, isize), &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.len {
+            let ret = ((self.i, self.j), &self.vec[self.index]);
+            self.j += 1;
+            if self.j == self.max_j {
+                self.i += 1;
+                self.j = 0;
+            }
+            self.index += 1;
+            Some(ret)
+        } else {
+            None
+        }
+    }
+}
+
+impl<T: Clone + Default + Sized> Index<&Vec2> for Rect<T> {
     type Output = T;
     #[inline]
     fn index(&self, i: &Vec2) -> &Self::Output {
@@ -65,7 +120,7 @@ impl<T: Clone + Sized> Index<&Vec2> for Rect<T> {
     }
 }
 
-impl<T: Clone + Sized> IndexMut<&Vec2> for Rect<T> {
+impl<T: Clone + Default + Sized> IndexMut<&Vec2> for Rect<T> {
     #[inline]
     fn index_mut(&mut self, i: &Vec2) -> &mut Self::Output {
         self.get_mut(i).unwrap()
