@@ -3,6 +3,7 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
+        rect::Rect,
     },
     rayon::prelude::*,
     serde::Serialize,
@@ -37,7 +38,7 @@ fn kind_from(c: &char) -> Kind {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     mapping: Vec<Vec<char>>,
-    hash: HashSet<Vec2>,
+    plane: Rect<bool>,
     guard: (Vec2, Direction),
     size: Vec2,
     trail: HashMap<Vec2, Option<(Vec2, Direction)>>,
@@ -52,7 +53,7 @@ impl Puzzle {
         self.guard.1 = self.guard.1.turn_right();
     }
     fn is_loop(&mut self, pos: Vec2, pre: (Vec2, Direction)) -> bool {
-        self.hash.insert(pos);
+        self.plane[&pos] = true;
         let mut trail: HashSet<(Vec2, Direction)> = HashSet::new();
         self.guard = pre;
         let mut pos = Some(self.guard.0);
@@ -64,11 +65,11 @@ impl Puzzle {
             trail.insert(self.guard);
             pos = self.next_pos();
             if let Some(p) = pos {
-                if self.hash.contains(&p) {
+                if self.plane[&p] {
                     self.turn();
                     pos = self.next_pos();
                     if let Some(p) = pos {
-                        if self.hash.contains(&p) {
+                        if self.plane[&p] {
                             self.turn();
                             pos = self.next_pos();
                         }
@@ -97,8 +98,10 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
+        self.size.0 = self.mapping.len() as isize;
+        self.size.1 = self.mapping[0].len() as isize;
+        self.plane = Rect::new(self.size, false);
         for (i, l) in self.mapping.iter().enumerate() {
-            self.size.0 = i as isize + 1;
             for (j, c) in l.iter().enumerate() {
                 let pos = (i as isize, j as isize);
                 match kind_from(c) {
@@ -106,11 +109,10 @@ impl AdventOfCode for Puzzle {
                         self.guard = (pos, d);
                     }
                     Kind::Obst => {
-                        self.hash.insert(pos);
+                        self.plane[&pos] = true;
                     }
                     _ => (),
                 }
-                self.size.1 = j as isize + 1;
             }
         }
     }
@@ -124,7 +126,7 @@ impl AdventOfCode for Puzzle {
             self.guard.0 = p;
             pos = self.next_pos();
             if let Some(p) = pos {
-                if self.hash.contains(&p) {
+                if self.plane[&p] {
                     self.turn();
                     pos = self.next_pos();
                     // there's no chains of obstructions.

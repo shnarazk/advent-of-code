@@ -22,7 +22,7 @@ use {
 /// }
 /// assert_eq!(rect2.get(&(1, 1)), Some(&Some(false)));
 /// ```
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Rect<T: Clone + Default + Sized> {
     size: Vec2,
     vec: Vec<T>,
