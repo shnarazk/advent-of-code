@@ -33,17 +33,21 @@ impl<T: Clone + Sized> Rect<T> {
             vec: vec![default; (size.0.max(0) * size.1.max(0)) as usize],
         }
     }
+    #[inline]
     pub fn get(&self, index: &Vec2) -> Option<&T> {
         self.to_index(index).and_then(|i| self.vec.get(i))
     }
+    #[inline]
     pub fn get_mut(&mut self, index: &Vec2) -> Option<&mut T> {
         self.to_index(index).and_then(|i| self.vec.get_mut(i))
     }
+    #[inline]
     pub fn set(&mut self, index: &Vec2, val: T) {
         if let Some(i) = self.to_index(index) {
             self.vec[i] = val;
         }
     }
+    #[inline]
     pub fn to_index(&self, index: &Vec2) -> Option<usize> {
         if (0..self.size.0).contains(&index.0) && (0..self.size.1).contains(&index.1) {
             Some((index.0 * index.1) as usize)
@@ -55,12 +59,14 @@ impl<T: Clone + Sized> Rect<T> {
 
 impl<T: Clone + Sized> Index<&Vec2> for Rect<T> {
     type Output = T;
+    #[inline]
     fn index(&self, i: &Vec2) -> &Self::Output {
         self.get(i).unwrap()
     }
 }
 
 impl<T: Clone + Sized> IndexMut<&Vec2> for Rect<T> {
+    #[inline]
     fn index_mut(&mut self, i: &Vec2) -> &mut Self::Output {
         self.get_mut(i).unwrap()
     }
