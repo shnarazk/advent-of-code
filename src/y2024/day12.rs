@@ -112,24 +112,6 @@ impl Puzzle {
                 m
             },
         );
-        let num_hseg: usize = hss
-            .into_values()
-            .map(|mut v| {
-                v.sort();
-                let mut num = 1;
-                let mut end = v[0].0 + 1;
-                let mut spin = v[0].1;
-                for &(st, sp) in v.iter().skip(1) {
-                    if end != st || spin != sp {
-                        num += 1;
-                    }
-                    end = st + 1;
-                    spin = sp;
-                }
-                num
-            })
-            .sum::<usize>();
-
         let vss: HashMap<usize, Vec<(usize, bool)>> = v_segs.iter().fold(
             HashMap::new(),
             |mut m: HashMap<usize, Vec<(usize, bool)>>, &(pos, spin): &((isize, isize), bool)| {
@@ -139,26 +121,26 @@ impl Puzzle {
                 m
             },
         );
-        let num_vseg: usize = vss
-            .into_values()
-            .map(|mut v| {
-                v.sort();
-                let mut num = 1;
-                let mut end = v[0].0 + 1;
-                let mut spin = v[0].1;
-                for &(st, sp) in v.iter().skip(1) {
-                    if end != st || spin != sp {
-                        num += 1;
-                    }
-                    end = st + 1;
-                    spin = sp;
-                }
-                num
-            })
-            .sum::<usize>();
 
-        // println!("({pos:?}) => area: {count}, sides: {}", num_hseg + num_vseg);
-        count * (num_hseg + num_vseg)
+        fn count_sides(hash: HashMap<usize, Vec<(usize, bool)>>) -> usize {
+            hash.into_values()
+                .map(|mut v| {
+                    v.sort();
+                    let mut num = 1;
+                    let mut end = v[0].0 + 1;
+                    let mut spin = v[0].1;
+                    for &(st, sp) in v.iter().skip(1) {
+                        if end != st || spin != sp {
+                            num += 1;
+                        }
+                        end = st + 1;
+                        spin = sp;
+                    }
+                    num
+                })
+                .sum::<usize>()
+        }
+        count * (count_sides(hss) + count_sides(vss))
     }
 }
 
