@@ -1,5 +1,8 @@
 # 2024 in Rust
 
+- rustc-1.83
+- Apple Silicon M3
+
 |   day |time(msec)|
 |------:|---------:|
 | day1  |      0.8 |
@@ -27,4 +30,4 @@
 | day23 |          |
 | day24 |          |
 | day25 |          |
-| y2023 |          |
+| y2024 |          |
