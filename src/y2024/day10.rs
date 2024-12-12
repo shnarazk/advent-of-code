@@ -18,7 +18,7 @@ use {
 #[derive(Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
-    plane: HashMap<Vec2, usize>,
+    plane: Rect<usize>,
     heads: HashSet<Vec2>,
     size: Vec2,
 }
@@ -95,16 +95,17 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
+        self.size.0 = self.line.len() as isize;
+        self.size.1 = self.line[0].len() as isize;
+        self.plane = Rect::new(self.size, 0);
         for (i, l) in self.line.iter().enumerate() {
             for (j, &n) in l.iter().enumerate() {
-                self.plane.insert((i as isize, j as isize), n);
+                self.plane[&(i as isize, j as isize)] = n;
                 if n == 0 {
                     self.heads.insert((i as isize, j as isize));
                 }
             }
         }
-        self.size.0 = self.line.len() as isize;
-        self.size.1 = self.line[0].len() as isize;
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut memo: HashMap<Vec2, HashSet<Vec2>> = HashMap::new();
