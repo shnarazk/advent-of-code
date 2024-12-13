@@ -5,8 +5,9 @@ use {
         parser::parse_usize,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
-    std::collections::HashSet,
+    std::{collections::HashSet, hash::BuildHasherDefault},
     winnow::{ascii::newline, combinator::separated, PResult, Parser},
 };
 
@@ -58,8 +59,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn expands(vec: &[usize], threshold: usize) -> HashSet<usize> {
-    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>, threshold: usize) -> HashSet<usize> {
+fn expands(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> FxHashSet<usize> {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
@@ -72,7 +73,7 @@ fn expands(vec: &[usize], threshold: usize) -> HashSet<usize> {
                             .cloned()
                             .collect::<Vec<_>>()
                     })
-                    .collect::<HashSet<usize>>(),
+                    .collect::<FxHashSet<usize>>(),
                 threshold,
             )
         } else {
@@ -80,12 +81,12 @@ fn expands(vec: &[usize], threshold: usize) -> HashSet<usize> {
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
-    let mut temp: HashSet<usize> = HashSet::new();
+    let mut temp: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
     temp.insert(args.remove(0));
     exp(args, temp, threshold)
 }
 
-fn expands2(vec: &[usize], threshold: usize) -> HashSet<usize> {
+fn expands2(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
     fn shift(a: usize, b: usize, b0: usize) -> usize {
         if b0 < 10 {
             a * 10 + b
@@ -93,7 +94,7 @@ fn expands2(vec: &[usize], threshold: usize) -> HashSet<usize> {
             shift(a * 10, b, b0 / 10)
         }
     }
-    fn exp(mut vec: Vec<usize>, subs: HashSet<usize>, threshold: usize) -> HashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> FxHashSet<usize> {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
@@ -106,7 +107,7 @@ fn expands2(vec: &[usize], threshold: usize) -> HashSet<usize> {
                             .cloned()
                             .collect::<Vec<_>>()
                     })
-                    .collect::<HashSet<usize>>(),
+                    .collect::<FxHashSet<usize>>(),
                 threshold,
             )
         } else {
@@ -114,7 +115,7 @@ fn expands2(vec: &[usize], threshold: usize) -> HashSet<usize> {
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
-    let mut temp: HashSet<usize> = HashSet::new();
+    let mut temp: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
     temp.insert(args.remove(0));
     exp(args, temp, threshold)
 }

@@ -6,8 +6,9 @@ use {
         rect::Rect,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
-    std::collections::{HashMap, HashSet},
+    std::{collections::HashSet, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
         combinator::{repeat, separated},
@@ -41,7 +42,7 @@ pub struct Puzzle {
     plane: Rect<bool>,
     guard: (Vec2, Direction),
     size: Vec2,
-    trail: HashMap<Vec2, Option<(Vec2, Direction)>>,
+    trail: FxHashMap<Vec2, Option<(Vec2, Direction)>>,
 }
 
 impl Puzzle {
@@ -54,7 +55,8 @@ impl Puzzle {
     }
     fn is_loop(&mut self, pos: Vec2, pre: (Vec2, Direction)) -> bool {
         self.plane[&pos] = true;
-        let mut trail: HashSet<(Vec2, Direction)> = HashSet::new();
+        let mut trail: FxHashSet<(Vec2, Direction)> =
+            HashSet::<(Vec2, Direction), BuildHasherDefault<FxHasher>>::default();
         self.guard = pre;
         let mut pos = Some(self.guard.0);
         while let Some(p) = pos {

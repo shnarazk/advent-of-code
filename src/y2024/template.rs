@@ -9,8 +9,9 @@ use {
         parser::parse_usize,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::collections::HashMap,
+    std::{collections::HashMap, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
         combinator::{repeat, repeat_till, separated, terminated},
@@ -48,6 +49,8 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
+        let mut ret: FxHashMap<usize, usize> =
+            HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
         1
     }
     fn part2(&mut self) -> Self::Output2 {
