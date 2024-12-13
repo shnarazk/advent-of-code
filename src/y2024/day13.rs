@@ -5,7 +5,8 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
+        geometric::{neighbors, GeometricMath},
+        math::{gcd, lcm},
         parser::{self, parse_usize},
     },
     rayon::prelude::*,
@@ -62,20 +63,36 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|(a, b, g)| {
-                let Some((i, j)) = solve(g, a, b) else {
-                    return 0;
-                };
-                i * 3 + j
-            })
+            .map(|(a, b, g)| solve(g, a, b).map_or(0, |(a, b)| a * 3 + b))
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .map(|(a, b, g)| {
+                let gg = g.add(&(10_000_000_000_000, 10_000_000_000_000));
+                if let Some((i, j)) = solve(&gg, a, b) {
+                    assert_eq!(gg.0, a.0 * i + b.0 * j);
+                    assert_eq!(gg.1, a.1 * i + b.1 * j);
+                    // let bb = b.mul_scalar(2);
+                    // if let Some((ii, jj)) = solve(&gg, a, &bb) {
+                    //     dbg!(3 * i + j, 3 * ii + 2 * jj);
+                    // }
+                    return 3 * i + j;
+                }
+                0
+            })
+            .sum()
     }
 }
 
 fn solve(goal: &(usize, usize), a: &(usize, usize), b: &(usize, usize)) -> Option<(usize, usize)> {
+    if lcm(a.0, b.0) == lcm(a.1, b.1) {
+        println!("lcm: {a:?}, {b:?} == ({},{})", lcm(a.0, b.0), lcm(a.1, b.1));
+    }
+    // if gcd(a.0, b.0) == gcd(a.1, b.1) {
+    //     println!("gcd: {a:?}, {b:?} == ({},{})", gcd(a.0, b.0), gcd(a.1, b.1));
+    // }
     /*
       . a.0 * i + b.0 * j = goal.0
       . a.1 * i + b.1 * j = goal.1
@@ -84,23 +101,32 @@ fn solve(goal: &(usize, usize), a: &(usize, usize), b: &(usize, usize)) -> Optio
       i = (goal.1 - b.1 * j) / a.1
 
       . a.0 * (goal.1 - b.1 * j) / a.1 + b.0 * j = goal.0
+        . a.0 * (goal.1 - b.1 * j) + a.1 * b.0 * j = a.1 * goal.0
+        . a.0 * goal.1 - a.0 * b.1 * j + a.1 * b.0 * j = a.1 * goal.0
+        . (a.1 * b.0 - a.0 * b.1) * j = a.1 * goal.0 - a.0 * goal.1
+
       . a.1 * (goal.0 - b.0 * j) / a.0 + b.1 * j = goal.1
+        . a.1 * (goal.0 - b.0 * j) + a.0 * b.1 * j = a.0 * goal.1
+        . a.1 * goal.0 - a.1 * b.0 * j + a.0 * b.1 * j = a.0 * goal.1
+        . (a.0 * b.1 - a.1 * b.0) * j = a.0 * goal.1 - a.1 * goal.0
 
-      . a.0 * (goal.1 - b.1 * j) + a.1 * b.0 * j = a.1 * goal.0
-
-      . a.0 * goal.1 - a.0 * b.1 * j + a.1 * b.0 * j = a.1 * goal.0
-
-      . (a.1 * b.0 - a.0 * b.1) * j = (a.1 * goal.0 - a.0 * goal.1)
-
+      (400, 600) = 10 * (10, 10) + 100 * (2, 3) = 1 * (10, 10) + 90 * (1, 1)
     */
     if a.1 * b.0 != a.0 * b.1 {
         let tmp1 = (a.1 * b.0).abs_diff(a.0 * b.1);
         let tmp2 = (a.1 * goal.0).abs_diff(a.0 * goal.1);
         if tmp2 % tmp1 == 0 {
             let j = tmp2 / tmp1;
-            let i = (goal.0 - b.0 * j) / a.0;
-            return Some((i, j));
+            if (goal.0 - b.0 * j) % a.0 == 0 {
+                let i = (goal.0 - b.0 * j) / a.0;
+                return Some((i, j));
+            }
         }
+    } else {
+        /*
+          . a.0 * i = goal.0
+          . a.1 * i = goal.1
+        */
     }
     None
 }
