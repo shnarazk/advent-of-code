@@ -18,14 +18,14 @@ pub trait GeometricMath {
     fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors4<V1: AsReference<Self>, V2: AsReference<Self>>(
+    fn neighbors4<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         boundary0: V1,
         boundary1: V2,
     ) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors8<V1: AsReference<Self>, V2: AsReference<Self>>(
+    fn neighbors8<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         boundary0: V1,
         boundary1: V2,
@@ -42,18 +42,18 @@ pub trait GeometricRotation {
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
 
-pub trait AsReference<V> {
+pub trait AsVecReference<V> {
     fn as_vec_ref(&self) -> &V;
 }
 
-impl<L> AsReference<Dim2<L>> for Dim2<L> {
+impl<L> AsVecReference<Dim2<L>> for Dim2<L> {
     #[inline]
     fn as_vec_ref(&self) -> &Dim2<L> {
         self
     }
 }
 
-impl<L> AsReference<Dim2<L>> for &Dim2<L> {
+impl<L> AsVecReference<Dim2<L>> for &Dim2<L> {
     #[inline]
     fn as_vec_ref(&self) -> &Dim2<L> {
         self
@@ -188,7 +188,7 @@ impl GeometricMath for Dim2<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4<V1: AsReference<Dim2<isize>>, V2: AsReference<Dim2<isize>>>(
+    fn neighbors4<V1: AsVecReference<Dim2<isize>>, V2: AsVecReference<Dim2<isize>>>(
         &self,
         boundary0: V1,
         boundary1: V2,
@@ -209,7 +209,7 @@ impl GeometricMath for Dim2<isize> {
             })
             .collect::<Vec<_>>()
     }
-    fn neighbors8<V1: AsReference<Dim2<isize>>, V2: AsReference<Dim2<isize>>>(
+    fn neighbors8<V1: AsVecReference<Dim2<isize>>, V2: AsVecReference<Dim2<isize>>>(
         &self,
         boundary0: V1,
         boundary1: V2,
@@ -282,7 +282,7 @@ impl GeometricMath for Dim2<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4<V1: AsReference<Dim2<usize>>, V2: AsReference<Dim2<usize>>>(
+    fn neighbors4<V1: AsVecReference<Dim2<usize>>, V2: AsVecReference<Dim2<usize>>>(
         &self,
         boundary0: V1,
         boundary1: V2,
@@ -301,7 +301,7 @@ impl GeometricMath for Dim2<usize> {
             })
             .collect::<Vec<_>>()
     }
-    fn neighbors8<V1: AsReference<Dim2<usize>>, V2: AsReference<Dim2<usize>>>(
+    fn neighbors8<V1: AsVecReference<Dim2<usize>>, V2: AsVecReference<Dim2<usize>>>(
         &self,
         boundary0: V1,
         boundary1: V2,
@@ -326,14 +326,14 @@ impl GeometricMath for Dim2<usize> {
 pub type Dim3<L> = (L, L, L);
 pub type Vec3 = (isize, isize, isize);
 
-impl<L> AsReference<Dim3<L>> for Dim3<L> {
+impl<L> AsVecReference<Dim3<L>> for Dim3<L> {
     #[inline]
     fn as_vec_ref(&self) -> &Dim3<L> {
         self
     }
 }
 
-impl<L> AsReference<Dim3<L>> for &Dim3<L> {
+impl<L> AsVecReference<Dim3<L>> for &Dim3<L> {
     #[inline]
     fn as_vec_ref(&self) -> &Dim3<L> {
         self
@@ -428,14 +428,14 @@ impl GeometricMath for Dim3<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4<V1: AsReference<Dim3<isize>>, V2: AsReference<Dim3<isize>>>(
+    fn neighbors4<V1: AsVecReference<Dim3<isize>>, V2: AsVecReference<Dim3<isize>>>(
         &self,
         _boundary0: V1,
         _boundary1: V2,
     ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8<V1: AsReference<Dim3<isize>>, V2: AsReference<Dim3<isize>>>(
+    fn neighbors8<V1: AsVecReference<Dim3<isize>>, V2: AsVecReference<Dim3<isize>>>(
         &self,
         _boundary0: V1,
         _boundary1: V2,
@@ -500,14 +500,14 @@ impl GeometricMath for Dim3<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4<V1: AsReference<Dim3<usize>>, V2: AsReference<Dim3<usize>>>(
+    fn neighbors4<V1: AsVecReference<Dim3<usize>>, V2: AsVecReference<Dim3<usize>>>(
         &self,
         _boundary0: V1,
         _boundary1: V2,
     ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8<V1: AsReference<Dim3<usize>>, V2: AsReference<Dim3<usize>>>(
+    fn neighbors8<V1: AsVecReference<Dim3<usize>>, V2: AsVecReference<Dim3<usize>>>(
         &self,
         _boundary0: V1,
         _boundary1: V2,
