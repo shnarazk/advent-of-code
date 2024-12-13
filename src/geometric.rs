@@ -35,19 +35,19 @@ pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
 
 pub trait AsReference<V> {
-    fn as_vec2_ref(&self) -> &V;
+    fn as_vec_ref(&self) -> &V;
 }
 
-impl AsReference<Vec2> for Vec2 {
+impl<L> AsReference<Dim2<L>> for Dim2<L> {
     #[inline]
-    fn as_vec2_ref(&self) -> &Vec2 {
+    fn as_vec_ref(&self) -> &Dim2<L> {
         self
     }
 }
 
-impl AsReference<Vec2> for &Vec2 {
+impl<L> AsReference<Dim2<L>> for &Dim2<L> {
     #[inline]
-    fn as_vec2_ref(&self) -> &Vec2 {
+    fn as_vec_ref(&self) -> &Dim2<L> {
         self
     }
 }
@@ -293,6 +293,20 @@ impl GeometricMath for Dim2<usize> {
 
 pub type Dim3<L> = (L, L, L);
 pub type Vec3 = (isize, isize, isize);
+
+impl<L> AsReference<Dim3<L>> for Dim3<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim3<L> {
+        self
+    }
+}
+
+impl<L> AsReference<Dim3<L>> for &Dim3<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim3<L> {
+        self
+    }
+}
 
 const DIR6: [Vec3; 6] = [
     (-1, 0, 0),
