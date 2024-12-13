@@ -1,5 +1,4 @@
 //! misc functions about 2D/3D computation
-
 use serde::Serialize;
 
 pub trait GeometricMath {
@@ -34,6 +33,24 @@ pub trait GeometricRotation {
 
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
+
+pub trait AsVec2Reference {
+    fn as_vec2_ref(&self) -> &Vec2;
+}
+
+impl AsVec2Reference for Vec2 {
+    #[inline]
+    fn as_vec2_ref(&self) -> &Vec2 {
+        self
+    }
+}
+
+impl AsVec2Reference for &Vec2 {
+    #[inline]
+    fn as_vec2_ref(&self) -> &Vec2 {
+        self
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Direction {
