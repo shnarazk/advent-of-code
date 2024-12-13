@@ -52,13 +52,10 @@ impl AdventOfCode for Puzzle {
         self.line = parse(s)?;
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .par_iter()
-            .map(|(a, b, g)| solve(g, a, b).map_or(0, |(a, b)| a * 3 + b))
+            .map(|(a, b, g)| solve(g, a, b).map_or(0, |(i, j)| i * 3 + j))
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -66,37 +63,21 @@ impl AdventOfCode for Puzzle {
             .par_iter()
             .map(|(a, b, g)| {
                 let gg = g.add(&(10_000_000_000_000, 10_000_000_000_000));
-                if let Some((i, j)) = solve(&gg, a, b) {
-                    debug_assert_eq!(gg.0, a.0 * i + b.0 * j);
-                    debug_assert_eq!(gg.1, a.1 * i + b.1 * j);
-                    return 3 * i + j;
-                }
-                0
+                solve(&gg, a, b).map_or(0, |(i, j)| 3 * i + j)
             })
             .sum()
     }
 }
 
 fn solve(goal: &Dim2<usize>, a: &Dim2<usize>, b: &Dim2<usize>) -> Option<Dim2<usize>> {
-    /*
-      . a.0 * i + b.0 * j = goal.0
-      . a.1 * i + b.1 * j = goal.1
-
-      i = (goal.0 - b.0 * j) / a.0
-      i = (goal.1 - b.1 * j) / a.1
-
-      . a.0 * (goal.1 - b.1 * j) / a.1 + b.0 * j = goal.0
-        . a.0 * (goal.1 - b.1 * j) + a.1 * b.0 * j = a.1 * goal.0
-        . a.0 * goal.1 - a.0 * b.1 * j + a.1 * b.0 * j = a.1 * goal.0
-        . (a.1 * b.0 - a.0 * b.1) * j = a.1 * goal.0 - a.0 * goal.1
-
-      . a.1 * (goal.0 - b.0 * j) / a.0 + b.1 * j = goal.1
-        . a.1 * (goal.0 - b.0 * j) + a.0 * b.1 * j = a.0 * goal.1
-        . a.1 * goal.0 - a.1 * b.0 * j + a.0 * b.1 * j = a.0 * goal.1
-        . (a.0 * b.1 - a.1 * b.0) * j = a.0 * goal.1 - a.1 * goal.0
-
-      (400, 600) = 10 * (10, 10) + 100 * (2, 3) = 1 * (10, 10) + 90 * (1, 1)
-    */
+    // . a.0 * i + b.0 * j = goal.0
+    // . a.1 * i + b.1 * j = goal.1
+    // i = (goal.0 - b.0 * j) / a.0
+    // i = (goal.1 - b.1 * j) / a.1
+    // . a.0 * (goal.1 - b.1 * j) / a.1 + b.0 * j = goal.0
+    //   . a.0 * (goal.1 - b.1 * j) + a.1 * b.0 * j = a.1 * goal.0
+    //   . a.0 * goal.1 - a.0 * b.1 * j + a.1 * b.0 * j = a.1 * goal.0
+    //   . (a.1 * b.0 - a.0 * b.1) * j = a.1 * goal.0 - a.0 * goal.1
     if a.1 * b.0 != a.0 * b.1 {
         let tmp1 = (a.1 * b.0).abs_diff(a.0 * b.1);
         let tmp2 = (a.1 * goal.0).abs_diff(a.0 * goal.1);
