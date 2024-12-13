@@ -5,8 +5,12 @@ use {
         geometric::{GeometricMath, Vec2},
         rect::Rect,
     },
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
-    std::collections::{HashMap, HashSet},
+    std::{
+        collections::{HashMap, HashSet},
+        hash::BuildHasherDefault,
+    },
     winnow::{
         ascii::{alpha1, newline},
         combinator::separated,
@@ -30,8 +34,8 @@ impl Puzzle {
         let mut count = 0;
         let mut r: Rect<Option<bool>> = self.mapping.map(|_| None);
         let mut to_visid: Vec<Vec2> = vec![pos];
-        let mut h_segs: HashSet<Vec2> = HashSet::new();
-        let mut v_segs: HashSet<Vec2> = HashSet::new();
+        let mut h_segs: FxHashSet<Vec2> = HashSet::<Vec2, BuildHasherDefault<FxHasher>>::default();
+        let mut v_segs: FxHashSet<Vec2> = HashSet::<Vec2, BuildHasherDefault<FxHasher>>::default();
         while let Some(p) = to_visid.pop() {
             if let Some(None) = r.get(p) {
                 if self.mapping[p] == *c {
@@ -73,8 +77,10 @@ impl Puzzle {
         let mut count = 0;
         let mut r: Rect<Option<bool>> = self.mapping.map(|_| None);
         let mut to_visid: Vec<Vec2> = vec![pos];
-        let mut h_segs: HashSet<(Vec2, bool)> = HashSet::new();
-        let mut v_segs: HashSet<(Vec2, bool)> = HashSet::new();
+        let mut h_segs: FxHashSet<(Vec2, bool)> =
+            HashSet::<(Vec2, bool), BuildHasherDefault<FxHasher>>::default();
+        let mut v_segs: FxHashSet<(Vec2, bool)> =
+            HashSet::<(Vec2, bool), BuildHasherDefault<FxHasher>>::default();
         while let Some(p) = to_visid.pop() {
             if let Some(None) = r.get(p) {
                 if self.mapping[p] == *c {
@@ -104,18 +110,18 @@ impl Puzzle {
             }
         }
         // build longer segment
-        let hss: HashMap<usize, Vec<(usize, bool)>> = h_segs.iter().fold(
-            HashMap::new(),
-            |mut m: HashMap<usize, Vec<(usize, bool)>>, &(pos, spin): &((isize, isize), bool)| {
+        let hss: FxHashMap<usize, Vec<(usize, bool)>> = h_segs.iter().fold(
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default(),
+            |mut m: FxHashMap<usize, Vec<(usize, bool)>>, &(pos, spin): &((isize, isize), bool)| {
                 m.entry(pos.0 as usize)
                     .or_default()
                     .push((pos.1 as usize, spin));
                 m
             },
         );
-        let vss: HashMap<usize, Vec<(usize, bool)>> = v_segs.iter().fold(
-            HashMap::new(),
-            |mut m: HashMap<usize, Vec<(usize, bool)>>, &(pos, spin): &((isize, isize), bool)| {
+        let vss: FxHashMap<usize, Vec<(usize, bool)>> = v_segs.iter().fold(
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default(),
+            |mut m: FxHashMap<usize, Vec<(usize, bool)>>, &(pos, spin): &((isize, isize), bool)| {
                 m.entry(pos.1 as usize)
                     .or_default()
                     .push((pos.0 as usize, spin));
@@ -123,7 +129,7 @@ impl Puzzle {
             },
         );
 
-        fn count_sides(hash: HashMap<usize, Vec<(usize, bool)>>) -> usize {
+        fn count_sides(hash: FxHashMap<usize, Vec<(usize, bool)>>) -> usize {
             hash.into_values()
                 .map(|mut v| {
                     v.sort();

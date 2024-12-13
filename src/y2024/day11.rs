@@ -5,8 +5,9 @@ use {
         parser,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::collections::HashMap,
+    std::{collections::HashMap, hash::BuildHasherDefault},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -45,12 +46,13 @@ fn num_edges(threshold: usize, depth: usize, val: usize) -> usize {
 fn num_edges2(
     threshold: usize,
     depth: usize,
-    vals: HashMap<usize, usize>,
-) -> HashMap<usize, usize> {
+    vals: FxHashMap<usize, usize>,
+) -> FxHashMap<usize, usize> {
     if depth == threshold {
         return vals;
     }
-    let mut ret: HashMap<usize, usize> = HashMap::new();
+    let mut ret: FxHashMap<usize, usize> =
+        HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
     for (&val, &count) in vals.iter() {
         if val == 0 {
             *ret.entry(1).or_default() += count;
@@ -74,11 +76,11 @@ impl AdventOfCode for Puzzle {
         self.line.par_iter().map(|&n| num_edges(25, 0, n)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let vals: HashMap<usize, usize> = self
+        let vals: FxHashMap<usize, usize> = self
             .line
             .par_iter()
             .map(|&n| (n, 1))
-            .collect::<HashMap<usize, usize>>();
+            .collect::<FxHashMap<usize, usize>>();
         num_edges2(75, 0, vals).values().sum()
     }
 }

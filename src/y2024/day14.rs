@@ -9,8 +9,9 @@ use {
         parser,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::collections::HashMap,
+    std::{collections::HashMap, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
         combinator::{repeat, repeat_till, separated, seq, terminated},
