@@ -1,5 +1,4 @@
 //! misc functions about 2D/3D computation
-
 use serde::Serialize;
 
 pub trait GeometricMath {
@@ -19,10 +18,18 @@ pub trait GeometricMath {
     fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors4(&self, boundary0: Self, boundary1: Self) -> Vec<Self>
+    fn neighbors4<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self>
+    fn neighbors8<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self>
     where
         Self: Sized;
 }
@@ -34,6 +41,24 @@ pub trait GeometricRotation {
 
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
+
+pub trait AsVecReference<V> {
+    fn as_vec_ref(&self) -> &V;
+}
+
+impl<L> AsVecReference<Dim2<L>> for Dim2<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim2<L> {
+        self
+    }
+}
+
+impl<L> AsVecReference<Dim2<L>> for &Dim2<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim2<L> {
+        self
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Direction {
@@ -163,14 +188,20 @@ impl GeometricMath for Dim2<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+    fn neighbors4<V1: AsVecReference<Dim2<isize>>, V2: AsVecReference<Dim2<isize>>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self> {
+        let b0 = boundary0.as_vec_ref();
+        let b1 = boundary1.as_vec_ref();
         [self.0 - 1, self.0, self.0 + 1]
             .iter()
-            .filter(|s| boundary0.0 <= **s && **s < boundary1.0)
+            .filter(|s| b0.0 <= **s && **s < b1.0)
             .flat_map(|y| {
                 [self.1 - 1, self.1, self.1 + 1]
                     .iter()
-                    .filter(|t| boundary0.1 <= **t && **t < boundary1.1)
+                    .filter(|t| b0.1 <= **t && **t < b1.1)
                     .filter(|x| *y == self.0 || **x == self.1)
                     .filter(|x| *y != self.0 || **x != self.1)
                     .map(|x| (*y, *x))
@@ -178,14 +209,20 @@ impl GeometricMath for Dim2<isize> {
             })
             .collect::<Vec<_>>()
     }
-    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+    fn neighbors8<V1: AsVecReference<Dim2<isize>>, V2: AsVecReference<Dim2<isize>>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self> {
+        let b0 = boundary0.as_vec_ref();
+        let b1 = boundary1.as_vec_ref();
         [self.0 - 1, self.0, self.0 + 1]
             .iter()
-            .filter(|s| boundary0.0 <= **s && **s < boundary1.0)
+            .filter(|s| b0.0 <= **s && **s < b1.0)
             .flat_map(|y| {
                 [self.1 - 1, self.1, self.1 + 1]
                     .iter()
-                    .filter(|t| boundary0.1 <= **t && **t < boundary1.1)
+                    .filter(|t| b0.1 <= **t && **t < b1.1)
                     .filter(|x| *y != self.0 || **x != self.1)
                     .map(|x| (*y, *x))
                     .collect::<Vec<_>>()
@@ -245,12 +282,18 @@ impl GeometricMath for Dim2<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+    fn neighbors4<V1: AsVecReference<Dim2<usize>>, V2: AsVecReference<Dim2<usize>>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self> {
+        let b0 = boundary0.as_vec_ref();
+        let b1 = boundary1.as_vec_ref();
         (0.max(self.0 as isize - 1) as usize..=self.0 + 1)
-            .filter(|s| boundary0.0 <= *s && *s < boundary1.0)
+            .filter(|s| b0.0 <= *s && *s < b1.0)
             .flat_map(|y| {
                 (0.max(self.1 as isize - 1) as usize..=self.1 + 1)
-                    .filter(|t| boundary0.1 <= *t && *t < boundary1.1)
+                    .filter(|t| b0.1 <= *t && *t < b1.1)
                     .filter(|x| y == self.0 || *x == self.1)
                     .filter(|x| y != self.0 || *x != self.1)
                     .map(|x| (y, x))
@@ -258,14 +301,20 @@ impl GeometricMath for Dim2<usize> {
             })
             .collect::<Vec<_>>()
     }
-    fn neighbors8(&self, boundary0: Self, boundary1: Self) -> Vec<Self> {
+    fn neighbors8<V1: AsVecReference<Dim2<usize>>, V2: AsVecReference<Dim2<usize>>>(
+        &self,
+        boundary0: V1,
+        boundary1: V2,
+    ) -> Vec<Self> {
+        let b0 = boundary0.as_vec_ref();
+        let b1 = boundary1.as_vec_ref();
         [self.0 - 1, self.0, self.0 + 1]
             .iter()
-            .filter(|s| boundary0.0 <= **s && **s < boundary1.0)
+            .filter(|s| b0.0 <= **s && **s < b1.0)
             .flat_map(|y| {
                 [self.1 - 1, self.1, self.1 + 1]
                     .iter()
-                    .filter(|t| boundary0.1 <= **t && **t < boundary1.1)
+                    .filter(|t| b0.1 <= **t && **t < b1.1)
                     .filter(|x| *y != self.0 || **x != self.1)
                     .map(|x| (*y, *x))
                     .collect::<Vec<_>>()
@@ -276,6 +325,20 @@ impl GeometricMath for Dim2<usize> {
 
 pub type Dim3<L> = (L, L, L);
 pub type Vec3 = (isize, isize, isize);
+
+impl<L> AsVecReference<Dim3<L>> for Dim3<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim3<L> {
+        self
+    }
+}
+
+impl<L> AsVecReference<Dim3<L>> for &Dim3<L> {
+    #[inline]
+    fn as_vec_ref(&self) -> &Dim3<L> {
+        self
+    }
+}
 
 const DIR6: [Vec3; 6] = [
     (-1, 0, 0),
@@ -365,10 +428,18 @@ impl GeometricMath for Dim3<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+    fn neighbors4<V1: AsVecReference<Dim3<isize>>, V2: AsVecReference<Dim3<isize>>>(
+        &self,
+        _boundary0: V1,
+        _boundary1: V2,
+    ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+    fn neighbors8<V1: AsVecReference<Dim3<isize>>, V2: AsVecReference<Dim3<isize>>>(
+        &self,
+        _boundary0: V1,
+        _boundary1: V2,
+    ) -> Vec<Self> {
         unimplemented!()
     }
 }
@@ -429,10 +500,18 @@ impl GeometricMath for Dim3<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
             .collect::<Vec<Self>>()
     }
-    fn neighbors4(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+    fn neighbors4<V1: AsVecReference<Dim3<usize>>, V2: AsVecReference<Dim3<usize>>>(
+        &self,
+        _boundary0: V1,
+        _boundary1: V2,
+    ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8(&self, _boundary0: Self, _boundary1: Self) -> Vec<Self> {
+    fn neighbors8<V1: AsVecReference<Dim3<usize>>, V2: AsVecReference<Dim3<usize>>>(
+        &self,
+        _boundary0: V1,
+        _boundary1: V2,
+    ) -> Vec<Self> {
         unimplemented!()
     }
 }

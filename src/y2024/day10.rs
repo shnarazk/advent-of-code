@@ -54,7 +54,7 @@ impl Puzzle {
         self.aux1(from, 0, memo).len()
     }
     fn aux2(&self, from: Vec2, lvl: usize, memo: &mut Rect<Option<usize>>) -> usize {
-        if let Some(Some(n)) = memo.get(&from) {
+        if let Some(Some(n)) = memo.get(from) {
             return *n;
         }
         if lvl == 9 {

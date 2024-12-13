@@ -29,10 +29,11 @@ pub struct Rect<T: Clone + Default + Sized> {
 }
 
 impl<T: Clone + Default + Sized> Rect<T> {
-    pub fn new(size: Vec2, default: T) -> Rect<T> {
+    pub fn new<V: AsVecReference<Vec2>>(size: V, default: T) -> Rect<T> {
+        let sf = size.as_vec_ref();
         Rect {
-            size,
-            vec: vec![default; (size.0.max(0) * size.1.max(0)) as usize],
+            size: *sf,
+            vec: vec![default; (sf.0.max(0) * sf.1.max(0)) as usize],
         }
     }
     pub fn from_vec(v: Vec<Vec<T>>) -> Rect<T> {
@@ -42,29 +43,49 @@ impl<T: Clone + Default + Sized> Rect<T> {
         }
     }
     #[inline]
-    pub fn get(&self, index: &Vec2) -> Option<&T> {
-        self.to_index(index).and_then(|i| self.vec.get(i))
+    pub fn get<V: AsVecReference<Vec2>>(&self, index: V) -> Option<&T> {
+        self.to_index(index.as_vec_ref())
+            .and_then(|i| self.vec.get(i))
     }
     #[inline]
-    pub fn get_mut(&mut self, index: &Vec2) -> Option<&mut T> {
-        self.to_index(index).and_then(|i| self.vec.get_mut(i))
+    pub fn get_unchecked<V: AsVecReference<Vec2>>(&self, index: V) -> &T {
+        unsafe {
+            self.vec
+                .get_unchecked(self.to_index_unchecked(index.as_vec_ref()))
+        }
     }
     #[inline]
-    pub fn set(&mut self, index: &Vec2, val: T) {
-        if let Some(i) = self.to_index(index) {
+    pub fn get_mut<V: AsVecReference<Vec2>>(&mut self, index: V) -> Option<&mut T> {
+        self.to_index(index.as_vec_ref())
+            .and_then(|i| self.vec.get_mut(i))
+    }
+    #[inline]
+    pub fn get_mut_unchecked<V: AsVecReference<Vec2>>(&mut self, index: V) -> &mut T {
+        let i = self.to_index_unchecked(index.as_vec_ref());
+        unsafe { self.vec.get_unchecked_mut(i) }
+    }
+    #[inline]
+    pub fn set<V: AsVecReference<Vec2>>(&mut self, index: V, val: T) {
+        if let Some(i) = self.to_index(index.as_vec_ref()) {
             self.vec[i] = val;
         }
     }
     #[inline]
-    pub fn to_index(&self, index: &Vec2) -> Option<usize> {
-        if (0..self.size.0).contains(&index.0) && (0..self.size.1).contains(&index.1) {
-            Some((index.0 * self.size.1 + index.1) as usize)
+    pub fn to_index<V: AsVecReference<Vec2>>(&self, index: V) -> Option<usize> {
+        let idx = index.as_vec_ref();
+        if (0..self.size.0).contains(&idx.0) && (0..self.size.1).contains(&idx.1) {
+            Some((idx.0 * self.size.1 + idx.1) as usize)
         } else {
             None
         }
     }
-    pub fn size(&self) -> (isize, isize) {
-        self.size
+    #[inline]
+    pub fn to_index_unchecked<V: AsVecReference<Vec2>>(&self, index: V) -> usize {
+        let idx = index.as_vec_ref();
+        (idx.0 * self.size.1 + idx.1) as usize
+    }
+    pub fn size(&self) -> &Vec2 {
+        &self.size
     }
     pub fn iter(&self) -> Vec2Iter<T> {
         Vec2Iter {
@@ -94,7 +115,7 @@ pub struct Vec2Iter<'a, T> {
 }
 
 impl<'a, T> Iterator for Vec2Iter<'a, T> {
-    type Item = ((isize, isize), &'a T);
+    type Item = (Vec2, &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index < self.len {
@@ -112,33 +133,18 @@ impl<'a, T> Iterator for Vec2Iter<'a, T> {
     }
 }
 
-impl<T: Clone + Default + Sized> Index<&Vec2> for Rect<T> {
+impl<V: AsVecReference<Vec2>, T: Clone + Default + Sized> Index<V> for Rect<T> {
     type Output = T;
     #[inline]
-    fn index(&self, i: &Vec2) -> &Self::Output {
-        self.get(i).unwrap()
+    fn index(&self, i: V) -> &Self::Output {
+        self.get_unchecked(i.as_vec_ref())
     }
 }
 
-impl<T: Clone + Default + Sized> Index<Vec2> for Rect<T> {
-    type Output = T;
+impl<V: AsVecReference<Vec2>, T: Clone + Default + Sized> IndexMut<V> for Rect<T> {
     #[inline]
-    fn index(&self, i: Vec2) -> &Self::Output {
-        self.get(&i).unwrap()
-    }
-}
-
-impl<T: Clone + Default + Sized> IndexMut<&Vec2> for Rect<T> {
-    #[inline]
-    fn index_mut(&mut self, i: &Vec2) -> &mut Self::Output {
-        self.get_mut(i).unwrap()
-    }
-}
-
-impl<T: Clone + Default + Sized> IndexMut<Vec2> for Rect<T> {
-    #[inline]
-    fn index_mut(&mut self, i: Vec2) -> &mut Self::Output {
-        self.get_mut(&i).unwrap()
+    fn index_mut(&mut self, i: V) -> &mut Self::Output {
+        self.get_mut_unchecked(i.as_vec_ref())
     }
 }
 

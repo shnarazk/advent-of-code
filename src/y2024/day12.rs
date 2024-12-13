@@ -24,7 +24,7 @@ impl Puzzle {
         if accum[pos] {
             return 0;
         };
-        let Some(c) = self.mapping.get(&pos) else {
+        let Some(c) = self.mapping.get(pos) else {
             return 0;
         };
         let mut count = 0;
@@ -33,22 +33,22 @@ impl Puzzle {
         let mut h_segs: HashSet<Vec2> = HashSet::new();
         let mut v_segs: HashSet<Vec2> = HashSet::new();
         while let Some(p) = to_visid.pop() {
-            if let Some(None) = r.get(&p) {
+            if let Some(None) = r.get(p) {
                 if self.mapping[p] == *c {
                     count += 1;
                     accum[p] = true;
                     r[p] = Some(true);
 
-                    if self.mapping.get(&(p.0 - 1, p.1)) != Some(c) {
+                    if self.mapping.get((p.0 - 1, p.1)) != Some(c) {
                         h_segs.insert(p);
                     }
-                    if self.mapping.get(&(p.0 + 1, p.1)) != Some(c) {
+                    if self.mapping.get((p.0 + 1, p.1)) != Some(c) {
                         h_segs.insert((p.0 + 1, p.1));
                     }
-                    if self.mapping.get(&(p.0, p.1 - 1)) != Some(c) {
+                    if self.mapping.get((p.0, p.1 - 1)) != Some(c) {
                         v_segs.insert(p);
                     }
-                    if self.mapping.get(&(p.0, p.1 + 1)) != Some(c) {
+                    if self.mapping.get((p.0, p.1 + 1)) != Some(c) {
                         v_segs.insert((p.0, p.1 + 1));
                     }
 
@@ -67,7 +67,7 @@ impl Puzzle {
         if accum[pos] {
             return 0;
         };
-        let Some(c) = self.mapping.get(&pos) else {
+        let Some(c) = self.mapping.get(pos) else {
             return 0;
         };
         let mut count = 0;
@@ -76,22 +76,22 @@ impl Puzzle {
         let mut h_segs: HashSet<(Vec2, bool)> = HashSet::new();
         let mut v_segs: HashSet<(Vec2, bool)> = HashSet::new();
         while let Some(p) = to_visid.pop() {
-            if let Some(None) = r.get(&p) {
+            if let Some(None) = r.get(p) {
                 if self.mapping[p] == *c {
                     count += 1;
                     accum[p] = true;
                     r[p] = Some(true);
 
-                    if self.mapping.get(&(p.0 - 1, p.1)) != Some(c) {
+                    if self.mapping.get((p.0 - 1, p.1)) != Some(c) {
                         h_segs.insert((p, false));
                     }
-                    if self.mapping.get(&(p.0 + 1, p.1)) != Some(c) {
+                    if self.mapping.get((p.0 + 1, p.1)) != Some(c) {
                         h_segs.insert(((p.0 + 1, p.1), true));
                     }
-                    if self.mapping.get(&(p.0, p.1 - 1)) != Some(c) {
+                    if self.mapping.get((p.0, p.1 - 1)) != Some(c) {
                         v_segs.insert((p, false));
                     }
-                    if self.mapping.get(&(p.0, p.1 + 1)) != Some(c) {
+                    if self.mapping.get((p.0, p.1 + 1)) != Some(c) {
                         v_segs.insert(((p.0, p.1 + 1), true));
                     }
 
