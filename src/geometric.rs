@@ -34,18 +34,18 @@ pub trait GeometricRotation {
 pub type Dim2<L> = (L, L);
 pub type Vec2 = (isize, isize);
 
-pub trait AsVec2Reference {
-    fn as_vec2_ref(&self) -> &Vec2;
+pub trait AsReference<V> {
+    fn as_vec2_ref(&self) -> &V;
 }
 
-impl AsVec2Reference for Vec2 {
+impl AsReference<Vec2> for Vec2 {
     #[inline]
     fn as_vec2_ref(&self) -> &Vec2 {
         self
     }
 }
 
-impl AsVec2Reference for &Vec2 {
+impl AsReference<Vec2> for &Vec2 {
     #[inline]
     fn as_vec2_ref(&self) -> &Vec2 {
         self

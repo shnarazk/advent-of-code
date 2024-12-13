@@ -29,7 +29,7 @@ pub struct Rect<T: Clone + Default + Sized> {
 }
 
 impl<T: Clone + Default + Sized> Rect<T> {
-    pub fn new<V: AsVec2Reference>(size: V, default: T) -> Rect<T> {
+    pub fn new<V: AsReference<Vec2>>(size: V, default: T) -> Rect<T> {
         let sf = size.as_vec2_ref();
         Rect {
             size: *sf,
@@ -43,35 +43,35 @@ impl<T: Clone + Default + Sized> Rect<T> {
         }
     }
     #[inline]
-    pub fn get<V: AsVec2Reference>(&self, index: V) -> Option<&T> {
+    pub fn get<V: AsReference<Vec2>>(&self, index: V) -> Option<&T> {
         self.to_index(index.as_vec2_ref())
             .and_then(|i| self.vec.get(i))
     }
     #[inline]
-    pub fn get_unchecked<V: AsVec2Reference>(&self, index: V) -> &T {
+    pub fn get_unchecked<V: AsReference<Vec2>>(&self, index: V) -> &T {
         unsafe {
             self.vec
                 .get_unchecked(self.to_index_unchecked(index.as_vec2_ref()))
         }
     }
     #[inline]
-    pub fn get_mut<V: AsVec2Reference>(&mut self, index: V) -> Option<&mut T> {
+    pub fn get_mut<V: AsReference<Vec2>>(&mut self, index: V) -> Option<&mut T> {
         self.to_index(index.as_vec2_ref())
             .and_then(|i| self.vec.get_mut(i))
     }
     #[inline]
-    pub fn get_mut_unchecked<V: AsVec2Reference>(&mut self, index: V) -> &mut T {
+    pub fn get_mut_unchecked<V: AsReference<Vec2>>(&mut self, index: V) -> &mut T {
         let i = self.to_index_unchecked(index.as_vec2_ref());
         unsafe { self.vec.get_unchecked_mut(i) }
     }
     #[inline]
-    pub fn set<V: AsVec2Reference>(&mut self, index: V, val: T) {
+    pub fn set<V: AsReference<Vec2>>(&mut self, index: V, val: T) {
         if let Some(i) = self.to_index(index.as_vec2_ref()) {
             self.vec[i] = val;
         }
     }
     #[inline]
-    pub fn to_index<V: AsVec2Reference>(&self, index: V) -> Option<usize> {
+    pub fn to_index<V: AsReference<Vec2>>(&self, index: V) -> Option<usize> {
         let idx = index.as_vec2_ref();
         if (0..self.size.0).contains(&idx.0) && (0..self.size.1).contains(&idx.1) {
             Some((idx.0 * self.size.1 + idx.1) as usize)
@@ -80,7 +80,7 @@ impl<T: Clone + Default + Sized> Rect<T> {
         }
     }
     #[inline]
-    pub fn to_index_unchecked<V: AsVec2Reference>(&self, index: V) -> usize {
+    pub fn to_index_unchecked<V: AsReference<Vec2>>(&self, index: V) -> usize {
         let idx = index.as_vec2_ref();
         (idx.0 * self.size.1 + idx.1) as usize
     }
@@ -133,7 +133,7 @@ impl<'a, T> Iterator for Vec2Iter<'a, T> {
     }
 }
 
-impl<V: AsVec2Reference, T: Clone + Default + Sized> Index<V> for Rect<T> {
+impl<V: AsReference<Vec2>, T: Clone + Default + Sized> Index<V> for Rect<T> {
     type Output = T;
     #[inline]
     fn index(&self, i: V) -> &Self::Output {
@@ -141,7 +141,7 @@ impl<V: AsVec2Reference, T: Clone + Default + Sized> Index<V> for Rect<T> {
     }
 }
 
-impl<V: AsVec2Reference, T: Clone + Default + Sized> IndexMut<V> for Rect<T> {
+impl<V: AsReference<Vec2>, T: Clone + Default + Sized> IndexMut<V> for Rect<T> {
     #[inline]
     fn index_mut(&mut self, i: V) -> &mut Self::Output {
         self.get_mut_unchecked(i.as_vec2_ref())
