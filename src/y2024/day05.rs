@@ -5,8 +5,12 @@ use {
         parser::parse_usize,
     },
     rayon::prelude::*,
+    rustc_data_structures::fx::FxHasher,
     serde::Serialize,
-    std::collections::{HashMap, HashSet},
+    std::{
+        collections::{HashMap, HashSet},
+        hash::BuildHasherDefault,
+    },
     winnow::{
         ascii::newline,
         combinator::{repeat_till, separated},
@@ -58,7 +62,7 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .enumerate()
                     .map(|(i, k)| (*k, i))
-                    .collect::<HashMap<usize, usize>>();
+                    .collect::<HashMap<usize, usize, BuildHasherDefault<FxHasher>>>();
                 self.rules.iter().all(|(a, b)| {
                     let i = occurs.get(a);
                     let j = occurs.get(b);
@@ -76,7 +80,7 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .enumerate()
                     .map(|(i, k)| (*k, i))
-                    .collect::<HashMap<usize, usize>>();
+                    .collect::<HashMap<usize, usize, BuildHasherDefault<FxHasher>>>();
                 !self.rules.iter().all(|(a, b)| {
                     let i = occurs.get(a);
                     let j = occurs.get(b);
@@ -96,12 +100,12 @@ fn topological_sort(rules: &[(usize, usize)], mut context: Vec<usize>) -> Vec<us
         .par_iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
         .map(|(_, b)| *b)
-        .collect::<HashSet<usize>>();
+        .collect::<HashSet<usize, BuildHasherDefault<FxHasher>>>();
     let lowers = rules
         .par_iter()
         .filter(|(a, b)| context.contains(a) && context.contains(b))
         .map(|(a, _)| *a)
-        .collect::<HashSet<usize>>();
+        .collect::<HashSet<usize, BuildHasherDefault<FxHasher>>>();
     let mut cands = lowers
         .par_iter()
         .filter(|x| !uppers.contains(x))
