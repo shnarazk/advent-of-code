@@ -5,13 +5,19 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
+        geometric::*,
         parser::parse_isize,
+        progress, progress_picture,
     },
-    rayon::prelude::*,
+    itertools::Itertools,
+    rayon::{max_num_threads, prelude::*},
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{cmp::Ordering, collections::HashMap, hash::BuildHasherDefault},
+    std::{
+        cmp::Ordering,
+        collections::{HashMap, HashSet},
+        hash::BuildHasherDefault,
+    },
     winnow::{
         ascii::newline,
         combinator::{repeat, repeat_till, separated, seq, terminated},
@@ -26,11 +32,18 @@ pub struct Puzzle {
     size: (isize, isize),
 }
 
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
+impl Puzzle {
+    fn dump(&self, set: &HashSet<(isize, isize)>) {
+        let mut s: String = String::new();
+        for i in 0..self.size.0 {
+            for j in 0..self.size.1 {
+                s.push_str(format!("{}", if set.contains(&(i, j)) { "#" } else { "." }).as_str());
+            }
+            s.push('\n');
+        }
+        progress_picture!(s);
+    }
+}
 
 // p=0,4 v=3,-3
 fn parse_line(s: &mut &str) -> PResult<(isize, isize, isize, isize)> {
@@ -78,10 +91,36 @@ impl AdventOfCode for Puzzle {
             .fold((0, 0, 0, 0), |acc, val| {
                 (acc.0 + val.0, acc.1 + val.1, acc.2 + val.2, acc.3 + val.3)
             });
-        dbg!(&res);
         res.0 * res.1 * res.2 * res.3
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let t = 10000;
+        let mut max_meaningful = 0;
+        let mut at: usize = 0;
+        for t in 1..t {
+            let res = self
+                .line
+                .iter()
+                .map(|&(pi, pj, si, sj)| {
+                    let a = (((t * si + pi) % self.size.0) + self.size.0) % self.size.0;
+                    let b = (((t * sj + pj) % self.size.1) + self.size.1) % self.size.1;
+                    (a, b)
+                })
+                .collect::<HashSet<_>>();
+            let num_connected = res
+                .iter()
+                .filter(|p| {
+                    p.neighbors8((0, 0), self.size)
+                        .iter()
+                        .any(|q| res.contains(q))
+                })
+                .count();
+            if max_meaningful < num_connected {
+                max_meaningful = num_connected;
+                at = t as usize;
+                self.dump(&res);
+            }
+        }
+        at
     }
 }

@@ -66,3 +66,14 @@ macro_rules! progress {
         );
     }};
 }
+
+#[macro_export]
+macro_rules! progress_picture {
+    ($val: expr) => {{
+        let rows = $val.chars().filter(|c| *c == '\n').count() + 1;
+        print!(
+            "\x1B[{}A\n\x1B[0J\x1B[48;2;220;220;220m\x1B[38;2;20;100;200m{}\x1B[0m\x1B[1G",
+            rows, $val
+        );
+    }};
+}
