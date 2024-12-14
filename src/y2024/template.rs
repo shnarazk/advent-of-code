@@ -31,7 +31,7 @@ pub struct Puzzle {
 //     }
 // }
 
-// fn parse(str: &mut &str) -> PResult<()> {}
+// fn parse(s: &mut &str) -> PResult<()> {}
 
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {
@@ -42,7 +42,6 @@ impl AdventOfCode for Puzzle {
     //     Self::parsed()
     // }
     // fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    //     dbg!(block);
     //     Ok(())
     // }
     fn end_of_data(&mut self) {
