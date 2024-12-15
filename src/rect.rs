@@ -84,6 +84,9 @@ impl<T: Clone + Default + Sized> Rect<T> {
         let idx = index.as_vec_ref();
         (idx.0 * self.size.1 + idx.1) as usize
     }
+    pub fn len(&self) -> usize {
+        (self.size.0 as usize) * (self.size.1 as usize)
+    }
     pub fn size(&self) -> &Vec2 {
         &self.size
     }
@@ -102,6 +105,26 @@ impl<T: Clone + Default + Sized> Rect<T> {
             size: self.size,
             vec: self.vec.iter().map(f).collect::<Vec<U>>(),
         }
+    }
+    pub fn rotate_clockwise(&self) -> Rect<T> {
+        let h = self.size.0;
+        let mut new = self.clone();
+        new.size = (self.size.1, self.size.0);
+        self.iter().for_each(|(p, _)| {
+            let q = new.to_index_unchecked((p.1, h - p.0 - 1));
+            new.vec[q] = self.vec[self.to_index_unchecked(p)].clone();
+        });
+        new
+    }
+
+    pub fn transpose(&self) -> Rect<T> {
+        let mut new = self.clone();
+        new.size = (new.size.1, new.size.0);
+        self.iter().for_each(|(p, _)| {
+            let q = new.to_index_unchecked((p.1, p.0));
+            new.vec[q] = self.vec[self.to_index_unchecked(p)].clone();
+        });
+        new
     }
 }
 
@@ -182,5 +205,33 @@ mod test {
             }
         }
         assert_eq!(count, 450);
+    }
+    #[test]
+    fn test_rotate() {
+        let v1 = vec![vec![0_usize, 1], vec![2, 3], vec![4, 5]];
+        let r0 = Rect::from_vec(v1);
+        let r1 = r0.rotate_clockwise();
+        assert_eq!(r1.size, (2, 3));
+        assert_eq!(r1.vec, vec![4_usize, 2, 0, 5, 3, 1]);
+
+        let v2 = vec![vec![0_usize, 1, 0], vec![0, 2, 0]];
+        let r2 = Rect::from_vec(v2);
+        let r3 = r2.rotate_clockwise();
+        assert_eq!(r3.size, (3, 2));
+        assert_eq!(r3.vec, vec![0_usize, 0, 2, 1, 0, 0]);
+    }
+    #[test]
+    fn test_transpose() {
+        let v1 = vec![vec![0_usize, 1], vec![2, 3], vec![4, 5]];
+        let r0 = Rect::from_vec(v1);
+        let r1 = r0.transpose();
+        assert_eq!(r1.size, (2, 3));
+        assert_eq!(r1.vec, vec![0_usize, 2, 4, 1, 3, 5]);
+
+        let v2 = vec![vec![0_usize, 1, 0], vec![0, 2, 0]];
+        let r2 = Rect::from_vec(v2);
+        let r3 = r2.transpose();
+        assert_eq!(r3.size, (3, 2));
+        assert_eq!(r3.vec, vec![0_usize, 0, 1, 2, 0, 0]);
     }
 }
