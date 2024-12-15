@@ -14,7 +14,7 @@ use {
     std::{collections::HashMap, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, terminated},
+        combinator::{repeat, repeat_till, separated, seq, terminated},
         token::one_of,
         PResult, Parser,
     },
