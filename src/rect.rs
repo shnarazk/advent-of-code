@@ -24,7 +24,7 @@ use {
 /// ```
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Rect<T: Clone + Default + Sized> {
-    size: Vec2,
+    pub size: Vec2,
     vec: Vec<T>,
 }
 
@@ -100,6 +100,16 @@ impl<T: Clone + Default + Sized> Rect<T> {
             len: self.vec.len(),
         }
     }
+    /* pub fn iter_mut(&self) -> Vec2Iter<T> {
+        Vec2IterMut {
+            vec: &mut self.vec,
+            max_j: self.size.1,
+            i: 0,
+            j: 0,
+            index: 0,
+            len: self.vec.len(),
+        }
+    } */
     pub fn map<U: Clone + Default + Sized>(&self, f: impl Fn(&T) -> U) -> Rect<U> {
         Rect {
             size: self.size,
@@ -155,6 +165,35 @@ impl<'a, T> Iterator for Vec2Iter<'a, T> {
         }
     }
 }
+
+/* pub struct Vec2IterMut<T> {
+    vec: &mut Vec<T>,
+    max_j: isize,
+    i: isize,
+    j: isize,
+    index: usize,
+    len: usize,
+}
+
+impl<T> Iterator for Vec2IterMut<T> {
+    type Item = (Vec2, &mut T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.len {
+            let i: (isize, isize) = (self.i, self.j);
+            let p: &mut T = &mut self.vec[self.index];
+            self.j += 1;
+            if self.j == self.max_j {
+                self.i += 1;
+                self.j = 0;
+            }
+            self.index += 1;
+            Some((i, p))
+        } else {
+            None
+        }
+    }
+} */
 
 impl<V: AsVecReference<Vec2>, T: Clone + Default + Sized> Index<V> for Rect<T> {
     type Output = T;
