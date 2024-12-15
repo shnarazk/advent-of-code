@@ -1,22 +1,15 @@
 //! <https://adventofcode.com/2024/day/15>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
-        parser::parse_usize,
         progress_picture,
         rect::Rect,
     },
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{collections::HashMap, fmt, fs::DirEntry, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated, seq},
         token::one_of,
         PResult, Parser,
     },
@@ -93,6 +86,7 @@ impl Puzzle {
             })
             .sum()
     }
+    #[allow(dead_code)]
     fn dump(&self) {
         let mut s = String::new();
         for i in 0..self.mapping.size.0 {
@@ -107,6 +101,7 @@ impl Puzzle {
         }
         progress_picture!(s);
     }
+    #[allow(dead_code)]
     fn dump2(&self) {
         let mut s = String::new();
         for i in 0..self.mapping.size.0 {
@@ -267,195 +262,163 @@ impl Puzzle {
             Direction::WEST => self.unsupported_w(pos),
         }
     }
-    fn shift_e(&mut self, pos: (Vec2, bool)) -> bool {
+    fn shift_e(&mut self, pos: (Vec2, bool)) {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
-                Kind::Wall => false,
                 Kind::Box => {
                     self.shift_e((pos.0.add(&(0, 1)), pos.1));
                     self.mapping[pos.0] = Kind::BoxH;
-                    true
                 }
-                Kind::BoxH => true,
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         } else {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
-                Kind::Wall => false,
                 Kind::Box => unreachable!(),
                 Kind::BoxH => {
                     let e = pos.0.add(&(0, 1));
                     self.shift_e((e, pos.1));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[e] = Kind::Box;
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         }
     }
-    fn shift_w(&mut self, pos: (Vec2, bool)) -> bool {
+    fn shift_w(&mut self, pos: (Vec2, bool)) {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Empty => {
                     let w = pos.0.add(&(0, -1));
-                    // self.mapping[w] != Kind::BoxH || self.unsupported_w((w, false))
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_w((w, false));
                         self.mapping[w] = Kind::Box;
                     }
-                    true
                 }
-                Kind::Wall => false,
                 Kind::Box => {
                     let w = pos.0.add(&(0, -1));
                     self.shift_w((w, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[w] = Kind::BoxH;
-                    true
                 }
                 Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
-                    // self.mapping[w] != Kind::BoxH || self.unsupported_w((w, false))
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_w((w, false));
                         self.mapping[w] = Kind::Box;
                     }
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         } else {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
-                Kind::Wall => false,
                 Kind::Box => {
                     let w = pos.0.add(&(0, -1));
                     self.shift_w((w, pos.1));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[w] = Kind::BoxH;
-                    true
                 }
                 Kind::BoxH => unreachable!(),
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         }
     }
-    fn shift_s(&mut self, pos: (Vec2, bool)) -> bool {
+    fn shift_s(&mut self, pos: (Vec2, bool)) {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Wall => false,
                 Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let s1 = pos.0.add(&(1, -1));
                     let s2 = pos.0.add(&(1, 0));
-                    // self.mapping[w] != Kind::BoxH
-                    //     || (self.shift_s((s1, true)) && self.shift_s((s2, false)))
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_s((s1, true));
                         self.shift_s((s2, false));
                         self.mapping[w] = Kind::Empty;
                         self.mapping[s1] = Kind::BoxH;
                     }
-                    true
                 }
                 Kind::Box => {
                     let s = pos.0.add(&(1, 0));
-                    // self.shift_s((s, false)) && self.shift_s((s, true))
                     self.shift_s((s, false));
                     self.shift_s((s, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[s] = Kind::Box;
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         } else {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
-                Kind::Wall => false,
                 Kind::BoxH => {
                     let s1 = pos.0.add(&(1, 0));
                     let s2 = pos.0.add(&(1, 1));
-                    // self.shift_s((s1, true)) && self.shift_s((s2, false))
                     self.shift_s((s1, true));
                     self.shift_s((s2, false));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[s1] = Kind::BoxH;
-                    true
                 }
                 Kind::Box => {
                     let s = pos.0.add(&(1, 0));
-                    // self.shift_s((s1, true)) && self.shift_s((s2, false))
                     self.shift_s((s, false));
                     self.shift_s((s, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[s] = Kind::Box;
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         }
     }
-    fn shift_n(&mut self, pos: (Vec2, bool)) -> bool {
+    fn shift_n(&mut self, pos: (Vec2, bool)) {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Wall => false,
                 Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let n1 = pos.0.add(&(-1, -1));
                     let n2 = pos.0.add(&(-1, 0));
-                    // self.mapping[w] != Kind::BoxH
-                    //     || (self.shift_n((s1, true)) && self.shift_n((s2, false)))
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_n((n1, true));
                         self.shift_n((n2, false));
                         self.mapping[w] = Kind::Empty;
                         self.mapping[n1] = Kind::BoxH;
                     }
-                    true
                 }
                 Kind::Box => {
                     let n = pos.0.add(&(-1, 0));
-                    // self.shift_n((n, false)) && self.shift_n((n, true))
                     self.shift_n((n, false));
                     self.shift_n((n, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[n] = Kind::Box;
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         } else {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
-                Kind::Wall => false,
                 Kind::BoxH => {
                     let n1 = pos.0.add(&(-1, 0));
                     let n2 = pos.0.add(&(-1, 1));
-                    // self.shift_n((n1, true)) && self.shift_n((n2, false))
                     self.shift_n((n1, true));
                     self.shift_n((n2, false));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[n1] = Kind::BoxH;
-                    true
                 }
                 Kind::Box => {
                     let n = pos.0.add(&(-1, 0));
-                    // self.shift_n((n1, true)) && self.shift_n((n2, false))
                     self.shift_n((n, false));
                     self.shift_n((n, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[n] = Kind::Box;
-                    true
                 }
                 Kind::Robot => unreachable!(),
+                _ => (),
             }
         }
     }
-    fn shift(&mut self, pos: (Vec2, bool), dir: Direction) -> bool {
+    fn shift(&mut self, pos: (Vec2, bool), dir: Direction) {
         match dir {
             Direction::NORTH => self.shift_n(pos),
             Direction::EAST => self.shift_e(pos),
@@ -565,16 +528,16 @@ impl AdventOfCode for Puzzle {
         for t in 0..self.moves.len() {
             self.press(t);
         }
-        self.dump();
+        // self.dump();
         self.evaluate1()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.dump2();
+        // self.dump2();
         for t in 0..self.moves.len() {
             self.press2(t);
-            let time = t + 1;
-            println!("{time}, Move {}:", self.dir.as_char());
-            self.dump2();
+            // let time = t + 1;
+            // println!("{time}, Move {}:", self.dir.as_char());
+            // self.dump2();
         }
         self.evaluate2()
     }
