@@ -87,6 +87,9 @@ impl<T: Clone + Default + Sized> Rect<T> {
     pub fn len(&self) -> usize {
         (self.size.0 as usize) * (self.size.1 as usize)
     }
+    pub fn is_empty(&self) -> bool {
+        self.vec.is_empty()
+    }
     pub fn size(&self) -> &Vec2 {
         &self.size
     }
