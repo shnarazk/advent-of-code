@@ -138,6 +138,11 @@ impl Puzzle {
         }
         // progress_picture!(s);
         println!("{s}");
+        assert!(s
+            .chars()
+            .collect::<Vec<_>>()
+            .windows(2)
+            .all(|v| (v[0] != '[' || v[1] == ']') && (v[1] != ']' || v[0] == '[')));
     }
 }
 
@@ -189,9 +194,8 @@ impl Puzzle {
     fn unsupported_s(&self, pos: (Vec2, bool)) -> bool {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::BoxH => {
+                Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let s1 = pos.0.add(&(1, -1));
                     let s2 = pos.0.add(&(1, 0));
@@ -224,9 +228,8 @@ impl Puzzle {
     fn unsupported_n(&self, pos: (Vec2, bool)) -> bool {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::BoxH => {
+                Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let n1 = pos.0.add(&(-1, -1));
                     let n2 = pos.0.add(&(-1, 0));
@@ -343,9 +346,8 @@ impl Puzzle {
     fn shift_s(&mut self, pos: (Vec2, bool)) -> bool {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::BoxH => {
+                Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let s1 = pos.0.add(&(1, -1));
                     let s2 = pos.0.add(&(1, 0));
@@ -390,7 +392,7 @@ impl Puzzle {
                     self.shift_s((s, false));
                     self.shift_s((s, true));
                     self.mapping[pos.0] = Kind::Empty;
-                    self.mapping[s] = Kind::BoxH;
+                    self.mapping[s] = Kind::Box;
                     true
                 }
                 Kind::Robot => unreachable!(),
@@ -400,9 +402,8 @@ impl Puzzle {
     fn shift_n(&mut self, pos: (Vec2, bool)) -> bool {
         if !pos.1 {
             match self.mapping[pos.0] {
-                Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::BoxH => {
+                Kind::Empty | Kind::BoxH => {
                     let w = pos.0.add(&(0, -1));
                     let n1 = pos.0.add(&(-1, -1));
                     let n2 = pos.0.add(&(-1, 0));
@@ -483,7 +484,9 @@ impl Puzzle {
             .iter()
             .map(|(p, c)| {
                 if *c == Kind::Box {
-                    (p.0 * 100 + p.1) as usize
+                    (p.0 * 100 + p.1 * 2) as usize
+                } else if *c == Kind::BoxH {
+                    (p.0 * 100 + p.1 * 2 + 1) as usize
                 } else {
                     0
                 }
@@ -567,13 +570,12 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.dump2();
-        for t in 0..self.moves.len().min(322) {
+        for t in 0..self.moves.len() {
             self.press2(t);
             let time = t + 1;
             println!("{time}, Move {}:", self.dir.as_char());
             self.dump2();
         }
-        // self.evaluate2()
-        0
+        self.evaluate2()
     }
 }
