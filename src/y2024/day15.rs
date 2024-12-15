@@ -29,12 +29,7 @@ enum Kind {
     Wall,
     Box,
     Robot,
-}
-
-impl fmt::Display for Kind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.as_char())
-    }
+    BoxH,
 }
 
 impl Kind {
@@ -44,6 +39,7 @@ impl Kind {
             Kind::Wall => '#',
             Kind::Box => 'O',
             Kind::Robot => '@',
+            Kind::BoxH => '\\',
         }
     }
 }
@@ -55,6 +51,7 @@ pub struct Puzzle {
     next_move: usize,
     pos: Vec2,
     dir: Direction,
+    pos_half: bool,
 }
 
 impl Puzzle {
@@ -72,7 +69,7 @@ impl Puzzle {
                 self.pos = next;
             }
             Kind::Wall => (),
-            Kind::Box | Kind::Robot => unreachable!(),
+            Kind::Box | Kind::Robot | Kind::BoxH => unreachable!(),
         }
     }
     fn evaluate1(&self) -> usize {
@@ -100,6 +97,130 @@ impl Puzzle {
             s.push('\n');
         }
         progress_picture!(s);
+    }
+}
+
+impl Puzzle {
+    fn horizontal_unsupported(&self, pos: (Vec2, bool), dir: Direction) -> bool {
+        if pos.1 {
+            match self.mapping[pos.0] {
+                Kind::Empty => true,
+                Kind::Wall => false,
+                Kind::Box => self.horizontal_unsupported((pos.0.add(&dir.as_vec2()), true), dir),
+                Kind::BoxH => unreachable!(),
+                Kind::Robot => unreachable!(),
+            }
+        } else {
+            match self.mapping[pos.0] {
+                Kind::Empty => unreachable!(),
+                Kind::BoxH => {
+                    self.mapping[pos.0.add(&dir.as_vec2())] != Kind::BoxH
+                        || self.horizontal_unsupported((pos.0.add(&dir.as_vec2()), true), dir)
+                }
+                Kind::Wall => unreachable!(),
+                Kind::Box => unreachable!(),
+                Kind::Robot => unreachable!(),
+            }
+        }
+    }
+    // FIXME
+    fn push_horizontal(&mut self, pos: (Vec2, bool), dir: Direction) {
+        if pos.1 {
+            if self.mapping[pos.0] == Kind::Box {
+                let next = pos.0.add(&dir.as_vec2());
+                self.push_horizontal((next, true), dir);
+            }
+            self.mapping[pos.0] = Kind::BoxH;
+        } else {
+            // if self.mapping[pos.0] == Kind::Empty {
+            //     Kind::Empty => self.mapping[pos.0.add(&dir.as_vec2()))] != Kind::BoxH,
+            // }
+            //     Kind::Wall => unreachable!(),
+            //     Kind::Box => unreachable!(),
+            //     Kind::BoxH => unreachable!(),
+            //     Kind::Robot => unreachable!(),
+            // };
+            ()
+        };
+    }
+    fn vertical_unsupported(&mut self, pos: (Vec2, bool), dir: Direction) -> bool {
+        match self.mapping[pos.0] {
+            Kind::Empty => true,
+            Kind::Wall => false,
+            Kind::Box => {
+                self.vertical_unsupported((pos.0.add(&dir.as_vec2()), false), dir)
+                    && self.vertical_unsupported((pos.0.add(&dir.as_vec2()), true), dir)
+            }
+            Kind::BoxH => {
+                if pos.1 {
+                    self.vertical_unsupported((pos.0.add(&dir.as_vec2()), true), dir)
+                        && self.vertical_unsupported(
+                            (pos.0.add(&dir.as_vec2().add(&(0, 1))), false),
+                            dir,
+                        )
+                } else {
+                    true
+                }
+            }
+            Kind::Robot => unreachable!(),
+        }
+    }
+    // FIXME
+    fn push_vertical(&mut self, pos: (Vec2, bool), dir: Direction) {
+        match self.mapping[pos.0] {
+            Kind::Empty => true,
+            Kind::Wall => false,
+            Kind::Box => {
+                self.vertical_unsupported((pos.0.add(&dir.as_vec2()), false), dir)
+                    && self.vertical_unsupported((pos.0.add(&dir.as_vec2()), true), dir)
+            }
+            Kind::BoxH => {
+                if pos.1 {
+                    self.vertical_unsupported((pos.0.add(&dir.as_vec2()), true), dir)
+                        && self.vertical_unsupported(
+                            (pos.0.add(&dir.as_vec2().add(&(0, 1))), false),
+                            dir,
+                        )
+                } else {
+                    true
+                }
+            }
+            Kind::Robot => unreachable!(),
+        };
+    }
+    fn press2(&mut self, t: usize) {
+        self.dir = self.moves[t];
+        if [Direction::EAST, Direction::WEST].contains(&self.dir) {
+            let next = if self.pos_half {
+                (self.pos.add(&self.dir.as_vec2()), false)
+            } else {
+                (self.pos, true)
+            };
+            if self.horizontal_unsupported(next, self.dir) {
+                self.push_horizontal(next, self.dir);
+                self.pos = next.0;
+                self.pos_half = next.1;
+            }
+        } else {
+            let next = (self.pos.add(&self.dir.as_vec2()), self.pos_half);
+            if self.vertical_unsupported(next, self.dir) {
+                self.push_vertical(next, self.dir);
+                self.pos = next.0;
+                self.pos_half = next.1;
+            }
+        };
+    }
+    fn evaluate2(&self) -> usize {
+        self.mapping
+            .iter()
+            .map(|(p, c)| {
+                if *c == Kind::Box {
+                    (p.0 * 100 + p.1) as usize
+                } else {
+                    0
+                }
+            })
+            .sum()
     }
 }
 
@@ -170,7 +291,6 @@ impl AdventOfCode for Puzzle {
         self.next_move = 0;
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut ret: FxHashMap<usize, usize> = HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
         for t in 0..self.moves.len() {
             self.press(t);
         }
@@ -178,6 +298,10 @@ impl AdventOfCode for Puzzle {
         self.evaluate1()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        for t in 0..self.moves.len() {
+            self.press2(t);
+        }
+        self.dump();
+        self.evaluate2()
     }
 }
