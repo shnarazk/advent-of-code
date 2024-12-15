@@ -87,6 +87,14 @@ impl Direction {
             _ => None,
         }
     }
+    pub fn as_char(&self) -> char {
+        match self {
+            Direction::NORTH => '^',
+            Direction::EAST => '>',
+            Direction::SOUTH => 'v',
+            Direction::WEST => '<',
+        }
+    }
 }
 
 impl GeometricRotation for Direction {
