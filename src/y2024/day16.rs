@@ -1,15 +1,11 @@
 //! <https://adventofcode.com/2024/day/16>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
-        parser::parse_usize,
+        progress,
         rect::Rect,
     },
-    rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
     std::{
@@ -18,7 +14,7 @@ use {
     },
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated},
         token::one_of,
         PResult, Parser,
     },
@@ -31,17 +27,6 @@ enum Kind {
     Wall,
     End,
     Start,
-}
-
-impl Kind {
-    fn as_char(&self) -> char {
-        match self {
-            Kind::Empty => '.',
-            Kind::Wall => '#',
-            Kind::End => 'E',
-            Kind::Start => 'S',
-        }
-    }
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
@@ -95,6 +80,7 @@ impl Puzzle {
                 if cost < best {
                     visited[self.goal] = Some(cost);
                     best = cost;
+                    progress!(best);
                     best_map.clear(None);
                     for p in path.iter() {
                         best_map[p.0] = visited[p.0];
@@ -128,32 +114,30 @@ impl Puzzle {
     ) -> usize {
         type SEARCHSPACE = (usize, Vec<(Vec2, Direction)>);
         let mut tiles: HashSet<Vec2> = HashSet::new();
-        let mut visited: HashMap<(Vec2, Direction), usize> = HashMap::new();
+        let mut visited: FxHashMap<(Vec2, Direction), usize> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         let mut to_visit: BinaryHeap<SEARCHSPACE> = BinaryHeap::new();
 
         for &(pos, dir) in cands.iter() {
             let cost = best_map[pos].unwrap();
+            visited.insert((pos, dir), cost);
             tiles.insert(pos);
             for &d in DIRECTIONS.iter() {
                 if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
-                    if self.mapping[q] {
+                    if self.mapping[q] && best_map[q].is_none() {
                         let c = cost + if dir == d { 1 } else { 1001 };
                         to_visit.push((c, vec![(*q, d)]));
                     }
                 }
             }
         }
-
-        // to_visit.push((0, vec![self.pos], self.dir));
         while let Some((cost, path)) = to_visit.pop() {
             let (pos, dir) = *path.last().unwrap();
-            if let Some(c) = best_map[pos] {
-                if c == cost {
-                    for p in path.iter() {
-                        tiles.insert(p.0);
-                    }
-                    continue;
+            if best_map[pos].map_or(false, |c| c == cost) {
+                for p in path.iter() {
+                    tiles.insert(p.0);
                 }
+                continue;
             }
             if threshold < cost || visited.get(&(pos, dir)).map_or(false, |c| *c < cost) {
                 continue;
