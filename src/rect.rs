@@ -119,6 +119,11 @@ impl<T: Clone + Default + Sized> Rect<T> {
             vec: self.vec.iter().map(f).collect::<Vec<U>>(),
         }
     }
+    pub fn clear(&mut self, val: T) {
+        for p in self.vec.iter_mut() {
+            *p = val.clone();
+        }
+    }
     pub fn rotate_clockwise(&self) -> Rect<T> {
         let h = self.size.0;
         let mut new = self.clone();
