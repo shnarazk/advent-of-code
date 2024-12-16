@@ -8,6 +8,13 @@ pub trait GeometricMath {
     fn sub(&self, other: &Self) -> Self;
     fn add_scalar(&self, other: Self::BaseType) -> Self;
     fn mul_scalar(&self, other: Self::BaseType) -> Self;
+    fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        from: V1,
+        to: &V2,
+    ) -> Option<&Self>
+    where
+        Self: Sized;
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
         Self: Sized;
@@ -69,6 +76,13 @@ pub enum Direction {
     WEST,
 }
 
+pub const DIRECTIONS: [Direction; 4] = [
+    Direction::NORTH,
+    Direction::EAST,
+    Direction::SOUTH,
+    Direction::WEST,
+];
+
 impl Direction {
     pub fn as_vec2(&self) -> Vec2 {
         match self {
@@ -116,9 +130,9 @@ impl GeometricRotation for Direction {
     }
 }
 
-const DIR4: [Vec2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+pub const DIR4: [Vec2; 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
 
-const DIR8: [Vec2; 8] = [
+pub const DIR8: [Vec2; 8] = [
     (-1, 0),
     (-1, 1),
     (0, 1),
@@ -164,6 +178,18 @@ impl GeometricMath for Dim2<isize> {
     }
     fn mul_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 * other, self.1 * other)
+    }
+    fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        from: V1,
+        to: &V2,
+    ) -> Option<&Self>
+    where
+        Self: Sized,
+    {
+        let f = from.as_vec_ref();
+        let t = to.as_vec_ref();
+        (f.0 <= self.0 && self.0 < t.0 && f.1 <= self.1 && self.1 < t.1).then_some(self)
     }
     fn shift(&self, vec: &Vec2) -> Option<Self>
     where
@@ -256,6 +282,18 @@ impl GeometricMath for Dim2<usize> {
     }
     fn mul_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 * other, self.1 * other)
+    }
+    fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        from: V1,
+        to: &V2,
+    ) -> Option<&Self>
+    where
+        Self: Sized,
+    {
+        let f = from.as_vec_ref();
+        let t = to.as_vec_ref();
+        (f.0 <= self.0 && self.0 < t.0 && f.1 <= self.1 && self.1 < t.1).then_some(self)
     }
     fn shift(&self, vec: &Vec2) -> Option<Self>
     where
@@ -402,6 +440,24 @@ impl GeometricMath for Dim3<isize> {
     fn mul_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 * other, self.1 * other, self.2 * other)
     }
+    fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        from: V1,
+        to: &V2,
+    ) -> Option<&Self>
+    where
+        Self: Sized,
+    {
+        let f = from.as_vec_ref();
+        let t = to.as_vec_ref();
+        (f.0 <= self.0
+            && self.0 < t.0
+            && f.1 <= self.1
+            && self.1 < t.1
+            && f.2 <= self.2
+            && self.2 < t.2)
+            .then_some(self)
+    }
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
         Self: Sized,
@@ -470,6 +526,24 @@ impl GeometricMath for Dim3<usize> {
     }
     fn mul_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 * other, self.1 * other, self.2 * other)
+    }
+    fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
+        &self,
+        from: V1,
+        to: &V2,
+    ) -> Option<&Self>
+    where
+        Self: Sized,
+    {
+        let f = from.as_vec_ref();
+        let t = to.as_vec_ref();
+        (f.0 <= self.0
+            && self.0 < t.0
+            && f.1 <= self.1
+            && self.1 < t.1
+            && f.2 <= self.2
+            && self.2 < t.2)
+            .then_some(self)
     }
     fn shift(&self, vec: &Self::Vector) -> Option<Self>
     where
