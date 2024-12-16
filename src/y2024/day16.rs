@@ -14,35 +14,24 @@ use {
     std::{collections::HashMap, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, terminated},
+        combinator::{repeat, repeat_till, separated, seq, terminated},
         token::one_of,
         PResult, Parser,
     },
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<()>,
 }
-
-// impl Default for Puzzle {
-//     fn default() -> Self {
-//         Puzzle { }
-//     }
-// }
 
 // fn parse(s: &mut &str) -> PResult<()> {}
 
 #[aoc(2024, 16)]
 impl AdventOfCode for Puzzle {
-    // const DELIMITER: &'static str = "\n";
     // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     let s = &mut input.as_str();
-    //     self.line = parser(s)?;
+    //     self.line = parser(&mut input.as_str())?;
     //     Self::parsed()
-    // }
-    // fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    //     Ok(())
     // }
     fn end_of_data(&mut self) {
         dbg!(&self.line);

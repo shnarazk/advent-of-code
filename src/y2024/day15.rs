@@ -91,11 +91,11 @@ impl Puzzle {
         let mut s = String::new();
         for i in 0..self.mapping.size.0 {
             for j in 0..self.mapping.size.1 {
-                if self.pos == (i, j) {
-                    s.push(self.dir.as_char());
+                s.push(if self.pos == (i, j) {
+                    self.dir.as_char()
                 } else {
-                    s.push(self.mapping[(i, j)].as_char());
-                }
+                    self.mapping[(i, j)].as_char()
+                });
             }
             s.push('\n');
         }
