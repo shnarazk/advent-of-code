@@ -3,14 +3,14 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
-        // progress,
+        progress,
         rect::Rect,
     },
     itertools::Itertools,
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
-        cmp::Ordering,
+        cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
     },
@@ -88,12 +88,13 @@ impl Puzzle {
     fn path_cost(&self) -> usize {
         let mut best = usize::MAX;
         let mut visited: Rect<Option<usize>> = self.mapping.map(|_| None);
-        let mut to_visit: BinaryHeap<(usize, Vec2, Direction)> = BinaryHeap::new();
-        to_visit.push((0, self.pos, self.dir));
-        while let Some((cost, pos, dir)) = to_visit.pop() {
+        let mut to_visit: BinaryHeap<Reverse<(usize, Vec2, Direction)>> = BinaryHeap::new();
+        to_visit.push(Reverse((0, self.pos, self.dir)));
+        while let Some(Reverse((cost, pos, dir))) = to_visit.pop() {
             if pos == self.goal {
                 if cost < best {
                     best = cost;
+                    progress!(best);
                 }
                 continue;
             }
@@ -105,7 +106,7 @@ impl Puzzle {
                 if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
                     if self.mapping[q] {
                         let c = cost + if dir == *d { 1 } else { 1001 };
-                        to_visit.push((c, *q, *d));
+                        to_visit.push(Reverse((c, *q, *d)));
                     }
                 }
             }
@@ -116,9 +117,10 @@ impl Puzzle {
         let mut best = usize::MAX;
         let mut visited: FxHashMap<SearchPoint, (usize, FxHashSet<SearchPoint>)> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut to_visit: BinaryHeap<(usize, (SearchPoint, SearchPoint))> = BinaryHeap::new();
-        to_visit.push((0, ((self.pos, self.dir), (self.pos, self.dir))));
-        while let Some((cost, (p @ (pos, dir), pre))) = to_visit.pop() {
+        let mut to_visit: BinaryHeap<Reverse<(usize, (SearchPoint, SearchPoint))>> =
+            BinaryHeap::new();
+        to_visit.push(Reverse((0, ((self.pos, self.dir), (self.pos, self.dir)))));
+        while let Some(Reverse((cost, (p @ (pos, dir), pre)))) = to_visit.pop() {
             let e = visited.entry(p).or_insert((
                 usize::MAX,
                 HashSet::<_, BuildHasherDefault<FxHasher>>::default(),
@@ -150,7 +152,7 @@ impl Puzzle {
                 if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
                     if self.mapping[q] {
                         let c = cost + if dir == *d { 1 } else { 1001 };
-                        to_visit.push((c, ((*q, *d), p)));
+                        to_visit.push(Reverse((c, ((*q, *d), p))));
                     }
                 }
             }
