@@ -13,7 +13,7 @@ use {
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
     std::{
-        collections::{BinaryHeap, HashMap},
+        collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
     },
     winnow::{
@@ -81,6 +81,97 @@ impl Puzzle {
         }
         best
     }
+    fn a_best_path_map(&self) -> (usize, Vec<(Vec2, Direction)>, Rect<Option<usize>>) {
+        type SEARCHSPACE = (usize, Vec<(Vec2, Direction)>);
+        let mut best = usize::MAX;
+        let mut best_path: Vec<(Vec2, Direction)> = Vec::new();
+        let mut best_map: Rect<Option<usize>> = self.mapping.map(|_| None);
+        let mut visited: Rect<Option<usize>> = self.mapping.map(|_| None);
+        let mut to_visit: BinaryHeap<SEARCHSPACE> = BinaryHeap::new();
+        to_visit.push((0, vec![(self.pos, self.dir)]));
+        while let Some((cost, path)) = to_visit.pop() {
+            let (pos, dir) = *path.last().unwrap();
+            if pos == self.goal {
+                if cost < best {
+                    visited[self.goal] = Some(cost);
+                    best = cost;
+                    best_map.clear(None);
+                    for p in path.iter() {
+                        best_map[p.0] = visited[p.0];
+                    }
+                    best_path = path;
+                }
+                continue;
+            }
+            if best < cost || visited[pos].map_or(false, |c| c < cost) {
+                continue;
+            }
+            visited[pos] = Some(cost);
+            for d in DIRECTIONS.iter() {
+                if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
+                    if self.mapping[q] {
+                        let c = cost + if dir == *d { 1 } else { 1001 };
+                        let mut new_path = path.clone();
+                        new_path.push((*q, *d));
+                        to_visit.push((c, new_path));
+                    }
+                }
+            }
+        }
+        (best, best_path, best_map)
+    }
+    fn best_tiles(
+        &self,
+        threshold: usize,
+        cands: &[(Vec2, Direction)],
+        best_map: &Rect<Option<usize>>,
+    ) -> usize {
+        type SEARCHSPACE = (usize, Vec<(Vec2, Direction)>);
+        let mut tiles: HashSet<Vec2> = HashSet::new();
+        let mut visited: HashMap<(Vec2, Direction), usize> = HashMap::new();
+        let mut to_visit: BinaryHeap<SEARCHSPACE> = BinaryHeap::new();
+
+        for &(pos, dir) in cands.iter() {
+            let cost = best_map[pos].unwrap();
+            tiles.insert(pos);
+            for &d in DIRECTIONS.iter() {
+                if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
+                    if self.mapping[q] {
+                        let c = cost + if dir == d { 1 } else { 1001 };
+                        to_visit.push((c, vec![(*q, d)]));
+                    }
+                }
+            }
+        }
+
+        // to_visit.push((0, vec![self.pos], self.dir));
+        while let Some((cost, path)) = to_visit.pop() {
+            let (pos, dir) = *path.last().unwrap();
+            if let Some(c) = best_map[pos] {
+                if c == cost {
+                    for p in path.iter() {
+                        tiles.insert(p.0);
+                    }
+                    continue;
+                }
+            }
+            if threshold < cost || visited.get(&(pos, dir)).map_or(false, |c| *c < cost) {
+                continue;
+            }
+            visited.insert((pos, dir), cost);
+            for d in DIRECTIONS.iter() {
+                if let Some(q) = pos.add(&d.as_vec2()).included((0, 0), &self.size) {
+                    if self.mapping[q] {
+                        let c = cost + if dir == *d { 1 } else { 1001 };
+                        let mut new_path = path.clone();
+                        new_path.push((*q, *d));
+                        to_visit.push((c, new_path));
+                    }
+                }
+            }
+        }
+        tiles.len()
+    }
 }
 
 fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
@@ -133,13 +224,11 @@ impl AdventOfCode for Puzzle {
         *dir = Direction::EAST;
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        dbg!(self.pos);
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.path_cost()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let (threshold, cands, map) = self.a_best_path_map();
+        self.best_tiles(threshold, &cands, &map)
     }
 }
