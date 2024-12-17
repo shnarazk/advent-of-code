@@ -34,7 +34,7 @@ pub struct Puzzle {
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {
     // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     self.line = parser(&mut input.as_str())?;
+    //     self.line = parse(&mut input.as_str())?;
     //     Self::parsed()
     // }
     fn end_of_data(&mut self) {
