@@ -172,14 +172,18 @@ impl AdventOfCode for Puzzle {
                 usize::MAX,
                 HashSet::<_, BuildHasherDefault<FxHasher>>::default(),
             ));
-            if cost < e.0 {
-                e.0 = cost;
-                e.1.clear();
-                e.1.insert(pre);
-            } else if cost == e.0 {
-                e.1.insert(pre);
-            } else {
-                continue;
+            match cost.cmp(&e.0) {
+                Ordering::Less => {
+                    e.0 = cost;
+                    e.1.clear();
+                    e.1.insert(pre);
+                }
+                Ordering::Equal => {
+                    e.1.insert(pre);
+                }
+                Ordering::Greater => {
+                    continue;
+                }
             }
             if best < cost {
                 continue;

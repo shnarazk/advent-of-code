@@ -39,8 +39,8 @@ impl Puzzle {
         pc
     }
     fn fetch(&mut self) -> Option<(u8, u8)> {
-        if let Some(a) = self.code.get(self.ip).map(|p| *p) {
-            if let Some(b) = self.code.get(self.ip + 1).map(|p| *p) {
+        if let Some(a) = self.code.get(self.ip).copied() {
+            if let Some(b) = self.code.get(self.ip + 1).copied() {
                 return Some((a, b));
             }
         }
@@ -48,7 +48,7 @@ impl Puzzle {
     }
     fn combo_opland(&self, d: u8) -> usize {
         match d {
-            0 | 1 | 2 | 3 => d as usize,
+            0..=3 => d as usize,
             4 => self.reg[0],
             5 => self.reg[1],
             6 => self.reg[2],
