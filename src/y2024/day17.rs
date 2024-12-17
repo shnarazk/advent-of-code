@@ -23,20 +23,12 @@ pub struct Puzzle {
     output: Vec<u8>,
 }
 
-fn to_num(vec: &[u8]) -> usize {
-    let mut result: usize = 0;
-    for d in vec.iter() {
-        result *= 8;
-        result += *d as usize;
-    }
-    result
-}
-
 impl Puzzle {
-    fn reset(&self, i: usize) -> Puzzle {
+    fn test_run(&self, i: usize) -> Vec<u8> {
         let mut pc = self.clone();
         pc.reg[0] = i;
-        pc
+        pc.run();
+        pc.output
     }
     fn fetch(&mut self) -> Option<(u8, u8)> {
         if let Some(a) = self.code.get(self.ip).copied() {
@@ -169,23 +161,19 @@ impl AdventOfCode for Puzzle {
                 .enumerate()
                 .all(|(i, n)| *n == base[len - i - 1])
         }
-        let mut to_visit: BinaryHeap<Reverse<(usize, Vec<u8>)>> = BinaryHeap::new();
-        to_visit.push(Reverse((0, Vec::new())));
-        while let Some(Reverse((done, vec))) = to_visit.pop() {
+        let mut to_visit: BinaryHeap<Reverse<(usize, usize)>> = BinaryHeap::new();
+        to_visit.push(Reverse((0, 0)));
+        while let Some(Reverse((done, ans))) = to_visit.pop() {
             if done == cond.len() {
-                return to_num(&vec);
+                return ans;
             }
-            let base = to_num(&vec);
-            for i in 0..7_u8 {
-                let cand = base * 8 + i as usize;
-                let mut pc = self.reset(cand);
-                if compatible(&cond, pc.run()) {
-                    let mut v = vec.clone();
-                    v.push(i);
-                    to_visit.push(Reverse((done + 1, v)));
+            for i in 0..7 {
+                let a = ans * 8 + i;
+                if compatible(&cond, self.test_run(a).as_ref()) {
+                    to_visit.push(Reverse((done + 1, a)));
                 }
             }
         }
-        0
+        unreachable!()
     }
 }
