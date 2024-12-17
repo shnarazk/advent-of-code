@@ -153,8 +153,7 @@ impl AdventOfCode for Puzzle {
         // 1,6   : B <- B ^ 6
         // 5,5(B): output <- B % 8
         // 3,0   : if A != 0 { goto 0 }
-        let mut cond = self.code.clone();
-        cond.reverse();
+        let cond = self.code.iter().rev().cloned().collect::<Vec<_>>();
         fn compatible(base: &[u8], cand: &[u8]) -> bool {
             let len = cand.len();
             cand.iter()
