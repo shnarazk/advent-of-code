@@ -1,5 +1,6 @@
 use {
     crate::geometric::*,
+    itertools::Itertools,
     serde::Serialize,
     std::ops::{Index, IndexMut},
 };
@@ -146,17 +147,18 @@ impl<T: Clone + Default + Sized> Rect<T> {
     }
 }
 
-impl<T: Clone + Default + std::fmt::Display> Rect<T> {
-    pub fn to_string(&self) -> String {
-        let mut s = String::new();
+impl<T: Clone + Default + std::fmt::Display> std::fmt::Display for Rect<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in 0..self.size.0 {
-            for j in 0..self.size.1 {
-                s.push_str(format!("{}", self[(i, j)]).as_str());
-                s.push(',');
-            }
-            s.push('\n');
+            writeln!(
+                f,
+                "{}",
+                (0..self.size.1)
+                    .map(|j| format!("{}", self[(i, j)]))
+                    .join(",")
+            )?;
         }
-        s
+        Ok(())
     }
 }
 

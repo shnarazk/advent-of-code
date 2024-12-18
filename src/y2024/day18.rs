@@ -1,7 +1,4 @@
 //! <https://adventofcode.com/2024/day/18>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
@@ -9,19 +6,11 @@ use {
         parser::parse_usize,
         rect::Rect,
     },
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    serde_json::to_value,
-    std::{
-        cmp::Reverse,
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
+    std::{cmp::Reverse, collections::BinaryHeap},
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
-        token::one_of,
+        combinator::{separated, seq},
         PResult, Parser,
     },
 };
@@ -51,7 +40,7 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         match &self.get_config().alt {
-            Some(x) if *x == "0".to_string() => {
+            Some(x) if x.as_str() == "0" => {
                 self.size = (7, 7);
                 self.bricks = 12;
             }
@@ -64,7 +53,7 @@ impl AdventOfCode for Puzzle {
         for p in self.line.iter().take(self.bricks) {
             self.mapping[(p.1 as isize, p.0 as isize)] = false;
         }
-        // println!("{}", &self.mapping.to_string());
+        // println!("{}", self.mapping);
     }
     fn part1(&mut self) -> Self::Output1 {
         // let mut ret: FxHashMap<usize, usize> = HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
