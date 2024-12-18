@@ -53,10 +53,8 @@ impl AdventOfCode for Puzzle {
         for p in self.line.iter().take(self.bricks) {
             self.mapping[(p.1 as isize, p.0 as isize)] = false;
         }
-        // println!("{}", self.mapping);
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut ret: FxHashMap<usize, usize> = HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
         let start: Vec2 = (0, 0);
         let goal: Vec2 = self.size.sub(&(1, 1));
         let mut to_visit: BinaryHeap<Reverse<(usize, Vec2)>> = BinaryHeap::new();
@@ -79,7 +77,6 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut index = dbg!(self.bricks);
         let mut range: (usize, usize) = (self.bricks, self.line.len());
         while range.0 + 1 != range.1 {
             let med = (range.0 + range.1) / 2;
@@ -94,17 +91,6 @@ impl AdventOfCode for Puzzle {
                 range.0 = med;
             }
         }
-        /* loop {
-            index += 1;
-            let mut you = self.clone();
-            for p in you.line.iter().take(index) {
-                you.mapping[(p.1 as isize, p.0 as isize)] = false;
-            }
-            // println!("{},{}", you.line[index - 1].0, you.line[index - 1].1);
-            if you.part1() == 0 {
-                break;
-            }
-        } */
         format!("{},{}", self.line[range.0].0, self.line[range.0].1)
     }
 }
