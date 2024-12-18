@@ -146,6 +146,20 @@ impl<T: Clone + Default + Sized> Rect<T> {
     }
 }
 
+impl<T: Clone + Default + std::fmt::Display> Rect<T> {
+    pub fn to_string(&self) -> String {
+        let mut s = String::new();
+        for i in 0..self.size.0 {
+            for j in 0..self.size.1 {
+                s.push_str(format!("{}", self[(i, j)]).as_str());
+                s.push(',');
+            }
+            s.push('\n');
+        }
+        s
+    }
+}
+
 pub struct Vec2Iter<'a, T> {
     vec: &'a Vec<T>,
     max_j: isize,
