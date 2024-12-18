@@ -12,6 +12,10 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 
 * [calendar](https://adventofcode.com/2024)
 
+- day14: define meaningful images mathematically
+- day17: this is a search problem that we can solve by Dijkstra nicely
+- day18: bisect
+
 ![](https://github.com/user-attachments/assets/0f35d486-3b28-4fde-b75b-4d7b3851540d)
 
 ## 2023 completed
