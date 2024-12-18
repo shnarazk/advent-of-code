@@ -79,8 +79,22 @@ impl AdventOfCode for Puzzle {
         0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut index = dbg!(self.bricks);
-        loop {
+        // let mut index = dbg!(self.bricks);
+        let mut range: (usize, usize) = (self.bricks, self.line.len());
+        while range.0 + 1 != range.1 {
+            let med = (range.0 + range.1) / 2;
+            let mut you = self.clone();
+            for p in you.line.iter().take(med) {
+                you.mapping[(p.1 as isize, p.0 as isize)] = false;
+            }
+            // println!("{},{}", you.line[index - 1].0, you.line[index - 1].1);
+            if you.part1() == 0 {
+                range.1 = med;
+            } else {
+                range.0 = med;
+            }
+        }
+        /* loop {
             index += 1;
             let mut you = self.clone();
             for p in you.line.iter().take(index) {
@@ -90,7 +104,7 @@ impl AdventOfCode for Puzzle {
             if you.part1() == 0 {
                 break;
             }
-        }
-        format!("{},{}", self.line[index - 1].0, self.line[index - 1].1)
+        } */
+        format!("{},{}", self.line[range.0].0, self.line[range.0].1)
     }
 }
