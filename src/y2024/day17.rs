@@ -162,14 +162,14 @@ impl AdventOfCode for Puzzle {
         }
         let mut to_visit: BinaryHeap<Reverse<(usize, usize)>> = BinaryHeap::new();
         to_visit.push(Reverse((0, 0)));
-        while let Some(Reverse((done, ans))) = to_visit.pop() {
-            if done == cond.len() {
+        while let Some(Reverse((len, ans))) = to_visit.pop() {
+            if len == cond.len() {
                 return ans;
             }
             for i in 0..7 {
                 let a = ans * 8 + i;
                 if compatible(&cond, self.test_run(a).as_ref()) {
-                    to_visit.push(Reverse((done + 1, a)));
+                    to_visit.push(Reverse((len + 1, a)));
                 }
             }
         }
