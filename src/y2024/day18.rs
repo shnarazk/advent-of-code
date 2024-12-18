@@ -4,7 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{aoc_at, AdventOfCode, ParseError},
         geometric::*,
         parser::parse_usize,
         rect::Rect,
@@ -41,8 +41,10 @@ fn parse(s: &mut &str) -> PResult<Vec<(usize, usize)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 
-#[aoc(2024, 18)]
+#[aoc_at(2024, 18)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
         Self::parsed()
@@ -85,10 +87,21 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        dbg!(goal);
-        1
+        0
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut index = dbg!(self.bricks);
+        loop {
+            index += 1;
+            let mut you = self.clone();
+            for p in you.line.iter().take(index) {
+                you.mapping[(p.1 as isize, p.0 as isize)] = false;
+            }
+            // println!("{},{}", you.line[index - 1].0, you.line[index - 1].1);
+            if you.part1() == 0 {
+                break;
+            }
+        }
+        format!("{},{}", self.line[index - 1].0, self.line[index - 1].1)
     }
 }
