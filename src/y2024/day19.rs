@@ -27,24 +27,29 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn matchable(&self, design: &[Kind], from: usize, checked: &mut [bool]) -> bool {
+    fn matchable(&self, design: &[Kind], from: usize, checked: &mut [Option<bool>]) -> bool {
+        if let Some(b) = checked[from] {
+            return b;
+        }
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
-                if remain == design.len() {
+                if remain == design.len()
+                    || checked[remain]
+                        .map_or_else(|| self.matchable(design, remain, checked), |b| b)
+                {
+                    checked[from] = Some(true);
                     return true;
-                }
-                if !checked[remain] {
-                    if self.matchable(design, remain, checked) {
-                        return true;
-                    }
-                    checked[remain] = true;
                 }
             }
         }
+        checked[from] = Some(false);
         false
     }
     fn count(&self, design: &[Kind], from: usize, checked: &mut [Option<usize>]) -> usize {
+        if let Some(n) = checked[from] {
+            return n;
+        }
         let mut c = 0;
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
@@ -104,13 +109,10 @@ impl AdventOfCode for Puzzle {
         self.designs = designs;
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.designs.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.designs
             .par_iter()
-            .filter(|d| self.matchable(d, 0, &mut vec![false; d.len()]))
+            .filter(|d| self.matchable(d, 0, &mut vec![None; d.len()]))
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
