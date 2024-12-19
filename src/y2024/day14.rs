@@ -24,6 +24,7 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
+    #[allow(dead_code)]
     fn dump(&self, set: &FxHashSet<(isize, isize)>) {
         let mut s: String = String::new();
         for i in 0..self.size.0 {
@@ -110,7 +111,7 @@ impl AdventOfCode for Puzzle {
             if max_meaningful < num_connected {
                 max_meaningful = num_connected;
                 at = t as usize;
-                self.dump(&res);
+                // self.dump(&res);
             }
         }
         at
