@@ -38,8 +38,7 @@ impl Puzzle {
         }
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
-                let remain = from + towel.len();
-                if self.matchable_aux(design, remain, checked) {
+                if self.matchable_aux(design, from + towel.len(), checked) {
                     checked[from] = Some(true);
                     return true;
                 }
@@ -57,13 +56,12 @@ impl Puzzle {
         if let Some(n) = checked[from] {
             return n;
         }
-        let mut c = 0;
-        for towel in self.pattern.iter() {
-            if design[from..].starts_with(towel) {
-                let remain = from + towel.len();
-                c += self.count_aux(design, remain, checked);
-            }
-        }
+        let c = self
+            .pattern
+            .iter()
+            .filter(|pattern| design[from..].starts_with(&pattern))
+            .map(|p| self.count_aux(design, from + p.len(), checked))
+            .sum::<usize>();
         checked[from] = Some(c);
         c
     }
