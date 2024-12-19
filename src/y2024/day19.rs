@@ -57,6 +57,25 @@ impl Puzzle {
         }
         false
     }
+    fn count(&self, design: &[Kind], from: usize, checked: &mut [Option<usize>]) -> usize {
+        let mut c = 0;
+        for towel in self.pattern.iter() {
+            if design[from..].starts_with(&towel) {
+                let remain = from + towel.len();
+                if remain == design.len() {
+                    c += 1;
+                    continue;
+                }
+                if let Some(n) = checked[remain] {
+                    c += n;
+                } else {
+                    c += self.count(design, remain, checked);
+                }
+            }
+        }
+        checked[from] = Some(c);
+        c
+    }
 }
 
 fn parse_kind(s: &mut &str) -> PResult<Kind> {
@@ -105,13 +124,16 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.designs.len());
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         self.designs
             .par_iter()
             .filter(|d| self.matchable(d, 0, &mut vec![false; d.len()]))
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.designs
+            .par_iter()
+            .filter(|d| self.matchable(d, 0, &mut vec![false; d.len()]))
+            .map(|d| self.count(d, 0, &mut vec![None; d.len()]))
+            .sum::<usize>()
     }
 }
