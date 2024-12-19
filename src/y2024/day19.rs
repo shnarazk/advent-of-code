@@ -27,17 +27,19 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn matchable(&self, design: &[Kind], from: usize, checked: &mut [Option<bool>]) -> bool {
+    fn matchable(&self, design: &[Kind]) -> bool {
+        let mut checked: Vec<Option<bool>> = vec![None; design.len() + 1];
+        checked[design.len()] = Some(true);
+        self.matchable_aux(design, 0, &mut checked)
+    }
+    fn matchable_aux(&self, design: &[Kind], from: usize, checked: &mut [Option<bool>]) -> bool {
         if let Some(b) = checked[from] {
             return b;
         }
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
-                if remain == design.len()
-                    || checked[remain]
-                        .map_or_else(|| self.matchable(design, remain, checked), |b| b)
-                {
+                if self.matchable_aux(design, remain, checked) {
                     checked[from] = Some(true);
                     return true;
                 }
@@ -46,7 +48,12 @@ impl Puzzle {
         checked[from] = Some(false);
         false
     }
-    fn count(&self, design: &[Kind], from: usize, checked: &mut [Option<usize>]) -> usize {
+    fn count(&self, design: &[Kind]) -> usize {
+        let mut checked: Vec<Option<usize>> = vec![None; design.len() + 1];
+        checked[design.len()] = Some(1);
+        self.count_aux(design, 0, &mut checked)
+    }
+    fn count_aux(&self, design: &[Kind], from: usize, checked: &mut [Option<usize>]) -> usize {
         if let Some(n) = checked[from] {
             return n;
         }
@@ -54,11 +61,7 @@ impl Puzzle {
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
-                c += if remain == design.len() {
-                    1
-                } else {
-                    checked[remain].map_or_else(|| self.count(design, remain, checked), |n| n)
-                };
+                c += self.count_aux(design, remain, checked);
             }
         }
         checked[from] = Some(c);
@@ -112,13 +115,13 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.designs
             .par_iter()
-            .filter(|d| self.matchable(d, 0, &mut vec![None; d.len()]))
+            .filter(|d| self.matchable(d))
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.designs
             .par_iter()
-            .map(|d| self.count(d, 0, &mut vec![None; d.len()]))
+            .map(|d| self.count(d))
             .sum::<usize>()
     }
 }
