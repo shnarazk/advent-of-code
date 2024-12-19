@@ -54,6 +54,9 @@ impl AdventOfCode for Puzzle {
             self.mapping[(p.1 as isize, p.0 as isize)] = false;
         }
     }
+    fn serialize(&self) -> Option<String> {
+        serde_json::to_string(self).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         let start: Vec2 = (0, 0);
         let goal: Vec2 = self.size.sub(&(1, 1));
@@ -84,7 +87,6 @@ impl AdventOfCode for Puzzle {
             for p in you.line.iter().take(med) {
                 you.mapping[(p.1 as isize, p.0 as isize)] = false;
             }
-            // println!("{},{}", you.line[index - 1].0, you.line[index - 1].1);
             if you.part1() == 0 {
                 range.1 = med;
             } else {
