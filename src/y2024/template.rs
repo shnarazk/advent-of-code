@@ -43,7 +43,7 @@ impl AdventOfCode for Puzzle {
         dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut ret: FxHashMap<usize, usize> = HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         1
     }
     fn part2(&mut self) -> Self::Output2 {
