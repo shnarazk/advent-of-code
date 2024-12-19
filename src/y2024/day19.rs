@@ -11,7 +11,11 @@ use {
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{collections::HashMap, hash::BuildHasherDefault},
+    std::{
+        cmp::{Ordering, Reverse},
+        collections::{BinaryHeap, HashMap},
+        hash::BuildHasherDefault,
+    },
     winnow::{
         ascii::newline,
         combinator::{repeat, repeat_till, separated, seq, terminated},
@@ -25,14 +29,16 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-// fn parse(s: &mut &str) -> PResult<()> {}
+fn parse(s: &mut &str) -> PResult<()> {
+    ().parse_next(s)
+}
 
 #[aoc(2024, 19)]
 impl AdventOfCode for Puzzle {
-    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     self.line = parser(&mut input.as_str())?;
-    //     Self::parsed()
-    // }
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        // self.line = parse(&mut input.as_str())?;
+        Self::parsed()
+    }
     fn end_of_data(&mut self) {
         dbg!(&self.line);
     }

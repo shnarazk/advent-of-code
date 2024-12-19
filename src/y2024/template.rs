@@ -29,14 +29,16 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-// fn parse(s: &mut &str) -> PResult<()> {}
+fn parse(s: &mut &str) -> PResult<()> {
+    ().parse_next(s)
+}
 
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {
-    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    //     self.line = parse(&mut input.as_str())?;
-    //     Self::parsed()
-    // }
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        // self.line = parse(&mut input.as_str())?;
+        Self::parsed()
+    }
     fn end_of_data(&mut self) {
         dbg!(&self.line);
     }
