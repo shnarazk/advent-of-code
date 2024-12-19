@@ -240,10 +240,11 @@ pub trait AdventOfCode: fmt::Debug + Default {
         if let Some(json) = self.serialize() {
             let dir = std::path::Path::new(&output).parent().unwrap();
             if !dir.exists() {
-                std::fs::create_dir_all(&dir)
-                    .expect(format!("fail to create a directory {dir:?}").as_str());
+                std::fs::create_dir_all(dir)
+                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
             }
-            let mut file = File::create(&output).expect(format!("fail to open {output}").as_str());
+            let mut file =
+                File::create(&output).unwrap_or_else(|_| panic!("fail to open {output}"));
             writeln!(file, "{}", json).expect("fail to save");
             println!(
                 "{}# write JSON data on {}{}",

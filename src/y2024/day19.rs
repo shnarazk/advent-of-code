@@ -1,24 +1,11 @@
 //! <https://adventofcode.com/2024/day/19>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        parser::parse_usize,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated, seq},
         token::one_of,
         PResult, Parser,
     },
@@ -42,7 +29,7 @@ pub struct Puzzle {
 impl Puzzle {
     fn matchable(&self, design: &[Kind], from: usize, checked: &mut [bool]) -> bool {
         for towel in self.pattern.iter() {
-            if design[from..].starts_with(&towel) {
+            if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
                 if remain == design.len() {
                     return true;
@@ -60,7 +47,7 @@ impl Puzzle {
     fn count(&self, design: &[Kind], from: usize, checked: &mut [Option<usize>]) -> usize {
         let mut c = 0;
         for towel in self.pattern.iter() {
-            if design[from..].starts_with(&towel) {
+            if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
                 if remain == design.len() {
                     c += 1;
@@ -102,6 +89,7 @@ fn parse_design(s: &mut &str) -> PResult<Vec<Kind>> {
     repeat(1.., parse_kind).parse_next(s)
 }
 
+#[allow(clippy::type_complexity)]
 fn parse(s: &mut &str) -> PResult<(Vec<Vec<Kind>>, Vec<Vec<Kind>>)> {
     seq!(
         parse_pattern,
