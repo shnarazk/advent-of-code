@@ -49,15 +49,11 @@ impl Puzzle {
         for towel in self.pattern.iter() {
             if design[from..].starts_with(towel) {
                 let remain = from + towel.len();
-                if remain == design.len() {
-                    c += 1;
-                    continue;
-                }
-                if let Some(n) = checked[remain] {
-                    c += n;
+                c += if remain == design.len() {
+                    1
                 } else {
-                    c += self.count(design, remain, checked);
-                }
+                    checked[remain].map_or_else(|| self.count(design, remain, checked), |n| n)
+                };
             }
         }
         checked[from] = Some(c);
@@ -120,7 +116,6 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.designs
             .par_iter()
-            .filter(|d| self.matchable(d, 0, &mut vec![false; d.len()]))
             .map(|d| self.count(d, 0, &mut vec![None; d.len()]))
             .sum::<usize>()
     }
