@@ -83,11 +83,10 @@ impl AdventOfCode for Puzzle {
         let mut range: (usize, usize) = (self.bricks, self.line.len());
         while range.0 + 1 != range.1 {
             let med = (range.0 + range.1) / 2;
-            let mut you = self.clone();
-            for p in you.line.iter().take(med) {
-                you.mapping[(p.1 as isize, p.0 as isize)] = false;
+            for (i, p) in self.line.iter().enumerate() {
+                self.mapping[(p.1 as isize, p.0 as isize)] = med <= i;
             }
-            if you.part1() == 0 {
+            if self.part1() == 0 {
                 range.1 = med;
             } else {
                 range.0 = med;
