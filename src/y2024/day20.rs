@@ -29,8 +29,7 @@ pub struct Puzzle {
     mapping: Rect<bool>,
     dist: Rect<usize>,
     size: Vec2,
-    pos: Vec2,
-    dir: Direction,
+    start: Vec2,
     goal: Vec2,
     threshold: usize,
 }
@@ -62,8 +61,7 @@ impl AdventOfCode for Puzzle {
         let Puzzle {
             mapping,
             size,
-            pos,
-            dir,
+            start,
             goal,
             ..
         } = self;
@@ -72,7 +70,7 @@ impl AdventOfCode for Puzzle {
             for (j, k) in l.iter().enumerate() {
                 match k {
                     Kind::Start => {
-                        *pos = (i as isize, j as isize);
+                        *start = (i as isize, j as isize);
                     }
                     Kind::End => {
                         *goal = (i as isize, j as isize);
@@ -82,12 +80,11 @@ impl AdventOfCode for Puzzle {
             }
         }
         *mapping = Rect::from_vec(line).map(|c| *c != Kind::Wall);
-        *dir = Direction::EAST;
         Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.dist = Rect::new(self.size, usize::MAX);
-        let mut pos: Vec2 = self.pos;
+        let mut pos: Vec2 = self.start;
         let mut dist: usize = 0;
         self.dist[pos] = dist;
         'next: while pos != self.goal {
@@ -104,20 +101,7 @@ impl AdventOfCode for Puzzle {
         self.threshold = self.get_config().alt.as_ref().map_or(100, |_| 64);
     }
     fn part1(&mut self) -> Self::Output1 {
-        const POS: [Vec2; 4] = [
-            (-2, 0),
-            // (-1, -1),
-            // (-1, 0),
-            // (-1, 1),
-            (0, -2),
-            // (0, -1),
-            // (0, 1),
-            (0, 2),
-            // (1, -1),
-            // (1, 0),
-            // (1, 1),
-            (2, 0),
-        ];
+        const POS: [Vec2; 4] = [(-2, 0), (0, -2), (0, 2), (2, 0)];
         self.mapping
             .iter()
             .filter(|(_, b)| **b)
@@ -152,17 +136,13 @@ impl AdventOfCode for Puzzle {
                     .filter(|(_, b)| **b)
                     .map(|(q, _)| {
                         let dist = p.manhattan_distance(&q);
-                        if 1 < dist
+                        (1 < dist
                             && dist <= 20
                             && self.dist[p] != usize::MAX
                             && self.dist[q] != usize::MAX
                             && self.dist[p] < self.dist[q]
-                            && (dist as usize) + self.threshold <= self.dist[q] - self.dist[p]
-                        {
-                            1
-                        } else {
-                            0
-                        }
+                            && (dist as usize) + self.threshold <= self.dist[q] - self.dist[p])
+                            as usize
                     })
                     .sum::<usize>()
             })
