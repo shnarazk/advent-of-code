@@ -6,6 +6,7 @@ pub trait GeometricMath {
     type Vector;
     fn add(&self, other: &Self) -> Self;
     fn sub(&self, other: &Self) -> Self;
+    fn manhattan_distance(&self, other: &Self) -> isize;
     fn add_scalar(&self, other: Self::BaseType) -> Self;
     fn mul_scalar(&self, other: Self::BaseType) -> Self;
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
@@ -173,6 +174,9 @@ impl GeometricMath for Dim2<isize> {
     fn sub(&self, other: &Self) -> Self {
         (self.0 - other.0, self.1 - other.1)
     }
+    fn manhattan_distance(&self, other: &Self) -> isize {
+        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1)) as isize
+    }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other)
     }
@@ -276,6 +280,9 @@ impl GeometricMath for Dim2<usize> {
             self.0.saturating_sub(other.0),
             self.1.saturating_sub(other.1),
         )
+    }
+    fn manhattan_distance(&self, other: &Self) -> isize {
+        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other)
@@ -434,6 +441,9 @@ impl GeometricMath for Dim3<isize> {
     fn sub(&self, other: &Self) -> Self {
         (self.0 - other.0, self.1 - other.1, self.2 - other.2)
     }
+    fn manhattan_distance(&self, other: &Self) -> isize {
+        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1) + self.2.abs_diff(other.2)) as isize
+    }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other, self.2 + other)
     }
@@ -520,6 +530,9 @@ impl GeometricMath for Dim3<usize> {
             self.1.saturating_sub(other.1),
             self.2.saturating_sub(other.2),
         )
+    }
+    fn manhattan_distance(&self, other: &Self) -> isize {
+        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1) + self.2.abs_diff(other.2)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other, self.2 + other)
