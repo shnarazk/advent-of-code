@@ -1,26 +1,14 @@
 //! <https://adventofcode.com/2024/day/20>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::*,
-        parser::parse_usize,
         rect::Rect,
     },
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-        usize,
-    },
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated},
         token::one_of,
         PResult, Parser,
     },
@@ -132,7 +120,7 @@ impl AdventOfCode for Puzzle {
         self.mapping
             .iter()
             .filter(|(_, b)| **b)
-            .map(|(p, v)| {
+            .map(|(p, _)| {
                 POS.iter()
                     .map(|off| {
                         if let Some(q) = p.add(off).included((0, 0), &self.size) {
@@ -163,9 +151,7 @@ impl AdventOfCode for Puzzle {
                         let dist = p.manhattan_distance(&q);
                         if 1 < dist
                             && dist <= 20
-                            && self.mapping[p]
                             && self.dist[p] != usize::MAX
-                            && self.mapping[q]
                             && self.dist[q] != usize::MAX
                             && self.dist[p] < self.dist[q]
                             && (dist as usize) + self.threshold <= self.dist[q] - self.dist[p]
