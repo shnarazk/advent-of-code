@@ -43,6 +43,7 @@ pub struct Puzzle {
     pos: Vec2,
     dir: Direction,
     goal: Vec2,
+    threshold: usize,
 }
 
 fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
@@ -111,6 +112,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.dist[self.goal] = dist;
+        self.threshold = self.get_config().alt.as_ref().map_or(100, |_| 64);
     }
     fn part1(&mut self) -> Self::Output1 {
         const POS: [Vec2; 4] = [
@@ -127,7 +129,6 @@ impl AdventOfCode for Puzzle {
             // (1, 1),
             (2, 0),
         ];
-        const THRESHOLD: usize = 100;
         self.mapping
             .iter()
             .filter(|(_, b)| **b)
@@ -136,7 +137,7 @@ impl AdventOfCode for Puzzle {
                     .map(|off| {
                         if let Some(q) = p.add(off).included((0, 0), &self.size) {
                             if self.dist[q] != usize::MAX
-                                && self.dist[p] + 2 + THRESHOLD <= self.dist[q]
+                                && self.dist[p] + 2 + self.threshold <= self.dist[q]
                             {
                                 1
                             } else {
@@ -151,6 +152,31 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.mapping
+            .iter()
+            .filter(|(_, b)| **b)
+            .map(|(p, _)| {
+                self.mapping
+                    .iter()
+                    .filter(|(_, b)| **b)
+                    .map(|(q, _)| {
+                        let dist = p.manhattan_distance(&q);
+                        if 1 < dist
+                            && dist <= 20
+                            && self.mapping[p]
+                            && self.dist[p] != usize::MAX
+                            && self.mapping[q]
+                            && self.dist[q] != usize::MAX
+                            && self.dist[p] < self.dist[q]
+                            && (dist as usize) + self.threshold <= self.dist[q] - self.dist[p]
+                        {
+                            1
+                        } else {
+                            0
+                        }
+                    })
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
     }
 }
