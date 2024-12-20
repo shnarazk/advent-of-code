@@ -103,7 +103,7 @@ impl AdventOfCode for Puzzle {
             let num_connected = res
                 .par_iter()
                 .filter(|p| {
-                    p.neighbors8((0, 0), self.size)
+                    p.neighbors4((0, 0), self.size)
                         .iter()
                         .any(|q| res.contains(q))
                 })
