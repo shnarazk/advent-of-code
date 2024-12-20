@@ -124,7 +124,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     ///     for num in segment[1].split(',') {
     ///         self.settings.push(num.parse::<usize>()?);
     ///     }
-    ///     self.parsed()
+    ///     Self.parsed()
     /// }
     /// ```
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
@@ -215,7 +215,7 @@ pub trait AdventOfCode: fmt::Debug + Default {
     /// }
     /// ```
     fn part2(&mut self) -> Self::Output2;
-    /// returns String by serialization in JSON format
+    /// returns `String` by serialization in JSON format
     ///
     /// ```ignore
     /// fn serialize(&mut self) -> Option<String> {
