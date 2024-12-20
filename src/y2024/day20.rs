@@ -5,6 +5,7 @@ use {
         geometric::*,
         rect::Rect,
     },
+    rayon::prelude::*,
     serde::Serialize,
     winnow::{
         ascii::newline,
@@ -143,6 +144,8 @@ impl AdventOfCode for Puzzle {
         self.mapping
             .iter()
             .filter(|(_, b)| **b)
+            .collect::<Vec<_>>()
+            .par_iter()
             .map(|(p, _)| {
                 self.mapping
                     .iter()
