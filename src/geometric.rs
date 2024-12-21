@@ -18,7 +18,7 @@ pub trait GeometricMath {
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         from: V1,
-        to: &V2,
+        to: V2,
     ) -> Option<&Self>
     where
         Self: Sized;
@@ -204,7 +204,7 @@ impl GeometricMath for Dim2<isize> {
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         from: V1,
-        to: &V2,
+        to: V2,
     ) -> Option<&Self>
     where
         Self: Sized,
@@ -320,7 +320,7 @@ impl GeometricMath for Dim2<usize> {
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         from: V1,
-        to: &V2,
+        to: V2,
     ) -> Option<&Self>
     where
         Self: Sized,
@@ -492,7 +492,7 @@ impl GeometricMath for Dim3<isize> {
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         from: V1,
-        to: &V2,
+        to: V2,
     ) -> Option<&Self>
     where
         Self: Sized,
@@ -594,7 +594,7 @@ impl GeometricMath for Dim3<usize> {
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
         &self,
         from: V1,
-        to: &V2,
+        to: V2,
     ) -> Option<&Self>
     where
         Self: Sized,
