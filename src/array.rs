@@ -1,13 +1,15 @@
 pub fn rotate_clockwise<I: Clone>(m: Vec<Vec<I>>) -> Vec<Vec<I>> {
     let h = m.len();
-    let mut n = m.clone();
-    for (y, l) in n.iter_mut().enumerate() {
-        for (x, p) in l.iter_mut().enumerate() {
-            *p = m[h - x - 1][y].clone();
-        }
-    }
-    n
+    let w = m[0].len();
+    (0..w)
+        .map(|i| {
+            (0..h)
+                .map(|jj| m[h - jj - 1][i].clone())
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>()
 }
+
 #[allow(clippy::ptr_arg)]
 pub fn transpose<I: Clone>(v: &Vec<Vec<I>>) -> Vec<Vec<I>> {
     let h = v.len();
