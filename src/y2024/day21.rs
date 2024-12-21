@@ -1,12 +1,13 @@
 //! <https://adventofcode.com/2024/day/21>
-#![allow(dead_code)]
-#![allow(unused_variables)]
+// #![allow(dead_code)]
+// #![allow(unused_variables)]
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
     std::{
         cmp::Ordering,
         collections::{HashMap, HashSet},
+        fmt::Write,
     },
     winnow::{
         ascii::newline,
@@ -53,74 +54,26 @@ impl std::fmt::Display for Kind1 {
     }
 }
 
-impl Kind1 {
-    fn iterator() -> impl Iterator<Item = Kind1> {
-        [
-            Kind1::K0,
-            Kind1::K1,
-            Kind1::K2,
-            Kind1::K3,
-            Kind1::K4,
-            Kind1::K5,
-            Kind1::K6,
-            Kind1::K7,
-            Kind1::K8,
-            Kind1::K6,
-            Kind1::K7,
-            Kind1::K9,
-            Kind1::KA,
-        ]
-        .into_iter()
-    }
-}
-
-const LV1LINK: [(Kind1, Kind1); 15] = [
-    (Kind1::K0, Kind1::K2),
-    (Kind1::K0, Kind1::KA),
-    (Kind1::K1, Kind1::K2),
-    (Kind1::K1, Kind1::K4),
-    (Kind1::K2, Kind1::K3),
-    (Kind1::K2, Kind1::K5),
-    (Kind1::K3, Kind1::K6),
-    (Kind1::K3, Kind1::KA),
-    (Kind1::K4, Kind1::K5),
-    (Kind1::K4, Kind1::K7),
-    (Kind1::K5, Kind1::K6),
-    (Kind1::K5, Kind1::K8),
-    (Kind1::K6, Kind1::K9),
-    (Kind1::K7, Kind1::K8),
-    (Kind1::K8, Kind1::K9),
-];
-
-fn lv1_build_pathes(from: Kind1, to: Kind1) -> Vec<Vec<Kind1>> {
-    if from == to {
-        return vec![vec![to]];
-    }
-    let mut to_visit: Vec<Vec<Kind1>> = Vec::new();
-    let mut pathes: Vec<Vec<Kind1>> = Vec::new();
-    to_visit.push(vec![from]);
-    while let Some(path) = to_visit.pop() {
-        if path.last().unwrap() == &to {
-            // path.remove(0);
-            pathes.push(path);
-            continue;
-        }
-        for (p, q) in LV1LINK.iter() {
-            let r = if path.last().unwrap() == p && !path.contains(q) {
-                q
-            } else if path.last().unwrap() == q && !path.contains(p) {
-                p
-            } else {
-                continue;
-            };
-            let mut path1 = path.clone();
-            path1.push(*r);
-            to_visit.push(path1);
-        }
-    }
-    pathes.sort_unstable_by_key(|l| l.len());
-    pathes
-}
+// impl Kind1 {
+//     fn iterator() -> impl Iterator<Item = Kind1> {
+//         [
+//             Kind1::K0,
+//             Kind1::K1,
+//             Kind1::K2,
+//             Kind1::K3,
+//             Kind1::K4,
+//             Kind1::K5,
+//             Kind1::K6,
+//             Kind1::K7,
+//             Kind1::K8,
+//             Kind1::K6,
+//             Kind1::K7,
+//             Kind1::K9,
+//             Kind1::KA,
+//         ]
+//         .into_iter()
+//     }
+// }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 enum Kind2 {
@@ -147,180 +100,23 @@ impl std::fmt::Display for Kind2 {
     }
 }
 
-fn to_string(v: &[Kind2]) -> String {
-    v.iter().map(|k| format!("{k}")).collect::<String>()
-}
-
-impl Kind2 {
-    fn iterator() -> impl Iterator<Item = Kind2> {
-        [Kind2::U, Kind2::D, Kind2::L, Kind2::R, Kind2::A].into_iter()
-    }
-}
-
-const LV2LINK: [(Kind2, Kind2); 5] = [
-    (Kind2::U, Kind2::D),
-    (Kind2::U, Kind2::A),
-    (Kind2::D, Kind2::L),
-    (Kind2::D, Kind2::R),
-    (Kind2::R, Kind2::A),
-];
-
-fn lv2_build_pathes(from: Kind2, to: Kind2) -> Vec<Vec<Kind2>> {
-    if from == to {
-        return vec![vec![]];
-    }
-    let mut to_visit: Vec<Vec<Kind2>> = Vec::new();
-    let mut pathes: Vec<Vec<Kind2>> = Vec::new();
-    to_visit.push(vec![from]);
-    while let Some(path) = to_visit.pop() {
-        if path.last().unwrap() == &to {
-            // path.remove(0);
-            pathes.push(path);
-            continue;
-        }
-        for (p, q) in LV2LINK.iter() {
-            let r = if path.last().unwrap() == p && !path.contains(q) {
-                q
-            } else if path.last().unwrap() == q && !path.contains(p) {
-                p
-            } else {
-                continue;
-            };
-            let mut path1 = path.clone();
-            path1.push(*r);
-            to_visit.push(path1);
-        }
-    }
-    let len = pathes.iter().map(|l| l.len()).min().unwrap();
-    pathes.retain(|l| l.len() == len);
-    pathes
-}
-
-fn build_lv3_actions_to_push(
-    lv3: Kind2,
-    from: Kind2,
-    to: Kind2,
-) -> Vec<(Vec<Kind2>, Kind2, Kind2)> {
-    if from == to {
-        return vec![(vec![Kind2::A], Kind2::A, to)];
-    }
-    let mut pathes = lv2_build_pathes(from, to);
-    let len = pathes.iter().map(|l| l.len()).min().unwrap();
-    pathes.retain(|l| l.len() == len);
-    pathes
-        .iter()
-        .map(|p| {
-            let (a, b) = lv2_path_to_lv2_actions(p);
-            (a, lv3, to)
-        })
-        .collect::<Vec<_>>()
-    // let (a, b) = lv2_path_to_lv2_actions(&pathes[0]);
-    // // dbg!(lv3, from, to, b);
-    // (a, lv3, to)
-}
-
-const LV1TOLV2: [((Kind1, Kind1), Kind2); 30] = [
-    ((Kind1::K0, Kind1::K2), Kind2::U),
-    ((Kind1::K0, Kind1::KA), Kind2::R),
-    ((Kind1::K1, Kind1::K2), Kind2::R),
-    ((Kind1::K1, Kind1::K4), Kind2::U),
-    ((Kind1::K2, Kind1::K3), Kind2::R),
-    ((Kind1::K2, Kind1::K5), Kind2::U),
-    ((Kind1::K3, Kind1::K6), Kind2::U),
-    ((Kind1::K3, Kind1::KA), Kind2::D),
-    ((Kind1::K4, Kind1::K5), Kind2::R),
-    ((Kind1::K4, Kind1::K7), Kind2::U),
-    ((Kind1::K5, Kind1::K6), Kind2::R),
-    ((Kind1::K5, Kind1::K8), Kind2::U),
-    ((Kind1::K6, Kind1::K9), Kind2::U),
-    ((Kind1::K7, Kind1::K8), Kind2::R),
-    ((Kind1::K8, Kind1::K9), Kind2::R),
-    ((Kind1::K2, Kind1::K0), Kind2::D),
-    ((Kind1::KA, Kind1::K0), Kind2::L),
-    ((Kind1::K2, Kind1::K1), Kind2::L),
-    ((Kind1::K4, Kind1::K1), Kind2::D),
-    ((Kind1::K3, Kind1::K2), Kind2::L),
-    ((Kind1::K5, Kind1::K2), Kind2::D),
-    ((Kind1::K6, Kind1::K3), Kind2::D),
-    ((Kind1::KA, Kind1::K3), Kind2::D),
-    ((Kind1::K5, Kind1::K4), Kind2::L),
-    ((Kind1::K7, Kind1::K4), Kind2::D),
-    ((Kind1::K6, Kind1::K5), Kind2::L),
-    ((Kind1::K8, Kind1::K5), Kind2::D),
-    ((Kind1::K9, Kind1::K6), Kind2::D),
-    ((Kind1::K8, Kind1::K7), Kind2::L),
-    ((Kind1::K9, Kind1::K8), Kind2::L),
-];
-
-fn lv1_path_to_lv2_actions(path: &[Kind1]) -> Vec<Kind2> {
-    let mut ret = path
-        .windows(2)
-        .map(|v| {
-            let p = v[0];
-            let q = v[1];
-            LV1TOLV2.iter().find(|(key, _)| key == &(p, q)).unwrap().1
-        })
-        .collect::<Vec<_>>();
-    ret.push(Kind2::A);
-    ret
-}
-
-const LV2TOLV2: [((Kind2, Kind2), Kind2); 10] = [
-    ((Kind2::U, Kind2::D), Kind2::D),
-    ((Kind2::U, Kind2::A), Kind2::R),
-    ((Kind2::D, Kind2::L), Kind2::L),
-    ((Kind2::D, Kind2::R), Kind2::R),
-    ((Kind2::R, Kind2::A), Kind2::U),
-    ((Kind2::D, Kind2::U), Kind2::U),
-    ((Kind2::A, Kind2::U), Kind2::L),
-    ((Kind2::L, Kind2::D), Kind2::R),
-    ((Kind2::R, Kind2::D), Kind2::L),
-    ((Kind2::A, Kind2::R), Kind2::D),
-];
-
-fn lv2_path_to_lv2_actions(path: &[Kind2]) -> (Vec<Kind2>, Kind2) {
-    let mut p = vec![Kind2::A];
-    p.append(&mut path.to_vec());
-    let mut ret = path
-        .windows(2)
-        .map(|v| {
-            let p = v[0];
-            let q = v[1];
-            LV2TOLV2.iter().find(|(key, _)| key == &(p, q)).unwrap().1
-        })
-        .collect::<Vec<_>>();
-    let last = *ret.last().unwrap();
-    ret.push(Kind2::A);
-    (ret, last)
-}
-
 #[allow(dead_code)]
-fn lv1_to_lv2_pathes(from: Kind1, to: Kind1) -> Vec<Vec<Kind2>> {
-    lv1_build_pathes(from, to)
-        .iter()
-        .map(|path| {
-            let mut path1 = vec![from];
-            path1.append(&mut path.clone());
-            let mut ret = path1
-                .windows(2)
-                .map(|pair| {
-                    let p = pair[0];
-                    let q = pair[1];
-                    LV1TOLV2.iter().find(|(key, _)| key == &(p, q)).unwrap().1
-                })
-                .collect::<Vec<_>>();
-            ret.push(Kind2::A);
-            ret
-        })
-        .collect::<Vec<_>>()
+fn to_string(v: &[Kind2]) -> String {
+    v.iter().fold(String::new(), |mut s, k| {
+        let _ = write!(s, "{k}");
+        s
+    })
 }
+
+// impl Kind2 {
+//     fn iterator() -> impl Iterator<Item = Kind2> {
+//         [Kind2::U, Kind2::D, Kind2::L, Kind2::R, Kind2::A].into_iter()
+//     }
+// }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     line: Vec<Vec<Kind1>>,
-    level1path: HashMap<(Kind1, Kind1), Vec<Vec<Kind1>>>,
-    lv1_to_lv2: HashMap<(Kind1, Kind1), Vec<Vec<Kind2>>>,
-    level2path: HashMap<(Kind2, Kind2), Vec<Vec<Kind2>>>,
     lv1: HashMap<(Kind1, Kind1), Kind2>,
     lv2: HashMap<(Kind2, Kind2), Kind2>,
 }
@@ -359,24 +155,6 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-        /* self.level2path = Kind2::iterator()
-            .flat_map(|from| {
-                Kind2::iterator()
-                    .map(|to| ((from, to), lv2_build_pathes(from, to)))
-                    .collect::<HashMap<(Kind2, Kind2), Vec<Vec<Kind2>>>>()
-            })
-            .collect::<HashMap<_, _>>();
-        self.level1path = Kind1::iterator()
-            .flat_map(|from| {
-                Kind1::iterator()
-                    .filter(|to| &from != to)
-                    .map(|to| ((from, to), lv1_build_pathes(from, to)))
-                    .collect::<HashMap<(Kind1, Kind1), Vec<Vec<Kind1>>>>()
-            })
-            .collect::<HashMap<_, _>>(); */
-        // dbg!(lv1_build_pathes(Kind1::K5, Kind1::K3));
-        // dbg!(lv1_to_lv2_pathes(Kind1::K5, Kind1::K3));
         self.lv1 = [
             ((Kind1::K0, Kind1::K2), Kind2::U),
             ((Kind1::K0, Kind1::KA), Kind2::R),
@@ -434,20 +212,20 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .map(|p| {
-                let v2 = lift::<Kind1, Kind2>(&p, &self.lv1, Kind1::KA, Kind2::A, 0);
+                let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
                 // for v in v2.iter() {
                 //     println!("l2: {} ({})", to_string(v), v.len());
                 // }
                 let v3 = v2
                     .iter()
-                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A, 4))
+                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A))
                     .collect::<Vec<_>>();
                 // for v in v3.iter() {
                 //     println!("l3: {} ({})", to_string(v), v.len());
                 // }
                 let v4 = v3
                     .iter()
-                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A, 0))
+                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A))
                     .collect::<Vec<_>>();
                 // for v in v4.iter() {
                 //     println!("{}", to_string(v));
@@ -474,7 +252,7 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn lift_aux<T1, T2>(dict: &HashMap<(T1, T1), T2>, from: T1, to: T1, margin: usize) -> Vec<Vec<T2>>
+fn lift_aux<T1, T2>(dict: &HashMap<(T1, T1), T2>, from: T1, to: T1) -> Vec<Vec<T2>>
 where
     T1: Copy + Eq,
     T2: Copy + Eq,
@@ -515,13 +293,7 @@ where
     ret
 }
 
-fn lift<T1, T2>(
-    path: &[T1],
-    dict: &HashMap<(T1, T1), T2>,
-    init: T1,
-    post: T2,
-    margin: usize,
-) -> Vec<Vec<T2>>
+fn lift<T1, T2>(path: &[T1], dict: &HashMap<(T1, T1), T2>, init: T1, post: T2) -> Vec<Vec<T2>>
 where
     T1: Copy + std::fmt::Debug + Eq,
     T2: Copy + std::fmt::Debug + Eq,
@@ -529,7 +301,7 @@ where
     let mut p = vec![init];
     p.append(&mut path.to_vec());
     p.windows(2).fold(vec![Vec::new()], |acc, segment| {
-        let cands = lift_aux(&dict, segment[0], segment[1], margin);
+        let cands = lift_aux(dict, segment[0], segment[1]);
         acc.iter()
             .flat_map(|pre| {
                 cands.iter().map(|c| {
