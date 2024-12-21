@@ -4,9 +4,15 @@ use serde::Serialize;
 pub trait GeometricMath {
     type BaseType;
     type Vector;
-    fn add(&self, other: &Self) -> Self;
-    fn sub(&self, other: &Self) -> Self;
-    fn manhattan_distance(&self, other: &Self) -> isize;
+    fn add<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized;
+    fn sub<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized;
+    fn manhattan_distance<V: AsVecReference<Self>>(&self, other: V) -> isize
+    where
+        Self: Sized;
     fn add_scalar(&self, other: Self::BaseType) -> Self;
     fn mul_scalar(&self, other: Self::BaseType) -> Self;
     fn included<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
@@ -168,14 +174,26 @@ impl GeometricRotation for Vec2 {
 impl GeometricMath for Dim2<isize> {
     type BaseType = isize;
     type Vector = Vec2;
-    fn add(&self, other: &Self) -> Self {
-        (self.0 + other.0, self.1 + other.1)
+    fn add<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 + o.0, self.1 + o.1)
     }
-    fn sub(&self, other: &Self) -> Self {
-        (self.0 - other.0, self.1 - other.1)
+    fn sub<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 - o.0, self.1 - o.1)
     }
-    fn manhattan_distance(&self, other: &Self) -> isize {
-        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1)) as isize
+    fn manhattan_distance<V: AsVecReference<Self>>(&self, other: V) -> isize
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0.abs_diff(o.0) + self.1.abs_diff(o.1)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other)
@@ -272,17 +290,26 @@ impl GeometricMath for Dim2<isize> {
 impl GeometricMath for Dim2<usize> {
     type BaseType = usize;
     type Vector = Vec2;
-    fn add(&self, other: &Self) -> Self {
-        (self.0 + other.0, self.1 + other.1)
+    fn add<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 + o.0, self.1 + o.1)
     }
-    fn sub(&self, other: &Self) -> Self {
-        (
-            self.0.saturating_sub(other.0),
-            self.1.saturating_sub(other.1),
-        )
+    fn sub<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0.saturating_sub(o.0), self.1.saturating_sub(o.1))
     }
-    fn manhattan_distance(&self, other: &Self) -> isize {
-        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1)) as isize
+    fn manhattan_distance<V: AsVecReference<Self>>(&self, other: V) -> isize
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0.abs_diff(o.0) + self.1.abs_diff(o.1)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other)
@@ -435,14 +462,26 @@ const DIR26: [Vec3; 26] = [
 impl GeometricMath for Dim3<isize> {
     type BaseType = isize;
     type Vector = Vec3;
-    fn add(&self, other: &Self) -> Self {
-        (self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    fn add<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 + o.0, self.1 + o.1, self.2 + o.2)
     }
-    fn sub(&self, other: &Self) -> Self {
-        (self.0 - other.0, self.1 - other.1, self.2 - other.2)
+    fn sub<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 - o.0, self.1 - o.1, self.2 - o.2)
     }
-    fn manhattan_distance(&self, other: &Self) -> isize {
-        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1) + self.2.abs_diff(other.2)) as isize
+    fn manhattan_distance<V: AsVecReference<Self>>(&self, other: V) -> isize
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0.abs_diff(o.0) + self.1.abs_diff(o.1) + self.2.abs_diff(o.2)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other, self.2 + other)
@@ -521,18 +560,30 @@ impl GeometricMath for Dim3<isize> {
 impl GeometricMath for Dim3<usize> {
     type BaseType = usize;
     type Vector = Vec3;
-    fn add(&self, other: &Self) -> Self {
-        (self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    fn add<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0 + o.0, self.1 + o.1, self.2 + o.2)
     }
-    fn sub(&self, other: &Self) -> Self {
+    fn sub<V: AsVecReference<Self>>(&self, other: V) -> Self
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
         (
-            self.0.saturating_sub(other.0),
-            self.1.saturating_sub(other.1),
-            self.2.saturating_sub(other.2),
+            self.0.saturating_sub(o.0),
+            self.1.saturating_sub(o.1),
+            self.2.saturating_sub(o.2),
         )
     }
-    fn manhattan_distance(&self, other: &Self) -> isize {
-        (self.0.abs_diff(other.0) + self.1.abs_diff(other.1) + self.2.abs_diff(other.2)) as isize
+    fn manhattan_distance<V: AsVecReference<Self>>(&self, other: V) -> isize
+    where
+        Self: Sized,
+    {
+        let o = other.as_vec_ref();
+        (self.0.abs_diff(o.0) + self.1.abs_diff(o.1) + self.2.abs_diff(o.2)) as isize
     }
     fn add_scalar(&self, other: Self::BaseType) -> Self {
         (self.0 + other, self.1 + other, self.2 + other)
