@@ -4,10 +4,7 @@
 use {
     crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
-    std::{
-        cmp::Ordering,
-        collections::{HashMap, HashSet},
-    },
+    std::collections::HashMap,
     winnow::{
         ascii::newline,
         combinator::{repeat, separated},
@@ -321,8 +318,6 @@ pub struct Puzzle {
     level1path: HashMap<(Kind1, Kind1), Vec<Vec<Kind1>>>,
     lv1_to_lv2: HashMap<(Kind1, Kind1), Vec<Vec<Kind2>>>,
     level2path: HashMap<(Kind2, Kind2), Vec<Vec<Kind2>>>,
-    lv1: HashMap<(Kind1, Kind1), Kind2>,
-    lv2: HashMap<(Kind2, Kind2), Kind2>,
 }
 
 fn parse_kind1(s: &mut &str) -> PResult<Kind1> {
@@ -360,7 +355,7 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line);
-        /* self.level2path = Kind2::iterator()
+        self.level2path = Kind2::iterator()
             .flat_map(|from| {
                 Kind2::iterator()
                     .map(|to| ((from, to), lv2_build_pathes(from, to)))
@@ -374,172 +369,140 @@ impl AdventOfCode for Puzzle {
                     .map(|to| ((from, to), lv1_build_pathes(from, to)))
                     .collect::<HashMap<(Kind1, Kind1), Vec<Vec<Kind1>>>>()
             })
-            .collect::<HashMap<_, _>>(); */
+            .collect::<HashMap<_, _>>();
         // dbg!(lv1_build_pathes(Kind1::K5, Kind1::K3));
         // dbg!(lv1_to_lv2_pathes(Kind1::K5, Kind1::K3));
-        self.lv1 = [
-            ((Kind1::K0, Kind1::K2), Kind2::U),
-            ((Kind1::K0, Kind1::KA), Kind2::R),
-            ((Kind1::K1, Kind1::K2), Kind2::R),
-            ((Kind1::K1, Kind1::K4), Kind2::U),
-            ((Kind1::K2, Kind1::K3), Kind2::R),
-            ((Kind1::K2, Kind1::K5), Kind2::U),
-            ((Kind1::K3, Kind1::K6), Kind2::U),
-            ((Kind1::K3, Kind1::KA), Kind2::D),
-            ((Kind1::K4, Kind1::K5), Kind2::R),
-            ((Kind1::K4, Kind1::K7), Kind2::U),
-            ((Kind1::K5, Kind1::K6), Kind2::R),
-            ((Kind1::K5, Kind1::K8), Kind2::U),
-            ((Kind1::K6, Kind1::K9), Kind2::U),
-            ((Kind1::K7, Kind1::K8), Kind2::R),
-            ((Kind1::K8, Kind1::K9), Kind2::R),
-            // reverse
-            ((Kind1::K2, Kind1::K0), Kind2::D),
-            ((Kind1::KA, Kind1::K0), Kind2::L),
-            ((Kind1::K2, Kind1::K1), Kind2::L),
-            ((Kind1::K4, Kind1::K1), Kind2::D),
-            ((Kind1::K3, Kind1::K2), Kind2::L),
-            ((Kind1::K5, Kind1::K2), Kind2::D),
-            ((Kind1::K6, Kind1::K3), Kind2::D),
-            ((Kind1::KA, Kind1::K3), Kind2::U),
-            ((Kind1::K5, Kind1::K4), Kind2::L),
-            ((Kind1::K7, Kind1::K4), Kind2::D),
-            ((Kind1::K6, Kind1::K5), Kind2::L),
-            ((Kind1::K8, Kind1::K5), Kind2::D),
-            ((Kind1::K9, Kind1::K6), Kind2::D),
-            ((Kind1::K8, Kind1::K7), Kind2::L),
-            ((Kind1::K9, Kind1::K8), Kind2::L),
-        ]
-        .iter()
-        .cloned()
-        .collect::<HashMap<_, _>>();
-        self.lv2 = [
-            ((Kind2::U, Kind2::D), Kind2::D),
-            ((Kind2::U, Kind2::A), Kind2::R),
-            ((Kind2::D, Kind2::L), Kind2::L),
-            ((Kind2::D, Kind2::R), Kind2::R),
-            ((Kind2::R, Kind2::A), Kind2::U),
-            // reverse
-            ((Kind2::D, Kind2::U), Kind2::U),
-            ((Kind2::A, Kind2::U), Kind2::L),
-            ((Kind2::L, Kind2::D), Kind2::R),
-            ((Kind2::R, Kind2::D), Kind2::L),
-            ((Kind2::A, Kind2::R), Kind2::D),
-        ]
-        .iter()
-        .cloned()
-        .collect::<HashMap<_, _>>();
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|p| {
-                let v2 = lift::<Kind1, Kind2>(&p, &self.lv1, Kind1::KA, Kind2::A, 0);
-                // for v in v2.iter() {
-                //     println!("l2: {} ({})", to_string(v), v.len());
-                // }
-                let v3 = v2
+            .skip(3)
+            .take(1)
+            .map(|targets| {
+                // これは数値パッドに打ち込みたいキーの並び
+                let mut lv1_targets = vec![Kind1::KA];
+                lv1_targets.append(&mut targets.clone());
+                dbg!(&lv1_targets);
+                let a = lv1_targets
+                    .windows(2)
+                    .fold(
+                        (0, Kind2::A, Kind2::A, Kind2::A),
+                        |(len, lv4_pos, lv3_pos, lv2_pos), segment| {
+                            let x = lv1_build_pathes(segment[0], segment[1]).iter().fold(
+                                (usize::MAX, lv4_pos, lv3_pos, lv2_pos),
+                                |(len, lv4_pos, lv3_pos, lv2_pos), lv1_path| {
+                                    // これはlv1で辿るキーの系列
+                                    println!("L1_path: {lv1_path:?}");
+                                    let lv2_targets = lv1_path_to_lv2_actions(lv1_path);
+                                    // これはlv2で押すべきキーの系列
+                                    println!(
+                                        "lv2_targets: {}, lv3:{}, lv2:{}",
+                                        to_string(&lv2_targets),
+                                        lv3_pos,
+                                        lv2_pos,
+                                    );
+                                    // lv3に持ち上げ
+                                    let lv3_targets = lv2_targets.iter().fold(
+                                        (Vec::new(), lv4_pos, lv3_pos, lv2_pos),
+                                        |(mut subs, lv4_pos, lv3_pos, lv2_pos), to| {
+                                            let x = build_lv3_actions_to_push(lv3_pos, lv2_pos, *to)
+                                                .into_iter()
+                                                .map(|(t, lv3, lv2)| {
+                                                    println!(
+                                                        "lv2 segment: {}:{} => lv3_action: {} lv3:{}, lv2:{}",
+                                                        lv2_pos,
+                                                        to,
+                                                        to_string(&t),
+                                                        lv3,
+                                                        lv2,
+                                                    );
+                                                    let mut lv3_actions = subs.clone();
+                                                    let mut tt = t.clone();
+                                                    lv3_actions.append(&mut tt);
+                                                    // (p, lv4_pos, lv3, lv2)
+                                                    
+                                                    let lv4_targets = lv3_actions.iter().fold(
+                                                        (0, lv4_pos,  lv3, lv2),
+                                                        |(len, lv4_pos, lv3_pos, lv2_pos), to| {
+                                                            build_lv3_actions_to_push(lv4_pos, lv3_pos, *to)
+                                                                .iter()
+                                                                .map(|(p, l4, l3)| (p.len(),p, l4, l3))
+                                                                .min()
+                                                                .unwrap();
+                                                            /* println!(
+                                                                "lv3 segment: {}:{} => lv4_action: {} lv4:{}, lv3:{}",
+                                                                lv3_pos,
+                                                                to,
+                                                                to_string(&t),
+                                                                lv4,
+                                                                lv3,
+                                                            ); */
+                                                            (len + t.len(), lv4, lv3, lv2_pos)
+                                                        },
+                                                    );
+                                                    
+                                                     })
+                                                .collect::<Vec<_>>();
+                                            assert!(x.iter().all(|(l, _, _, _)| l.len() == x[0].0.len()));
+
+                                            let (mut t, lv3, lv2) = build_lv3_actions_to_push(
+                                                lv3_pos, lv2_pos, *to,
+                                            )[0].clone();
+                                            println!(
+                                                "lv2 segment: {}:{} => lv3_action: {} lv3:{}, lv2:{}",
+                                                lv2_pos,
+                                                to,
+                                                to_string(&t),
+                                                lv3,
+                                                lv2,
+                                            );
+                                            subs.append(&mut t);
+                                            (subs, lv4_pos, lv3, lv2)
+                                        },
+                                    );
+                                    // println!("lv3_targets: {}", to_string(&lv3_targets.0));
+
+                                    let lv4_targets = lv3_targets.0.iter().fold(
+                                        (Vec::new(), lv4_pos, lv3_targets.1, lv3_targets.2),
+                                        |(mut subs, lv4_pos, lv3_pos, lv2_pos), to| {
+                                            let (mut t, lv4, lv3) = build_lv3_actions_to_push(
+                                                lv4_pos, lv3_pos, *to,
+                                            )[0].clone();
+                                            /* println!(
+                                                "lv3 segment: {}:{} => lv4_action: {} lv4:{}, lv3:{}",
+                                                lv3_pos,
+                                                to,
+                                                to_string(&t),
+                                                lv4,
+                                                lv3,
+                                            ); */
+                                            subs.append(&mut t);
+                                            (subs, lv4, lv3, lv2_pos)
+                                        },
+                                    );
+                                    // println!("lv4_targets: {}", to_string(&lv4_targets.0));
+                                    (
+                                        len.min(lv4_targets.0.len()),
+                                        lv4_targets.1,
+                                        lv4_targets.2,
+                                        lv4_targets.3,
+                                    )
+                                },
+                            );
+                            (len + x.0, x.1, x.2, x.3)
+                        },
+                    )
+                    .0;
+                let b = targets
                     .iter()
-                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A, 4))
-                    .collect::<Vec<_>>();
-                // for v in v3.iter() {
-                //     println!("l3: {} ({})", to_string(v), v.len());
-                // }
-                let v4 = v3
-                    .iter()
-                    .flat_map(|p| lift::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A, 0))
-                    .collect::<Vec<_>>();
-                // for v in v4.iter() {
-                //     println!("{}", to_string(v));
-                // }
-                let l = v4.iter().map(|l| l.len()).collect::<HashSet<_>>();
-                println!("{:?}", l);
-                v4.iter()
-                    .map(|l| {
-                        let a = l.len();
-                        let b = p
-                            .iter()
-                            .filter(|k| **k != Kind1::KA)
-                            .fold(0, |acc, k| acc * 10 + (*k as usize));
-                        (a * b, a, b)
-                    })
-                    .min()
-                    .unwrap_or((0, 0, 0))
+                    .filter(|k| **k != Kind1::KA)
+                    .fold(0, |acc, k| acc * 10 + (*k as usize));
+                dbg!(a) * dbg!(b)
             })
-            .map(|s| dbg!(s).0)
+            .map(|n| dbg!(n))
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
         2
     }
-}
-
-fn lift_aux<T1, T2>(dict: &HashMap<(T1, T1), T2>, from: T1, to: T1, margin: usize) -> Vec<Vec<T2>>
-where
-    T1: Copy + Eq,
-    T2: Copy + Eq,
-{
-    let mut to_visit: Vec<(Vec<T1>, Vec<T2>)> = Vec::new();
-    to_visit.push((vec![from], Vec::new()));
-    let mut _visited: HashSet<T1> = HashSet::new();
-    let mut ret: Vec<Vec<T2>> = Vec::new();
-    let mut len: usize = usize::MAX;
-    while let Some((path, lifted_path)) = to_visit.pop() {
-        if path.last() == Some(&to) {
-            match lifted_path.len().cmp(&len) {
-                Ordering::Less => {
-                    len = lifted_path.len();
-                    ret = vec![lifted_path];
-                }
-                Ordering::Equal => {
-                    ret.push(lifted_path);
-                }
-                Ordering::Greater => {
-                    if lifted_path.len() <= len + 1 {
-                        ret.push(lifted_path);
-                    }
-                }
-            }
-            continue;
-        }
-        for (pair, by) in dict.iter() {
-            if path.last() == Some(&pair.0) && !path.contains(&pair.1) {
-                let mut path1 = path.clone();
-                path1.push(pair.1);
-                let mut lifted_path1 = lifted_path.clone();
-                lifted_path1.push(*by);
-                to_visit.push((path1, lifted_path1));
-            }
-        }
-    }
-    ret
-}
-
-fn lift<T1, T2>(
-    path: &[T1],
-    dict: &HashMap<(T1, T1), T2>,
-    init: T1,
-    post: T2,
-    margin: usize,
-) -> Vec<Vec<T2>>
-where
-    T1: Copy + std::fmt::Debug + Eq,
-    T2: Copy + std::fmt::Debug + Eq,
-{
-    let mut p = vec![init];
-    p.append(&mut path.to_vec());
-    p.windows(2).fold(vec![Vec::new()], |acc, segment| {
-        let cands = lift_aux(&dict, segment[0], segment[1], margin);
-        acc.iter()
-            .flat_map(|pre| {
-                cands.iter().map(|c| {
-                    let mut path = pre.clone();
-                    let mut cc = c.clone();
-                    path.append(&mut cc);
-                    path.push(post);
-                    path
-                })
-            })
-            .collect::<Vec<_>>()
-    })
 }
