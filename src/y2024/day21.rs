@@ -8,6 +8,7 @@ use {
         cmp::Ordering,
         collections::{HashMap, HashSet},
         fmt::Write,
+        hash::Hash,
     },
     winnow::{
         ascii::newline,
@@ -248,7 +249,42 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .map(|p| {
+                let pack = (
+                    p[0],
+                    p.windows(2)
+                        .map(|p| ((p[0], p[1]), 1))
+                        .collect::<HashMap<_, _>>(),
+                );
+                let v2 = lift2::<Kind1, Kind2>(&pack, &self.lv1, Kind1::KA, Kind2::A);
+                // for v in v2.iter() {
+                //     println!("l2: {} ({})", to_string(v), v.len());
+                // }
+                let mut bag = v2;
+                for _i in 0..2 {
+                    bag = bag
+                        .iter()
+                        .flat_map(|p| lift2::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A))
+                        .collect::<Vec<_>>();
+                }
+                // let l = bag.iter().map(|l| l.len()).collect::<HashSet<_>>();
+                // println!("{:?}", l);
+                bag.iter()
+                    .map(|(_, h)| {
+                        let a = h.values().sum::<usize>();
+                        let b = p
+                            .iter()
+                            .filter(|k| **k != Kind1::KA)
+                            .fold(0, |acc, k| acc * 10 + (*k as usize));
+                        (a * b, a, b)
+                    })
+                    .min()
+                    .unwrap_or((0, 0, 0))
+            })
+            .map(|s| dbg!(s).0)
+            .sum::<usize>()
     }
 }
 
@@ -314,4 +350,85 @@ where
             })
             .collect::<Vec<_>>()
     })
+}
+
+#[allow(dead_code)]
+fn lift2_aux<T1, T2>(dict: &HashMap<(T1, T1), T2>, from: T1, to: T1) -> Vec<Vec<T2>>
+where
+    T1: Copy + Eq,
+    T2: Copy + Eq,
+{
+    let mut to_visit: Vec<(Vec<T1>, Vec<T2>)> = Vec::new();
+    to_visit.push((vec![from], Vec::new()));
+    let mut _visited: HashSet<T1> = HashSet::new();
+    let mut ret: Vec<Vec<T2>> = Vec::new();
+    let mut len: usize = usize::MAX;
+    while let Some((path, lifted_path)) = to_visit.pop() {
+        if path.last() == Some(&to) {
+            match lifted_path.len().cmp(&len) {
+                Ordering::Less => {
+                    len = lifted_path.len();
+                    ret = vec![lifted_path];
+                }
+                Ordering::Equal => {
+                    ret.push(lifted_path);
+                }
+                Ordering::Greater => {
+                    if lifted_path.len() <= len + 1 {
+                        ret.push(lifted_path);
+                    }
+                }
+            }
+            continue;
+        }
+        for (pair, by) in dict.iter() {
+            if path.last() == Some(&pair.0) && !path.contains(&pair.1) {
+                let mut path1 = path.clone();
+                path1.push(pair.1);
+                let mut lifted_path1 = lifted_path.clone();
+                lifted_path1.push(*by);
+                to_visit.push((path1, lifted_path1));
+            }
+        }
+    }
+    ret
+}
+
+fn lift2<T1, T2>(
+    path: &(T1, HashMap<(T1, T1), usize>),
+    dict: &HashMap<(T1, T1), T2>,
+    init: T1,
+    post: T2,
+) -> Vec<(T2, HashMap<(T2, T2), usize>)>
+where
+    T1: Copy + std::fmt::Debug + Eq,
+    T2: Copy + std::fmt::Debug + Eq + Hash,
+{
+    let _vec1 = lift_aux(dict, init, path.0)
+        .iter()
+        .map(|c| {
+            let mut path = c.clone();
+            path.push(post);
+            path
+        })
+        .collect::<Vec<_>>();
+    let _vec2 = path.1.iter().fold(
+        vec![HashMap::<(T2, T2), usize>::new()],
+        |acc, (segment, count)| {
+            let cands = lift_aux(dict, segment.0, segment.1);
+            acc.iter()
+                .flat_map(|hash| {
+                    cands.iter().map(|path| {
+                        let mut new_hash = hash.clone();
+                        for seg in path.windows(2) {
+                            let e = new_hash.entry((seg[0], seg[1])).or_default();
+                            *e += count;
+                        }
+                        new_hash
+                    })
+                })
+                .collect::<Vec<_>>()
+        },
+    );
+    unimplemented!()
 }
