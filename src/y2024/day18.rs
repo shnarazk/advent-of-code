@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         let start: Vec2 = (0, 0);
-        let goal: Vec2 = self.size.sub(&(1, 1));
+        let goal: Vec2 = self.size.sub((1, 1));
         let mut to_visit: BinaryHeap<Reverse<(usize, Vec2)>> = BinaryHeap::new();
         to_visit.push(Reverse((0, start)));
         let mut visited: Rect<bool> = self.mapping.map(|_| false);

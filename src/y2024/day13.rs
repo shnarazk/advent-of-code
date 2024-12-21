@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
         self.line
             .par_iter()
             .map(|(a, b, g)| {
-                let gg = g.add(&(10_000_000_000_000, 10_000_000_000_000));
+                let gg = g.add((10_000_000_000_000, 10_000_000_000_000));
                 solve(&gg, a, b)
             })
             .sum()

@@ -47,7 +47,7 @@ pub struct Puzzle {
 
 impl Puzzle {
     fn next_pos(&mut self) -> Option<Vec2> {
-        let p = self.guard.0.add(&self.guard.1.as_vec2());
+        let p = self.guard.0.add(self.guard.1.as_vec2());
         ((0..self.size.0).contains(&p.0) && (0..self.size.1).contains(&p.1)).then_some(p)
     }
     fn turn(&mut self) {

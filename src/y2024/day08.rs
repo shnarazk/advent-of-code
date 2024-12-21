@@ -47,10 +47,10 @@ impl AdventOfCode for Puzzle {
             for (j, (q, f2)) in self.antenna.iter().enumerate() {
                 if i < j && f1 == f2 {
                     let d = q.sub(p);
-                    if let Some(a) = self.check_pos(p.sub(&d)) {
+                    if let Some(a) = self.check_pos(p.sub(d)) {
                         self.antinode.insert(a);
                     }
-                    if let Some(b) = self.check_pos(q.add(&d)) {
+                    if let Some(b) = self.check_pos(q.add(d)) {
                         self.antinode.insert(b);
                     }
                 }
@@ -64,14 +64,14 @@ impl AdventOfCode for Puzzle {
                 if i < j && f1 == f2 {
                     let d0 = q.sub(p);
                     let mut d = (0, 0);
-                    while let Some(a) = self.check_pos(p.sub(&d)) {
+                    while let Some(a) = self.check_pos(p.sub(d)) {
                         self.antinode.insert(a);
-                        d = d.add(&d0);
+                        d = d.add(d0);
                     }
                     d = (0, 0);
-                    while let Some(a) = self.check_pos(q.add(&d)) {
+                    while let Some(a) = self.check_pos(q.add(d)) {
                         self.antinode.insert(a);
-                        d = d.add(&d0);
+                        d = d.add(d0);
                     }
                 }
             }

@@ -59,10 +59,10 @@ pub struct Puzzle {
 impl Puzzle {
     fn press(&mut self, t: usize) {
         self.dir = self.moves[t];
-        let next = self.pos.add(&self.dir.as_vec2());
+        let next = self.pos.add(self.dir.as_vec2());
         let mut p = next;
         while self.mapping[p] == Kind::Box {
-            p = p.add(&self.dir.as_vec2());
+            p = p.add(self.dir.as_vec2());
         }
         match self.mapping[p] {
             Kind::Empty => {
@@ -147,7 +147,7 @@ impl Puzzle {
             match self.mapping[pos.0] {
                 Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::Box => self.unsupported_e((pos.0.add(&(0, 1)), pos.1)),
+                Kind::Box => self.unsupported_e((pos.0.add((0, 1)), pos.1)),
                 Kind::BoxH => true,
                 Kind::Robot => unreachable!(),
             }
@@ -156,7 +156,7 @@ impl Puzzle {
                 Kind::Empty => true,
                 Kind::Wall => false,
                 Kind::Box => unreachable!(),
-                Kind::BoxH => self.unsupported_e((pos.0.add(&(0, 1)), pos.1)),
+                Kind::BoxH => self.unsupported_e((pos.0.add((0, 1)), pos.1)),
                 Kind::Robot => unreachable!(),
             }
         }
@@ -165,13 +165,13 @@ impl Puzzle {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Empty => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     self.mapping[w] != Kind::BoxH || self.unsupported_w((w, false))
                 }
                 Kind::Wall => false,
-                Kind::Box => self.unsupported_w((pos.0.add(&(0, -1)), true)),
+                Kind::Box => self.unsupported_w((pos.0.add((0, -1)), true)),
                 Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     self.mapping[w] != Kind::BoxH || self.unsupported_w((w, false))
                 }
                 Kind::Robot => unreachable!(),
@@ -180,7 +180,7 @@ impl Puzzle {
             match self.mapping[pos.0] {
                 Kind::Empty => true,
                 Kind::Wall => false,
-                Kind::Box => self.unsupported_w((pos.0.add(&(0, -1)), pos.1)),
+                Kind::Box => self.unsupported_w((pos.0.add((0, -1)), pos.1)),
                 Kind::BoxH => unreachable!(),
                 Kind::Robot => unreachable!(),
             }
@@ -191,14 +191,14 @@ impl Puzzle {
             match self.mapping[pos.0] {
                 Kind::Wall => false,
                 Kind::Empty | Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
-                    let s1 = pos.0.add(&(1, -1));
-                    let s2 = pos.0.add(&(1, 0));
+                    let w = pos.0.add((0, -1));
+                    let s1 = pos.0.add((1, -1));
+                    let s2 = pos.0.add((1, 0));
                     self.mapping[w] != Kind::BoxH
                         || (self.unsupported_s((s1, true)) && self.unsupported_s((s2, false)))
                 }
                 Kind::Box => {
-                    let s = pos.0.add(&(1, 0));
+                    let s = pos.0.add((1, 0));
                     self.unsupported_s((s, false)) && self.unsupported_s((s, true))
                 }
                 Kind::Robot => unreachable!(),
@@ -208,12 +208,12 @@ impl Puzzle {
                 Kind::Empty => true,
                 Kind::Wall => false,
                 Kind::BoxH => {
-                    let s1 = pos.0.add(&(1, 0));
-                    let s2 = pos.0.add(&(1, 1));
+                    let s1 = pos.0.add((1, 0));
+                    let s2 = pos.0.add((1, 1));
                     self.unsupported_s((s1, true)) && self.unsupported_s((s2, false))
                 }
                 Kind::Box => {
-                    let s = pos.0.add(&(1, 0));
+                    let s = pos.0.add((1, 0));
                     self.unsupported_s((s, false)) && self.unsupported_s((s, true))
                 }
                 Kind::Robot => unreachable!(),
@@ -225,14 +225,14 @@ impl Puzzle {
             match self.mapping[pos.0] {
                 Kind::Wall => false,
                 Kind::Empty | Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
-                    let n1 = pos.0.add(&(-1, -1));
-                    let n2 = pos.0.add(&(-1, 0));
+                    let w = pos.0.add((0, -1));
+                    let n1 = pos.0.add((-1, -1));
+                    let n2 = pos.0.add((-1, 0));
                     self.mapping[w] != Kind::BoxH
                         || (self.unsupported_n((n1, true)) && self.unsupported_n((n2, false)))
                 }
                 Kind::Box => {
-                    let n = pos.0.add(&(-1, 0));
+                    let n = pos.0.add((-1, 0));
                     self.unsupported_n((n, false)) && self.unsupported_n((n, true))
                 }
                 Kind::Robot => unreachable!(),
@@ -242,12 +242,12 @@ impl Puzzle {
                 Kind::Empty => true,
                 Kind::Wall => false,
                 Kind::BoxH => {
-                    let n1 = pos.0.add(&(-1, 0));
-                    let n2 = pos.0.add(&(-1, 1));
+                    let n1 = pos.0.add((-1, 0));
+                    let n2 = pos.0.add((-1, 1));
                     self.unsupported_n((n1, true)) && self.unsupported_n((n2, false))
                 }
                 Kind::Box => {
-                    let n = pos.0.add(&(-1, 0));
+                    let n = pos.0.add((-1, 0));
                     self.unsupported_n((n, false)) && self.unsupported_n((n, true))
                 }
                 Kind::Robot => unreachable!(),
@@ -266,7 +266,7 @@ impl Puzzle {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Box => {
-                    self.shift_e((pos.0.add(&(0, 1)), pos.1));
+                    self.shift_e((pos.0.add((0, 1)), pos.1));
                     self.mapping[pos.0] = Kind::BoxH;
                 }
                 Kind::Robot => unreachable!(),
@@ -276,7 +276,7 @@ impl Puzzle {
             match self.mapping[pos.0] {
                 Kind::Box => unreachable!(),
                 Kind::BoxH => {
-                    let e = pos.0.add(&(0, 1));
+                    let e = pos.0.add((0, 1));
                     self.shift_e((e, pos.1));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[e] = Kind::Box;
@@ -290,20 +290,20 @@ impl Puzzle {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Empty => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_w((w, false));
                         self.mapping[w] = Kind::Box;
                     }
                 }
                 Kind::Box => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     self.shift_w((w, true));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[w] = Kind::BoxH;
                 }
                 Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_w((w, false));
                         self.mapping[w] = Kind::Box;
@@ -315,7 +315,7 @@ impl Puzzle {
         } else {
             match self.mapping[pos.0] {
                 Kind::Box => {
-                    let w = pos.0.add(&(0, -1));
+                    let w = pos.0.add((0, -1));
                     self.shift_w((w, pos.1));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[w] = Kind::BoxH;
@@ -330,9 +330,9 @@ impl Puzzle {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Empty | Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
-                    let s1 = pos.0.add(&(1, -1));
-                    let s2 = pos.0.add(&(1, 0));
+                    let w = pos.0.add((0, -1));
+                    let s1 = pos.0.add((1, -1));
+                    let s2 = pos.0.add((1, 0));
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_s((s1, true));
                         self.shift_s((s2, false));
@@ -341,7 +341,7 @@ impl Puzzle {
                     }
                 }
                 Kind::Box => {
-                    let s = pos.0.add(&(1, 0));
+                    let s = pos.0.add((1, 0));
                     self.shift_s((s, false));
                     self.shift_s((s, true));
                     self.mapping[pos.0] = Kind::Empty;
@@ -353,15 +353,15 @@ impl Puzzle {
         } else {
             match self.mapping[pos.0] {
                 Kind::BoxH => {
-                    let s1 = pos.0.add(&(1, 0));
-                    let s2 = pos.0.add(&(1, 1));
+                    let s1 = pos.0.add((1, 0));
+                    let s2 = pos.0.add((1, 1));
                     self.shift_s((s1, true));
                     self.shift_s((s2, false));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[s1] = Kind::BoxH;
                 }
                 Kind::Box => {
-                    let s = pos.0.add(&(1, 0));
+                    let s = pos.0.add((1, 0));
                     self.shift_s((s, false));
                     self.shift_s((s, true));
                     self.mapping[pos.0] = Kind::Empty;
@@ -376,9 +376,9 @@ impl Puzzle {
         if !pos.1 {
             match self.mapping[pos.0] {
                 Kind::Empty | Kind::BoxH => {
-                    let w = pos.0.add(&(0, -1));
-                    let n1 = pos.0.add(&(-1, -1));
-                    let n2 = pos.0.add(&(-1, 0));
+                    let w = pos.0.add((0, -1));
+                    let n1 = pos.0.add((-1, -1));
+                    let n2 = pos.0.add((-1, 0));
                     if self.mapping[w] == Kind::BoxH {
                         self.shift_n((n1, true));
                         self.shift_n((n2, false));
@@ -387,7 +387,7 @@ impl Puzzle {
                     }
                 }
                 Kind::Box => {
-                    let n = pos.0.add(&(-1, 0));
+                    let n = pos.0.add((-1, 0));
                     self.shift_n((n, false));
                     self.shift_n((n, true));
                     self.mapping[pos.0] = Kind::Empty;
@@ -399,15 +399,15 @@ impl Puzzle {
         } else {
             match self.mapping[pos.0] {
                 Kind::BoxH => {
-                    let n1 = pos.0.add(&(-1, 0));
-                    let n2 = pos.0.add(&(-1, 1));
+                    let n1 = pos.0.add((-1, 0));
+                    let n2 = pos.0.add((-1, 1));
                     self.shift_n((n1, true));
                     self.shift_n((n2, false));
                     self.mapping[pos.0] = Kind::Empty;
                     self.mapping[n1] = Kind::BoxH;
                 }
                 Kind::Box => {
-                    let n = pos.0.add(&(-1, 0));
+                    let n = pos.0.add((-1, 0));
                     self.shift_n((n, false));
                     self.shift_n((n, true));
                     self.mapping[pos.0] = Kind::Empty;
@@ -429,11 +429,11 @@ impl Puzzle {
     fn press2(&mut self, t: usize) {
         self.dir = self.moves[t];
         let next = match (self.dir, self.pos_half) {
-            (Direction::NORTH, b) => (self.pos.add(&(-1, 0)), b),
-            (Direction::SOUTH, b) => (self.pos.add(&(1, 0)), b),
+            (Direction::NORTH, b) => (self.pos.add((-1, 0)), b),
+            (Direction::SOUTH, b) => (self.pos.add((1, 0)), b),
             (Direction::EAST, false) => (self.pos, true),
-            (Direction::EAST, true) => (self.pos.add(&(0, 1)), false),
-            (Direction::WEST, false) => (self.pos.add(&(0, -1)), true),
+            (Direction::EAST, true) => (self.pos.add((0, 1)), false),
+            (Direction::WEST, false) => (self.pos.add((0, -1)), true),
             (Direction::WEST, true) => (self.pos, false),
         };
         if self.unsupported(next, self.dir) {

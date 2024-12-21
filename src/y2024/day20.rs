@@ -108,7 +108,7 @@ impl AdventOfCode for Puzzle {
             .map(|(p, _)| {
                 POS.iter()
                     .map(|off| {
-                        if let Some(q) = p.add(off).included((0, 0), &self.size) {
+                        if let Some(q) = p.add(off).included((0, 0), self.size) {
                             if self.dist[q] != usize::MAX
                                 && self.dist[p] + 2 + self.threshold <= self.dist[q]
                             {
@@ -135,7 +135,7 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .filter(|(_, b)| **b)
                     .map(|(q, _)| {
-                        let dist = p.manhattan_distance(&q);
+                        let dist = p.manhattan_distance(q);
                         (1 < dist
                             && dist <= 20
                             && self.dist[p] != usize::MAX
