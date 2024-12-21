@@ -1,10 +1,16 @@
 //! <https://adventofcode.com/2022/day/5>
 use {
     crate::{
+        array::rotate_clockwise,
         framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
+        parser::parse_usize,
     },
     std::collections::HashMap,
+    winnow::{
+        ascii::{alpha1, newline, space1},
+        combinator::{alt, separated, seq},
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -13,49 +19,54 @@ pub struct Puzzle {
     stacks: HashMap<usize, Vec<char>>,
 }
 
+fn parse_optional_cell(s: &mut &str) -> PResult<Option<char>> {
+    let (x,) = alt((seq!(_:"[", alpha1, _: "]"), seq!(_:" ", " ", _:" "))).parse_next(s)?;
+    if x == " " {
+        Ok(None)
+    } else {
+        Ok(Some(x.chars().next().unwrap()))
+    }
+}
+
+fn parse_config_line(s: &mut &str) -> PResult<Vec<Option<char>>> {
+    separated(1.., parse_optional_cell, " ").parse_next(s)
+}
+
+fn parse_config_ids(s: &mut &str) -> PResult<()> {
+    separated(1.., space1, parse_usize).parse_next(s)
+}
+
+fn parse_config(s: &mut &str) -> PResult<Vec<Vec<Option<char>>>> {
+    seq!(separated(1.., parse_config_line, newline), _: newline, _: parse_config_ids)
+        .map(|(t,)| t)
+        .parse_next(s)
+}
+
+fn parse_move(s: &mut &str) -> PResult<(usize, usize, usize)> {
+    seq!(_: "move ", parse_usize, _: " from ", parse_usize, _: " to ", parse_usize).parse_next(s)
+}
+
+fn parse_moves(s: &mut &str) -> PResult<Vec<(usize, usize, usize)>> {
+    separated(1.., parse_move, newline).parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize, usize)>)> {
+    seq!(parse_config, _: newline, _: newline, parse_moves).parse_next(s)
+}
+
 #[aoc_at(2022, 5)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let mut num_stack = 0;
-        let parser = regex!(r"^((.+\n)+)\n((.+\n)+)$");
-        let segment = parser.captures(&input).ok_or(ParseError)?;
-        for (i, line) in segment[1].split('\n').enumerate() {
-            let chs = line.chars().collect::<Vec<char>>();
-            if !chs.contains(&'[') {
-                break;
-            }
-            if i == 0 {
-                num_stack = (line.len() + 1) / 4;
-            }
-            for n in 1..=num_stack {
-                let ch = chs[4 * (n - 1) + 1];
-                if ch == ' ' {
-                    continue;
-                }
-                self.stacks.entry(n).or_default().push(ch);
-            }
+        let (mc, moves) = parse(&mut input.as_str())?;
+        let maze_config = rotate_clockwise(mc);
+        for (n, config) in maze_config.iter().enumerate() {
+            let stack = config.iter().flat_map(|c| c).cloned().collect::<Vec<_>>();
+            self.stacks.insert(n + 1, stack);
         }
-        Ok(segment[3].to_string())
-    }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^move (\d+) from (\d+) to (\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].parse::<usize>()?,
-            segment[2].parse::<usize>()?,
-            segment[3].parse::<usize>()?,
-        ));
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        for st in self.stacks.values_mut() {
-            st.reverse();
-        }
-        // dbg!(&self.stacks);
-        // dbg!(&self.line);
+        self.line = moves;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let Puzzle { line, stacks } = self;
@@ -66,7 +77,6 @@ impl AdventOfCode for Puzzle {
                 };
                 stacks.get_mut(to).unwrap().push(x);
             }
-            // dbg!(&stacks);
         }
         (1..=stacks.len())
             .map(|i| stacks.get(&i).unwrap().last().unwrap())
