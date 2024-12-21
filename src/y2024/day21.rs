@@ -385,71 +385,92 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
+            .skip(3)
             .take(1)
             .map(|targets| {
                 // これは数値パッドに打ち込みたいキーの並び
                 let mut lv1_targets = vec![Kind1::KA];
                 lv1_targets.append(&mut targets.clone());
-                dbg!(&lv1_targets);
-                lv1_targets
+                // dbg!(&lv1_targets);
+                let a = lv1_targets
                     .windows(2)
                     .fold(
-                        (0, Kind2::A, Kind2::A),
-                        |(len, lv3_pos, lv2_pos), segment| {
+                        (0, Kind2::A, Kind2::A, Kind2::A),
+                        |(len, lv4_pos, lv3_pos, lv2_pos), segment| {
                             lv1_build_pathes(segment[0], segment[1])
                                 .iter()
                                 .take(1)
                                 .fold(
-                                    (0, lv3_pos, lv2_pos),
-                                    |(len, lv3_pos, lv2_pos), lv1_path| {
+                                    (len, lv4_pos, lv3_pos, lv2_pos),
+                                    |(len, lv4_pos, lv3_pos, lv2_pos), lv1_path| {
                                         // これはlv1で辿るキーの系列
                                         // println!("L1_path: {lv1_path:?}");
                                         let lv2_targets = lv1_path_to_lv2_actions(lv1_path);
                                         // これはlv2で押すべきキーの系列
-                                        println!(
+                                        /* println!(
                                             "lv2_targets: {}, lv3:{}, lv2:{}",
                                             to_string(&lv2_targets),
                                             lv3_pos,
                                             lv2_pos,
-                                        );
+                                        ); */
                                         // lv3に持ち上げ
                                         let lv3_targets = lv2_targets.iter().fold(
-                                            (Vec::new(), lv3_pos, lv2_pos),
-                                            |(mut subs, lv3_pos, lv2_pos), to| {
+                                            (Vec::new(), lv4_pos, lv3_pos, lv2_pos),
+                                            |(mut subs, lv4_pos, lv3_pos, lv2_pos), to| {
                                                 let (mut t, lv3, lv2) =
                                                     build_lv3_best_actions_to_push(
                                                         lv3_pos, lv2_pos, *to,
                                                     );
-                                                println!(
+                                                /* println!(
                                                     "lv2 segment: {}:{} => lv3_action: {} lv3:{}, lv2:{}",
                                                     lv2_pos,
                                                     to,
                                                     to_string(&t),
                                                     lv3,
                                                     lv2,
-                                                );
+                                                ); */
                                                 subs.append(&mut t);
-                                                (subs, lv3, lv2)
+                                                (subs, lv4_pos, lv3, lv2)
                                             },
                                         );
+                                        // println!("lv3_targets: {}", to_string(&lv3_targets.0));
 
-                                        println!("lv3_targets: {}", to_string(&lv3_targets.0));
-                                        // let lv4_targets = lv3_targets
-                                        //     .0
-                                        //     .windows(2)
-                                        //     .map(|seg| {
-                                        //         build_lv4_best_actions_to_push(seg[0], seg[1])
-                                        //     })
-                                        //     .map(|c| c)
-                                        //     .collect::<Vec<_>>();
-                                        // println!("lv4_targets: {}", to_string(&lv4_targets[0].0));
-                                        // lv4_targets[0].1
-                                        (lv3_targets.0.len(), lv3_targets.1, lv3_targets.2)
+                                        let lv4_targets = lv3_targets.0.iter().fold(
+                                            (Vec::new(), lv4_pos, lv3_targets.1, lv3_targets.2),
+                                            |(mut subs, lv4_pos, lv3_pos, lv2_pos), to| {
+                                                let (mut t, lv4, lv3) =
+                                                    build_lv3_best_actions_to_push(
+                                                        lv4_pos, lv3_pos, *to,
+                                                    );
+                                                /* println!(
+                                                    "lv3 segment: {}:{} => lv4_action: {} lv4:{}, lv3:{}",
+                                                    lv3_pos,
+                                                    to,
+                                                    to_string(&t),
+                                                    lv4,
+                                                    lv3,
+                                                ); */
+                                                subs.append(&mut t);
+                                                (subs, lv4, lv3, lv2_pos)
+                                            },
+                                        );
+                                        // println!("lv4_targets: {}", to_string(&lv4_targets.0));
+                                        (
+                                            len + lv4_targets.0.len(),
+                                            lv4_targets.1,
+                                            lv4_targets.2,
+                                            lv4_targets.3,
+                                        )
                                     },
                                 )
                         },
                     )
-                    .0
+                    .0;
+                let b = targets
+                    .iter()
+                    .filter(|k| **k != Kind1::KA)
+                    .fold(0, |acc, k| acc * 10 + (*k as usize));
+                dbg!(a) * dbg!(b)
             })
             .map(|n| dbg!(n))
             .sum::<usize>()
