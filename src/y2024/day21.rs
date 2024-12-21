@@ -1,26 +1,11 @@
 //! <https://adventofcode.com/2024/day/21>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
-        parser::parse_usize,
-    },
-    itertools::Itertools,
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     serde::Serialize,
-    serde_json::to_value,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
+    std::collections::HashMap,
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated},
         token::one_of,
         PResult, Parser,
     },
@@ -220,12 +205,6 @@ fn build_lv3_best_actions_to_push(
     (a, lv3, to)
 }
 
-fn build_lv4_best_actions_to_push(from: Kind2, to: Kind2) -> (Vec<Kind2>, Kind2) {
-    let mut go = lv2_build_pathes(from, to)[0].clone();
-    go.push(Kind2::A);
-    (go, to)
-}
-
 const LV1TOLV2: [((Kind1, Kind1), Kind2); 30] = [
     ((Kind1::K0, Kind1::K2), Kind2::U),
     ((Kind1::K0, Kind1::KA), Kind2::R),
@@ -301,6 +280,7 @@ fn lv2_path_to_lv2_actions(path: &[Kind2]) -> (Vec<Kind2>, Kind2) {
     (ret, last)
 }
 
+#[allow(dead_code)]
 fn lv1_to_lv2_pathes(from: Kind1, to: Kind1) -> Vec<Vec<Kind2>> {
     lv1_build_pathes(from, to)
         .iter()
@@ -391,7 +371,7 @@ impl AdventOfCode for Puzzle {
                 // これは数値パッドに打ち込みたいキーの並び
                 let mut lv1_targets = vec![Kind1::KA];
                 lv1_targets.append(&mut targets.clone());
-                // dbg!(&lv1_targets);
+                dbg!(&lv1_targets);
                 let a = lv1_targets
                     .windows(2)
                     .fold(
@@ -404,7 +384,7 @@ impl AdventOfCode for Puzzle {
                                     (len, lv4_pos, lv3_pos, lv2_pos),
                                     |(len, lv4_pos, lv3_pos, lv2_pos), lv1_path| {
                                         // これはlv1で辿るキーの系列
-                                        // println!("L1_path: {lv1_path:?}");
+                                        println!("L1_path: {lv1_path:?}");
                                         let lv2_targets = lv1_path_to_lv2_actions(lv1_path);
                                         // これはlv2で押すべきキーの系列
                                         /* println!(
