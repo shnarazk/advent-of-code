@@ -89,7 +89,7 @@ struct ResultData {
     time: f64,
 }
 fn bench(config: ConfigAoC) {
-    let results = (1..26)
+    let results = (1..=25)
         .map(|day| {
             let year = config.year;
             let mut config = config.clone();
@@ -115,7 +115,7 @@ fn bench(config: ConfigAoC) {
                 #[cfg(feature = "y2023")]
                 2023 => aoc_arms!(2023),
                 #[cfg(feature = "y2024")]
-                2024 => aoc_arms!(2024, 14),
+                2024 => aoc_arms!(2024),
                 _ => println!("invalid year for benchmark: {}", config.year),
             }
             let end = Instant::now();
