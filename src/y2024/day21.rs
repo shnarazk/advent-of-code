@@ -1,6 +1,4 @@
 //! <https://adventofcode.com/2024/day/21>
-// #![allow(dead_code)]
-// #![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
@@ -243,13 +241,13 @@ impl AdventOfCode for Puzzle {
                         (a * b, a, b, l)
                     })
                     .min_by_key(|(n, _, _, _)| *n)
-                    .map(|(sum, a, b, l)| {
-                        println!(
-                            "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
-                            l.iter()
-                                .map(|(l, c)| (format!("{}", to_string(l)), c))
-                                .collect::<Vec<_>>(),
-                        );
+                    .map(|(sum, a, b, _l)| {
+                        // println!(
+                        //     "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
+                        //     l.iter()
+                        //         .map(|(l, c)| (format!("{}", to_string(l)), c))
+                        //         .collect::<Vec<_>>(),
+                        // );
                         (sum, a, b)
                     })
                     .unwrap_or((0, 0, 0))
@@ -262,8 +260,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output1 {
         let mut memo = HashMap::new();
-        let ret = self
-            .line
+        self.line
             .iter()
             .map(|p| {
                 let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
@@ -272,7 +269,6 @@ impl AdventOfCode for Puzzle {
                     .map(|path| {
                         let mut p = vec![Kind2::A];
                         p.append(&mut path.clone());
-                        println!("{}", to_string(&p));
                         p.windows(2)
                             .map(|segment| {
                                 get_length(&mut memo, &self.lv2, 25, 0, segment[0], segment[1])
@@ -287,9 +283,7 @@ impl AdventOfCode for Puzzle {
                     .fold(0, |acc, k| acc * 10 + (*k as usize));
                 a * b
             })
-            .sum::<usize>();
-        // dbg!(memo);
-        ret
+            .sum::<usize>()
     }
 }
 
@@ -358,43 +352,6 @@ fn lift_k2(path: &[Kind2], dict: &HashMap<(Kind2, Kind2), Kind2>) -> Vec<Vec<Kin
     let mut p = vec![Kind2::A];
     p.append(&mut path.to_vec());
     p.windows(2).fold(vec![Vec::new()], |acc, segment| {
-        /*
-        let cand = match (segment[0], segment[1]) {
-            (Kind2::U, Kind2::U) => vec![Kind2::A],
-            (Kind2::U, Kind2::D) => vec![Kind2::D, Kind2::A],
-            (Kind2::U, Kind2::L) => vec![Kind2::D, Kind2::L, Kind2::A],
-            (Kind2::U, Kind2::R) => vec![Kind2::D, Kind2::R, Kind2::A],
-            (Kind2::U, Kind2::A) => vec![Kind2::R, Kind2::A],
-            (Kind2::D, Kind2::U) => vec![Kind2::U, Kind2::A],
-            (Kind2::D, Kind2::D) => vec![Kind2::A],
-            (Kind2::D, Kind2::L) => vec![Kind2::L, Kind2::A],
-            (Kind2::D, Kind2::R) => vec![Kind2::R, Kind2::A],
-            (Kind2::D, Kind2::A) => vec![Kind2::R, Kind2::U, Kind2::A],
-            (Kind2::L, Kind2::U) => vec![Kind2::R, Kind2::U, Kind2::A],
-            (Kind2::L, Kind2::D) => vec![Kind2::R, Kind2::A],
-            (Kind2::L, Kind2::L) => vec![Kind2::A],
-            (Kind2::L, Kind2::R) => vec![Kind2::R, Kind2::R, Kind2::A],
-            (Kind2::L, Kind2::A) => vec![Kind2::R, Kind2::R, Kind2::U, Kind2::A],
-            (Kind2::R, Kind2::U) => vec![Kind2::L, Kind2::U, Kind2::A],
-            (Kind2::R, Kind2::D) => vec![Kind2::L, Kind2::A],
-            (Kind2::R, Kind2::L) => vec![Kind2::L, Kind2::L, Kind2::A],
-            (Kind2::R, Kind2::R) => vec![Kind2::A],
-            (Kind2::R, Kind2::A) => vec![Kind2::U, Kind2::A],
-            (Kind2::A, Kind2::U) => vec![Kind2::L, Kind2::A],
-            (Kind2::A, Kind2::D) => vec![Kind2::D, Kind2::L, Kind2::A],
-            (Kind2::A, Kind2::L) => vec![Kind2::D, Kind2::L, Kind2::L, Kind2::A],
-            (Kind2::A, Kind2::R) => vec![Kind2::D, Kind2::A],
-            (Kind2::A, Kind2::A) => vec![Kind2::A],
-        };
-        acc.iter()
-            .map(|pre| {
-                let mut path = pre.clone();
-                let mut cc = cand.clone();
-                path.append(&mut cc);
-                path
-            })
-            .collect::<Vec<_>>()
-        */
         let cands = lift_aux(dict, segment[0], segment[1], Kind2::A);
         acc.iter()
             .flat_map(|pre| {
@@ -421,8 +378,6 @@ fn lift2(
                 .iter()
                 .flat_map(|seq_| {
                     let segments = segmentize(seq_);
-
-                    // there
                     vec.iter()
                         .map(|hash| {
                             let mut h = hash.clone();
@@ -437,21 +392,9 @@ fn lift2(
         });
     ret.iter()
         .enumerate()
-        .filter(|(k, h1)| {
-            let ret = ret.iter().skip(*k + 1).all(|h2| *h1 != h2);
-            // if !ret {
-            //     dbg!();
-            // }
-            ret
-        })
+        .filter(|(k, h1)| ret.iter().skip(*k + 1).all(|h2| *h1 != h2))
         .map(|(_, h)| h.clone())
         .collect::<Vec<_>>()
-    // assert!(ret
-    //     .iter()
-    //     .enumerate()
-    //     .all(|(k, h2)| ret.iter().skip(k).all(|h1| h1 != h2)));
-
-    // ret
 }
 
 fn segmentize(seq_: &[Kind2]) -> HashMap<Vec<Kind2>, usize> {
@@ -465,9 +408,7 @@ fn segmentize(seq_: &[Kind2]) -> HashMap<Vec<Kind2>, usize> {
         .map(|(n, _)| n)
         .collect::<Vec<_>>();
     breaks
-        .iter()
-        .cloned()
-        .collect::<Vec<_>>()
+        .to_vec()
         .windows(2)
         .map(|seg| seq[seg[0] + 1..=seg[1]].to_vec())
         .fold(HashMap::<Vec<Kind2>, usize>::new(), |mut hash, seq| {
@@ -503,42 +444,11 @@ fn expand2(
     vec: &[HashMap<Vec<Kind2>, usize>],
     dict: &HashMap<(Kind2, Kind2), Kind2>,
 ) -> Vec<HashMap<Vec<Kind2>, usize>> {
-    let ret = vec.iter().flat_map(|h| lift2(h, dict)).collect::<Vec<_>>();
-    // .fold(Vec::new(), |mut stored, me| {
-    //     if stored.iter().any(|hash: &HashMap<Vec<Kind2>, usize>| {
-    //         hash.iter()
-    //             .all(|(k, c): (&Vec<Kind2>, &usize)| me.get(k).map_or(false, |d| *c < *d))
-    //     }) {
-    //         stored
-    //     } else {
-    //         stored.push(me);
-    //         stored
-    //     }
-    // })
-    // .iter()
-    // .map(|h| {
-    //     h.iter()
-    //         .sorted()
-    //         .map(|(v, n)| (v.clone(), *n))
-    //         .collect::<Vec<_>>()
-    // })
-    // .collect::<HashSet<_>>()
-    // .iter()
-    // .map(|l| l.iter().cloned().collect::<HashMap<_, _>>())
-    // .collect::<Vec<_>>();
-
-    // let best = ret
-    //     .iter()
-    //     .map(|h| h.iter().map(|(l, n)| l.len() * n).sum::<usize>())
-    //     .min()
-    //     .unwrap();
-    // ret.retain(|h| h.iter().map(|(l, n)| l.len() * n).sum::<usize>() == best);
-    // ret
-    ret
+    vec.iter().flat_map(|h| lift2(h, dict)).collect::<Vec<_>>()
 }
 
 // 深さ優先で最終的な長さをキャッシュしながら返す。
-// on-the-flyで25x6x6程度のエントリーを生成するなら非常に効率がよい
+// on-the-flyで25x5x5程度のエントリーを生成するなら非常に効率がよい
 fn get_length(
     memo: &mut HashMap<(usize, Kind2, Kind2), usize>,
     dict: &HashMap<(Kind2, Kind2), Kind2>,
@@ -551,21 +461,11 @@ fn get_length(
         return *d;
     }
     if level == depth {
-        // let cands = lift_aux(dict, from, to, Kind2::A);
-        // println!("@last level: {}", to_string(&cands[0]));
-        let dist = 1; // cands.iter().map(|l| l.len()).min().unwrap();
-        memo.insert((level, from, to), dist);
-        return dist;
+        memo.insert((level, from, to), 1);
+        return 1;
     }
     // build all pathes from `from` to `to` even if they are connected directly
     let cands = lift_aux(dict, from, to, Kind2::A);
-    // if level == 1 {
-    //     println!(
-    //         "lv{level}: {from}:{to} => lv{}: {}",
-    //         level + 1,
-    //         to_string(&cands[0])
-    //     );
-    // }
     let dist = cands
         .iter()
         .map(|path| {
