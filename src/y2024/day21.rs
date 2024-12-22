@@ -209,13 +209,13 @@ impl AdventOfCode for Puzzle {
                     })
                     .min()
                     .map(|(sum, a, b, l)| {
-                        println!("= {a:>4} * {b:>5} = {sum:>6}: {:?}", to_string(l));
+                        println!("- {a:>4} * {b:>5} = {sum:>6}: {:?}", to_string(l));
                         (sum, a, b)
                     })
                     .unwrap_or((0, 0, 0))
             })
             .map(|s| {
-                println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
+                // println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
                 s.0
             })
             .sum::<usize>()
@@ -224,12 +224,15 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .map(|p| {
-                let mut v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
-                v2.truncate(1);
-                let h2 = v2.iter().map(segmentize).collect::<Vec<_>>();
-                // dbg!(&h2);
+                let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
+                // v2.truncate(1);
+                let v3 = expand(&v2, &self.lv2);
+                // v3.truncate(1);
+                // dbg!(&v3);
+                let h3 = v3.iter().map(|v| segmentize(v)).collect::<Vec<_>>();
+                // dbg!(&h3);
 
-                let h3 = expand2(&h2, &self.lv2);
+                // let h3 = expand2(&h2, &self.lv2);
                 // print_shortest(&v3_);
                 let h4 = expand2(&h3, &self.lv2);
                 // print_shortest(&v4_);
@@ -251,7 +254,7 @@ impl AdventOfCode for Puzzle {
                         println!(
                             "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
                             l.iter()
-                                .map(|(l, c)| format!("{}({})", to_string(l), c))
+                                .map(|(l, c)| (format!("{}", to_string(l)), c))
                                 .collect::<Vec<_>>(),
                         );
                         (sum, a, b)
@@ -337,30 +340,11 @@ fn lift2(
     dict: &HashMap<(Kind2, Kind2), Kind2>,
 ) -> Vec<HashMap<Vec<Kind2>, usize>> {
     hash.iter()
-        .fold(vec![HashMap::new()], |vec, (segment, _count)| {
+        .fold(vec![HashMap::new()], |vec, (segment, count)| {
             let cands = lift::<Kind2, Kind2>(segment, dict, Kind2::A, Kind2::A);
             cands
                 .iter()
                 .flat_map(|seq_| {
-                    // here
-                    // let mut seq = vec![Kind2::A];
-                    // seq.append(&mut seq_.clone());
-                    // let last = seq.len() - 1;
-                    // let breaks = seq
-                    //     .iter()
-                    //     .enumerate()
-                    //     .filter(|(n, k)| [0, last].contains(n) || **k == Kind2::A)
-                    //     .map(|(n, _)| n)
-                    //     .collect::<Vec<_>>();
-                    // let segments = breaks
-                    //     .iter()
-                    //     .enumerate()
-                    //     .filter(|(i, _)| *i % 2 == 0)
-                    //     .map(|(_, n)| *n)
-                    //     .collect::<Vec<_>>()
-                    //     .windows(2)
-                    //     .map(|seg| seq[seg[0] + 1..=seg[1]].to_vec())
-                    //     .collect::<Vec<_>>();
                     let segments = segmentize(seq_);
 
                     // there
@@ -368,7 +352,7 @@ fn lift2(
                         .map(|hash| {
                             let mut h = hash.clone();
                             for seg in segments.iter() {
-                                *h.entry(seg.0.clone()).or_default() += seg.1;
+                                *h.entry(seg.0.clone()).or_default() += seg.1 * count;
                             }
                             h
                         })
@@ -378,7 +362,7 @@ fn lift2(
         })
 }
 
-fn segmentize(seq_: &Vec<Kind2>) -> HashMap<Vec<Kind2>, usize> {
+fn segmentize(seq_: &[Kind2]) -> HashMap<Vec<Kind2>, usize> {
     let mut seq = vec![Kind2::A];
     seq.append(&mut seq_.to_vec());
     let last = seq.len() - 1;
@@ -390,9 +374,7 @@ fn segmentize(seq_: &Vec<Kind2>) -> HashMap<Vec<Kind2>, usize> {
         .collect::<Vec<_>>();
     breaks
         .iter()
-        .enumerate()
-        .filter(|(i, _)| *i % 2 == 0)
-        .map(|(_, n)| *n)
+        .cloned()
         .collect::<Vec<_>>()
         .windows(2)
         .map(|seg| seq[seg[0] + 1..=seg[1]].to_vec())
