@@ -2,7 +2,11 @@
 // #![allow(dead_code)]
 // #![allow(unused_variables)]
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        // progress,
+    },
+    // itertools::Itertools,
     serde::Serialize,
     std::{
         cmp::Ordering,
@@ -182,7 +186,7 @@ impl AdventOfCode for Puzzle {
         .cloned()
         .collect::<HashMap<_, _>>();
     }
-    fn part1(&mut self) -> Self::Output1 {
+    /* fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
             .map(|p| {
@@ -219,28 +223,56 @@ impl AdventOfCode for Puzzle {
                 s.0
             })
             .sum::<usize>()
+    } */
+    fn part1(&mut self) -> Self::Output1 {
+        self.line
+            .iter()
+            .map(|p| {
+                let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
+                let mut h = v2.iter().map(|v| segmentize(v)).collect::<Vec<_>>();
+                for _i in 0..2 {
+                    h = expand2(&h, &self.lv2);
+                }
+                h.iter()
+                    .map(|l| {
+                        let a = l.iter().map(|(seg, n)| seg.len() * n).sum::<usize>();
+                        let b = p
+                            .iter()
+                            .filter(|k| **k != Kind1::KA)
+                            .fold(0, |acc, k| acc * 10 + (*k as usize));
+                        (a * b, a, b, l)
+                    })
+                    .min_by_key(|(n, _, _, _)| *n)
+                    .map(|(sum, a, b, l)| {
+                        println!(
+                            "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
+                            l.iter()
+                                .map(|(l, c)| (format!("{}", to_string(l)), c))
+                                .collect::<Vec<_>>(),
+                        );
+                        (sum, a, b)
+                    })
+                    .unwrap_or((0, 0, 0))
+            })
+            .map(|s| {
+                // println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
+                s.0
+            })
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
         self.line
             .iter()
             .map(|p| {
                 let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
-                // v2.truncate(1);
-                let v3 = expand(&v2, &self.lv2);
-                // v3.truncate(1);
-                // dbg!(&v3);
-                let h3 = v3.iter().map(|v| segmentize(v)).collect::<Vec<_>>();
-                // dbg!(&h3);
-
-                // let h3 = expand2(&h2, &self.lv2);
-                // print_shortest(&v3_);
-                let h4 = expand2(&h3, &self.lv2);
-                // print_shortest(&v4_);
-
-                // let v3 = expand(&v2, &self.lv2);
-                // let v4 = expand(&v3, &self.lv2);
-
-                h4.iter()
+                let mut h = v2.iter().map(|v| segmentize(v)).collect::<Vec<_>>();
+                // 23回コピーしな
+                for _i in 0..25 {
+                    h = expand2(&h, &self.lv2);
+                    // println!("{}, {}", i, h.len());
+                }
+                // */
+                h.iter()
                     .map(|l| {
                         let a = l.iter().map(|(seg, n)| seg.len() * n).sum::<usize>();
                         let b = p
@@ -291,12 +323,7 @@ where
                     lifted_path.push(post);
                     ret.push(lifted_path);
                 }
-                Ordering::Greater => {
-                    if lifted_path.len() <= len + 1 {
-                        lifted_path.push(post);
-                        ret.push(lifted_path);
-                    }
-                }
+                Ordering::Greater => (),
             }
             continue;
         }
@@ -335,13 +362,69 @@ where
     })
 }
 
+fn lift_k2(path: &[Kind2], dict: &HashMap<(Kind2, Kind2), Kind2>) -> Vec<Vec<Kind2>> {
+    let mut p = vec![Kind2::A];
+    p.append(&mut path.to_vec());
+    p.windows(2).fold(vec![Vec::new()], |acc, segment| {
+        /*
+        let cand = match (segment[0], segment[1]) {
+            (Kind2::U, Kind2::U) => vec![Kind2::A],
+            (Kind2::U, Kind2::D) => vec![Kind2::D, Kind2::A],
+            (Kind2::U, Kind2::L) => vec![Kind2::D, Kind2::L, Kind2::A],
+            (Kind2::U, Kind2::R) => vec![Kind2::D, Kind2::R, Kind2::A],
+            (Kind2::U, Kind2::A) => vec![Kind2::R, Kind2::A],
+            (Kind2::D, Kind2::U) => vec![Kind2::U, Kind2::A],
+            (Kind2::D, Kind2::D) => vec![Kind2::A],
+            (Kind2::D, Kind2::L) => vec![Kind2::L, Kind2::A],
+            (Kind2::D, Kind2::R) => vec![Kind2::R, Kind2::A],
+            (Kind2::D, Kind2::A) => vec![Kind2::R, Kind2::U, Kind2::A],
+            (Kind2::L, Kind2::U) => vec![Kind2::R, Kind2::U, Kind2::A],
+            (Kind2::L, Kind2::D) => vec![Kind2::R, Kind2::A],
+            (Kind2::L, Kind2::L) => vec![Kind2::A],
+            (Kind2::L, Kind2::R) => vec![Kind2::R, Kind2::R, Kind2::A],
+            (Kind2::L, Kind2::A) => vec![Kind2::R, Kind2::R, Kind2::U, Kind2::A],
+            (Kind2::R, Kind2::U) => vec![Kind2::L, Kind2::U, Kind2::A],
+            (Kind2::R, Kind2::D) => vec![Kind2::L, Kind2::A],
+            (Kind2::R, Kind2::L) => vec![Kind2::L, Kind2::L, Kind2::A],
+            (Kind2::R, Kind2::R) => vec![Kind2::A],
+            (Kind2::R, Kind2::A) => vec![Kind2::U, Kind2::A],
+            (Kind2::A, Kind2::U) => vec![Kind2::L, Kind2::A],
+            (Kind2::A, Kind2::D) => vec![Kind2::D, Kind2::L, Kind2::A],
+            (Kind2::A, Kind2::L) => vec![Kind2::D, Kind2::L, Kind2::L, Kind2::A],
+            (Kind2::A, Kind2::R) => vec![Kind2::D, Kind2::A],
+            (Kind2::A, Kind2::A) => vec![Kind2::A],
+        };
+        acc.iter()
+            .map(|pre| {
+                let mut path = pre.clone();
+                let mut cc = cand.clone();
+                path.append(&mut cc);
+                path
+            })
+            .collect::<Vec<_>>()
+        */
+        let cands = lift_aux(dict, segment[0], segment[1], Kind2::A);
+        acc.iter()
+            .flat_map(|pre| {
+                cands.iter().map(|c| {
+                    let mut path = pre.clone();
+                    let mut cc = c.clone();
+                    path.append(&mut cc);
+                    path
+                })
+            })
+            .collect::<Vec<_>>()
+    })
+}
+
 fn lift2(
     hash: &HashMap<Vec<Kind2>, usize>,
     dict: &HashMap<(Kind2, Kind2), Kind2>,
 ) -> Vec<HashMap<Vec<Kind2>, usize>> {
-    hash.iter()
+    let ret = hash
+        .iter()
         .fold(vec![HashMap::new()], |vec, (segment, count)| {
-            let cands = lift::<Kind2, Kind2>(segment, dict, Kind2::A, Kind2::A);
+            let cands = lift_k2(segment, dict);
             cands
                 .iter()
                 .flat_map(|seq_| {
@@ -359,7 +442,24 @@ fn lift2(
                         .collect::<Vec<_>>()
                 })
                 .collect::<Vec<_>>()
+        });
+    ret.iter()
+        .enumerate()
+        .filter(|(k, h1)| {
+            let ret = ret.iter().skip(*k + 1).all(|h2| *h1 != h2);
+            // if !ret {
+            //     dbg!();
+            // }
+            ret
         })
+        .map(|(_, h)| h.clone())
+        .collect::<Vec<_>>()
+    // assert!(ret
+    //     .iter()
+    //     .enumerate()
+    //     .all(|(k, h2)| ret.iter().skip(k).all(|h1| h1 != h2)));
+
+    // ret
 }
 
 fn segmentize(seq_: &[Kind2]) -> HashMap<Vec<Kind2>, usize> {
@@ -399,6 +499,8 @@ fn print_shortest(hashes: &[HashMap<Vec<Kind2>, usize>]) {
             .collect::<Vec<_>>()
     );
 }
+
+#[allow(dead_code)]
 fn expand(vec: &[Vec<Kind2>], dict: &HashMap<(Kind2, Kind2), Kind2>) -> Vec<Vec<Kind2>> {
     vec.iter()
         .flat_map(|h| lift::<Kind2, Kind2>(h, dict, Kind2::A, Kind2::A))
@@ -409,5 +511,36 @@ fn expand2(
     vec: &[HashMap<Vec<Kind2>, usize>],
     dict: &HashMap<(Kind2, Kind2), Kind2>,
 ) -> Vec<HashMap<Vec<Kind2>, usize>> {
-    vec.iter().flat_map(|h| lift2(h, dict)).collect::<Vec<_>>()
+    let ret = vec.iter().flat_map(|h| lift2(h, dict)).collect::<Vec<_>>();
+    // .fold(Vec::new(), |mut stored, me| {
+    //     if stored.iter().any(|hash: &HashMap<Vec<Kind2>, usize>| {
+    //         hash.iter()
+    //             .all(|(k, c): (&Vec<Kind2>, &usize)| me.get(k).map_or(false, |d| *c < *d))
+    //     }) {
+    //         stored
+    //     } else {
+    //         stored.push(me);
+    //         stored
+    //     }
+    // })
+    // .iter()
+    // .map(|h| {
+    //     h.iter()
+    //         .sorted()
+    //         .map(|(v, n)| (v.clone(), *n))
+    //         .collect::<Vec<_>>()
+    // })
+    // .collect::<HashSet<_>>()
+    // .iter()
+    // .map(|l| l.iter().cloned().collect::<HashMap<_, _>>())
+    // .collect::<Vec<_>>();
+
+    // let best = ret
+    //     .iter()
+    //     .map(|h| h.iter().map(|(l, n)| l.len() * n).sum::<usize>())
+    //     .min()
+    //     .unwrap();
+    // ret.retain(|h| h.iter().map(|(l, n)| l.len() * n).sum::<usize>() == best);
+    // ret
+    ret
 }
