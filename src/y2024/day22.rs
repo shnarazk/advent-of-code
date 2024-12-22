@@ -13,7 +13,7 @@ use {
     serde::Serialize,
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
+        collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
     },
     winnow::{
@@ -27,6 +27,7 @@ use {
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<usize>,
+    threshold: usize,
 }
 
 fn parse(s: &mut &str) -> PResult<Vec<usize>> {
@@ -47,15 +48,70 @@ impl AdventOfCode for Puzzle {
         // dbg!(next(&mut secret));
         // dbg!(next(&mut secret));
         // dbg!(next(&mut secret));
+        self.threshold = self.get_config().alt.as_ref().map_or(2000, |_| 2000);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|seed| generate(*seed, 2000))
+            .map(|seed| generate(*seed, self.threshold))
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let matrix = self
+            .line
+            .iter()
+            .map(|secret| {
+                sequence(*secret, self.threshold)
+                    .iter()
+                    .map(|n| n % 10)
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let trends = matrix
+            .iter()
+            .map(|seq| {
+                let mut hash: HashMap<[isize; 4], usize> = HashMap::new();
+                for v in seq.windows(5) {
+                    let diffs = v
+                        .windows(2)
+                        .map(|s| s[1] as isize - s[0] as isize)
+                        .collect::<Vec<isize>>();
+                    if diffs == [-2, 1, -1, 3] {
+                        dbg!();
+                    }
+                    let profit = *v.last().unwrap();
+                    let trend = [diffs[0], diffs[1], diffs[2], diffs[3]];
+                    if hash.get(&trend).is_none() {
+                        hash.insert(trend, profit);
+                    }
+                }
+                hash
+            })
+            .collect::<Vec<_>>();
+        let all_trends = trends.iter().fold(HashSet::new(), |acc, hash| {
+            hash.keys().fold(acc, |mut acc, trend| {
+                acc.insert(*trend);
+                acc
+            })
+        });
+        all_trends
+            .iter()
+            .map(|trend| {
+                if trend == &[-2, 1, -1, 3] {
+                    trends
+                        .iter()
+                        .map(|hash| hash.get(trend).map_or(0, |n| *n))
+                        .map(|k| dbg!(k))
+                        .sum::<usize>()
+                } else {
+                    trends
+                        .iter()
+                        .map(|hash| hash.get(trend).map_or(0, |n| *n))
+                        .sum::<usize>()
+                }
+            })
+            .max()
+            .unwrap()
     }
 }
 
@@ -83,4 +139,11 @@ fn next(secret: &mut usize) -> usize {
 
 fn generate(seed: usize, limit: usize) -> usize {
     (0..limit).fold(seed, |mut n, _| next(&mut n))
+}
+fn sequence(seed: usize, limit: usize) -> Vec<usize> {
+    (0..limit).fold(vec![seed], |mut v, _| {
+        let mut n = *v.last().unwrap();
+        v.push(next(&mut n));
+        v
+    })
 }
