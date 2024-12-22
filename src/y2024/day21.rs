@@ -261,43 +261,35 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output1 {
-        self.line
+        let mut memo = HashMap::new();
+        let ret = self
+            .line
             .iter()
             .map(|p| {
                 let v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
-                let mut h = v2.iter().map(|v| segmentize(v)).collect::<Vec<_>>();
-                // 23回コピーしな
-                for _i in 0..25 {
-                    h = expand2(&h, &self.lv2);
-                    // println!("{}, {}", i, h.len());
-                }
-                // */
-                h.iter()
-                    .map(|l| {
-                        let a = l.iter().map(|(seg, n)| seg.len() * n).sum::<usize>();
-                        let b = p
-                            .iter()
-                            .filter(|k| **k != Kind1::KA)
-                            .fold(0, |acc, k| acc * 10 + (*k as usize));
-                        (a * b, a, b, l)
+                let a = v2
+                    .iter()
+                    .map(|path| {
+                        let mut p = vec![Kind2::A];
+                        p.append(&mut path.clone());
+                        println!("{}", to_string(&p));
+                        p.windows(2)
+                            .map(|segment| {
+                                get_length(&mut memo, &self.lv2, 25, 0, segment[0], segment[1])
+                            })
+                            .sum::<usize>()
                     })
-                    .min_by_key(|(n, _, _, _)| *n)
-                    .map(|(sum, a, b, l)| {
-                        println!(
-                            "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
-                            l.iter()
-                                .map(|(l, c)| (format!("{}", to_string(l)), c))
-                                .collect::<Vec<_>>(),
-                        );
-                        (sum, a, b)
-                    })
-                    .unwrap_or((0, 0, 0))
+                    .min()
+                    .unwrap();
+                let b = p
+                    .iter()
+                    .filter(|k| **k != Kind1::KA)
+                    .fold(0, |acc, k| acc * 10 + (*k as usize));
+                a * b
             })
-            .map(|s| {
-                // println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
-                s.0
-            })
-            .sum::<usize>()
+            .sum::<usize>();
+        // dbg!(memo);
+        ret
     }
 }
 
@@ -543,4 +535,48 @@ fn expand2(
     // ret.retain(|h| h.iter().map(|(l, n)| l.len() * n).sum::<usize>() == best);
     // ret
     ret
+}
+
+// 深さ優先で最終的な長さをキャッシュしながら返す。
+// on-the-flyで25x6x6程度のエントリーを生成するなら非常に効率がよい
+fn get_length(
+    memo: &mut HashMap<(usize, Kind2, Kind2), usize>,
+    dict: &HashMap<(Kind2, Kind2), Kind2>,
+    depth: usize,
+    level: usize,
+    from: Kind2,
+    to: Kind2,
+) -> usize {
+    if let Some(d) = memo.get(&(level, from, to)) {
+        return *d;
+    }
+    if level == depth {
+        // let cands = lift_aux(dict, from, to, Kind2::A);
+        // println!("@last level: {}", to_string(&cands[0]));
+        let dist = 1; // cands.iter().map(|l| l.len()).min().unwrap();
+        memo.insert((level, from, to), dist);
+        return dist;
+    }
+    // build all pathes from `from` to `to` even if they are connected directly
+    let cands = lift_aux(dict, from, to, Kind2::A);
+    // if level == 1 {
+    //     println!(
+    //         "lv{level}: {from}:{to} => lv{}: {}",
+    //         level + 1,
+    //         to_string(&cands[0])
+    //     );
+    // }
+    let dist = cands
+        .iter()
+        .map(|path| {
+            let mut p = vec![Kind2::A];
+            p.append(&mut path.clone());
+            p.windows(2)
+                .map(|seg| get_length(memo, dict, depth, level + 1, seg[0], seg[1]))
+                .sum::<usize>()
+        })
+        .min()
+        .unwrap();
+    memo.insert((level, from, to), dist);
+    dist
 }
