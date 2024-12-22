@@ -55,27 +55,6 @@ impl std::fmt::Display for Kind1 {
     }
 }
 
-// impl Kind1 {
-//     fn iterator() -> impl Iterator<Item = Kind1> {
-//         [
-//             Kind1::K0,
-//             Kind1::K1,
-//             Kind1::K2,
-//             Kind1::K3,
-//             Kind1::K4,
-//             Kind1::K5,
-//             Kind1::K6,
-//             Kind1::K7,
-//             Kind1::K8,
-//             Kind1::K6,
-//             Kind1::K7,
-//             Kind1::K9,
-//             Kind1::KA,
-//         ]
-//         .into_iter()
-//     }
-// }
-
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 enum Kind2 {
     U,
@@ -108,12 +87,6 @@ fn to_string(v: &[Kind2]) -> String {
         s
     })
 }
-
-// impl Kind2 {
-//     fn iterator() -> impl Iterator<Item = Kind2> {
-//         [Kind2::U, Kind2::D, Kind2::L, Kind2::R, Kind2::A].into_iter()
-//     }
-// }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
@@ -232,9 +205,13 @@ impl AdventOfCode for Puzzle {
                             .iter()
                             .filter(|k| **k != Kind1::KA)
                             .fold(0, |acc, k| acc * 10 + (*k as usize));
-                        (a * b, a, b)
+                        (a * b, a, b, l)
                     })
                     .min()
+                    .map(|(sum, a, b, l)| {
+                        println!("= {a:>4} * {b:>5} = {sum:>6}: {:?}", to_string(l));
+                        (sum, a, b)
+                    })
                     .unwrap_or((0, 0, 0))
             })
             .map(|s| {
@@ -250,79 +227,43 @@ impl AdventOfCode for Puzzle {
                 let mut v2 = lift::<Kind1, Kind2>(p, &self.lv1, Kind1::KA, Kind2::A);
                 v2.truncate(1);
                 let h2 = v2.iter().map(segmentize).collect::<Vec<_>>();
-                dbg!(&h2);
-                let v3_ = expand2(&h2, &self.lv2);
-                print_shortest(&v3_);
-                let v3 = expand(&v2, &self.lv2);
-                let _h3 = v3.iter().map(segmentize).collect::<Vec<_>>();
-                let v4_ = expand2(&v3_, &self.lv2);
-                print_shortest(&v4_);
-                let v4 = expand(&v3, &self.lv2);
-                let _h4 = v4.iter().map(segmentize).collect::<Vec<_>>();
-                v4.iter()
+                // dbg!(&h2);
+
+                let h3 = expand2(&h2, &self.lv2);
+                // print_shortest(&v3_);
+                let h4 = expand2(&h3, &self.lv2);
+                // print_shortest(&v4_);
+
+                // let v3 = expand(&v2, &self.lv2);
+                // let v4 = expand(&v3, &self.lv2);
+
+                h4.iter()
                     .map(|l| {
-                        let a = l.len();
+                        let a = l.iter().map(|(seg, n)| seg.len() * n).sum::<usize>();
                         let b = p
                             .iter()
                             .filter(|k| **k != Kind1::KA)
                             .fold(0, |acc, k| acc * 10 + (*k as usize));
                         (a * b, a, b, l)
                     })
-                    .min()
+                    .min_by_key(|(n, _, _, _)| *n)
                     .map(|(sum, a, b, l)| {
-                        println!("{a} * {b} = {sum}: {}", to_string(l));
+                        println!(
+                            "= {a:>4} * {b:>5} = {sum:>6}: {:?}",
+                            l.iter()
+                                .map(|(l, c)| format!("{}({})", to_string(l), c))
+                                .collect::<Vec<_>>(),
+                        );
                         (sum, a, b)
                     })
                     .unwrap_or((0, 0, 0))
             })
             .map(|s| {
-                println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
+                // println!("- {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
                 s.0
             })
             .sum::<usize>()
-    } /* fn part2(&mut self) -> Self::Output2 {
-          self.line
-              .iter()
-              .map(|p| {
-                  let pack = (
-                      p[0],
-                      p.windows(2)
-                          .map(|p| ((p[0], p[1]), 1))
-                          .collect::<HashMap<_, _>>(),
-                  );
-                  dbg!(&pack);
-                  let v2 = lift2::<Kind1, Kind2>(&pack, &self.lv1, Kind1::KA, Kind2::A);
-                  // for v in v2.iter() {
-                  //     println!("l2: {} ({})", to_string(v), v.len());
-                  // }
-                  let mut bag = v2;
-                  dbg!(&bag);
-                  for _i in 0..8 {
-                      bag = bag
-                          .iter()
-                          .flat_map(|p| lift2::<Kind2, Kind2>(p, &self.lv2, Kind2::A, Kind2::A))
-                          .collect::<Vec<_>>();
-                  }
-                  // let l = bag.iter().map(|l| l.len()).collect::<HashSet<_>>();
-                  // println!("{:?}", l);
-                  bag.iter()
-                      .map(|(_, h)| {
-                          let a = h.values().sum::<usize>();
-                          let b = p
-                              .iter()
-                              .filter(|k| **k != Kind1::KA)
-                              .fold(0, |acc, k| acc * 10 + (*k as usize));
-                          (a * b, a, b)
-                      })
-                      .min()
-                      .unwrap_or((0, 0, 0))
-              })
-              .map(|s| {
-                  println!("= {:>4} * {:>5} = {:>6}", s.1, s.2, s.0);
-                  s.0
-              })
-              .sum::<usize>()
-      } */
+    }
 }
 
 fn lift_aux<T1, T2>(dict: &HashMap<(T1, T1), T2>, from: T1, to: T1, post: T2) -> Vec<Vec<T2>>
@@ -402,31 +343,32 @@ fn lift2(
                 .iter()
                 .flat_map(|seq_| {
                     // here
-                    let mut seq = vec![Kind2::A];
-                    seq.append(&mut seq_.clone());
-                    let last = seq.len() - 1;
-                    let breaks = seq
-                        .iter()
-                        .enumerate()
-                        .filter(|(n, k)| [0, last].contains(n) || **k == Kind2::A)
-                        .map(|(n, _)| n)
-                        .collect::<Vec<_>>();
-                    let segments = breaks
-                        .iter()
-                        .enumerate()
-                        .filter(|(i, _)| *i % 2 == 0)
-                        .map(|(_, n)| *n)
-                        .collect::<Vec<_>>()
-                        .windows(2)
-                        .map(|seg| seq[seg[0] + 1..=seg[1]].to_vec())
-                        .collect::<Vec<_>>();
+                    // let mut seq = vec![Kind2::A];
+                    // seq.append(&mut seq_.clone());
+                    // let last = seq.len() - 1;
+                    // let breaks = seq
+                    //     .iter()
+                    //     .enumerate()
+                    //     .filter(|(n, k)| [0, last].contains(n) || **k == Kind2::A)
+                    //     .map(|(n, _)| n)
+                    //     .collect::<Vec<_>>();
+                    // let segments = breaks
+                    //     .iter()
+                    //     .enumerate()
+                    //     .filter(|(i, _)| *i % 2 == 0)
+                    //     .map(|(_, n)| *n)
+                    //     .collect::<Vec<_>>()
+                    //     .windows(2)
+                    //     .map(|seg| seq[seg[0] + 1..=seg[1]].to_vec())
+                    //     .collect::<Vec<_>>();
+                    let segments = segmentize(seq_);
 
                     // there
                     vec.iter()
                         .map(|hash| {
                             let mut h = hash.clone();
                             for seg in segments.iter() {
-                                *h.entry(seg.clone()).or_default() += 1;
+                                *h.entry(seg.0.clone()).or_default() += seg.1;
                             }
                             h
                         })
@@ -459,6 +401,8 @@ fn segmentize(seq_: &Vec<Kind2>) -> HashMap<Vec<Kind2>, usize> {
             hash
         })
 }
+
+#[allow(dead_code)]
 fn print_shortest(hashes: &[HashMap<Vec<Kind2>, usize>]) {
     let xx = hashes
         .iter()
