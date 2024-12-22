@@ -1,27 +1,17 @@
 //! <https://adventofcode.com/2024/day/22>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::neighbors,
         parser::parse_usize,
     },
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
     std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
+        collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
-    winnow::{
-        ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
-        token::one_of,
-        PResult, Parser,
-    },
+    winnow::{ascii::newline, combinator::separated, PResult, Parser},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -70,45 +60,36 @@ impl AdventOfCode for Puzzle {
         let trends = matrix
             .iter()
             .map(|seq| {
-                let mut hash: HashMap<[isize; 4], usize> = HashMap::new();
+                let mut hash: FxHashMap<[isize; 4], usize> =
+                    HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
                 for v in seq.windows(5) {
                     let diffs = v
                         .windows(2)
                         .map(|s| s[1] as isize - s[0] as isize)
                         .collect::<Vec<isize>>();
-                    if diffs == [-2, 1, -1, 3] {
-                        dbg!();
-                    }
                     let profit = *v.last().unwrap();
                     let trend = [diffs[0], diffs[1], diffs[2], diffs[3]];
-                    if hash.get(&trend).is_none() {
-                        hash.insert(trend, profit);
-                    }
+                    hash.entry(trend).or_insert(profit);
                 }
                 hash
             })
             .collect::<Vec<_>>();
-        let all_trends = trends.iter().fold(HashSet::new(), |acc, hash| {
-            hash.keys().fold(acc, |mut acc, trend| {
-                acc.insert(*trend);
-                acc
-            })
-        });
+        let all_trends = trends.iter().fold(
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default(),
+            |acc, hash| {
+                hash.keys().fold(acc, |mut acc, trend| {
+                    acc.insert(*trend);
+                    acc
+                })
+            },
+        );
         all_trends
-            .iter()
+            .par_iter()
             .map(|trend| {
-                if trend == &[-2, 1, -1, 3] {
-                    trends
-                        .iter()
-                        .map(|hash| hash.get(trend).map_or(0, |n| *n))
-                        .map(|k| dbg!(k))
-                        .sum::<usize>()
-                } else {
-                    trends
-                        .iter()
-                        .map(|hash| hash.get(trend).map_or(0, |n| *n))
-                        .sum::<usize>()
-                }
+                trends
+                    .iter()
+                    .map(|hash| hash.get(trend).map_or(0, |n| *n))
+                    .sum::<usize>()
             })
             .max()
             .unwrap()
