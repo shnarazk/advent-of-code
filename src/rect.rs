@@ -226,7 +226,7 @@ impl<'a, T> Iterator for Vec2IterMut<'a, T> {
                 self.j = 0;
             }
             self.index += 1;
-            p.and_then(|p| Some((i, p)))
+            p.map(|p| (i, p))
         } else {
             None
         }
