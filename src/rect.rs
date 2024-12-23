@@ -190,8 +190,22 @@ impl<'a, T> Iterator for Vec2Iter<'a, T> {
     }
 }
 
-/* pub struct Vec2IterMut<T> {
-    vec: &mut Vec<T>,
+impl<T: Clone + Default + Sized> Rect<T> {
+    pub fn iter_mut(&mut self) -> Vec2IterMut<'_, T> {
+        let len = self.vec.len();
+        Vec2IterMut {
+            vec: self.vec.iter_mut(),
+            max_j: self.size.1,
+            i: 0,
+            j: 0,
+            index: 0,
+            len,
+        }
+    }
+}
+
+pub struct Vec2IterMut<'a, T> {
+    vec: std::slice::IterMut<'a, T>,
     max_j: isize,
     i: isize,
     j: isize,
@@ -199,25 +213,25 @@ impl<'a, T> Iterator for Vec2Iter<'a, T> {
     len: usize,
 }
 
-impl<T> Iterator for Vec2IterMut<T> {
-    type Item = (Vec2, &mut T);
+impl<'a, T> Iterator for Vec2IterMut<'a, T> {
+    type Item = (Vec2, &'a mut T);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index < self.len {
             let i: (isize, isize) = (self.i, self.j);
-            let p: &mut T = &mut self.vec[self.index];
+            let p = self.vec.next();
             self.j += 1;
             if self.j == self.max_j {
                 self.i += 1;
                 self.j = 0;
             }
             self.index += 1;
-            Some((i, p))
+            p.and_then(|p| Some((i, p)))
         } else {
             None
         }
     }
-} */
+}
 
 impl<V: AsVecReference<Vec2>, T: Clone + Default + Sized> Index<V> for Rect<T> {
     type Output = T;
@@ -253,6 +267,21 @@ mod test {
         r[(2, 2)] = true;
         assert_eq!(r[(2, 2)], true);
     }
+
+    #[test]
+    fn test_iter_mut() {
+        let mut r: Rect<usize> = Rect::new((3, 3), 0_usize);
+        for ((i, j), p) in r.iter_mut() {
+            if (i + j) % 2 == 0 {
+                *p = (i * j) as usize + 1;
+            }
+        }
+        assert_eq!(r[(1, 0)], 0);
+        assert_eq!(r[(1, 1)], 2);
+        assert_eq!(r[(2, 2)], 5);
+        assert_eq!(r[(2, 0)], 1);
+    }
+
     #[test]
     fn test_sum() {
         let mut r: Rect<usize> = Rect::new((10, 10), 0);
