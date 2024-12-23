@@ -50,6 +50,7 @@ fn parse_moves(s: &mut &str) -> PResult<Vec<(usize, usize, usize)>> {
     separated(1.., parse_move, newline).parse_next(s)
 }
 
+#[allow(clippy::type_complexity)]
 fn parse(s: &mut &str) -> PResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize, usize)>)> {
     seq!(parse_config, _: newline, _: newline, parse_moves).parse_next(s)
 }
@@ -62,7 +63,7 @@ impl AdventOfCode for Puzzle {
         let (mc, moves) = parse(&mut input.as_str())?;
         let maze_config = rotate_clockwise(mc);
         for (n, config) in maze_config.iter().enumerate() {
-            let stack = config.iter().flat_map(|c| c).cloned().collect::<Vec<_>>();
+            let stack = config.iter().flatten().cloned().collect::<Vec<_>>();
             self.stacks.insert(n + 1, stack);
         }
         self.line = moves;

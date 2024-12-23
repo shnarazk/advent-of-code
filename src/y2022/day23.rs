@@ -76,7 +76,7 @@ impl AdventOfCode for Puzzle {
                             .map(|d| pos.add(d))
                             .all(|p| !self.map.contains(&p))
                         {
-                            targets.insert(*pos, pos.add(&target[dir]));
+                            targets.insert(*pos, pos.add(target[dir]));
                             continue 'next_elf;
                         }
                     }
@@ -136,7 +136,7 @@ impl AdventOfCode for Puzzle {
                             .map(|d| pos.add(d))
                             .all(|p| !self.map.contains(&p))
                         {
-                            targets.insert(*pos, pos.add(&target[dir]));
+                            targets.insert(*pos, pos.add(target[dir]));
                             continue 'next_elf;
                         }
                     }
