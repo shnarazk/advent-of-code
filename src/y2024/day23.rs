@@ -52,6 +52,19 @@ impl AdventOfCode for Puzzle {
         }
         self.nodes = nodes.iter().sorted().cloned().collect::<Vec<_>>();
     }
+    fn serialize(&self) -> Option<String> {
+        let data = self
+            .line
+            .iter()
+            .map(|(name1, name2)| {
+                (
+                    format!("{}{}", name1.0, name1.1),
+                    format!("{}{}", name2.0, name2.1),
+                )
+            })
+            .collect::<Vec<_>>();
+        serde_json::to_string(&data).ok()
+    }
     fn part1(&mut self) -> Self::Output1 {
         for (i, n1) in self.nodes.iter().enumerate() {
             for (j, n2) in self.nodes.iter().enumerate().skip(i + 1) {
