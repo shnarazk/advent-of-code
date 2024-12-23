@@ -30,7 +30,7 @@ type Node = (char, char);
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     line: Vec<(Node, Node)>,
-    nodes: HashSet<Node>,
+    nodes: Vec<Node>,
     pair: HashSet<(Node, Node)>,
     triplet: HashSet<(Node, Node, Node)>,
 }
@@ -58,29 +58,29 @@ impl AdventOfCode for Puzzle {
     }
     fn end_of_data(&mut self) {
         dbg!(&self.line.len());
+        let mut nodes: HashSet<Node> = HashSet::new();
         for (na, nb) in self.line.iter() {
-            self.nodes.insert(*na);
-            self.nodes.insert(*nb);
+            nodes.insert(*na);
+            nodes.insert(*nb);
             self.pair
                 .insert(if na < nb { (*na, *nb) } else { (*nb, *na) });
         }
-        let nodes = self.nodes.iter().sorted().collect::<Vec<_>>();
         dbg!(&self.nodes.len());
-        // dbg!(&self.nodes);
-        for (i, n1) in nodes.iter().enumerate() {
-            for (j, n2) in nodes.iter().enumerate().skip(i + 1) {
-                for (k, n3) in nodes.iter().enumerate().skip(j + 1) {
-                    if self.pair.contains(&(**n1, **n2))
-                        && self.pair.contains(&(**n1, **n3))
-                        && self.pair.contains(&(**n2, **n3))
+        self.nodes = nodes.iter().sorted().cloned().collect::<Vec<_>>();
+    }
+    fn part1(&mut self) -> Self::Output1 {
+        for (i, n1) in self.nodes.iter().enumerate() {
+            for (j, n2) in self.nodes.iter().enumerate().skip(i + 1) {
+                for (k, n3) in self.nodes.iter().enumerate().skip(j + 1) {
+                    if self.pair.contains(&(*n1, *n2))
+                        && self.pair.contains(&(*n1, *n3))
+                        && self.pair.contains(&(*n2, *n3))
                     {
-                        self.triplet.insert((**n1, **n2, **n3));
+                        self.triplet.insert((*n1, *n2, *n3));
                     }
                 }
             }
         }
-    }
-    fn part1(&mut self) -> Self::Output1 {
         self.triplet
             .iter()
             .filter(|(a, b, c)| a.0 == 't' || b.0 == 't' || c.0 == 't')
