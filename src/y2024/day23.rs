@@ -8,12 +8,13 @@ use {
         geometric::neighbors,
         parser::parse_usize,
     },
+    itertools::Itertools,
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
+        collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
     },
     winnow::{
@@ -24,27 +25,66 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+type Node = (char, char);
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
-    line: Vec<()>,
+    line: Vec<(Node, Node)>,
+    nodes: HashSet<Node>,
+    pair: HashSet<(Node, Node)>,
+    triplet: HashSet<(Node, Node, Node)>,
 }
 
-fn parse(s: &mut &str) -> PResult<()> {
-    ().parse_next(s)
+// fn parse_letter(s: &mut &str) -> PResult<char> {
+//     ('a'..='z').parse_next(s)
+// }
+
+fn parse_node(s: &mut &str) -> PResult<Node> {
+    (one_of('a'..='z'), one_of('a'..='z')).parse_next(s)
+}
+fn parse_line(s: &mut &str) -> PResult<(Node, Node)> {
+    seq!(parse_node, _:"-", parse_node).parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<(Node, Node)>> {
+    separated(1.., parse_line, newline).parse_next(s)
 }
 
 #[aoc(2024, 23)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        // self.line = parse(&mut input.as_str())?;
+        self.line = parse(&mut input.as_str())?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line);
+        dbg!(&self.line.len());
+        for (na, nb) in self.line.iter() {
+            self.nodes.insert(*na);
+            self.nodes.insert(*nb);
+            self.pair
+                .insert(if na < nb { (*na, *nb) } else { (*nb, *na) });
+        }
+        let nodes = self.nodes.iter().sorted().collect::<Vec<_>>();
+        dbg!(&self.nodes.len());
+        // dbg!(&self.nodes);
+        for (i, n1) in nodes.iter().enumerate() {
+            for (j, n2) in nodes.iter().enumerate().skip(i + 1) {
+                for (k, n3) in nodes.iter().enumerate().skip(j + 1) {
+                    if self.pair.contains(&(**n1, **n2))
+                        && self.pair.contains(&(**n1, **n3))
+                        && self.pair.contains(&(**n2, **n3))
+                    {
+                        self.triplet.insert((**n1, **n2, **n3));
+                    }
+                }
+            }
+        }
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        1
+        self.triplet
+            .iter()
+            .filter(|(a, b, c)| a.0 == 't' || b.0 == 't' || c.0 == 't')
+            .count()
     }
     fn part2(&mut self) -> Self::Output2 {
         2
