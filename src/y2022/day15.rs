@@ -3,9 +3,14 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::Dim2,
-        regex,
+        parser::parse_isize,
     },
     std::collections::HashSet,
+    winnow::{
+        ascii::newline,
+        combinator::{separated, seq},
+        PResult, Parser,
+    },
 };
 
 type Loc = Dim2<isize>;
@@ -78,18 +83,25 @@ pub struct Puzzle {
     line: Vec<(Loc, Loc)>,
 }
 
+fn parse_line(s: &mut &str) -> PResult<(Loc, Loc)> {
+    seq!(
+        _: "Sensor at x=",
+        parse_isize, _:", y=",
+        parse_isize, _:": closest beacon is at x=",
+        parse_isize, _:", y=", parse_isize)
+    .map(|(a, b, c, d)| ((a, b), (c, d)))
+    .parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<(Loc, Loc)>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc(2022, 15)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser =
-            regex!(r"^Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            (segment[1].parse::<isize>()?, segment[2].parse::<isize>()?),
-            (segment[3].parse::<isize>()?, segment[4].parse::<isize>()?),
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let target = 2_000_000; // 10;
