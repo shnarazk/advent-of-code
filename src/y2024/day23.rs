@@ -1,25 +1,13 @@
 //! <https://adventofcode.com/2024/day/23>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        parser::parse_usize,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     itertools::Itertools,
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
-        hash::BuildHasherDefault,
-    },
+    std::{collections::HashSet, hash::BuildHasherDefault},
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{separated, seq},
         token::one_of,
         PResult, Parser,
     },
@@ -31,13 +19,9 @@ type Node = (char, char);
 pub struct Puzzle {
     line: Vec<(Node, Node)>,
     nodes: Vec<Node>,
-    pair: HashSet<(Node, Node)>,
-    triplet: HashSet<(Node, Node, Node)>,
+    pair: HashSet<(Node, Node), BuildHasherDefault<FxHasher>>,
+    triplet: HashSet<(Node, Node, Node), BuildHasherDefault<FxHasher>>,
 }
-
-// fn parse_letter(s: &mut &str) -> PResult<char> {
-//     ('a'..='z').parse_next(s)
-// }
 
 fn parse_node(s: &mut &str) -> PResult<Node> {
     (one_of('a'..='z'), one_of('a'..='z')).parse_next(s)
@@ -59,21 +43,19 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
-        dbg!(&self.line.len());
-        let mut nodes: HashSet<Node> = HashSet::new();
+        let mut nodes: FxHashSet<Node> = HashSet::<Node, BuildHasherDefault<FxHasher>>::default();
         for (na, nb) in self.line.iter() {
             nodes.insert(*na);
             nodes.insert(*nb);
             self.pair
                 .insert(if na < nb { (*na, *nb) } else { (*nb, *na) });
         }
-        dbg!(&self.nodes.len());
         self.nodes = nodes.iter().sorted().cloned().collect::<Vec<_>>();
     }
     fn part1(&mut self) -> Self::Output1 {
         for (i, n1) in self.nodes.iter().enumerate() {
             for (j, n2) in self.nodes.iter().enumerate().skip(i + 1) {
-                for (k, n3) in self.nodes.iter().enumerate().skip(j + 1) {
+                for n3 in self.nodes.iter().skip(j + 1) {
                     if self.pair.contains(&(*n1, *n2))
                         && self.pair.contains(&(*n1, *n3))
                         && self.pair.contains(&(*n2, *n3))
@@ -89,14 +71,14 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut best: HashSet<Node> = HashSet::new();
+        let mut best: FxHashSet<Node> = HashSet::<Node, BuildHasherDefault<FxHasher>>::default();
         for (i, n1) in self.nodes.iter().enumerate() {
             if best.contains(n1) {
                 continue;
             }
-            let mut tmp: HashSet<Node> = HashSet::new();
+            let mut tmp: FxHashSet<Node> = HashSet::<Node, BuildHasherDefault<FxHasher>>::default();
             tmp.insert(*n1);
-            for (j, n2) in self.nodes.iter().enumerate().skip(i + 1) {
+            for n2 in self.nodes.iter().skip(i + 1) {
                 if tmp.iter().all(|n| self.pair.contains(&(*n, *n2))) {
                     tmp.insert(*n2);
                 }
