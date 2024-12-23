@@ -4,7 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{aoc_at, AdventOfCode, ParseError},
         geometric::neighbors,
         parser::parse_usize,
     },
@@ -50,8 +50,10 @@ fn parse(s: &mut &str) -> PResult<Vec<(Node, Node)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 
-#[aoc(2024, 23)]
+#[aoc_at(2024, 23)]
 impl AdventOfCode for Puzzle {
+    type Output1 = usize;
+    type Output2 = String;
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
         Self::parsed()
@@ -87,6 +89,25 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut best: HashSet<Node> = HashSet::new();
+        for (i, n1) in self.nodes.iter().enumerate() {
+            if best.contains(n1) {
+                continue;
+            }
+            let mut tmp: HashSet<Node> = HashSet::new();
+            tmp.insert(*n1);
+            for (j, n2) in self.nodes.iter().enumerate().skip(i + 1) {
+                if tmp.iter().all(|n| self.pair.contains(&(*n, *n2))) {
+                    tmp.insert(*n2);
+                }
+            }
+            if best.len() < tmp.len() {
+                best = tmp;
+            }
+        }
+        best.iter()
+            .sorted()
+            .map(|n| format!("{}{}", n.0, n.1))
+            .join(",")
     }
 }
