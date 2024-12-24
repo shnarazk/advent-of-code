@@ -1,9 +1,15 @@
 //! <https://adventofcode.com/2022/day/10>
-use crate::{
-    framework::{aoc_at, AdventOfCode, ParseError},
-    regex,
+use {
+    crate::{
+        framework::{aoc_at, AdventOfCode, ParseError},
+        parser::parse_isize,
+    },
+    winnow::{
+        ascii::newline,
+        combinator::{alt, separated},
+        PResult, Parser,
+    },
 };
-
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Code {
     Noop,
@@ -19,20 +25,31 @@ pub struct Puzzle {
     state: Option<isize>,
 }
 
+fn parse_noop(s: &mut &str) -> PResult<Code> {
+    "noop".map(|_| Code::Noop).parse_next(s)
+}
+
+fn parse_addx(s: &mut &str) -> PResult<Code> {
+    ("addx ", parse_isize)
+        .map(|(_, i)| Code::Addx(i))
+        .parse_next(s)
+}
+
+fn parse_line(s: &mut &str) -> PResult<Code> {
+    alt((parse_noop, parse_addx)).parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<Code>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc_at(2022, 10)]
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let addx_parser = regex!(r"^addx (-?\d+)$");
-        let noop_parser = regex!(r"^noop$");
-        if let Some(segment) = addx_parser.captures(block) {
-            self.line.push(Code::Addx(segment[1].parse::<isize>()?));
-        } else if noop_parser.captures(block).is_some() {
-            self.line.push(Code::Noop);
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.register = 1;
