@@ -30,6 +30,16 @@ use {
     },
 };
 
+fn to_bit_vector(mut n: usize) -> Vec<bool> {
+    let mut bit_vector: Vec<bool> = Vec::new();
+    while 1 < n {
+        bit_vector.push(n % 2 == 1);
+        n /= 2;
+    }
+    bit_vector.push(n % 2 == 1);
+    bit_vector
+}
+
 type Wire = (char, char, char);
 
 fn bit_to_wire(n: usize, prefix: char) -> Wire {
@@ -64,6 +74,7 @@ pub struct Puzzle {
     value: FxHashMap<Wire, bool>,
     wire_downward: HashMap<Wire, HashSet<Wire>>,
     wire_upward: HashMap<Wire, HashSet<Wire>>,
+    /// most least bit affected by wire
     wire_level: HashMap<Wire, usize>,
     input_bits: usize,
 }
@@ -100,14 +111,24 @@ impl Puzzle {
         let relevants = self
             .wire
             .iter()
+            .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
             .filter(|wire| !swapped.contains(wire))
             // .filter(|wire| *self.wire_level.get(wire).unwrap() <= level + 1)
             .sorted()
             .collect::<Vec<_>>();
         let mut to_search: Vec<Option<(Wire, Wire)>> = vec![None];
+        let mut num_lifts: usize = 0;
         for (i, pick1) in relevants.iter().enumerate() {
+            let pick1_level = self
+                .wire_tree_downward(**pick1)
+                .contains(&bit_to_wire(level, 'z'));
             for pick2 in relevants.iter().skip(i + 1) {
-                to_search.push(Some((**pick1, **pick2)));
+                let pick2_level = self
+                    .wire_tree_downward(**pick2)
+                    .contains(&bit_to_wire(level, 'z'));
+                if pick1_level || pick2_level {
+                    to_search.push(Some((**pick1, **pick2)));
+                }
             }
         }
         let search_space = to_search.len();
@@ -118,11 +139,8 @@ impl Puzzle {
                     continue;
                 }
                 progress!(format!(
-                    "{:>10} level:{} {}/{} {}-{}",
+                    "{:>10} level:{level:>2}({i:>5}/{search_space:>5}) lift:{num_lifts:>5}:: {}-{}",
                     memo.len(),
-                    level,
-                    i,
-                    search_space,
                     wire_name(pick1),
                     wire_name(pick2)
                 ));
@@ -130,7 +148,7 @@ impl Puzzle {
             } else {
                 self.new()
             };
-            if checker.check_exhausitively(level) {
+            if let Some(bit) = checker.wrong_bit() {
                 /* println!(
                     "attemp({:>2}): {:?}: {}",
                     level,
@@ -139,6 +157,9 @@ impl Puzzle {
                     // aff_x.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
                     // aff_y.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
                 ); */
+                if bit <= level {
+                    continue;
+                }
                 let mut s = swapped.clone();
                 if let Some((pick1, pick2)) = case {
                     s.push(*pick1);
@@ -148,10 +169,21 @@ impl Puzzle {
                 // if let Some(s) = checker.seek(&wrong_bits[1..], f) {
                 //     return Some(s);
                 // }
-                if let Some(ret) = checker.seek(level + 1, s, memo) {
-                    memo.insert((level, swapped), true);
-                    return Some(ret);
+                num_lifts += 1;
+                if let Some(ret) = checker.seek(bit, s, memo) {
+                    if ret.len() == 8 {
+                        memo.insert((level, swapped), true);
+                        return Some(ret);
+                    } else {
+                        // memo.insert((level, swapped.clone()), false);
+                    }
+                } else {
+                    memo.insert((level, swapped.clone()), false);
                 }
+            } else {
+                assert!(checker.wrong_bit().is_none());
+                println!("{swapped:?}");
+                return Some(swapped);
             }
         }
         memo.insert((level, swapped.clone()), false);
@@ -174,6 +206,18 @@ impl Puzzle {
                 gate.3 = *pick1;
             }
         }
+        checker.wire.clear();
+        checker.wire_downward.clear();
+        checker.wire_upward.clear();
+        for (g, i1, i2, o) in checker.link.iter() {
+            checker.wire.insert(*i1);
+            checker.wire.insert(*i2);
+            checker.wire.insert(*o);
+            checker.wire_downward.entry(*i1).or_default().insert(*o);
+            checker.wire_downward.entry(*i2).or_default().insert(*o);
+            checker.wire_upward.entry(*o).or_default().insert(*i1);
+            checker.wire_upward.entry(*o).or_default().insert(*i2);
+        }
         checker
     }
     fn set_input(&mut self, prefix: char, val: usize) {
@@ -188,6 +232,43 @@ impl Puzzle {
             let wire = bit_to_wire(i, prefix);
             self.value.insert(wire, bit_vector.get(i) == Some(&true));
         }
+    }
+    fn wrong_bit(&self) -> Option<usize> {
+        let mut target: Option<usize> = None;
+        for bit1 in 0..=self.input_bits {
+            let target_value1 = 1_usize << bit1;
+            for bit2 in (bit1 + 1)..=self.input_bits {
+                let target_value2 = 1_usize << bit2;
+                for offset_x in 0..2 {
+                    for offset_y in 0..2 {
+                        let mut checker = self.new();
+                        let x = target_value1 + offset_x;
+                        let y = target_value2 + offset_y;
+                        checker.set_input('x', x);
+                        checker.set_input('y', y);
+                        let (n, v) = checker.eval();
+                        let ans_bit = to_bit_vector(x + y);
+                        for (i, b) in v.iter().enumerate() {
+                            if *b != *ans_bit.get(i).unwrap_or(&false) {
+                                target = target.map_or(Some(i), |b| Some(b.min(i)));
+                            }
+                        }
+                        if v.len() != self.input_bits + 1 {
+                            let l = v.len() + 1;
+                            target = target.map_or(Some(l), |b| Some(b.min(l)));
+                            // println!(
+                            //     "failed 0..{}: x={}, y={}: {:?}",
+                            //     range,
+                            //     x,
+                            //     y,
+                            //     v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
+                            // );
+                        }
+                    }
+                }
+            }
+        }
+        target
     }
     /// exhaustive-check
     fn check_exhausitively(&self, range: usize) -> bool {
@@ -469,7 +550,7 @@ impl AdventOfCode for Puzzle {
             let output_vec = output_range.iter().cloned().sorted().collect::<Vec<_>>();
 
             self.wire_level
-                .insert(*wire, *input_range.iter().max().unwrap());
+                .insert(*wire, *output_range.iter().min().unwrap());
             if *output_range.iter().min().unwrap() < *input_range.iter().max().unwrap() {
                 println!(
                     "{}: input from {} to {}, output from {} to {}",
