@@ -48,15 +48,12 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let line = parse(&mut input.as_str())?;
-        self.line = line
-            .into_iter()
-            .map(|r| Rect::from_vec(r))
-            .collect::<Vec<_>>();
+        self.line = line.into_iter().map(Rect::from_vec).collect::<Vec<_>>();
         Self::parsed()
     }
     fn end_of_data(&mut self) {
         for r in self.line.iter() {
-            if r.iter().filter(|((i, j), _)| *i == 0).all(|(_, b)| *b) {
+            if r.iter().filter(|((i, _), _)| *i == 0).all(|(_, b)| *b) {
                 let v = r.transpose().to_vec();
                 let w = v
                     .iter()
@@ -66,7 +63,7 @@ impl AdventOfCode for Puzzle {
                 self.locks.push((r.size.0 as usize, w));
             } else if r
                 .iter()
-                .filter(|((i, j), _)| *i + 1 == r.size.0)
+                .filter(|((i, _), _)| *i + 1 == r.size.0)
                 .all(|(_, b)| *b)
             {
                 let v = r.transpose().to_vec();
