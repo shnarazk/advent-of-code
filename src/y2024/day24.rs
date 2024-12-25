@@ -7,6 +7,7 @@ use {
         framework::{aoc_at, AdventOfCode, ParseError},
         geometric::neighbors,
         parser::parse_usize,
+        progress,
     },
     core::prelude,
     itertools::Itertools,
@@ -71,134 +72,90 @@ impl Puzzle {
     fn seek(
         &self,
         level: usize,
-        fixed: HashSet<Wire>,
-        swapped: HashSet<Wire>,
-    ) -> Option<(Puzzle, HashSet<Wire>)> {
-        if level < self.input_bits {
-            let relevants = self
-                .wire
-                .iter()
-                .filter(|wire| !fixed.contains(wire))
-                .filter(|wire| *self.wire_level.get(wire).unwrap() <= level)
-                .collect::<Vec<_>>();
-            let mut to_search: Vec<Option<(Wire, Wire)>> = vec![None];
-            for (i, pick1) in relevants.iter().enumerate() {
-                for pick2 in relevants.iter().skip(i + 1) {
-                    to_search.push(Some((**pick1, **pick2)));
-                }
-            }
-            println!("{} :: |set|:{}", level, to_search.len());
-
-            for case in to_search.iter() {
-                // println!("{}-{}", wire_name(pick1), wire_name(pick2));
-                let checker = if let Some((pick1, pick2)) = case {
-                    if 8 < swapped.len() {
-                        continue;
-                    }
-                    self.new_swapped(pick1, pick2)
-                } else {
-                    self.new()
-                };
-                let passed = checker.check_exhausitively(level + 1);
-                if passed {
-                    /* println!(
-                        "attemp({:>2}): {:?}: {}",
-                        level,
-                        case,
-                        passed,
-                        // aff_x.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
-                        // aff_y.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
-                    ); */
-                    let mut f = fixed.clone();
-                    for w in self.wire_tree_upward(bit_to_wire(level, 'z')) {
-                        f.insert(w);
-                    }
-                    let mut s = swapped.clone();
-                    if let Some((pick1, pick2)) = case {
-                        s.insert(*pick1);
-                        s.insert(*pick2);
-                    }
-                    // if let Some(s) = checker.seek(&wrong_bits[1..], f) {
-                    //     return Some(s);
-                    // }
-                    checker.seek(level + 1, f, s);
-                }
-                // println!(
-                //     "  {}{}{}{}: {:?} = {}",
-                //     (setting.0 as usize),
-                //     (setting.1 as usize),
-                //     (setting.2 as usize),
-                //     (setting.3 as usize),
-                //     v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
-                //     val,
-                // );
-                // let x = (1_usize << level) * (setting.0 as usize);
-                // let y = (1_usize << level) * (setting.1 as usize);
-                // if x + y != val {
-                //     continue 'fail;
-                // }
-                // println!("{}-{}", wire_name(pick1), wire_name(pick2));
-
-                // let affected1 = self.wire_tree_upward(**pick1);
-                // let aff1 = affected1
-                //     .iter()
-                //     .filter(|n| n.0 == 'x' || n.0 == 'y')
-                //     .cloned()
-                //     .collect::<HashSet<_>>();
-                // let affected2 = self.wire_tree_upward(**pick2);
-                // let aff2 = affected2
-                //     .iter()
-                //     .filter(|n| n.0 == 'x' || n.0 == 'y')
-                //     .cloned()
-                //     .collect::<HashSet<_>>();
-                // let aff = aff1.union(&aff2).cloned().collect::<HashSet<_>>();
-                // let aff_x = aff1
-                //     .iter()
-                //     .filter(|n| n.0 == 'x')
-                //     .sorted()
-                //     .cloned()
-                //     .collect::<Vec<_>>();
-
-                // let aff_y = aff2
-                //     .iter()
-                //     .filter(|n| n.0 == 'x')
-                //     .sorted()
-                //     .cloned()
-                //     .collect::<Vec<_>>();
-
-                // let checker = self.new_swapped(pick1, pick2);
-                // let passed = checker.check_exhausitively(level + 1);
-                // if passed {
-                //     println!(
-                //         "attemp({:>2}): {}-{}: {}, affecting {:?} + {:?}",
-                //         level,
-                //         wire_name(pick1),
-                //         wire_name(pick2),
-                //         passed,
-                //         aff_x.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
-                //         aff_y.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
-                //     );
-                //     let mut f = fixed.clone();
-                //     let mut s = swapped.clone();
-                //     f.insert(**pick1);
-                //     f.insert(**pick2);
-                //     // if let Some(s) = checker.seek(&wrong_bits[1..], f) {
-                //     //     return Some(s);
-                //     // }
-                //     checker.seek(level + 1, f, s);
-            }
-            None
-        } else {
-            println!(
-                "{:?}",
-                swapped
-                    .iter()
-                    .map(|t| format!("{}{}{}", t.0, t.1, t.2))
-                    .sorted()
-                    .join(",")
-            );
-            Some((self.clone(), swapped))
+        // fixed: HashSet<Wire>,
+        swapped: Vec<Wire>,
+        memo: &mut HashMap<(usize, Vec<Wire>), bool>,
+    ) -> Option<Vec<Wire>> {
+        if let Some(b) = memo.get(&(level, swapped.clone())) {
+            return if *b { Some(swapped) } else { None };
         }
+        if level == self.input_bits {
+            if swapped.len() == 8 && self.final_check(self.input_bits) {
+                println!(
+                    "{:?}",
+                    swapped
+                        .iter()
+                        .map(|t| format!("{}{}{}", t.0, t.1, t.2))
+                        .sorted()
+                        .join(",")
+                );
+                memo.insert((level, swapped.clone()), true);
+                return Some(swapped);
+            } else {
+                memo.insert((level, swapped.clone()), false);
+                return None;
+            }
+        }
+
+        let relevants = self
+            .wire
+            .iter()
+            .filter(|wire| !swapped.contains(wire))
+            // .filter(|wire| *self.wire_level.get(wire).unwrap() <= level + 1)
+            .sorted()
+            .collect::<Vec<_>>();
+        let mut to_search: Vec<Option<(Wire, Wire)>> = vec![None];
+        for (i, pick1) in relevants.iter().enumerate() {
+            for pick2 in relevants.iter().skip(i + 1) {
+                to_search.push(Some((**pick1, **pick2)));
+            }
+        }
+        let search_space = to_search.len();
+        for (i, case) in to_search.iter().enumerate() {
+            // println!("{}-{}", wire_name(pick1), wire_name(pick2));
+            let checker = if let Some((pick1, pick2)) = case {
+                if 8 < swapped.len() {
+                    continue;
+                }
+                progress!(format!(
+                    "{:>10} level:{} {}/{} {}-{}",
+                    memo.len(),
+                    level,
+                    i,
+                    search_space,
+                    wire_name(pick1),
+                    wire_name(pick2)
+                ));
+                self.new_swapped(pick1, pick2)
+            } else {
+                self.new()
+            };
+            if checker.check_exhausitively(level) {
+                /* println!(
+                    "attemp({:>2}): {:?}: {}",
+                    level,
+                    case,
+                    passed,
+                    // aff_x.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
+                    // aff_y.iter().map(|n| wire_to_ord(n)).collect::<Vec<_>>(),
+                ); */
+                let mut s = swapped.clone();
+                if let Some((pick1, pick2)) = case {
+                    s.push(*pick1);
+                    s.push(*pick2);
+                    s.sort_unstable();
+                }
+                // if let Some(s) = checker.seek(&wrong_bits[1..], f) {
+                //     return Some(s);
+                // }
+                if let Some(ret) = checker.seek(level + 1, s, memo) {
+                    memo.insert((level, swapped), true);
+                    return Some(ret);
+                }
+            }
+        }
+        memo.insert((level, swapped.clone()), false);
+        None
     }
     /// return a clean cloned itself
     fn new(&self) -> Puzzle {
@@ -234,13 +191,13 @@ impl Puzzle {
     }
     /// exhaustive-check
     fn check_exhausitively(&self, range: usize) -> bool {
-        let band = 1_usize << range;
+        let band = 2_usize << range;
         for target_input1 in 0..=4 {
-            let target_value1 = (1_usize << range / 2) + target_input1;
+            let target_value1 = (1_usize << range) + target_input1;
             for target_input2 in 0..=4 {
-                let target_value2 = (1_usize << range / 2) + target_input2;
-                for offset_x in 0..32 {
-                    for offset_y in 0..32 {
+                let target_value2 = (1_usize << range) + target_input2;
+                for offset_x in 0..4 {
+                    for offset_y in 0..4 {
                         let mut checker = self.new();
                         let x = target_value1 + offset_x;
                         let y = target_value2 + offset_y;
@@ -255,6 +212,41 @@ impl Puzzle {
                             //     y,
                             //     v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
                             // );
+                            return false;
+                        }
+                        if v.len() != self.input_bits + 1 {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        true
+    }
+    /// exhaustive-check
+    fn final_check(&self, from: usize) -> bool {
+        let band = (1_usize << from) / 2;
+        for target_input1 in 0..self.input_bits {
+            let target_value1 = 1_usize << target_input1;
+            for target_input2 in (target_input1 + 1)..self.input_bits {
+                let target_value2 = 1_usize << target_input2;
+                for offset_x in 0..4 {
+                    for offset_y in 0..4 {
+                        let mut checker = self.new();
+                        let x = target_value1 + offset_x;
+                        let y = target_value2 + offset_y;
+                        checker.set_input('x', x);
+                        checker.set_input('y', y);
+                        let (n, v) = checker.eval();
+                        println!(
+                            "failed 0..{}: {}+{}={}: {:?}",
+                            from,
+                            x,
+                            y,
+                            x + y,
+                            v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
+                        );
+                        if (x + y) / band != n / band {
                             return false;
                         }
                         if v.len() != self.input_bits + 1 {
@@ -528,7 +520,8 @@ impl AdventOfCode for Puzzle {
         println!("{sum_vector:?}");
         println!("{wrong_bits:?}");
 
-        if let Some((_, vec)) = self.seek(0, HashSet::new(), HashSet::new()) {
+        let mut memo: HashMap<(usize, Vec<Wire>), bool> = HashMap::new();
+        if let Some(vec) = self.seek(0, Vec::new(), &mut memo) {
             vec.iter()
                 .sorted()
                 .map(|t| format!("{}{}{}", t.0, t.1, t.2))
