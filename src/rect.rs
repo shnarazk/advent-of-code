@@ -145,6 +145,16 @@ impl<T: Clone + Default + Sized> Rect<T> {
         });
         new
     }
+    pub fn to_vec(&self) -> Vec<Vec<T>> {
+        let mut res = Vec::new();
+        let mut index = 0;
+        let width = self.size.1 as usize;
+        while index + width <= self.vec.len() {
+            res.push(self.vec[index..index + width].to_vec());
+            index += width;
+        }
+        res
+    }
 }
 
 impl<T: Clone + Default + std::fmt::Display> std::fmt::Display for Rect<T> {
