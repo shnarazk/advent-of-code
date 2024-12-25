@@ -1,25 +1,13 @@
 //! <https://adventofcode.com/2024/day/25>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
-        parser::parse_usize,
         rect::Rect,
     },
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
     winnow::{
         ascii::newline,
-        combinator::{repeat, repeat_till, separated, seq, terminated},
+        combinator::{repeat, separated},
         token::one_of,
         PResult, Parser,
     },
