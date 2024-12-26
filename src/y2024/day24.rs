@@ -224,6 +224,7 @@ fn wrong_bit(memo: &mut HashMap<Vec<Wire>, Option<usize>>, swaps: Vec<Wire>) -> 
     unimplemented!()
 }
 
+static WIRE_NAMES: OnceLock<HashSet<Wire>> = OnceLock::new();
 static BASE_LINK: OnceLock<Vec<(Gate, Wire, Wire, Wire)>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
 
@@ -245,8 +246,6 @@ fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     input_wire: Vec<(Wire, bool)>,
-    wire: HashSet<Wire>,
-    wire_level: HashMap<Wire, usize>,
 }
 
 impl Puzzle {
@@ -257,8 +256,9 @@ impl Puzzle {
         memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
     ) -> Option<Vec<(GateSpec, GateSpec)>> {
         let input_bits = *INPUT_BITS.get().unwrap();
-        let relevants = self
-            .wire
+        let relevants = WIRE_NAMES
+            .get()
+            .unwrap()
             .iter()
             .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
             .filter(|wire| {
@@ -269,9 +269,10 @@ impl Puzzle {
             .sorted()
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
-        let mut num_lifts: usize = 0;
+        let num_lifts: usize = 0;
         let adder = Adder::new(swaps.clone());
-        let down_tree = adder.wire_trees().0;
+        dbg!(relevants.len());
+        let (down_tree, up_tree) = adder.wire_trees();
         for (i, pick1) in relevants.iter().enumerate() {
             let pick1_level = adder
                 .wire_affects(&down_tree, **pick1)
@@ -285,6 +286,7 @@ impl Puzzle {
                 }
             }
         }
+        let mut a = (0, 0);
         for (i, case) in to_search.iter().enumerate() {
             // println!("{}-{}", wire_name(pick1), wire_name(pick2));
             progress!(format!(
@@ -304,19 +306,25 @@ impl Puzzle {
                 memo.insert(sw.clone(), ret);
                 ret
             };
-            if bit == input_bits + 1 {
-                assert_eq!(sw.len(), 4);
-                println!("{sw:?}");
-                return Some(sw);
+            if level < bit {
+                a.1 += 1;
+            } else {
+                a.0 += 1;
             }
-            if bit <= level {
-                continue;
-            }
-            num_lifts += 1;
-            if let Some(ret) = self.search(bit, sw, memo) {
-                return Some(ret);
-            }
+            // if bit == input_bits + 1 {
+            //     assert_eq!(sw.len(), 4);
+            //     println!("{sw:?}");
+            //     return Some(sw);
+            // }
+            // if bit <= level {
+            //     continue;
+            // }
+            // num_lifts += 1;
+            // if let Some(ret) = self.search(bit, sw, memo) {
+            //     return Some(ret);
+            // }
         }
+        dbg!(level, a);
         None
     }
 }
@@ -368,10 +376,14 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let (wires, links) = parse(&mut input.as_str())?;
         self.input_wire = wires;
+        let mut wire_names: HashSet<Wire> = HashSet::new();
         for (g, i1, i2, o) in links.iter() {
-            self.wire.insert(*i1);
-            self.wire.insert(*i2);
-            self.wire.insert(*o);
+            wire_names.insert(*i1);
+            wire_names.insert(*i2);
+            wire_names.insert(*o);
+        }
+        if WIRE_NAMES.get().is_none() {
+            WIRE_NAMES.set(wire_names).unwrap();
         }
         if BASE_LINK.get().is_none() {
             BASE_LINK.set(links).unwrap();
@@ -379,9 +391,6 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
-        for (w, b) in self.input_wire.iter() {
-            self.wire.insert(*w);
-        }
         let input_bits = self.input_wire.iter().filter(|(g, _)| g.0 == 'x').count();
         if INPUT_BITS.get().is_none() {
             INPUT_BITS.set(input_bits).unwrap();
