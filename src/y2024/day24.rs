@@ -5,6 +5,7 @@
 #![allow(clippy::type_complexity)]
 use {
     crate::{
+        color,
         framework::{aoc_at, AdventOfCode, ParseError},
         parser::parse_usize,
         progress,
@@ -12,10 +13,13 @@ use {
     itertools::Itertools,
     rayon::{prelude::*, slice::Windows},
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    serde::Serialize,
+    serde::{Deserialize, Serialize},
     std::{
         collections::{HashMap, HashSet},
+        fmt,
+        fs::File,
         hash::BuildHasherDefault,
+        io::prelude::*,
         sync::OnceLock,
     },
     winnow::{
@@ -25,6 +29,8 @@ use {
         PResult, Parser,
     },
 };
+
+const PERSISTENT_STORAGE: &'static str = "misc/2024/day23-diff-table.json";
 
 /// convert a `usize` to its binary representation
 fn int_to_bit_vector(mut n: usize, l: usize) -> Vec<bool> {
@@ -49,6 +55,18 @@ fn fmt(v: &[bool]) -> String {
             .map(|b| if *b { 'x' } else { '.' })
             .collect::<String>(),
         v.iter().filter(|b| **b).count(),
+    )
+}
+
+fn fmt_(v: &[usize]) -> String {
+    format!(
+        "{}|{}|0({})",
+        v.len(),
+        v.iter()
+            .rev()
+            .map(|n| format!("{n:>2}"))
+            .collect::<String>(),
+        v.iter().filter(|n| 0 < **n).count(),
     )
 }
 
@@ -85,15 +103,11 @@ fn wire_name((a, b, c): &Wire) -> String {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Adder {
-    overrides: Vec<GateSpec>,
+    overrides: Vec<(GateSpec, GateSpec)>,
 }
 
 impl Adder {
-    fn new(pairs: Vec<(GateSpec, GateSpec)>) -> Adder {
-        let overrides = pairs
-            .iter()
-            .flat_map(|(g1, g2)| [*g1, *g2])
-            .collect::<Vec<_>>();
+    fn new(overrides: Vec<(GateSpec, GateSpec)>) -> Adder {
         Adder { overrides }
     }
     fn evaluate(
@@ -132,8 +146,12 @@ impl Adder {
         let base_config = BASE_LINK.get().unwrap();
         while propagated {
             propagated = false;
-            for gate in self.overrides.iter() {
-                if self.evaluate(&mut values, gate).is_some() {
+            for gates in self.overrides.iter() {
+                if self.evaluate(&mut values, &gates.0).is_some() {
+                    propagated = true;
+                    continue;
+                }
+                if self.evaluate(&mut values, &gates.1).is_some() {
                     propagated = true;
                     continue;
                 }
@@ -225,29 +243,48 @@ impl Adder {
             })
             .0
     }
-    fn affect_bits(&self, origin: &Adder) -> Vec<bool> {
+    fn affect_bits(&self, final_check: bool) -> Vec<bool> {
+        let base = BASE_OUTPUT.get().unwrap();
         let input_bits = *INPUT_BITS.get().unwrap();
-        let ret = (0..=input_bits)
+        let ret = (0..input_bits)
             .collect::<Vec<_>>()
             .par_iter()
             .map(|bit1| {
-                let target_value1 = 1_usize << (*bit1).min(input_bits - 1);
-                (0..input_bits)
+                let target_value1 = 1_usize << *bit1;
+                (bit1 + 1..input_bits)
                     .map(|bit2| {
                         let target_value2 = 1_usize << bit2;
-                        [[0, 0], [0, 1], [1, 0], [0, 0]]
-                            .iter()
-                            .fold(false, |acc, pattern| {
-                                let x = target_value1 * pattern[0];
-                                let y = target_value2 * pattern[1];
-                                let base = origin.add(x, y).1;
-                                let v = self.add(x, y).1;
-                                acc || v.get(*bit1).map_or(true, |b| *b != base[*bit1])
+                        let x = target_value1;
+                        let y = target_value2;
+                        let base = if final_check {
+                            x + y
+                        } else {
+                            *base.get(&(x, y)).unwrap()
+                        };
+                        let v = self.add(x, y).1;
+                        (0..input_bits + 1)
+                            .map(|index| {
+                                v.get(index)
+                                    .map_or(true, |b| *b != (0 != base & (1 << index)))
                             })
+                            .collect::<Vec<_>>()
                     })
-                    .any(|b| b)
+                    .map(|f| f)
+                    .fold(vec![false; input_bits + 1], |mut acc, v| {
+                        for (i, p) in acc.iter_mut().enumerate() {
+                            *p |= v[i];
+                        }
+                        acc
+                    })
             })
-            .collect::<Vec<_>>();
+            .collect::<Vec<_>>()
+            .iter()
+            .fold(vec![false; input_bits + 1], |mut acc, v| {
+                for (i, p) in acc.iter_mut().enumerate() {
+                    *p |= v[i];
+                }
+                acc
+            });
         ret.iter()
             .fold((Vec::new(), false), |(mut acc, pre), b| match (pre, *b) {
                 (false, b) => {
@@ -265,6 +302,20 @@ impl Adder {
             })
             .0
     }
+    fn all_outputs(&self) -> HashMap<(usize, usize), usize> {
+        let mut hash: HashMap<(usize, usize), usize> = HashMap::new();
+        let input_bits = *INPUT_BITS.get().unwrap();
+        (0..input_bits).for_each(|bit1| {
+            let target_value1 = 1_usize << bit1;
+            (bit1 + 1..input_bits).for_each(|bit2| {
+                let target_value2 = 1_usize << bit2;
+                let x = target_value1;
+                let y = target_value2;
+                hash.insert((x, y), self.add(x, y).0);
+            })
+        });
+        hash
+    }
     /// return `(down_tree, up_tree)`
     fn wire_trees(&self) -> (HashMap<Wire, HashSet<Wire>>, HashMap<Wire, HashSet<Wire>>) {
         let base_links = BASE_LINK.get().unwrap();
@@ -272,14 +323,21 @@ impl Adder {
         let mut down_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
         let mut up_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
         for entry in base_links.iter() {
-            let (g, i1, i2, o) = self.overrides.iter().find(|_| true).map_or(entry, |e| e);
-            wires.insert(*i1);
-            wires.insert(*i2);
-            wires.insert(*o);
-            down_tree.entry(*i1).or_default().insert(*o);
-            down_tree.entry(*i2).or_default().insert(*o);
-            up_tree.entry(*o).or_default().insert(*i1);
-            up_tree.entry(*o).or_default().insert(*i2);
+            let (g, i1, i2, o) =
+                if let Some(ps) = self.overrides.iter().find(|(g, _)| entry.3 == g.3) {
+                    (entry.0, entry.1, entry.2, ps.1 .3)
+                } else if let Some(ps) = self.overrides.iter().find(|(_, g)| entry.3 == g.3) {
+                    (entry.0, entry.1, entry.2, ps.0 .3)
+                } else {
+                    *entry
+                };
+            wires.insert(i1);
+            wires.insert(i2);
+            wires.insert(o);
+            down_tree.entry(i1).or_default().insert(o);
+            down_tree.entry(i2).or_default().insert(o);
+            up_tree.entry(o).or_default().insert(i1);
+            up_tree.entry(o).or_default().insert(i2);
         }
         (down_tree, up_tree)
     }
@@ -288,17 +346,22 @@ impl Adder {
         if let Some(linked) = tree.get(&wire) {
             let mut to_visit: Vec<Wire> = linked.iter().cloned().collect::<Vec<_>>();
             subtree.insert(wire);
-            while let Some(wire) = to_visit.pop() {
-                if subtree.contains(&wire) {
+            while let Some(w) = to_visit.pop() {
+                if subtree.contains(&w) {
                     continue;
                 }
-                subtree.insert(wire);
-                if let Some(subs) = tree.get(&wire) {
+                subtree.insert(w);
+                if let Some(subs) = tree.get(&w) {
                     for w in subs.iter() {
                         to_visit.push(*w);
                     }
                 } else {
-                    assert_eq!(wire.0, 'z');
+                    assert!(
+                        ['x', 'y', 'z'].contains(&w.0),
+                        "unlinked wire: {} from {}",
+                        wire_name(&w),
+                        wire_name(&wire),
+                    );
                 }
             }
         } else {
@@ -315,6 +378,8 @@ fn wrong_bit(memo: &mut HashMap<Vec<Wire>, Option<usize>>, swaps: Vec<Wire>) -> 
 static WIRE_NAMES: OnceLock<HashSet<Wire>> = OnceLock::new();
 static BASE_LINK: OnceLock<Vec<(Gate, Wire, Wire, Wire)>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
+static BASE_OUTPUT: OnceLock<HashMap<(usize, usize), usize>> = OnceLock::new();
+static DIFF_MAP: OnceLock<HashMap<(Wire, Wire), Vec<usize>>> = OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
     let (p1, p2) = if pick1 < pick2 {
@@ -337,42 +402,185 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn search(
-        &self,
-        level: usize,
-        swaps: Vec<(GateSpec, GateSpec)>,
-        memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
-    ) -> Option<Vec<(GateSpec, GateSpec)>> {
+    fn build_search_table(&mut self) {
+        #[derive(Debug, Default, Eq, PartialEq, Deserialize, Serialize)]
+        struct Record {
+            key: (String, String),
+            value: Vec<usize>,
+        }
+        let path = std::path::Path::new(PERSISTENT_STORAGE);
+        if path.exists() {
+            match File::open(&path) {
+                Ok(mut file) => {
+                    let mut contents = String::new();
+                    file.read_to_string(&mut contents).expect("read error");
+                    let Ok(vec) = serde_json::from_str::<Vec<Record>>(&contents) else {
+                        panic!("Can't read {PERSISTENT_STORAGE}");
+                    };
+                    println!(
+                        "{}# read intermediate data on {}{}",
+                        color::MAGENTA,
+                        PERSISTENT_STORAGE,
+                        color::RESET,
+                    );
+                    if DIFF_MAP.get().is_none() {
+                        let hash = vec
+                            .iter()
+                            .map(|r| {
+                                let w1 = r.key.0.chars().collect::<Vec<char>>();
+                                let w2 = r.key.1.chars().collect::<Vec<char>>();
+                                let v = r.value.iter().map(|n| *n).collect::<Vec<usize>>();
+                                (((w1[0], w1[1], w1[2]), (w2[0], w2[1], w2[2])), v)
+                            })
+                            .filter(|((w1, w2), _)| {
+                                assert!(w1 < w2);
+                                true
+                            })
+                            .collect::<HashMap<(Wire, Wire), Vec<usize>>>();
+                        DIFF_MAP.set(hash).unwrap();
+                    }
+                }
+                Err(e) => panic!("Can't read {PERSISTENT_STORAGE}: {e:?}"),
+            }
+            return;
+        }
+        println!("{}# build diff table{}", color::MAGENTA, color::RESET,);
+        let mut memo: HashMap<(Wire, Wire), Vec<usize>> = HashMap::new();
         let input_bits = *INPUT_BITS.get().unwrap();
         let relevants = WIRE_NAMES
             .get()
             .unwrap()
             .iter()
             .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
-            .filter(|wire| {
-                !swaps
-                    .iter()
-                    .any(|(gs1, gs2)| gs1.3 == **wire || gs2.3 == **wire)
-            })
             .sorted()
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
         let num_lifts: usize = 0;
-        let adder = Adder::new(swaps.clone());
+        let adder = Adder::new(Vec::new());
         let wrong_vector = adder.wrong_bits();
         let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         dbg!(relevants.len());
         let (down_tree, up_tree) = adder.wire_trees();
         for (i, pick1) in relevants.iter().enumerate() {
-            let _pick1_level = adder
-                .wire_affects(&down_tree, **pick1)
-                .contains(&bit_to_wire(level, 'z'));
             for pick2 in relevants.iter().skip(i + 1) {
-                let _pick2_level = adder
-                    .wire_affects(&down_tree, **pick2)
-                    .contains(&bit_to_wire(level, 'z'));
-                /* if pick1_level || pick2_level */
-                {
+                to_search.push((**pick1, **pick2));
+            }
+        }
+        for (i, case) in to_search.iter().enumerate() {
+            progress!(format!(
+                "{i:>6}/{:>6} :: {}-{}",
+                to_search.len(),
+                wire_name(&case.0),
+                wire_name(&case.1)
+            ));
+            let gates = build_swapped_pair(case);
+            let sw = vec![gates];
+            let result_vector = Adder::new(sw.clone()).affect_bits(false);
+            memo.insert(
+                (case.0, case.1),
+                result_vector
+                    .iter()
+                    .map(|b| *b as usize)
+                    .collect::<Vec<_>>(),
+            );
+        }
+
+        let vec = memo
+            .iter()
+            .map(|(k, v)| Record {
+                key: (wire_name(&k.0), wire_name(&k.1)),
+                value: v.iter().map(|b| *b as usize).collect::<Vec<_>>(),
+            })
+            .collect::<Vec<_>>();
+        if let Some(json) = serde_json::to_string(&vec).ok() {
+            let dir = std::path::Path::new(PERSISTENT_STORAGE).parent().unwrap();
+            if !dir.exists() {
+                std::fs::create_dir_all(dir)
+                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
+            }
+            let mut file = File::create(PERSISTENT_STORAGE)
+                .unwrap_or_else(|_| panic!("fail to open {PERSISTENT_STORAGE}"));
+            writeln!(file, "{}", json).expect("fail to save");
+            println!(
+                "{}# write JSON data on {}{}",
+                color::MAGENTA,
+                PERSISTENT_STORAGE,
+                color::RESET,
+            );
+        }
+        if DIFF_MAP.get().is_none() {
+            DIFF_MAP.set(memo).unwrap();
+        }
+    }
+    fn search(
+        &self,
+        level: usize,
+        swaps: Vec<(GateSpec, GateSpec)>,
+        diff_vector: Vec<usize>,
+        // memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
+    ) -> Option<Vec<(GateSpec, GateSpec)>> {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let diff_vectors: &HashMap<(Wire, Wire), Vec<usize>> = DIFF_MAP.get().unwrap();
+        let relevants = WIRE_NAMES
+            .get()
+            .unwrap()
+            .iter()
+            .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
+            .filter(|wire| {
+                swaps
+                    .iter()
+                    .all(|(gs1, gs2)| gs1.3 != **wire && gs2.3 != **wire)
+            })
+            .sorted()
+            .collect::<Vec<_>>();
+        let mut to_search: Vec<(Wire, Wire)> = vec![];
+        let adder = Adder::new(swaps.clone());
+        // let wrong_vector = adder.wrong_bits();
+        // let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
+        let (down_tree, up_tree) = adder.wire_trees();
+        if level == 1 {
+            let (down_tree, up_tree) = adder.wire_trees();
+            for (i, pick1) in relevants.iter().enumerate() {
+                let pick1_cond = adder
+                    .wire_affects(&down_tree, **pick1)
+                    .contains(&bit_to_wire(5, 'z'));
+                for pick2 in relevants.iter() {
+                    let pick2_cond = adder
+                        .wire_affects(&up_tree, **pick2)
+                        .iter()
+                        .any(|w| *w == bit_to_wire(5, 'x') || *w == bit_to_wire(5, 'y'));
+                    if pick1_cond && pick2_cond && pick1 != pick2 {
+                        if pick1 < pick2 {
+                            to_search.push((**pick1, **pick2));
+                        } else {
+                            to_search.push((**pick2, **pick1));
+                        }
+                    }
+                }
+            }
+        } else if level == 2 {
+            let (down_tree, up_tree) = adder.wire_trees();
+            for (i, pick1) in relevants.iter().enumerate() {
+                let pick1_cond = adder
+                    .wire_affects(&down_tree, **pick1)
+                    .contains(&bit_to_wire(20, 'z'));
+                for pick2 in relevants.iter() {
+                    let pick2_cond = adder
+                        .wire_affects(&up_tree, **pick2)
+                        .iter()
+                        .any(|w| *w == bit_to_wire(20, 'x') || *w == bit_to_wire(20, 'y'));
+                    if pick1_cond && pick2_cond && pick1 != pick2 {
+                        if pick1 < pick2 {
+                            to_search.push((**pick1, **pick2));
+                        } else {
+                            to_search.push((**pick2, **pick1));
+                        }
+                    }
+                }
+            }
+        } else {
+            for (i, pick1) in relevants.iter().enumerate() {
+                for pick2 in relevants.iter().skip(i + 1) {
                     to_search.push((**pick1, **pick2));
                 }
             }
@@ -380,23 +588,83 @@ impl Puzzle {
         let mut a = (0, 0, 0);
         for (i, case) in to_search.iter().enumerate() {
             // println!("{}-{}", wire_name(pick1), wire_name(pick2));
-            // progress!(format!(
-            //     "{:>10} level:{level:>2}({i:>5}/{:>5}) lift:{num_lifts:>5}:: {}-{}",
-            //     memo.len(),
-            //     to_search.len(),
-            //     wire_name(&case.0),
-            //     wire_name(&case.1)
-            // ));
+            if 0 < level {
+                progress!(format!(
+                    "level:{level:>2}({i:>5}/{:>5}) :: {}-{}",
+                    to_search.len(),
+                    wire_name(&case.0),
+                    wire_name(&case.1)
+                ));
+            }
             let mut sw = swaps.clone();
+            let vec = diff_vectors
+                .get(case)
+                .expect(format!("{case:?}").as_str())
+                .clone()
+                .iter()
+                .enumerate()
+                .map(|(i, a)| *a + diff_vector[i])
+                .collect::<Vec<_>>();
             sw.push(build_swapped_pair(case));
             assert!(sw.len() <= 4);
-            let result_vector = Adder::new(sw.clone()).affect_bits(&adder);
+            let result_vector = Adder::new(sw.clone()).affect_bits(true);
+            let num_vector = result_vector
+                .iter()
+                .map(|b| *b as usize)
+                .collect::<Vec<_>>();
+            let merged = result_vector
+                .iter()
+                .enumerate()
+                .map(|(i, b)| *b as usize + diff_vector[i])
+                .collect::<Vec<_>>();
             let affects = result_vector.iter().filter(|b| **b).count();
-            if 0 < affects {
+            if affects < level {
+                if level == 4 && !result_vector[9] {
+                    println!("{i:>5}:{}", fmt(&result_vector));
+                    if let Some(ret) = self.search(
+                        level - 1,
+                        sw,
+                        result_vector
+                            .iter()
+                            .map(|b| *b as usize)
+                            .collect::<Vec<_>>(),
+                    ) {}
+                } else if level == 3 && !result_vector[37] {
+                    println!("{i:>5}:{}", fmt(&result_vector));
+                    if let Some(ret) = self.search(
+                        level - 1,
+                        sw,
+                        result_vector
+                            .iter()
+                            .map(|b| *b as usize)
+                            .collect::<Vec<_>>(),
+                    ) {}
+                } else if level == 2 && !result_vector[20] {
+                    println!("{i:>5}:{}", fmt(&result_vector));
+                    if let Some(ret) = self.search(
+                        level - 1,
+                        sw,
+                        result_vector
+                            .iter()
+                            .map(|b| *b as usize)
+                            .collect::<Vec<_>>(),
+                    ) {}
+                }
                 a.2 += 1;
-                println!("{i:>5}:{}", fmt(&result_vector));
-            } else {
+            } else if level == 2 && diff_vector == num_vector {
+                // println!("{i:>5}:{}", fmt(&result_ector));
+                if let Some(ret) = self.search(
+                    level - 1,
+                    sw,
+                    result_vector
+                        .iter()
+                        .map(|b| *b as usize)
+                        .collect::<Vec<_>>(),
+                ) {}
                 a.1 += 1;
+            } else if level == 1 && affects == 0 {
+                println!("{i:>5}:{}", fmt(&result_vector));
+                panic!();
             }
             /*
             let bit = if let Some(b) = memo.get(&sw) {
@@ -425,7 +693,6 @@ impl Puzzle {
             //     return Some(ret);
             // }
         }
-        dbg!(a);
         None
     }
 }
@@ -530,8 +797,21 @@ impl AdventOfCode for Puzzle {
         Adder::new(Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut memo: HashMap<Vec<(GateSpec, GateSpec)>, usize> = HashMap::new();
-        if let Some(vec) = self.search(0, Vec::new(), &mut memo) {
+        let adder = Adder::new(Vec::new());
+        if BASE_OUTPUT.get().is_none() {
+            let hash = adder.all_outputs();
+            let input_bits = *INPUT_BITS.get().unwrap();
+            assert_eq!(hash.len(), input_bits * (input_bits - 1) / 2);
+            BASE_OUTPUT.set(hash).unwrap();
+        }
+        self.build_search_table();
+        let init_vector = adder
+            .affect_bits(true)
+            .iter()
+            .map(|b| *b as usize)
+            .collect::<Vec<_>>();
+        dbg!(fmt_(&init_vector));
+        if let Some(vec) = self.search(4, Vec::new(), init_vector) {
             vec.iter()
                 .flat_map(|(gs1, gs2)| vec![wire_name(&gs1.3), wire_name(&gs2.3)])
                 .sorted()
