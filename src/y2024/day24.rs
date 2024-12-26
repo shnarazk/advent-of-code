@@ -83,7 +83,7 @@ type Wire = (char, char, char);
 type GateSpec = (Gate, Wire, Wire, Wire);
 
 /// convert from 'ord', 0 to 43, to wire
-fn bit_to_wire(n: usize, prefix: char) -> Wire {
+fn ord_to_wire(n: usize, prefix: char) -> Wire {
     (
         prefix,
         (b'0' + ((n / 10) as u8)) as char,
@@ -97,18 +97,19 @@ fn wire_to_ord((_, b, c): &Wire) -> usize {
 }
 
 /// convert  `Wire` to its string representation
-fn wire_name((a, b, c): &Wire) -> String {
+fn wire_to_string((a, b, c): &Wire) -> String {
     format!("{a}{b}{c}")
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Adder {
     overrides: Vec<(GateSpec, GateSpec)>,
+    width: usize,
 }
 
 impl Adder {
-    fn new(overrides: Vec<(GateSpec, GateSpec)>) -> Adder {
-        Adder { overrides }
+    fn new(width: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Adder {
+        Adder { overrides, width }
     }
     fn evaluate(
         &self,
@@ -134,11 +135,11 @@ impl Adder {
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
 
         for i in 0..input_bits {
-            let wire = bit_to_wire(i, 'x');
+            let wire = ord_to_wire(i, 'x');
             values.insert(wire, bit1.get(i) == Some(&true));
         }
         for i in 0..input_bits {
-            let wire = bit_to_wire(i, 'y');
+            let wire = ord_to_wire(i, 'y');
             values.insert(wire, bit2.get(i) == Some(&true));
         }
 
@@ -164,7 +165,7 @@ impl Adder {
         }
         let v = values
             .iter()
-            .filter(|(wire, _)| wire.0 == 'z')
+            .filter(|(wire, _)| wire.0 == 'z' && wire_to_ord(wire) <= self.width)
             .sorted()
             .map(|(_, b)| b)
             .cloned()
@@ -243,6 +244,17 @@ impl Adder {
             })
             .0
     }
+    fn check_correctness(&self) -> bool {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        (0..input_bits).collect::<Vec<_>>().par_iter().all(|&bit1| {
+            let x = 1_usize << bit1;
+            (bit1..input_bits).all(|bit2| {
+                let y = 1_usize << bit2;
+                self.add(x, y).0 == x + y % (1 << self.width)
+            })
+        })
+    }
+
     fn affect_bits(&self, final_check: bool) -> Vec<bool> {
         let base = BASE_OUTPUT.get().unwrap();
         let input_bits = *INPUT_BITS.get().unwrap();
@@ -359,8 +371,8 @@ impl Adder {
                     assert!(
                         ['x', 'y', 'z'].contains(&w.0),
                         "unlinked wire: {} from {}",
-                        wire_name(&w),
-                        wire_name(&wire),
+                        wire_to_string(&w),
+                        wire_to_string(&wire),
                     );
                 }
             }
@@ -456,7 +468,7 @@ impl Puzzle {
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
         let num_lifts: usize = 0;
-        let adder = Adder::new(Vec::new());
+        let adder = Adder::new(0, Vec::new());
         let wrong_vector = adder.wrong_bits();
         let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         dbg!(relevants.len());
@@ -470,12 +482,12 @@ impl Puzzle {
             progress!(format!(
                 "{i:>6}/{:>6} :: {}-{}",
                 to_search.len(),
-                wire_name(&case.0),
-                wire_name(&case.1)
+                wire_to_string(&case.0),
+                wire_to_string(&case.1)
             ));
             let gates = build_swapped_pair(case);
             let sw = vec![gates];
-            let result_vector = Adder::new(sw.clone()).affect_bits(false);
+            let result_vector = Adder::new(0, sw.clone()).affect_bits(false);
             memo.insert(
                 (case.0, case.1),
                 result_vector
@@ -488,7 +500,7 @@ impl Puzzle {
         let vec = memo
             .iter()
             .map(|(k, v)| Record {
-                key: (wire_name(&k.0), wire_name(&k.1)),
+                key: (wire_to_string(&k.0), wire_to_string(&k.1)),
                 value: v.iter().map(|b| *b as usize).collect::<Vec<_>>(),
             })
             .collect::<Vec<_>>();
@@ -520,7 +532,6 @@ impl Puzzle {
         // memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
     ) -> Option<Vec<(GateSpec, GateSpec)>> {
         if level == 2 {
-            return None;
             let diff_vectors: Vec<(Wire, Wire)> = DIFF_MAP
                 .get()
                 .unwrap()
@@ -544,12 +555,12 @@ impl Puzzle {
                 progress!(format!(
                     " => ({i:>5}/{:>5}) :: {}-{}-{}-{}",
                     tries.len(),
-                    wire_name(&swap1.0),
-                    wire_name(&swap1.1),
-                    wire_name(&swap2.0),
-                    wire_name(&swap2.1),
+                    wire_to_string(&swap1.0),
+                    wire_to_string(&swap1.1),
+                    wire_to_string(&swap2.0),
+                    wire_to_string(&swap2.1),
                 ));
-                let result_vector = Adder::new(sw.clone()).affect_bits(true);
+                let result_vector = Adder::new(0, sw.clone()).affect_bits(true);
                 if result_vector.iter().all(|b| !*b) {
                     dbg!(sw);
                     panic!();
@@ -572,7 +583,7 @@ impl Puzzle {
             .sorted()
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
-        let adder = Adder::new(swaps.clone());
+        let adder = Adder::new(0, swaps.clone());
         // let wrong_vector = adder.wrong_bits();
         // let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         let (down_tree, up_tree) = adder.wire_trees();
@@ -588,8 +599,8 @@ impl Puzzle {
                 progress!(format!(
                     "level:{level:>2}({i:>5}/{:>5}) :: {}-{}",
                     to_search.len(),
-                    wire_name(&case.0),
-                    wire_name(&case.1)
+                    wire_to_string(&case.0),
+                    wire_to_string(&case.1)
                 ));
             }
             let mut sw = swaps.clone();
@@ -603,7 +614,7 @@ impl Puzzle {
                 .collect::<Vec<_>>();
             sw.push(build_swapped_pair(case));
             assert!(sw.len() <= 4);
-            let result_vector = Adder::new(sw.clone()).affect_bits(true);
+            let result_vector = Adder::new(0, sw.clone()).affect_bits(true);
             let num_vector = result_vector
                 .iter()
                 .map(|b| *b as usize)
@@ -761,10 +772,15 @@ impl AdventOfCode for Puzzle {
         let mut data = links
             .iter()
             .enumerate()
-            .map(|(i, (g, i1, i2, o))| (wire_name(o), vec![wire_name(i1), wire_name(i2)]))
+            .map(|(i, (g, i1, i2, o))| {
+                (
+                    wire_to_string(o),
+                    vec![wire_to_string(i1), wire_to_string(i2)],
+                )
+            })
             .collect::<Vec<_>>();
         for (input, _) in self.input_wire.iter() {
-            data.push((wire_name(input), Vec::new()));
+            data.push((wire_to_string(input), Vec::new()));
         }
         serde_json::to_string(&data).ok()
     }
@@ -786,72 +802,71 @@ impl AdventOfCode for Puzzle {
             .map(|(_, b)| b)
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
 
-        Adder::new(Vec::new()).add(x, y).0
+        Adder::new(0, Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
         let input_bits = *INPUT_BITS.get().unwrap();
         let wire_names = WIRE_NAMES.get().unwrap();
-        let adder = Adder::new(Vec::new());
+        let adder = Adder::new(input_bits, Vec::new());
         let (d_tree, u_tree) = adder.wire_trees();
         for index in 0..(input_bits + 1) {
-            let inputs = adder.wire_affects(&u_tree, bit_to_wire(index, 'z'));
-            let xs = inputs
+            let input_tree = adder.wire_affects(&u_tree, ord_to_wire(index, 'z'));
+            let inputs = input_tree
                 .iter()
-                .filter(|w| w.0 == 'x')
+                .filter(|w| w.0 == 'x' || w.0 == 'y')
                 .sorted()
                 .cloned()
                 .collect::<Vec<_>>();
-            let xs_required = (0..=index).map(|i| bit_to_wire(i, 'x')).collect::<Vec<_>>();
-            let xs_missing = xs_required
+            let required = (0..=index)
+                .flat_map(|i| [ord_to_wire(i, 'x'), ord_to_wire(i, 'y')])
+                .collect::<Vec<_>>();
+            let missing = required
                 .iter()
-                .filter(|w| !xs.contains(w))
+                .filter(|w| !inputs.contains(w))
                 .cloned()
                 .collect::<Vec<_>>();
-            if !xs_missing.is_empty() {
+            if !missing.is_empty() {
                 println!(
-                    "x{}: {:?}",
+                    "bit{}: {:?}",
                     index,
-                    xs_missing.iter().map(wire_name).collect::<Vec<_>>()
+                    missing.iter().map(wire_to_string).collect::<Vec<_>>()
                 );
-                for w in wire_names.iter() {
-                    let inputs = adder.wire_affects(&u_tree, *w);
-                    let x = inputs
-                        .iter()
-                        .filter(|w| w.0 == 'x')
-                        .sorted()
-                        .cloned()
-                        .collect::<Vec<_>>();
-                    if xs_missing.iter().all(|w| x.contains(w))
-                        && x.iter().all(|w| xs_required.contains(w))
-                    {
-                        println!(
-                            " found {}: {:?}",
-                            wire_name(w),
-                            x.iter().map(wire_name).collect::<Vec<_>>()
-                        );
-                    }
+                // find upper-side nodes (wires)
+                let upper_wires = wire_names
+                    .iter()
+                    .filter(|&w| {
+                        let w_input_tree = adder.wire_affects(&u_tree, *w);
+                        let w_output_tree = adder.wire_affects(&d_tree, *w);
+                        let w_inputs = w_input_tree
+                            .iter()
+                            .filter(|w| w.0 == 'x' || w.0 == 'y')
+                            .sorted()
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        let w_outputs = w_output_tree
+                            .iter()
+                            .filter(|w| w.0 == 'z')
+                            .sorted()
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        missing.iter().all(|w| w_inputs.contains(w))
+                            && w_inputs.iter().all(|w| required.contains(w))
+                            && index <= wire_to_ord(w_outputs.first().unwrap())
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>();
+                dbg!(upper_wires.iter().map(wire_to_string).collect::<Vec<_>>());
+                for upper in upper_wires.iter() {
+                    println!(" - try {index}: {}", wire_to_string(upper),);
+                    let checker = Adder::new(index, Vec::new());
+                    dbg!(checker.check_correctness());
                 }
-            }
-            let ys = inputs
-                .iter()
-                .filter(|w| w.0 == 'y')
-                .sorted()
-                .cloned()
-                .collect::<Vec<_>>();
-            let ys_required = (0..=index)
-                .map(|i| bit_to_wire(i, 'y'))
-                .filter(|w| !ys.contains(w))
-                .collect::<Vec<_>>();
-            if !ys_required.is_empty() {
-                println!(
-                    "y{}: {:?}",
-                    index,
-                    ys_required.iter().map(wire_name).collect::<Vec<_>>()
-                );
             }
         }
 
-        return "".to_string();
+        "".to_string()
+
+        /*
         if BASE_OUTPUT.get().is_none() {
             let hash = adder.all_outputs();
             let input_bits = *INPUT_BITS.get().unwrap();
@@ -872,5 +887,6 @@ impl AdventOfCode for Puzzle {
         } else {
             "".to_string()
         }
+        */
     }
 }
