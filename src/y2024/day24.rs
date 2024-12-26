@@ -2,28 +2,25 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+#![allow(clippy::type_complexity)]
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        geometric::neighbors,
         parser::parse_usize,
         progress,
     },
-    core::prelude,
     itertools::Itertools,
-    rayon::{prelude::*, slice::Windows},
+    // rayon::{prelude::*, slice::Windows},
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
     std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
-        default,
+        collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
         sync::OnceLock,
     },
     winnow::{
         ascii::newline,
-        combinator::{alt, repeat, repeat_till, separated, seq, terminated},
+        combinator::{alt, separated, seq},
         token::one_of,
         PResult, Parser,
     },
@@ -184,6 +181,62 @@ impl Adder {
         }
         target
     }
+    /// return `(down_tree, up_tree)`
+    fn wire_affects(&self, wire: Wire) -> (HashSet<Wire>, HashSet<Wire>) {
+        let base_links = BASE_LINK.get().unwrap();
+        let mut wires: HashSet<Wire> = HashSet::new();
+        let mut down_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
+        let mut up_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
+        for entry in base_links.iter() {
+            let (g, i1, i2, o) = self.overrides.iter().find(|_| true).map_or(entry, |e| e);
+            wires.insert(*i1);
+            wires.insert(*i2);
+            wires.insert(*o);
+            down_tree.entry(*i1).or_default().insert(*o);
+            down_tree.entry(*i2).or_default().insert(*o);
+            up_tree.entry(*o).or_default().insert(*i1);
+            up_tree.entry(*o).or_default().insert(*i2);
+        }
+        let mut down_subtree: HashSet<Wire> = HashSet::new();
+        if let Some(downs) = down_tree.get(&wire) {
+            let mut to_visit: Vec<Wire> = downs.iter().cloned().collect::<Vec<_>>();
+            down_subtree.insert(wire);
+            while let Some(wire) = to_visit.pop() {
+                if down_subtree.contains(&wire) {
+                    continue;
+                }
+                down_subtree.insert(wire);
+                if let Some(subs) = down_tree.get(&wire) {
+                    for w in subs.iter() {
+                        to_visit.push(*w);
+                    }
+                } else {
+                    assert_eq!(wire.0, 'z');
+                }
+            }
+        }
+        let mut up_subtree: HashSet<Wire> = HashSet::new();
+        if let Some(uppers) = up_tree.get(&wire) {
+            let mut to_visit: Vec<Wire> = uppers.iter().cloned().collect::<Vec<_>>();
+            up_subtree.insert(wire);
+            while let Some(wire) = to_visit.pop() {
+                if up_subtree.contains(&wire) {
+                    continue;
+                }
+                up_subtree.insert(wire);
+                if let Some(subs) = up_tree.get(&wire) {
+                    for w in subs.iter() {
+                        to_visit.push(*w);
+                    }
+                } else {
+                    assert!(wire.0 == 'x' || wire.0 == 'y');
+                }
+            }
+        } else {
+            up_subtree.insert(wire);
+        }
+        (down_subtree, up_subtree)
+    }
 }
 
 fn wrong_bit(memo: &mut HashMap<Vec<Wire>, Option<usize>>, swaps: Vec<Wire>) -> Option<usize> {
@@ -212,8 +265,6 @@ fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
 pub struct Puzzle {
     input_wire: Vec<(Wire, bool)>,
     wire: HashSet<Wire>,
-    wire_downward: HashMap<Wire, HashSet<Wire>>,
-    wire_upward: HashMap<Wire, HashSet<Wire>>,
     wire_level: HashMap<Wire, usize>,
 }
 
@@ -260,13 +311,16 @@ impl Puzzle {
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
         let mut num_lifts: usize = 0;
+        let adder = Adder::new(vec![]);
         for (i, pick1) in relevants.iter().enumerate() {
-            let pick1_level = self
-                .wire_tree_downward(**pick1)
+            let pick1_level = adder
+                .wire_affects(**pick1)
+                .0
                 .contains(&bit_to_wire(level, 'z'));
             for pick2 in relevants.iter().skip(i + 1) {
-                let pick2_level = self
-                    .wire_tree_downward(**pick2)
+                let pick2_level = adder
+                    .wire_affects(**pick2)
+                    .0
                     .contains(&bit_to_wire(level, 'z'));
                 if pick1_level || pick2_level {
                     to_search.push((**pick1, **pick2));
@@ -325,213 +379,6 @@ impl Puzzle {
         memo.insert((level, swapped.clone()), false);
         None
     }
-    /*
-    /// return a clean cloned itself
-    fn new(&self) -> Puzzle {
-        let mut checker = self.clone();
-        for (name, b) in checker.value.iter_mut() {
-            *b = false;
-        }
-        checker
-    }
-    */
-    /*
-    fn new_swapped(&self, pick1: &Wire, pick2: &Wire) -> Puzzle {
-        let mut checker = self.new();
-        for gate in checker.link.iter_mut() {
-            if gate.3 == *pick1 {
-                gate.3 = *pick2;
-            } else if gate.3 == *pick2 {
-                gate.3 = *pick1;
-            }
-        }
-        checker.wire.clear();
-        checker.wire_downward.clear();
-        checker.wire_upward.clear();
-        for (g, i1, i2, o) in checker.link.iter() {
-            checker.wire.insert(*i1);
-            checker.wire.insert(*i2);
-            checker.wire.insert(*o);
-            checker.wire_downward.entry(*i1).or_default().insert(*o);
-            checker.wire_downward.entry(*i2).or_default().insert(*o);
-            checker.wire_upward.entry(*o).or_default().insert(*i1);
-            checker.wire_upward.entry(*o).or_default().insert(*i2);
-        }
-        checker
-    }
-    */
-    /*
-    fn set_input(&mut self, prefix: char, val: usize) {
-        let bit_vector: Vec<bool> = int_to_bit_vector(val);
-        for i in 0..self.input_bits {
-            let wire = bit_to_wire(i, prefix);
-            self.value.insert(wire, bit_vector.get(i) == Some(&true));
-        }
-    }
-    */
-    /*
-    /// exhaustive-check
-    fn check_exhausitively(&self, range: usize) -> bool {
-        let band = 2_usize << range;
-        for target_input1 in 0..=4 {
-            let target_value1 = (1_usize << range) + target_input1;
-            for target_input2 in 0..=4 {
-                let target_value2 = (1_usize << range) + target_input2;
-                for offset_x in 0..4 {
-                    for offset_y in 0..4 {
-                        let mut checker = self.new();
-                        let x = target_value1 + offset_x;
-                        let y = target_value2 + offset_y;
-                        checker.set_input('x', x);
-                        checker.set_input('y', y);
-                        let (n, v) = checker.eval();
-                        if (x + y) % band != n % band {
-                            // println!(
-                            //     "failed 0..{}: x={}, y={}: {:?}",
-                            //     range,
-                            //     x,
-                            //     y,
-                            //     v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
-                            // );
-                            return false;
-                        }
-                        if v.len() != self.input_bits + 1 {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        true
-    }
-    */
-    /*
-    /// exhaustive-check
-    fn final_check(&self, from: usize) -> bool {
-        let band = (1_usize << from) / 2;
-        for target_input1 in 0..self.input_bits {
-            let target_value1 = 1_usize << target_input1;
-            for target_input2 in (target_input1 + 1)..self.input_bits {
-                let target_value2 = 1_usize << target_input2;
-                for offset_x in 0..4 {
-                    for offset_y in 0..4 {
-                        let mut checker = self.new();
-                        let x = target_value1 + offset_x;
-                        let y = target_value2 + offset_y;
-                        checker.set_input('x', x);
-                        checker.set_input('y', y);
-                        let (n, v) = checker.eval();
-                        println!(
-                            "failed 0..{}: {}+{}={}: {:?}",
-                            from,
-                            x,
-                            y,
-                            x + y,
-                            v.iter().rev().map(|b| *b as usize).collect::<Vec<_>>(),
-                        );
-                        if (x + y) / band != n / band {
-                            return false;
-                        }
-                        if v.len() != self.input_bits + 1 {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        true
-    }
-    */
-    /*
-        /// returns `true` if a now propagaton occured.
-        fn evaluate(&mut self, g: Gate, input1: &Wire, input2: &Wire, output: &Wire) -> Option<Wire> {
-            let Some(&b1) = self.value.get(input1) else {
-                return None;
-            };
-            let Some(&b2) = self.value.get(input2) else {
-                return None;
-            };
-            let unassigned = self.value.get(output).is_none();
-            match g {
-                Gate::And => self.value.insert(*output, b1 & b2),
-                Gate::Or => self.value.insert(*output, b1 | b2),
-                Gate::Xor => self.value.insert(*output, b1 ^ b2),
-            };
-            unassigned.then(|| *output)
-        }
-        /// return the evaluation result as a value and a bit vector
-        fn eval(&mut self) -> (usize, Vec<bool>) {
-            let mut propagated = true;
-            let links = self.link.clone();
-            while propagated {
-                propagated = false;
-                for g in links.iter() {
-                    if self.evaluate(g.0, &g.1, &g.2, &g.3).is_some() {
-                        propagated = true;
-                    }
-                }
-            }
-            let v = self
-                .value
-                .iter()
-                .filter(|(wire, _)| wire.0 == 'z')
-                .sorted()
-                .map(|(_, b)| b)
-                .cloned()
-                .collect::<Vec<bool>>();
-            let val = v
-                .iter()
-                .rev()
-                .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
-            (val, v)
-        }
-    */
-    fn wire_tree_downward(&self, wire: Wire) -> HashSet<Wire> {
-        let mut result: HashSet<Wire> = HashSet::new();
-        if let Some(downs) = self.wire_downward.get(&wire) {
-            let mut to_visit: Vec<Wire> = downs.iter().cloned().collect::<Vec<_>>();
-            result.insert(wire);
-            while let Some(wire) = to_visit.pop() {
-                if result.contains(&wire) {
-                    continue;
-                }
-                result.insert(wire);
-                if let Some(subs) = self.wire_downward.get(&wire) {
-                    for w in subs.iter() {
-                        to_visit.push(*w);
-                    }
-                } else {
-                    assert_eq!(wire.0, 'z');
-                }
-            }
-        } else {
-            result.insert(wire);
-        }
-        result
-    }
-    fn wire_tree_upward(&self, wire: Wire) -> HashSet<Wire> {
-        let mut result: HashSet<Wire> = HashSet::new();
-        if let Some(uppers) = self.wire_upward.get(&wire) {
-            let mut to_visit: Vec<Wire> = uppers.iter().cloned().collect::<Vec<_>>();
-            result.insert(wire);
-            while let Some(wire) = to_visit.pop() {
-                if result.contains(&wire) {
-                    continue;
-                }
-                result.insert(wire);
-                if let Some(subs) = self.wire_upward.get(&wire) {
-                    for w in subs.iter() {
-                        to_visit.push(*w);
-                    }
-                } else {
-                    assert!(wire.0 == 'x' || wire.0 == 'y');
-                }
-            }
-        } else {
-            result.insert(wire);
-        }
-        result
-    }
 }
 
 fn parse_wire(s: &mut &str) -> PResult<Wire> {
@@ -585,10 +432,6 @@ impl AdventOfCode for Puzzle {
             self.wire.insert(*i1);
             self.wire.insert(*i2);
             self.wire.insert(*o);
-            self.wire_downward.entry(*i1).or_default().insert(*o);
-            self.wire_downward.entry(*i2).or_default().insert(*o);
-            self.wire_upward.entry(*o).or_default().insert(*i1);
-            self.wire_upward.entry(*o).or_default().insert(*i2);
         }
         if BASE_LINK.get().is_none() {
             BASE_LINK.set(links).unwrap();
