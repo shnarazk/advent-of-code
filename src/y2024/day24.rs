@@ -519,6 +519,42 @@ impl Puzzle {
         diff_vector: Vec<usize>,
         // memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
     ) -> Option<Vec<(GateSpec, GateSpec)>> {
+        if level == 2 {
+            let diff_vectors: Vec<(Wire, Wire)> = DIFF_MAP
+                .get()
+                .unwrap()
+                .iter()
+                .filter(|(_, v)| **v == diff_vector)
+                .map(|(k, v)| *k)
+                .sorted()
+                .collect::<Vec<_>>();
+            let mut tries = Vec::new();
+            for (i, swap1) in diff_vectors.iter().enumerate() {
+                for swap2 in diff_vectors.iter().skip(i + 1) {
+                    tries.push((swap1, swap2));
+                }
+            }
+            for (i, (swap1, swap2)) in tries.iter().enumerate() {
+                let mut sw = swaps.clone();
+                sw.push(build_swapped_pair(swap1));
+                sw.push(build_swapped_pair(swap2));
+
+                progress!(format!(
+                    " => ({i:>5}/{:>5}) :: {}-{}-{}-{}",
+                    tries.len(),
+                    wire_name(&swap1.0),
+                    wire_name(&swap1.1),
+                    wire_name(&swap2.0),
+                    wire_name(&swap2.1),
+                ));
+                let result_vector = Adder::new(sw.clone()).affect_bits(true);
+                if result_vector.iter().all(|b| !*b) {
+                    dbg!(sw);
+                    panic!();
+                }
+            }
+            return None;
+        }
         let input_bits = *INPUT_BITS.get().unwrap();
         let diff_vectors: &HashMap<(Wire, Wire), Vec<usize>> = DIFF_MAP.get().unwrap();
         let relevants = WIRE_NAMES
@@ -538,7 +574,7 @@ impl Puzzle {
         // let wrong_vector = adder.wrong_bits();
         // let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         let (down_tree, up_tree) = adder.wire_trees();
-        if level == 1 {
+        if false && level == 1 {
             let (down_tree, up_tree) = adder.wire_trees();
             for (i, pick1) in relevants.iter().enumerate() {
                 let pick1_cond = adder
@@ -558,7 +594,7 @@ impl Puzzle {
                     }
                 }
             }
-        } else if level == 2 {
+        } else if false && level == 2 {
             let (down_tree, up_tree) = adder.wire_trees();
             for (i, pick1) in relevants.iter().enumerate() {
                 let pick1_cond = adder
