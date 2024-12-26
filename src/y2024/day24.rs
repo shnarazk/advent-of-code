@@ -30,7 +30,7 @@ use {
     },
 };
 
-const PERSISTENT_STORAGE: &'static str = "misc/2024/day23-diff-table.json";
+const PERSISTENT_STORAGE: &'static str = "misc/2024/day24-diff-table.json";
 
 /// convert a `usize` to its binary representation
 fn int_to_bit_vector(mut n: usize, l: usize) -> Vec<bool> {
@@ -418,7 +418,7 @@ impl Puzzle {
                         panic!("Can't read {PERSISTENT_STORAGE}");
                     };
                     println!(
-                        "{}# read intermediate data on {}{}",
+                        "{}# reading intermediate data on {}{}",
                         color::MAGENTA,
                         PERSISTENT_STORAGE,
                         color::RESET,
@@ -444,7 +444,7 @@ impl Puzzle {
             }
             return;
         }
-        println!("{}# build diff table{}", color::MAGENTA, color::RESET,);
+        println!("{}# building diff table{}...", color::MAGENTA, color::RESET,);
         let mut memo: HashMap<(Wire, Wire), Vec<usize>> = HashMap::new();
         let input_bits = *INPUT_BITS.get().unwrap();
         let relevants = WIRE_NAMES
@@ -520,14 +520,16 @@ impl Puzzle {
         // memo: &mut HashMap<Vec<(GateSpec, GateSpec)>, usize>,
     ) -> Option<Vec<(GateSpec, GateSpec)>> {
         if level == 2 {
+            return None;
             let diff_vectors: Vec<(Wire, Wire)> = DIFF_MAP
                 .get()
                 .unwrap()
                 .iter()
-                .filter(|(_, v)| **v == diff_vector)
+                .filter(|(_, v)| v.iter().sum::<usize>() == 2 && (v[5] == 1 || v[20] == 1))
                 .map(|(k, v)| *k)
                 .sorted()
                 .collect::<Vec<_>>();
+            dbg!(diff_vectors.len());
             let mut tries = Vec::new();
             for (i, swap1) in diff_vectors.iter().enumerate() {
                 for swap2 in diff_vectors.iter().skip(i + 1) {
@@ -574,51 +576,9 @@ impl Puzzle {
         // let wrong_vector = adder.wrong_bits();
         // let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         let (down_tree, up_tree) = adder.wire_trees();
-        if false && level == 1 {
-            let (down_tree, up_tree) = adder.wire_trees();
-            for (i, pick1) in relevants.iter().enumerate() {
-                let pick1_cond = adder
-                    .wire_affects(&down_tree, **pick1)
-                    .contains(&bit_to_wire(5, 'z'));
-                for pick2 in relevants.iter() {
-                    let pick2_cond = adder
-                        .wire_affects(&up_tree, **pick2)
-                        .iter()
-                        .any(|w| *w == bit_to_wire(5, 'x') || *w == bit_to_wire(5, 'y'));
-                    if pick1_cond && pick2_cond && pick1 != pick2 {
-                        if pick1 < pick2 {
-                            to_search.push((**pick1, **pick2));
-                        } else {
-                            to_search.push((**pick2, **pick1));
-                        }
-                    }
-                }
-            }
-        } else if false && level == 2 {
-            let (down_tree, up_tree) = adder.wire_trees();
-            for (i, pick1) in relevants.iter().enumerate() {
-                let pick1_cond = adder
-                    .wire_affects(&down_tree, **pick1)
-                    .contains(&bit_to_wire(20, 'z'));
-                for pick2 in relevants.iter() {
-                    let pick2_cond = adder
-                        .wire_affects(&up_tree, **pick2)
-                        .iter()
-                        .any(|w| *w == bit_to_wire(20, 'x') || *w == bit_to_wire(20, 'y'));
-                    if pick1_cond && pick2_cond && pick1 != pick2 {
-                        if pick1 < pick2 {
-                            to_search.push((**pick1, **pick2));
-                        } else {
-                            to_search.push((**pick2, **pick1));
-                        }
-                    }
-                }
-            }
-        } else {
-            for (i, pick1) in relevants.iter().enumerate() {
-                for pick2 in relevants.iter().skip(i + 1) {
-                    to_search.push((**pick1, **pick2));
-                }
+        for (i, pick1) in relevants.iter().enumerate() {
+            for pick2 in relevants.iter().skip(i + 1) {
+                to_search.push((**pick1, **pick2));
             }
         }
         let mut a = (0, 0, 0);
@@ -648,15 +608,11 @@ impl Puzzle {
                 .iter()
                 .map(|b| *b as usize)
                 .collect::<Vec<_>>();
-            let merged = result_vector
-                .iter()
-                .enumerate()
-                .map(|(i, b)| *b as usize + diff_vector[i])
-                .collect::<Vec<_>>();
-            let affects = result_vector.iter().filter(|b| **b).count();
-            if affects < level {
+            let num_affects = result_vector.iter().filter(|b| **b).count();
+            if num_affects < level {
                 if level == 4 && !result_vector[9] {
-                    println!("{i:>5}:{}", fmt(&result_vector));
+                    assert_eq!(num_affects, 3);
+                    println!("L4 | {i:>5}:{}", fmt(&result_vector));
                     if let Some(ret) = self.search(
                         level - 1,
                         sw,
@@ -666,7 +622,7 @@ impl Puzzle {
                             .collect::<Vec<_>>(),
                     ) {}
                 } else if level == 3 && !result_vector[37] {
-                    println!("{i:>5}:{}", fmt(&result_vector));
+                    println!("L3 | {i:>5}:{}", fmt(&result_vector));
                     if let Some(ret) = self.search(
                         level - 1,
                         sw,
@@ -676,7 +632,7 @@ impl Puzzle {
                             .collect::<Vec<_>>(),
                     ) {}
                 } else if level == 2 && !result_vector[20] {
-                    println!("{i:>5}:{}", fmt(&result_vector));
+                    println!("L2 | {i:>5}:{}", fmt(&result_vector));
                     if let Some(ret) = self.search(
                         level - 1,
                         sw,
@@ -698,7 +654,7 @@ impl Puzzle {
                         .collect::<Vec<_>>(),
                 ) {}
                 a.1 += 1;
-            } else if level == 1 && affects == 0 {
+            } else if level == 1 && num_affects == 0 {
                 println!("{i:>5}:{}", fmt(&result_vector));
                 panic!();
             }
@@ -846,7 +802,6 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|b| *b as usize)
             .collect::<Vec<_>>();
-        dbg!(fmt_(&init_vector));
         if let Some(vec) = self.search(4, Vec::new(), init_vector) {
             vec.iter()
                 .flat_map(|(gs1, gs2)| vec![wire_name(&gs1.3), wire_name(&gs2.3)])
