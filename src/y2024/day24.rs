@@ -40,6 +40,18 @@ fn int_to_bit_vector(mut n: usize, l: usize) -> Vec<bool> {
     bit_vector
 }
 
+fn fmt(v: &[bool]) -> String {
+    format!(
+        "{}|{}|0({})",
+        v.len(),
+        v.iter()
+            .rev()
+            .map(|b| if *b { 'x' } else { '.' })
+            .collect::<String>(),
+        v.iter().filter(|b| **b).count(),
+    )
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 enum Gate {
     #[default]
@@ -177,6 +189,82 @@ impl Adder {
             .min()
             .unwrap()
     }
+    fn wrong_bits(&self) -> Vec<bool> {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let ret = (0..=input_bits)
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|bit1| {
+                let target_value1 = 1_usize << (*bit1).min(input_bits - 1);
+                (0..input_bits)
+                    .map(|bit2| {
+                        let x = target_value1;
+                        let y = 1_usize << bit2;
+                        let ans_bit = int_to_bit_vector(x + y, input_bits + 1);
+                        let (_, v) = self.add(x, y);
+
+                        v.get(*bit1).map_or(true, |b| *b != ans_bit[*bit1])
+                    })
+                    .any(|b| b)
+            })
+            .collect::<Vec<_>>();
+        ret.iter()
+            .fold((Vec::new(), false), |(mut acc, pre), b| match (pre, *b) {
+                (false, b) => {
+                    acc.push(b);
+                    (acc, b)
+                }
+                (true, false) => {
+                    acc.push(false);
+                    (acc, false)
+                }
+                (true, true) => {
+                    acc.push(false);
+                    (acc, true)
+                }
+            })
+            .0
+    }
+    fn affect_bits(&self, origin: &Adder) -> Vec<bool> {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let ret = (0..=input_bits)
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|bit1| {
+                let target_value1 = 1_usize << (*bit1).min(input_bits - 1);
+                (0..input_bits)
+                    .map(|bit2| {
+                        let target_value2 = 1_usize << bit2;
+                        [[0, 0], [0, 1], [1, 0], [0, 0]]
+                            .iter()
+                            .fold(false, |acc, pattern| {
+                                let x = target_value1 * pattern[0];
+                                let y = target_value2 * pattern[1];
+                                let base = origin.add(x, y).1;
+                                let v = self.add(x, y).1;
+                                acc || v.get(*bit1).map_or(true, |b| *b != base[*bit1])
+                            })
+                    })
+                    .any(|b| b)
+            })
+            .collect::<Vec<_>>();
+        ret.iter()
+            .fold((Vec::new(), false), |(mut acc, pre), b| match (pre, *b) {
+                (false, b) => {
+                    acc.push(b);
+                    (acc, b)
+                }
+                (true, false) => {
+                    acc.push(false);
+                    (acc, false)
+                }
+                (true, true) => {
+                    acc.push(false);
+                    (acc, true)
+                }
+            })
+            .0
+    }
     /// return `(down_tree, up_tree)`
     fn wire_trees(&self) -> (HashMap<Wire, HashSet<Wire>>, HashMap<Wire, HashSet<Wire>>) {
         let base_links = BASE_LINK.get().unwrap();
@@ -271,34 +359,46 @@ impl Puzzle {
         let mut to_search: Vec<(Wire, Wire)> = vec![];
         let num_lifts: usize = 0;
         let adder = Adder::new(swaps.clone());
+        let wrong_vector = adder.wrong_bits();
+        let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
         dbg!(relevants.len());
         let (down_tree, up_tree) = adder.wire_trees();
         for (i, pick1) in relevants.iter().enumerate() {
-            let pick1_level = adder
+            let _pick1_level = adder
                 .wire_affects(&down_tree, **pick1)
                 .contains(&bit_to_wire(level, 'z'));
             for pick2 in relevants.iter().skip(i + 1) {
-                let pick2_level = adder
+                let _pick2_level = adder
                     .wire_affects(&down_tree, **pick2)
                     .contains(&bit_to_wire(level, 'z'));
-                if pick1_level || pick2_level {
+                /* if pick1_level || pick2_level */
+                {
                     to_search.push((**pick1, **pick2));
                 }
             }
         }
-        let mut a = (0, 0);
+        let mut a = (0, 0, 0);
         for (i, case) in to_search.iter().enumerate() {
             // println!("{}-{}", wire_name(pick1), wire_name(pick2));
-            progress!(format!(
-                "{:>10} level:{level:>2}({i:>5}/{:>5}) lift:{num_lifts:>5}:: {}-{}",
-                memo.len(),
-                to_search.len(),
-                wire_name(&case.0),
-                wire_name(&case.1)
-            ));
+            // progress!(format!(
+            //     "{:>10} level:{level:>2}({i:>5}/{:>5}) lift:{num_lifts:>5}:: {}-{}",
+            //     memo.len(),
+            //     to_search.len(),
+            //     wire_name(&case.0),
+            //     wire_name(&case.1)
+            // ));
             let mut sw = swaps.clone();
             sw.push(build_swapped_pair(case));
             assert!(sw.len() <= 4);
+            let result_vector = Adder::new(sw.clone()).affect_bits(&adder);
+            let affects = result_vector.iter().filter(|b| **b).count();
+            if 0 < affects {
+                a.2 += 1;
+                println!("{i:>5}:{}", fmt(&result_vector));
+            } else {
+                a.1 += 1;
+            }
+            /*
             let bit = if let Some(b) = memo.get(&sw) {
                 *b
             } else {
@@ -311,6 +411,7 @@ impl Puzzle {
             } else {
                 a.0 += 1;
             }
+            */
             // if bit == input_bits + 1 {
             //     assert_eq!(sw.len(), 4);
             //     println!("{sw:?}");
@@ -324,7 +425,7 @@ impl Puzzle {
             //     return Some(ret);
             // }
         }
-        dbg!(level, a);
+        dbg!(a);
         None
     }
 }
@@ -429,9 +530,6 @@ impl AdventOfCode for Puzzle {
         Adder::new(Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let adder = Adder::new(vec![]);
-        // dbg!(adder.wrong_bit());
-        // "".to_string()
         let mut memo: HashMap<Vec<(GateSpec, GateSpec)>, usize> = HashMap::new();
         if let Some(vec) = self.search(0, Vec::new(), &mut memo) {
             vec.iter()
