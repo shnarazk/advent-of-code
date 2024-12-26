@@ -789,7 +789,69 @@ impl AdventOfCode for Puzzle {
         Adder::new(Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let wire_names = WIRE_NAMES.get().unwrap();
         let adder = Adder::new(Vec::new());
+        let (d_tree, u_tree) = adder.wire_trees();
+        for index in 0..(input_bits + 1) {
+            let inputs = adder.wire_affects(&u_tree, bit_to_wire(index, 'z'));
+            let xs = inputs
+                .iter()
+                .filter(|w| w.0 == 'x')
+                .sorted()
+                .cloned()
+                .collect::<Vec<_>>();
+            let xs_required = (0..=index).map(|i| bit_to_wire(i, 'x')).collect::<Vec<_>>();
+            let xs_missing = xs_required
+                .iter()
+                .filter(|w| !xs.contains(w))
+                .cloned()
+                .collect::<Vec<_>>();
+            if !xs_missing.is_empty() {
+                println!(
+                    "x{}: {:?}",
+                    index,
+                    xs_missing.iter().map(wire_name).collect::<Vec<_>>()
+                );
+                for w in wire_names.iter() {
+                    let inputs = adder.wire_affects(&u_tree, *w);
+                    let x = inputs
+                        .iter()
+                        .filter(|w| w.0 == 'x')
+                        .sorted()
+                        .cloned()
+                        .collect::<Vec<_>>();
+                    if xs_missing.iter().all(|w| x.contains(w))
+                        && x.iter().all(|w| xs_required.contains(w))
+                    {
+                        println!(
+                            " found {}: {:?}",
+                            wire_name(w),
+                            x.iter().map(wire_name).collect::<Vec<_>>()
+                        );
+                    }
+                }
+            }
+            let ys = inputs
+                .iter()
+                .filter(|w| w.0 == 'y')
+                .sorted()
+                .cloned()
+                .collect::<Vec<_>>();
+            let ys_required = (0..=index)
+                .map(|i| bit_to_wire(i, 'y'))
+                .filter(|w| !ys.contains(w))
+                .collect::<Vec<_>>();
+            if !ys_required.is_empty() {
+                println!(
+                    "y{}: {:?}",
+                    index,
+                    ys_required.iter().map(wire_name).collect::<Vec<_>>()
+                );
+            }
+        }
+
+        return "".to_string();
         if BASE_OUTPUT.get().is_none() {
             let hash = adder.all_outputs();
             let input_bits = *INPUT_BITS.get().unwrap();
