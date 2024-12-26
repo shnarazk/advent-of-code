@@ -92,19 +92,15 @@ impl Adder {
         values: &mut FxHashMap<Wire, bool>,
         (g, arg1, arg2, output): &(Gate, Wire, Wire, Wire),
     ) -> Option<Wire> {
-        let Some(&b1) = values.get(arg1) else {
-            return None;
-        };
-        let Some(&b2) = values.get(arg2) else {
-            return None;
-        };
+        let b1 = *values.get(arg1)?;
+        let b2 = *values.get(arg2)?;
         let unassigned = values.get(output).is_none();
         match g {
             Gate::And => values.insert(*output, b1 & b2),
             Gate::Or => values.insert(*output, b1 | b2),
             Gate::Xor => values.insert(*output, b1 ^ b2),
         };
-        unassigned.then(|| *output)
+        unassigned.then_some(*output)
     }
     fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
         let input_bits = *INPUT_BITS.get().unwrap();
@@ -128,13 +124,13 @@ impl Adder {
         while propagated {
             propagated = false;
             for gate in self.overrides.iter() {
-                if self.evaluate(&mut values, &gate).is_some() {
+                if self.evaluate(&mut values, gate).is_some() {
                     propagated = true;
                     continue;
                 }
             }
             for gate in base_config.iter() {
-                if self.evaluate(&mut values, &gate).is_some() {
+                if self.evaluate(&mut values, gate).is_some() {
                     propagated = true;
                 }
             }
@@ -216,13 +212,9 @@ fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
 pub struct Puzzle {
     input_wire: Vec<(Wire, bool)>,
     wire: HashSet<Wire>,
-    link: Vec<(Gate, Wire, Wire, Wire)>,
-    value: FxHashMap<Wire, bool>,
     wire_downward: HashMap<Wire, HashSet<Wire>>,
     wire_upward: HashMap<Wire, HashSet<Wire>>,
-    /// most least bit affected by wire
     wire_level: HashMap<Wire, usize>,
-    input_bits: usize,
 }
 
 impl Puzzle {
@@ -233,10 +225,11 @@ impl Puzzle {
         swapped: Vec<(Wire, Wire)>,
         memo: &mut HashMap<(usize, Vec<(Wire, Wire)>), bool>,
     ) -> Option<Vec<(Wire, Wire)>> {
+        let input_bits = *INPUT_BITS.get().unwrap();
         if let Some(b) = memo.get(&(level, swapped.clone())) {
             return if *b { Some(swapped) } else { None };
         }
-        if level == self.input_bits {
+        if level == input_bits {
             /*
             if swapped.len() == 8 && self.final_check(self.input_bits) {
                 println!(
@@ -261,12 +254,7 @@ impl Puzzle {
             .wire
             .iter()
             .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
-            .filter(|wire| {
-                !swapped
-                    .iter()
-                    .find(|(w1, w2)| w1 == *wire || w2 == *wire)
-                    .is_some()
-            })
+            .filter(|wire| !swapped.iter().any(|(w1, w2)| w1 == *wire || w2 == *wire))
             // .filter(|wire| *self.wire_level.get(wire).unwrap() <= level + 1)
             .sorted()
             .collect::<Vec<_>>();
@@ -299,7 +287,7 @@ impl Puzzle {
             ));
             let mut swapps: Vec<(GateSpec, GateSpec)> =
                 swapped.iter().map(build_swapped_pair).collect::<Vec<_>>();
-            swapps.push(build_swapped_pair(&case));
+            swapps.push(build_swapped_pair(case));
             let checker = Adder::new(swapps);
 
             if let Some(bit) = checker.wrong_bit() {
@@ -571,13 +559,13 @@ fn parse_setting(s: &mut &str) -> PResult<(Wire, bool)> {
         .parse_next(s)
 }
 
-fn parse_connection(s: &mut &str) -> PResult<(Gate, Wire, Wire, Wire)> {
+fn parse_connection(s: &mut &str) -> PResult<GateSpec> {
     seq!(parse_wire, _: " ", parse_gate, _: " ", parse_wire, _: " -> ", parse_wire)
         .map(|(in1, g, in2, out)| (g, in1, in2, out))
         .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<(Vec<(Wire, bool)>, Vec<(Gate, Wire, Wire, Wire)>)> {
+fn parse(s: &mut &str) -> PResult<(Vec<(Wire, bool)>, Vec<GateSpec>)> {
     seq!(
         separated(1.., parse_setting, newline),
         _: (newline, newline),
@@ -593,15 +581,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let (wires, links) = parse(&mut input.as_str())?;
         self.input_wire = wires;
-        self.link = links;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        for (w, b) in self.input_wire.iter() {
-            self.value.insert(*w, *b);
-            self.wire.insert(*w);
-        }
-        for (g, i1, i2, o) in self.link.iter() {
+        for (g, i1, i2, o) in links.iter() {
             self.wire.insert(*i1);
             self.wire.insert(*i2);
             self.wire.insert(*o);
@@ -610,17 +590,23 @@ impl AdventOfCode for Puzzle {
             self.wire_upward.entry(*o).or_default().insert(*i1);
             self.wire_upward.entry(*o).or_default().insert(*i2);
         }
+        if BASE_LINK.get().is_none() {
+            BASE_LINK.set(links).unwrap();
+        }
+        Self::parsed()
+    }
+    fn end_of_data(&mut self) {
+        for (w, b) in self.input_wire.iter() {
+            self.wire.insert(*w);
+        }
         let input_bits = self.input_wire.iter().filter(|(g, _)| g.0 == 'x').count();
         if INPUT_BITS.get().is_none() {
             INPUT_BITS.set(input_bits).unwrap();
         }
-        if BASE_LINK.get().is_none() {
-            BASE_LINK.set(self.link.clone()).unwrap();
-        }
     }
     fn serialize(&self) -> Option<String> {
-        let mut data = self
-            .link
+        let links = BASE_LINK.get().unwrap();
+        let mut data = links
             .iter()
             .enumerate()
             .map(|(i, (g, i1, i2, o))| (wire_name(o), vec![wire_name(i1), wire_name(i2)]))
