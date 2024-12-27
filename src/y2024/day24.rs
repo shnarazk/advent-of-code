@@ -15,6 +15,7 @@ use {
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::{Deserialize, Serialize},
     std::{
+        cmp::Reverse,
         collections::{BinaryHeap, HashMap, HashSet},
         fmt,
         fs::File,
@@ -158,7 +159,6 @@ impl Adder {
             .map(|(_, b)| b)
             .cloned()
             .collect::<Vec<bool>>();
-        dbg!(fmt(&v));
         let val = v
             .iter()
             .rev()
@@ -167,15 +167,30 @@ impl Adder {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Serialize)]
 pub struct Descriptor {
+    num_broken: usize,
     overrides: Vec<(GateSpec, GateSpec)>,
-    width: usize,
+}
+
+impl Ord for Descriptor {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.num_broken.cmp(&other.num_broken)
+    }
+}
+
+impl PartialOrd for Descriptor {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl Descriptor {
-    fn new(width: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
-        Descriptor { overrides, width }
+    fn new(num_broken: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+        Descriptor {
+            num_broken,
+            overrides,
+        }
     }
     fn add_swaps(&self, w1: Wire, w2: Wire) -> Option<Descriptor> {
         if w1 == w2 {
@@ -190,28 +205,57 @@ impl Descriptor {
         }
         swaps.push(build_swapped_pair(&(w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(self.width, swaps))
+        Some(Descriptor::new(self.num_broken, swaps))
     }
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
     }
-    fn check_correctness(&self) -> bool {
+    fn check_correctness(&self) -> Option<Vec<usize>> {
         let adder = self.build_adder();
         let input_bits = *INPUT_BITS.get().unwrap();
-        (0..input_bits).collect::<Vec<_>>().par_iter().all(|&bit1| {
-            let x = 1_usize << bit1;
-            (bit1..input_bits).all(|bit2| {
-                let y = 1_usize << bit2;
-                /* println!(
-                    "{} + {} =/{} {}",
-                    x % (1 << self.width),
-                    y % (1 << self.width),
-                    self.width,
-                    self.add(x, y).0 % (1 << self.width)
-                ); */
-                adder.add(x, y).0 % (1 << self.width) == (x + y) % (1 << self.width)
+        let ret = (0..input_bits)
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|&bit1| {
+                let x = 1_usize << bit1;
+                (bit1..input_bits)
+                    .map(|bit2| {
+                        let y = 1_usize << bit2;
+                        /* println!(
+                            "{} + {} =/{} {}",
+                            x % (1 << self.width),
+                            y % (1 << self.width),
+                            self.width,
+                            self.add(x, y).0 % (1 << self.width)
+                        ); */
+                        let added = adder.add(x, y).0;
+                        (0..input_bits)
+                            .map(|i| {
+                                let bit_mask = 1_usize << i;
+                                added % bit_mask != (x + y) % bit_mask
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                    .fold(vec![0; input_bits + 1], |acc, v| {
+                        acc.iter()
+                            .zip(v.iter())
+                            .map(|(a, b)| a + (*b as usize))
+                            .collect::<Vec<_>>()
+                    })
             })
-        })
+            .collect::<Vec<_>>()
+            .iter()
+            .fold(vec![0; input_bits + 1], |acc, v| {
+                acc.iter()
+                    .zip(v.iter())
+                    .map(|(a, b)| a + *b)
+                    .collect::<Vec<_>>()
+            });
+        if ret.iter().all(|n| *n == 0) {
+            None
+        } else {
+            Some(ret)
+        }
     }
     /// return `(down_tree, up_tree)`
     fn wire_trees(&self) -> (HashMap<Wire, HashSet<Wire>>, HashMap<Wire, HashSet<Wire>>) {
@@ -409,31 +453,42 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let input_bits = *INPUT_BITS.get().unwrap();
         let wire_names = WIRE_NAMES.get().unwrap();
-        let mut to_visit: BinaryHeap<Descriptor> = BinaryHeap::new();
-        let adder = Descriptor::new(0, Vec::new());
-        to_visit.push(adder);
+        let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
+
+        let mut init = Descriptor::new(0, Vec::new());
+        if let Some(brokens) = init.check_correctness() {
+            dbg!(fmt_(&brokens));
+            init.num_broken = dbg!(brokens.iter().filter(|n| 0 < **n).count());
+            to_visit.push(Reverse(init));
+        }
         let mut visited: HashSet<Descriptor> = HashSet::new();
-        let mut best_level: usize = 0;
-        while let Some(mut adder) = to_visit.pop() {
+        let mut best: usize = 99;
+        while let Some(Reverse(mut adder)) = to_visit.pop() {
             if visited.contains(&adder) {
                 continue;
             }
             visited.insert(adder.clone());
-            progress!(format!(
-                "{:>2} {:>2}-{}/{:>9}",
-                best_level,
-                adder.width,
-                adder.overrides.len(),
-                to_visit.len()
-            ));
-            best_level = best_level.max(adder.width);
-            if 40 < adder.width {
+            best = best.min(adder.num_broken);
+            if adder.num_broken < 2 {
                 panic!();
             }
             let (d_tree, u_tree) = adder.wire_trees();
-            for index in adder.width..(input_bits + 1) {
-                adder.width = index;
-                if !adder.check_correctness() && adder.overrides.len() < 4 {
+            if let Some(brokens) = adder.check_correctness() {
+                let num_broken = brokens.iter().filter(|n| 0 < **n).count();
+                // if adder.num_broken < num_broken {
+                //     continue;
+                // }
+                adder.num_broken = num_broken;
+                progress!(format!(
+                    "best:{:>2} broken:{:>2} #swaps:{} |{:>9}| {}",
+                    best,
+                    adder.num_broken,
+                    adder.overrides.len(),
+                    visited.len(),
+                    fmt(&brokens.iter().map(|n| 0 < *n).collect::<Vec<_>>())
+                ));
+                let index = brokens.iter().position(|n| 0 < *n).unwrap();
+                if adder.overrides.len() < 4 {
                     let input_tree = adder.wire_affects(&u_tree, ord_to_wire(index, b'z'));
                     let inputs = input_tree
                         .iter()
@@ -449,7 +504,6 @@ impl AdventOfCode for Puzzle {
                         .filter(|w| !inputs.contains(w))
                         .cloned()
                         .collect::<Vec<_>>();
-                    adder.width -= 1;
                     // println!(
                     //     "bit{}: {:?}",
                     //     index,
@@ -480,7 +534,15 @@ impl AdventOfCode for Puzzle {
                         .cloned()
                         .collect::<Vec<_>>();
                     for upper in related_wires.iter() {
+                        let from_upper = adder.wire_affects(&d_tree, *upper);
                         for lower in related_wires.iter() {
+                            if from_upper.contains(lower) {
+                                continue;
+                            }
+                            let another_tree = adder.wire_affects(&d_tree, *lower);
+                            if another_tree.contains(upper) {
+                                continue;
+                            }
                             if let Some(new_adder) = adder.add_swaps(*upper, *lower) {
                                 if visited.contains(&new_adder) {
                                     continue;
@@ -490,11 +552,10 @@ impl AdventOfCode for Puzzle {
                                 //     wire_to_string(upper),
                                 //     wire_to_string(lower)
                                 // );
-                                to_visit.push(new_adder);
+                                to_visit.push(Reverse(new_adder));
                             }
                         }
                     }
-                    break;
                 }
             }
         }
