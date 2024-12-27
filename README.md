@@ -8,15 +8,16 @@
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
 
-## Ongoing 2024
+## 2024 completed
 
 * [calendar](https://adventofcode.com/2024)
 
 - day14: define meaningful images mathematically
 - day17: this is a search problem that we can solve by Dijkstra nicely
 - day18: bisect
+- day24: a variant of search problem with a shallow but vast search space requiring mathematical intuition or analysis
 
-![](https://github.com/user-attachments/assets/0f35d486-3b28-4fde-b75b-4d7b3851540d)
+![](https://github.com/user-attachments/assets/7a38eead-1109-43a9-89b5-385af0ad757d)
 
 ## 2023 completed
 
