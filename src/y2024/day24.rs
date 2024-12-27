@@ -12,7 +12,7 @@ use {
     },
     itertools::Itertools,
     rayon::{prelude::*, slice::Windows},
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::{Deserialize, Serialize},
     std::{
         collections::{BinaryHeap, HashMap, HashSet},
@@ -101,17 +101,83 @@ fn wire_to_string((a, b, c): &Wire) -> String {
     format!("{a}{b}{c}")
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Adder {
+    mapper: FxHashMap<(Gate, Wire, Wire), Wire>,
+}
+
+impl Adder {
+    fn new(overrides: &[(GateSpec, GateSpec)]) -> Adder {
+        let mut mapper: FxHashMap<(Gate, Wire, Wire), Wire> =
+            BASE_PROPAGATION_TABLE.get().unwrap().clone();
+        for (g1, g2) in overrides.iter() {
+            mapper.insert((g1.0, g1.1, g1.2), g1.3);
+            mapper.insert((g2.0, g2.1, g2.2), g2.3);
+        }
+        Adder { mapper }
+    }
+    fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let bit1 = int_to_bit_vector(arg1, input_bits);
+        let bit2 = int_to_bit_vector(arg2, input_bits);
+        let mut values: FxHashMap<Wire, bool> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+
+        for i in 0..input_bits {
+            let wire1 = ord_to_wire(i, b'x');
+            values.insert(wire1, bit1.get(i) == Some(&true));
+            let wire2 = ord_to_wire(i, b'y');
+            values.insert(wire2, bit2.get(i) == Some(&true));
+        }
+
+        let mut propagated = true;
+        // let base_config = BASE_LINK.get().unwrap();
+        while propagated {
+            propagated = false;
+            for (gate, output) in self.mapper.iter() {
+                match (values.get(&gate.1), values.get(&gate.2), values.get(output)) {
+                    (Some(b1), Some(b2), None) => {
+                        values.insert(
+                            *output,
+                            match gate.0 {
+                                Gate::And => b1 & b2,
+                                Gate::Or => b1 | b2,
+                                Gate::Xor => b1 ^ b2,
+                            },
+                        );
+                        propagated = true;
+                    }
+                    _ => (),
+                }
+            }
+        }
+        let v = values
+            .iter()
+            .filter(|(wire, _)| wire.0 == b'z') // && wire_to_ord(wire) <= self.width)
+            .sorted()
+            .map(|(_, b)| b)
+            .cloned()
+            .collect::<Vec<bool>>();
+        dbg!(fmt(&v));
+        let val = v
+            .iter()
+            .rev()
+            .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
+        (val, v)
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Descriptor {
     overrides: Vec<(GateSpec, GateSpec)>,
     width: usize,
 }
 
-impl Adder {
-    fn new(width: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Adder {
-        Adder { overrides, width }
+impl Descriptor {
+    fn new(width: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+        Descriptor { overrides, width }
     }
-    fn add_swaps(&self, w1: Wire, w2: Wire) -> Option<Adder> {
+    fn add_swaps(&self, w1: Wire, w2: Wire) -> Option<Descriptor> {
         if w1 == w2 {
             return None;
         }
@@ -124,142 +190,13 @@ impl Adder {
         }
         swaps.push(build_swapped_pair(&(w1, w2)));
         swaps.sort_unstable();
-        Some(Adder::new(self.width, swaps))
+        Some(Descriptor::new(self.width, swaps))
     }
-
-    fn evaluate(
-        &self,
-        values: &mut FxHashMap<Wire, bool>,
-        (g, arg1, arg2, output): &(Gate, Wire, Wire, Wire),
-    ) -> Option<Wire> {
-        let b1 = *values.get(arg1)?;
-        let b2 = *values.get(arg2)?;
-        let unassigned = values.get(output).is_none();
-        match g {
-            Gate::And => values.insert(*output, b1 & b2),
-            Gate::Or => values.insert(*output, b1 | b2),
-            Gate::Xor => values.insert(*output, b1 ^ b2),
-        };
-        unassigned.then_some(*output)
-    }
-    fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
-        let input_bits = *INPUT_BITS.get().unwrap();
-        let bit1 = int_to_bit_vector(arg1, input_bits);
-        let bit2 = int_to_bit_vector(arg2, input_bits);
-
-        let mut values: FxHashMap<Wire, bool> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-
-        for i in 0..input_bits {
-            let wire1 = ord_to_wire(i, b'x');
-            values.insert(wire1, bit1.get(i) == Some(&true));
-            let wire2 = ord_to_wire(i, b'y');
-            values.insert(wire2, bit2.get(i) == Some(&true));
-        }
-
-        let mut propagated = true;
-        let base_config = BASE_LINK.get().unwrap();
-        'next: while propagated {
-            propagated = false;
-            for gates in self.overrides.iter() {
-                if self.evaluate(&mut values, &gates.0).is_some() {
-                    propagated = true;
-                    continue 'next;
-                }
-                if self.evaluate(&mut values, &gates.1).is_some() {
-                    propagated = true;
-                    continue 'next;
-                }
-            }
-            for gate in base_config.iter() {
-                if self.evaluate(&mut values, gate).is_some() {
-                    propagated = true;
-                    continue 'next;
-                }
-            }
-        }
-        let v = values
-            .iter()
-            .filter(|(wire, _)| wire.0 == b'z' && wire_to_ord(wire) <= self.width)
-            .sorted()
-            .map(|(_, b)| b)
-            .cloned()
-            .collect::<Vec<bool>>();
-        let val = v
-            .iter()
-            .rev()
-            .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
-        (val, v)
-    }
-    fn wrong_bit(&self) -> usize {
-        let input_bits = *INPUT_BITS.get().unwrap();
-        (0..=input_bits - 1)
-            .collect::<Vec<_>>()
-            .par_iter()
-            .map(|bit1| {
-                let target_value1 = 1_usize << bit1;
-                ((bit1 + 1)..=input_bits)
-                    .map(|bit2| {
-                        let x = target_value1;
-                        let y = 1_usize << bit2;
-                        let (n, v) = self.add(x, y);
-                        let ans_bit = int_to_bit_vector(x + y, input_bits + 1);
-                        let mut target: Option<usize> = None;
-                        for (i, b) in v.iter().enumerate() {
-                            if *b != *ans_bit.get(i).unwrap_or(&false) {
-                                target = target.map_or(Some(i), |b| Some(b.min(i)));
-                                break;
-                            }
-                        }
-                        if v.len() != input_bits + 1 {
-                            let l = v.len() + 1;
-                            target = target.map_or(Some(l), |b| Some(b.min(l)));
-                        }
-                        target.map_or(input_bits + 1, |n| n)
-                    })
-                    .min()
-                    .unwrap()
-            })
-            .min()
-            .unwrap()
-    }
-    fn wrong_bits(&self) -> Vec<bool> {
-        let input_bits = *INPUT_BITS.get().unwrap();
-        let ret = (0..=input_bits)
-            .collect::<Vec<_>>()
-            .par_iter()
-            .map(|bit1| {
-                let target_value1 = 1_usize << (*bit1).min(input_bits - 1);
-                (0..input_bits)
-                    .map(|bit2| {
-                        let x = target_value1;
-                        let y = 1_usize << bit2;
-                        let ans_bit = int_to_bit_vector(x + y, input_bits + 1);
-                        let (_, v) = self.add(x, y);
-
-                        v.get(*bit1).map_or(true, |b| *b != ans_bit[*bit1])
-                    })
-                    .any(|b| b)
-            })
-            .collect::<Vec<_>>();
-        ret.iter()
-            .fold((Vec::new(), false), |(mut acc, pre), b| match (pre, *b) {
-                (false, b) => {
-                    acc.push(b);
-                    (acc, b)
-                }
-                (true, false) => {
-                    acc.push(false);
-                    (acc, false)
-                }
-                (true, true) => {
-                    acc.push(false);
-                    (acc, true)
-                }
-            })
-            .0
+    fn build_adder(&self) -> Adder {
+        Adder::new(&self.overrides)
     }
     fn check_correctness(&self) -> bool {
+        let adder = self.build_adder();
         let input_bits = *INPUT_BITS.get().unwrap();
         (0..input_bits).collect::<Vec<_>>().par_iter().all(|&bit1| {
             let x = 1_usize << bit1;
@@ -272,106 +209,25 @@ impl Adder {
                     self.width,
                     self.add(x, y).0 % (1 << self.width)
                 ); */
-                self.add(x, y).0 % (1 << self.width) == (x + y) % (1 << self.width)
+                adder.add(x, y).0 % (1 << self.width) == (x + y) % (1 << self.width)
             })
         })
     }
-
-    fn affect_bits(&self, final_check: bool) -> Vec<bool> {
-        let base = BASE_OUTPUT.get().unwrap();
-        let input_bits = *INPUT_BITS.get().unwrap();
-        let ret = (0..input_bits)
-            .collect::<Vec<_>>()
-            .par_iter()
-            .map(|bit1| {
-                let target_value1 = 1_usize << *bit1;
-                (bit1 + 1..input_bits)
-                    .map(|bit2| {
-                        let target_value2 = 1_usize << bit2;
-                        let x = target_value1;
-                        let y = target_value2;
-                        let base = if final_check {
-                            x + y
-                        } else {
-                            *base.get(&(x, y)).unwrap()
-                        };
-                        let v = self.add(x, y).1;
-                        (0..input_bits + 1)
-                            .map(|index| {
-                                v.get(index)
-                                    .map_or(true, |b| *b != (0 != base & (1 << index)))
-                            })
-                            .collect::<Vec<_>>()
-                    })
-                    .map(|f| f)
-                    .fold(vec![false; input_bits + 1], |mut acc, v| {
-                        for (i, p) in acc.iter_mut().enumerate() {
-                            *p |= v[i];
-                        }
-                        acc
-                    })
-            })
-            .collect::<Vec<_>>()
-            .iter()
-            .fold(vec![false; input_bits + 1], |mut acc, v| {
-                for (i, p) in acc.iter_mut().enumerate() {
-                    *p |= v[i];
-                }
-                acc
-            });
-        ret.iter()
-            .fold((Vec::new(), false), |(mut acc, pre), b| match (pre, *b) {
-                (false, b) => {
-                    acc.push(b);
-                    (acc, b)
-                }
-                (true, false) => {
-                    acc.push(false);
-                    (acc, false)
-                }
-                (true, true) => {
-                    acc.push(false);
-                    (acc, true)
-                }
-            })
-            .0
-    }
-    fn all_outputs(&self) -> HashMap<(usize, usize), usize> {
-        let mut hash: HashMap<(usize, usize), usize> = HashMap::new();
-        let input_bits = *INPUT_BITS.get().unwrap();
-        (0..input_bits).for_each(|bit1| {
-            let target_value1 = 1_usize << bit1;
-            (bit1 + 1..input_bits).for_each(|bit2| {
-                let target_value2 = 1_usize << bit2;
-                let x = target_value1;
-                let y = target_value2;
-                hash.insert((x, y), self.add(x, y).0);
-            })
-        });
-        hash
-    }
     /// return `(down_tree, up_tree)`
     fn wire_trees(&self) -> (HashMap<Wire, HashSet<Wire>>, HashMap<Wire, HashSet<Wire>>) {
+        let adder = self.build_adder();
         let base_links = BASE_LINK.get().unwrap();
         let mut wires: HashSet<Wire> = HashSet::new();
         let mut down_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
         let mut up_tree: HashMap<Wire, HashSet<Wire>> = HashMap::new();
-        for entry in base_links.iter() {
-            let (g, i1, i2, o) =
-                if let Some(ps) = self.overrides.iter().find(|(g, _)| entry.3 == g.3) {
-                    (entry.0, entry.1, entry.2, ps.1 .3)
-                } else if let Some(ps) = self.overrides.iter().find(|(_, g)| entry.3 == g.3) {
-                    (entry.0, entry.1, entry.2, ps.0 .3)
-                } else {
-                    *entry
-                };
-            wires.insert(i1);
-            wires.insert(i2);
-            wires.insert(o);
-            down_tree.entry(i1).or_default().insert(o);
-            down_tree.entry(i2).or_default().insert(o);
-            up_tree.entry(o).or_default().insert(i1);
-            up_tree.entry(o).or_default().insert(i2);
+        for ((g, i1, i2), o) in adder.mapper.iter() {
+            wires.insert(*i1);
+            wires.insert(*i2);
+            wires.insert(*o);
+            down_tree.entry(*i1).or_default().insert(*o);
+            down_tree.entry(*i2).or_default().insert(*o);
+            up_tree.entry(*o).or_default().insert(*i1);
+            up_tree.entry(*o).or_default().insert(*i2);
         }
         (down_tree, up_tree)
     }
@@ -415,6 +271,7 @@ static BASE_LINK: OnceLock<Vec<(Gate, Wire, Wire, Wire)>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
 static BASE_OUTPUT: OnceLock<HashMap<(usize, usize), usize>> = OnceLock::new();
 static DIFF_MAP: OnceLock<HashMap<(Wire, Wire), Vec<usize>>> = OnceLock::new();
+static BASE_PROPAGATION_TABLE: OnceLock<FxHashMap<(Gate, Wire, Wire), Wire>> = OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
     assert!(![b'x', b'y'].contains(&pick1.0));
@@ -437,119 +294,6 @@ fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     input_wire: Vec<(Wire, bool)>,
-}
-
-impl Puzzle {
-    fn build_search_table(&mut self) {
-        #[derive(Debug, Default, Eq, PartialEq, Deserialize, Serialize)]
-        struct Record {
-            key: (String, String),
-            value: Vec<usize>,
-        }
-        let path = std::path::Path::new(PERSISTENT_STORAGE);
-        if path.exists() {
-            match File::open(&path) {
-                Ok(mut file) => {
-                    let mut contents = String::new();
-                    file.read_to_string(&mut contents).expect("read error");
-                    let Ok(vec) = serde_json::from_str::<Vec<Record>>(&contents) else {
-                        panic!("Can't read {PERSISTENT_STORAGE}");
-                    };
-                    println!(
-                        "{}# reading intermediate data on {}{}",
-                        color::MAGENTA,
-                        PERSISTENT_STORAGE,
-                        color::RESET,
-                    );
-                    if DIFF_MAP.get().is_none() {
-                        let hash = vec
-                            .iter()
-                            .map(|r| {
-                                let w1 = r.key.0.chars().map(|c| c as u8).collect::<Vec<u8>>();
-                                let w2 = r.key.1.chars().map(|c| c as u8).collect::<Vec<u8>>();
-                                let v = r.value.iter().map(|n| *n).collect::<Vec<usize>>();
-                                (((w1[0], w1[1], w1[2]), (w2[0], w2[1], w2[2])), v)
-                            })
-                            .filter(|((w1, w2), _)| {
-                                assert!(w1 < w2);
-                                true
-                            })
-                            .collect::<HashMap<(Wire, Wire), Vec<usize>>>();
-                        DIFF_MAP.set(hash).unwrap();
-                    }
-                }
-                Err(e) => panic!("Can't read {PERSISTENT_STORAGE}: {e:?}"),
-            }
-            return;
-        }
-        println!("{}# building diff table{}...", color::MAGENTA, color::RESET,);
-        let mut memo: HashMap<(Wire, Wire), Vec<usize>> = HashMap::new();
-        let input_bits = *INPUT_BITS.get().unwrap();
-        let relevants = WIRE_NAMES
-            .get()
-            .unwrap()
-            .iter()
-            .filter(|wire| wire.0 != b'x' && wire.0 != b'y')
-            .sorted()
-            .collect::<Vec<_>>();
-        let mut to_search: Vec<(Wire, Wire)> = vec![];
-        let num_lifts: usize = 0;
-        let adder = Adder::new(0, Vec::new());
-        let wrong_vector = adder.wrong_bits();
-        let num_wrong_bits = wrong_vector.iter().filter(|b| **b).count();
-        dbg!(relevants.len());
-        let (down_tree, up_tree) = adder.wire_trees();
-        for (i, pick1) in relevants.iter().enumerate() {
-            for pick2 in relevants.iter().skip(i + 1) {
-                to_search.push((**pick1, **pick2));
-            }
-        }
-        for (i, case) in to_search.iter().enumerate() {
-            progress!(format!(
-                "{i:>6}/{:>6} :: {}-{}",
-                to_search.len(),
-                wire_to_string(&case.0),
-                wire_to_string(&case.1)
-            ));
-            let gates = build_swapped_pair(case);
-            let sw = vec![gates];
-            let result_vector = Adder::new(0, sw.clone()).affect_bits(false);
-            memo.insert(
-                (case.0, case.1),
-                result_vector
-                    .iter()
-                    .map(|b| *b as usize)
-                    .collect::<Vec<_>>(),
-            );
-        }
-
-        let vec = memo
-            .iter()
-            .map(|(k, v)| Record {
-                key: (wire_to_string(&k.0), wire_to_string(&k.1)),
-                value: v.iter().map(|b| *b as usize).collect::<Vec<_>>(),
-            })
-            .collect::<Vec<_>>();
-        if let Some(json) = serde_json::to_string(&vec).ok() {
-            let dir = std::path::Path::new(PERSISTENT_STORAGE).parent().unwrap();
-            if !dir.exists() {
-                std::fs::create_dir_all(dir)
-                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
-            }
-            let mut file = File::create(PERSISTENT_STORAGE)
-                .unwrap_or_else(|_| panic!("fail to open {PERSISTENT_STORAGE}"));
-            writeln!(file, "{}", json).expect("fail to save");
-            println!(
-                "{}# write JSON data on {}{}",
-                color::MAGENTA,
-                PERSISTENT_STORAGE,
-                color::RESET,
-            );
-        }
-        if DIFF_MAP.get().is_none() {
-            DIFF_MAP.set(memo).unwrap();
-        }
-    }
 }
 
 fn parse_wire(s: &mut &str) -> PResult<Wire> {
@@ -600,11 +344,16 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let (wires, links) = parse(&mut input.as_str())?;
         self.input_wire = wires;
+        let mut propagation_table: FxHashMap<(Gate, Wire, Wire), Wire> = FxHashMap::default();
         let mut wire_names: HashSet<Wire> = HashSet::new();
         for (g, i1, i2, o) in links.iter() {
             wire_names.insert(*i1);
             wire_names.insert(*i2);
             wire_names.insert(*o);
+            propagation_table.insert((*g, *i1, *i2), *o);
+        }
+        if BASE_PROPAGATION_TABLE.get().is_none() {
+            BASE_PROPAGATION_TABLE.set(propagation_table).unwrap();
         }
         if WIRE_NAMES.get().is_none() {
             WIRE_NAMES.set(wire_names).unwrap();
@@ -654,15 +403,16 @@ impl AdventOfCode for Puzzle {
             .rev()
             .map(|(_, b)| b)
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
-        Adder::new(0, Vec::new()).add(x, y).0
+        dbg!(x, y);
+        Adder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
         let input_bits = *INPUT_BITS.get().unwrap();
         let wire_names = WIRE_NAMES.get().unwrap();
-        let mut to_visit: BinaryHeap<Adder> = BinaryHeap::new();
-        let adder = Adder::new(0, Vec::new());
+        let mut to_visit: BinaryHeap<Descriptor> = BinaryHeap::new();
+        let adder = Descriptor::new(0, Vec::new());
         to_visit.push(adder);
-        let mut visited: HashSet<Adder> = HashSet::new();
+        let mut visited: HashSet<Descriptor> = HashSet::new();
         let mut best_level: usize = 0;
         while let Some(mut adder) = to_visit.pop() {
             if visited.contains(&adder) {
@@ -723,7 +473,8 @@ impl AdventOfCode for Puzzle {
                                 .filter(|w| w.0 == b'z')
                                 .min()
                                 .map_or(usize::MAX, |w| wire_to_ord(w));
-                            index <= w_level && w_inputs.iter().all(|w| required.contains(w))
+                            // index <= w_level && w_inputs.iter().all(|w| required.contains(w))
+                            w_level <= index
                             // && index <= wire_to_ord(w_outputs.first().unwrap())
                         })
                         .cloned()
