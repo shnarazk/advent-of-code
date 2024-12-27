@@ -78,16 +78,16 @@ enum Gate {
     Xor,
 }
 
-type Wire = (char, char, char);
+type Wire = (u8, u8, u8);
 
 type GateSpec = (Gate, Wire, Wire, Wire);
 
 /// convert from 'ord', 0 to 43, to wire
-fn ord_to_wire(n: usize, prefix: char) -> Wire {
+fn ord_to_wire(n: usize, prefix: u8) -> Wire {
     (
         prefix,
-        (b'0' + ((n / 10) as u8)) as char,
-        (b'0' + ((n % 10) as u8)) as char,
+        (b'0' + ((n / 10) as u8)) as u8,
+        (b'0' + ((n % 10) as u8)) as u8,
     )
 }
 
@@ -151,9 +151,9 @@ impl Adder {
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
 
         for i in 0..input_bits {
-            let wire1 = ord_to_wire(i, 'x');
+            let wire1 = ord_to_wire(i, b'x');
             values.insert(wire1, bit1.get(i) == Some(&true));
-            let wire2 = ord_to_wire(i, 'y');
+            let wire2 = ord_to_wire(i, b'y');
             values.insert(wire2, bit2.get(i) == Some(&true));
         }
 
@@ -180,7 +180,7 @@ impl Adder {
         }
         let v = values
             .iter()
-            .filter(|(wire, _)| wire.0 == 'z' && wire_to_ord(wire) <= self.width)
+            .filter(|(wire, _)| wire.0 == b'z' && wire_to_ord(wire) <= self.width)
             .sorted()
             .map(|(_, b)| b)
             .cloned()
@@ -391,7 +391,7 @@ impl Adder {
                     }
                 } else {
                     assert!(
-                        ['x', 'y', 'z'].contains(&w.0),
+                        [b'x', b'y', b'z'].contains(&w.0),
                         "unlinked wire: {} from {}",
                         wire_to_string(&w),
                         wire_to_string(&wire),
@@ -417,8 +417,8 @@ static BASE_OUTPUT: OnceLock<HashMap<(usize, usize), usize>> = OnceLock::new();
 static DIFF_MAP: OnceLock<HashMap<(Wire, Wire), Vec<usize>>> = OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
-    assert!(!['x', 'y'].contains(&pick1.0));
-    assert!(!['x', 'y'].contains(&pick2.0));
+    assert!(![b'x', b'y'].contains(&pick1.0));
+    assert!(![b'x', b'y'].contains(&pick2.0));
 
     let (p1, p2) = if pick1 < pick2 {
         (pick1, pick2)
@@ -465,8 +465,8 @@ impl Puzzle {
                         let hash = vec
                             .iter()
                             .map(|r| {
-                                let w1 = r.key.0.chars().collect::<Vec<char>>();
-                                let w2 = r.key.1.chars().collect::<Vec<char>>();
+                                let w1 = r.key.0.chars().map(|c| c as u8).collect::<Vec<u8>>();
+                                let w2 = r.key.1.chars().map(|c| c as u8).collect::<Vec<u8>>();
                                 let v = r.value.iter().map(|n| *n).collect::<Vec<usize>>();
                                 (((w1[0], w1[1], w1[2]), (w2[0], w2[1], w2[2])), v)
                             })
@@ -489,7 +489,7 @@ impl Puzzle {
             .get()
             .unwrap()
             .iter()
-            .filter(|wire| wire.0 != 'x' && wire.0 != 'y')
+            .filter(|wire| wire.0 != b'x' && wire.0 != b'y')
             .sorted()
             .collect::<Vec<_>>();
         let mut to_search: Vec<(Wire, Wire)> = vec![];
@@ -558,6 +558,7 @@ fn parse_wire(s: &mut &str) -> PResult<Wire> {
         one_of(('a'..='z', '0'..='9')),
         one_of(('a'..='z', '0'..='9')),
     )
+        .map(|(a, b, c)| (a as u8, b as u8, c as u8))
         .parse_next(s)
 }
 fn parse_gate(s: &mut &str) -> PResult<Gate> {
@@ -614,7 +615,7 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn end_of_data(&mut self) {
-        let input_bits = self.input_wire.iter().filter(|(g, _)| g.0 == 'x').count();
+        let input_bits = self.input_wire.iter().filter(|(g, _)| g.0 == b'x').count();
         if INPUT_BITS.get().is_none() {
             INPUT_BITS.set(input_bits).unwrap();
         }
@@ -640,7 +641,7 @@ impl AdventOfCode for Puzzle {
         let x = self
             .input_wire
             .iter()
-            .filter(|(wire, _)| wire.0 == 'x')
+            .filter(|(wire, _)| wire.0 == b'x')
             .sorted()
             .rev()
             .map(|(_, b)| b)
@@ -648,7 +649,7 @@ impl AdventOfCode for Puzzle {
         let y = self
             .input_wire
             .iter()
-            .filter(|(wire, _)| wire.0 == 'y')
+            .filter(|(wire, _)| wire.0 == b'y')
             .sorted()
             .rev()
             .map(|(_, b)| b)
@@ -683,15 +684,15 @@ impl AdventOfCode for Puzzle {
             for index in adder.width..(input_bits + 1) {
                 adder.width = index;
                 if !adder.check_correctness() && adder.overrides.len() < 4 {
-                    let input_tree = adder.wire_affects(&u_tree, ord_to_wire(index, 'z'));
+                    let input_tree = adder.wire_affects(&u_tree, ord_to_wire(index, b'z'));
                     let inputs = input_tree
                         .iter()
-                        .filter(|w| w.0 == 'x' || w.0 == 'y')
+                        .filter(|w| w.0 == b'x' || w.0 == b'y')
                         .sorted()
                         .cloned()
                         .collect::<Vec<_>>();
                     let required = (0..=index)
-                        .flat_map(|i| [ord_to_wire(i, 'x'), ord_to_wire(i, 'y')])
+                        .flat_map(|i| [ord_to_wire(i, b'x'), ord_to_wire(i, b'y')])
                         .collect::<Vec<_>>();
                     let missing = required
                         .iter()
@@ -707,19 +708,19 @@ impl AdventOfCode for Puzzle {
                     // find upper-side nodes (wires)
                     let related_wires = wire_names
                         .iter()
-                        .filter(|w| !['x', 'y'].contains(&w.0))
+                        .filter(|w| ![b'x', b'y'].contains(&w.0))
                         .filter(|&w| {
                             let w_input_tree = adder.wire_affects(&u_tree, *w);
                             let w_inputs = w_input_tree
                                 .iter()
-                                .filter(|w| ['x', 'y'].contains(&w.0))
+                                .filter(|w| [b'x', b'y'].contains(&w.0))
                                 .sorted()
                                 .cloned()
                                 .collect::<Vec<_>>();
                             let w_output_tree = adder.wire_affects(&d_tree, *w);
                             let w_level = w_output_tree
                                 .iter()
-                                .filter(|w| w.0 == 'z')
+                                .filter(|w| w.0 == b'z')
                                 .min()
                                 .map_or(usize::MAX, |w| wire_to_ord(w));
                             index <= w_level && w_inputs.iter().all(|w| required.contains(w))
