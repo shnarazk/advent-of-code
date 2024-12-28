@@ -298,7 +298,7 @@ impl Descriptor {
                         to_visit.push(*w);
                     }
                 } else {
-                    assert!(
+                    debug_assert!(
                         [b'x', b'y', b'z'].contains(&w.0),
                         "unlinked wire: {} from {}",
                         wire_to_string(&w),
@@ -449,6 +449,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let wire_names = WIRE_NAMES.get().unwrap();
+        let wires = wire_names.iter().cloned().collect::<Vec<_>>();
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
 
         let mut init = Descriptor::new(0, Vec::new());
@@ -483,12 +484,13 @@ impl AdventOfCode for Puzzle {
                 ));
                 let index = brokens.iter().position(|b| *b).unwrap();
                 if desc.overrides.len() < 4 {
+                    let cones = build_cones(&d_tree, &wires);
                     let related_wires = wire_names
                         .iter()
                         .filter(|w| ![b'x', b'y'].contains(&w.0))
                         .filter(|&w| {
-                            let w_output_tree = desc.wire_affects(&d_tree, *w);
-                            let w_level = w_output_tree
+                            let cone = cones.get(w).unwrap();
+                            let w_level = cone
                                 .iter()
                                 .filter(|w| w.0 == b'z')
                                 .min()
@@ -497,7 +499,6 @@ impl AdventOfCode for Puzzle {
                         })
                         .cloned()
                         .collect::<Vec<_>>();
-                    let cones = build_cones(&d_tree, &related_wires);
                     for wire1 in related_wires.iter() {
                         let cone1 = cones.get(wire1).unwrap();
                         for wire2 in related_wires.iter() {
@@ -536,35 +537,28 @@ fn build_cones(
     tree: &FxHashMap<Wire, FxHashSet<Wire>>,
     wires: &[Wire],
 ) -> FxHashMap<Wire, FxHashSet<Wire>> {
-    fn aux(
-        result: &mut FxHashMap<Wire, FxHashSet<Wire>>,
-        tree: &FxHashMap<Wire, FxHashSet<Wire>>,
-        wire: &Wire,
-    ) -> FxHashSet<Wire> {
-        if let Some(h) = result.get(wire) {
-            return h.clone();
-        } else {
-            if wire.0 == b'z' {
-                let h = HashSet::<Wire, BuildHasherDefault<FxHasher>>::default();
-                result.insert(*wire, h.clone());
-                return h;
-            }
+    fn aux<'a, 'b>(
+        result: &'b mut FxHashMap<Wire, FxHashSet<Wire>>,
+        tree: &'a FxHashMap<Wire, FxHashSet<Wire>>,
+        wire: &'a Wire,
+    ) -> &'b FxHashSet<Wire>
+    where
+        'b: 'a,
+    {
+        if !result.contains_key(wire) {
+            let mut entry: FxHashSet<Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+            entry.insert(wire.clone());
             if let Some(childs) = tree.get(wire) {
-                let cs = childs.clone();
-                let mut entry: FxHashSet<Wire> =
-                    HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-                for w in cs.iter() {
+                for w in childs.into_iter() {
                     entry.insert(*w);
                     for s in aux(result, tree, w) {
-                        entry.insert(s);
+                        entry.insert(s.clone());
                     }
                 }
-                result.insert(*wire, entry.clone());
-                entry
-            } else {
-                unimplemented!()
             }
+            result.insert(wire.clone(), entry);
         }
+        result.get(wire).unwrap()
     }
     wires.iter().fold(
         HashMap::<Wire, FxHashSet<Wire>, BuildHasherDefault<FxHasher>>::default(),
