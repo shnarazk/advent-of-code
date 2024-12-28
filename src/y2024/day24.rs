@@ -499,13 +499,11 @@ impl AdventOfCode for Puzzle {
                         .collect::<Vec<_>>();
                     let cones = build_cones(&d_tree, &related_wires);
                     for wire1 in related_wires.iter() {
-                        // let from_upper = desc.wire_affects(&d_tree, *wire1);
                         let cone1 = cones.get(wire1).unwrap();
                         for wire2 in related_wires.iter() {
                             if cone1.contains(wire2) {
                                 continue;
                             }
-                            // let another_tree = desc.wire_affects(&d_tree, *wire2);
                             let cone2 = cones.get(wire2).unwrap();
                             if cone2.contains(wire1) {
                                 continue;
@@ -572,7 +570,7 @@ fn build_cones(
         HashMap::<Wire, FxHashSet<Wire>, BuildHasherDefault<FxHasher>>::default(),
         |mut acc, wire| {
             let _ = aux(&mut acc, tree, wire);
-            assert!(acc.contains_key(wire));
+            debug_assert!(acc.contains_key(wire));
             acc
         },
     )
