@@ -203,7 +203,7 @@ impl Descriptor {
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&bit1| {
-                let x = 1_usize << bit1 * ((bit1 < input_bits) as usize);
+                let x = (1_usize << bit1) * ((bit1 < input_bits) as usize);
                 (bit1..input_bits)
                     .map(|bit2| {
                         let y = 1_usize << bit2;
@@ -243,7 +243,7 @@ impl Descriptor {
                     .iter()
                     .filter(|w| [b'x', b'y'].contains(&w.0))
                     .collect::<Vec<_>>();
-                inputs.iter().any(|w| n < wire_to_ord(*w)) || inputs.len() != 2 * (n + 1)
+                inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * (n + 1)
             })
             .collect::<Vec<bool>>();
 
@@ -251,12 +251,11 @@ impl Descriptor {
             let n = input_bits;
             let wire = ord_to_wire(n, b'z');
             let up_tree = self.wire_affects(&up_trees, wire);
-            let inputs = up_tree
+            let input_len = up_tree
                 .iter()
                 .filter(|w| [b'x', b'y'].contains(&w.0))
-                .cloned()
-                .collect::<Vec<_>>();
-            inputs.len() != 2 * n
+                .count();
+            input_len != 2 * n
         };
         ret.push(carry_bit);
         if ret.iter().all(|b| !b) {
@@ -507,7 +506,6 @@ impl AdventOfCode for Puzzle {
                                 .map_or(usize::MAX, wire_to_ord);
                             w_level <= index
                         })
-                        .cloned()
                         .collect::<Vec<_>>();
                     for wire1 in related_wires.iter() {
                         let cone1 = cones.get(wire1).unwrap();
@@ -519,7 +517,7 @@ impl AdventOfCode for Puzzle {
                             if cone2.contains(wire1) {
                                 continue;
                             }
-                            if let Some(new_adder) = desc.add_swaps(*wire1, *wire2) {
+                            if let Some(new_adder) = desc.add_swaps(**wire1, **wire2) {
                                 if visited.contains(&new_adder) {
                                     continue;
                                 }
@@ -557,16 +555,16 @@ fn build_cones(
     {
         if !result.contains_key(wire) {
             let mut entry: FxHashSet<Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-            entry.insert(wire.clone());
+            entry.insert(*wire);
             if let Some(childs) = tree.get(wire) {
-                for w in childs.into_iter() {
+                for w in childs.iter() {
                     entry.insert(*w);
                     for s in aux(result, tree, w) {
-                        entry.insert(s.clone());
+                        entry.insert(*s);
                     }
                 }
             }
-            result.insert(wire.clone(), entry);
+            result.insert(*wire, entry);
         }
         result.get(wire).unwrap()
     }
