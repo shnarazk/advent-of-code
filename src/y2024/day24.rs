@@ -265,6 +265,30 @@ impl Descriptor {
             Some(ret1)
         }
     }
+    fn check_connectivity(&self) -> Option<Vec<bool>> {
+        let input_bits = *INPUT_BITS.get().unwrap();
+        let (_, up_trees) = self.wire_trees();
+        let ret = (0..=input_bits)
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|&n| {
+                let wire = ord_to_wire(n, b'z');
+                let up_tree = self.wire_affects(&up_trees, wire);
+                let inputs = up_tree
+                    .iter()
+                    .filter(|w| [b'x', b'y'].contains(&w.0))
+                    .cloned()
+                    .collect::<Vec<_>>();
+                // println!("{n}:{}", inputs.iter().map(|w| wire_to_string(w)).join(","));
+                inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * n
+            })
+            .collect::<Vec<bool>>();
+        if ret.iter().all(|b| !b) {
+            None
+        } else {
+            Some(ret)
+        }
+    }
     /// return `(down_tree, up_tree)`
     fn wire_trees(
         &self,
@@ -329,12 +353,14 @@ fn build_swapped_pair((pick1, pick2): &(Wire, Wire)) -> (GateSpec, GateSpec) {
     assert!(![b'x', b'y'].contains(&pick1.0));
     assert!(![b'x', b'y'].contains(&pick2.0));
 
+    let p1 = pick1.min(pick2);
+    let p2 = pick1.max(pick2);
     let specs = BASE_LINK.get().unwrap();
-    let spec1: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == *pick1).unwrap();
-    let spec2: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == *pick2).unwrap();
+    let spec1: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == *p1).unwrap();
+    let spec2: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == *p2).unwrap();
     (
-        (spec1.0, spec1.1, spec1.2, *pick2),
-        (spec2.0, spec2.1, spec2.2, *pick1),
+        (spec1.0, spec1.1, spec1.2, *p2),
+        (spec2.0, spec2.1, spec2.2, *p1),
     )
 }
 
@@ -457,7 +483,9 @@ impl AdventOfCode for Puzzle {
 
         let mut init = Descriptor::new(0, Vec::new());
         if let Some(brokens) = init.check_correctness() {
-            init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
+            dbg!(fmt(&init.check_connectivity().unwrap()));
+            // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
+            init.num_broken = brokens.len() + 1;
             to_visit.push(Reverse(init));
         }
         let mut visited: HashSet<Descriptor> = HashSet::new();
@@ -468,12 +496,17 @@ impl AdventOfCode for Puzzle {
             }
             visited.insert(desc.clone());
             best = best.min(desc.num_broken);
-            let (d_tree, _) = desc.wire_trees();
-            if let Some(brokens) = desc.check_correctness() {
+            let (d_tree, _u_tree) = desc.wire_trees();
+            if let Some(brokens) = /* desc.check_connectivity().map_or_else(
+                    || desc.check_correctness(),
+                    |v| Some(v.iter().map(|n| *n as usize).collect::<Vec<_>>()),
+                )*/
+                desc.check_correctness()
+            {
                 let num_broken = brokens.iter().filter(|n| 0 < **n).count();
-                // if adder.num_broken < num_broken {
-                //     continue;
-                // }
+                if desc.num_broken < num_broken {
+                    continue;
+                }
                 desc.num_broken = num_broken;
                 progress!(format!(
                     "best:{:>2} broken:{:>2} #swaps:{} |{:>9}| {}",
@@ -498,9 +531,21 @@ impl AdventOfCode for Puzzle {
                             // index <= w_level && w_inputs.iter().all(|w| required.contains(w))
                             w_level <= index
                             // && index <= wire_to_ord(w_outputs.first().unwrap())
+                            // let tree = desc.wire_affects(&d_tree, *w);
+                            // tree
+                            //     .iter()
+                            //     .any(|i| [b'x', b'y'].contains(&i.0) && wire_to_ord(i) <= index)
                         })
                         .cloned()
                         .collect::<Vec<_>>();
+                    let _related_wires = {
+                        let x: HashSet<_, _> = desc.wire_affects(&d_tree, ord_to_wire(index, b'x'));
+                        let y: HashSet<_, _> = desc.wire_affects(&d_tree, ord_to_wire(index, b'y'));
+                        x.union(&y)
+                            .filter(|w| ![b'x', b'y'].contains(&w.0))
+                            .cloned()
+                            .collect::<Vec<_>>()
+                    };
                     for upper in related_wires.iter() {
                         let from_upper = desc.wire_affects(&d_tree, *upper);
                         for lower in related_wires.iter() {
