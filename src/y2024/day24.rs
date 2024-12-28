@@ -248,12 +248,13 @@ impl Descriptor {
                             .collect::<Vec<_>>()
                     })
             })
-            .fold(vec![0; input_bits], |acc, v| {
+            .fold(vec![0; input_bits + 1], |acc, v| {
                 acc.iter()
                     .zip(v.iter())
                     .map(|(a, b)| a + *b)
                     .collect::<Vec<_>>()
             });
+        assert_eq!(ret.len(), one_more.len());
         let ret1 = ret
             .iter()
             .zip(one_more.iter())
@@ -265,10 +266,13 @@ impl Descriptor {
             Some(ret1)
         }
     }
-    fn check_connectivity(&self) -> Option<Vec<bool>> {
+    /// return a vector of wrong structure bools
+    /// This measure doesn't return mono-decreasing values
+    /// So we can't use to cut branches. This is the final checker.
+    fn check_structure(&self) -> Option<Vec<bool>> {
         let input_bits = *INPUT_BITS.get().unwrap();
         let (_, up_trees) = self.wire_trees();
-        let ret = (0..=input_bits)
+        let mut ret = (0..input_bits)
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&n| {
@@ -280,9 +284,22 @@ impl Descriptor {
                     .cloned()
                     .collect::<Vec<_>>();
                 // println!("{n}:{}", inputs.iter().map(|w| wire_to_string(w)).join(","));
-                inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * n
+                inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * (n + 1)
             })
             .collect::<Vec<bool>>();
+
+        let carry_bit = {
+            let n = input_bits;
+            let wire = ord_to_wire(n, b'z');
+            let up_tree = self.wire_affects(&up_trees, wire);
+            let inputs = up_tree
+                .iter()
+                .filter(|w| [b'x', b'y'].contains(&w.0))
+                .cloned()
+                .collect::<Vec<_>>();
+            inputs.len() != 2 * n
+        };
+        ret.push(carry_bit);
         if ret.iter().all(|b| !b) {
             None
         } else {
@@ -483,7 +500,7 @@ impl AdventOfCode for Puzzle {
 
         let mut init = Descriptor::new(0, Vec::new());
         if let Some(brokens) = init.check_correctness() {
-            dbg!(fmt(&init.check_connectivity().unwrap()));
+            // dbg!(fmt(&init.check_connectivity().unwrap()));
             // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
             init.num_broken = brokens.len() + 1;
             to_visit.push(Reverse(init));
@@ -497,12 +514,7 @@ impl AdventOfCode for Puzzle {
             visited.insert(desc.clone());
             best = best.min(desc.num_broken);
             let (d_tree, _u_tree) = desc.wire_trees();
-            if let Some(brokens) = /* desc.check_connectivity().map_or_else(
-                    || desc.check_correctness(),
-                    |v| Some(v.iter().map(|n| *n as usize).collect::<Vec<_>>()),
-                )*/
-                desc.check_correctness()
-            {
+            if let Some(brokens) = desc.check_correctness() {
                 let num_broken = brokens.iter().filter(|n| 0 < **n).count();
                 if desc.num_broken < num_broken {
                     continue;
@@ -565,31 +577,16 @@ impl AdventOfCode for Puzzle {
                         }
                     }
                 }
-            } else {
-                let adder = desc.build_adder();
-                let x = 27339360157359;
-                let y = 34293989942303;
-                assert_eq!(adder.add(x, y).0, x + y);
-                if adder.add(x, y).0 == x + y
-                    && adder.add(y, x).0 == x + y
-                    && adder.add(x, 0).0 == x
-                    && adder.add(0, y).0 == y
-                {
-                    desc.num_broken = 0;
-                    visited.insert(desc.clone());
-                    println!();
-                    println!("found!");
-                    let ret = desc
-                        .overrides
-                        .iter()
-                        .flat_map(|pair| [pair.0 .3, pair.1 .3])
-                        .sorted()
-                        .map(|w| wire_to_string(&w))
-                        .join(",");
-                    println!("\n\n{ret}\n\n");
-                }
+            } else if desc.check_structure().is_none() {
+                return desc
+                    .overrides
+                    .iter()
+                    .flat_map(|pair| [pair.0 .3, pair.1 .3])
+                    .sorted()
+                    .map(|w| wire_to_string(&w))
+                    .join(",");
             }
         }
-        "".to_string()
+        unreachable!()
     }
 }
