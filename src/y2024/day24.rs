@@ -497,25 +497,20 @@ impl AdventOfCode for Puzzle {
                         })
                         .cloned()
                         .collect::<Vec<_>>();
-                    let _related_wires = {
-                        let x: HashSet<_, _> = desc.wire_affects(&d_tree, ord_to_wire(index, b'x'));
-                        let y: HashSet<_, _> = desc.wire_affects(&d_tree, ord_to_wire(index, b'y'));
-                        x.union(&y)
-                            .filter(|w| ![b'x', b'y'].contains(&w.0))
-                            .cloned()
-                            .collect::<Vec<_>>()
-                    };
-                    for upper in related_wires.iter() {
-                        let from_upper = desc.wire_affects(&d_tree, *upper);
-                        for lower in related_wires.iter() {
-                            if from_upper.contains(lower) {
+                    let cones = build_cones(&d_tree, &related_wires);
+                    for wire1 in related_wires.iter() {
+                        // let from_upper = desc.wire_affects(&d_tree, *wire1);
+                        let cone1 = cones.get(wire1).unwrap();
+                        for wire2 in related_wires.iter() {
+                            if cone1.contains(wire2) {
                                 continue;
                             }
-                            let another_tree = desc.wire_affects(&d_tree, *lower);
-                            if another_tree.contains(upper) {
+                            // let another_tree = desc.wire_affects(&d_tree, *wire2);
+                            let cone2 = cones.get(wire2).unwrap();
+                            if cone2.contains(wire1) {
                                 continue;
                             }
-                            if let Some(new_adder) = desc.add_swaps(*upper, *lower) {
+                            if let Some(new_adder) = desc.add_swaps(*wire1, *wire2) {
                                 if visited.contains(&new_adder) {
                                     continue;
                                 }
@@ -537,4 +532,48 @@ impl AdventOfCode for Puzzle {
         }
         unreachable!()
     }
+}
+
+fn build_cones(
+    tree: &FxHashMap<Wire, FxHashSet<Wire>>,
+    wires: &[Wire],
+) -> FxHashMap<Wire, FxHashSet<Wire>> {
+    fn aux(
+        result: &mut FxHashMap<Wire, FxHashSet<Wire>>,
+        tree: &FxHashMap<Wire, FxHashSet<Wire>>,
+        wire: &Wire,
+    ) -> FxHashSet<Wire> {
+        if let Some(h) = result.get(wire) {
+            return h.clone();
+        } else {
+            if wire.0 == b'z' {
+                let h = HashSet::<Wire, BuildHasherDefault<FxHasher>>::default();
+                result.insert(*wire, h.clone());
+                return h;
+            }
+            if let Some(childs) = tree.get(wire) {
+                let cs = childs.clone();
+                let mut entry: FxHashSet<Wire> =
+                    HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+                for w in cs.iter() {
+                    entry.insert(*w);
+                    for s in aux(result, tree, w) {
+                        entry.insert(s);
+                    }
+                }
+                result.insert(*wire, entry.clone());
+                entry
+            } else {
+                unimplemented!()
+            }
+        }
+    }
+    wires.iter().fold(
+        HashMap::<Wire, FxHashSet<Wire>, BuildHasherDefault<FxHasher>>::default(),
+        |mut acc, wire| {
+            let _ = aux(&mut acc, tree, wire);
+            assert!(acc.contains_key(wire));
+            acc
+        },
+    )
 }
