@@ -183,24 +183,23 @@ impl Descriptor {
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
     }
-    fn check_correctness(&self) -> Option<Vec<usize>> {
+    fn check_correctness(&self) -> Option<Vec<bool>> {
+        fn merge_or(acc: Vec<bool>, v: Vec<bool>) -> Vec<bool> {
+            acc.iter()
+                .zip(v.iter())
+                .map(|(a, b)| *a || *b)
+                .collect::<Vec<_>>()
+        }
         let adder = self.build_adder();
         let input_bits = *INPUT_BITS.get().unwrap();
-        let ret = (0..input_bits)
+        let ret = (0..=input_bits)
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&bit1| {
-                let x = 1_usize << bit1;
+                let x = 1_usize << bit1 * ((bit1 < input_bits) as usize);
                 (bit1..input_bits)
                     .map(|bit2| {
                         let y = 1_usize << bit2;
-                        /* println!(
-                            "{} + {} =/{} {}",
-                            x % (1 << self.width),
-                            y % (1 << self.width),
-                            self.width,
-                            self.add(x, y).0 % (1 << self.width)
-                        ); */
                         let added = adder.add(x, y).0;
                         (0..=input_bits)
                             .map(|i| {
@@ -209,61 +208,16 @@ impl Descriptor {
                             })
                             .collect::<Vec<_>>()
                     })
-                    .fold(vec![0; input_bits + 1], |acc, v| {
-                        acc.iter()
-                            .zip(v.iter())
-                            .map(|(a, b)| a + (*b as usize))
-                            .collect::<Vec<_>>()
-                    })
+                    .fold(vec![false; input_bits + 1], merge_or)
             })
             .collect::<Vec<_>>()
             .iter()
-            .fold(vec![0; input_bits + 1], |acc, v| {
-                acc.iter()
-                    .zip(v.iter())
-                    .map(|(a, b)| a + *b)
-                    .collect::<Vec<_>>()
-            });
-        let x = 27339360157359;
-        let y = 34293989942303;
-        let samples = [x, y, 0, 1];
-        let one_more = samples
-            .iter()
-            .map(|a| {
-                samples
-                    .iter()
-                    .map(|b| {
-                        let added = adder.add(*a, *b).0;
-                        (0..=input_bits)
-                            .map(|i| {
-                                let bit_mask = 1_usize << i;
-                                added % bit_mask != (a + b) % bit_mask
-                            })
-                            .collect::<Vec<_>>()
-                    })
-                    .fold(vec![0; input_bits + 1], |acc, v| {
-                        acc.iter()
-                            .zip(v.iter())
-                            .map(|(a, b)| a + (*b as usize))
-                            .collect::<Vec<_>>()
-                    })
-            })
-            .fold(vec![0; input_bits + 1], |acc, v| {
-                acc.iter()
-                    .zip(v.iter())
-                    .map(|(a, b)| a + *b)
-                    .collect::<Vec<_>>()
-            });
-        assert_eq!(ret.len(), one_more.len());
-        let ret1 = ret
-            .iter()
-            .zip(one_more.iter())
-            .map(|(a, b)| a + *b)
-            .collect::<Vec<_>>();
-        if ret1.iter().all(|n| *n == 0) {
+            .cloned()
+            .fold(vec![false; input_bits + 1], merge_or);
+        if ret.iter().all(|n| !*n) {
             None
         } else {
-            Some(ret1)
+            Some(ret)
         }
     }
     /// return a vector of wrong structure bools
@@ -283,7 +237,6 @@ impl Descriptor {
                     .filter(|w| [b'x', b'y'].contains(&w.0))
                     .cloned()
                     .collect::<Vec<_>>();
-                // println!("{n}:{}", inputs.iter().map(|w| wire_to_string(w)).join(","));
                 inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * (n + 1)
             })
             .collect::<Vec<bool>>();
@@ -515,7 +468,7 @@ impl AdventOfCode for Puzzle {
             best = best.min(desc.num_broken);
             let (d_tree, _u_tree) = desc.wire_trees();
             if let Some(brokens) = desc.check_correctness() {
-                let num_broken = brokens.iter().filter(|n| 0 < **n).count();
+                let num_broken = brokens.iter().filter(|n| **n).count();
                 if desc.num_broken < num_broken {
                     continue;
                 }
@@ -526,9 +479,9 @@ impl AdventOfCode for Puzzle {
                     desc.num_broken,
                     desc.overrides.len(),
                     visited.len(),
-                    fmt(&brokens.iter().map(|n| 0 < *n).collect::<Vec<_>>())
+                    fmt(&brokens)
                 ));
-                let index = brokens.iter().position(|n| 0 < *n).unwrap();
+                let index = brokens.iter().position(|b| *b).unwrap();
                 if desc.overrides.len() < 4 {
                     let related_wires = wire_names
                         .iter()
@@ -540,13 +493,7 @@ impl AdventOfCode for Puzzle {
                                 .filter(|w| w.0 == b'z')
                                 .min()
                                 .map_or(usize::MAX, wire_to_ord);
-                            // index <= w_level && w_inputs.iter().all(|w| required.contains(w))
                             w_level <= index
-                            // && index <= wire_to_ord(w_outputs.first().unwrap())
-                            // let tree = desc.wire_affects(&d_tree, *w);
-                            // tree
-                            //     .iter()
-                            //     .any(|i| [b'x', b'y'].contains(&i.0) && wire_to_ord(i) <= index)
                         })
                         .cloned()
                         .collect::<Vec<_>>();
@@ -578,6 +525,7 @@ impl AdventOfCode for Puzzle {
                     }
                 }
             } else if desc.check_structure().is_none() {
+                progress!("");
                 return desc
                     .overrides
                     .iter()
