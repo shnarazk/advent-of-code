@@ -59,7 +59,6 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .map(|l| l.iter().filter(|b| **b).count() - 1)
                     .collect::<Vec<_>>();
-                println!("{w:?}");
                 self.locks.push((r.size.0 as usize, w));
             } else if r
                 .iter()
@@ -71,19 +70,15 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .map(|l| l.iter().filter(|b| **b).count() - 1)
                     .collect::<Vec<_>>();
-                println!("{w:?}");
                 self.keys.push((r.size.0 as usize, w));
             }
         }
-        dbg!(&self.line.len());
-        dbg!(&self.locks.len());
-        dbg!(&self.keys.len());
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut count = 0;
         for (h1, r) in self.locks.iter() {
             for (h2, k) in self.keys.iter() {
-                assert_eq!(h1, h2);
+                debug_assert_eq!(h1, h2);
                 let h = h1 - 2;
                 if r.iter().enumerate().all(|(i, a)| *a + k[i] <= h) {
                     // println!("o h{h} {:?} - {:?}", r, k);
@@ -96,6 +91,6 @@ impl AdventOfCode for Puzzle {
         count
     }
     fn part2(&mut self) -> Self::Output2 {
-        "Congraturations".to_string()
+        "Congraturations!!".to_string()
     }
 }
