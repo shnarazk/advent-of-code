@@ -148,7 +148,7 @@ pub struct Descriptor {
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.num_broken * self.overrides.len()).cmp(&(other.num_broken * other.overrides.len()))
+        (self.num_broken + self.overrides.len()).cmp(&(other.num_broken + other.overrides.len()))
     }
 }
 
@@ -475,7 +475,7 @@ impl AdventOfCode for Puzzle {
                 }
                 desc.num_broken = num_broken;
                 progress!(format!(
-                    "best:{:>2} broken:{:>2} #swaps:{} |{:>9}| {}",
+                    "best:{:>2} broken:{:>2} #swaps:{} |{:>6}| {}",
                     best,
                     desc.num_broken,
                     desc.overrides.len(),
