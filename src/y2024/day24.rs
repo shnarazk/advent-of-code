@@ -144,11 +144,13 @@ impl Adder {
 pub struct Descriptor {
     num_broken: usize,
     overrides: Vec<(GateSpec, GateSpec)>,
+    structure: usize,
 }
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.num_broken + self.overrides.len()).cmp(&(other.num_broken + other.overrides.len()))
+        (self.num_broken + self.overrides.len() + self.structure)
+            .cmp(&(other.num_broken + other.overrides.len() + other.structure))
     }
 }
 
@@ -159,10 +161,15 @@ impl PartialOrd for Descriptor {
 }
 
 impl Descriptor {
-    fn new(num_broken: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+    fn new(
+        num_broken: usize,
+        structure: usize,
+        overrides: Vec<(GateSpec, GateSpec)>,
+    ) -> Descriptor {
         Descriptor {
             num_broken,
             overrides,
+            structure,
         }
     }
     fn add_swaps(&self, w1: Wire, w2: Wire) -> Option<Descriptor> {
@@ -178,7 +185,7 @@ impl Descriptor {
         }
         swaps.push(build_swapped_pair(&(w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(self.num_broken, swaps))
+        Some(Descriptor::new(self.num_broken, self.structure, swaps))
     }
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
@@ -192,7 +199,7 @@ impl Descriptor {
         }
         let adder = self.build_adder();
         let input_bits = *INPUT_BITS.get().unwrap();
-        let ret = (0..=input_bits)
+        let ret: Vec<bool> = (0..=input_bits)
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&bit1| {
@@ -230,14 +237,13 @@ impl Descriptor {
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&n| {
-                let wire = ord_to_wire(n, b'z');
-                let up_tree = self.wire_affects(&up_trees, wire);
-                let inputs = up_tree
+                let wire: Wire = ord_to_wire(n, b'z');
+                let up_tree: FxHashSet<Wire> = self.wire_affects(&up_trees, wire);
+                let inputs: Vec<&Wire> = up_tree
                     .iter()
                     .filter(|w| [b'x', b'y'].contains(&w.0))
-                    .cloned()
                     .collect::<Vec<_>>();
-                inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * (n + 1)
+                inputs.iter().any(|w| n < wire_to_ord(*w)) || inputs.len() != 2 * (n + 1)
             })
             .collect::<Vec<bool>>();
 
@@ -449,10 +455,11 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let wire_names = WIRE_NAMES.get().unwrap();
+        let input_bits = INPUT_BITS.get().unwrap();
         let wires = wire_names.iter().cloned().collect::<Vec<_>>();
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
 
-        let mut init = Descriptor::new(0, Vec::new());
+        let mut init = Descriptor::new(0, input_bits + 1, Vec::new());
         if let Some(brokens) = init.check_correctness() {
             // dbg!(fmt(&init.check_connectivity().unwrap()));
             // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
@@ -474,6 +481,9 @@ impl AdventOfCode for Puzzle {
                     continue;
                 }
                 desc.num_broken = num_broken;
+                desc.structure = desc
+                    .check_structure()
+                    .map_or(0, |v| v.iter().filter(|b| **b).count());
                 progress!(format!(
                     "best:{:>2} broken:{:>2} #swaps:{} |{:>6}| {}",
                     best,
