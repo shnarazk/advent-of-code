@@ -2,9 +2,15 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
+        parser::parse_usize,
     },
     std::collections::HashMap,
+    winnow::{
+        ascii::{newline, space1},
+        combinator::{alt, repeat, separated, seq},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -36,48 +42,59 @@ pub struct Puzzle {
     file_system: HashMap<String, Directory>,
 }
 
+fn parse_entry_name(s: &mut &str) -> PResult<String> {
+    repeat(1.., one_of(('a'..='z', 'A'..='Z', '0'..='9', '.'))).parse_next(s)
+}
+
+fn parse_ls_dir(s: &mut &str) -> PResult<Entry> {
+    ("dir ", parse_entry_name)
+        .map(|(_, path): (&str, String)| Entry::Dir(path))
+        .parse_next(s)
+}
+
+fn parse_ls_file(s: &mut &str) -> PResult<Entry> {
+    (parse_usize, space1, parse_entry_name)
+        .map(|(n, _, path): (usize, &str, String)| Entry::File(path, n))
+        .parse_next(s)
+}
+
+fn parse_ls_output(s: &mut &str) -> PResult<Vec<Entry>> {
+    separated(0.., alt((parse_ls_dir, parse_ls_file)), newline).parse_next(s)
+}
+
+fn parse_ls(s: &mut &str) -> PResult<Command> {
+    ("$ ls\n", parse_ls_output)
+        .map(|(_, b)| Command::Ls(b))
+        .parse_next(s)
+}
+
+fn parse_cd_to(s: &mut &str) -> PResult<Command> {
+    seq!("$ cd ", parse_entry_name)
+        .map(|(_, path)| Command::CdTo(path))
+        .parse_next(s)
+}
+
+fn parse_cd_up(s: &mut &str) -> PResult<Command> {
+    "$ cd ..".map(|_| Command::CdUp).parse_next(s)
+}
+
+fn parse_cd_root(s: &mut &str) -> PResult<Command> {
+    "$ cd /".map(|_| Command::CdRoot).parse_next(s)
+}
+
+fn parse_line(s: &mut &str) -> PResult<Command> {
+    alt((parse_ls, parse_cd_up, parse_cd_to, parse_cd_root)).parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<Command>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc(2022, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "$";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let ls_parser = regex!(r"^ ls\n((.|\n)+)\n$");
-        if let Some(segment) = ls_parser.captures(block) {
-            let dir_parser = regex!(r"^dir (.+)");
-            let file_parser = regex!(r"^(\d+) (.+)$");
-            let v = segment[1]
-                .split('\n')
-                .map(|line| {
-                    if let Some(seg) = dir_parser.captures(line) {
-                        Entry::Dir(seg[1].to_string())
-                    } else if let Some(seg) = file_parser.captures(line) {
-                        let Ok(size) = seg[1].parse::<usize>() else {
-                            panic!();
-                        };
-                        Entry::File(seg[2].to_string(), size)
-                    } else {
-                        dbg!(line);
-                        unreachable!()
-                    }
-                })
-                .collect::<Vec<_>>();
-            self.line.push(Command::Ls(v));
-            return Ok(());
-        }
-        let up_parser = regex!(r"^ cd \.\.\n$");
-        if up_parser.captures(block).is_some() {
-            self.line.push(Command::CdUp);
-            return Ok(());
-        }
-        let root_parser = regex!(r"^ cd /\n$");
-        if root_parser.captures(block).is_some() {
-            self.line.push(Command::CdRoot);
-            return Ok(());
-        }
-        let cd_parser = regex!(r"^ cd ((.|\n)+)\n$");
-        if let Some(segment) = cd_parser.captures(block) {
-            self.line.push(Command::CdTo(segment[1].to_string()));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let mut pwd = "/".to_string();
