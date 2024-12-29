@@ -3,9 +3,15 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        progress, regex,
+        parser::parse_usize,
+        progress,
     },
     std::collections::{BinaryHeap, HashMap},
+    winnow::{
+        ascii::newline,
+        combinator::{separated, seq},
+        PResult, Parser,
+    },
 };
 
 trait Calculation {
@@ -154,36 +160,45 @@ pub struct Puzzle {
     line: Vec<Blueprint>,
 }
 
+#[allow(clippy::type_complexity)]
+fn parse_line(s: &mut &str) -> PResult<(usize, usize, usize, usize, usize, usize, usize)> {
+    seq!(
+            _: "Blueprint ", parse_usize,
+            _: ": Each ore robot costs ", parse_usize,
+            _: " ore. Each clay robot costs ", parse_usize,
+            _: " ore. Each obsidian robot costs ", parse_usize,
+            _: " ore and ", parse_usize,
+            _: " clay. Each geode robot costs ", parse_usize,
+            _: " ore and ", parse_usize,
+            _: " obsidian."
+    )
+    .parse_next(s)
+}
+
+#[allow(clippy::type_complexity)]
+fn parse(s: &mut &str) -> PResult<Vec<(usize, usize, usize, usize, usize, usize, usize)>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc(2022, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian."
-        );
-        if let Some(segment) = parser.captures(block) {
-            macro_rules! nth {
-                ($n: expr) => {
-                    segment[$n].parse::<usize>()?
-                };
-            }
-            self.line.push(Blueprint {
-                id: segment[1].parse::<_>()?,
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let line = parse(&mut input.as_str())?;
+        self.line = line
+            .iter()
+            .map(|(n0, n1, n2, n3, n4, n5, n6)| Blueprint {
+                id: *n0,
                 trans: [
-                    [0, nth!(7), 0, nth!(6)],
-                    [0, 0, nth!(5), nth!(4)],
-                    [0, 0, 0, nth!(3)],
-                    [0, 0, 0, nth!(2)],
+                    [0, *n6, 0, *n5],
+                    [0, 0, *n4, *n3],
+                    [0, 0, 0, *n2],
+                    [0, 0, 0, *n1],
                 ],
-                limits: [
-                    usize::MAX,
-                    nth!(7),
-                    nth!(5),
-                    (nth!(6).max(nth!(4))).max(nth!(3).max(nth!(2))),
-                ],
-            });
-        }
-        Ok(())
+                limits: [usize::MAX, *n6, *n4, *n5.max(n3).max(n2.max(n1))],
+            })
+            .collect::<_>();
+
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().map(|bp| bp.id * bp.profit(24)).sum()
