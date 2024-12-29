@@ -2,11 +2,18 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        progress, regex,
+        parser::parse_usize,
+        progress,
     },
     std::{
         cmp::Reverse,
         collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+    },
+    winnow::{
+        ascii::newline,
+        combinator::{alt, separated, seq},
+        token::one_of,
+        PResult, Parser,
     },
 };
 
@@ -18,22 +25,33 @@ pub struct Puzzle {
     label_id: HashMap<String, usize>,
 }
 
+fn parse_name(s: &mut &str) -> PResult<String> {
+    (one_of('A'..='Z'), one_of('A'..='Z'))
+        .map(|(c1, c2)| format!("{c1}{c2}"))
+        .parse_next(s)
+}
+
+fn parse_line(s: &mut &str) -> PResult<(String, usize, Vec<String>)> {
+    seq!(
+        _: "Valve ", parse_name,
+        _: " has flow rate=", parse_usize,
+        _: alt(("; tunnel leads to ", "; tunnels lead to ")),
+        _: alt(("valve ", "valves ")),
+        separated::<_, String, Vec<String>, _, _, _, _>(1.., parse_name, ", ")
+    )
+    .map(|(name, num, vec)| (name, num, vec))
+    .parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<(String, usize, Vec<String>)>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc(2022, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser =
-            regex!(r"^Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? ((\w+, )*\w+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].to_string(),
-            segment[2].parse::<usize>()?,
-            segment[3]
-                .split(", ")
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>(),
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let mut id = 0;
