@@ -1,7 +1,15 @@
 //! <https://adventofcode.com/2022/day/11>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    parser, regex,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
+    winnow::{
+        ascii::{newline, space1},
+        combinator::{alt, separated, seq},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -60,28 +68,41 @@ pub struct Puzzle {
     line: Vec<Monkey>,
 }
 
+fn parse_operation_target(s: &mut &str) -> PResult<Option<usize>> {
+    alt(("old".map(|_a| None), parse_usize.map(Some))).parse_next(s)
+}
+
+fn parse_block(s: &mut &str) -> PResult<Monkey> {
+    seq!(
+        _: "Monkey ", parse_usize, _: ":",
+        _: "\n  Starting items: ", separated(1.., parse_usize, ", "),
+        _: "\n  Operation: new = old ", one_of(['*', '+']), _: space1, parse_operation_target,
+        _: "\n  Test: divisible by ", parse_usize,
+        _: "\n    If true: throw to monkey ", parse_usize,
+        _: "\n    If false: throw to monkey ", parse_usize,
+        _: newline
+    )
+    .map(|(id, items, op, num1, test, test_then, test_else)| Monkey {
+        id,
+        items,
+        operation: (op == '*', num1),
+        test,
+        test_then,
+        test_else,
+        ..Default::default()
+    })
+    .parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<Monkey>> {
+    separated(1.., parse_block, newline).parse_next(s)
+}
+
 #[aoc(2022, 11)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^Monkey (\d+):\n  Starting items: (.+)\n  Operation: new = old (.) (.+)\n  Test: divisible by (.+)\n    If true: throw to monkey (\d+)\n    If false: throw to monkey (\d+)\n?$"
-        );
-        if let Some(segment) = parser.captures(block) {
-            self.line.push(Monkey {
-                id: segment[1].parse::<usize>()?,
-                items: parser::to_usizes(&segment[2], &[' ', ','])?,
-                operation: (&segment[3] == "*", segment[4].parse::<usize>().ok()),
-                test: segment[5].parse::<usize>()?,
-                test_then: segment[6].parse::<usize>()?,
-                test_else: segment[7].parse::<usize>()?,
-                ..Default::default()
-            });
-        }
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line.len());
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut tmp = vec![Vec::new(); self.line.len()];
