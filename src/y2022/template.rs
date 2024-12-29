@@ -6,9 +6,15 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        parser, regex,
+        parser,
     },
     std::collections::HashMap,
+    winnow::{
+        ascii::newline,
+        combinator::{repeat, repeat_till, separated, seq, terminated},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,23 +22,16 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
+fn parse(s: &mut &str) -> PResult<()> {
+    ().parse_next(s)
+}
+
 #[aoc(2022, 9)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     let parser = regex!(r"^(.+)\n\n((.|\n)+)$");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(segment[2].to_string())
+    // fn parse(&mut self, input: String) -> Result<String, ParseError> {
+    //     // self.line = parse(&mut input.as_str())?;
+    //     Self::parsed()
     // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // self.line.push(segment[1].parse::<_>());
-        Ok(())
-    }
     fn end_of_data(&mut self) {
         dbg!(&self.line);
     }
