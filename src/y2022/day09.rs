@@ -2,9 +2,15 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
+        parser::parse_usize,
     },
     std::collections::HashSet,
+    winnow::{
+        ascii::newline,
+        combinator::{separated, seq},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -35,25 +41,27 @@ pub struct Puzzle {
     knots: Vec<(isize, isize)>,
 }
 
+fn parse_line(s: &mut &str) -> PResult<Dir> {
+    seq!(one_of(&['R', 'U', 'L', 'D']), _: " ", parse_usize)
+        .map(|(c, n)| match c {
+            'R' => Dir::R(n),
+            'U' => Dir::U(n),
+            'L' => Dir::L(n),
+            'D' => Dir::D(n),
+            _ => unreachable!(),
+        })
+        .parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<Dir>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc(2022, 9)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(R|U|L|D) (\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let n = segment[2].parse::<usize>()?;
-        let d = match &segment[1] {
-            "R" => Dir::R(n),
-            "U" => Dir::U(n),
-            "L" => Dir::L(n),
-            "D" => Dir::D(n),
-            _ => panic!(),
-        };
-        self.line.push(d);
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         for dir in self.line.clone().iter() {
