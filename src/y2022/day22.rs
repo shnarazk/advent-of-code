@@ -4,9 +4,15 @@ use {
         // color,
         framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, Vec2},
-        regex,
+        parser::parse_usize,
     },
     std::collections::HashMap,
+    winnow::{
+        ascii::newline,
+        combinator::{alt, repeat, separated, seq},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 
 type Loc = Dim2<usize>;
@@ -241,36 +247,40 @@ pub struct Puzzle {
     plane_size: usize,
 }
 
+fn parse_maze_line(s: &mut &str) -> PResult<Vec<char>> {
+    repeat(1.., one_of(&['.', '#', ' '])).parse_next(s)
+}
+
+fn parse_maze(s: &mut &str) -> PResult<Vec<Vec<char>>> {
+    separated(1.., parse_maze_line, newline)
+        .map(|v| dbg!(v))
+        .parse_next(s)
+}
+
+fn parse_direction(s: &mut &str) -> PResult<Direction> {
+    alt((
+        parse_usize.map(Direction::Go),
+        'R'.map(|_| Direction::TurnRight),
+        'L'.map(|_| Direction::TurnLeft),
+    ))
+    .parse_next(s)
+}
+
+fn parse_directions(s: &mut &str) -> PResult<Vec<Direction>> {
+    repeat(1.., parse_direction).map(|v| dbg!(v)).parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<(Vec<Vec<char>>, Vec<Direction>)> {
+    seq!(parse_maze,  _: (newline, newline), parse_directions).parse_next(s)
+}
+
 #[aoc(2022, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let v = block.chars().collect::<Vec<_>>();
-        if v.iter().any(|c| [' ', '.', '#'].contains(c)) {
-            self.line.push(v);
-        } else {
-            let mut buffer = block;
-            let num_parser = regex!(r"^(\d+)");
-            let turn_parser = regex!(r"^(L|R)");
-            loop {
-                if let Some(segment) = num_parser.captures(buffer) {
-                    self.path.push(Direction::Go(segment[1].parse::<usize>()?));
-                    buffer = &buffer[segment[1].len()..];
-                    continue;
-                }
-                if let Some(segment) = turn_parser.captures(buffer) {
-                    if &segment[1] == "L" {
-                        self.path.push(Direction::TurnLeft);
-                    } else {
-                        self.path.push(Direction::TurnRight);
-                    }
-                    buffer = &buffer[segment[1].len()..];
-                    continue;
-                }
-                break;
-            }
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (maze, moves) = parse(&mut input.as_str())?;
+        self.line = maze;
+        self.path = moves;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
