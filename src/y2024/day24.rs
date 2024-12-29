@@ -526,6 +526,13 @@ impl AdventOfCode for Puzzle {
                 let index = brokens.iter().position(|b| *b).unwrap();
                 if desc.overrides.len() < 4 {
                     let cones = build_cones(&d_tree, &wires);
+                    let strict_mode = {
+                        let wrong_bit = brokens.iter().position(|b| *b).unwrap();
+                        let invalid_bit = desc
+                            .check_structure()
+                            .map_or_else(|| 0, |v| v.iter().position(|b| *b).unwrap());
+                        wrong_bit == invalid_bit
+                    };
                     let related_wires = wire_names
                         .iter()
                         .filter(|w| ![b'x', b'y'].contains(&w.0))
@@ -539,6 +546,7 @@ impl AdventOfCode for Puzzle {
                             w_level <= index
                         })
                         .collect::<Vec<_>>();
+                    let output_wire = ord_to_wire(index, b'z');
                     for wire1 in related_wires.iter() {
                         let cone1 = cones.get(wire1).unwrap();
                         for wire2 in related_wires.iter() {
@@ -547,6 +555,12 @@ impl AdventOfCode for Puzzle {
                             }
                             let cone2 = cones.get(wire2).unwrap();
                             if cone2.contains(wire1) {
+                                continue;
+                            }
+                            if strict_mode
+                                && !cone1.iter().any(|w| *w == output_wire)
+                                && !cone2.iter().any(|w| *w == output_wire)
+                            {
                                 continue;
                             }
                             if let Some(new_adder) = desc.add_swaps(wire1, wire2) {
