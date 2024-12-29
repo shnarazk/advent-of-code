@@ -2,9 +2,15 @@
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
+        parser::parse_isize,
     },
     std::{cmp::Ordering, collections::HashMap},
+    winnow::{
+        ascii::{newline, space1},
+        combinator::{alt, separated, seq},
+        token::one_of,
+        PResult, Parser,
+    },
 };
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[allow(dead_code)]
@@ -98,33 +104,61 @@ pub struct Puzzle {
     line: Vec<Expr>,
 }
 
+fn parse_id(s: &mut &str) -> PResult<String> {
+    seq!(
+        one_of('a'..='z'),
+        one_of('a'..='z'),
+        one_of('a'..='z'),
+        one_of('a'..='z'),
+    )
+    .map(|(a, b, c, d)| format!("{a}{b}{c}{d}"))
+    .parse_next(s)
+}
+
+fn parse_num(s: &mut &str) -> PResult<Expr> {
+    seq!(
+        parse_id,
+        _: ": ",
+        parse_isize,
+    )
+    .map(|(dest, num)| Expr::Num(dest, num))
+    .parse_next(s)
+}
+
+fn parse_term(s: &mut &str) -> PResult<Expr> {
+    seq!(
+        parse_id,
+        _: ": ",
+        parse_id,
+        _: space1,
+        one_of(&['+', '-', '*', '/']),
+        _: space1,
+        parse_id,
+    )
+    .map(|(dest, src1, opr, src2)| match opr {
+        '+' => Expr::Add(dest, src1, src2),
+        '-' => Expr::Sub(dest, src1, src2),
+        '*' => Expr::Mul(dest, src1, src2),
+        '/' => Expr::Div(dest, src1, src2),
+        _ => unreachable!(),
+    })
+    .parse_next(s)
+}
+
+fn parse_line(s: &mut &str) -> PResult<Expr> {
+    alt((parse_num, parse_term)).parse_next(s)
+}
+fn parse(s: &mut &str) -> PResult<Vec<Expr>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
+
 #[aoc_at(2022, 21)]
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let num_parser = regex!(r"^(\w{4}): (\d+)$");
-        let term_parser = regex!(r"^(\w{4}): (\w{4}) (\+|-|\*|/) (\w{4})$");
-        if let Some(segment) = num_parser.captures(block) {
-            let dest = segment[1].to_string();
-            let num = segment[2].parse::<isize>()?;
-            self.line.push(Expr::Num(dest, num));
-        } else if let Some(segment) = term_parser.captures(block) {
-            let dest = segment[1].to_string();
-            let src1 = segment[2].to_string();
-            let src2 = segment[4].to_string();
-            self.line.push(match &segment[3] {
-                "+" => Expr::Add(dest, src1, src2),
-                "-" => Expr::Sub(dest, src1, src2),
-                "*" => Expr::Mul(dest, src1, src2),
-                "/" => Expr::Div(dest, src1, src2),
-                _ => unreachable!(),
-            });
-        } else {
-            // dbg!(block);
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut values: HashMap<String, isize> = HashMap::new();
