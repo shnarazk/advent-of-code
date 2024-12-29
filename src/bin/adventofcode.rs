@@ -145,7 +145,7 @@ fn bench(config: ConfigAoC) {
             color::RESET,
         );
     };
-    println!("|   day |    time |");
+    println!("|   day | time(ms)|");
     println!("|------:|--------:|");
     for result in results.iter() {
         println!("| day{:<2} | {:>7.1} |", result.day, result.time);
