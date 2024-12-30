@@ -11,7 +11,6 @@ use {
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
-        cmp::Reverse,
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
         sync::OnceLock,
@@ -145,13 +144,14 @@ impl Adder {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Serialize)]
 pub struct Descriptor {
-    num_broken: usize,
+    broken_bit: usize,
     overrides: Vec<(GateSpec, GateSpec)>,
 }
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.num_broken * self.overrides.len()).cmp(&(other.num_broken * other.overrides.len()))
+        (self.broken_bit * (5 - self.overrides.len()))
+            .cmp(&(other.broken_bit * (5 - other.overrides.len())))
     }
 }
 
@@ -162,9 +162,9 @@ impl PartialOrd for Descriptor {
 }
 
 impl Descriptor {
-    fn new(num_broken: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+    fn new(broken_bit: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
         Descriptor {
-            num_broken,
+            broken_bit,
             overrides,
         }
     }
@@ -181,7 +181,7 @@ impl Descriptor {
         }
         swaps.push(build_swapped_pair((w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(self.num_broken, swaps))
+        Some(Descriptor::new(self.broken_bit, swaps))
     }
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
@@ -462,36 +462,35 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let wire_names = WIRE_NAMES.get().unwrap();
-        let input_bits = INPUT_BITS.get().unwrap();
+        let _input_bits = INPUT_BITS.get().unwrap();
         let wires = wire_names.iter().collect::<Vec<_>>();
-        let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
+        let mut to_visit: BinaryHeap<Descriptor> = BinaryHeap::new();
 
-        let mut init = Descriptor::new(input_bits + 1, Vec::new());
-        if let Some(brokens) = init.check_correctness() {
-            // dbg!(fmt(&init.check_connectivity().unwrap()));
-            // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
-            init.num_broken = brokens.len() + 1;
-            to_visit.push(Reverse(init));
-        }
+        let init = Descriptor::new(0, Vec::new());
+        to_visit.push(init);
+        // if let Some(brokens) = init.check_correctness() {
+        //     // dbg!(fmt(&init.check_connectivity().unwrap()));
+        //     // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
+        // }
         let mut visited: FxHashSet<Descriptor> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         let mut best: usize = 99;
-        while let Some(Reverse(mut desc)) = to_visit.pop() {
+        while let Some(mut desc) = to_visit.pop() {
             if visited.contains(&desc) {
                 continue;
             }
             visited.insert(desc.clone());
-            best = best.min(desc.num_broken);
+            best = best.min(desc.broken_bit);
             let (d_tree, _u_tree) = desc.wire_trees();
             if let Some(brokens) = desc.check_correctness() {
-                let num_broken = brokens.iter().filter(|n| **n).count();
-                if desc.num_broken < num_broken {
+                let broken_bit = brokens.iter().position(|n| *n).unwrap();
+                if broken_bit < desc.broken_bit {
                     continue;
                 }
-                desc.num_broken = num_broken;
+                desc.broken_bit = broken_bit;
                 progress!(format!(
                     "#broken:{:>2}({:>2}) #swaps:{} |{:>6}| {}",
-                    desc.num_broken,
+                    desc.broken_bit,
                     best,
                     desc.overrides.len(),
                     visited.len(),
@@ -543,7 +542,7 @@ impl AdventOfCode for Puzzle {
                                 if visited.contains(&new_adder) {
                                     continue;
                                 }
-                                to_visit.push(Reverse(new_adder));
+                                to_visit.push(new_adder);
                             }
                         }
                     }
