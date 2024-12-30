@@ -147,13 +147,11 @@ impl Adder {
 pub struct Descriptor {
     num_broken: usize,
     overrides: Vec<(GateSpec, GateSpec)>,
-    structure: usize,
 }
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.num_broken + self.overrides.len() + self.structure)
-            .cmp(&(other.num_broken + other.overrides.len() + other.structure))
+        (self.num_broken * self.overrides.len()).cmp(&(other.num_broken * other.overrides.len()))
     }
 }
 
@@ -164,15 +162,10 @@ impl PartialOrd for Descriptor {
 }
 
 impl Descriptor {
-    fn new(
-        num_broken: usize,
-        structure: usize,
-        overrides: Vec<(GateSpec, GateSpec)>,
-    ) -> Descriptor {
+    fn new(num_broken: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
         Descriptor {
             num_broken,
             overrides,
-            structure,
         }
     }
     fn add_swaps(&self, w1: &'static Wire, w2: &'static Wire) -> Option<Descriptor> {
@@ -188,7 +181,7 @@ impl Descriptor {
         }
         swaps.push(build_swapped_pair((w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(self.num_broken, self.structure, swaps))
+        Some(Descriptor::new(self.num_broken, swaps))
     }
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
@@ -473,7 +466,7 @@ impl AdventOfCode for Puzzle {
         let wires = wire_names.iter().collect::<Vec<_>>();
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
 
-        let mut init = Descriptor::new(0, input_bits + 1, Vec::new());
+        let mut init = Descriptor::new(input_bits + 1, Vec::new());
         if let Some(brokens) = init.check_correctness() {
             // dbg!(fmt(&init.check_connectivity().unwrap()));
             // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
@@ -496,13 +489,6 @@ impl AdventOfCode for Puzzle {
                     continue;
                 }
                 desc.num_broken = num_broken;
-                let structure = desc
-                    .check_structure()
-                    .map_or(0, |v| v.iter().filter(|b| **b).count());
-                if desc.structure < structure {
-                    continue;
-                }
-                desc.structure = structure;
                 progress!(format!(
                     "#broken:{:>2}({:>2}) #swaps:{} |{:>6}| {}",
                     desc.num_broken,
@@ -514,7 +500,7 @@ impl AdventOfCode for Puzzle {
                 let index = brokens.iter().position(|b| *b).unwrap();
                 if desc.overrides.len() < 4 {
                     let cones = build_cones(&d_tree, &wires);
-                    let strict_mode = {
+                    let _strict_mode = {
                         let wrong_bit = brokens.iter().position(|b| *b).unwrap();
                         let invalid_bit = desc
                             .check_structure()
@@ -545,8 +531,10 @@ impl AdventOfCode for Puzzle {
                             if cone2.contains(wire1) {
                                 continue;
                             }
-                            if strict_mode
-                                && !cone1.iter().any(|w| *w == output_wire)
+                            if
+                            /* strict_mode
+                            && */
+                            !cone1.iter().any(|w| *w == output_wire)
                                 && !cone2.iter().any(|w| *w == output_wire)
                             {
                                 continue;
