@@ -18,7 +18,7 @@ use {
     },
     winnow::{
         ascii::newline,
-        combinator::{alt, epeat, repeat_till, separated, seq, terminated},
+        combinator::{alt, repeat, repeat_till, separated, seq},
         token::one_of,
         PResult, Parser,
     },
@@ -28,15 +28,17 @@ use {
 pub struct Puzzle {
     line: Vec<()>,
 }
-
-fn parse(s: &mut &str) -> PResult<()> {
+fn parse_line(s: &mut &str) -> PResult<()> {
     ().parse_next(s)
+}
+fn parse(s: &mut &str) -> PResult<Vec<()>> {
+    separated(1.., parse_line, newline).parse_next(s)
 }
 
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        // self.line = parse(&mut input.as_str())?;
+        self.line = parse(&mut input.as_str())?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {

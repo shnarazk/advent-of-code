@@ -88,7 +88,7 @@ pub struct Adder {
 impl Adder {
     fn new(overrides: &[(GateSpec, GateSpec)]) -> Adder {
         let mut mapper: FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire> =
-            BASE_PROPAGATION_TABLE.get().unwrap().clone();
+            PROPAGATION_TABLE.get().unwrap().clone();
         for (g1, g2) in overrides.iter() {
             mapper.insert((g1.0, g1.1, g1.2), g1.3);
             mapper.insert((g2.0, g2.1, g2.2), g2.3);
@@ -250,7 +250,6 @@ impl Descriptor {
                 inputs.iter().any(|w| n < wire_to_ord(w)) || inputs.len() != 2 * (n + 1)
             })
             .collect::<Vec<bool>>();
-
         let carry_bit = {
             let n = input_bits;
             let wire: &'static Wire = ord_to_wire(n, b'z');
@@ -323,31 +322,28 @@ impl Descriptor {
         } else {
             subtree.insert(wire);
         }
-        // assert!(subtree.iter().any(|w| ['x', 'y', 'z'].contains(&w.0)));
+        debug_assert!(subtree.iter().any(|w| [b'x', b'y', b'z'].contains(&w.0)));
         subtree
     }
 }
 
 static WIRE_NAMES: OnceLock<FxHashSet<Wire>> = OnceLock::new();
-static BASE_LINK: OnceLock<Vec<(Gate, &'static Wire, &'static Wire, &'static Wire)>> =
-    OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
-static BASE_PROPAGATION_TABLE: OnceLock<
-    FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire>,
-> = OnceLock::new();
+static PROPAGATION_TABLE: OnceLock<FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire>> =
+    OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): (&'static Wire, &'static Wire)) -> (GateSpec, GateSpec) {
-    assert!(![b'x', b'y'].contains(&pick1.0));
-    assert!(![b'x', b'y'].contains(&pick2.0));
+    debug_assert!(![b'x', b'y'].contains(&pick1.0));
+    debug_assert!(![b'x', b'y'].contains(&pick2.0));
 
     let p1 = pick1.min(pick2);
     let p2 = pick1.max(pick2);
-    let specs = BASE_LINK.get().unwrap();
-    let spec1: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == p1).unwrap();
-    let spec2: &GateSpec = specs.iter().find(|(_, _, _, o)| *o == p2).unwrap();
+    let specs = PROPAGATION_TABLE.get().unwrap();
+    let spec1 = specs.iter().find(|(_, o)| **o == p1).unwrap();
+    let spec2 = specs.iter().find(|(_, o)| **o == p2).unwrap();
     (
-        (spec1.0, spec1.1, spec1.2, p2),
-        (spec2.0, spec2.1, spec2.2, p1),
+        (spec1.0 .0, spec1.0 .1, spec1.0 .2, p2),
+        (spec2.0 .0, spec2.0 .1, spec2.0 .2, p1),
     )
 }
 
@@ -424,22 +420,8 @@ impl AdventOfCode for Puzzle {
                 wire_names.get(o).unwrap(),
             );
         }
-        if BASE_PROPAGATION_TABLE.get().is_none() {
-            BASE_PROPAGATION_TABLE.set(propagation_table).unwrap();
-        }
-        let linkp: Vec<GateSpec> = links
-            .iter()
-            .map(|(g, i1, i2, o)| {
-                (
-                    *g,
-                    wire_names.get(i1).unwrap(),
-                    wire_names.get(i2).unwrap(),
-                    wire_names.get(o).unwrap(),
-                )
-            })
-            .collect::<Vec<(Gate, _, _, _)>>();
-        if BASE_LINK.get().is_none() {
-            BASE_LINK.set(linkp).unwrap();
+        if PROPAGATION_TABLE.get().is_none() {
+            PROPAGATION_TABLE.set(propagation_table).unwrap();
         }
         Self::parsed()
     }
@@ -450,10 +432,11 @@ impl AdventOfCode for Puzzle {
         }
     }
     fn serialize(&self) -> Option<String> {
-        let links = BASE_LINK.get().unwrap();
-        let mut data = links
+        let mut data = PROPAGATION_TABLE
+            .get()
+            .unwrap()
             .iter()
-            .map(|(_, i1, i2, o)| {
+            .map(|((_, i1, i2), o)| {
                 (
                     wire_to_string(o),
                     vec![wire_to_string(i1), wire_to_string(i2)],
@@ -497,7 +480,8 @@ impl AdventOfCode for Puzzle {
             init.num_broken = brokens.len() + 1;
             to_visit.push(Reverse(init));
         }
-        let mut visited: HashSet<Descriptor> = HashSet::new();
+        let mut visited: FxHashSet<Descriptor> =
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         let mut best: usize = 99;
         while let Some(Reverse(mut desc)) = to_visit.pop() {
             if visited.contains(&desc) {
@@ -512,13 +496,17 @@ impl AdventOfCode for Puzzle {
                     continue;
                 }
                 desc.num_broken = num_broken;
-                desc.structure = desc
+                let structure = desc
                     .check_structure()
                     .map_or(0, |v| v.iter().filter(|b| **b).count());
+                if desc.structure < structure {
+                    continue;
+                }
+                desc.structure = structure;
                 progress!(format!(
-                    "best:{:>2} broken:{:>2} #swaps:{} |{:>6}| {}",
-                    best,
+                    "#broken:{:>2}({:>2}) #swaps:{} |{:>6}| {}",
                     desc.num_broken,
+                    best,
                     desc.overrides.len(),
                     visited.len(),
                     fmt(&brokens)
@@ -605,7 +593,6 @@ fn build_cones(
             entry.insert(wire);
             if let Some(childs) = tree.get(wire) {
                 for w in childs.iter() {
-                    entry.insert(*w);
                     for s in aux(result, tree, w) {
                         entry.insert(*s);
                     }
