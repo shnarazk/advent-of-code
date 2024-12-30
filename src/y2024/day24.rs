@@ -11,7 +11,7 @@ use {
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
-        cmp::Reverse,
+        cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
         sync::OnceLock,
@@ -67,7 +67,7 @@ fn ord_to_wire(n: usize, prefix: u8) -> &'static Wire {
     let wire_names = WIRE_NAMES.get().unwrap();
     wire_names
         .get(&(prefix, b'0' + ((n / 10) as u8), b'0' + ((n % 10) as u8)))
-        .unwrap()
+        .expect(format!("wire not found: {}{}", prefix as char, n).as_str())
 }
 
 /// convert a `Wire` type to its 'ord', 0 to 43
@@ -152,8 +152,9 @@ pub struct Descriptor {
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.num_broken + self.overrides.len() + self.structure)
-            .cmp(&(other.num_broken + other.overrides.len() + other.structure))
+        // (self.num_broken + self.overrides.len() + self.structure)
+        //     .cmp(&(other.num_broken + other.overrides.len() + other.structure))
+        self.structure.cmp(&other.structure)
     }
 }
 
@@ -233,9 +234,9 @@ impl Descriptor {
     /// return a vector of wrong structure bools
     /// This measure doesn't return mono-decreasing values
     /// So we can't use to cut branches. This is the final checker.
-    fn check_structure(&self) -> Option<Vec<bool>> {
+    fn check_structure(&self) -> Vec<bool> {
         let input_bits = *INPUT_BITS.get().unwrap();
-        let (_, up_trees) = self.wire_trees();
+        let up_trees = self.wire_trees(false, true).1.unwrap();
         let mut ret = (0..input_bits)
             .collect::<Vec<_>>()
             .par_iter()
@@ -261,42 +262,39 @@ impl Descriptor {
             input_len != 2 * n
         };
         ret.push(carry_bit);
-        if ret.iter().all(|b| !b) {
-            None
-        } else {
-            Some(ret)
-        }
+        ret
     }
     /// return `(down_tree, up_tree)`
     fn wire_trees(
         &self,
+        down: bool,
+        up: bool,
     ) -> (
-        FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-        FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
+        Option<FxHashMap<&'static Wire, FxHashSet<&'static Wire>>>,
+        Option<FxHashMap<&'static Wire, FxHashSet<&'static Wire>>>,
     ) {
         let adder = self.build_adder();
-        let mut wires: FxHashSet<&'static Wire> =
-            HashSet::<&'static Wire, BuildHasherDefault<FxHasher>>::default();
         let mut down_tree: FxHashMap<&'static Wire, FxHashSet<&'static Wire>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         let mut up_tree: FxHashMap<&'static Wire, FxHashSet<&'static Wire>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for ((_, i1, i2), o) in adder.mapper.iter() {
-            wires.insert(*i1);
-            wires.insert(*i2);
-            wires.insert(*o);
-            down_tree.entry(*i1).or_default().insert(o);
-            down_tree.entry(*i2).or_default().insert(o);
-            up_tree.entry(*o).or_default().insert(i1);
-            up_tree.entry(*o).or_default().insert(i2);
+            if down {
+                down_tree.entry(*i1).or_default().insert(o);
+                down_tree.entry(*i2).or_default().insert(o);
+            }
+            if up {
+                up_tree.entry(*o).or_default().insert(i1);
+                up_tree.entry(*o).or_default().insert(i2);
+            }
         }
-        (down_tree, up_tree)
+        (down.then_some(down_tree), up.then_some(up_tree))
     }
     fn wire_affects(
         &self,
         tree: &FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
         wire: &'static Wire,
-    ) -> FxHashSet<&Wire> {
+    ) -> FxHashSet<&'static Wire> {
         let mut subtree: FxHashSet<&Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         if let Some(linked) = tree.get(&wire) {
             let mut to_visit: Vec<&Wire> = linked.iter().cloned().collect::<Vec<_>>();
@@ -469,71 +467,149 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let wire_names = WIRE_NAMES.get().unwrap();
-        let input_bits = INPUT_BITS.get().unwrap();
+        let input_bits = *INPUT_BITS.get().unwrap();
         let wires = wire_names.iter().collect::<Vec<_>>();
-        let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
-
-        let mut init = Descriptor::new(0, input_bits + 1, Vec::new());
-        if let Some(brokens) = init.check_correctness() {
-            // dbg!(fmt(&init.check_connectivity().unwrap()));
-            // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
-            init.num_broken = brokens.len() + 1;
-            to_visit.push(Reverse(init));
-        }
+        let mut to_visit: BinaryHeap<Descriptor> = BinaryHeap::new();
+        to_visit.push(Descriptor::new(0, 0, Vec::new()));
         let mut visited: FxHashSet<Descriptor> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        let mut best: usize = 99;
-        while let Some(Reverse(mut desc)) = to_visit.pop() {
+        let mut best: usize = 0;
+        while let Some(mut desc) = to_visit.pop() {
             if visited.contains(&desc) {
                 continue;
             }
             visited.insert(desc.clone());
-            best = best.min(desc.num_broken);
-            let (d_tree, _u_tree) = desc.wire_trees();
+            let (d_tree, u_tree) = {
+                let t = desc.wire_trees(true, true);
+                (t.0.unwrap(), t.1.unwrap())
+            };
             if let Some(brokens) = desc.check_correctness() {
-                let num_broken = brokens.iter().filter(|n| **n).count();
-                if desc.num_broken < num_broken {
-                    continue;
+                let _num_broken = brokens.iter().filter(|n| **n).count();
+                let broken_bit = brokens.iter().position(|b| *b).unwrap_or(input_bits + 1);
+                let structure = desc.check_structure();
+                let _ill_structure_bits = structure.iter().filter(|b| **b).count();
+                let ill_structure_bit = structure.iter().position(|b| *b).unwrap_or(input_bits + 1);
+                match ill_structure_bit.cmp(&desc.structure) {
+                    Ordering::Less => {
+                        continue;
+                        // if ill_structure_bit < desc.structure {
+                        //     continue;
+                        // }
+                        // desc.num_broken = broken_bit;
+                        // desc.structure = ill_structure_bit;
+                    }
+                    Ordering::Equal => {
+                        desc.num_broken = broken_bit;
+                        desc.structure = ill_structure_bit;
+                    }
+                    Ordering::Greater => {
+                        // if ill_structure_bit <= desc.structure {
+                        //     continue;
+                        // }
+                        desc.num_broken = broken_bit;
+                        desc.structure = ill_structure_bit;
+                    }
                 }
-                desc.num_broken = num_broken;
-                let structure = desc
-                    .check_structure()
-                    .map_or(0, |v| v.iter().filter(|b| **b).count());
-                if desc.structure < structure {
-                    continue;
-                }
-                desc.structure = structure;
+                best = best.max(desc.num_broken);
+                // let structure = 1 /* desc
+                //     .check_structure()
+                //     .map_or(0, |v| v.iter().filter(|b| **b).count()) */ ;
+                // if desc.structure < structure {
+                //     continue;
+                // }
+                // desc.structure = structure;
                 progress!(format!(
-                    "#broken:{:>2}({:>2}) #swaps:{} |{:>6}| {}",
+                    " ❎{:>2}/{:>2}🔄{:>1}📖{:<5} {}",
                     desc.num_broken,
                     best,
                     desc.overrides.len(),
                     visited.len(),
-                    fmt(&brokens)
+                    fmt(&structure) // fmt(&brokens)
                 ));
-                let index = brokens.iter().position(|b| *b).unwrap();
+                let index = ill_structure_bit.min(broken_bit); // brokens.iter().position(|b| *b).unwrap();
                 if desc.overrides.len() < 4 {
                     let cones = build_cones(&d_tree, &wires);
+                    // I don't know how to use this condition.
                     let strict_mode = {
-                        let wrong_bit = brokens.iter().position(|b| *b).unwrap();
-                        let invalid_bit = desc
-                            .check_structure()
-                            .map_or_else(|| 0, |v| v.iter().position(|b| *b).unwrap());
-                        wrong_bit == invalid_bit
+                        // let wrong_bit = brokens.iter().position(|b| *b).unwrap();
+                        // let invalid_bit = structure.iter().position(|b| *b).unwrap();
+                        // wrong_bit == invalid_bit
+                        ill_structure_bit == broken_bit
                     };
-                    let related_wires = wire_names
-                        .iter()
-                        .filter(|w| ![b'x', b'y'].contains(&w.0))
-                        .filter(|&w| {
-                            let cone = cones.get(w).unwrap();
-                            let w_level = cone
+                    let related_wires = if ill_structure_bit <= broken_bit {
+                        let up_tree =
+                            desc.wire_affects(&u_tree, ord_to_wire(ill_structure_bit, b'z'));
+                        let inputs = up_tree
+                            .iter()
+                            .filter(|w| [b'x', b'y'].contains(&w.0))
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        let targets1 = up_tree
+                            .iter()
+                            .filter(|w| ![b'x', b'y'].contains(&w.0))
+                            .cloned()
+                            .collect::<HashSet<_>>();
+                        let missing_lowest_input = (0..=ill_structure_bit)
+                            .flat_map(|n| {
+                                if n < input_bits {
+                                    vec![ord_to_wire(n, b'x'), ord_to_wire(n, b'y')]
+                                } else {
+                                    Vec::new()
+                                }
+                            })
+                            .filter(|w| !inputs.contains(w))
+                            .sorted()
+                            .min()
+                            .unwrap();
+                        let down_tree = desc.wire_affects(&d_tree, missing_lowest_input);
+                        let targets2 = down_tree
+                            .iter()
+                            .filter(|w| ![b'x', b'y'].contains(&w.0))
+                            .cloned()
+                            .collect::<HashSet<_>>();
+                        let extra_inputs = (ill_structure_bit + 1..input_bits)
+                            .flat_map(|n| [ord_to_wire(n, b'x'), ord_to_wire(n, b'y')])
+                            .filter(|w| {
+                                cones
+                                    .get(w)
+                                    .unwrap()
+                                    .contains(&ord_to_wire(ill_structure_bit, b'z'))
+                            })
+                            .collect::<Vec<_>>();
+                        println!(
+                            "{:?}: target1:{:?}target2:{:?}",
+                            up_tree
                                 .iter()
-                                .filter(|w| w.0 == b'z')
-                                .min()
-                                .map_or(usize::MAX, |w| wire_to_ord(w));
-                            w_level <= index
-                        })
-                        .collect::<Vec<_>>();
+                                .map(|w| wire_to_string(w))
+                                .collect::<Vec<_>>(),
+                            targets1
+                                .iter()
+                                .map(|w| wire_to_string(w))
+                                .collect::<Vec<_>>(),
+                            targets2
+                                .iter()
+                                .map(|w| wire_to_string(w))
+                                .collect::<Vec<_>>()
+                        );
+                        // assert!(!extra_inputs.is_empty());
+                        targets1.union(&targets2).map(|f| *f).collect::<Vec<_>>()
+                    } else {
+                        wire_names
+                            .iter()
+                            .filter(|w| ![b'x', b'y'].contains(&w.0))
+                            .filter(|&w| {
+                                cones
+                                    .get(w)
+                                    .unwrap()
+                                    .iter()
+                                    .filter(|w| w.0 == b'z')
+                                    .min()
+                                    .map_or(usize::MAX, |w| wire_to_ord(w))
+                                    <= index
+                            })
+                            .map(|f| f)
+                            .collect::<Vec<_>>()
+                    };
                     let output_wire = ord_to_wire(index, b'z');
                     for wire1 in related_wires.iter() {
                         let cone1 = cones.get(wire1).unwrap();
@@ -546,21 +622,20 @@ impl AdventOfCode for Puzzle {
                                 continue;
                             }
                             if strict_mode
-                                && !cone1.iter().any(|w| *w == output_wire)
-                                && !cone2.iter().any(|w| *w == output_wire)
+                                && !cone1.contains(output_wire)
+                                && !cone2.contains(output_wire)
                             {
                                 continue;
                             }
-                            if let Some(new_adder) = desc.add_swaps(wire1, wire2) {
-                                if visited.contains(&new_adder) {
-                                    continue;
+                            if let Some(new_desc) = desc.add_swaps(wire1, wire2) {
+                                if !visited.contains(&new_desc) {
+                                    to_visit.push(new_desc);
                                 }
-                                to_visit.push(Reverse(new_adder));
                             }
                         }
                     }
                 }
-            } else if desc.check_structure().is_none() {
+            } else if desc.check_structure().iter().all(|b| !*b) {
                 progress!("");
                 return desc
                     .overrides
