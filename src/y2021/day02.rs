@@ -1,7 +1,14 @@
 //! <https://adventofcode.com/2021/day/2>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        parser::parse_usize,
+    },
+    winnow::{
+        ascii::newline,
+        combinator::{alt, separated, seq},
+        PResult, Parser,
+    },
 };
 
 #[derive(Debug, PartialEq)]
@@ -15,22 +22,24 @@ enum Direction {
 pub struct Puzzle {
     line: Vec<Direction>,
 }
+fn parse_line(s: &mut &str) -> PResult<Direction> {
+    alt((
+        seq!(_: "forward ", parse_usize).map(|(n,)| Direction::Forward(n)),
+        seq!(_: "up ", parse_usize).map(|(n,)| Direction::Up(n)),
+        seq!(_: "down ", parse_usize).map(|(n,)| Direction::Down(n)),
+    ))
+    .parse_next(s)
+}
+
+fn parse(s: &mut &str) -> PResult<Vec<Direction>> {
+    separated(1.., parse_line, newline).parse_next(s)
+}
 
 #[aoc(2021, 2)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(forward|down|up) ([0-9]+)");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let num = segment[2].parse::<usize>()?;
-        let object = match &segment[1] {
-            "forward" => Direction::Forward(num),
-            "down" => Direction::Down(num),
-            "up" => Direction::Up(num),
-            _ => return Err(ParseError),
-        };
-        self.line.push(object);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let mut horizontal: usize = 0;
