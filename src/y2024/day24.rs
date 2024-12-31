@@ -528,7 +528,8 @@ impl AdventOfCode for Puzzle {
 
         let mut step0 = Descriptor::new(vec![]);
         step0.evaluate();
-        dbg!(fmt(&step0.target_vector));
+        println!("initial:{}", fmt(&step0.target_vector));
+        println!("       :{}", fmt(&step0.check_structure()));
 
         let z05 = propagation_table
             .get_key_value(&(b'z', b'0', b'5'))
@@ -541,7 +542,8 @@ impl AdventOfCode for Puzzle {
             panic!();
         };
         step1.evaluate();
-        dbg!(fmt(&step1.target_vector));
+        println!("z05-gdd:{}", fmt(&step1.target_vector));
+        println!("       :{}", fmt(&step1.check_structure()));
 
         let z09 = propagation_table
             .get_key_value(&(b'z', b'0', b'9'))
@@ -554,7 +556,8 @@ impl AdventOfCode for Puzzle {
             panic!();
         };
         step2.evaluate();
-        dbg!(fmt(&step2.target_vector));
+        println!("z09-cwt:{}", fmt(&step2.target_vector));
+        println!("       :{}", fmt(&step2.check_structure()));
 
         let css = propagation_table
             .get_key_value(&(b'c', b's', b's'))
@@ -567,7 +570,8 @@ impl AdventOfCode for Puzzle {
             panic!();
         };
         step3.evaluate();
-        dbg!(fmt(&step3.target_vector));
+        println!("css-jmv:{}", fmt(&step3.target_vector));
+        println!("       :{}", fmt(&step3.check_structure()));
 
         let z37 = propagation_table
             .get_key_value(&(b'z', b'3', b'7'))
@@ -581,9 +585,10 @@ impl AdventOfCode for Puzzle {
             panic!();
         };
         step4.evaluate();
-        dbg!(fmt(&step4.target_vector));
+        println!("z37-pqt:{}", fmt(&step4.target_vector));
+        println!("       :{}", fmt(&step4.check_structure()));
 
-        return "not implemented".to_string();
+        // return "not implemented".to_string();
 
         // dbg!(fmt(&step1.target_vector));
         // let mut jmv = Descriptor::new(vec![((*z05.0, *z05.1), (*jmv.0, *jmv.1))]);
@@ -591,7 +596,6 @@ impl AdventOfCode for Puzzle {
         // dbg!(fmt(&jmv.target_vector));
         // let mut pqt = Descriptor::new(vec![((*z05.0, *z05.1), (*pqt.0, *pqt.1))]);
         // pqt.evaluate();
-        return "not implemented".to_string();
         // dbg!(fmt(&pqt.target_vector));
         // let gdd = propagation_table
         //     .get_key_value(&(b'g', b'd', b'd'))
@@ -645,14 +649,14 @@ impl AdventOfCode for Puzzle {
             if desc.number_of_targets() == 0 {
                 progress!("");
                 println!("{desc}");
-                if desc.check_structure().iter().any(|b| *b) {
-                    continue;
-                }
+                // if desc.check_structure().iter().any(|b| *b) {
+                //     continue;
+                // }
                 return desc
                     .overrides
                     .iter()
                     .flat_map(|pair| [pair.0 .0, pair.1 .0])
-                    .sorted()
+                    // .sorted()
                     .map(wire_to_string)
                     .join(",");
             }
