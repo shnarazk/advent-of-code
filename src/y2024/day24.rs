@@ -214,11 +214,10 @@ impl Descriptor {
     fn evaluate(&mut self) {
         self.target_vector = self
             .check_correctness()
-            // .iter()
-            // .zip(self.check_structure().iter())
-            // .map(|(a, b)| *a || !*b)
-            // .collect();
-            ;
+            .iter()
+            .zip(self.check_structure().iter())
+            .map(|(a, b)| *a | *b)
+            .collect();
     }
     fn add_swaps(&self, w1: &'static Wire, w2: &'static Wire) -> Option<Descriptor> {
         if w1 == w2 {
@@ -656,7 +655,7 @@ impl AdventOfCode for Puzzle {
                     .overrides
                     .iter()
                     .flat_map(|pair| [pair.0 .0, pair.1 .0])
-                    // .sorted()
+                    .sorted()
                     .map(wire_to_string)
                     .join(",");
             }
