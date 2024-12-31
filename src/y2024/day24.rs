@@ -113,17 +113,13 @@ impl Adder {
             values: &mut FxHashMap<&'static Wire, Option<bool>>,
             wire: &'static Wire,
         ) -> Option<bool> {
-            // dbg!(wire_to_string(wire));
             if let Some(b) = values.get(wire) {
                 if b.is_none() {
                     return None;
                 }
                 return *b;
             }
-            let Some((g, w1, w2)) = dep_graph.get(wire) else {
-                // panic!("gate_output: {}", wire_to_string(wire));
-                return None;
-            };
+            let (g, w1, w2) = dep_graph.get(wire)?;
             values.insert(wire, None);
             let b1 = gate_output(dep_graph, values, w1)?;
             let b2 = gate_output(dep_graph, values, w2)?;
@@ -145,13 +141,6 @@ impl Adder {
                     .map_or(false, |b| b.map_or(false, |b| b))
             })
             .collect::<Vec<_>>();
-        // let v = values
-        //     .iter()
-        //     .filter(|(wire, _)| wire.0 == b'z') // && wire_to_ord(wire) <= self.width)
-        //     .sorted()
-        //     .map(|(_, b)| b)
-        //     .cloned()
-        //     .collect::<Vec<bool>>();
         let val = v
             .iter()
             .rev()
@@ -269,10 +258,6 @@ impl Descriptor {
             .cloned()
             .fold(vec![false; input_bits + 1], merge_or)
     }
-    /// return a vector of wrong structure bools
-    /// This measure doesn't return mono-decreasing values
-    /// So we can't use to cut branches. This is the final checker.
-    #[allow(dead_code)]
     fn check_structure(&self) -> Vec<bool> {
         let input_bits = *INPUT_BITS.get().unwrap();
         let (_, up_trees) = self.wire_trees(false, true);
@@ -304,7 +289,6 @@ impl Descriptor {
         ret
     }
     /// return `(down_tree, up_tree)`
-    #[allow(dead_code)]
     fn wire_trees(
         &self,
         down: bool,
@@ -395,8 +379,6 @@ fn build_swapped_pair((pick1, pick2): (&'static Wire, &'static Wire)) -> (GateSp
     (
         (p1, (spec1.1 .0, spec1.1 .1, spec1.1 .2)),
         (p2, (spec2.1 .0, spec2.1 .1, spec2.1 .2)),
-        // (p2, (spec1.1 .0, spec1.1 .1, spec1.1 .2)),
-        // (p1, (spec2.1 .0, spec2.1 .1, spec2.1 .2)),
     )
 }
 
@@ -459,7 +441,6 @@ impl AdventOfCode for Puzzle {
             wire_names_tmp.insert(*i1);
             wire_names_tmp.insert(*i2);
             wire_names_tmp.insert(*o);
-            // propagation_table.insert((*g, i1, i2), o);
         }
         if WIRE_NAMES.get().is_none() {
             WIRE_NAMES.set(wire_names_tmp).unwrap();
@@ -521,10 +502,9 @@ impl AdventOfCode for Puzzle {
         Adder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let propagation_table = PROPAGATION_TABLE.get().unwrap();
-        let wire_names = WIRE_NAMES.get().unwrap();
-        let wires = wire_names.iter().collect::<Vec<_>>();
+        let wires = WIRE_NAMES.get().unwrap().iter().collect::<Vec<_>>();
 
+        /*
         let mut step0 = Descriptor::new(vec![]);
         step0.evaluate();
         println!("initial:{}", fmt(&step0.target_vector));
@@ -586,71 +566,20 @@ impl AdventOfCode for Puzzle {
         step4.evaluate();
         println!("z37-pqt:{}", fmt(&step4.target_vector));
         println!("       :{}", fmt(&step4.check_structure()));
-
         // return "not implemented".to_string();
-
-        // dbg!(fmt(&step1.target_vector));
-        // let mut jmv = Descriptor::new(vec![((*z05.0, *z05.1), (*jmv.0, *jmv.1))]);
-        // jmv.evaluate();
-        // dbg!(fmt(&jmv.target_vector));
-        // let mut pqt = Descriptor::new(vec![((*z05.0, *z05.1), (*pqt.0, *pqt.1))]);
-        // pqt.evaluate();
-        // dbg!(fmt(&pqt.target_vector));
-        // let gdd = propagation_table
-        //     .get_key_value(&(b'g', b'd', b'd'))
-        //     .unwrap();
-
-        // let mut init = Descriptor::new(Vec::new());
-        // let (d_tree, u_tree) = init.wire_trees(true, true);
-        // let inputs = init.wire_affects(&u_tree, wire_names.get(&(b'g', b'd', b'd')).unwrap());
-        // dbg!(inputs
-        //     .iter()
-        //     .filter(|w| [b'x', b'y'].contains(&w.0))
-        //     .map(|w| wire_to_string(w))
-        //     .collect::<Vec<_>>());
-
-        // let outputs = init.wire_affects(&d_tree, wire_names.get(&(b'g', b'd', b'd')).unwrap());
-        // dbg!(outputs
-        //     .iter()
-        //     .filter(|w| [b'z'].contains(&w.0))
-        //     .map(|w| wire_to_string(w))
-        //     .collect::<Vec<_>>());
-        // return "not implemented".to_string();
+        */
 
         let mut generated = 0;
-        let _input_bits = INPUT_BITS.get().unwrap();
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
         let mut init = Descriptor::new(Vec::new());
         init.evaluate();
-        dbg!(fmt(&init.target_vector));
         to_visit.push(Reverse(init));
-        // if let Some(brokens) = init.check_correctness() {
-        // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
-        // }
         let mut visited: FxHashSet<Descriptor> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        let mut best: usize = 99;
+        let mut best: usize = *INPUT_BITS.get().unwrap();
         while let Some(Reverse(desc)) = to_visit.pop() {
-            if generated == 221 {
-                // dbg!(desc.first_target());
-                // let index = desc.first_target();
-                // let (_d_tree, u_tree) = desc.wire_trees(false, true);
-                // let inputs = desc
-                //     .wire_affects(&u_tree, ord_to_wire(index, b'z'))
-                //     .iter()
-                //     .filter(|w| ![b'x', b'y'].contains(&w.0))
-                //     .map(|w| wire_to_string(w))
-                //     .collect::<Vec<_>>();
-                // dbg!(inputs);
-                // dbg!(desc.number_of_targets());
-                // panic!();
-            }
             if desc.number_of_targets() == 0 {
                 progress!("");
-                println!("{desc}");
-                // if desc.check_structure().iter().any(|b| *b) {
-                //     continue;
-                // }
                 return desc
                     .overrides
                     .iter()
@@ -664,28 +593,7 @@ impl AdventOfCode for Puzzle {
             }
             best = best.min(desc.number_of_targets());
             let index = desc.first_target();
-            // assert!(index <= 5);
             let (d_tree, u_tree) = desc.wire_trees(true, true);
-            // FIXME: 以下は構造検査を有効にするまで妥当ではない
-            // assert!((0..index).all(|i| desc
-            //     .wire_affects(&u_tree, ord_to_wire(i, b'z'))
-            //     .iter()
-            //     .filter(|w| [b'x', b'y'].contains(&w.0))
-            //     .count()
-            //     == (i + 1) * 2));
-            // assert!(
-            //     desc.wire_affects(&u_tree, ord_to_wire(index, b'z'))
-            //         .iter()
-            //         .filter(|w| [b'x', b'y'].contains(&w.0))
-            //         .count()
-            //         != (index + 1) * 2,
-            //     "aa{} {}",
-            //     index,
-            //     desc.wire_affects(&u_tree, ord_to_wire(index, b'z'))
-            //         .iter()
-            //         .filter(|w| [b'x', b'y'].contains(&w.0))
-            //         .count()
-            // );
             let related_wires = desc
                 .wire_affects(&u_tree, ord_to_wire(index, b'z'))
                 .iter()
@@ -695,15 +603,9 @@ impl AdventOfCode for Puzzle {
             assert!(related_wires.contains(&ord_to_wire(index, b'z')));
             let _output_wire = ord_to_wire(index, b'z');
             let cones = build_cones(&d_tree, &wires);
-            // if generated == 221 {
-            //     println!(
-            //         "related_wires: {}",
-            //         related_wires.iter().map(|w| wire_to_string(w)).join(", ")
-            //     );
-            // }
             for &wire1 in related_wires.iter() {
                 let cone1 = cones.get(wire1).unwrap();
-                for wire2 in wire_names.iter() {
+                for wire2 in wires.iter() {
                     if [b'x', b'y'].contains(&wire2.0) {
                         continue;
                     }
@@ -717,25 +619,7 @@ impl AdventOfCode for Puzzle {
                     if let Some(mut new_desc) = desc.add_swaps(wire1, wire2) {
                         if !visited.contains(&new_desc) {
                             new_desc.evaluate();
-                            if new_desc <= desc {
-                                // if false
-                                //     && *wire1 == (b'z', b'0', b'5')
-                                //     && *wire2 == (b'g', b'd', b'd')
-                                // {
-                                //     dbg!();
-                                //     dbg!(format!("{}", desc));
-                                //     dbg!(format!("{}", new_desc));
-                                //     dbg!(desc.overrides.len());
-                                //     dbg!(new_desc.overrides.len());
-                                //     dbg!(new_desc.cmp(&desc));
-                                //     let mut gdd_desc =
-                                //         Descriptor::new(vec![((*z05.0, *z05.1), (*gdd.0, *gdd.1))]);
-                                //     gdd_desc.evaluate();
-                                //     assert_eq!(new_desc, gdd_desc);
-                                // }
-                                // if new_desc < desc {
-                                //     dbg!(format!("{}", new_desc));
-                                // }
+                            if new_desc < desc {
                                 to_visit.push(Reverse(new_desc));
                                 generated += 1;
                                 progress!(format!(
@@ -746,8 +630,6 @@ impl AdventOfCode for Puzzle {
                                     fmt(&desc.target_vector),
                                     generated
                                 ));
-                            } else {
-                                // dbg!(fmt(&new_desc.target_vector));
                             }
                         }
                     }
