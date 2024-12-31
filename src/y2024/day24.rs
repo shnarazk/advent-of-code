@@ -99,28 +99,32 @@ impl Adder {
         let input_bits = *INPUT_BITS.get().unwrap();
         let bit1 = int_to_bit_vector(arg1, input_bits);
         let bit2 = int_to_bit_vector(arg2, input_bits);
-        let mut values: FxHashMap<&'static Wire, bool> =
+        let mut values: FxHashMap<&'static Wire, Option<bool>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
 
         for i in 0..input_bits {
             let wire1 = ord_to_wire(i, b'x');
-            values.insert(wire1, bit1.get(i) == Some(&true));
+            values.insert(wire1, Some(bit1.get(i) == Some(&true)));
             let wire2 = ord_to_wire(i, b'y');
-            values.insert(wire2, bit2.get(i) == Some(&true));
+            values.insert(wire2, Some(bit2.get(i) == Some(&true)));
         }
         fn gate_output(
             dep_graph: &FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>,
-            values: &mut FxHashMap<&'static Wire, bool>,
+            values: &mut FxHashMap<&'static Wire, Option<bool>>,
             wire: &'static Wire,
         ) -> Option<bool> {
             // dbg!(wire_to_string(wire));
             if let Some(b) = values.get(wire) {
-                return Some(*b);
+                if b.is_none() {
+                    return None;
+                }
+                return *b;
             }
             let Some((g, w1, w2)) = dep_graph.get(wire) else {
                 // panic!("gate_output: {}", wire_to_string(wire));
                 return None;
             };
+            values.insert(wire, None);
             let b1 = gate_output(dep_graph, values, w1)?;
             let b2 = gate_output(dep_graph, values, w2)?;
             let b = match g {
@@ -128,14 +132,18 @@ impl Adder {
                 Gate::Or => b1 | b2,
                 Gate::Xor => b1 ^ b2,
             };
-            values.insert(wire, b);
+            values.insert(wire, Some(b));
             Some(b)
         }
         (0..=input_bits).for_each(|i| {
             gate_output(&self.dep_graph, &mut values, ord_to_wire(i, b'z'));
         });
         let v = (0..=input_bits)
-            .map(|i| *values.get(ord_to_wire(i, b'z')).unwrap())
+            .map(|i| {
+                values
+                    .get(ord_to_wire(i, b'z'))
+                    .map_or(false, |b| b.map_or(false, |b| b))
+            })
             .collect::<Vec<_>>();
         // let v = values
         //     .iter()
@@ -518,39 +526,73 @@ impl AdventOfCode for Puzzle {
         let wire_names = WIRE_NAMES.get().unwrap();
         let wires = wire_names.iter().collect::<Vec<_>>();
 
+        let mut step0 = Descriptor::new(vec![]);
+        step0.evaluate();
+        dbg!(fmt(&step0.target_vector));
+
         let z05 = propagation_table
             .get_key_value(&(b'z', b'0', b'5'))
-            .unwrap();
-        let css = propagation_table
-            .get_key_value(&(b'c', b's', b's'))
-            .unwrap();
-        let cwt = propagation_table
-            .get_key_value(&(b'c', b'w', b't'))
             .unwrap();
         let gdd = propagation_table
             .get_key_value(&(b'g', b'd', b'd'))
             .unwrap();
+
+        let Some(mut step1) = step0.add_swaps(*z05.0, *gdd.0) else {
+            panic!();
+        };
+        step1.evaluate();
+        dbg!(fmt(&step1.target_vector));
+
+        let z09 = propagation_table
+            .get_key_value(&(b'z', b'0', b'9'))
+            .unwrap();
+        let cwt = propagation_table
+            .get_key_value(&(b'c', b'w', b't'))
+            .unwrap();
+
+        let Some(mut step2) = step1.add_swaps(*z09.0, *cwt.0) else {
+            panic!();
+        };
+        step2.evaluate();
+        dbg!(fmt(&step2.target_vector));
+
+        let css = propagation_table
+            .get_key_value(&(b'c', b's', b's'))
+            .unwrap();
         let jmv = propagation_table
             .get_key_value(&(b'j', b'm', b'v'))
             .unwrap();
+
+        let Some(mut step3) = step2.add_swaps(*css.0, *jmv.0) else {
+            panic!();
+        };
+        step3.evaluate();
+        dbg!(fmt(&step3.target_vector));
+
+        let z37 = propagation_table
+            .get_key_value(&(b'z', b'3', b'7'))
+            .unwrap();
+
         let pqt = propagation_table
             .get_key_value(&(b'p', b'q', b't'))
             .unwrap();
-        let mut css = Descriptor::new(vec![((*z05.0, *z05.1), (*css.0, *css.1))]);
-        css.evaluate();
-        dbg!(fmt(&css.target_vector));
-        let mut cwt = Descriptor::new(vec![((*z05.0, *z05.1), (*cwt.0, *cwt.1))]);
-        cwt.evaluate();
-        dbg!(fmt(&cwt.target_vector));
-        let mut gdd = Descriptor::new(vec![((*z05.0, *z05.1), (*gdd.0, *gdd.1))]);
-        gdd.evaluate();
-        dbg!(fmt(&gdd.target_vector));
-        let mut jmv = Descriptor::new(vec![((*z05.0, *z05.1), (*jmv.0, *jmv.1))]);
-        jmv.evaluate();
-        dbg!(fmt(&jmv.target_vector));
-        let mut pqt = Descriptor::new(vec![((*z05.0, *z05.1), (*pqt.0, *pqt.1))]);
-        pqt.evaluate();
-        dbg!(fmt(&pqt.target_vector));
+
+        let Some(mut step4) = step3.add_swaps(*z37.0, *pqt.0) else {
+            panic!();
+        };
+        step4.evaluate();
+        dbg!(fmt(&step4.target_vector));
+
+        return "not implemented".to_string();
+
+        // dbg!(fmt(&step1.target_vector));
+        // let mut jmv = Descriptor::new(vec![((*z05.0, *z05.1), (*jmv.0, *jmv.1))]);
+        // jmv.evaluate();
+        // dbg!(fmt(&jmv.target_vector));
+        // let mut pqt = Descriptor::new(vec![((*z05.0, *z05.1), (*pqt.0, *pqt.1))]);
+        // pqt.evaluate();
+        return "not implemented".to_string();
+        // dbg!(fmt(&pqt.target_vector));
         // let gdd = propagation_table
         //     .get_key_value(&(b'g', b'd', b'd'))
         //     .unwrap();
