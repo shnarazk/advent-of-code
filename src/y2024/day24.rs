@@ -11,6 +11,7 @@ use {
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
+        cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
         sync::OnceLock,
@@ -59,7 +60,7 @@ enum Gate {
 
 type Wire = (u8, u8, u8);
 
-type GateSpec = (Gate, &'static Wire, &'static Wire, &'static Wire);
+type GateSpec = (&'static Wire, (Gate, &'static Wire, &'static Wire));
 
 /// convert from 'ord', 0 to 43, to wire
 fn ord_to_wire(n: usize, prefix: u8) -> &'static Wire {
@@ -81,18 +82,18 @@ fn wire_to_string((a, b, c): &Wire) -> String {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Adder {
-    mapper: FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire>,
+    dep_graph: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>,
 }
 
 impl Adder {
     fn new(overrides: &[(GateSpec, GateSpec)]) -> Adder {
-        let mut mapper: FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire> =
+        let mut dep_graph: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)> =
             PROPAGATION_TABLE.get().unwrap().clone();
-        for (g1, g2) in overrides.iter() {
-            mapper.insert((g1.0, g1.1, g1.2), g1.3);
-            mapper.insert((g2.0, g2.1, g2.2), g2.3);
+        for ((g1_out, g1), (g2_out, g2)) in overrides.iter() {
+            dep_graph.insert(*g1_out, *g2);
+            dep_graph.insert(*g2_out, *g1);
         }
-        Adder { mapper }
+        Adder { dep_graph }
     }
     fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
         let input_bits = *INPUT_BITS.get().unwrap();
@@ -107,33 +108,42 @@ impl Adder {
             let wire2 = ord_to_wire(i, b'y');
             values.insert(wire2, bit2.get(i) == Some(&true));
         }
-
-        let mut propagated = true;
-        while propagated {
-            propagated = false;
-            for (gate, output) in self.mapper.iter() {
-                if let (Some(b1), Some(b2), None) =
-                    (values.get(&gate.1), values.get(&gate.2), values.get(output))
-                {
-                    values.insert(
-                        *output,
-                        match gate.0 {
-                            Gate::And => b1 & b2,
-                            Gate::Or => b1 | b2,
-                            Gate::Xor => b1 ^ b2,
-                        },
-                    );
-                    propagated = true;
-                }
+        fn gate_output(
+            dep_graph: &FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>,
+            values: &mut FxHashMap<&'static Wire, bool>,
+            wire: &'static Wire,
+        ) -> Option<bool> {
+            // dbg!(wire_to_string(wire));
+            if let Some(b) = values.get(wire) {
+                return Some(*b);
             }
+            let Some((g, w1, w2)) = dep_graph.get(wire) else {
+                // panic!("gate_output: {}", wire_to_string(wire));
+                return None;
+            };
+            let b1 = gate_output(dep_graph, values, w1)?;
+            let b2 = gate_output(dep_graph, values, w2)?;
+            let b = match g {
+                Gate::And => b1 & b2,
+                Gate::Or => b1 | b2,
+                Gate::Xor => b1 ^ b2,
+            };
+            values.insert(wire, b);
+            Some(b)
         }
-        let v = values
-            .iter()
-            .filter(|(wire, _)| wire.0 == b'z') // && wire_to_ord(wire) <= self.width)
-            .sorted()
-            .map(|(_, b)| b)
-            .cloned()
-            .collect::<Vec<bool>>();
+        (0..=input_bits).for_each(|i| {
+            gate_output(&self.dep_graph, &mut values, ord_to_wire(i, b'z'));
+        });
+        let v = (0..=input_bits)
+            .map(|i| *values.get(ord_to_wire(i, b'z')).unwrap())
+            .collect::<Vec<_>>();
+        // let v = values
+        //     .iter()
+        //     .filter(|(wire, _)| wire.0 == b'z') // && wire_to_ord(wire) <= self.width)
+        //     .sorted()
+        //     .map(|(_, b)| b)
+        //     .cloned()
+        //     .collect::<Vec<bool>>();
         let val = v
             .iter()
             .rev()
@@ -144,14 +154,28 @@ impl Adder {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Serialize)]
 pub struct Descriptor {
-    broken_bit: usize,
+    target_vector: Vec<bool>,
     overrides: Vec<(GateSpec, GateSpec)>,
 }
 
 impl Ord for Descriptor {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.broken_bit * (5 - self.overrides.len()))
-            .cmp(&(other.broken_bit * (5 - other.overrides.len())))
+        match (
+            self.target_vector
+                .iter()
+                .enumerate()
+                .all(|(i, b)| !*b || other.target_vector[i]),
+            other
+                .target_vector
+                .iter()
+                .enumerate()
+                .all(|(i, b)| !*b || self.target_vector[i]),
+        ) {
+            (true, true) => Ordering::Equal,
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            (false, false) => other.first_target().cmp(&self.first_target()),
+        }
     }
 }
 
@@ -161,12 +185,32 @@ impl PartialOrd for Descriptor {
     }
 }
 
+impl std::fmt::Display for Descriptor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "({}){}",
+            self.number_of_targets(),
+            fmt(&self.target_vector)
+        )
+    }
+}
+
 impl Descriptor {
-    fn new(broken_bit: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+    fn new(overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
         Descriptor {
-            broken_bit,
+            target_vector: Vec::new(),
             overrides,
         }
+    }
+    fn evaluate(&mut self) {
+        self.target_vector = self
+            .check_correctness()
+            // .iter()
+            // .zip(self.check_structure().iter())
+            // .map(|(a, b)| *a || !*b)
+            // .collect();
+            ;
     }
     fn add_swaps(&self, w1: &'static Wire, w2: &'static Wire) -> Option<Descriptor> {
         if w1 == w2 {
@@ -175,18 +219,18 @@ impl Descriptor {
         let mut swaps = self.overrides.clone();
         if swaps
             .iter()
-            .any(|pair| [w1, w2].contains(&pair.0 .3) || [w1, w2].contains(&pair.1 .3))
+            .any(|pair| [w1, w2].contains(&pair.0 .0) || [w1, w2].contains(&pair.1 .0))
         {
             return None;
         }
         swaps.push(build_swapped_pair((w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(self.broken_bit, swaps))
+        Some(Descriptor::new(swaps))
     }
     fn build_adder(&self) -> Adder {
         Adder::new(&self.overrides)
     }
-    fn check_correctness(&self) -> Option<Vec<bool>> {
+    fn check_correctness(&self) -> Vec<bool> {
         fn merge_or(acc: Vec<bool>, v: Vec<bool>) -> Vec<bool> {
             acc.iter()
                 .zip(v.iter())
@@ -195,7 +239,7 @@ impl Descriptor {
         }
         let adder = self.build_adder();
         let input_bits = *INPUT_BITS.get().unwrap();
-        let ret: Vec<bool> = (0..=input_bits)
+        (0..=input_bits)
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&bit1| {
@@ -207,7 +251,7 @@ impl Descriptor {
                         (0..=input_bits)
                             .map(|i| {
                                 let bit_mask = 1_usize << i;
-                                added % bit_mask != (x + y) % bit_mask
+                                added & bit_mask != (x + y) & bit_mask
                             })
                             .collect::<Vec<_>>()
                     })
@@ -216,19 +260,15 @@ impl Descriptor {
             .collect::<Vec<_>>()
             .iter()
             .cloned()
-            .fold(vec![false; input_bits + 1], merge_or);
-        if ret.iter().all(|n| !*n) {
-            None
-        } else {
-            Some(ret)
-        }
+            .fold(vec![false; input_bits + 1], merge_or)
     }
     /// return a vector of wrong structure bools
     /// This measure doesn't return mono-decreasing values
     /// So we can't use to cut branches. This is the final checker.
-    fn check_structure(&self) -> Option<Vec<bool>> {
+    #[allow(dead_code)]
+    fn check_structure(&self) -> Vec<bool> {
         let input_bits = *INPUT_BITS.get().unwrap();
-        let (_, up_trees) = self.wire_trees();
+        let (_, up_trees) = self.wire_trees(false, true);
         let mut ret = (0..input_bits)
             .collect::<Vec<_>>()
             .par_iter()
@@ -254,15 +294,14 @@ impl Descriptor {
             input_len != 2 * n
         };
         ret.push(carry_bit);
-        if ret.iter().all(|b| !b) {
-            None
-        } else {
-            Some(ret)
-        }
+        ret
     }
     /// return `(down_tree, up_tree)`
+    #[allow(dead_code)]
     fn wire_trees(
         &self,
+        down: bool,
+        up: bool,
     ) -> (
         FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
         FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
@@ -274,14 +313,18 @@ impl Descriptor {
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         let mut up_tree: FxHashMap<&'static Wire, FxHashSet<&'static Wire>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        for ((_, i1, i2), o) in adder.mapper.iter() {
+        for (o, (_, i1, i2)) in adder.dep_graph.iter() {
             wires.insert(*i1);
             wires.insert(*i2);
             wires.insert(*o);
-            down_tree.entry(*i1).or_default().insert(o);
-            down_tree.entry(*i2).or_default().insert(o);
-            up_tree.entry(*o).or_default().insert(i1);
-            up_tree.entry(*o).or_default().insert(i2);
+            if down {
+                down_tree.entry(*i1).or_default().insert(o);
+                down_tree.entry(*i2).or_default().insert(o);
+            }
+            if up {
+                up_tree.entry(*o).or_default().insert(i1);
+                up_tree.entry(*o).or_default().insert(i2);
+            }
         }
         (down_tree, up_tree)
     }
@@ -289,7 +332,7 @@ impl Descriptor {
         &self,
         tree: &FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
         wire: &'static Wire,
-    ) -> FxHashSet<&Wire> {
+    ) -> FxHashSet<&'static Wire> {
         let mut subtree: FxHashSet<&Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         if let Some(linked) = tree.get(&wire) {
             let mut to_visit: Vec<&Wire> = linked.iter().cloned().collect::<Vec<_>>();
@@ -318,11 +361,19 @@ impl Descriptor {
         debug_assert!(subtree.iter().any(|w| [b'x', b'y', b'z'].contains(&w.0)));
         subtree
     }
+    /// return the first broken bit
+    fn first_target(&self) -> usize {
+        self.target_vector.iter().position(|n| *n).unwrap()
+    }
+    /// return the number of broken bits
+    fn number_of_targets(&self) -> usize {
+        self.target_vector.iter().filter(|b| **b).count()
+    }
 }
 
 static WIRE_NAMES: OnceLock<FxHashSet<Wire>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
-static PROPAGATION_TABLE: OnceLock<FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire>> =
+static PROPAGATION_TABLE: OnceLock<FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>> =
     OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): (&'static Wire, &'static Wire)) -> (GateSpec, GateSpec) {
@@ -332,11 +383,13 @@ fn build_swapped_pair((pick1, pick2): (&'static Wire, &'static Wire)) -> (GateSp
     let p1 = pick1.min(pick2);
     let p2 = pick1.max(pick2);
     let specs = PROPAGATION_TABLE.get().unwrap();
-    let spec1 = specs.iter().find(|(_, o)| **o == p1).unwrap();
-    let spec2 = specs.iter().find(|(_, o)| **o == p2).unwrap();
+    let spec1 = specs.iter().find(|(o, _)| **o == p1).unwrap();
+    let spec2 = specs.iter().find(|(o, _)| **o == p2).unwrap();
     (
-        (spec1.0 .0, spec1.0 .1, spec1.0 .2, p2),
-        (spec2.0 .0, spec2.0 .1, spec2.0 .2, p1),
+        (p1, (spec1.1 .0, spec1.1 .1, spec1.1 .2)),
+        (p2, (spec2.1 .0, spec2.1 .1, spec2.1 .2)),
+        // (p2, (spec1.1 .0, spec1.1 .1, spec1.1 .2)),
+        // (p1, (spec2.1 .0, spec2.1 .1, spec2.1 .2)),
     )
 }
 
@@ -405,12 +458,12 @@ impl AdventOfCode for Puzzle {
             WIRE_NAMES.set(wire_names_tmp).unwrap();
         }
         let wire_names: &'static FxHashSet<Wire> = WIRE_NAMES.get().unwrap();
-        let mut propagation_table: FxHashMap<(Gate, &'static Wire, &'static Wire), &'static Wire> =
+        let mut propagation_table: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)> =
             FxHashMap::default();
         for (g, i1, i2, o) in links.iter() {
             propagation_table.insert(
-                (*g, wire_names.get(i1).unwrap(), wire_names.get(i2).unwrap()),
                 wire_names.get(o).unwrap(),
+                (*g, wire_names.get(i1).unwrap(), wire_names.get(i2).unwrap()),
             );
         }
         if PROPAGATION_TABLE.get().is_none() {
@@ -429,7 +482,7 @@ impl AdventOfCode for Puzzle {
             .get()
             .unwrap()
             .iter()
-            .map(|((_, i1, i2), o)| {
+            .map(|(o, (_, i1, i2))| {
                 (
                     wire_to_string(o),
                     vec![wire_to_string(i1), wire_to_string(i2)],
@@ -461,103 +514,204 @@ impl AdventOfCode for Puzzle {
         Adder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let propagation_table = PROPAGATION_TABLE.get().unwrap();
         let wire_names = WIRE_NAMES.get().unwrap();
-        let _input_bits = INPUT_BITS.get().unwrap();
         let wires = wire_names.iter().collect::<Vec<_>>();
-        let mut to_visit: BinaryHeap<Descriptor> = BinaryHeap::new();
 
-        let init = Descriptor::new(0, Vec::new());
-        to_visit.push(init);
+        let z05 = propagation_table
+            .get_key_value(&(b'z', b'0', b'5'))
+            .unwrap();
+        let css = propagation_table
+            .get_key_value(&(b'c', b's', b's'))
+            .unwrap();
+        let cwt = propagation_table
+            .get_key_value(&(b'c', b'w', b't'))
+            .unwrap();
+        let gdd = propagation_table
+            .get_key_value(&(b'g', b'd', b'd'))
+            .unwrap();
+        let jmv = propagation_table
+            .get_key_value(&(b'j', b'm', b'v'))
+            .unwrap();
+        let pqt = propagation_table
+            .get_key_value(&(b'p', b'q', b't'))
+            .unwrap();
+        let mut css = Descriptor::new(vec![((*z05.0, *z05.1), (*css.0, *css.1))]);
+        css.evaluate();
+        dbg!(fmt(&css.target_vector));
+        let mut cwt = Descriptor::new(vec![((*z05.0, *z05.1), (*cwt.0, *cwt.1))]);
+        cwt.evaluate();
+        dbg!(fmt(&cwt.target_vector));
+        let mut gdd = Descriptor::new(vec![((*z05.0, *z05.1), (*gdd.0, *gdd.1))]);
+        gdd.evaluate();
+        dbg!(fmt(&gdd.target_vector));
+        let mut jmv = Descriptor::new(vec![((*z05.0, *z05.1), (*jmv.0, *jmv.1))]);
+        jmv.evaluate();
+        dbg!(fmt(&jmv.target_vector));
+        let mut pqt = Descriptor::new(vec![((*z05.0, *z05.1), (*pqt.0, *pqt.1))]);
+        pqt.evaluate();
+        dbg!(fmt(&pqt.target_vector));
+        // let gdd = propagation_table
+        //     .get_key_value(&(b'g', b'd', b'd'))
+        //     .unwrap();
+
+        // let mut init = Descriptor::new(Vec::new());
+        // let (d_tree, u_tree) = init.wire_trees(true, true);
+        // let inputs = init.wire_affects(&u_tree, wire_names.get(&(b'g', b'd', b'd')).unwrap());
+        // dbg!(inputs
+        //     .iter()
+        //     .filter(|w| [b'x', b'y'].contains(&w.0))
+        //     .map(|w| wire_to_string(w))
+        //     .collect::<Vec<_>>());
+
+        // let outputs = init.wire_affects(&d_tree, wire_names.get(&(b'g', b'd', b'd')).unwrap());
+        // dbg!(outputs
+        //     .iter()
+        //     .filter(|w| [b'z'].contains(&w.0))
+        //     .map(|w| wire_to_string(w))
+        //     .collect::<Vec<_>>());
+        // return "not implemented".to_string();
+
+        let mut generated = 0;
+        let _input_bits = INPUT_BITS.get().unwrap();
+        let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
+        let mut init = Descriptor::new(Vec::new());
+        init.evaluate();
+        dbg!(fmt(&init.target_vector));
+        to_visit.push(Reverse(init));
         // if let Some(brokens) = init.check_correctness() {
-        //     // dbg!(fmt(&init.check_connectivity().unwrap()));
-        //     // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
+        // init.num_broken = brokens.iter().filter(|n| 0 < **n).count();
         // }
         let mut visited: FxHashSet<Descriptor> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         let mut best: usize = 99;
-        while let Some(mut desc) = to_visit.pop() {
-            if visited.contains(&desc) {
-                continue;
+        while let Some(Reverse(desc)) = to_visit.pop() {
+            if generated == 221 {
+                // dbg!(desc.first_target());
+                // let index = desc.first_target();
+                // let (_d_tree, u_tree) = desc.wire_trees(false, true);
+                // let inputs = desc
+                //     .wire_affects(&u_tree, ord_to_wire(index, b'z'))
+                //     .iter()
+                //     .filter(|w| ![b'x', b'y'].contains(&w.0))
+                //     .map(|w| wire_to_string(w))
+                //     .collect::<Vec<_>>();
+                // dbg!(inputs);
+                // dbg!(desc.number_of_targets());
+                // panic!();
             }
-            visited.insert(desc.clone());
-            best = best.min(desc.broken_bit);
-            let (d_tree, _u_tree) = desc.wire_trees();
-            if let Some(brokens) = desc.check_correctness() {
-                let broken_bit = brokens.iter().position(|n| *n).unwrap();
-                if broken_bit < desc.broken_bit {
+            if desc.number_of_targets() == 0 {
+                progress!("");
+                println!("{desc}");
+                if desc.check_structure().iter().any(|b| *b) {
                     continue;
                 }
-                desc.broken_bit = broken_bit;
-                progress!(format!(
-                    "#broken:{:>2}({:>2}) #swaps:{} |{:>6}| {}",
-                    desc.broken_bit,
-                    best,
-                    desc.overrides.len(),
-                    visited.len(),
-                    fmt(&brokens)
-                ));
-                let index = brokens.iter().position(|b| *b).unwrap();
-                if desc.overrides.len() < 4 {
-                    let cones = build_cones(&d_tree, &wires);
-                    let _strict_mode = {
-                        let wrong_bit = brokens.iter().position(|b| *b).unwrap();
-                        let invalid_bit = desc
-                            .check_structure()
-                            .map_or_else(|| 0, |v| v.iter().position(|b| *b).unwrap());
-                        wrong_bit == invalid_bit
-                    };
-                    let related_wires = wire_names
-                        .iter()
-                        .filter(|w| ![b'x', b'y'].contains(&w.0))
-                        .filter(|&w| {
-                            let cone = cones.get(w).unwrap();
-                            let w_level = cone
-                                .iter()
-                                .filter(|w| w.0 == b'z')
-                                .min()
-                                .map_or(usize::MAX, |w| wire_to_ord(w));
-                            w_level <= index
-                        })
-                        .collect::<Vec<_>>();
-                    let output_wire = ord_to_wire(index, b'z');
-                    for wire1 in related_wires.iter() {
-                        let cone1 = cones.get(wire1).unwrap();
-                        for wire2 in related_wires.iter() {
-                            if cone1.contains(wire2) {
-                                continue;
-                            }
-                            let cone2 = cones.get(wire2).unwrap();
-                            if cone2.contains(wire1) {
-                                continue;
-                            }
-                            if
-                            /* strict_mode
-                            && */
-                            !cone1.iter().any(|w| *w == output_wire)
-                                && !cone2.iter().any(|w| *w == output_wire)
-                            {
-                                continue;
-                            }
-                            if let Some(new_adder) = desc.add_swaps(wire1, wire2) {
-                                if visited.contains(&new_adder) {
-                                    continue;
-                                }
-                                to_visit.push(new_adder);
-                            }
-                        }
-                    }
-                }
-            } else if desc.check_structure().is_none() {
-                progress!("");
                 return desc
                     .overrides
                     .iter()
-                    .flat_map(|pair| [pair.0 .3, pair.1 .3])
+                    .flat_map(|pair| [pair.0 .0, pair.1 .0])
                     .sorted()
                     .map(wire_to_string)
                     .join(",");
             }
+            if visited.contains(&desc) || 4 <= desc.overrides.len() {
+                continue;
+            }
+            best = best.min(desc.number_of_targets());
+            let index = desc.first_target();
+            // assert!(index <= 5);
+            let (d_tree, u_tree) = desc.wire_trees(true, true);
+            // FIXME: 以下は構造検査を有効にするまで妥当ではない
+            // assert!((0..index).all(|i| desc
+            //     .wire_affects(&u_tree, ord_to_wire(i, b'z'))
+            //     .iter()
+            //     .filter(|w| [b'x', b'y'].contains(&w.0))
+            //     .count()
+            //     == (i + 1) * 2));
+            // assert!(
+            //     desc.wire_affects(&u_tree, ord_to_wire(index, b'z'))
+            //         .iter()
+            //         .filter(|w| [b'x', b'y'].contains(&w.0))
+            //         .count()
+            //         != (index + 1) * 2,
+            //     "aa{} {}",
+            //     index,
+            //     desc.wire_affects(&u_tree, ord_to_wire(index, b'z'))
+            //         .iter()
+            //         .filter(|w| [b'x', b'y'].contains(&w.0))
+            //         .count()
+            // );
+            let related_wires = desc
+                .wire_affects(&u_tree, ord_to_wire(index, b'z'))
+                .iter()
+                .filter(|w| ![b'x', b'y'].contains(&w.0))
+                .cloned()
+                .collect::<Vec<_>>();
+            assert!(related_wires.contains(&ord_to_wire(index, b'z')));
+            let _output_wire = ord_to_wire(index, b'z');
+            let cones = build_cones(&d_tree, &wires);
+            // if generated == 221 {
+            //     println!(
+            //         "related_wires: {}",
+            //         related_wires.iter().map(|w| wire_to_string(w)).join(", ")
+            //     );
+            // }
+            for &wire1 in related_wires.iter() {
+                let cone1 = cones.get(wire1).unwrap();
+                for wire2 in wire_names.iter() {
+                    if [b'x', b'y'].contains(&wire2.0) {
+                        continue;
+                    }
+                    if cone1.contains(wire2) {
+                        continue;
+                    }
+                    let cone2 = cones.get(wire2).unwrap();
+                    if cone2.contains(wire1) {
+                        continue;
+                    }
+                    if let Some(mut new_desc) = desc.add_swaps(wire1, wire2) {
+                        if !visited.contains(&new_desc) {
+                            new_desc.evaluate();
+                            if new_desc <= desc {
+                                // if false
+                                //     && *wire1 == (b'z', b'0', b'5')
+                                //     && *wire2 == (b'g', b'd', b'd')
+                                // {
+                                //     dbg!();
+                                //     dbg!(format!("{}", desc));
+                                //     dbg!(format!("{}", new_desc));
+                                //     dbg!(desc.overrides.len());
+                                //     dbg!(new_desc.overrides.len());
+                                //     dbg!(new_desc.cmp(&desc));
+                                //     let mut gdd_desc =
+                                //         Descriptor::new(vec![((*z05.0, *z05.1), (*gdd.0, *gdd.1))]);
+                                //     gdd_desc.evaluate();
+                                //     assert_eq!(new_desc, gdd_desc);
+                                // }
+                                // if new_desc < desc {
+                                //     dbg!(format!("{}", new_desc));
+                                // }
+                                to_visit.push(Reverse(new_desc));
+                                generated += 1;
+                                progress!(format!(
+                                    " ❌{:>2}/{:>2} 📃{:<6} {} 💥{}",
+                                    desc.number_of_targets(),
+                                    best,
+                                    visited.len(),
+                                    fmt(&desc.target_vector),
+                                    generated
+                                ));
+                            } else {
+                                // dbg!(fmt(&new_desc.target_vector));
+                            }
+                        }
+                    }
+                }
+            }
+            visited.insert(desc);
         }
+        println!();
+        dbg!(generated);
         unreachable!()
     }
 }
