@@ -537,7 +537,7 @@ impl AdventOfCode for Puzzle {
             .get_key_value(&(b'g', b'd', b'd'))
             .unwrap();
 
-        let Some(mut step1) = step0.add_swaps(*z05.0, *gdd.0) else {
+        let Some(mut step1) = step0.add_swaps(z05.0, gdd.0) else {
             panic!();
         };
         step1.evaluate();
@@ -551,7 +551,7 @@ impl AdventOfCode for Puzzle {
             .get_key_value(&(b'c', b'w', b't'))
             .unwrap();
 
-        let Some(mut step2) = step1.add_swaps(*z09.0, *cwt.0) else {
+        let Some(mut step2) = step1.add_swaps(z09.0, cwt.0) else {
             panic!();
         };
         step2.evaluate();
@@ -565,7 +565,7 @@ impl AdventOfCode for Puzzle {
             .get_key_value(&(b'j', b'm', b'v'))
             .unwrap();
 
-        let Some(mut step3) = step2.add_swaps(*css.0, *jmv.0) else {
+        let Some(mut step3) = step2.add_swaps(css.0, jmv.0) else {
             panic!();
         };
         step3.evaluate();
@@ -580,7 +580,7 @@ impl AdventOfCode for Puzzle {
             .get_key_value(&(b'p', b'q', b't'))
             .unwrap();
 
-        let Some(mut step4) = step3.add_swaps(*z37.0, *pqt.0) else {
+        let Some(mut step4) = step3.add_swaps(z37.0, pqt.0) else {
             panic!();
         };
         step4.evaluate();
