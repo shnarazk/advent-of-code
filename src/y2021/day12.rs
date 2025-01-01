@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2021/day/12>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashSet,
 };
 
@@ -86,27 +83,40 @@ impl Puzzle {
     }
 }
 
+mod parser {
+    use {
+        super::Node,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, repeat, separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_node(s: &mut &str) -> PResult<Node> {
+        alt((
+            "start".map(|_| Node::Start),
+            "end".map(|_| Node::End),
+            repeat(1.., one_of('A'..='Z')).map(Node::Big),
+            repeat(1.., one_of('a'..='z')).map(Node::Small),
+        ))
+        .parse_next(s)
+    }
+    fn parse_line(s: &mut &str) -> PResult<(Node, Node)> {
+        seq!((parse_node, _: "-", parse_node)).parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<(Node, Node)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2021, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(start|end|[a-z]+|[A-Z]+)-(start|end|[a-z]+|[A-Z]+)$");
-        // dbg!(&block);
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let b: Node = match &segment[1] {
-            "start" => Node::Start,
-            "end" => Node::End,
-            s if s.chars().all(|c| c.is_ascii_lowercase()) => Node::Small(s.to_string()),
-            b => Node::Big(b.to_string()),
-        };
-        let e: Node = match &segment[2] {
-            "start" => Node::Start,
-            "end" => Node::End,
-            s if s.chars().all(|c| c.is_ascii_lowercase()) => Node::Small(s.to_string()),
-            b => Node::Big(b.to_string()),
-        };
-        self.line.push((b, e));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (from, to) in self.line.iter() {

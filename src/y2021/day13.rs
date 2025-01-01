@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2021/day/13>
-use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    regex::Regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 fn folding_x(vec: &[Vec<bool>], pos: usize) -> Vec<Vec<bool>> {
     let mut result: Vec<Vec<bool>> = Vec::new();
@@ -58,20 +55,49 @@ pub struct Puzzle {
     folding: Vec<(bool, usize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_dot(s: &mut &str) -> PResult<(usize, usize)> {
+        seq!(parse_usize, _: ",", parse_usize)
+            .map(|(x, y)| (y, x))
+            .parse_next(s)
+    }
+
+    fn parse_dots(s: &mut &str) -> PResult<Vec<(usize, usize)>> {
+        separated(1.., parse_dot, newline).parse_next(s)
+    }
+
+    fn parse_folding(s: &mut &str) -> PResult<(bool, usize)> {
+        seq!(_: "fold along ", alt(("x", "y")), _: "=", parse_usize)
+            .map(|(s, n)| (s == "x", n))
+            .parse_next(s)
+    }
+
+    fn parse_foldings(s: &mut &str) -> PResult<Vec<(bool, usize)>> {
+        separated(1.., parse_folding, newline).parse_next(s)
+    }
+
+    #[allow(clippy::type_complexity)]
+    pub fn parse(s: &mut &str) -> PResult<(Vec<(usize, usize)>, Vec<(bool, usize)>)> {
+        seq!(parse_dots, _: (newline, newline), parse_foldings).parse_next(s)
+    }
+}
+
 #[aoc(2021, 13)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let num_pair: Regex = Regex::new(r"^([0-9]+),([0-9]+)$").expect("wrong");
-        let props: Regex = Regex::new(r"^fold along (x|y)=([0-9]+)$").expect("wrong");
-        if let Some(segment) = num_pair.captures(block) {
-            self.line
-                .push((segment[2].parse::<usize>()?, segment[1].parse::<usize>()?));
-        } else if let Some(segment) = props.captures(block) {
-            self.folding
-                .push((&segment[1] == "x", segment[2].parse::<usize>()?));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (dots, foldings) = parser::parse(&mut input.as_str())?;
+        self.line = dots;
+        self.folding = foldings;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let height = self.line.iter().map(|(y, _)| y).max().unwrap() + 1;

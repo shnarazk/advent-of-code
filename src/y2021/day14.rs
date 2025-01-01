@@ -1,39 +1,62 @@
 //! <https://adventofcode.com/2021/day/14>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
+
+type Rule = (char, char, char);
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
     template: Vec<char>,
-    line: Vec<(char, char, char)>,
+    line: Vec<Rule>,
     rule: HashMap<(char, char), char>,
     atom: HashSet<char>,
 }
 
+mod parser {
+    use {
+        super::Rule,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_template(s: &mut &str) -> PResult<String> {
+        alpha1.map(|s: &str| s.to_string()).parse_next(s)
+    }
+
+    fn parse_rule(s: &mut &str) -> PResult<Rule> {
+        seq!(
+        one_of('A'..='Z'),
+        one_of('A'..='Z'),
+        _: " -> ",
+        one_of('A'..='Z')
+        )
+        .parse_next(s)
+    }
+
+    fn parse_rules(s: &mut &str) -> PResult<Vec<Rule>> {
+        separated(1.., parse_rule, newline).parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<(String, Vec<Rule>)> {
+        seq!(parse_template, _: (newline, newline), parse_rules).parse_next(s)
+    }
+}
+
 #[aoc(2021, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let template = regex!(r"^([A-Z]+)$");
-        let rule = regex!(r"^([A-Z])([A-Z]) -> ([A-Z])$");
-        if let Ok(segment) = template.captures(block).ok_or(ParseError) {
-            self.template = segment[1].chars().collect::<Vec<char>>();
-        } else if let Ok(segment) = rule.captures(block).ok_or(ParseError) {
-            self.line.push((
-                segment[1].chars().next().unwrap(),
-                segment[2].chars().next().unwrap(),
-                segment[3].chars().next().unwrap(),
-            ));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (template, rules) = parser::parse(&mut input.as_str())?;
+        self.template = template.chars().collect();
+        self.line = rules.into_iter().collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
-        // dbg!(&self.line);
         for (l, r, m) in self.line.iter() {
             self.rule.insert((*l, *r), *m);
             self.atom.insert(*l);
