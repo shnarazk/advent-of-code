@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        progress, regex,
+        progress,
     },
     std::collections::HashMap,
 };
@@ -12,14 +12,32 @@ pub struct Puzzle {
     line: Vec<usize>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<usize> {
+        seq!(_: "Player ", parse_usize, _: " starting position: ", parse_usize)
+            .map(|(_, n)| n)
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<usize>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2021, 21)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^Player ([0-9]+) starting position: ([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push(segment[2].parse::<usize>()?);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pos: [usize; 2] = [self.line[0], self.line[1]];

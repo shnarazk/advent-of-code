@@ -1,10 +1,7 @@
 //! <https://adventofcode.com/2021/day/22>
 use std::collections::HashSet;
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        parser, regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     itertools::Itertools,
     std::collections::HashMap,
 };
@@ -14,25 +11,40 @@ pub struct Puzzle {
     line: Vec<(bool, isize, isize, isize, isize, isize, isize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<(bool, isize, isize, isize, isize, isize, isize)> {
+        seq!(
+            alt(("on", "off")).map(|s| s == "on"),
+            _: " x=", parse_isize,
+            _: "..", parse_isize,
+            _: ",y=", parse_isize,
+            _: "..", parse_isize,
+            _: ",z=", parse_isize,
+            _: "..", parse_isize
+        )
+        .parse_next(s)
+    }
+
+    #[allow(clippy::type_complexity)]
+    pub fn parse(s: &mut &str) -> PResult<Vec<(bool, isize, isize, isize, isize, isize, isize)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2021, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^(on|off) x=(-?[0-9]+)\.\.(-?[0-9]+),y=(-?[0-9]+)\.\.(-?[0-9]+),z=(-?[0-9]+)\.\.(-?[0-9]+)$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            &segment[1] == "on",
-            parser::to_isize(&segment[2])?,
-            parser::to_isize(&segment[3])?,
-            parser::to_isize(&segment[4])?,
-            parser::to_isize(&segment[5])?,
-            parser::to_isize(&segment[6])?,
-            parser::to_isize(&segment[7])?,
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let offset = |p: isize| (p + 50isize) as usize;

@@ -1,12 +1,7 @@
 //! <https://adventofcode.com/2021/day/24>
 
 use {
-    crate::{
-        // color,
-        framework::{aoc_at, AdventOfCode, ParseError},
-        parser,
-        regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::{cmp::Ordering, fmt, fmt::Write},
 };
 
@@ -41,44 +36,60 @@ pub struct Puzzle {
     direction: Option<Ordering>,
 }
 
+mod parser {
+    use {
+        super::{Inst, Opr},
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::{newline, space1},
+            combinator::{alt, separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_lit(s: &mut &str) -> PResult<Opr> {
+        parse_isize.map(Opr::Lit).parse_next(s)
+    }
+
+    fn parse_var(s: &mut &str) -> PResult<Opr> {
+        alt((
+            "w".map(|_| Opr::Var('w')),
+            "x".map(|_| Opr::Var('x')),
+            "y".map(|_| Opr::Var('y')),
+            "z".map(|_| Opr::Var('z')),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_opr(s: &mut &str) -> PResult<Opr> {
+        alt((parse_lit, parse_var)).parse_next(s)
+    }
+
+    fn parse_inst(s: &mut &str) -> PResult<Inst> {
+        alt((
+            seq!( _: "inp ", parse_opr).map(|_| Inst::Inp),
+            seq!( _: "add ", parse_opr, _: space1, parse_opr).map(|(_, o)| Inst::Add(o)),
+            seq!( _: "mul ", parse_opr, _: space1, parse_opr).map(|(_, _)| Inst::Mul),
+            seq!( _: "div ", parse_opr, _: space1, parse_opr).map(|(_, o)| Inst::Div(o)),
+            seq!( _: "mod ", parse_opr, _: space1, parse_opr).map(|(_, _)| Inst::Mod),
+            seq!( _: "eql ", parse_opr, _: space1, parse_opr).map(|(_, _)| Inst::Eql),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<Inst>> {
+        separated(1.., parse_inst, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2021, 24)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let inp = regex!(r"^inp ([a-z])$");
-        let opr = regex!(r"^([a-z]+) ([a-z]) ([a-z])$");
-        let opl = regex!(r"^([a-z]+) ([a-z]) (-?[0-9]+)$");
-        if let Some(_segment) = inp.captures(block) {
-            self.line.push(Inst::Inp);
-            return Ok(());
-        } else if let Some(segment) = opr.captures(block) {
-            let _reg1 = segment[2].chars().next().unwrap();
-            let reg2 = Opr::Var(segment[3].chars().next().unwrap());
-            self.line.push(match &segment[1] {
-                "add" => Inst::Add(reg2),
-                "mul" => Inst::Mul,
-                "div" => Inst::Div(reg2),
-                "mod" => Inst::Mod,
-                "eql" => Inst::Eql,
-                _ => unreachable!(),
-            });
-            return Ok(());
-        } else if let Some(segment) = opl.captures(block) {
-            let _reg1 = segment[2].chars().next().unwrap();
-            let val = Opr::Lit(parser::to_isize(&segment[3])?);
-            self.line.push(match &segment[1] {
-                "add" => Inst::Add(val),
-                "mul" => Inst::Mul,
-                "div" => Inst::Div(val),
-                "mod" => Inst::Mod,
-                "eql" => Inst::Eql,
-                _ => unreachable!(),
-            });
-            return Ok(());
-        }
-        Err(ParseError)
+
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.jit = self.build();

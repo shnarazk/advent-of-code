@@ -1,27 +1,39 @@
 //! <https://adventofcode.com/2021/day/17>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    parser, regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
     line: Vec<(isize, isize, isize, isize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{combinator::seq, PResult, Parser},
+    };
+
+    pub fn parse(s: &mut &str) -> PResult<(isize, isize, isize, isize)> {
+        seq!(
+            _: "target area: x=",
+            parse_isize,
+             _: "..",
+            parse_isize,
+            _: ", y=",
+            parse_isize,
+            _: "..",
+            parse_isize,
+        )
+        .parse_next(s)
+    }
+}
+
 #[aoc(2021, 17)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^target area: x=(-?[0-9]+)..(-?[0-9]+), y=(-?[0-9]+)..(-?[0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let y1 = parser::to_isize(&segment[3])?; // y1
-        let y2 = parser::to_isize(&segment[4])?; // y2
-        let x1 = parser::to_isize(&segment[1])?; // x1
-        let x2 = parser::to_isize(&segment[2])?; // x2
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (x1, x2, y1, y2) = parser::parse(&mut input.as_str())?;
         self.line
             .push((y1.max(y2), y1.min(y2), x1.min(x2), x1.max(x2)));
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut result: isize = 0;
