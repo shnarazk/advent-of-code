@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2021/day/>
+//! <https://adventofcode.com/2021/day/X>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -34,7 +34,7 @@ mod parser {
     }
 }
 
-#[aoc(2021, 0)]
+#[aoc(2021, X)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parser::parse(&mut input.as_str())?;
