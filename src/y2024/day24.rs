@@ -59,13 +59,14 @@ enum Gate {
 }
 
 type Wire = (u8, u8, u8);
+type WireRef = &'static Wire;
+type GateSpec = (WireRef, (Gate, WireRef, WireRef));
 
-type GateSpec = (&'static Wire, (Gate, &'static Wire, &'static Wire));
-
-/// convert from 'ord', 0 to 43, to wire
-fn ord_to_wire(n: usize, prefix: u8) -> &'static Wire {
-    let wire_names = WIRE_NAMES.get().unwrap();
-    wire_names
+/// convert from 'ord', 0 to 45, to wire
+fn ord_to_wire(n: usize, prefix: u8) -> WireRef {
+    WIRE_NAMES
+        .get()
+        .unwrap()
         .get(&(prefix, b'0' + ((n / 10) as u8), b'0' + ((n % 10) as u8)))
         .unwrap()
 }
@@ -82,12 +83,12 @@ fn wire_to_string((a, b, c): &Wire) -> String {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Adder {
-    dep_graph: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>,
+    dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)>,
 }
 
 impl Adder {
     fn new(overrides: &[(GateSpec, GateSpec)]) -> Adder {
-        let mut dep_graph: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)> =
+        let mut dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)> =
             PROPAGATION_TABLE.get().unwrap().clone();
         for ((g1_out, g1), (g2_out, g2)) in overrides.iter() {
             dep_graph.insert(*g1_out, *g2);
@@ -99,7 +100,7 @@ impl Adder {
         let input_bits = *INPUT_BITS.get().unwrap();
         let bit1 = int_to_bit_vector(arg1, input_bits);
         let bit2 = int_to_bit_vector(arg2, input_bits);
-        let mut values: FxHashMap<&'static Wire, Option<bool>> =
+        let mut values: FxHashMap<WireRef, Option<bool>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
 
         for i in 0..input_bits {
@@ -109,15 +110,12 @@ impl Adder {
             values.insert(wire2, Some(bit2.get(i) == Some(&true)));
         }
         fn gate_output(
-            dep_graph: &FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>,
-            values: &mut FxHashMap<&'static Wire, Option<bool>>,
-            wire: &'static Wire,
+            dep_graph: &FxHashMap<WireRef, (Gate, WireRef, WireRef)>,
+            values: &mut FxHashMap<WireRef, Option<bool>>,
+            wire: WireRef,
         ) -> Option<bool> {
             if let Some(b) = values.get(wire) {
-                if b.is_none() {
-                    return None;
-                }
-                return *b;
+                return b.map(|b| b);
             }
             let (g, w1, w2) = dep_graph.get(wire)?;
             values.insert(wire, None);
@@ -208,7 +206,7 @@ impl Descriptor {
             .map(|(a, b)| *a | *b)
             .collect();
     }
-    fn add_swaps(&self, w1: &'static Wire, w2: &'static Wire) -> Option<Descriptor> {
+    fn add_swaps(&self, w1: WireRef, w2: WireRef) -> Option<Descriptor> {
         if w1 == w2 {
             return None;
         }
@@ -265,7 +263,7 @@ impl Descriptor {
             .collect::<Vec<_>>()
             .par_iter()
             .map(|&n| {
-                let wire: &'static Wire = ord_to_wire(n, b'z');
+                let wire: WireRef = ord_to_wire(n, b'z');
                 let up_tree: FxHashSet<&Wire> = self.wire_affects(&up_trees, wire);
                 let inputs: Vec<&Wire> = up_tree
                     .iter()
@@ -277,7 +275,7 @@ impl Descriptor {
             .collect::<Vec<bool>>();
         let carry_bit = {
             let n = input_bits;
-            let wire: &'static Wire = ord_to_wire(n, b'z');
+            let wire: WireRef = ord_to_wire(n, b'z');
             let up_tree = self.wire_affects(&up_trees, wire);
             let input_len = up_tree
                 .iter()
@@ -294,15 +292,15 @@ impl Descriptor {
         down: bool,
         up: bool,
     ) -> (
-        FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-        FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
+        FxHashMap<WireRef, FxHashSet<WireRef>>,
+        FxHashMap<WireRef, FxHashSet<WireRef>>,
     ) {
         let adder = self.build_adder();
-        let mut wires: FxHashSet<&'static Wire> =
-            HashSet::<&'static Wire, BuildHasherDefault<FxHasher>>::default();
-        let mut down_tree: FxHashMap<&'static Wire, FxHashSet<&'static Wire>> =
+        let mut wires: FxHashSet<WireRef> =
+            HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
+        let mut down_tree: FxHashMap<WireRef, FxHashSet<WireRef>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut up_tree: FxHashMap<&'static Wire, FxHashSet<&'static Wire>> =
+        let mut up_tree: FxHashMap<WireRef, FxHashSet<WireRef>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (o, (_, i1, i2)) in adder.dep_graph.iter() {
             wires.insert(*i1);
@@ -321,9 +319,9 @@ impl Descriptor {
     }
     fn wire_affects(
         &self,
-        tree: &FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-        wire: &'static Wire,
-    ) -> FxHashSet<&'static Wire> {
+        tree: &FxHashMap<WireRef, FxHashSet<WireRef>>,
+        wire: WireRef,
+    ) -> FxHashSet<WireRef> {
         let mut subtree: FxHashSet<&Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         if let Some(linked) = tree.get(&wire) {
             let mut to_visit: Vec<&Wire> = linked.iter().cloned().collect::<Vec<_>>();
@@ -364,10 +362,9 @@ impl Descriptor {
 
 static WIRE_NAMES: OnceLock<FxHashSet<Wire>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
-static PROPAGATION_TABLE: OnceLock<FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)>> =
-    OnceLock::new();
+static PROPAGATION_TABLE: OnceLock<FxHashMap<WireRef, (Gate, WireRef, WireRef)>> = OnceLock::new();
 
-fn build_swapped_pair((pick1, pick2): (&'static Wire, &'static Wire)) -> (GateSpec, GateSpec) {
+fn build_swapped_pair((pick1, pick2): (WireRef, WireRef)) -> (GateSpec, GateSpec) {
     debug_assert!(![b'x', b'y'].contains(&pick1.0));
     debug_assert!(![b'x', b'y'].contains(&pick2.0));
 
@@ -446,7 +443,7 @@ impl AdventOfCode for Puzzle {
             WIRE_NAMES.set(wire_names_tmp).unwrap();
         }
         let wire_names: &'static FxHashSet<Wire> = WIRE_NAMES.get().unwrap();
-        let mut propagation_table: FxHashMap<&'static Wire, (Gate, &'static Wire, &'static Wire)> =
+        let mut propagation_table: FxHashMap<WireRef, (Gate, WireRef, WireRef)> =
             FxHashMap::default();
         for (g, i1, i2, o) in links.iter() {
             propagation_table.insert(
@@ -502,7 +499,7 @@ impl AdventOfCode for Puzzle {
         Adder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let wires = WIRE_NAMES.get().unwrap().iter().collect::<Vec<_>>();
+        let wires: Vec<WireRef> = WIRE_NAMES.get().unwrap().iter().collect::<Vec<_>>();
 
         /*
         let mut step0 = Descriptor::new(vec![]);
@@ -637,26 +634,24 @@ impl AdventOfCode for Puzzle {
             }
             visited.insert(desc);
         }
-        println!();
-        dbg!(generated);
         unreachable!()
     }
 }
 
 fn build_cones(
-    tree: &FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-    wires: &[&'static Wire],
-) -> FxHashMap<&'static Wire, FxHashSet<&'static Wire>> {
+    tree: &FxHashMap<WireRef, FxHashSet<WireRef>>,
+    wires: &[WireRef],
+) -> FxHashMap<WireRef, FxHashSet<WireRef>> {
     fn aux<'a, 'b>(
-        result: &'b mut FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-        tree: &'a FxHashMap<&'static Wire, FxHashSet<&'static Wire>>,
-        wire: &'static Wire,
-    ) -> &'b FxHashSet<&'static Wire>
+        result: &'b mut FxHashMap<WireRef, FxHashSet<WireRef>>,
+        tree: &'a FxHashMap<WireRef, FxHashSet<WireRef>>,
+        wire: WireRef,
+    ) -> &'b FxHashSet<WireRef>
     where
         'b: 'a,
     {
         if !result.contains_key(wire) {
-            let mut entry: FxHashSet<&'static Wire> =
+            let mut entry: FxHashSet<WireRef> =
                 HashSet::<_, BuildHasherDefault<FxHasher>>::default();
             entry.insert(wire);
             if let Some(childs) = tree.get(wire) {
@@ -671,7 +666,7 @@ fn build_cones(
         result.get(wire).unwrap()
     }
     wires.iter().fold(
-        HashMap::<&'static Wire, FxHashSet<&'static Wire>, BuildHasherDefault<FxHasher>>::default(),
+        HashMap::<WireRef, FxHashSet<WireRef>, BuildHasherDefault<FxHasher>>::default(),
         |mut acc, wire| {
             let _ = aux(&mut acc, tree, wire);
             debug_assert!(acc.contains_key(wire));
