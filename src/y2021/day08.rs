@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2021/day/8>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -139,24 +136,40 @@ fn segments_to_num(vec: &[usize]) -> usize {
     panic!("{:?}", vec);
 }
 
+mod parser {
+    use {
+        super::DataSegment,
+        winnow::{
+            ascii::{alpha1, newline, space1},
+            combinator::{separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<DataSegment> {
+        seq!(
+            separated::<_,_, Vec<&str>,_,_,_,_>(1.., alpha1, space1),
+            _: " | ",
+            separated::<_,_, Vec<&str>,_,_,_,_>(1.., alpha1, space1),
+        )
+        .map(|(a, b)| DataSegment {
+            pattern: a.iter().map(|s| s.chars().collect::<Vec<_>>()).collect(),
+            target: b.iter().map(|s| s.chars().collect::<Vec<_>>()).collect(),
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<DataSegment>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2021, 8)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([ a-g]+)\|([ a-g]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let mut pattern: Vec<Vec<char>> = Vec::new();
-        let mut target: Vec<Vec<char>> = Vec::new();
-        for w in segment[1].trim().split(' ') {
-            pattern.push(w.chars().collect::<Vec<_>>());
-        }
-        for w in segment[2].trim().split(' ') {
-            target.push(w.chars().collect::<Vec<_>>());
-        }
-        self.line.push(DataSegment { pattern, target });
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
-    fn end_of_data(&mut self) {}
     fn part1(&mut self) -> usize {
         self.line
             .iter()
@@ -181,7 +194,6 @@ impl AdventOfCode for Puzzle {
                 value *= 10;
                 value += segments_to_num(&ss.iter().map(|s| decode[s2i(*s)]).collect::<Vec<_>>());
             }
-            // dbg!(value);
             total += value;
         }
         total

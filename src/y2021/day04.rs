@@ -1,17 +1,15 @@
 //! <https://adventofcode.com/2021/day/4>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        parser,
-    },
-    regex::Regex,
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::borrow::Cow,
 };
+
+type Board = Vec<Vec<usize>>;
 
 #[derive(Debug, Default)]
 pub struct Puzzle {
     hands: Vec<usize>,
-    board: Vec<Vec<Vec<usize>>>,
+    board: Vec<Board>,
     order: Vec<usize>,
     num_col: usize,
     num_row: usize,
@@ -45,27 +43,50 @@ fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize,
     Some((need, point))
 }
 
+mod parser {
+    use {
+        super::Board,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{newline, space0, space1},
+            combinator::{preceded, separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_sequence(s: &mut &str) -> PResult<Vec<usize>> {
+        separated(1.., parse_usize, ",").parse_next(s)
+    }
+
+    fn parse_bingo(s: &mut &str) -> PResult<Board> {
+        separated(
+            5..=5,
+            preceded(
+                space0,
+                separated::<_, _, Vec<usize>, _, _, _, _>(5..=5, parse_usize, space1),
+            ),
+            newline,
+        )
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<(Vec<usize>, Vec<Board>)> {
+        seq!(
+            parse_sequence,
+            _: (newline, newline),
+            separated(1.., parse_bingo, (newline, newline))
+        )
+        .parse_next(s)
+    }
+}
+
 #[aoc(2021, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-        let segment = parser.captures(&input).ok_or(ParseError)?;
-        for num in segment[1].split(',') {
-            self.hands.push(num.parse::<usize>()?);
-        }
-        Ok(segment[2].to_string())
-    }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut vec = Vec::new();
-        for l in block.split('\n') {
-            if l.is_empty() {
-                break;
-            }
-            vec.push(parser::to_usizes(l, &[' '])?);
-        }
-        self.board.push(vec);
-        Ok(())
+        let (hands, boards) = parser::parse(&mut input.as_str())?;
+        self.hands = hands;
+        self.board = boards;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.num_col = self.board[0][0].len();

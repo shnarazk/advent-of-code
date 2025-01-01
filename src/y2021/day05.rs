@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2021/day/5>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Debug, PartialEq)]
 struct DataSegment {
@@ -18,22 +15,39 @@ pub struct Puzzle {
     count: Vec<Vec<usize>>,
 }
 
+mod parser {
+    use {
+        super::DataSegment,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<DataSegment> {
+        seq!(
+            parse_usize, _: ",",parse_usize, _: " -> ",
+            parse_usize, _: ",",parse_usize,
+        )
+        .map(|(a, b, c, d)| DataSegment {
+            beg: (a, b),
+            end: (c, d),
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<DataSegment>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2021, 5)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut i = DataSegment {
-            beg: (0, 0),
-            end: (0, 0),
-        };
-        let parser = regex!(r"^([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        i.beg.0 = segment[1].parse::<usize>()?;
-        i.beg.1 = segment[2].parse::<usize>()?;
-        i.end.0 = segment[3].parse::<usize>()?;
-        i.end.1 = segment[4].parse::<usize>()?;
-        self.line.push(i);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.max_x = self
