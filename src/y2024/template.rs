@@ -6,7 +6,6 @@ use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
-        parser::parse_usize,
     },
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
@@ -16,29 +15,36 @@ use {
         collections::{BinaryHeap, HashMap},
         hash::BuildHasherDefault,
     },
-    winnow::{
-        ascii::newline,
-        combinator::{alt, repeat, repeat_till, separated, seq},
-        token::one_of,
-        PResult, Parser,
-    },
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<()>,
 }
-fn parse_line(s: &mut &str) -> PResult<()> {
-    ().parse_next(s)
-}
-fn parse(s: &mut &str) -> PResult<Vec<()>> {
-    separated(1.., parse_line, newline).parse_next(s)
+
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline, space1},
+            combinator::{alt, separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<()> {
+        ().parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<()>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
 }
 
 #[aoc(2024, X)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(&mut input.as_str())?;
+        self.line = parser::parse(&mut input.as_str())?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {
