@@ -31,6 +31,8 @@
     "allow_concurrent_runs": false,
     "reveal": "always",
     "hide": "never",
-    "shell": "system"
+    "shell": "system",
+    "show_summary": true,
+    "tags": ["cargo clippy"]
   }
 ]
