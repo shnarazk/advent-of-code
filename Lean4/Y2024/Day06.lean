@@ -57,7 +57,7 @@ def includes (self : Input) (pos : Vec2) : Option Vec2 :=
 def nextPos (self : Input) : Option Vec2 :=
   self.includes <| self.guardPos + self.guardDir.asVec2
 
-def isLoop (_self : Input) (_pos : Vec2) : Bool := true
+def isLoop (_self : Input) (_pos : Vec2) (_pre: Vec2 × Dir) : Bool := true
 
 end Input
 
@@ -88,27 +88,36 @@ def parse : String → Option Input := AoCParser.parse parser
 
 end parser
 
-namespace Part1
-
-partial def traceMove (self : Input) (set : Std.HashSet Vec2) :=
-  let set' := set.insert self.guardPos
+partial def traceMove
+    (self : Input)
+    (pre : Option (Vec2 × Dir))
+    (hash : Std.HashMap Vec2 (Option (Vec2 × Dir)))
+    : Std.HashMap Vec2 (Option (Vec2 × Dir)) :=
+  let hash' := hash.insert self.guardPos pre
   match self.nextPos with
-    | none   => set'.size
+    | none   => hash'
     | some p =>
       if self.obstruction.contains p
       then
+        let pre := some (self.guardPos, self.guardDir)
         let self' := self.turn
-        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) set'
+        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) pre hash'
       else
-        traceMove (self.moveTo p)      set'
+        traceMove (self.moveTo p) pre hash'
 
-def solve (input : Input) : Nat := traceMove input Std.HashSet.empty
+namespace Part1
+
+def solve (input : Input) : Nat := traceMove input none Std.HashMap.empty |>.size
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+def solve (input : Input) : Nat :=
+  let trail := traceMove input none Std.HashMap.empty
+  trail
+    |>.filter (fun pos pre => if let some p := pre then input.isLoop pos p else false)
+    |>.size
 
 end Part2
 
