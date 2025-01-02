@@ -14,7 +14,7 @@ inductive Dir
   | E
   | S
   | W
-deriving BEq, Repr
+deriving BEq, Hashable, Repr
 
 namespace Dir
 def turn : Dir → Dir
@@ -30,6 +30,13 @@ def asVec2 : Dir → Vec2
   | Dir.S => ( 1,  0)
   | Dir.W => ( 0, -1)
 -- #eval (8, 5) + Dir.N.asVec2
+
+instance : ToString Dir where
+  toString
+    | Dir.N => "N"
+    | Dir.E => "E"
+    | Dir.S => "S"
+    | Dir.W => "W"
 
 end Dir
 
@@ -57,7 +64,37 @@ def includes (self : Input) (pos : Vec2) : Option Vec2 :=
 def nextPos (self : Input) : Option Vec2 :=
   self.includes <| self.guardPos + self.guardDir.asVec2
 
-def isLoop (_self : Input) (_pos : Vec2) (_pre: Vec2 × Dir) : Bool := true
+partial def loop (self : Input) (trail : Std.HashSet (Vec2 × Dir)) (pos : Option Vec2) : Bool :=
+  match pos with
+    | none   => false
+    | some p =>
+      let self' := self.moveTo p
+      if trail.contains (p, self'.guardDir) && !self'.obstruction.contains p
+        then true
+        else
+          let trail' := trail.insert (p, self'.guardDir)
+          if let some p' := self'.nextPos
+            then
+              if self'.obstruction.contains p'
+                then
+                  let self'' := self'.turn
+                  if let some p'' := self''.nextPos
+                    then
+                        if self''.obstruction.contains p''
+                            then
+                              let self''' := self''.turn
+                              loop self''' trail' self'''.nextPos
+                            else loop self'' trail' self''.nextPos
+                    else false
+                else loop self' trail' self'.nextPos
+            else false
+
+def isLoop (self : Input) (pos : Vec2) (pre: Vec2 × Dir) : Bool :=
+  let self' := { self with
+      guardPos := pre.1,
+      guardDir := pre.2,
+      obstruction := (self.obstruction.insert pos) }
+  loop self' Std.HashSet.empty pre.1
 
 end Input
 
@@ -93,30 +130,34 @@ partial def traceMove
     (pre : Option (Vec2 × Dir))
     (hash : Std.HashMap Vec2 (Option (Vec2 × Dir)))
     : Std.HashMap Vec2 (Option (Vec2 × Dir)) :=
-  let hash' := hash.insert self.guardPos pre
+  let hash' := if hash.contains self.guardPos
+      then hash
+      else hash.insert self.guardPos pre
   match self.nextPos with
     | none   => hash'
     | some p =>
       if self.obstruction.contains p
       then
-        let pre := some (self.guardPos, self.guardDir)
         let self' := self.turn
-        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) pre hash'
+        let pre' := some (self'.guardPos, self'.guardDir)
+        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) pre' hash'
       else
-        traceMove (self.moveTo p) pre hash'
+        let pre' := some (self.guardPos, self.guardDir)
+        traceMove (self.moveTo p) pre' hash'
 
 namespace Part1
 
-def solve (input : Input) : Nat := traceMove input none Std.HashMap.empty |>.size
+def solve (input : Input) : Nat :=
+  traceMove input none Std.HashMap.empty
+    |>.size
 
 end Part1
 
 namespace Part2
 
 def solve (input : Input) : Nat :=
-  let trail := traceMove input none Std.HashMap.empty
-  trail
-    |>.filter (fun pos pre => if let some p := pre then input.isLoop pos p else false)
+  traceMove input none Std.HashMap.empty
+    |>.filter (fun pos pre ↦ if let some p := pre then (input.isLoop pos p) else false)
     |>.size
 
 end Part2
