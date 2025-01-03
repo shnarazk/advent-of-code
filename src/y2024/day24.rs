@@ -2,11 +2,16 @@
 #![allow(clippy::type_complexity)]
 use {
     crate::{
+        color,
         framework::{aoc_at, AdventOfCode, ParseError},
         parser::parse_usize,
         progress,
     },
     itertools::Itertools,
+    petgraph::{
+        dot::{Config, Dot},
+        Graph,
+    },
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
@@ -14,6 +19,7 @@ use {
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
+        io::prelude::*,
         sync::OnceLock,
     },
     winnow::{
@@ -477,6 +483,43 @@ impl AdventOfCode for Puzzle {
         for (input, _) in self.input_wire.iter() {
             data.push((wire_to_string(input), Vec::new()));
         }
+        // firstly, write a dot file
+        let weight = "".to_string();
+        let mut graph_id: HashMap<&String, _> = HashMap::new();
+        let mut graph = Graph::<&String, &String>::new();
+        for (node, inputs) in data.iter() {
+            let to = if graph_id.contains_key(&node) {
+                *graph_id.get(node).unwrap()
+            } else {
+                graph.add_node(node)
+            };
+            graph_id.insert(node, to);
+            for input in inputs.iter() {
+                let from =
+                    if let std::collections::hash_map::Entry::Vacant(e) = graph_id.entry(input) {
+                        let from = graph.add_node(input);
+                        e.insert(from);
+                        from
+                    } else {
+                        *graph_id.get(input).unwrap()
+                    };
+                graph.add_edge(from, to, &weight);
+            }
+        }
+        let dot = Dot::with_config(&graph, &[Config::EdgeNoLabel]);
+        let config = self.get_config();
+        if let Ok(path) = config.serialization_path(Self::YEAR, Self::DAY, "nodes.dot") {
+            let dir = std::path::Path::new(&path).parent().unwrap();
+            if !dir.exists() {
+                std::fs::create_dir_all(dir)
+                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
+            }
+            let mut file =
+                std::fs::File::create(&path).unwrap_or_else(|_| panic!("fail to open {path:?}"));
+            writeln!(file, "{:?}", dot).expect("fail to save");
+            println!("{}# write {:?}{}", color::MAGENTA, path, color::RESET,);
+        }
+
         serde_json::to_string(&data).ok()
     }
     fn part1(&mut self) -> Self::Output1 {

@@ -1,10 +1,12 @@
 //! data handling framework
+use std::path::PathBuf;
+
 pub use aoc_macro::{aoc, aoc_at};
 use {
     crate::color,
     clap::Parser,
     std::sync::OnceLock,
-    std::{fmt, fs::File, io::prelude::*},
+    std::{fmt, fs::File, io::prelude::*, path::Path},
 };
 
 pub const JSON_DUMP_DIR: &str = "misc";
@@ -45,6 +47,22 @@ impl ConfigAoC {
             Some(ext) if ext == "-" => Ok("test.json".to_string()),
             Some(ext) => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}.json")),
             None => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}.json")),
+        }
+    }
+    pub fn serialization_path(
+        &self,
+        year: usize,
+        day: usize,
+        key: &str,
+    ) -> Result<PathBuf, ParseError> {
+        match &self.alt {
+            Some(ext) if ext == "-" => Ok(PathBuf::from("test.json")),
+            Some(ext) => Ok(PathBuf::from(format!(
+                "{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}-{key}"
+            ))),
+            None => Ok(PathBuf::from(format!(
+                "{JSON_DUMP_DIR}/{year}/day{day:>02}-{key}"
+            ))),
         }
     }
 }
@@ -238,7 +256,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
             return;
         };
         if let Some(json) = self.serialize() {
-            let dir = std::path::Path::new(&output).parent().unwrap();
+            let dir = Path::new(&output).parent().unwrap();
             if !dir.exists() {
                 std::fs::create_dir_all(dir)
                     .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
