@@ -62,12 +62,10 @@ fn expands(vec: &[usize], threshold: usize) -> usize {
                     .collect::<FxHashSet<usize>>(),
                 threshold,
             )
+        } else if subs.contains(&threshold) {
+            threshold
         } else {
-            if subs.contains(&threshold) {
-                threshold
-            } else {
-                0
-            }
+            0
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
@@ -100,12 +98,10 @@ fn expands2(vec: &[usize], threshold: usize) -> usize {
                     .collect::<FxHashSet<usize>>(),
                 threshold,
             )
+        } else if subs.contains(&threshold) {
+            threshold
         } else {
-            if subs.contains(&threshold) {
-                threshold
-            } else {
-                0
-            }
+            0
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
