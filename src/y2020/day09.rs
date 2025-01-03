@@ -4,7 +4,7 @@ use {
     std::collections::HashSet,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     vec: Vec<usize>,
     len: usize,

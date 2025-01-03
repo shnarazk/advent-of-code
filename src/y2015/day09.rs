@@ -53,7 +53,7 @@ fn search2(
     new_weight
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<(String, String, usize)>,
     path: HashMap<(String, String), usize>,

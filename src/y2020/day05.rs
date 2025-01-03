@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/5>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Puzzle {
     seats: [bool; 128 * 8 + 1],
     max_sid: usize,

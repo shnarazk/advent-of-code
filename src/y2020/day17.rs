@@ -7,7 +7,7 @@ use {
     std::{collections::HashSet, hash::Hash},
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     map: HashSet<Dim2<isize>>,

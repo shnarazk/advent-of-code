@@ -11,14 +11,14 @@ use {
     },
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 enum Direction {
     Forward(usize),
     Down(usize),
     Up(usize),
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Direction>,
 }

@@ -5,7 +5,7 @@ use crate::{
 };
 use std::collections::VecDeque;
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum OpCode {
     Swap0(usize, usize),
     Swap1(u8, u8),
@@ -14,7 +14,7 @@ enum OpCode {
     Move(usize, usize),
     Rotate1(u8),
 }
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<OpCode>,
 }

@@ -23,7 +23,7 @@ fn y2018day13_turn() {
     assert_eq!(turn_dim2((0, -1), true), (-1, 0));
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Cart {
     location: Dim2,
     direction: Dim2,
@@ -42,7 +42,7 @@ impl Cart {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     cart: Vec<Cart>,

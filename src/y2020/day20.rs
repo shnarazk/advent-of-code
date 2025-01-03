@@ -15,7 +15,7 @@ pub struct Tile {
     pub image: Vec<String>,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     tile: Vec<Tile>,
 }

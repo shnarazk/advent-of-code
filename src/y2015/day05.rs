@@ -47,7 +47,7 @@ fn is_nicer(s: &str) -> bool {
     false
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<String>,
 }

@@ -49,7 +49,7 @@ impl RegionType {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     depth: usize,
     target: Dim2,

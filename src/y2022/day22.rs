@@ -53,14 +53,14 @@ impl GeometricMove for Loc {
     }
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Direction {
     Go(usize),
     TurnLeft,
     TurnRight,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct Seeker {
     position: Loc,
     direction: Vec2,
@@ -237,7 +237,7 @@ impl Seeker {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     map: HashMap<Loc, char>,
     ring_h: HashMap<Loc, Loc>,

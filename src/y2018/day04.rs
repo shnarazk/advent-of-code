@@ -33,7 +33,7 @@ pub struct Day {
     day: usize,
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Record {
     Start(Timestamp, usize),
     Sleep(Timestamp, usize),
@@ -50,7 +50,7 @@ impl Record {
     }
 }
 
-#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Record>,
 }

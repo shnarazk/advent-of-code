@@ -48,7 +48,7 @@ impl TryFrom<char> for Field {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<Field>>,
     map: HashMap<Dim2, Field>,

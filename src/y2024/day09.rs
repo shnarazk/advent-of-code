@@ -7,7 +7,7 @@ use {
     serde::Serialize,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<usize>,
     /// id to its length

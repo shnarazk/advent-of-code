@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/25>
 use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     card: usize,
     door: usize,

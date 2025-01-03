@@ -4,7 +4,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<char>,
     hash: HashMap<(isize, isize), usize>,

@@ -48,7 +48,7 @@ fn co2_s_rate(vec: Vec<Vec<bool>>, i: usize) -> usize {
     co2_s_rate(nv, i + 1)
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
 }

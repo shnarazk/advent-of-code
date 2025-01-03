@@ -17,7 +17,7 @@ use {
     },
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<(String, usize, Vec<String>)>,
     map: HashMap<usize, (usize, Vec<usize>)>,

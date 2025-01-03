@@ -7,7 +7,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Compare {
     LessThan,
     LessEqual,
@@ -17,7 +17,7 @@ enum Compare {
     GreaterEqual,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct Inst {
     register: String,
     offset: isize,
@@ -26,7 +26,7 @@ struct Inst {
     cond_val: isize,
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Inst>,
 }

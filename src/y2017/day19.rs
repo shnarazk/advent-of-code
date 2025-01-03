@@ -6,7 +6,7 @@ use {
 
 type Location = (isize, isize);
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     map: HashMap<Location, u8>,

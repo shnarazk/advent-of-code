@@ -19,7 +19,7 @@ enum Op {
     Val(usize, usize),
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Op>,
 }

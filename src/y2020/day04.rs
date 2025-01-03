@@ -7,7 +7,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Rule {
     dic: HashMap<String, String>,
 }
@@ -37,7 +37,7 @@ impl Rule {
     }
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     entry: Vec<Rule>,
 }

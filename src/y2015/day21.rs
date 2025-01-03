@@ -94,7 +94,7 @@ impl State {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<()>,
     invetories: Vec<Inventory>,

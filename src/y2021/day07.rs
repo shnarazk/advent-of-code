@@ -4,7 +4,7 @@ use crate::{
     parser,
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     config: Vec<usize>,
 }

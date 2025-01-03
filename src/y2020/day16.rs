@@ -6,7 +6,7 @@ use crate::{
 
 type Range = (String, usize, usize, usize, usize);
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     dic: Vec<Range>,
     samples: Vec<Vec<usize>>,

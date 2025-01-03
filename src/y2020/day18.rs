@@ -26,7 +26,7 @@ enum Expr {
     NUM(isize),
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     expr: Vec<String>,
 }

@@ -11,7 +11,7 @@ const L: usize = 100;
 const OFFSET: usize = 10;
 type Dim3 = (usize, usize, usize);
 
-#[derive(Default, Debug, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
     map: HashSet<Dim3>,

@@ -14,7 +14,7 @@ fn code(j: usize, i: usize) -> usize {
     n
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {}
 
 #[aoc_at(2015, 25)]

@@ -31,7 +31,7 @@ fn go_forward(vec: &mut Vec<usize>) {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     vec: Vec<usize>,
 }

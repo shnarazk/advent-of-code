@@ -1,12 +1,12 @@
 //! <https://adventofcode.com/2020/day/3>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct Chars {
     char: Vec<char>,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     line: Vec<Chars>,
 }

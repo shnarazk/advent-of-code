@@ -15,7 +15,7 @@ use {
     },
 };
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
     plane: Rect<usize>,

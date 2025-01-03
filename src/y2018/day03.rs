@@ -9,7 +9,7 @@ use {
 
 type Dim2 = (usize, usize);
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Claim {
     id: usize,
     left: usize,
@@ -17,7 +17,8 @@ struct Claim {
     width: usize,
     height: usize,
 }
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Claim>,
 }

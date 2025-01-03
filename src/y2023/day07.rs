@@ -6,7 +6,7 @@ use {
     std::{cmp::Ordering, collections::HashMap},
 };
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct Hand {
     card: Vec<u8>,
     bid: usize,
@@ -54,7 +54,7 @@ impl PartialOrd for Hand {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line1: Vec<Hand>,
     line2: Vec<Hand>,

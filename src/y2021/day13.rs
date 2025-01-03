@@ -48,7 +48,7 @@ fn print_grid(vec: &[Vec<bool>]) {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<(usize, usize)>,
     grid: Vec<Vec<bool>>,

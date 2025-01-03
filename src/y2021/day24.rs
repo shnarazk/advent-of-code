@@ -5,6 +5,7 @@ use {
     std::{cmp::Ordering, fmt, fmt::Write},
 };
 
+#[derive(Clone)]
 enum Opr {
     Lit(isize),
     Var(char),
@@ -18,7 +19,8 @@ impl fmt::Debug for Opr {
         }
     }
 }
-#[derive(Debug)]
+
+#[derive(Clone, Debug)]
 enum Inst {
     Inp,
     Add(Opr),
@@ -28,7 +30,7 @@ enum Inst {
     Eql,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Inst>,
     jit: Vec<(isize, isize, isize)>,

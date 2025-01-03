@@ -10,7 +10,7 @@ use {
 
 const LIMIT: usize = 26501365;
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     start: Dim2<usize>,

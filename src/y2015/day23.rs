@@ -4,7 +4,7 @@ use crate::{
     parser, regex,
 };
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Inst {
     Hlf(u8),
     Tpl(u8),
@@ -14,7 +14,7 @@ enum Inst {
     Jio(u8, isize),
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Inst>,
 }

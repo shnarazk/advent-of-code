@@ -13,13 +13,13 @@ use {
     },
 };
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Entry {
     Dir(String),
     File(String, usize),
 }
 
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Command {
     Ls(Vec<Entry>),
     CdTo(String),
@@ -27,7 +27,7 @@ enum Command {
     CdRoot,
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Directory {
     name: String,
     parent: String,
@@ -36,7 +36,7 @@ struct Directory {
     total_size: usize,
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Command>,
     file_system: HashMap<String, Directory>,

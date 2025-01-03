@@ -95,7 +95,7 @@ fn decompose(original_v: &[Segment]) -> Option<Vec<Vec<Segment>>> {
     None
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<isize>,
     memory: HashMap<usize, isize>,

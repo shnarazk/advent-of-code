@@ -208,7 +208,7 @@ impl Block for Plane3 {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Plane4(Vec<bool>);
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<(Vec<bool>, Vec<bool>)>,
     rule: Rule,

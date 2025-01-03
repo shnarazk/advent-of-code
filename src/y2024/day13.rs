@@ -16,7 +16,7 @@ use {
 };
 type Setting = (Dim2<usize>, Dim2<usize>, Dim2<usize>);
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<Setting>,
 }

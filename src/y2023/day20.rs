@@ -8,7 +8,7 @@ use {
     std::collections::{HashMap, VecDeque},
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     modules: HashMap<String, Module>,
     pulses: VecDeque<(String, String, bool)>,
@@ -16,7 +16,7 @@ pub struct Puzzle {
     history: HashMap<String, Vec<(usize, bool)>>,
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 enum ModuleType {
     #[default]
     Broadcast,
@@ -24,7 +24,7 @@ enum ModuleType {
     Conjunction,
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 struct Module {
     module_type: ModuleType,
     bool_state: bool,

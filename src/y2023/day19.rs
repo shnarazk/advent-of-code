@@ -25,7 +25,7 @@ enum Op {
 
 type Rule = (Option<(Var, Op, Val)>, Label);
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     rules: HashMap<Label, Vec<Rule>>,
     settings: Vec<HashMap<Var, Val>>,

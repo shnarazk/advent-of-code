@@ -10,7 +10,7 @@ enum Val {
     Lit(isize),
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Code {
     Cpy(Val, Val),
     Inc(Val),
@@ -19,7 +19,7 @@ enum Code {
     Tgl(Val),
 }
 
-#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Code>,
     register: [isize; 8],

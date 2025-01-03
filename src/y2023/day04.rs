@@ -4,7 +4,7 @@ use crate::{
     parser,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     card: Vec<[Vec<usize>; 2]>,
     amount: Vec<usize>,
