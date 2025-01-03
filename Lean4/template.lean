@@ -8,7 +8,7 @@ namespace Y20XX.DayXX
 open Accumulation CiCL
 
 structure Input where
-deriving BEq, Repr
+deriving BEq, Hashable, Repr
 
 instance : ToString Input where toString _ := s!""
 
