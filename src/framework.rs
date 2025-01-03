@@ -272,6 +272,22 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
             );
         };
     }
+    /// write the given contents to a file specified by the key under misc directory.
+    fn dump_to<S: AsRef<str>>(&self, key: &str, contents: S) {
+        let config = self.get_config();
+        if let Ok(path) = config.serialization_path(Self::YEAR, Self::DAY, key) {
+            let dir = std::path::Path::new(&path).parent().unwrap();
+            if !dir.exists() {
+                std::fs::create_dir_all(dir)
+                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
+            }
+            let mut file =
+                std::fs::File::create(&path).unwrap_or_else(|_| panic!("fail to open {path:?}"));
+            writeln!(file, "{:?}", contents.as_ref()).expect("fail to save");
+            println!("{}# write {:?}{}", color::MAGENTA, path, color::RESET,);
+        }
+    }
+
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(config: ConfigAoC) -> Answer<Self::Output1, Self::Output2> {

@@ -2,9 +2,7 @@
 #![allow(clippy::type_complexity)]
 use {
     crate::{
-        color,
         framework::{aoc_at, AdventOfCode, ParseError},
-        parser::parse_usize,
         progress,
     },
     itertools::Itertools,
@@ -19,14 +17,7 @@ use {
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
         hash::BuildHasherDefault,
-        io::prelude::*,
         sync::OnceLock,
-    },
-    winnow::{
-        ascii::newline,
-        combinator::{alt, separated, seq},
-        token::one_of,
-        PResult, Parser,
     },
 };
 
@@ -390,45 +381,59 @@ pub struct Puzzle {
     input_wire: Vec<(Wire, bool)>,
 }
 
-fn parse_wire(s: &mut &str) -> PResult<Wire> {
-    (
-        one_of('a'..='z'),
-        one_of(('a'..='z', '0'..='9')),
-        one_of(('a'..='z', '0'..='9')),
-    )
-        .map(|(a, b, c)| (a as u8, b as u8, c as u8))
-        .parse_next(s)
-}
-fn parse_gate(s: &mut &str) -> PResult<Gate> {
-    alt(("AND", "OR", "XOR"))
-        .map(|g| match g {
-            "AND" => Gate::And,
-            "OR" => Gate::Or,
-            "XOR" => Gate::Xor,
-            _ => unreachable!(),
-        })
-        .parse_next(s)
-}
+mod parser {
+    use {
+        super::{Gate, Wire},
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
 
-fn parse_setting(s: &mut &str) -> PResult<(Wire, bool)> {
-    seq!(parse_wire, _: ": ", parse_usize)
-        .map(|(w, b)| (w, b == 1))
-        .parse_next(s)
-}
+    fn parse_wire(s: &mut &str) -> PResult<Wire> {
+        (
+            one_of('a'..='z'),
+            one_of(('a'..='z', '0'..='9')),
+            one_of(('a'..='z', '0'..='9')),
+        )
+            .map(|(a, b, c)| (a as u8, b as u8, c as u8))
+            .parse_next(s)
+    }
 
-fn parse_connection(s: &mut &str) -> PResult<(Gate, Wire, Wire, Wire)> {
-    seq!(parse_wire, _: " ", parse_gate, _: " ", parse_wire, _: " -> ", parse_wire)
-        .map(|(in1, g, in2, out)| (g, in1, in2, out))
-        .parse_next(s)
-}
+    fn parse_gate(s: &mut &str) -> PResult<Gate> {
+        alt(("AND", "OR", "XOR"))
+            .map(|g| match g {
+                "AND" => Gate::And,
+                "OR" => Gate::Or,
+                "XOR" => Gate::Xor,
+                _ => unreachable!(),
+            })
+            .parse_next(s)
+    }
 
-fn parse(s: &mut &str) -> PResult<(Vec<(Wire, bool)>, Vec<(Gate, Wire, Wire, Wire)>)> {
-    seq!(
-        separated(1.., parse_setting, newline),
-        _: (newline, newline),
-        separated(1.., parse_connection, newline)
-    )
-    .parse_next(s)
+    fn parse_setting(s: &mut &str) -> PResult<(Wire, bool)> {
+        seq!(parse_wire, _: ": ", parse_usize)
+            .map(|(w, b)| (w, b == 1))
+            .parse_next(s)
+    }
+
+    fn parse_connection(s: &mut &str) -> PResult<(Gate, Wire, Wire, Wire)> {
+        seq!(parse_wire, _: " ", parse_gate, _: " ", parse_wire, _: " -> ", parse_wire)
+            .map(|(in1, g, in2, out)| (g, in1, in2, out))
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<(Vec<(Wire, bool)>, Vec<(Gate, Wire, Wire, Wire)>)> {
+        seq!(
+            separated(1.., parse_setting, newline),
+            _: (newline, newline),
+            separated(1.., parse_connection, newline)
+        )
+        .parse_next(s)
+    }
 }
 
 #[aoc_at(2024, 24)]
@@ -436,7 +441,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (wires, links) = parse(&mut input.as_str())?;
+        let (wires, links) = parser::parse(&mut input.as_str())?;
         self.input_wire = wires;
         let mut wire_names_tmp: FxHashSet<Wire> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
@@ -506,20 +511,10 @@ impl AdventOfCode for Puzzle {
                 graph.add_edge(from, to, &weight);
             }
         }
-        let dot = Dot::with_config(&graph, &[Config::EdgeNoLabel]);
-        let config = self.get_config();
-        if let Ok(path) = config.serialization_path(Self::YEAR, Self::DAY, "nodes.dot") {
-            let dir = std::path::Path::new(&path).parent().unwrap();
-            if !dir.exists() {
-                std::fs::create_dir_all(dir)
-                    .unwrap_or_else(|_| panic!("fail to create a directory {dir:?}"));
-            }
-            let mut file =
-                std::fs::File::create(&path).unwrap_or_else(|_| panic!("fail to open {path:?}"));
-            writeln!(file, "{:?}", dot).expect("fail to save");
-            println!("{}# write {:?}{}", color::MAGENTA, path, color::RESET,);
-        }
-
+        self.dump_to(
+            "nodes.dot",
+            format!("{:?}", Dot::with_config(&graph, &[Config::EdgeNoLabel])),
+        );
         serde_json::to_string(&data).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
