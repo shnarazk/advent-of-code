@@ -32,38 +32,36 @@ end parser
 
 namespace Part1
 
-def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Std.HashSet Nat :=
-  match l with
-    | [] => subs
-    | a :: rest =>
-      subs.fold
-            (fun acc val ↦ [val + a, val * a]
-              |>.filter (· <= threshold)
-              |>.foldl (fun acc n ↦ acc.insert n) acc)
-            Std.HashSet.empty
-        |> (exp threshold rest ·)
+  def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Nat :=
+    match l with
+      | [] => if subs.contains threshold then threshold else 0
+      | a :: rest =>
+        subs.fold
+              (fun acc val ↦ [val + a, val * a]
+                |>.filter (· <= threshold)
+                |>.foldl (fun acc n ↦ acc.insert n) acc)
+              Std.HashSet.empty
+          |> (exp threshold rest ·)
 
-def expand (threshold : Nat) (l : Array Nat) : Std.HashSet Nat :=
-  exp threshold l.toList (Std.HashSet.empty.insert 0)
+  def check (threshold : Nat) (l : Array Nat) : Nat :=
+    exp threshold l.toList (Std.HashSet.empty.insert 0)
 
 def solve (input : Input) : Nat :=
-  input.line
-    |>.map (fun ((val: Nat), (v: Array Nat)) ↦
-      if expand val v |>.contains val then val else 0)
-    |> sum
+  input.line |>.map (fun ((val: Nat), (v: Array Nat)) ↦ check val v) |> sum
 
 end Part1
 
 namespace Part2
 
 def shift₀ (a b b0 : Nat) : Nat :=
-  if b0 < 10 then a * 10 + b else shift₀  (a * 10) b (b0 / 10)
+  if b0 < 10 then a * 10 + b else shift₀ (a * 10) b (b0 / 10)
+
 def shift (a b : Nat) : Nat := shift₀ a b b
 -- #eval shift 3000000 1000000
 
-def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Std.HashSet Nat :=
+def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Nat :=
   match l with
-    | [] => subs
+    | [] => if subs.contains threshold then threshold else 0
     | a :: rest =>
       subs.fold
             (fun acc val ↦ [val + a, val * a, shift val a]
@@ -72,14 +70,11 @@ def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Std.HashSet 
             Std.HashSet.empty
         |> (exp threshold rest ·)
 
-def expand (threshold : Nat) (l : Array Nat) : Std.HashSet Nat :=
+def check (threshold : Nat) (l : Array Nat) : Nat :=
   exp threshold l.toList (Std.HashSet.empty.insert 0)
 
 def solve (input : Input) : Nat :=
-  input.line
-    |>.map (fun ((val: Nat), (v: Array Nat)) ↦
-      if expand val v |>.contains val then val else 0)
-    |> sum
+  input.line |>.map (fun ((val: Nat), (v: Array Nat)) ↦ check val v) |> sum
 
 end Part2
 
