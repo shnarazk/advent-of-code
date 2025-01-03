@@ -52,6 +52,8 @@ instance : ToString Input where toString self := s!"{self.obstruction.toList}"
 
 namespace Input
 
+def status (self : Input) : (Vec2 × Dir) := (self.guardPos, self.guardDir)
+
 def turn (self : Input) : Input := { self with guardDir := self.guardDir.turn }
 
 def moveTo (self : Input) (pos : Vec2) : Input := { self with guardPos := pos }
@@ -68,25 +70,25 @@ partial def loop (self : Input) (trail : Std.HashSet (Vec2 × Dir)) (pos : Optio
   match pos with
     | none   => false
     | some p =>
-      let self' := self.moveTo p
-      if trail.contains (p, self'.guardDir) && !self'.obstruction.contains p
+      let self₀ := self.moveTo p
+      if trail.contains self₀.status -- && !self₀.obstruction.contains p
         then true
         else
-          let trail' := trail.insert (p, self'.guardDir)
-          if let some p' := self'.nextPos
+          let trail' := trail.insert self₀.status
+          if let some p' := self₀.nextPos
             then
-              if self'.obstruction.contains p'
+              if self₀.obstruction.contains p'
                 then
-                  let self'' := self'.turn
-                  if let some p'' := self''.nextPos
+                  let self₁ := self₀.turn
+                  if let some p'' := self₁.nextPos
                     then
-                        if self''.obstruction.contains p''
+                        if self₁.obstruction.contains p''
                             then
-                              let self''' := self''.turn
-                              loop self''' trail' self'''.nextPos
-                            else loop self'' trail' self''.nextPos
+                              let self₂ := self₁.turn
+                              self₂.loop trail' self₂.nextPos
+                            else self₁.loop trail' self₁.nextPos
                     else false
-                else loop self' trail' self'.nextPos
+                else self₀.loop trail' self₀.nextPos
             else false
 
 def isLoop (self : Input) (pos : Vec2) (pre: Vec2 × Dir) : Bool :=
@@ -94,7 +96,7 @@ def isLoop (self : Input) (pos : Vec2) (pre: Vec2 × Dir) : Bool :=
       guardPos := pre.1,
       guardDir := pre.2,
       obstruction := (self.obstruction.insert pos) }
-  loop self' Std.HashSet.empty pre.1
+  self'.loop Std.HashSet.empty pre.1
 
 end Input
 
@@ -139,11 +141,9 @@ partial def traceMove
       if self.obstruction.contains p
       then
         let self' := self.turn
-        let pre' := some (self'.guardPos, self'.guardDir)
-        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) pre' hash'
+        traceMove (self'.moveTo <| self'.nextPos.unwrapOr p) (some self'.status) hash'
       else
-        let pre' := some (self.guardPos, self.guardDir)
-        traceMove (self.moveTo p) pre' hash'
+        traceMove (self.moveTo p) (some self.status) hash'
 
 namespace Part1
 
