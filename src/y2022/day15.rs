@@ -78,7 +78,7 @@ fn intersections(a: &Loc, ab: &Loc, b: &Loc, bb: &Loc) -> Vec<Loc> {
     .collect::<Vec<_>>()
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<(Loc, Loc)>,
 }

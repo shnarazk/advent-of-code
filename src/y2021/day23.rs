@@ -10,7 +10,7 @@ use {
     },
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<char>,
 }

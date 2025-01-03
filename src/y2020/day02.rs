@@ -4,7 +4,7 @@ use crate::{
     regex,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     line: Vec<String>,
 }

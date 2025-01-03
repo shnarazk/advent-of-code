@@ -49,7 +49,7 @@ impl Instruction {
     }
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     code: Vec<(Instruction, bool)>,
 }

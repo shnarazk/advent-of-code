@@ -28,7 +28,7 @@ fn parse(block: &str) -> Option<VecDeque<usize>> {
 type Player = VecDeque<usize>;
 type Config = (Player, Player);
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct Cache {
     set: HashSet<Config>,
 }
@@ -49,7 +49,7 @@ impl Cache {
     }
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     player1: Player,
     player2: Player,

@@ -41,7 +41,7 @@ impl OP {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Puzzle {
     mask: OP,
     code: Vec<OP>,

@@ -1,4 +1,4 @@
-//! <https://adventofcode.com/2023/day/1>
+//! <https://adventofcode.com/2023/day/0>
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
@@ -12,7 +12,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<()>,
 }
@@ -23,7 +23,7 @@ pub struct Puzzle {
 //     }
 // }
 
-#[aoc(2023, 1)]
+#[aoc(2023, 0)]
 impl AdventOfCode for Puzzle {
     // const DELIMITER: &'static str = "\n";
     // fn header(&mut self, input: String) -> Result<String, ParseError> {

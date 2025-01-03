@@ -15,7 +15,7 @@ use {
 // A half-open range implementation
 type Range = (usize, usize);
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     seeds: Vec<usize>,
     line: Vec<Vec<(usize, usize, usize)>>,

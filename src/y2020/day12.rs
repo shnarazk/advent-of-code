@@ -67,7 +67,7 @@ impl Instruction {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Puzzle {
     codes: Vec<Instruction>,
     dir: Dir,

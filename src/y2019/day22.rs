@@ -4,7 +4,7 @@ use crate::{
     regex,
 };
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Shuffle<const N: usize> {
     Stack,
     Cut(isize),
@@ -51,7 +51,7 @@ impl<const N: usize> Shuffle<N> {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Shuffle<0>>,
 }

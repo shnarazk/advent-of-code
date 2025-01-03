@@ -41,7 +41,7 @@ impl Calculation for [usize; 4] {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Blueprint {
     id: usize,
     trans: [[usize; 4]; 4],
@@ -155,7 +155,7 @@ impl Blueprint {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Blueprint>,
 }

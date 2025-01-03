@@ -9,7 +9,7 @@ use {
 
 type ChemicalUnit = (String, usize);
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<(Vec<ChemicalUnit>, ChemicalUnit)>,
 }

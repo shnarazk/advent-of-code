@@ -18,7 +18,7 @@ use {
     },
 };
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     mapping: Rect<char>,
 }

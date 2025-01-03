@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2017/day/11>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Direction {
     N,
     NE,
@@ -39,7 +39,7 @@ impl Direction {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<Direction>,
 }

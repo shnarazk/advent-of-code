@@ -4,7 +4,7 @@ use crate::{
     parser, regex,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Ingredient {
     name: String,
     capacity: isize,
@@ -14,7 +14,7 @@ struct Ingredient {
     calories: isize,
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Ingredient>,
 }

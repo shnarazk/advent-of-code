@@ -1,13 +1,13 @@
 //! <https://adventofcode.com/2021/day/5>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct DataSegment {
     beg: (usize, usize),
     end: (usize, usize),
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<DataSegment>,
     max_x: usize,

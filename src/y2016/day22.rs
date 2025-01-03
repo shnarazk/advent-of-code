@@ -7,7 +7,7 @@ use {
     std::collections::{binary_heap::BinaryHeap, HashSet},
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<(usize, usize, usize, usize, usize, usize)>,
 }

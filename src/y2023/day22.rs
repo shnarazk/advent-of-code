@@ -8,7 +8,7 @@ use {
     std::{cmp::Ordering, collections::HashMap},
 };
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct Block {
     pos: Dim3<usize>,
     shape: Dim3<usize>,
@@ -39,7 +39,7 @@ impl PartialOrd for Block {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     blocks: Vec<Block>,
     supported: Vec<Vec<usize>>,

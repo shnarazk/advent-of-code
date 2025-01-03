@@ -7,7 +7,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<isize>,
     pc: usize,

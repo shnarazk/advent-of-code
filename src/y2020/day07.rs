@@ -7,14 +7,14 @@ use {
     std::collections::HashSet,
 };
 
-#[derive(Eq, Debug, Hash, PartialEq)]
+#[derive(Clone, Eq, Debug, Hash, PartialEq)]
 struct Link {
     outer: String,
     inner: String,
     amount: usize,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     links: HashSet<Link>,
 }

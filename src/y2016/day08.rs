@@ -4,14 +4,14 @@ use crate::{
     regex,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum Op {
     Rect(usize, usize),
     RotateRow(usize, usize),
     RotateCol(usize, usize),
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Op>,
 }

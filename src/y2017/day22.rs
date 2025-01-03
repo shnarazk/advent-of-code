@@ -38,7 +38,7 @@ fn turn_to(dir: Location, infected: bool) -> Location {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 enum Mode2 {
     #[default]
     Clean,
@@ -58,7 +58,7 @@ impl Mode2 {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     infection_map: HashSet<Location>,

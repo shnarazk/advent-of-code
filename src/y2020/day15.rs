@@ -5,7 +5,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     dic: HashMap<usize, usize>,
     last: usize,

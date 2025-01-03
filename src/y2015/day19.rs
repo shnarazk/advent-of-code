@@ -10,7 +10,7 @@ use {
     std::collections::HashSet,
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     num_atom: usize,
     dic: HashMap<String, usize>,

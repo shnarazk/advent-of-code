@@ -9,7 +9,7 @@ use {
 
 type Dim = Dim2<isize>;
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<bool>>,
     map: HashSet<Dim>,

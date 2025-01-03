@@ -99,7 +99,7 @@ impl Expr {
     }
 }
 
-#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Expr>,
 }

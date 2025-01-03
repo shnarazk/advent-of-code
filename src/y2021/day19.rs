@@ -86,7 +86,7 @@ impl Block {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Block>,
 }

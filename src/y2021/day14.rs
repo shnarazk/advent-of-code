@@ -6,7 +6,7 @@ use {
 
 type Rule = (char, char, char);
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     template: Vec<char>,
     line: Vec<Rule>,

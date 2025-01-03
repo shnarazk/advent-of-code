@@ -4,7 +4,7 @@ use {
     md5::{Digest, Md5},
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: String,
 }

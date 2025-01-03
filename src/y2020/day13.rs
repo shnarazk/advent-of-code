@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/13>
 use crate::framework::{aoc, AdventOfCode, ParseError};
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     time: usize,
     bus: Vec<(usize, usize)>,

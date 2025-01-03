@@ -102,7 +102,7 @@ impl std::fmt::Display for ParseError {
 impl std::error::Error for ParseError {}
 
 /// The standard interface for a problem description with solving methods
-pub trait AdventOfCode: fmt::Debug + Default {
+pub trait AdventOfCode: fmt::Debug + Clone + Default {
     type Output1: fmt::Debug + PartialEq;
     type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
@@ -301,8 +301,9 @@ pub trait AdventOfCode: fmt::Debug + Default {
                     input,
                     color::RESET,
                 );
-                let ans1 = Self::run(config.clone()).expect(&parse_error).part1();
-                let ans2 = Self::run(config).expect(&parse_error).part2();
+                let solver = Self::run(config.clone()).expect(&parse_error);
+                let ans1 = solver.clone().part1();
+                let ans2 = solver.clone().part2();
                 Answer::Answers(ans1, ans2)
             }
             _ => Answer::None,

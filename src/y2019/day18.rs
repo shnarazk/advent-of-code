@@ -37,7 +37,7 @@ struct State4 {
     inventry: [Vec<u8>; 4],
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<u8>>,
     map: HashMap<Location, u8>,

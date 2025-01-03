@@ -4,7 +4,7 @@ use crate::{
     geometric, parser,
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }

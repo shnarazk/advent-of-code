@@ -4,7 +4,7 @@ use crate::{
     geometric,
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     enhancer: Vec<char>,
     image: Vec<Vec<char>>,

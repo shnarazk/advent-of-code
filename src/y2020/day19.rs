@@ -8,7 +8,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 enum Rule {
     Match(char),
     Or(Vec<usize>, Vec<usize>),
@@ -21,7 +21,7 @@ enum Rule {
 //     rule: Rule,
 // }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     rule: HashMap<usize, Rule>,
     message: Vec<Vec<char>>,

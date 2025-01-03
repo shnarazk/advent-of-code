@@ -21,7 +21,7 @@ fn formatter1(mut vec: &[usize]) -> Vec<usize> {
     v
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<usize>,
 }

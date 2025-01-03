@@ -7,7 +7,7 @@ use {
     std::collections::HashSet,
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<(String, String)>,
     orbit: HashSet<(String, String)>,

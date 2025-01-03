@@ -68,7 +68,7 @@ impl Ord for Expr {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     line: Vec<(Expr, Expr)>,
 }

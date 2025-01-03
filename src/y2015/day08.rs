@@ -26,7 +26,7 @@ fn encode(vec: &[char]) -> usize {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
 }

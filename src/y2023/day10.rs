@@ -14,7 +14,7 @@ fn add((py, px): &Dim2<isize>, (qy, qx): &Dim2<isize>) -> Dim2<isize> {
     (py + qy, px + qx)
 }
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Pipe(Vec<Dim2<isize>>);
 
 impl Pipe {
@@ -23,7 +23,7 @@ impl Pipe {
     }
 }
 // fn goto()
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Vec<Pipe>>,
     start: Dim2<isize>,

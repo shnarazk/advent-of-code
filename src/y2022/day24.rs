@@ -12,7 +12,7 @@ use {
 
 type Dim = Dim2<usize>;
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
     map: HashMap<Dim, char>,

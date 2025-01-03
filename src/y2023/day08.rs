@@ -12,7 +12,7 @@ use {
     },
 };
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     head: Vec<char>,
     line: HashMap<String, (String, String)>,

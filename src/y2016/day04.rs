@@ -7,7 +7,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[allow(clippy::type_complexity)]
 pub struct Puzzle {
     line: Vec<(HashMap<char, usize>, usize, Vec<char>, Vec<Vec<char>>)>,

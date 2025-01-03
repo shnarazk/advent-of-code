@@ -11,7 +11,7 @@ use {
     },
 };
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
     hash: HashMap<(isize, isize), char>,
