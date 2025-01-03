@@ -1,36 +1,40 @@
 //! <https://adventofcode.com/2024/day/7>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        parser::parse_usize,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
     std::{collections::HashSet, hash::BuildHasherDefault},
-    winnow::{ascii::newline, combinator::separated, PResult, Parser},
 };
 
 #[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Puzzle {
     line: Vec<(usize, Vec<usize>)>,
 }
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            PResult, Parser,
+        },
+    };
 
-fn parse_line(str: &mut &str) -> PResult<(usize, Vec<usize>)> {
-    let (head, _): (usize, &str) = (parse_usize, ": ").parse_next(str)?;
-    let v: Vec<usize> = separated(1.., parse_usize, " ").parse_next(str)?;
-    Ok((head, v))
-}
+    fn parse_line(s: &mut &str) -> PResult<(usize, Vec<usize>)> {
+        seq!(parse_usize, _: ": ", separated(1.., parse_usize, " "),).parse_next(s)
+    }
 
-fn parse(str: &mut &str) -> PResult<Vec<(usize, Vec<usize>)>> {
-    separated(1.., parse_line, newline).parse_next(str)
+    pub fn parse(str: &mut &str) -> PResult<Vec<(usize, Vec<usize>)>> {
+        separated(1.., parse_line, newline).parse_next(str)
+    }
 }
 
 #[aoc(2024, 7)]
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         let p = &mut input.as_str();
-        self.line = parse(p)?;
+        self.line = parser::parse(p)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
