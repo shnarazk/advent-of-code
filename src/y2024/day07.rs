@@ -38,33 +38,15 @@ impl AdventOfCode for Puzzle {
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
-        self.line
-            .par_iter()
-            .map(|(val, v)| {
-                if expands(v, *val).contains(val) {
-                    *val
-                } else {
-                    0
-                }
-            })
-            .sum()
+        self.line.par_iter().map(|(val, v)| expands(v, *val)).sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line
-            .par_iter()
-            .map(|(val, v)| {
-                if expands2(v, *val).contains(val) {
-                    *val
-                } else {
-                    0
-                }
-            })
-            .sum()
+        self.line.par_iter().map(|(val, v)| expands2(v, *val)).sum()
     }
 }
 
-fn expands(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
-    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> FxHashSet<usize> {
+fn expands(vec: &[usize], threshold: usize) -> usize {
+    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> usize {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
@@ -81,7 +63,11 @@ fn expands(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
                 threshold,
             )
         } else {
-            subs
+            if subs.contains(&threshold) {
+                threshold
+            } else {
+                0
+            }
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
@@ -90,7 +76,7 @@ fn expands(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
     exp(args, temp, threshold)
 }
 
-fn expands2(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
+fn expands2(vec: &[usize], threshold: usize) -> usize {
     fn shift(a: usize, b: usize, b0: usize) -> usize {
         if b0 < 10 {
             a * 10 + b
@@ -98,7 +84,7 @@ fn expands2(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
             shift(a * 10, b, b0 / 10)
         }
     }
-    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> FxHashSet<usize> {
+    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> usize {
         if let Some(&a) = vec.first() {
             vec.remove(0);
             exp(
@@ -115,7 +101,11 @@ fn expands2(vec: &[usize], threshold: usize) -> FxHashSet<usize> {
                 threshold,
             )
         } else {
-            subs
+            if subs.contains(&threshold) {
+                threshold
+            } else {
+                0
+            }
         }
     }
     let mut args: Vec<usize> = vec.to_vec();
