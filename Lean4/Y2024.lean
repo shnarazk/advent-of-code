@@ -5,6 +5,7 @@ import «Y2024».Day03
 import «Y2024».Day04
 import «Y2024».Day05
 import «Y2024».Day06
+import «Y2024».Day07
 
 namespace Y2024
 
@@ -15,10 +16,11 @@ def solvers : List (Option String → IO AocProblem) := [
   Day04.solve,
   Day05.solve,
   Day06.solve,
+  Day07.solve,
 ]
 
 def there_are_solvers : 0 < solvers.length := by
-  have count : solvers.length = 6 := by exact rfl
+  have count : solvers.length = 7 := by exact rfl
   simp [count]
 
 protected def solvedDays : Nat := solvers.length
