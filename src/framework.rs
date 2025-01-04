@@ -1,12 +1,16 @@
 //! data handling framework
-use std::path::PathBuf;
-
 pub use aoc_macro::{aoc, aoc_at};
+
 use {
     crate::color,
     clap::Parser,
     std::sync::OnceLock,
-    std::{fmt, fs::File, io::prelude::*, path::Path},
+    std::{
+        fmt,
+        fs::File,
+        io::prelude::*,
+        path::{Path, PathBuf},
+    },
 };
 
 pub const JSON_DUMP_DIR: &str = "misc";
