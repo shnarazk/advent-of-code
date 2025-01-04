@@ -287,7 +287,6 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
             println!("{}# write {:?}{}", color::MAGENTA, path, color::RESET,);
         }
     }
-
     /// # UNDER THE HOOD
     /// read the input, run solver(s), return the results
     fn solve(config: ConfigAoC) -> Answer<Self::Output1, Self::Output2> {
