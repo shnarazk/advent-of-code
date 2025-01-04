@@ -422,7 +422,11 @@ def of2DMatrix [BEq α]
     (self : Rect α) (p : Dim2) (default : α) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
-    self.vector.get (Fin.ofNat' self.vector.size (self.shape.index p))
+    let index := Fin.ofNat' self.vector.size (self.shape.index p)
+    have so : ↑(Fin.ofNat' self.vector.size (self.shape.index p)) < self.vector.size := by
+      simp only [Fin.ofNat']
+      exact Nat.mod_lt (self.shape.index p) h
+   self.vector.get (Fin.ofNat' self.vector.size (self.shape.index p)) so
   else
     default
 
