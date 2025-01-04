@@ -1,75 +1,84 @@
 //! <https://adventofcode.com/2020/day/2>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
-    line: Vec<String>,
+    line: Vec<(usize, usize, char, String)>,
+}
+
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline, space1},
+            combinator::{separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<(usize, usize, char, String)> {
+        seq!(
+            parse_usize,
+            _: "-",
+            parse_usize,
+            _: space1,
+            one_of('a'..='z'),
+            _: ": ",
+            alpha1,
+        )
+        .map(|(beg, end, lead, seq)| (beg, end, lead, seq.to_string()))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<(usize, usize, char, String)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
 }
 
 #[aoc(2020, 2)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.to_string());
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
-        self.line.iter().map(|s| check_line1(s)).sum::<usize>()
+        self.line.iter().filter(check_line1).count()
     }
     fn part2(&mut self) -> usize {
-        self.line.iter().map(|s| check_line2(s)).sum::<usize>()
+        self.line.iter().filter(check_line2).count()
     }
 }
 
-fn check_line1(str: &str) -> usize {
-    let parser = regex!(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$");
-    if let Some(m) = parser.captures(str) {
-        let mi = m[1].parse::<usize>().unwrap();
-        let ma = m[2].parse::<usize>().unwrap();
-        let target: char = m[3].chars().next().unwrap();
-        // println!("min:{}, max:{}, letter:{}, body: {}", mi, ma, target, &m[4]);
-        let occ = m[4].chars().filter(|c| *c == target).count();
-        (mi <= occ && occ <= ma) as usize
-    } else {
-        0
-    }
+fn check_line1((mi, ma, target, seq): &&(usize, usize, char, String)) -> bool {
+    let occ = seq.chars().filter(|c| *c == *target).count();
+    *mi <= occ && occ <= *ma
 }
 
-fn check_line2(str: &str) -> usize {
-    let parser = regex!(r"^([0-9]+)-([0-9]+) ([a-zA-Z]): (.*)$");
-    if let Some(m) = parser.captures(str) {
-        let pos1 = m[1].parse::<usize>().unwrap();
-        let pos2 = m[2].parse::<usize>().unwrap();
-        let ch: char = m[3].chars().next().unwrap();
-        let target: &str = &m[4];
-        let p1 = target.chars().nth(pos1 - 1) == Some(ch);
-        let p2 = target.chars().nth(pos2 - 1) == Some(ch);
-        // if p1 ^ p2 {
-        //     println!(
-        //         "OK: p1:{}=>{}, p2:{}=>{}, letter:{}, body: {}",
-        //         pos1,
-        //         target.chars().nth(pos1 - 1).unwrap(),
-        //         pos2,
-        //         target.chars().nth(pos2 - 1).unwrap(),
-        //         ch,
-        //         target
-        //     );
-        // } else {
-        //     println!(
-        //         "NG: p1:{}=>{}, p2:{}=>{}, letter:{}, body: {}",
-        //         pos1,
-        //         target.chars().nth(pos1 - 1).unwrap(),
-        //         pos2,
-        //         target.chars().nth(pos2 - 1).unwrap(),
-        //         ch,
-        //         target
-        //     );
-        // }
-        (p1 ^ p2) as usize
-    } else {
-        0
-    }
+fn check_line2((pos1, pos2, ch, target): &&(usize, usize, char, String)) -> bool {
+    let p1 = target.chars().nth(pos1 - 1) == Some(*ch);
+    let p2 = target.chars().nth(pos2 - 1) == Some(*ch);
+    p1 ^ p2
+    // if p1 ^ p2 {
+    //     println!(
+    //         "OK: p1:{}=>{}, p2:{}=>{}, letter:{}, body: {}",
+    //         pos1,
+    //         target.chars().nth(pos1 - 1).unwrap(),
+    //         pos2,
+    //         target.chars().nth(pos2 - 1).unwrap(),
+    //         ch,
+    //         target
+    //     );
+    // } else {
+    //     println!(
+    //         "NG: p1:{}=>{}, p2:{}=>{}, letter:{}, body: {}",
+    //         pos1,
+    //         target.chars().nth(pos1 - 1).unwrap(),
+    //         pos2,
+    //         target.chars().nth(pos2 - 1).unwrap(),
+    //         ch,
+    //         target
+    //     );
+    // }
+    // (p1 ^ p2) as usize
 }
