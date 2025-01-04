@@ -629,13 +629,15 @@ impl AdventOfCode for Puzzle {
             best = best.min(desc.number_of_targets());
             let index = desc.first_target();
             let (d_tree, u_tree) = desc.wire_trees(true, true);
+            // let unrelated_wires = desc.wire_affects(&u_tree, ord_to_wire(index + 1, b'z'));
             let related_wires = desc
                 .wire_affects(&u_tree, ord_to_wire(index, b'z'))
                 .iter()
                 .filter(|w| ![b'x', b'y'].contains(&w.0))
+                // .filter(|w| !unrelated_wires.contains(*w))
                 .cloned()
                 .collect::<Vec<_>>();
-            assert!(related_wires.contains(&ord_to_wire(index, b'z')));
+            debug_assert!(related_wires.contains(&ord_to_wire(index, b'z')));
             let _output_wire = ord_to_wire(index, b'z');
             let cones = build_cones(&d_tree, &wires);
             for &wire1 in related_wires.iter() {
