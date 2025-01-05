@@ -6,7 +6,7 @@ import Cli
 import «AoC».Basic
 import «AoC».Color
 import «AoC».Combinator
--- import «Y2023»
+import «Y2023»
 import «Y2024»
 
 open AoC
@@ -15,7 +15,7 @@ open Cli
 def events
     : Batteries.AssocList Nat (Nat × (Nat → Option String → IO AocProblem))
   := Batteries.AssocList.nil
---    |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
+    |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
     |>.cons 2024 (Y2024.solvedDays, Y2024.solve)
 -- #check events.find? 2023
 

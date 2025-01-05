@@ -113,15 +113,20 @@ def evaluation₂ (h : Hand) : (Nat × List Nat) × Nat :=
   let ord := orderOf order₂ h |> Array.toList
   let num_J := Array.filter (. == 'J') h.cards |> Array.size
   let cardsJ := Array.filter (· != 'J') h.cards
-  let oc := if num_J == 5 then #[5] else Array.modify (occurences cardsJ) 0 (. + num_J)
-  match oc with
-  | #[5]          => ((7, ord), h.bid) -- Five of a kind
-  | #[4, 1]       => ((6, ord), h.bid) -- Four of a kind
-  | #[3, 2]       => ((5, ord), h.bid) -- Full house
-  | #[3, 1, 1]    => ((4, ord), h.bid) -- Three of a kind
-  | #[2, 2, 1]    => ((3, ord), h.bid) -- Two pair
-  | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
-  | _             => ((1, ord), h.bid) -- High card
+  let occurs := occurences cardsJ
+  -- Lean-4.15 requires the following check!!!
+  if occurs.size == 0
+    then ((7, ord), h.bid)
+  else
+    let oc := if num_J == 5 then #[5] else Array.modify occurs 0 (. + num_J)
+    match oc with
+    | #[5]          => ((7, ord), h.bid) -- Five of a kind
+    | #[4, 1]       => ((6, ord), h.bid) -- Four of a kind
+    | #[3, 2]       => ((5, ord), h.bid) -- Full house
+    | #[3, 1, 1]    => ((4, ord), h.bid) -- Three of a kind
+    | #[2, 2, 1]    => ((3, ord), h.bid) -- Two pair
+    | #[2, 1, 1, 1] => ((2, ord), h.bid) -- One pair
+    | _             => ((1, ord), h.bid) -- High card
 
 -- #eval evaluation₂ <| Hand.hand #['A', '3', '9', 'J', 'A'] 33
 
