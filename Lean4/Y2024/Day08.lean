@@ -8,24 +8,30 @@ namespace Y2024.Day08
 open Std Accumulation CiCL TwoDimensionalVector64
 
 structure Input where
-  line : Array (Array Char)
-  anntena : Array (Dim2 × Char)
+  anntena : List ((Nat × Nat) × Char)
 deriving BEq, Hashable, Repr
 -- #check ((4, 8) : Dim2)
 
-instance : ToString Input where toString _ := s!""
+instance : ToString Input where toString s := s!"{s.anntena}"
 
 namespace parser
 
+open Std
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def parseSymbol := do asciiLetter <|> digit <|> pchar '.'
+
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
-      let v ← sepBy1 alphabets eol
-      return Input.mk (v.map (·.toList.toArray)) Array.empty
+      let v ← sepBy1 (many1 parseSymbol) eol
+      let a := v.enum.toList.map
+        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ ((i, j), c)))
+        |>.flatten
+        |>.filter (fun (_, c) ↦ c ≠ '.')
+      return Input.mk a
 
 end parser
 
