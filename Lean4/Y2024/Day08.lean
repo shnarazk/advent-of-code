@@ -2,17 +2,27 @@ import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
+import Init.Data.SInt.Basic
 
 namespace Y2024.Day08
 
 open Std Accumulation CiCL TwoDimensionalVector64
 
+abbrev Vec2 := Int64 × Int64
+instance : ToString Vec2 where toString v := s!"({v.1},{v.2})"
+instance : Hashable Int64 where hash a := a.toUInt64
+-- instance : Hashable Vec2 where hash a := hash (a.1)
+
+def add (a b : Vec2) : Vec2 := (a.1 + b.1, a.2 + b.2)
+def sub (a b : Vec2) : Vec2 := (a.1 - b.1, a.2 - b.2)
+
 structure Input where
-  anntena : List ((Nat × Nat) × Char)
-deriving BEq, Hashable, Repr
+  anntena : List (Char × Vec2)
+  size: Vec2
+deriving BEq
 -- #check ((4, 8) : Dim2)
 
-instance : ToString Input where toString s := s!"{s.anntena}"
+instance : ToString Input where toString s := s!"({s.size}){s.anntena}"
 
 namespace parser
 
@@ -28,20 +38,31 @@ def parse : String → Option Input := AoCParser.parse parser
     parser : Parser Input := do
       let v ← sepBy1 (many1 parseSymbol) eol
       let a := v.enum.toList.map
-        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ ((i, j), c)))
+        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ (c, (i.toInt64, j.toInt64))))
         |>.flatten
-        |>.filter (fun (_, c) ↦ c ≠ '.')
-      return Input.mk a
+        |>.filter (fun (c, _) ↦ c ≠ '.')
+      return Input.mk a (v.size.toInt64, v[0]!.size.toInt64)
 
 end parser
 
 namespace Part1
+def contains (size pos : Vec2) : Bool :=
+  0 ≤ pos.1 && pos.1 < size.1 && 0 ≤ pos.2 && pos.2 < size.2
+
+def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
+  if a.1 == b.1
+    then
+      let d := sub b.2 a.2
+      [sub a.2 d, add b.2 d].filter (fun p ↦ contains size p)
+    else []
 
 def solve (input : Input) : Nat :=
-  input.anntena
-    |>.foldl
-        (fun (h : HashSet Dim2) _anntena ↦ h)
-        HashSet.empty
+  input.anntena.enum.map
+    (fun (i, a1) ↦
+        input.anntena.drop (i + 1)
+            |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
+    |>.flatten
+    |> HashSet.ofList
     |>.size
 
 end Part1
@@ -52,9 +73,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2024 08
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 08 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day08
