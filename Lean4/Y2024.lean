@@ -7,6 +7,7 @@ import «Y2024».Day05
 import «Y2024».Day06
 import «Y2024».Day07
 import «Y2024».Day08
+import «Y2024».Day09
 
 namespace Y2024
 
@@ -19,6 +20,7 @@ def solvers : List (Option String → IO AocProblem) := [
   Y2024.Day06.solve,
   Y2024.Day07.solve,
   Y2024.Day08.solve,
+  Y2024.Day09.solve,
 ]
 
 protected def solvedDays : Nat := solvers.length
