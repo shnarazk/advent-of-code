@@ -1,7 +1,6 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
--- import «AoC».Rect64
 
 namespace Y2024.Day09
 
@@ -23,7 +22,7 @@ def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
       let v ← many1 digit
-      return (v.map (fun (_c : Char) ↦ some 0) |> Input.mk) 
+      return (v.map (fun (_c : Char) ↦ some 0) |> Input.mk)
 
 end parser
 
