@@ -6,6 +6,7 @@ use {
 
 const OUT_FILE_NAME: &str = "misc/histogram.png";
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct Record {
     year: usize,
@@ -15,7 +16,6 @@ struct Record {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let json_data = load_data();
-    dbg!(&json_data);
 
     let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
 
@@ -25,8 +25,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
-        .caption("Histogram Test", ("sans-serif", 50.0))
-        .build_cartesian_2d((0_i32..40).into_segmented(), 1_i32..8)?;
+        .caption("AoC 2024 in Rust Histogram", ("sans-serif", 50.0))
+        .build_cartesian_2d((-2_i32..20).into_segmented(), 1_i32..8)?;
 
     chart
         .configure_mesh()
@@ -37,16 +37,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .axis_desc_style(("sans-serif", 15))
         .draw()?;
 
-    let _data = [
-        0u32, 1, 1, 1, 4, 2, 5, 7, 8, 6, 4, 2, 1, 8, 3, 3, 3, 4, 4, 3, 3, 3,
-    ];
-
-    let data = json_data.iter().map(|r| r.time).collect::<Vec<_>>();
+    let data = json_data
+        .iter()
+        .map(|r| r.time.log2() as i32)
+        .collect::<Vec<_>>();
 
     chart.draw_series(
         Histogram::vertical(&chart)
             .style(RED.mix(0.5).filled())
-            .data(data.iter().map(|x| (*x as i32, 1))),
+            .data(data.iter().map(|x| (*x, 1))),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
