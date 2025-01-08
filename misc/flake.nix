@@ -10,12 +10,8 @@
       devShells.default = pkgs.mkShell {
         packages = [
           pkgs.bashInteractive
-          pkgs.cargo-watch
           pkgs.graphviz
-          pkgs.lldb_19
-          pkgs.libiconv
-          pkgs.samply
-          pkgs.tokei
+          pkgs.julia-bin
         ];
       };
     });
