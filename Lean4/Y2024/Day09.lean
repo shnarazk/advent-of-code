@@ -38,24 +38,28 @@ end parser
 
 namespace Part1
 
-partial def next (disc : Array (Option Nat)) ( limit_left limit_right i : Nat) (increase : Bool) : Nat :=
+partial def nextEmpty (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
   if disc.getD i none == none then i
-    else
-      if not increase && i == limit_left then i
-        else if increase && i == limit_right then i
-          else
-            next disc limit_left limit_right (if increase then i + 1 else i - 1) increase
+    else if i == limit then limit
+    else nextEmpty disc limit (i + 1)
+
+partial def nextUsed (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
+    if let some _ := disc.getD i (some 0) then i
+      else if i == limit then limit
+      else nextUsed disc limit (i - 1)
 
 partial def swap (disc : Array (Option Nat)) (left right : Nat) : Array (Option Nat) :=
-  if left < right then disc
+  if left ≥ right then disc
     else
-      let l := next disc 0 (disc.size - 1) left true
-      let r := next disc 0 (disc.size - 1) right false
+      let l := nextEmpty disc (disc.size - 1) left
+      let r := nextUsed disc 0 right
       if r <= l then disc else swap (disc.swapIfInBounds l r) (l + 1) (r - 1)
 
 def solve (input : Input) : Nat :=
-  let moved := swap input.line 0 (input.line.size - 1)
-  moved.size
+  swap input.line 0 (input.line.size - 1)
+   |>.enum
+   |>.map (fun (i, v) ↦ i * v.unwrapOr 0)
+   |> sum
 
 end Part1
 
@@ -65,9 +69,6 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2024 09
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 09 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day09
