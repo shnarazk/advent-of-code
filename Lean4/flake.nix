@@ -13,7 +13,7 @@
           packages = [
             pkgs.bashInteractive
             pkgs.elan
-            pkgs.nodejs_22
+            # pkgs.nodejs_22
             pkgs.tokei
             pkgs.vscodium
           ];

@@ -5,6 +5,9 @@ import «AoC».Rect64
 
 abbrev Vec2 := Int × Int
 
+instance : HAdd Vec2 Vec2 Vec2 where
+  hAdd a b := (a.1 + b.1, a.2 + b.2)
+
 namespace Y2024.Day06
 
 open Accumulation CiCL

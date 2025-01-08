@@ -1,4 +1,3 @@
-import Mathlib.Tactic
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Rect64

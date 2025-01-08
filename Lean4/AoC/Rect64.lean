@@ -1,5 +1,4 @@
 -- import Init.Data.Array.Subarray
-import Mathlib.Tactic
 import Std.Data.HashMap
 
 namespace TwoDimensionalVector64
