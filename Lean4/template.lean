@@ -3,8 +3,7 @@ import «AoC».Combinator
 import «AoC».Parser
 -- import «AoC».Rect64
 
-namespace Y20XX.DayXX
-
+namespace Y2024.Day00
 open Accumulation CiCL
 
 structure Input where
@@ -36,9 +35,9 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 20XX XX
+def solve := AocProblem.config 2024 00
   ((dbg "parsed as ") ∘ parser.parse)
   Part1.solve
   Part2.solve
 
-end Y20XX.DayXX
+end Y2024.Day00
