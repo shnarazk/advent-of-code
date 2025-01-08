@@ -10,7 +10,13 @@ structure Input where
   line : Array (Option Nat)
 deriving BEq, Hashable, Repr
 
-instance : ToString Input where toString s := s!"{s.line.size}"
+instance : ToString Input where
+  toString s :=
+    let v := s.line
+      |>.map (fun o ↦ match o with | none => "." | some d => s!"{d}")
+      |>.toList
+      |> (String.join ·)
+    s!"{s.line.size}: {v}"
 
 namespace parser
 
@@ -22,7 +28,11 @@ def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
       let v ← many1 digit
-      return (v.map (fun (_c : Char) ↦ some 0) |> Input.mk)
+      let disc := v.map (fun (c : Char) ↦ c.toNat - '0'.toNat)
+       |>.enum
+       |>.flatMap
+            (fun (i, l) ↦ Array.mkArray l (if i % 2 == 0 then some ((i + 1) / 2) else none))
+      return Input.mk disc
 
 end parser
 
