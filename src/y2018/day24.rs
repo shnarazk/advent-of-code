@@ -271,10 +271,10 @@ impl AdventOfCode for Puzzle {
         // dbg!(&segment);
         let mut weak_to: HashSet<AttackType> = HashSet::new();
         let mut immune_to: HashSet<AttackType> = HashSet::new();
+        let parser2 = regex!(r"(weak|immune) to (.*)$");
         if let Some(attrs) = segment.get(3) {
             for attr in attrs.as_str().split(';') {
                 let target = attr.trim().trim_matches('(').trim_matches(')');
-                let parser2 = regex!(r"(weak|immune) to (.*)$");
                 let attributes = parser2.captures(target).ok_or(ParseError)?;
                 if &attributes[1] == "weak" {
                     for word in attributes[2].split(", ") {

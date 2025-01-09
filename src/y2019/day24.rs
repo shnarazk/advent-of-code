@@ -228,15 +228,15 @@ impl Plane {
         next.state.insert(level, new_state);
     }
     fn extending(&self, level: i32) -> bool {
-        self.state.get(&level).map_or(false, |state| {
+        self.state.get(&level).is_some_and(|state| {
             [0, 1, 2, 3, 4, 5, 9, 10, 14, 15, 19, 20, 21, 22, 23, 24]
                 .iter()
                 .any(|i| 0 != state & (1 << i))
         })
     }
     fn shrinking(&self, level: i32) -> bool {
-        self.state.get(&level).map_or(false, |state| {
-            [7, 11, 13, 17].iter().any(|i| 0 != state & (1 << i))
-        })
+        self.state
+            .get(&level)
+            .is_some_and(|state| [7, 11, 13, 17].iter().any(|i| 0 != state & (1 << i)))
     }
 }

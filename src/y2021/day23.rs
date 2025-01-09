@@ -44,11 +44,11 @@ impl P1 {
     fn walkable_between(&self, s: usize, room_number: usize, maybe_me: Option<char>) -> bool {
         if s < room_number + 2 {
             (s..room_number + 2).all(|i| {
-                self.state[i] == '.' || maybe_me.map_or(false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.' || maybe_me.is_some_and(|me| i == s && self.state[i] == me)
             })
         } else {
             (room_number + 2..=s).all(|i| {
-                self.state[i] == '.' || maybe_me.map_or(false, |me| i == s && self.state[i] == me)
+                self.state[i] == '.' || maybe_me.is_some_and(|me| i == s && self.state[i] == me)
             })
         }
     }

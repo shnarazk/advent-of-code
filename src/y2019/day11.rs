@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
         let x_end = env.panel.keys().map(|loc| loc.1).max().unwrap();
         for y in y_beg..=y_end {
             for x in x_beg..=x_end {
-                if env.panel.get(&(y, x)).map_or(false, |(c, _)| *c) {
+                if env.panel.get(&(y, x)).is_some_and(|(c, _)| *c) {
                     print!("*");
                 } else {
                     print!(" ");

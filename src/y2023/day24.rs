@@ -53,7 +53,7 @@ impl AdventOfCode for Puzzle {
                     .enumerate()
                     .filter(|(x, _)| y < *x)
                     .filter(|(_, q)| {
-                        intersect_in_plane(p, *q).map_or(false, |(y, x)| {
+                        intersect_in_plane(p, *q).is_some_and(|(y, x)| {
                             (LEAST..=MOST).contains(&y) && (LEAST..=MOST).contains(&x)
                         })
                     })

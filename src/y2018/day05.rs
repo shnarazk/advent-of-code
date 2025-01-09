@@ -39,7 +39,7 @@ impl Puzzle {
             if c.abs() == ex {
                 continue;
             }
-            if result.last().map_or(false, |l| *l + *c == 0) {
+            if result.last().is_some_and(|l| *l + *c == 0) {
                 result.pop();
             } else {
                 result.push(*c);

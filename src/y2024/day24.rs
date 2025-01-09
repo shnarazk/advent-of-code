@@ -133,7 +133,7 @@ impl FullAdder {
             .map(|i| {
                 values
                     .get(ord_to_wire(i, b'z'))
-                    .map_or(false, |b| b.map_or(false, |b| b))
+                    .is_some_and(|b| b.map_or(false, |b| b))
             })
             .collect::<Vec<_>>();
         let val = v

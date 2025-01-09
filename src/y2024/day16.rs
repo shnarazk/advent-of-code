@@ -145,7 +145,7 @@ impl AdventOfCode for Puzzle {
                 }
                 continue;
             }
-            if best < cost || visited[pos].map_or(false, |c| c < cost) {
+            if best < cost || visited[pos].is_some_and(|c| c < cost) {
                 continue;
             }
             visited[pos] = Some(cost);

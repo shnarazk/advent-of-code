@@ -184,7 +184,7 @@ impl Puzzle {
             }
             if visited
                 .get(&(state.time, state.used.clone()))
-                .map_or(false, |v| state.total_flow < *v)
+                .is_some_and(|v| state.total_flow < *v)
             {
                 continue;
             }
@@ -232,7 +232,7 @@ impl Puzzle {
             }
             if visited
                 .get(&(now, state.used.clone()))
-                .map_or(false, |v| state.total_flow < *v)
+                .is_some_and(|v| state.total_flow < *v)
             {
                 continue;
             }

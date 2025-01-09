@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
             "WALK",
         ];
         let output: Vec<isize> = self.interprete(&sample);
-        if output.last().map_or(false, |c| 255 < *c) {
+        if output.last().is_some_and(|c| 255 < *c) {
             *output.last().unwrap() as usize
         } else {
             let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
@@ -57,7 +57,7 @@ impl AdventOfCode for Puzzle {
             "RUN",
         ];
         let output: Vec<isize> = self.interprete(&sample);
-        if output.last().map_or(false, |c| 255 < *c) {
+        if output.last().is_some_and(|c| 255 < *c) {
             *output.last().unwrap() as usize
         } else {
             let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
