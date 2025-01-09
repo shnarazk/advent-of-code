@@ -14,6 +14,8 @@ instance : ToString Dir where
 
 abbrev Dim2 := UInt64 × UInt64
 
+def Dim2.toInt64 (v : Dim2) : (Int64 × Int64) := (v.1.toNat.toInt64, v.2.toNat.toInt64)
+
 def NonNegDim (d : UInt64 × UInt64) := 0 ≤ d.fst ∧ 0 ≤ d.snd
 
 partial def range_list (n : UInt64) : List UInt64 :=
@@ -165,6 +167,9 @@ def findIdxInRow? [BEq α]
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
+def map {β : Type} [BEq α] [BEq β] (self : Rect α) (f : α → β) : Rect β :=
+  { self with vector := self.vector.map f }
+
 def foldl {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
@@ -194,22 +199,33 @@ def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
 def area [BEq α] (self : Rect α) : Nat := self.vector.size
 
 -- @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
-@[inline] def toIndex {α : Type} [BEq α] (frame : Rect α) (p : (UInt64 × UInt64)) : Nat :=
+@[inline] def toIndex₁ {α : Type} [BEq α] (frame : Rect α) (p : UInt64 × UInt64) : Nat :=
   (frame.width * p.fst + p.snd).toNat
 
+@[inline] def validateIndex₂ {α : Type} [BEq α] (self : Rect α) (p : UInt64 × UInt64) : Option (UInt64 × UInt64) :=
+  if p.2 < self.width && self.toIndex₁ p < self.vector.size then some p else none
+
+/-- convert from `Vec2` to valid `Dim2` or `None`
+-/
+@[inline] def toIndex₂ {α : Type} [BEq α] (self : Rect α) (ip : Int64 × Int64) : Option (UInt64 × UInt64) :=
+  if ip.1 < 0 || ip.2 < 0 then none
+    else
+      let p := (ip.1.toUInt64, ip.2.toUInt64)
+      if p.2 < self.width && self.toIndex₁ p < self.vector.size then some p else none
+
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
-@[inline] def ofIndex {α : Type} [BEq α] (frame : Rect α) (n : UInt64) : (UInt64 × UInt64) :=
+@[inline] def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : UInt64) : (UInt64 × UInt64) :=
   (n / frame.width, n % frame.width)
 
 @[inline] def enum {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array ((UInt64 × UInt64) × α) :=
   Array.range self.vector.size
     |>.filterMap (fun i ↦
-        let p := self.ofIndex i.toUInt64
+        let p := self.ofIndex₁ i.toUInt64
         if let some val := self.get? p.1 p.2 then some (p, val) else none)
 --
 @[inline] def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (UInt64 × UInt64) :=
   Array.range self.vector.size
-    |>.map (fun i ↦ self.ofIndex i.toUInt64)
+    |>.map (fun i ↦ self.ofIndex₁ i.toUInt64)
 
 end Rect
 

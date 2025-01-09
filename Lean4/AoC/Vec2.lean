@@ -2,6 +2,8 @@ namespace Vec2
 
 abbrev Vec2 := Int64 × Int64
 
+instance : BEq Vec2 where beq a b := a.1 == b.1 && a.2 == b.2
+-- #eval (0, 0) == (1, 0)
 instance : ToString Vec2 where toString v := s!"({v.1},{v.2})"
 instance : Hashable Int64 where hash a := a.toUInt64
 -- instance : Hashable Vec2 where hash a := hash (a.1)o
@@ -49,5 +51,7 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 -- #eval ((0, 0) : Vec2) < (3, 2)
 -- #eval geZeroAndLt (5, 5) (3, 2)
 -- #eval (3, 2) <₀ (5, 5)
+
+def Vec2.toUInt64 (v : Vec2) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
 
 end Vec2
