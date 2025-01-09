@@ -2,31 +2,26 @@ import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
+import «AoC».Vec2
 import Init.Data.SInt.Basic
 
 namespace Y2024.Day08
 
-open Std Accumulation CiCL TwoDimensionalVector64
+open Std Accumulation CiCL TwoDimensionalVector64 Vec2
 
-abbrev Vec2 := Int64 × Int64
-instance : ToString Vec2 where toString v := s!"({v.1},{v.2})"
-instance : Hashable Int64 where hash a := a.toUInt64
--- instance : Hashable Vec2 where hash a := hash (a.1)
+def contains (size pos : Vec2) : Bool := (0, 0) ≤ pos && pos < size
 
-instance : HAdd Vec2 Vec2 Vec2 where
-  hAdd (a b : Vec2) : Vec2 := (a.1 + b.1, a.2 + b.2)
+syntax:50 term:51 " ≺₀ " term:50 : term
+macro_rules | `($a ≺₀ $b) => `(contains $b $a)
 
-instance : HSub Vec2 Vec2 Vec2 where
-  hSub (a b : Vec2) : Vec2 := (a.1 - b.1, a.2 - b.2)
-
-def contains (size pos : Vec2) : Bool :=
-  0 ≤ pos.1 && pos.1 < size.1 && 0 ≤ pos.2 && pos.2 < size.2
+-- #eval ((0, 0) : Vec2) ≤ (3, 2)
+-- #eval contains (5, 5) (3, 2)
+-- #eval (3, 2) ≺₀ (5, 5)
 
 structure Input where
   anntena : List (Char × Vec2)
   size: Vec2
 deriving BEq
--- #check ((4, 8) : Dim2)
 
 instance : ToString Input where toString s := s!"({s.size}){s.anntena}"
 
@@ -55,7 +50,7 @@ namespace Part1
 
 partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
   let next := a + offset
-  if contains size next then [next] else []
+  if next ≺₀ size then [next] else []
 
 def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
   if a.1 == b.1
@@ -75,7 +70,7 @@ namespace Part2
 
 partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
   let next := a + offset
-  if contains size next then [next] ++ inbound_antinodes' size next offset else []
+  if next ≺₀ size then [next] ++ inbound_antinodes' size next offset else []
 
 def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
   if a.1 == b.1

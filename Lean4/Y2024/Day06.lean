@@ -2,15 +2,11 @@ import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
 import «AoC».Rect64
-
-abbrev Vec2 := Int × Int
-
-instance : HAdd Vec2 Vec2 Vec2 where
-  hAdd a b := (a.1 + b.1, a.2 + b.2)
+import «AoC».Vec2
 
 namespace Y2024.Day06
 
-open Accumulation CiCL
+open Accumulation CiCL Vec2
 
 inductive Dir
   | N
@@ -49,7 +45,7 @@ structure Input where
   guardPos : Vec2
   guardDir : Dir
   size: Vec2
-deriving BEq, Repr
+deriving BEq
 
 instance : ToString Input where toString self := s!"{self.obstruction.toList}"
 
@@ -119,14 +115,14 @@ def parse : String → Option Input := AoCParser.parse parser
       let v ← many1 (parseLine <* eol)
       let h := v.enum.foldl
         (fun h (i, l) ↦ l.enum.foldl
-          (fun h (j, c) ↦ if c == '#' then h.insert ((i : Int), (j : Int)) else h)
+          (fun h (j, c) ↦ if c == '#' then h.insert (i.toInt64, j.toInt64) else h)
           h)
         Std.HashSet.empty
       let p := v.enum.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
           |>.get! 0
-      let size := ((v.size : Int), (v[0]!.size : Int))
-      return Input.mk v h ((p.1 : Int), (p.2 : Int)) Dir.N size
+      let size := (v.size.toInt64, v[0]!.size.toInt64)
+      return Input.mk v h (p.1.toInt64, p.2.toInt64) Dir.N size
 
 end parser
 
