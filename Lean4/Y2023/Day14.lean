@@ -46,7 +46,7 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         (List.range height).foldl
           (fun (m, empty) yi ↦
             let y := yi.toUInt64
-            match m.get y x Kind.Empty with
+            match m.get (y, x) Kind.Empty with
             | Kind.Round => (m.swap (empty, x) (y, x), empty + 1)
             | Kind.Cube  => (m, y + 1)
             | Kind.Empty => (m, empty))
@@ -60,7 +60,7 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           (List.range height|>.reverse).foldl
             (fun (m, empty) yi ↦
               let y :=yi.toUInt64
-              match m.get y x Kind.Empty with
+              match m.get (y, x) Kind.Empty with
               | Kind.Round => (m.swap (empty, x) (y, x), empty - 1)
               | Kind.Cube  => (m, y - 1)
               | Kind.Empty => (m, empty))
@@ -74,7 +74,7 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           (List.range width |>.reverse).foldl
             (fun (m, empty) xi ↦
               let x := xi.toUInt64
-              match m.get y x Kind.Empty with
+              match m.get (y, x) Kind.Empty with
               | Kind.Round => (m.swap (y, empty) (y, x), empty - 1)
               | Kind.Cube  => (m, x - 1)
               | Kind.Empty => (m, empty))
@@ -88,7 +88,7 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
           (List.range width).foldl
             (fun (m, empty) xi ↦
               let x := xi.toUInt64
-              match m.get y x Kind.Empty with
+              match m.get (y, x) Kind.Empty with
               | Kind.Round => (m.swap (y, empty) (y, x), empty + 1)
               | Kind.Cube  => (m, x + 1)
               | Kind.Empty => (m, empty))
@@ -106,7 +106,7 @@ def evaluate (self : Rect Kind) : Nat :=
       (List.range self.width.toNat).foldl
         (fun c xi ↦
           let x := xi.toUInt64
-          match self.get y.toUInt64 x Kind.Empty with
+          match self.get (y.toUInt64, x) Kind.Empty with
           | Kind.Round => c + height - y
           | Kind.Cube  => c
           | Kind.Empty => c)

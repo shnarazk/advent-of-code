@@ -52,16 +52,16 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   let w := r.width - 1
   let go_n (t : Nat) := (t ≤ limit && 0 < state.pos.fst).map
       (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
-          State.mk p Dir.N (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.N (state.cost + r.get p 1) t)
   let go_s (t : Nat) := (t ≤ limit && state.pos.fst < h).map
       (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
-          State.mk p Dir.S (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.S (state.cost + r.get p 1) t)
   let go_w (t : Nat) := (t ≤ limit && 0 < state.pos.snd).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
-          State.mk p Dir.W (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.W (state.cost + r.get p 1) t)
   let go_e (t : Nat) := (t ≤ limit && state.pos.snd < w).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
-          State.mk p Dir.E (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.E (state.cost + r.get p 1) t)
   match state.dir with
   | .N => [go_n (state.steps + 1), go_e 1, go_w 1].filterMap I
   | .E => [go_e (state.steps + 1), go_s 1, go_n 1].filterMap I
@@ -112,19 +112,19 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   let go_n (turn : Bool) (t : Nat) :=
     ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.fst).map
       (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
-          State.mk p Dir.N (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.N (state.cost + r.get p 1) t)
   let go_s (turn : Bool) (t : Nat) :=
     ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h).map
       (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
-          State.mk p Dir.S (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.S (state.cost + r.get p 1) t)
   let go_w (turn : Bool) (t : Nat) :=
     ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
-          State.mk p Dir.W (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.W (state.cost + r.get p 1) t)
   let go_e (turn : Bool) (t : Nat) :=
     ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w).map
       (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
-          State.mk p Dir.E (state.cost + r.get p.fst p.snd 1) t)
+          State.mk p Dir.E (state.cost + r.get p 1) t)
   match state.dir with
   | .N => [go_n false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
   | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1].filterMap I

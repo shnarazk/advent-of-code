@@ -31,7 +31,7 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
   let cands := List.range height.toNat
       |>.filterMap (fun y ↦
         let b := List.range width.toNat
-            |>.filter (fun x ↦ r.get y.toUInt64 x.toUInt64 0 == 1)
+            |>.filter (fun x ↦ r.get (y.toUInt64, x.toUInt64) 0 == 1)
         if h : b.length = 2 then
           have H1 : 1 < b.length := by simp [h]
           have H0 : 0 < b.length := by simp [h]
@@ -46,15 +46,15 @@ partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
   | pos :: to_visit' =>
     let h := (r.height - 1).toNat
     let w := (r.width - 1).toNat
-    match r.get pos.fst.toUInt64 pos.snd.toUInt64 1 with
+    match r.get (pos.fst.toUInt64, pos.snd.toUInt64) 1 with
     | 0 =>
-      let r' := r.set pos.fst.toUInt64 pos.snd.toUInt64 1
+      let r' := r.set (pos.fst.toUInt64, pos.snd.toUInt64) 1
       let to_u := (0 < pos.fst : Bool).map (K (pos.fst - 1, pos.snd))
       let to_d := (pos.fst < h : Bool).map (K (pos.fst + 1, pos.snd))
       let to_l := (0 < pos.snd : Bool).map (K (pos.fst, pos.snd - 1))
       let to_r := (pos.snd < w : Bool).map (K (pos.fst, pos.snd + 1))
       let nexts := [to_u, to_d, to_l, to_r].filterMap I
-        |>.filter (fun p ↦ r'.get p.fst.toUInt64 p.snd.toUInt64 1 = 0)
+        |>.filter (fun p ↦ r'.get (p.fst.toUInt64, p.snd.toUInt64) 1 = 0)
       fill r' (nexts ++ to_visit')
     | _ =>
       fill r to_visit'
@@ -120,7 +120,7 @@ def solve (l : Array Input) : Nat :=
             | .R => (pos.fst, pos.snd + 1)
             | .D => (pos.fst + 1, pos.snd)
             | .L => (pos.fst, pos.snd - 1)
-          (p, r.set (p.fst + offset_h).toUInt64 (p.snd + offset_w).toUInt64 1))
+          (p, r.set ((p.fst + offset_h).toUInt64, (p.snd + offset_w).toUInt64) 1))
           (pos, r)
       )
       ((offset_h, offset_w), Rect.ofDim2 (height + offset_h).toUInt64 (width + offset_w).toUInt64 0)
@@ -169,10 +169,10 @@ def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
       let x₂' : Nat := xs.enum.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
       if y₁' == y₂' then
         fromTo' (2 * x₁') (2 * x₂')
-          |>.foldl (fun r x ↦ r.set (2 * y₁'.toUInt64) x.toUInt64 1) r
+          |>.foldl (fun r x ↦ r.set (2 * y₁'.toUInt64, x.toUInt64) 1) r
       else
         fromTo' (2 * y₁') (2 * y₂')
-          |>.foldl (fun r y ↦ r.set y.toUInt64 (2 * x₁'.toUInt64) 1) r)
+          |>.foldl (fun r y ↦ r.set (y.toUInt64, 2 * x₁'.toUInt64) 1) r)
     (Rect.ofDim2 (2 * ys.size.toUInt64 + 2) (2 * xs.size.toUInt64 + 2) 0)
   (dm, ys, xs)
 -- #eval List.range' 3 (5 - 3)
@@ -219,11 +219,11 @@ def solve (path' : Array Input) : Nat :=
         List.range width.toNat
             |>.foldl
               (fun acc x ↦
-                if filled.get? (2 * y).toUInt64 (2 * x).toUInt64 == some 1 then
+                if filled.get? ((2 * y).toUInt64, (2 * x).toUInt64) == some 1 then
                   let area := match
-                      filled.get? (2 * y + 1).toUInt64 (2 * x).toUInt64 == some 1,
-                      filled.get? (2 * y).toUInt64 (2 * x + 1).toUInt64 == some 1,
-                      filled.get? (2 * y + 1).toUInt64 (2 * x + 1).toUInt64 == some 1 with
+                      filled.get? ((2 * y + 1).toUInt64, (2 * x).toUInt64) == some 1,
+                      filled.get? ((2 * y).toUInt64, (2 * x + 1).toUInt64) == some 1,
+                      filled.get? ((2 * y + 1).toUInt64, (2 * x + 1).toUInt64) == some 1 with
                     | true,  true,  true  => (ys[y + 1]! - ys[y]!) * (xs[x + 1]! - xs[x]!)
                     | true,  true,  false => (ys[y + 1]! - ys[y]!) + (xs[x + 1]! - xs[x]!) - 1
                     | true,  false, false => ys[y + 1]! - ys[y]!

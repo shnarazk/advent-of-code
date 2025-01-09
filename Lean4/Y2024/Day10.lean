@@ -41,14 +41,14 @@ partial def expand
   match toVisit with
   | [] => result.size
   | node :: remain =>
-    if rect.get node.1 node.2 0 == 9 then expand rect visited remain (result.insert node)
+    if rect.get node 0 == 9 then expand rect visited remain (result.insert node)
       else
-        let currentLevel := rect.get node.1 node.2 0
+        let currentLevel := rect.get node 0
         let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
             |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
-            |>.filter (fun p ↦ currentLevel + 1 == rect.get p.1 p.2 0)
-            |>.filter (fun p ↦ !visited.get p.1 p.2 false)
-        let visited' := toVisit'.foldl (fun acc p ↦ acc.set p.1 p.2 true) visited
+            |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
+            |>.filter (fun p ↦ !visited.get p false)
+        let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect visited' (toVisit' ++ remain) result
 
 def solve (input : Input) : Nat :=
@@ -64,13 +64,13 @@ partial def expand (rect : Rect Nat) (visited : Rect Bool) (toVisit : List Dim2)
   match toVisit with
   | [] => count
   | node :: remain =>
-    if rect.get node.1 node.2 0 == 9 then expand rect visited remain (count + 1)
+    if rect.get node 0 == 9 then expand rect visited remain (count + 1)
       else
-        let currentLevel := rect.get node.1 node.2 0
+        let currentLevel := rect.get node 0
         let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
             |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
-            |>.filter (fun p ↦ currentLevel + 1 == rect.get p.1 p.2 0)
-        let visited' := toVisit'.foldl (fun acc p ↦ acc.set p.1 p.2 true) visited
+            |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
+        let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect visited' (toVisit' ++ remain) count
 
 def solve (input : Input) : Nat :=
