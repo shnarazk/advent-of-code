@@ -627,22 +627,27 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             best = best.min(desc.number_of_targets());
-            let index = desc.first_target();
             let (d_tree, u_tree) = desc.wire_trees(true, true);
             // let unrelated_wires = desc.wire_affects(&u_tree, ord_to_wire(index + 1, b'z'));
-            let related_wires = desc
-                .wire_affects(&u_tree, ord_to_wire(index, b'z'))
+            let tmp = desc
+                .target_vector
                 .iter()
-                .filter(|w| ![b'x', b'y'].contains(&w.0))
-                // .filter(|w| !unrelated_wires.contains(*w))
-                .cloned()
-                .collect::<Vec<_>>();
-            debug_assert!(related_wires.contains(&ord_to_wire(index, b'z')));
-            let _output_wire = ord_to_wire(index, b'z');
+                .enumerate()
+                .filter(|(_, b)| **b)
+                .flat_map(|(i, _)| {
+                    desc.wire_affects(&u_tree, ord_to_wire(i, b'z'))
+                        .iter()
+                        .filter(|w| ![b'x', b'y'].contains(&w.0))
+                        // .filter(|w| !unrelated_wires.contains(*w))
+                        .cloned()
+                        .collect::<Vec<_>>()
+                })
+                .collect::<HashSet<_>>();
+            let related_wires = tmp.iter().collect::<Vec<_>>();
             let cones = build_cones(&d_tree, &wires);
-            for &wire1 in related_wires.iter() {
+            for (i, &&wire1) in related_wires.iter().enumerate() {
                 let cone1 = cones.get(wire1).unwrap();
-                for wire2 in wires.iter() {
+                for &&wire2 in related_wires.iter().skip(i + 1) {
                     if [b'x', b'y'].contains(&wire2.0) {
                         continue;
                     }
