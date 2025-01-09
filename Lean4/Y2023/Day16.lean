@@ -28,7 +28,7 @@ instance : ToString (Rect Kind) where
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
 def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
-  let k := r.get pos.fst pos.snd Kind.E
+  let k := r.get pos Kind.E
   let w := r.width - 1
   let h := r.height - 1
   let go_n := (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), Dir.N))
@@ -84,7 +84,7 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (sepBy1 maz
 end parser
 
 def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
-  visited.toList.foldl (fun r (p, _) ↦ r.set p.fst p.snd Kind.P) self
+  visited.toList.foldl (fun r (p, _) ↦ r.set p Kind.P) self
 
 partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
     : Rect Kind :=
