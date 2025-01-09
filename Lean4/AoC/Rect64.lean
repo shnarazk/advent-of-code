@@ -201,6 +201,16 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
 @[inline] def ofIndex {α : Type} [BEq α] (frame : Rect α) (n : UInt64) : (UInt64 × UInt64) :=
   (n / frame.width, n % frame.width)
 
+@[inline] def enum {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array ((UInt64 × UInt64) × α) :=
+  Array.range self.vector.size
+    |>.filterMap (fun i ↦
+        let p := self.ofIndex i.toUInt64
+        if let some val := self.get? p.1 p.2 then some (p, val) else none)
+--
+@[inline] def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (UInt64 × UInt64) :=
+  Array.range self.vector.size
+    |>.map (fun i ↦ self.ofIndex i.toUInt64)
+
 end Rect
 
 def v := #[true, false, true, false]
