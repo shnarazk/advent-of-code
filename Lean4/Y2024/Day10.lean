@@ -60,13 +60,26 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+partial def expand (rect : Rect Nat) (visited : Rect Bool) (toVisit : List Dim2) (count : Nat := 0) : Nat :=
+  match toVisit with
+  | [] => count
+  | node :: remain =>
+    if rect.get node.1 node.2 0 == 9 then expand rect visited remain (count + 1)
+      else
+        let currentLevel := rect.get node.1 node.2 0
+        let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
+            |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
+            |>.filter (fun p ↦ currentLevel + 1 == rect.get p.1 p.2 0)
+        let visited' := toVisit'.foldl (fun acc p ↦ acc.set p.1 p.2 true) visited
+      expand rect visited' (toVisit' ++ remain) count
+
+def solve (input : Input) : Nat :=
+  input.mapping.enum
+    |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping (input.mapping.map (fun _ ↦ false)) [p] else 0)
+    |> sum
 
 end Part2
 
-def solve := AocProblem.config 2024 10
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+def solve := AocProblem.config 2024 10 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day10
