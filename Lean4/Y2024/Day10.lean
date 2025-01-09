@@ -19,29 +19,24 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def parse_line : Parser (Array Nat) :=
-  (·.map (·.toNat - '0'.toNat)) <$> many1 digit
+def parse_line : Parser (Array Nat) := many1 single_digit
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := do
-      let v ← sepBy1 parse_line eol
-      return Input.mk (Rect.of2DMatrix v)
+    parser : Parser Input := (Rect.of2DMatrix · |> Input.mk) <$> sepBy1 parse_line eol
 
 end parser
 
 namespace Part1
 
-partial def expand
-    (rect : Rect Nat)
-    (visited : Rect Bool)
-    (toVisit : List Dim2)
+partial def expand (rect : Rect Nat) (toVisit : List Dim2)
+    (visited : Rect Bool := rect.map (K false))
     (result : HashSet Dim2 := HashSet.empty)
     : Nat :=
   match toVisit with
   | [] => result.size
   | node :: remain =>
-    if rect.get node 0 == 9 then expand rect visited remain (result.insert node)
+    if rect.get node 0 == 9 then expand rect remain visited (result.insert node)
       else
         let currentLevel := rect.get node 0
         let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
@@ -49,33 +44,34 @@ partial def expand
             |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
             |>.filter (fun p ↦ !visited.get p false)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
-      expand rect visited' (toVisit' ++ remain) result
+      expand rect (toVisit' ++ remain) visited' result
 
 def solve (input : Input) : Nat :=
-  input.mapping.enum
-    |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping (input.mapping.map (fun _ ↦ false)) [p] else 0)
-    |> sum
+  input.mapping.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping [p] else 0) |> sum
 
 end Part1
 
 namespace Part2
 
-partial def expand (rect : Rect Nat) (visited : Rect Bool) (toVisit : List Dim2) (count : Nat := 0) : Nat :=
+partial def expand (rect : Rect Nat) (toVisit : List Dim2)
+    (visited : Rect Bool := rect.map (K false))
+    (count : Nat := 0)
+    : Nat :=
   match toVisit with
   | [] => count
   | node :: remain =>
-    if rect.get node 0 == 9 then expand rect visited remain (count + 1)
+    if rect.get node 0 == 9 then expand rect remain visited (count + 1)
       else
         let currentLevel := rect.get node 0
         let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
             |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
             |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
-      expand rect visited' (toVisit' ++ remain) count
+      expand rect (toVisit' ++ remain) visited' count
 
 def solve (input : Input) : Nat :=
   input.mapping.enum
-    |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping (input.mapping.map (fun _ ↦ false)) [p] else 0)
+    |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping [p] else 0)
     |> sum
 
 end Part2

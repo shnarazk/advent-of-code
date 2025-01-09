@@ -61,6 +61,12 @@ def number_signed := number_m <|> number_p
 
 -- #eval Parser.run number_signed "-21, 8,"
 
+/--
+single digit number
+-/
+def single_digit := (·.toNat - '0'.toNat) <$> digit
+-- #eval Parser.run single_digit "456"
+
 namespace test
 
 def label := many1Chars asciiLetter <* pchar ':'
