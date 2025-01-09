@@ -7,14 +7,9 @@ import «AoC».Vec2
 namespace Y2024.Day10
 open Accumulation CiCL TwoDimensionalVector64 Rect Vec2 Std
 
-structure Input where
-  mapping : Rect Nat
-deriving BEq, Hashable, Repr
-
-instance : ToString Input where toString s := s!"{s.mapping}"
+abbrev Input := Rect Nat
 
 namespace parser
-
 open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
@@ -23,7 +18,7 @@ def parse_line : Parser (Array Nat) := many1 single_digit
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := (Rect.of2DMatrix · |> Input.mk) <$> sepBy1 parse_line eol
+    parser : Parser Input := Rect.of2DMatrix <$> sepBy1 parse_line eol
 
 end parser
 
@@ -47,7 +42,7 @@ partial def expand (rect : Rect Nat) (toVisit : List Dim2)
       expand rect (toVisit' ++ remain) visited' result
 
 def solve (input : Input) : Nat :=
-  input.mapping.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping [p] else 0) |> sum
+  input.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input [p] else 0) |> sum
 
 end Part1
 
@@ -70,9 +65,7 @@ partial def expand (rect : Rect Nat) (toVisit : List Dim2)
       expand rect (toVisit' ++ remain) visited' count
 
 def solve (input : Input) : Nat :=
-  input.mapping.enum
-    |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input.mapping [p] else 0)
-    |> sum
+  input.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input [p] else 0) |> sum
 
 end Part2
 
