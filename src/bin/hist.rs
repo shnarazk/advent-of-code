@@ -44,17 +44,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(5)
         .caption(
             format!("AoC {} execution time distribution", config.year),
-            ("sans-serif", 50.0),
+            ("sans-serif", 24.0),
         )
-        .build_cartesian_2d((-2_i32..20).into_segmented(), 1_i32..8)?;
+        .build_cartesian_2d((-2_i32..18).into_segmented(), 0_i32..8)?;
 
     chart
         .configure_mesh()
         .disable_x_mesh()
         .bold_line_style(WHITE.mix(0.3))
         .y_desc("Count")
-        .x_desc("Bucket")
-        .axis_desc_style(("sans-serif", 15))
+        .x_desc("log2(time[ms])")
+        .axis_desc_style(("sans-serif", 16))
         .draw()?;
 
     let data = json_data
