@@ -2,7 +2,7 @@ use {
     clap::Parser,
     plotters::prelude::*,
     serde::Deserialize,
-    std::{fs::File, io::BufReader},
+    std::{fs::File, io::BufReader, path::PathBuf},
 };
 
 const OUT_FILE_NAME: &str = "misc/histogram.png";
@@ -13,6 +13,13 @@ pub struct Config {
     /// Target year like 2023
     #[arg(short, long, default_value_t = 2024)]
     pub year: usize,
+    /// filename to store
+    #[arg(
+        short,
+        long,
+        default_value_os_t = PathBuf::from("misc/histogram.png")
+    )]
+    pub out_filename: PathBuf,
 }
 
 #[allow(dead_code)]
@@ -27,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::parse();
     let json_data = load_data(config.year);
 
-    let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new(&config.out_filename, (640, 480)).into_drawing_area();
 
     root.fill(&WHITE)?;
 
