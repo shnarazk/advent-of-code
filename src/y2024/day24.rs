@@ -537,8 +537,6 @@ impl AdventOfCode for Puzzle {
         FullAdder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let wires: Vec<WireRef> = WIRE_NAMES.get().unwrap().iter().collect::<Vec<_>>();
-
         /*
         let mut step0 = Descriptor::new(vec![]);
         step0.evaluate();
@@ -608,6 +606,21 @@ impl AdventOfCode for Puzzle {
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
         let mut init = Descriptor::new(Vec::new());
         init.evaluate();
+        let (_, u_tree) = init.wire_trees(false, true);
+        let tmp = init
+            .target_vector
+            .iter()
+            .enumerate()
+            .filter(|(_, b)| **b)
+            .flat_map(|(i, _)| {
+                init.wire_affects(&u_tree, ord_to_wire(i, b'z'))
+                    .iter()
+                    .filter(|w| ![b'x', b'y'].contains(&w.0))
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+            .collect::<HashSet<_>>();
+        let related_wires = tmp.iter().cloned().collect::<Vec<_>>();
         to_visit.push(Reverse(init));
         let mut visited: FxHashSet<Descriptor> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
@@ -627,27 +640,13 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             best = best.min(desc.number_of_targets());
-            let (d_tree, u_tree) = desc.wire_trees(true, true);
-            // let unrelated_wires = desc.wire_affects(&u_tree, ord_to_wire(index + 1, b'z'));
-            let tmp = desc
-                .target_vector
-                .iter()
-                .enumerate()
-                .filter(|(_, b)| **b)
-                .flat_map(|(i, _)| {
-                    desc.wire_affects(&u_tree, ord_to_wire(i, b'z'))
-                        .iter()
-                        .filter(|w| ![b'x', b'y'].contains(&w.0))
-                        // .filter(|w| !unrelated_wires.contains(*w))
-                        .cloned()
-                        .collect::<Vec<_>>()
-                })
-                .collect::<HashSet<_>>();
-            let related_wires = tmp.iter().collect::<Vec<_>>();
-            let cones = build_cones(&d_tree, &wires);
-            for (i, &&wire1) in related_wires.iter().enumerate() {
+            let index = desc.first_target();
+            let (d_tree, _) = desc.wire_trees(true, false);
+            let cones = build_cones(&d_tree, &related_wires);
+            for (i, &wire1) in related_wires.iter().enumerate() {
                 let cone1 = cones.get(wire1).unwrap();
-                for &&wire2 in related_wires.iter().skip(i + 1) {
+                let related1 = cone1.contains(ord_to_wire(index, b'z'));
+                for &wire2 in related_wires.iter().skip(i + 1) {
                     if [b'x', b'y'].contains(&wire2.0) {
                         continue;
                     }
@@ -656,6 +655,9 @@ impl AdventOfCode for Puzzle {
                     }
                     let cone2 = cones.get(wire2).unwrap();
                     if cone2.contains(wire1) {
+                        continue;
+                    }
+                    if !related1 && !cone2.contains(ord_to_wire(index, b'z')) {
                         continue;
                     }
                     if let Some(mut new_desc) = desc.add_swaps(wire1, wire2) {
