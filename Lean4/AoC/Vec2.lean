@@ -1,4 +1,9 @@
+import Lean
+
 namespace Vec2
+
+open Lean
+open Lean.Parser
 
 abbrev Vec2 := Int64 × Int64
 
@@ -36,7 +41,32 @@ instance instDecidableLeVec2 (a b : Vec2) : Decidable (a ≤ b) := by
 
 -- #eval ((0, 0) : Vec2) ≤ ((8, 2) : Vec2)
 
-def contains (size pos : Vec2) : Bool :=
-  0 ≤ pos.1 && pos.1 < size.1 && 0 ≤ pos.2 && pos.2 < size.2
+-- def contains (size pos : Vec2) : Bool :=
+--   0 ≤ pos.1 && pos.1 < size.1 && 0 ≤ pos.2 && pos.2 < size.2
+
+def geZeroAndLe (size pos : Vec2) : Bool := (0, 0) ≤ pos && pos ≤ size
+
+syntax:50 term:51 " ≤₀ " term:50 : term
+macro_rules | `($a ≤₀ $b) => `(geZeroAndLe $b $a)
+
+-- #eval ((0, 0) : Vec2) ≤ (3, 2)
+-- #eval geZeroAndLe (5, 5) (3, 2)
+-- #eval (3, 2) ≤₀ (5, 5)
+
+def geZeroAndLt (size pos : Vec2) : Bool := (0, 0) ≤ pos && pos < size
+
+syntax:50 (name := syntaxInfixGeZeroAndLt) term:51 " <₀ " term:50 : term
+macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
+
+-- @[macro syntaxInfixGeZeroAndLt]
+-- def infixGeZeroiAndLt : Macro :=
+-- fun stx => match stx with
+-- |  `($a <₀ $b) => `(geZeroAndLt $b $a)
+-- | _ => Macro.throwUnsupported
+
+
+-- #eval ((0, 0) : Vec2) < (3, 2)
+-- #eval geZeroAndLt (5, 5) (3, 2)
+-- #eval (3, 2) <₀ (5, 5)
 
 end Vec2

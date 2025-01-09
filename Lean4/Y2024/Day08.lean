@@ -9,14 +9,8 @@ namespace Y2024.Day08
 
 open Std Accumulation CiCL TwoDimensionalVector64 Vec2
 
-def contains (size pos : Vec2) : Bool := (0, 0) ≤ pos && pos < size
-
-syntax:50 term:51 " ≺₀ " term:50 : term
-macro_rules | `($a ≺₀ $b) => `(contains $b $a)
-
--- #eval ((0, 0) : Vec2) ≤ (3, 2)
--- #eval contains (5, 5) (3, 2)
--- #eval (3, 2) ≺₀ (5, 5)
+-- syntax:50 term:51 " <₀ " term:50 : term
+-- macro_rules | `($a <₀ $b) => `(Vec2.geZeroAndLt $b $a)
 
 structure Input where
   anntena : List (Char × Vec2)
@@ -50,7 +44,7 @@ namespace Part1
 
 partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
   let next := a + offset
-  if next ≺₀ size then [next] else []
+  if next <₀ size then [next] else []
 
 def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
   if a.1 == b.1
@@ -70,7 +64,7 @@ namespace Part2
 
 partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
   let next := a + offset
-  if next ≺₀ size then [next] ++ inbound_antinodes' size next offset else []
+  if next <₀ size then [next] ++ inbound_antinodes' size next offset else []
 
 def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
   if a.1 == b.1
