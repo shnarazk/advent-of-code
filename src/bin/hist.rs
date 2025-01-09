@@ -1,10 +1,19 @@
 use {
+    clap::Parser,
     plotters::prelude::*,
     serde::Deserialize,
     std::{fs::File, io::BufReader},
 };
 
 const OUT_FILE_NAME: &str = "misc/histogram.png";
+
+#[derive(Clone, Debug, Default, Parser)]
+#[command(author, version, about, long_about = None)]
+pub struct Config {
+    /// Target year like 2023
+    #[arg(short, long, default_value_t = 2024)]
+    pub year: usize,
+}
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
@@ -15,7 +24,8 @@ struct Record {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let json_data = load_data();
+    let config = Config::parse();
+    let json_data = load_data(config.year);
 
     let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
 
@@ -25,7 +35,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
-        .caption("AoC 2024 in Rust Histogram", ("sans-serif", 50.0))
+        .caption(
+            format!("AoC {} execution time distribution", config.year),
+            ("sans-serif", 50.0),
+        )
         .build_cartesian_2d((-2_i32..20).into_segmented(), 1_i32..8)?;
 
     chart
@@ -55,8 +68,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn load_data() -> Vec<Record> {
-    let file = File::open("misc/2024/execution_time.json").expect("Unable to open file");
+fn load_data(year: usize) -> Vec<Record> {
+    let file =
+        File::open(format!("misc/{}/execution_time.json", year)).expect("Unable to open file");
     let reader = BufReader::new(file);
     serde_json::from_reader(reader).expect("Unable to parse JSON")
 }
