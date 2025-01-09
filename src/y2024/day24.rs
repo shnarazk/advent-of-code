@@ -79,19 +79,19 @@ fn wire_to_string((a, b, c): &Wire) -> String {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
-pub struct Adder {
+pub struct FullAdder {
     dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)>,
 }
 
-impl Adder {
-    fn new(overrides: &[(GateSpec, GateSpec)]) -> Adder {
+impl FullAdder {
+    fn new(overrides: &[(GateSpec, GateSpec)]) -> FullAdder {
         let mut dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)> =
             PROPAGATION_TABLE.get().unwrap().clone();
         for ((g1_out, g1), (g2_out, g2)) in overrides.iter() {
             dep_graph.insert(*g1_out, *g2);
             dep_graph.insert(*g2_out, *g1);
         }
-        Adder { dep_graph }
+        FullAdder { dep_graph }
     }
     fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
         let input_bits = *INPUT_BITS.get().unwrap();
@@ -218,8 +218,8 @@ impl Descriptor {
         swaps.sort_unstable();
         Some(Descriptor::new(swaps))
     }
-    fn build_adder(&self) -> Adder {
-        Adder::new(&self.overrides)
+    fn build_adder(&self) -> FullAdder {
+        FullAdder::new(&self.overrides)
     }
     fn check_correctness(&self) -> Vec<bool> {
         fn merge_or(acc: Vec<bool>, v: Vec<bool>) -> Vec<bool> {
@@ -534,7 +534,7 @@ impl AdventOfCode for Puzzle {
             .rev()
             .map(|(_, b)| b)
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
-        Adder::new(&Vec::new()).add(x, y).0
+        FullAdder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
         let wires: Vec<WireRef> = WIRE_NAMES.get().unwrap().iter().collect::<Vec<_>>();
