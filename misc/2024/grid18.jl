@@ -6,7 +6,7 @@ import Pkg
 # Pkg.add("Colors"),
 using JSON, Plots, Colors
 
-grid_data = JSON.parse(read("2024/day18.json", String))["line"]
+grid_data = JSON.parse(read("day18.json", String))["line"]
 
 # Extract dimensions of the grid
 rows = 1 + maximum([g[1] for g in grid_data])

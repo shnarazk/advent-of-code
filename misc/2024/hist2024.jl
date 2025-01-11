@@ -5,7 +5,7 @@
 # Pkg.add("KernelDensity")
 using JSON, Plots, KernelDensity
 
-data2024 = read("2024/execution_time.json", String)
+data2024 = read("execution_time.json", String)
 data = JSON.parse(data2024)
 times = [item["time"] for item in data if haskey(item, "time")]
 tl = log2.(times)
