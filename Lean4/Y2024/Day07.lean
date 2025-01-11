@@ -1,16 +1,15 @@
 import «AoC».Basic
-import «AoC».Combinator
 import «AoC».Parser
 
 namespace Y2024.Day07
+open Accumulation Std
 
-open Accumulation CiCL
+abbrev Input := Array (Nat × Array Nat)
 
-structure Input where
-  line : Array (Nat × Array Nat)
-deriving BEq,Hashable, Repr
-
-instance : ToString Input where toString s := s!"{s.line}"
+def expand (ops : Array (Nat → Nat → Nat)) (vals : HashSet Nat) (b threshold : Nat) : HashSet Nat :=
+  vals.fold
+    (fun acc val ↦ ops.map (· val b) |>.filter (· <= threshold) |>.foldl (·.insert ·) acc)
+    HashSet.empty
 
 namespace parser
 
@@ -23,60 +22,28 @@ def parse_line : Parser (Nat × Array Nat) := do
   let v ← sepBy1 number (pstring " ")
   return (head, v)
 
-def parse : String → Option Input := AoCParser.parse parser
-  where
-    parser : Parser Input := Input.mk <$> (sepBy1 parse_line eol)
+def parse : String → Option Input := AoCParser.parse (sepBy1 parse_line eol)
 
 end parser
 
-namespace Part1
-
-  def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Nat :=
-    match l with
-      | [] => if subs.contains threshold then threshold else 0
-      | a :: rest =>
-        subs.fold
-              (fun acc val ↦ [val + a, val * a]
-                |>.filter (· <= threshold)
-                |>.foldl (fun acc n ↦ acc.insert n) acc)
-              Std.HashSet.empty
-          |> (exp threshold rest ·)
-
-  def check (threshold : Nat) (l : Array Nat) : Nat :=
-    exp threshold l.toList (Std.HashSet.empty.insert 0)
-
-def solve (input : Input) : Nat :=
-  input.line |>.map (fun ((val: Nat), (v: Array Nat)) ↦ check val v) |> sum
-
-end Part1
-
-namespace Part2
-
-def shift₀ (a b b0 : Nat) : Nat :=
-  if b0 < 10 then a * 10 + b else shift₀ (a * 10) b (b0 / 10)
-
-def shift (a b : Nat) : Nat := shift₀ a b b
--- #eval shift 3000000 1000000
-
-def exp (threshold : Nat) (l : List Nat) (subs : Std.HashSet Nat) : Nat :=
+def exp (ops : Array (Nat → Nat → Nat)) (threshold : Nat)
+    (l : List Nat)
+    (subs : HashSet Nat := HashSet.empty.insert 0)
+    : Nat :=
   match l with
     | [] => if subs.contains threshold then threshold else 0
-    | a :: rest =>
-      subs.fold
-            (fun acc val ↦ [val + a, val * a, shift val a]
-              |>.filter (· <= threshold)
-              |>.foldl (fun acc n ↦ acc.insert n) acc)
-            Std.HashSet.empty
-        |> (exp threshold rest ·)
+    | b :: rest => expand ops subs b threshold |> (exp ops threshold rest ·)
 
-def check (threshold : Nat) (l : Array Nat) : Nat :=
-  exp threshold l.toList (Std.HashSet.empty.insert 0)
+def solve₁ (input : Input) : Nat :=
+  input.map (fun (val, v) ↦ exp #[(· + ·), (· * ·)] val v.toList) |> sum
 
-def solve (input : Input) : Nat :=
-  input.line |>.map (fun ((val: Nat), (v: Array Nat)) ↦ check val v) |> sum
+def shift (a b : Nat) (b0 : Nat := b) : Nat :=
+  if b0 < 10 then a * 10 + b else shift (a * 10) b (b0 / 10)
+-- #eval shift 3000000 1000000
 
-end Part2
+def solve₂ (input : Input) : Nat :=
+  input.map (fun (val, v) ↦ exp #[(· + ·), (· * ·), shift] val v.toList) |> sum
 
-def solve := AocProblem.config 2024 07 parser.parse Part1.solve Part2.solve
+def solve := AocProblem.config 2024 07 parser.parse solve₁ solve₂
 
 end Y2024.Day07
