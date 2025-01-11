@@ -87,9 +87,10 @@ impl AdventOfCode for Puzzle {
         res.0 * res.1 * res.2 * res.3
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut max_meaningful = 0;
-        let mut at: usize = 0;
-        for t in 1..10000 {
+        let decay_rate: f64 = 0.9;
+        let num_points = self.line.len();
+        let mut signal_rate_ema = 1.0;
+        for t in 1.. {
             let res = self
                 .line
                 .par_iter()
@@ -108,12 +109,13 @@ impl AdventOfCode for Puzzle {
                         .any(|q| res.contains(q))
                 })
                 .count();
-            if max_meaningful < num_connected {
-                max_meaningful = num_connected;
-                at = t as usize;
-                // self.dump(&res);
+            let r = num_connected as f64 / num_points as f64;
+            if 4.0 < r / signal_rate_ema {
+                return t as usize;
             }
+            signal_rate_ema *= decay_rate;
+            signal_rate_ema += (1.0 - decay_rate) * r;
         }
-        at
+        unreachable!()
     }
 }
