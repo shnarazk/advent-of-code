@@ -126,14 +126,9 @@ impl FullAdder {
             values.insert(wire, Some(b));
             Some(b)
         }
-        (0..=input_bits).for_each(|i| {
-            gate_output(&self.dep_graph, &mut values, ord_to_wire(i, b'z'));
-        });
         let v = (0..=input_bits)
             .map(|i| {
-                values
-                    .get(ord_to_wire(i, b'z'))
-                    .is_some_and(|b| b.map_or(false, |b| b))
+                gate_output(&self.dep_graph, &mut values, ord_to_wire(i, b'z')).is_some_and(|b| b)
             })
             .collect::<Vec<_>>();
         let val = v
