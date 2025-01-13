@@ -1,20 +1,19 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
-import «AoC».Rect64
-import «AoC».Vec2
+import «AoC».Vec
 import Init.Data.SInt.Basic
 
 namespace Y2024.Day08
 
-open Std Accumulation CiCL TwoDimensionalVector64 Vec2
+open Std Accumulation CiCL Dim2
 
 -- syntax:50 term:51 " <₀ " term:50 : term
--- macro_rules | `($a <₀ $b) => `(Vec2.geZeroAndLt $b $a)
+-- macro_rules | `($a <₀ $b) => `(Vec\_2.geZeroAndLt $b $a)
 
 structure Input where
-  anntena : List (Char × Vec2)
-  size: Vec2
+  anntena : List (Char × Vec₂)
+  size: Vec₂
 deriving BEq
 
 instance : ToString Input where toString s := s!"({s.size}){s.anntena}"
@@ -33,20 +32,20 @@ def parse : String → Option Input := AoCParser.parse parser
     parser : Parser Input := do
       let v ← sepBy1 (many1 parseSymbol) eol
       let a := v.enum.toList.map
-        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ (c, (i.toInt64, j.toInt64))))
+        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ (c, (i, j))))
         |>.flatten
         |>.filter (fun (c, _) ↦ c ≠ '.')
-      return Input.mk a (v.size.toInt64, v[0]!.size.toInt64)
+      return Input.mk a (v.size, v[0]!.size)
 
 end parser
 
 namespace Part1
 
-partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
+partial def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
   let next := a + offset
   if next <₀ size then [next] else []
 
-def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
+def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
   if a.1 == b.1
     then inbound_antinodes' size a.2 (a.2 - b.2) ++ inbound_antinodes' size b.2 (b.2 - a.2)
     else []
@@ -62,11 +61,11 @@ end Part1
 
 namespace Part2
 
-partial def inbound_antinodes' (size a offset : Vec2) : List Vec2 :=
+partial def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
   let next := a + offset
   if next <₀ size then [next] ++ inbound_antinodes' size next offset else []
 
-def inbound_antinodes (size : Vec2) (a b : Char × Vec2) : List Vec2 :=
+def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
   if a.1 == b.1
     then [a.2, b.2] ++ inbound_antinodes' size a.2 (a.2 - b.2) ++ inbound_antinodes' size b.2 (b.2 - a.2)
     else []
