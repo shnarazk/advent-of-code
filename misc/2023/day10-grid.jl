@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # This file reads "day10.json", constructs a color-coded grid, and saves a plot
 
-import Pkg
+# import Pkg
 # Pkg.add("JSON"),
 # Pkg.add("Plots"),
 # Pkg.add("GridVisualize"),
@@ -18,16 +18,10 @@ grid_matrix = fill(RGB(1.0, 1.0, 1.0), rows, cols)
 
 for (i, g) in enumerate(grid_data)
     for (j, c) in enumerate(g)
-        v = if c
-            RGB(1.0, 1.0, 1.0)
-        else
-            RGB(0.0, 0.0, 0.0)
-        end
-        grid_matrix[i, j] = v
+        grid_matrix[i, j] = c ? RGB(1.0, 1.0, 1.0) : RGB(0.0, 0.0, 0.0)
     end
 end
 
-# Plots.default(size=(1000, 800))
 heatmap(
     # color_matrix,
     grid_matrix,
