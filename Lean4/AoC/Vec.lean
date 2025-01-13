@@ -1,5 +1,6 @@
 import Mathlib.Tactic.Coe
-namespace Vec2
+
+namespace Dim2
 
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
@@ -10,7 +11,7 @@ instance : ToString Dir where
     | .S => "S"
     | .W => "W"
 
-abbrev Vec₂ := Int64 × Int64
+abbrev Vec₂ := Int × Int
 
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
 -- #eval (0, 0) == (1, 0)
@@ -21,14 +22,14 @@ instance : Hashable Int64 where hash a := a.toUInt64
 instance : HAdd Vec₂ Vec₂ Vec₂ where
   hAdd (a b : Vec₂) : Vec₂ := (a.1 + b.1, a.2 + b.2)
 
-instance : HAdd Vec₂ Int64 Vec₂ where
-  hAdd (v : Vec₂) (a : Int64) : Vec₂ := (v.1 + a, v.2 + a)
+instance : HAdd Vec₂ Int Vec₂ where
+  hAdd (v : Vec₂) (a : Int) : Vec₂ := (v.1 + a, v.2 + a)
 
 instance : HSub Vec₂ Vec₂ Vec₂ where
   hSub (a b : Vec₂) : Vec₂ := (a.1 - b.1, a.2 - b.2)
 
-instance : HSub Vec₂ Int64 Vec₂ where
-  hSub (v : Vec₂) (a : Int64) : Vec₂ := (v.1 - a, v.2 - a)
+instance : HSub Vec₂ Int Vec₂ where
+  hSub (v : Vec₂) (a : Int) : Vec₂ := (v.1 - a, v.2 - a)
 
 instance : LT Vec₂ where
   lt (a b : Vec₂) := a.1 < b.1 ∧ a.2 < b.2
@@ -62,11 +63,7 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 -- #eval geZeroAndLt (5, 5) (3, 2)
 -- #eval (3, 2) <₀ (5, 5)
 
-def Vec₂.toUInt64 (v : Vec₂) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
-
-end Vec2
-
-open Vec2
+-- def Vec₂.toUInt64 (v : Vec₂) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
 
 /--
   Subtype of `Vec₂` as valid index for `Rect`.
@@ -75,15 +72,20 @@ def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
 
 instance : Coe Idx₂ Vec₂ where coe v := v.1
 instance : Coe Idx₂ (Nat × Nat) where coe v := (v.1.1.toNat, v.1.2.toNat)
-
-def v : Vec₂ := (1, 1)
-def d : Idx₂ := ⟨(1, 1), by exact ⟨rfl, rfl⟩⟩
-
-#check ((↑ d) : Vec₂)
-#check ((↑ d) : Idx₂)
-
-def w : Vec₂ := (-1, -1)
-#eval (↑ w)
+instance : Coe (Nat × Nat) Idx₂ where coe v :=
+  ⟨
+    (((↑ v.1) : Int), ((↑ v.2) : Int)),
+    by
+      constructor
+      { simp ; exact Int.ofNat_zero_le v.fst }
+      { simp ; exact Int.ofNat_zero_le v.snd }
+  ⟩
+-- def v : Vec₂ := (1, 1)
+-- def d : Idx₂ := ⟨(1, 1), by exact ⟨rfl, rfl⟩⟩
+-- #check ((↑ d) : Vec₂)
+-- #check ((↑ d) : Idx₂)
+-- def w : Vec₂ := (-1, -1)
+-- #eval (↑ w)
 
 class RectIndex (α : Type) where
   toIndex₂ : α → Nat × Nat
@@ -94,9 +96,23 @@ instance : RectIndex Idx₂ where
 instance : RectIndex (Nat × Nat) where
   toIndex₂ p := p
 
-#check RectIndex.toIndex₂ ((↑ d) : Idx₂)
+-- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
 
-partial def range_list (n : Int64) : List Int64 := List.range n.toNat |>.map (·.toInt64)
+class RectIndexMaybe (α : Type) where
+  toIndex₂? : α → Option (Nat × Nat)
+
+instance : RectIndexMaybe Vec₂ where
+  toIndex₂? p := if (0, 0) ≤ p then some (p.1.toNat, p.2.toNat) else none
+
+instance : RectIndexMaybe Idx₂ where
+  toIndex₂? p := some (↑ p)
+
+instance : RectIndexMaybe (Nat × Nat) where
+  toIndex₂? p := some p
+
+-- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
+
+partial def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
 
 def toList' (p : Idx₂) : List Idx₂ :=
   let i : Vec₂ := ↑ p
@@ -104,8 +120,6 @@ def toList' (p : Idx₂) : List Idx₂ :=
   List.map (fun y ↦ (range_list i.2).map (y, ·) ) rl
     |>.flatten
     |>.flatMap (fun v ↦ if h : (0, 0) ≤ v then [⟨v, h⟩] else [])
-
-namespace TwoDimensionalVector64
 
 open Std.HashMap
 
@@ -224,8 +238,8 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
 def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
   if let some i := p.vector.findIdx? f
     then
-      if h : (0 ≤ (i / p.width).toInt64) ∧ (0 ≤ (i % p.width).toInt64)
-        then some ⟨((i / p.width).toInt64, (i % p.width).toInt64), by exact ⟨h.1, h.2⟩⟩
+      if h : 0 ≤ Int.ofNat (i / p.width) ∧ 0 ≤ Int.ofNat (i % p.width)
+        then some ⟨(Int.ofNat (i / p.width), Int.ofNat (i % p.width)), by exact ⟨h.1, h.2⟩⟩
         else none
     else none
 
@@ -291,17 +305,17 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (frame.width * i.fst + i.snd)
 
-@[inline] def validateIndex₂ {α : Type} [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option (Nat × Nat) :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.2 < self.width && self.toIndex₁ i < self.vector.size then some i else none
-
 /-- convert from `Vec2` to valid `Dim2` or `None`
 -/
-@[inline] def toIndex₂ {α : Type} [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option (Nat × Nat) :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.1 < 0 || i.2 < 0 then none
-    else
-      if i.2 < self.width && self.toIndex₁ i < self.vector.size then some i else none
+@[inline] def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
+  if let some i := RectIndexMaybe.toIndex₂? p then
+        if h: 0 ≤ Int.ofNat i.1 ∧ 0 ≤ Int.ofNat i.2 ∧ i.2 < self.width ∧ self.toIndex₁ i < self.vector.size
+          then some ⟨
+              ((↑ i) : Vec₂),
+              by constructor ; { simp ; exact h.left } ; { simp ; exact h.right.left }
+            ⟩
+          else none
+    else none
 
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
 @[inline] def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
@@ -316,13 +330,9 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
 @[inline] def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (Nat × Nat) :=
   Array.range self.vector.size |>.map (fun i ↦ self.ofIndex₁ i)
 
-end Rect
-
-def v := #[true, false, true, false]
-
-def x := Rect.mk 2 v
-def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
-
+-- def v := #[true, false, true, false]
+-- def x := Rect.mk 2 v
+-- def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 -- #check x
 -- #eval x
 -- #check y
@@ -337,4 +347,6 @@ def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 -- #eval x.set (0, 0) false
 -- #eval y.set (1, 1) 10000
 
-end TwoDimensionalVector64
+end Rect
+
+end Dim2
