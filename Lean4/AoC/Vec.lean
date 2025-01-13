@@ -1,3 +1,4 @@
+import Mathlib.Tactic.Basic
 import Mathlib.Tactic.Coe
 
 namespace Dim2
@@ -18,6 +19,11 @@ def turn : Dir → Dir
   | Dir.S => Dir.W
   | Dir.W => Dir.N
 -- #eval Dir.E.turn
+
+lemma turn_four_times_eq_self : ∀ d : Dir, d.turn.turn.turn.turn = d := by
+  intro d
+  dsimp [turn]
+  cases d <;> simp
 
 def asVec₂ : Dir → (Int × Int)
   | Dir.N => (-1,  0)
