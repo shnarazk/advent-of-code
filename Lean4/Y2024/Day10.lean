@@ -1,11 +1,10 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
-import «AoC».Rect64
-import «AoC».Vec2
+import «AoC».Vec
 
 namespace Y2024.Day10
-open Accumulation CiCL TwoDimensionalVector64 Rect Vec2 Std
+open Accumulation CiCL Dim2 Std
 
 abbrev Input := Rect Nat
 
@@ -24,9 +23,9 @@ end parser
 
 namespace Part1
 
-partial def expand (rect : Rect Nat) (toVisit : List Dim2)
+partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
-    (result : HashSet Dim2 := HashSet.empty)
+    (result : HashSet Vec₂ := HashSet.empty)
     : Nat :=
   match toVisit with
   | [] => result.size
@@ -34,8 +33,8 @@ partial def expand (rect : Rect Nat) (toVisit : List Dim2)
     if rect.get node 0 == 9 then expand rect remain visited (result.insert node)
       else
         let currentLevel := rect.get node 0
-        let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
-            |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
+        let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
+            |>.filterMap (fun offset ↦ rect.toValidIdx₂ (((↑ node) : Vec₂) + offset))
             |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
             |>.filter (fun p ↦ !visited.get p false)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
@@ -48,7 +47,7 @@ end Part1
 
 namespace Part2
 
-partial def expand (rect : Rect Nat) (toVisit : List Dim2)
+partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
     (count : Nat := 0)
     : Nat :=
@@ -58,8 +57,8 @@ partial def expand (rect : Rect Nat) (toVisit : List Dim2)
     if rect.get node 0 == 9 then expand rect remain visited (count + 1)
       else
         let currentLevel := rect.get node 0
-        let toVisit' := [((-1, 0) : Vec2), (1, 0), (0, -1), (0, 1)]
-            |>.filterMap (fun offset ↦ rect.toIndex₂ (node.toInt64 + offset))
+        let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
+            |>.filterMap (fun offset ↦ rect.toValidIdx₂ (((↑ node) : Vec₂) + offset))
             |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' count
