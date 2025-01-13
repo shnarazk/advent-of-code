@@ -15,4 +15,5 @@ Cargo.lock
 /data/2*.tar.xz
 /data/2*/input-day??.txt
 /tmp/
-/misc/*/*.png
+# /misc/*.png
+/misc/**/*.png
