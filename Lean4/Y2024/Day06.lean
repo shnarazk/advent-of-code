@@ -1,71 +1,37 @@
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
-import «AoC».Rect64
-import «AoC».Vec2
+import «AoC».Vec
 
 namespace Y2024.Day06
 
-open Accumulation CiCL Vec2
-
-inductive Dir
-  | N
-  | E
-  | S
-  | W
-deriving BEq, Hashable, Repr
-
-namespace Dir
-def turn : Dir → Dir
-  | Dir.N => Dir.E
-  | Dir.E => Dir.S
-  | Dir.S => Dir.W
-  | Dir.W => Dir.N
--- #eval Dir.E.turn
-
-def asVec2 : Dir → Vec2
-  | Dir.N => (-1,  0)
-  | Dir.E => ( 0,  1)
-  | Dir.S => ( 1,  0)
-  | Dir.W => ( 0, -1)
--- #eval (8, 5) + Dir.N.asVec2
-
-instance : ToString Dir where
-  toString
-    | Dir.N => "N"
-    | Dir.E => "E"
-    | Dir.S => "S"
-    | Dir.W => "W"
-
-end Dir
+open Accumulation CiCL Dim2 Std
 
 structure Input where
   line : Array (Array Char)
-  obstruction : Std.HashSet Vec2
-  guardPos : Vec2
+  obstruction : HashSet Idx₂
+  guardPos : Idx₂
   guardDir : Dir
-  size: Vec2
+  size: Vec₂
 deriving BEq
 
 instance : ToString Input where toString self := s!"{self.obstruction.toList}"
 
 namespace Input
 
-def status (self : Input) : (Vec2 × Dir) := (self.guardPos, self.guardDir)
+def status (self : Input) : (Idx₂ × Dir) := (self.guardPos, self.guardDir)
 
 def turn (self : Input) : Input := { self with guardDir := self.guardDir.turn }
 
-def moveTo (self : Input) (pos : Vec2) : Input := { self with guardPos := pos }
+def moveTo (self : Input) (pos : Idx₂) : Input := { self with guardPos := pos }
 
-def includes (self : Input) (pos : Vec2) : Option Vec2 :=
-  if 0 ≤ pos.1 && pos.1 < self.size.1 && 0 ≤ pos.2 && pos.2 < self.size.2
-    then some pos
-    else none
+def includes (self : Input) (pos : Vec₂) : Option Idx₂ :=
+  if h : (0, 0) ≤ pos ∧ pos.1 < self.size.1 ∧ pos.2 < self.size.2 then some ⟨pos, h.left⟩ else none
 
-def nextPos (self : Input) : Option Vec2 :=
-  self.includes <| self.guardPos + self.guardDir.asVec2
+def nextPos (self : Input) : Option Idx₂ :=
+  self.includes <| self.guardPos + self.guardDir.asVec₂
 
-partial def loop (self : Input) (trail : Std.HashSet (Vec2 × Dir)) (pos : Option Vec2) : Bool :=
+partial def loop (self : Input) (trail : HashSet (Idx₂ × Dir)) (pos : Option Idx₂) : Bool :=
   match pos with
     | none   => false
     | some p =>
@@ -90,12 +56,12 @@ partial def loop (self : Input) (trail : Std.HashSet (Vec2 × Dir)) (pos : Optio
                 else self₀.loop trail' self₀.nextPos
             else false
 
-def isLoop (self : Input) (pos : Vec2) (pre: Vec2 × Dir) : Bool :=
+def isLoop (self : Input) (pos : Idx₂) (pre: Idx₂ × Dir) : Bool :=
   let self' := { self with
       guardPos := pre.1,
       guardDir := pre.2,
       obstruction := (self.obstruction.insert pos) }
-  self'.loop Std.HashSet.empty pre.1
+  self'.loop HashSet.empty pre.1
 
 end Input
 
@@ -115,25 +81,20 @@ def parse : String → Option Input := AoCParser.parse parser
       let v ← many1 (parseLine <* eol)
       let h := v.enum.foldl
         (fun h (i, l) ↦ l.enum.foldl
-          (fun h (j, c) ↦ if c == '#' then h.insert (i.toInt64, j.toInt64) else h)
+          (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Idx₂) else h)
           h)
-        Std.HashSet.empty
+        (HashSet.empty : HashSet Idx₂)
       let p := v.enum.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
           |>.get! 0
-      let size := (v.size.toInt64, v[0]!.size.toInt64)
-      return Input.mk v h (p.1.toInt64, p.2.toInt64) Dir.N size
+      let size := (v.size, v[0]!.size)
+      return Input.mk v h (p.1, p.2) Dir.N size
 
 end parser
 
-partial def traceMove
-    (self : Input)
-    (pre : Option (Vec2 × Dir))
-    (hash : Std.HashMap Vec2 (Option (Vec2 × Dir)))
-    : Std.HashMap Vec2 (Option (Vec2 × Dir)) :=
-  let hash' := if hash.contains self.guardPos
-      then hash
-      else hash.insert self.guardPos pre
+partial def traceMove (self : Input) (pre : Option (Idx₂ × Dir)) (hash : HashMap Idx₂ (Option (Idx₂ × Dir)))
+    : HashMap Idx₂ (Option (Idx₂ × Dir)) :=
+  let hash' := if hash.contains self.guardPos then hash else hash.insert self.guardPos pre
   match self.nextPos with
     | none   => hash'
     | some p =>
@@ -146,16 +107,14 @@ partial def traceMove
 
 namespace Part1
 
-def solve (input : Input) : Nat :=
-  traceMove input none Std.HashMap.empty
-    |>.size
+def solve (input : Input) : Nat := traceMove input none HashMap.empty |>.size
 
 end Part1
 
 namespace Part2
 
 def solve (input : Input) : Nat :=
-  traceMove input none Std.HashMap.empty
+  traceMove input none HashMap.empty
     |>.filter (fun pos pre ↦ if let some p := pre then (input.isLoop pos p) else false)
     |>.size
 

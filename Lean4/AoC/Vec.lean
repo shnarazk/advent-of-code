@@ -11,6 +11,23 @@ instance : ToString Dir where
     | .S => "S"
     | .W => "W"
 
+namespace Dir
+def turn : Dir → Dir
+  | Dir.N => Dir.E
+  | Dir.E => Dir.S
+  | Dir.S => Dir.W
+  | Dir.W => Dir.N
+-- #eval Dir.E.turn
+
+def asVec₂ : Dir → (Int × Int)
+  | Dir.N => (-1,  0)
+  | Dir.E => ( 0,  1)
+  | Dir.S => ( 1,  0)
+  | Dir.W => ( 0, -1)
+-- #eval (8, 5) + Dir.N.asVec2
+
+end Dir
+
 abbrev Vec₂ := Int × Int
 
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
@@ -69,7 +86,9 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
   Subtype of `Vec₂` as valid index for `Rect`.
 -/
 def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
+deriving BEq, Hashable, Repr
 
+instance : ToString Idx₂ where toString v := toString v.val
 instance : Coe Idx₂ Vec₂ where coe v := v.1
 instance : Coe Idx₂ (Nat × Nat) where coe v := (v.1.1.toNat, v.1.2.toNat)
 instance : Coe (Nat × Nat) Idx₂ where coe v :=
