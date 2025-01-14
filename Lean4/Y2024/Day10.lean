@@ -6,7 +6,7 @@ import «AoC».Vec
 namespace Y2024.Day10
 open Accumulation CiCL Dim2 Std
 
-abbrev Input := Rect Nat
+-- abbrev Input := Rect Nat
 
 namespace parser
 open AoCParser
@@ -15,15 +15,15 @@ open Std.Internal.Parsec.String
 
 def parse_line : Parser (Array Nat) := many1 single_digit
 
-def parse : String → Option Input := AoCParser.parse parser
+def parse := AoCParser.parse parser
   where
-    parser : Parser Input := Rect.of2DMatrix <$> sepBy1 parse_line eol
+    parser := (Rect.of2DMatrix (· : Array (Array Nat)) 0) <$> sepBy1 parse_line eol
 
 end parser
 
 namespace Part1
 
-partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
+partial def expand (rect : Rect h w Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
     (result : HashSet Vec₂ := HashSet.empty)
     : Nat :=
@@ -40,14 +40,14 @@ partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' result
 
-def solve (input : Input) : Nat :=
+def solve input : Nat :=
   input.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input [p] else 0) |> sum
 
 end Part1
 
 namespace Part2
 
-partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
+partial def expand (rect : Rect h w Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
     (count : Nat := 0)
     : Nat :=
@@ -63,7 +63,7 @@ partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' count
 
-def solve (input : Input) : Nat :=
+def solve input : Nat :=
   input.enum |>.map (fun (p, lvl) ↦ if lvl == 0 then expand input [p] else 0) |> sum
 
 end Part2
