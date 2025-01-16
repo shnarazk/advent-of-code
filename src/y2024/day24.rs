@@ -58,6 +58,8 @@ enum Gate {
 type Wire = (u8, u8, u8);
 type WireRef = &'static Wire;
 type GateSpec = (WireRef, (Gate, WireRef, WireRef));
+type WireMap<T> = FxHashMap<WireRef, T>;
+type WireTree = FxHashMap<WireRef, FxHashSet<WireRef>>;
 
 /// convert from 'ord', 0 to 45, to wire
 fn ord_to_wire(n: usize, prefix: u8) -> WireRef {
@@ -80,12 +82,12 @@ fn wire_to_string((a, b, c): &Wire) -> String {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct FullAdder {
-    dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)>,
+    dep_graph: WireMap<(Gate, WireRef, WireRef)>,
 }
 
 impl FullAdder {
     fn new(overrides: &[(GateSpec, GateSpec)]) -> FullAdder {
-        let mut dep_graph: FxHashMap<WireRef, (Gate, WireRef, WireRef)> =
+        let mut dep_graph: WireMap<(Gate, WireRef, WireRef)> =
             PROPAGATION_TABLE.get().unwrap().clone();
         for ((g1_out, g1), (g2_out, g2)) in overrides.iter() {
             dep_graph.insert(*g1_out, *g2);
@@ -97,7 +99,7 @@ impl FullAdder {
         let input_bits = *INPUT_BITS.get().unwrap();
         let bit1 = int_to_bit_vector(arg1, input_bits);
         let bit2 = int_to_bit_vector(arg2, input_bits);
-        let mut values: FxHashMap<WireRef, Option<bool>> =
+        let mut values: WireMap<Option<bool>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
 
         for i in 0..input_bits {
@@ -107,8 +109,8 @@ impl FullAdder {
             values.insert(wire2, Some(bit2.get(i) == Some(&true)));
         }
         fn gate_output(
-            dep_graph: &FxHashMap<WireRef, (Gate, WireRef, WireRef)>,
-            values: &mut FxHashMap<WireRef, Option<bool>>,
+            dep_graph: &WireMap<(Gate, WireRef, WireRef)>,
+            values: &mut WireMap<Option<bool>>,
             wire: WireRef,
         ) -> Option<bool> {
             if let Some(b) = values.get(wire) {
@@ -279,14 +281,7 @@ impl Descriptor {
         ret
     }
     /// return `(down_tree, up_tree)`
-    fn wire_trees(
-        &self,
-        down: bool,
-        up: bool,
-    ) -> (
-        FxHashMap<WireRef, FxHashSet<WireRef>>,
-        FxHashMap<WireRef, FxHashSet<WireRef>>,
-    ) {
+    fn wire_trees(&self, down: bool, up: bool) -> (WireTree, WireTree) {
         let adder = self.build_adder();
         let mut wires: FxHashSet<WireRef> =
             HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
@@ -309,11 +304,7 @@ impl Descriptor {
         }
         (down_tree, up_tree)
     }
-    fn wire_affects(
-        &self,
-        tree: &FxHashMap<WireRef, FxHashSet<WireRef>>,
-        wire: WireRef,
-    ) -> FxHashSet<WireRef> {
+    fn wire_affects(&self, tree: &WireTree, wire: WireRef) -> FxHashSet<WireRef> {
         let mut subtree: FxHashSet<&Wire> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         if let Some(linked) = tree.get(&wire) {
             let mut to_visit: Vec<&Wire> = linked.iter().cloned().collect::<Vec<_>>();
@@ -350,11 +341,47 @@ impl Descriptor {
     fn number_of_targets(&self) -> usize {
         self.target_vector.iter().filter(|b| **b).count()
     }
+    // XOR -> XOR -> z(n)
+    // XOR -> AND -> OR -> XOR -> z(n+1)
+    // AND -> OR -> non-z
+    // XOR -> AND -> OR -> { AND -> OR }+ -> z(*)
+    fn check_flows_to_z(
+        &self,
+        tree: &WireTree,
+        i: usize,
+        case_end: bool,
+        prefix: u8,
+    ) -> Option<WireRef> {
+        let start = ord_to_wire(i, prefix);
+        let path1: (Vec<Gate>, WireRef) = (vec![Gate::Xor, Gate::Xor], ord_to_wire(i, b'z'));
+        let _path2: (Vec<Gate>, WireRef) = (
+            vec![Gate::And, Gate::Or, Gate::Xor],
+            ord_to_wire(i + 1, b'z'),
+        );
+        // they are special cases.
+        if i == 0 || case_end {
+            return None;
+        }
+        dbg!(self.check_flow(tree, start, &path1.0, path1.1));
+        unimplemented!();
+    }
+    fn check_flow(&self, tree: &WireTree, from: WireRef, path: &[Gate], terminal: WireRef) -> bool {
+        if path.is_empty() {
+            return from == terminal;
+        }
+        dbg!(&path);
+        if let Some(subs) = tree.get(from) {
+            subs.iter()
+                .any(|w: &WireRef| self.check_flow(tree, w, &path[1..], terminal))
+        } else {
+            false
+        }
+    }
 }
 
 static WIRE_NAMES: OnceLock<FxHashSet<Wire>> = OnceLock::new();
 static INPUT_BITS: OnceLock<usize> = OnceLock::new();
-static PROPAGATION_TABLE: OnceLock<FxHashMap<WireRef, (Gate, WireRef, WireRef)>> = OnceLock::new();
+static PROPAGATION_TABLE: OnceLock<WireMap<(Gate, WireRef, WireRef)>> = OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): (WireRef, WireRef)) -> (GateSpec, GateSpec) {
     debug_assert!(![b'x', b'y'].contains(&pick1.0));
@@ -449,8 +476,7 @@ impl AdventOfCode for Puzzle {
             WIRE_NAMES.set(wire_names_tmp).unwrap();
         }
         let wire_names: &'static FxHashSet<Wire> = WIRE_NAMES.get().unwrap();
-        let mut propagation_table: FxHashMap<WireRef, (Gate, WireRef, WireRef)> =
-            FxHashMap::default();
+        let mut propagation_table: WireMap<(Gate, WireRef, WireRef)> = FxHashMap::default();
         for (g, i1, i2, o) in links.iter() {
             propagation_table.insert(
                 wire_names.get(o).unwrap(),
@@ -532,6 +558,24 @@ impl AdventOfCode for Puzzle {
         FullAdder::new(&Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
+        let mut end = false;
+        let circuit = Descriptor::new(vec![]);
+        let (d_tree, _) = circuit.wire_trees(true, false);
+        let input_bits = *INPUT_BITS.get().unwrap();
+        for i in 1..=input_bits {
+            // input x
+            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, i == input_bits, b'x') {
+                dbg!(g);
+            }
+            // input y
+            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, i == input_bits, b'y') {
+                dbg!(g);
+            }
+            end = true;
+        }
+        if end {
+            return "".into();
+        }
         /*
         let mut step0 = Descriptor::new(vec![]);
         step0.evaluate();
