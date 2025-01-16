@@ -188,19 +188,19 @@ impl FullAdder {
                 }
                 match (subs[0].1, subs[1].1) {
                     (Gate::Xor, Gate::And) => {
-                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
-                            return invalid;
+                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
+                            return g;
                         }
-                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1And(n)) {
-                            return invalid;
+                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1And(n)) {
+                            return g;
                         }
                     }
                     (Gate::And, Gate::Xor) => {
-                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1And(n)) {
-                            return invalid;
+                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1And(n)) {
+                            return g;
                         }
-                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1Xor(n)) {
-                            return invalid;
+                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1Xor(n)) {
+                            return g;
                         }
                     }
                     _ => {
@@ -230,8 +230,8 @@ impl FullAdder {
                 if subs.len() != 1 {
                     return invalid;
                 }
-                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
-                    return invalid;
+                if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
+                    return g;
                 }
             }
             Role::Stage2And(n) => {
@@ -245,8 +245,8 @@ impl FullAdder {
                 if subs.len() != 1 {
                     return invalid;
                 }
-                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
-                    return invalid;
+                if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
+                    return g;
                 }
             }
             Role::Carry(n) if n == self.input_bits - 1 => {
@@ -255,6 +255,7 @@ impl FullAdder {
                 }
                 return (from != ord_to_wire(n + 1, b'z')).then(|| from);
             }
+            // FIXME: z(n+1) reachability should be checked.
             Role::Carry(_) => {
                 // println!(
                 //     "{}: carry({}):{} :: {:?}",
@@ -309,24 +310,24 @@ impl FullAdder {
                 }
                 match (subs[0].1, subs[1].1) {
                     (Gate::Xor, Gate::And) => {
-                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n)) {
+                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n)) {
                             // cdbg!();
-                            return invalid;
+                            return g;
                         }
-                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n)) {
+                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n)) {
                             // dbg!();
-                            return invalid;
+                            return g;
                         }
                     }
                     (Gate::And, Gate::Xor) => {
                         // 0, 1d
-                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n)) {
+                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n)) {
                             // dbg!();
-                            return invalid;
+                            return g;
                         }
-                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n)) {
+                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n)) {
                             // dbg!();
-                            return invalid;
+                            return g;
                         }
                     }
                     _ => {
