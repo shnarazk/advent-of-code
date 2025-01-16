@@ -80,20 +80,34 @@ fn wire_to_string((a, b, c): &Wire) -> String {
     format!("{}{}{}", *a as char, *b as char, *c as char)
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+enum Role {
+    Input(usize),
+    Stage1Xor(usize),
+    Output(usize),
+    Stage1And(usize),
+    Stage2And(usize),
+    Carry(usize),
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct FullAdder {
+    input_bits: usize,
     dep_graph: WireMap<(Gate, WireRef, WireRef)>,
 }
 
 impl FullAdder {
-    fn new(overrides: &[(GateSpec, GateSpec)]) -> FullAdder {
+    fn new(input_bits: usize, overrides: &[(GateSpec, GateSpec)]) -> FullAdder {
         let mut dep_graph: WireMap<(Gate, WireRef, WireRef)> =
             PROPAGATION_TABLE.get().unwrap().clone();
         for ((g1_out, g1), (g2_out, g2)) in overrides.iter() {
             dep_graph.insert(*g1_out, *g2);
             dep_graph.insert(*g2_out, *g1);
         }
-        FullAdder { dep_graph }
+        FullAdder {
+            input_bits,
+            dep_graph,
+        }
     }
     fn add(&self, arg1: usize, arg2: usize) -> (usize, Vec<bool>) {
         let input_bits = *INPUT_BITS.get().unwrap();
@@ -139,10 +153,206 @@ impl FullAdder {
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
         (val, v)
     }
+    // XOR -> XOR -> z(n)
+    // AND -> OR -> non-z
+    // XOR -> AND -> OR -> XOR -> z(n+1)
+    // XOR -> AND -> OR -> { AND -> OR }+ -> z(*)
+    fn check_flows_to_z(&self, tree: &WireTree, i: usize, prefix: u8) -> Option<WireRef> {
+        if i == 0 {
+            return None;
+        }
+        let start = ord_to_wire(i, prefix);
+        // they are special cases.
+        self.check_flow(tree, start, Role::Input(i))
+    }
+    fn check_flow(&self, tree: &WireTree, from: WireRef, role: Role) -> Option<WireRef> {
+        let Some(subs) = tree.get(from) else {
+            return Some(from);
+        };
+        let subs = subs
+            .iter()
+            .map(|g| (*g, self.dep_graph.get(g).unwrap().0))
+            .collect::<Vec<_>>();
+        let invalid = Some(from);
+        match role {
+            Role::Input(n) if n == self.input_bits - 1 => {
+                if subs.len() != 1 {
+                    return invalid;
+                }
+                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
+                    return invalid;
+                }
+            }
+            Role::Input(n) => {
+                println!(
+                    "{}: Input:{} :: {:?}",
+                    line!(),
+                    wire_to_string(from),
+                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                );
+                if subs.len() != 2 {
+                    return invalid;
+                }
+                match (subs[0].1, subs[1].1) {
+                    (Gate::Xor, Gate::And) => {
+                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
+                            return invalid;
+                        }
+                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1And(n)) {
+                            return invalid;
+                        }
+                    }
+                    (Gate::And, Gate::Xor) => {
+                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1And(n)) {
+                            return invalid;
+                        }
+                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1Xor(n)) {
+                            return invalid;
+                        }
+                    }
+                    _ => {
+                        return invalid;
+                    }
+                }
+            }
+            Role::Output(n) => {
+                println!(
+                    "{}: output:{} :: {}=[{}]",
+                    line!(),
+                    wire_to_string(from),
+                    subs.len(),
+                    wire_to_ord(subs[0].0),
+                );
+                if subs.len() != 1 {
+                    return invalid;
+                }
+                return (subs[0].0 != ord_to_wire(n, b'z')).then(|| from);
+            }
+            Role::Stage1And(n) => {
+                println!(
+                    "{}: stage1And:{} :: {:?}",
+                    line!(),
+                    wire_to_string(from),
+                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                );
+                if subs.len() != 1 {
+                    return invalid;
+                }
+                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
+                    return invalid;
+                }
+            }
+            Role::Stage2And(n) => {
+                println!(
+                    "{}: stage2and({}):{} :: {:?}",
+                    line!(),
+                    n,
+                    wire_to_string(from),
+                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                );
+                if subs.len() != 1 {
+                    return invalid;
+                }
+                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
+                    return invalid;
+                }
+            }
+            Role::Carry(n) => {
+                println!(
+                    "{}: carry({}):{} :: {:?}",
+                    line!(),
+                    n,
+                    wire_to_string(from),
+                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                );
+                if subs.len() != 2 {
+                    return invalid;
+                }
+                match (subs[0].1, subs[1].1) {
+                    (Gate::Xor, Gate::And) => {
+                        return None;
+                        // skip further investigation: it's up to the next stage.
+                        //
+                        // if let Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n + 1)) {
+                        //     dbg!();
+                        //     return invalid;
+                        // }
+                        // if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n + 1)) {
+                        //     dbg!();
+                        //     return invalid;
+                        // }
+                    }
+                    (Gate::And, Gate::Xor) => {
+                        return None;
+                        // if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n + 1)) {
+                        //     dbg!();
+                        //     return invalid;
+                        // }
+                        // if let Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n + 1)) {
+                        //     dbg!();
+                        //     return invalid;
+                        // }
+                    }
+                    _ => {
+                        return invalid;
+                    }
+                }
+            }
+            Role::Stage1Xor(n) => {
+                println!(
+                    "{}: stage1xor ({}):{} :: {:?}",
+                    line!(),
+                    n,
+                    wire_to_string(from),
+                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                );
+                if subs.len() != 2 {
+                    return invalid;
+                }
+                match (subs[0].1, subs[1].1) {
+                    (Gate::Xor, Gate::And) => {
+                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n)) {
+                            dbg!();
+                            return invalid;
+                        }
+                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n)) {
+                            dbg!();
+                            return invalid;
+                        }
+                    }
+                    (Gate::And, Gate::Xor) => {
+                        // 0, 1d
+                        if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n)) {
+                            dbg!();
+                            return invalid;
+                        }
+                        if let Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n)) {
+                            dbg!();
+                            return invalid;
+                        }
+                    }
+                    _ => {
+                        return invalid;
+                    }
+                }
+            }
+        }
+        // for w in subs.iter() {
+        //     // println!("{}: check: {}", file!(), wire_to_string(w));
+        //     if let Some(g) = self.dep_graph.get(w) {
+        //         if g.0 == path[0] && self.check_flow(tree, w, &path[1..]).is_none() {
+        //             return None;
+        //         }
+        //     }
+        //     // println!("{}: found: {}", file!(), wire_to_string(w));
+        // }
+        None
+    }
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Serialize)]
 pub struct Descriptor {
+    input_bits: usize,
     target_vector: Vec<bool>,
     overrides: Vec<(GateSpec, GateSpec)>,
 }
@@ -186,8 +396,9 @@ impl std::fmt::Display for Descriptor {
 }
 
 impl Descriptor {
-    fn new(overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
+    fn new(input_bits: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
         Descriptor {
+            input_bits,
             target_vector: Vec::new(),
             overrides,
         }
@@ -213,10 +424,10 @@ impl Descriptor {
         }
         swaps.push(build_swapped_pair((w1, w2)));
         swaps.sort_unstable();
-        Some(Descriptor::new(swaps))
+        Some(Descriptor::new(self.input_bits, swaps))
     }
     fn build_adder(&self) -> FullAdder {
-        FullAdder::new(&self.overrides)
+        FullAdder::new(self.input_bits, &self.overrides)
     }
     fn check_correctness(&self) -> Vec<bool> {
         fn merge_or(acc: Vec<bool>, v: Vec<bool>) -> Vec<bool> {
@@ -340,42 +551,6 @@ impl Descriptor {
     /// return the number of broken bits
     fn number_of_targets(&self) -> usize {
         self.target_vector.iter().filter(|b| **b).count()
-    }
-    // XOR -> XOR -> z(n)
-    // XOR -> AND -> OR -> XOR -> z(n+1)
-    // AND -> OR -> non-z
-    // XOR -> AND -> OR -> { AND -> OR }+ -> z(*)
-    fn check_flows_to_z(
-        &self,
-        tree: &WireTree,
-        i: usize,
-        case_end: bool,
-        prefix: u8,
-    ) -> Option<WireRef> {
-        let start = ord_to_wire(i, prefix);
-        let path1: (Vec<Gate>, WireRef) = (vec![Gate::Xor, Gate::Xor], ord_to_wire(i, b'z'));
-        let _path2: (Vec<Gate>, WireRef) = (
-            vec![Gate::And, Gate::Or, Gate::Xor],
-            ord_to_wire(i + 1, b'z'),
-        );
-        // they are special cases.
-        if i == 0 || case_end {
-            return None;
-        }
-        dbg!(self.check_flow(tree, start, &path1.0, path1.1));
-        unimplemented!();
-    }
-    fn check_flow(&self, tree: &WireTree, from: WireRef, path: &[Gate], terminal: WireRef) -> bool {
-        if path.is_empty() {
-            return from == terminal;
-        }
-        dbg!(&path);
-        if let Some(subs) = tree.get(from) {
-            subs.iter()
-                .any(|w: &WireRef| self.check_flow(tree, w, &path[1..], terminal))
-        } else {
-            false
-        }
     }
 }
 
@@ -539,6 +714,7 @@ impl AdventOfCode for Puzzle {
         serde_json::to_string(&data).ok()
     }
     fn part1(&mut self) -> Self::Output1 {
+        let input_bits = *INPUT_BITS.get().unwrap();
         let x = self
             .input_wire
             .iter()
@@ -555,21 +731,35 @@ impl AdventOfCode for Puzzle {
             .rev()
             .map(|(_, b)| b)
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
-        FullAdder::new(&Vec::new()).add(x, y).0
+        FullAdder::new(input_bits, &Vec::new()).add(x, y).0
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut end = false;
-        let circuit = Descriptor::new(vec![]);
-        let (d_tree, _) = circuit.wire_trees(true, false);
         let input_bits = *INPUT_BITS.get().unwrap();
-        for i in 1..=input_bits {
-            // input x
-            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, i == input_bits, b'x') {
-                dbg!(g);
+        let mut end = false;
+        let config = Descriptor::new(input_bits, vec![]);
+        let circuit = config.build_adder();
+        let (d_tree, _) = config.wire_trees(true, false);
+        for i in 1..2
+        /* input_bits */
+        {
+            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'x') {
+                dbg!(wire_to_string(g));
+            } else {
+                println!(
+                    "{}: {} passed.",
+                    line!(),
+                    wire_to_string(ord_to_wire(i, b'x'))
+                );
             }
             // input y
-            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, i == input_bits, b'y') {
-                dbg!(g);
+            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'y') {
+                dbg!(wire_to_string(g));
+            } else {
+                println!(
+                    "{}: {} passed.",
+                    line!(),
+                    wire_to_string(ord_to_wire(i, b'y'))
+                );
             }
             end = true;
         }
@@ -643,7 +833,7 @@ impl AdventOfCode for Puzzle {
 
         let mut generated = 0;
         let mut to_visit: BinaryHeap<Reverse<Descriptor>> = BinaryHeap::new();
-        let mut init = Descriptor::new(Vec::new());
+        let mut init = Descriptor::new(input_bits, Vec::new());
         init.evaluate();
         let (_, u_tree) = init.wire_trees(false, true);
         let tmp = init
