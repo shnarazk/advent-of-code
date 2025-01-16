@@ -166,13 +166,14 @@ impl FullAdder {
         self.check_flow(tree, start, Role::Input(i))
     }
     fn check_flow(&self, tree: &WireTree, from: WireRef, role: Role) -> Option<WireRef> {
-        let Some(subs) = tree.get(from) else {
-            return Some(from);
+        let subs = if let Some(subs) = tree.get(from) {
+            subs.iter()
+                .map(|g| (*g, self.dep_graph.get(g).unwrap().0))
+                .collect::<Vec<_>>()
+        } else {
+            vec![]
         };
-        let subs = subs
-            .iter()
-            .map(|g| (*g, self.dep_graph.get(g).unwrap().0))
-            .collect::<Vec<_>>();
+        // dbg!(subs.iter().map(|g| wire_to_string(g)).collect::<Vec<_>>());
         let invalid = Some(from);
         match role {
             Role::Input(n) if n == self.input_bits - 1 => {
@@ -217,16 +218,15 @@ impl FullAdder {
             }
             Role::Output(n) => {
                 println!(
-                    "{}: output:{} :: {}=[{}]",
+                    "{}: output:{} :: {}",
                     line!(),
                     wire_to_string(from),
                     subs.len(),
-                    wire_to_ord(subs[0].0),
                 );
-                if subs.len() != 1 {
+                if subs.len() != 0 {
                     return invalid;
                 }
-                return (subs[0].0 != ord_to_wire(n, b'z')).then(|| from);
+                return (from != ord_to_wire(n, b'z')).then(|| from);
             }
             Role::Stage1And(n) => {
                 println!(
