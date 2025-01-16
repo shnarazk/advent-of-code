@@ -176,21 +176,13 @@ impl FullAdder {
         // dbg!(subs.iter().map(|g| wire_to_string(g)).collect::<Vec<_>>());
         let invalid = Some(from);
         match role {
-            Role::Input(n) if n == self.input_bits - 1 => {
-                if subs.len() != 1 {
-                    return invalid;
-                }
-                if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
-                    return invalid;
-                }
-            }
             Role::Input(n) => {
-                println!(
-                    "{}: Input:{} :: {:?}",
-                    line!(),
-                    wire_to_string(from),
-                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
-                );
+                // println!(
+                //     "{}: Input:{} :: {:?}",
+                //     line!(),
+                //     wire_to_string(from),
+                //     subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                // );
                 if subs.len() != 2 {
                     return invalid;
                 }
@@ -217,24 +209,24 @@ impl FullAdder {
                 }
             }
             Role::Output(n) => {
-                println!(
-                    "{}: output:{} :: {}",
-                    line!(),
-                    wire_to_string(from),
-                    subs.len(),
-                );
+                // println!(
+                //     "{}: output:{} :: {}",
+                //     line!(),
+                //     wire_to_string(from),
+                //     subs.len(),
+                // );
                 if subs.len() != 0 {
                     return invalid;
                 }
                 return (from != ord_to_wire(n, b'z')).then(|| from);
             }
             Role::Stage1And(n) => {
-                println!(
-                    "{}: stage1And:{} :: {:?}",
-                    line!(),
-                    wire_to_string(from),
-                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
-                );
+                // println!(
+                //     "{}: stage1And:{} :: {:?}",
+                //     line!(),
+                //     wire_to_string(from),
+                //     subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                // );
                 if subs.len() != 1 {
                     return invalid;
                 }
@@ -243,13 +235,13 @@ impl FullAdder {
                 }
             }
             Role::Stage2And(n) => {
-                println!(
-                    "{}: stage2and({}):{} :: {:?}",
-                    line!(),
-                    n,
-                    wire_to_string(from),
-                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
-                );
+                // println!(
+                //     "{}: stage2and({}):{} :: {:?}",
+                //     line!(),
+                //     n,
+                //     wire_to_string(from),
+                //     subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                // );
                 if subs.len() != 1 {
                     return invalid;
                 }
@@ -257,14 +249,20 @@ impl FullAdder {
                     return invalid;
                 }
             }
-            Role::Carry(n) => {
-                println!(
-                    "{}: carry({}):{} :: {:?}",
-                    line!(),
-                    n,
-                    wire_to_string(from),
-                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
-                );
+            Role::Carry(n) if n == self.input_bits - 1 => {
+                if subs.len() != 0 {
+                    return invalid;
+                }
+                return (from != ord_to_wire(n + 1, b'z')).then(|| from);
+            }
+            Role::Carry(_) => {
+                // println!(
+                //     "{}: carry({}):{} :: {:?}",
+                //     line!(),
+                //     n,
+                //     wire_to_string(from),
+                //     subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                // );
                 if subs.len() != 2 {
                     return invalid;
                 }
@@ -299,35 +297,35 @@ impl FullAdder {
                 }
             }
             Role::Stage1Xor(n) => {
-                println!(
-                    "{}: stage1xor ({}):{} :: {:?}",
-                    line!(),
-                    n,
-                    wire_to_string(from),
-                    subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
-                );
+                // println!(
+                //     "{}: stage1xor ({}):{} :: {:?}",
+                //     line!(),
+                //     n,
+                //     wire_to_string(from),
+                //     subs.iter().map(|g| wire_to_string(g.0)).collect::<Vec<_>>(),
+                // );
                 if subs.len() != 2 {
                     return invalid;
                 }
                 match (subs[0].1, subs[1].1) {
                     (Gate::Xor, Gate::And) => {
                         if let Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n)) {
-                            dbg!();
+                            // cdbg!();
                             return invalid;
                         }
                         if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n)) {
-                            dbg!();
+                            // dbg!();
                             return invalid;
                         }
                     }
                     (Gate::And, Gate::Xor) => {
                         // 0, 1d
                         if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n)) {
-                            dbg!();
+                            // dbg!();
                             return invalid;
                         }
                         if let Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n)) {
-                            dbg!();
+                            // dbg!();
                             return invalid;
                         }
                     }
@@ -337,15 +335,6 @@ impl FullAdder {
                 }
             }
         }
-        // for w in subs.iter() {
-        //     // println!("{}: check: {}", file!(), wire_to_string(w));
-        //     if let Some(g) = self.dep_graph.get(w) {
-        //         if g.0 == path[0] && self.check_flow(tree, w, &path[1..]).is_none() {
-        //             return None;
-        //         }
-        //     }
-        //     // println!("{}: found: {}", file!(), wire_to_string(w));
-        // }
         None
     }
 }
@@ -739,27 +728,25 @@ impl AdventOfCode for Puzzle {
         let config = Descriptor::new(input_bits, vec![]);
         let circuit = config.build_adder();
         let (d_tree, _) = config.wire_trees(true, false);
-        for i in 1..2
-        /* input_bits */
-        {
+        for i in 1..input_bits {
             if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'x') {
                 dbg!(wire_to_string(g));
             } else {
-                println!(
-                    "{}: {} passed.",
-                    line!(),
-                    wire_to_string(ord_to_wire(i, b'x'))
-                );
+                // println!(
+                //     "{}: {} passed.",
+                //     line!(),
+                //     wire_to_string(ord_to_wire(i, b'x'))
+                // );
             }
             // input y
             if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'y') {
                 dbg!(wire_to_string(g));
             } else {
-                println!(
-                    "{}: {} passed.",
-                    line!(),
-                    wire_to_string(ord_to_wire(i, b'y'))
-                );
+                // println!(
+                //     "{}: {} passed.",
+                //     line!(),
+                //     wire_to_string(ord_to_wire(i, b'y'))
+                // );
             }
             end = true;
         }
