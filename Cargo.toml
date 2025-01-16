@@ -3,8 +3,13 @@ name = "adventofcode"
 version = "0.25.1"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2021"
+autobins = false
 default-run = "adventofcode"
 rust-version = "1.83"
+
+[[bin]]
+name = "adventofcode"
+path = "src/bin/adventofcode.rs"
 
 [dependencies]
 aoc_macro = { version = "^0.2", path = "aoc_macro" }
