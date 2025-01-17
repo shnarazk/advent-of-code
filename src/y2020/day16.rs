@@ -44,6 +44,7 @@ mod parser {
         separated(1.., parse_usize, ",").parse_next(s)
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn parse(s: &mut &str) -> PResult<(Vec<Range>, Vec<usize>, Vec<Vec<usize>>)> {
         seq!(
             separated(1.., parse_range, newline),

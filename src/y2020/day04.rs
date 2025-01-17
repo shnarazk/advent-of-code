@@ -41,10 +41,7 @@ pub struct Puzzle {
 
 mod parser {
     use {
-        crate::{
-            parser::{parse_dec, parse_usize},
-            regex,
-        },
+        crate::parser::{parse_dec, parse_usize},
         winnow::{
             combinator::{alt, repeat, seq},
             token::one_of,
@@ -77,7 +74,6 @@ mod parser {
 
     pub fn valid(key: &str, val: &str) -> bool {
         let s = val.to_string();
-        let _pid = regex!(r"^\d{9}$");
         match key {
             "byr" => val
                 .parse::<usize>()
