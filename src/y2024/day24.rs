@@ -7,7 +7,6 @@ use {
         dot::{Config, Dot},
         Graph,
     },
-    // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
@@ -29,18 +28,6 @@ fn int_to_bit_vector(mut n: usize, l: usize) -> Vec<bool> {
         bit_vector.push(false);
     }
     bit_vector
-}
-
-fn fmt(v: &[bool]) -> String {
-    format!(
-        "{}|{}|0({})",
-        v.len(),
-        v.iter()
-            .rev()
-            .map(|b| if *b { 'x' } else { '.' })
-            .collect::<String>(),
-        v.iter().filter(|b| **b).count(),
-    )
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -81,7 +68,6 @@ enum Role {
     Carry(usize),
 }
 
-// `?` returns if the value is `None`, so we can't use `Option<WireRef>` in checking.
 type ConnectionError = FxHashSet<WireRef>;
 
 fn merge_wires(set1: ConnectionError, set2: ConnectionError) -> ConnectionError {
@@ -151,16 +137,6 @@ impl FullAdder {
             .fold(0_usize, |acc, b| acc * 2 + (*b as usize));
         (val, v)
     }
-    // XOR -> XOR -> z(n)
-    // AND -> OR -> non-z
-    // XOR -> AND -> OR -> XOR -> z(n+1)
-    // XOR -> AND -> OR -> { AND -> OR }+ -> z(*)
-    fn check_flows_to_z(&self, tree: &WireTree, i: usize, prefix: u8) -> ConnectionError {
-        if i == 0 {
-            return HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
-        }
-        self.check_flow(tree, ord_to_wire(i, prefix), Role::Input(i))
-    }
     fn check_flow(&self, tree: &WireTree, from: WireRef, role: Role) -> ConnectionError {
         let subs = if let Some(subs) = tree.get(from) {
             subs.iter()
@@ -169,7 +145,6 @@ impl FullAdder {
         } else {
             vec![]
         };
-        // dbg!(subs.iter().map(|g| wire_to_string(g)).collect::<Vec<_>>());
         let mut invalid = HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
         invalid.insert(from);
         match role {
@@ -190,7 +165,7 @@ impl FullAdder {
                 }
             }
             Role::Output(n) => {
-                if subs.len() == 0 && from == ord_to_wire(n, b'z') {
+                if subs.is_empty() && from == ord_to_wire(n, b'z') {
                     HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default()
                 } else {
                     invalid
@@ -209,7 +184,7 @@ impl FullAdder {
                 self.check_flow(tree, subs[0].0, Role::Carry(n))
             }
             Role::Carry(n) if n == self.input_bits - 1 => {
-                if subs.len() == 0 && from == ord_to_wire(n + 1, b'z') {
+                if subs.is_empty() && from == ord_to_wire(n + 1, b'z') {
                     HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default()
                 } else {
                     invalid
@@ -252,44 +227,6 @@ pub struct Descriptor {
     overrides: Vec<(GateSpec, GateSpec)>,
 }
 
-/* impl Ord for Descriptor {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match (
-            self.target_vector
-                .iter()
-                .enumerate()
-                .all(|(i, b)| !*b || other.target_vector[i]),
-            other
-                .target_vector
-                .iter()
-                .enumerate()
-                .all(|(i, b)| !*b || self.target_vector[i]),
-        ) {
-            (true, true) => Ordering::Equal,
-            (true, false) => Ordering::Less,
-            (false, true) => Ordering::Greater,
-            (false, false) => other.first_target().cmp(&self.first_target()),
-        }
-    }
-}
-
-impl PartialOrd for Descriptor {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-} */
-
-impl std::fmt::Display for Descriptor {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "({}){}",
-            self.number_of_targets(),
-            fmt(&self.target_vector)
-        )
-    }
-}
-
 impl Descriptor {
     fn new(input_bits: usize, overrides: Vec<(GateSpec, GateSpec)>) -> Descriptor {
         Descriptor {
@@ -298,14 +235,6 @@ impl Descriptor {
             overrides,
         }
     }
-    // fn evaluate(&mut self) {
-    //     self.target_vector = self
-    //         .check_correctness()
-    //         .iter()
-    //         .zip(self.check_structure().iter())
-    //         .map(|(a, b)| *a | *b)
-    //         .collect();
-    // }
     fn add_swaps(&self, w1: WireRef, w2: WireRef) -> Option<Descriptor> {
         if w1 == w2 {
             return None;
@@ -347,14 +276,6 @@ impl Descriptor {
             }
         }
         (down_tree, up_tree)
-    }
-    /// return the first broken bit
-    fn first_target(&self) -> usize {
-        self.target_vector.iter().position(|n| *n).unwrap()
-    }
-    /// return the number of broken bits
-    fn number_of_targets(&self) -> usize {
-        self.target_vector.iter().filter(|b| **b).count()
     }
 }
 
@@ -547,8 +468,8 @@ impl AdventOfCode for Puzzle {
         let mut buffer: FxHashSet<WireRef> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         for i in 1..input_bits {
             let pair = merge_wires(
-                circuit.check_flows_to_z(&d_tree, i, b'x'),
-                circuit.check_flows_to_z(&d_tree, i, b'y'),
+                circuit.check_flow(&d_tree, ord_to_wire(i, b'x'), Role::Input(i)),
+                circuit.check_flow(&d_tree, ord_to_wire(i, b'y'), Role::Input(i)),
             );
             buffer = merge_wires(buffer, pair.clone());
             if 2 <= buffer.len() {
@@ -557,15 +478,18 @@ impl AdventOfCode for Puzzle {
                 checker = checker.add_swaps(l[0], l[1]).unwrap();
                 buffer.clear();
             }
-            result = merge_wires(result, circuit.check_flows_to_z(&d_tree, i, b'x'));
-            result = merge_wires(result, circuit.check_flows_to_z(&d_tree, i, b'y'));
+            result = merge_wires(result, pair);
         }
         // check the result
         let (d_tree, _) = checker.wire_trees(true, false);
         let adder = checker.build_adder();
         for i in 1..input_bits {
-            assert!(adder.check_flows_to_z(&d_tree, i, b'x').is_empty());
-            assert!(adder.check_flows_to_z(&d_tree, i, b'y').is_empty());
+            assert!(adder
+                .check_flow(&d_tree, ord_to_wire(i, b'x'), Role::Input(i))
+                .is_empty());
+            assert!(adder
+                .check_flow(&d_tree, ord_to_wire(i, b'y'), Role::Input(i))
+                .is_empty());
         }
         result
             .iter()
