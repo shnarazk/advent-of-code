@@ -90,6 +90,13 @@ enum Role {
     Carry(usize),
 }
 
+// `?` returns if the value is `None`, so we can't use `Option<WireRef>` in checking.
+type ConnectionError = FxHashSet<WireRef>;
+
+fn merge_wires(set1: ConnectionError, set2: ConnectionError) -> ConnectionError {
+    set1.union(&set2).cloned().collect()
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct FullAdder {
     input_bits: usize,
@@ -157,15 +164,13 @@ impl FullAdder {
     // AND -> OR -> non-z
     // XOR -> AND -> OR -> XOR -> z(n+1)
     // XOR -> AND -> OR -> { AND -> OR }+ -> z(*)
-    fn check_flows_to_z(&self, tree: &WireTree, i: usize, prefix: u8) -> Option<WireRef> {
+    fn check_flows_to_z(&self, tree: &WireTree, i: usize, prefix: u8) -> ConnectionError {
         if i == 0 {
-            return None;
+            return HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
         }
-        let start = ord_to_wire(i, prefix);
-        // they are special cases.
-        self.check_flow(tree, start, Role::Input(i))
+        self.check_flow(tree, ord_to_wire(i, prefix), Role::Input(i))
     }
-    fn check_flow(&self, tree: &WireTree, from: WireRef, role: Role) -> Option<WireRef> {
+    fn check_flow(&self, tree: &WireTree, from: WireRef, role: Role) -> ConnectionError {
         let subs = if let Some(subs) = tree.get(from) {
             subs.iter()
                 .map(|g| (*g, self.dep_graph.get(g).unwrap().0))
@@ -174,7 +179,8 @@ impl FullAdder {
             vec![]
         };
         // dbg!(subs.iter().map(|g| wire_to_string(g)).collect::<Vec<_>>());
-        let invalid = Some(from);
+        let mut invalid = HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default();
+        invalid.insert(from);
         match role {
             Role::Input(n) => {
                 // println!(
@@ -187,25 +193,15 @@ impl FullAdder {
                     return invalid;
                 }
                 match (subs[0].1, subs[1].1) {
-                    (Gate::Xor, Gate::And) => {
-                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)) {
-                            return g;
-                        }
-                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1And(n)) {
-                            return g;
-                        }
-                    }
-                    (Gate::And, Gate::Xor) => {
-                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage1And(n)) {
-                            return g;
-                        }
-                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage1Xor(n)) {
-                            return g;
-                        }
-                    }
-                    _ => {
-                        return invalid;
-                    }
+                    (Gate::Xor, Gate::And) => merge_wires(
+                        self.check_flow(tree, subs[0].0, Role::Stage1Xor(n)),
+                        self.check_flow(tree, subs[1].0, Role::Stage1And(n)),
+                    ),
+                    (Gate::And, Gate::Xor) => merge_wires(
+                        self.check_flow(tree, subs[0].0, Role::Stage1And(n)),
+                        self.check_flow(tree, subs[1].0, Role::Stage1Xor(n)),
+                    ),
+                    _ => invalid,
                 }
             }
             Role::Output(n) => {
@@ -215,10 +211,11 @@ impl FullAdder {
                 //     wire_to_string(from),
                 //     subs.len(),
                 // );
-                if subs.len() != 0 {
-                    return invalid;
+                if subs.len() == 0 && from == ord_to_wire(n, b'z') {
+                    HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default()
+                } else {
+                    invalid
                 }
-                return (from != ord_to_wire(n, b'z')).then(|| from);
             }
             Role::Stage1And(n) => {
                 // println!(
@@ -230,9 +227,7 @@ impl FullAdder {
                 if subs.len() != 1 {
                     return invalid;
                 }
-                if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
-                    return g;
-                }
+                self.check_flow(tree, subs[0].0, Role::Carry(n))
             }
             Role::Stage2And(n) => {
                 // println!(
@@ -245,18 +240,16 @@ impl FullAdder {
                 if subs.len() != 1 {
                     return invalid;
                 }
-                if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Carry(n)) {
-                    return g;
-                }
+                self.check_flow(tree, subs[0].0, Role::Carry(n))
             }
             Role::Carry(n) if n == self.input_bits - 1 => {
-                if subs.len() != 0 {
-                    return invalid;
+                if subs.len() == 0 && from == ord_to_wire(n + 1, b'z') {
+                    HashSet::<WireRef, BuildHasherDefault<FxHasher>>::default()
+                } else {
+                    invalid
                 }
-                return (from != ord_to_wire(n + 1, b'z')).then(|| from);
             }
-            // FIXME: z(n+1) reachability should be checked.
-            Role::Carry(_) => {
+            Role::Carry(n) => {
                 // println!(
                 //     "{}: carry({}):{} :: {:?}",
                 //     line!(),
@@ -268,33 +261,9 @@ impl FullAdder {
                     return invalid;
                 }
                 match (subs[0].1, subs[1].1) {
-                    (Gate::Xor, Gate::And) => {
-                        return None;
-                        // skip further investigation: it's up to the next stage.
-                        //
-                        // if let Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n + 1)) {
-                        //     dbg!();
-                        //     return invalid;
-                        // }
-                        // if let Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n + 1)) {
-                        //     dbg!();
-                        //     return invalid;
-                        // }
-                    }
-                    (Gate::And, Gate::Xor) => {
-                        return None;
-                        // if let Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n + 1)) {
-                        //     dbg!();
-                        //     return invalid;
-                        // }
-                        // if let Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n + 1)) {
-                        //     dbg!();
-                        //     return invalid;
-                        // }
-                    }
-                    _ => {
-                        return invalid;
-                    }
+                    (Gate::Xor, Gate::And) => self.check_flow(tree, subs[0].0, Role::Output(n + 1)),
+                    (Gate::And, Gate::Xor) => self.check_flow(tree, subs[1].0, Role::Output(n + 1)),
+                    _ => invalid,
                 }
             }
             Role::Stage1Xor(n) => {
@@ -309,34 +278,18 @@ impl FullAdder {
                     return invalid;
                 }
                 match (subs[0].1, subs[1].1) {
-                    (Gate::Xor, Gate::And) => {
-                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Output(n)) {
-                            // cdbg!();
-                            return g;
-                        }
-                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Stage2And(n)) {
-                            // dbg!();
-                            return g;
-                        }
-                    }
-                    (Gate::And, Gate::Xor) => {
-                        // 0, 1d
-                        if let g @ Some(_) = self.check_flow(tree, subs[0].0, Role::Stage2And(n)) {
-                            // dbg!();
-                            return g;
-                        }
-                        if let g @ Some(_) = self.check_flow(tree, subs[1].0, Role::Output(n)) {
-                            // dbg!();
-                            return g;
-                        }
-                    }
-                    _ => {
-                        return invalid;
-                    }
+                    (Gate::Xor, Gate::And) => merge_wires(
+                        self.check_flow(tree, subs[0].0, Role::Output(n)),
+                        self.check_flow(tree, subs[1].0, Role::Stage2And(n)),
+                    ),
+                    (Gate::And, Gate::Xor) => merge_wires(
+                        self.check_flow(tree, subs[0].0, Role::Stage2And(n)),
+                        self.check_flow(tree, subs[1].0, Role::Output(n)),
+                    ),
+                    _ => invalid,
                 }
             }
         }
-        None
     }
 }
 
@@ -729,28 +682,20 @@ impl AdventOfCode for Puzzle {
         let config = Descriptor::new(input_bits, vec![]);
         let circuit = config.build_adder();
         let (d_tree, _) = config.wire_trees(true, false);
+        let mut result: FxHashSet<WireRef> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         for i in 1..input_bits {
-            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'x') {
-                dbg!(wire_to_string(g));
-            } else {
-                // println!(
-                //     "{}: {} passed.",
-                //     line!(),
-                //     wire_to_string(ord_to_wire(i, b'x'))
-                // );
-            }
-            // input y
-            if let Some(g) = circuit.check_flows_to_z(&d_tree, i, b'y') {
-                dbg!(wire_to_string(g));
-            } else {
-                // println!(
-                //     "{}: {} passed.",
-                //     line!(),
-                //     wire_to_string(ord_to_wire(i, b'y'))
-                // );
-            }
-            end = true;
+            result = merge_wires(result, circuit.check_flows_to_z(&d_tree, i, b'x'));
+            result = merge_wires(result, circuit.check_flows_to_z(&d_tree, i, b'y'));
         }
+        println!(
+            "{}",
+            result
+                .iter()
+                .cloned()
+                .map(wire_to_string)
+                .sorted()
+                .join(",")
+        );
         if end {
             return "".into();
         }
