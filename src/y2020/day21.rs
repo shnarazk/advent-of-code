@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc_at, AdventOfCode, ParseError},
-        progress, regex,
+        progress,
     },
     splr::*,
     std::{
@@ -41,44 +41,61 @@ pub struct Puzzle {
     rules: Vec<Rule>,
 }
 
+mod parser {
+    use winnow::{
+        ascii::{alpha1, newline},
+        combinator::{separated, seq},
+        PResult, Parser,
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<(Vec<String>, Vec<String>)> {
+        seq!(
+            separated(1.., alpha1, " "),
+            _: " (contains ",
+            separated(1.., alpha1, ", "),
+            _: ")"
+        )
+        .map(|(s, v): (Vec<&str>, Vec<&str>)| {
+            (
+                s.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+                v.iter().map(|s| s.to_string()).collect(),
+            )
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<(Vec<String>, Vec<String>)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2020, 21)]
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let re = regex!(r"(^[^(]+)\(contains ((\w+, )*(\w+))\)$");
-        let m = re.captures(block).ok_or(ParseError)?;
-        let ingredients = m[1]
-            .trim()
-            .split(' ')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
-        let allergens = m[2]
-            .trim()
-            .split(", ")
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
-        // dbg!((&ingredients, &allergens));
-        let mut num_ingredient = self.ingredients.len();
-        for ing in ingredients.iter() {
-            if !self.ingredients.contains_key(ing) {
-                self.ingredients.insert(ing.to_string(), num_ingredient);
-                num_ingredient += 1;
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let data = parser::parse(&mut input.as_str())?;
+        for (ingredients, allergens) in data {
+            let mut num_ingredient = self.ingredients.len();
+            for ing in ingredients.iter() {
+                if !self.ingredients.contains_key(ing) {
+                    self.ingredients.insert(ing.to_string(), num_ingredient);
+                    num_ingredient += 1;
+                }
             }
-        }
-        let mut num_allergen = self.allergens.len();
-        for ale in allergens.iter() {
-            if !self.allergens.contains_key(ale) {
-                self.allergens.insert(ale.to_string(), num_allergen);
-                num_allergen += 1;
+            let mut num_allergen = self.allergens.len();
+            for ale in allergens.iter() {
+                if !self.allergens.contains_key(ale) {
+                    self.allergens.insert(ale.to_string(), num_allergen);
+                    num_allergen += 1;
+                }
             }
+            self.rules.push(Rule {
+                ingredients,
+                allergens,
+            });
         }
-        self.rules.push(Rule {
-            ingredients,
-            allergens,
-        });
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let verbose = !self.get_config().bench;
