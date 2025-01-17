@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2020/day/4>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -26,7 +23,7 @@ impl Rule {
         let mut count = 0;
         for key in &KEYS {
             if let Some(val) = self.dic.get(key.to_owned()) {
-                if valid(key, val) {
+                if parser::valid(key, val) {
                     count += 1;
                 } else {
                     // dbg!((key, val));
@@ -40,6 +37,75 @@ impl Rule {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Puzzle {
     entry: Vec<Rule>,
+}
+
+mod parser {
+    use {
+        crate::{
+            parser::{parse_dec, parse_usize},
+            regex,
+        },
+        winnow::{
+            combinator::{alt, repeat, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+    fn hexletter(s: &mut &str) -> PResult<char> {
+        one_of(('a'..='z', '0'..='9')).parse_next(s)
+    }
+
+    fn parse_hight<'a>(s: &'a mut &str) -> PResult<(usize, &'a str)> {
+        seq!(parse_usize, alt(("cm", "in"))).parse_next(s)
+    }
+
+    fn parse_hair(s: &mut &str) -> PResult<Vec<char>> {
+        seq!(_:"#", repeat(5..=5, hexletter))
+            .map(|(s,)| s)
+            .parse_next(s)
+    }
+
+    fn parse_eye<'a>(s: &'a mut &str) -> PResult<&'a str> {
+        alt(("amb", "blu", "brn", "gry", "grn", "hzl", "oth")).parse_next(s)
+    }
+
+    fn parse_pid(s: &mut &str) -> PResult<usize> {
+        repeat(9..=9, parse_dec)
+            .map(|v: Vec<usize>| v.iter().fold(0, |acc, x| acc * 10 + x))
+            .parse_next(s)
+    }
+
+    pub fn valid(key: &str, val: &str) -> bool {
+        let s = val.to_string();
+        let _pid = regex!(r"^\d{9}$");
+        match key {
+            "byr" => val
+                .parse::<usize>()
+                .map_or_else(|_| false, |y| (1920..=2002).contains(&y)),
+            "iyr" => val
+                .parse::<usize>()
+                .map_or_else(|_| false, |y| (2010..=2020).contains(&y)),
+            "eyr" => val
+                .parse::<usize>()
+                .map_or_else(|_| false, |y| (2020..=2030).contains(&y)),
+            "hgt" => parse_hight(&mut s.as_str()).map_or_else(
+                |_| false,
+                |(m, u)| {
+                    if u == "cm" {
+                        (150..=193).contains(&m)
+                    } else if u == "in" {
+                        (59..=76).contains(&m)
+                    } else {
+                        unreachable!()
+                    }
+                },
+            ),
+            "hcl" => parse_hair(&mut s.as_str()).is_ok(),
+            "ecl" => parse_eye(&mut s.as_str()).is_ok(),
+            "pid" => parse_pid(&mut s.as_str()).is_ok(),
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[aoc(2020, 4)]
@@ -60,52 +126,4 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> usize {
         self.entry.iter().filter(|r| r.check_values()).count()
     }
-}
-
-fn valid(key: &str, val: &str) -> bool {
-    let hight = regex!(r"^(\d+)(cm|in)$");
-    let hair = regex!(r"^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$");
-    let eye = regex!(r"^(amb|blu|brn|gry|grn|hzl|oth)$");
-    let pid = regex!(r"^\d{9}$");
-    match key {
-        "byr" => {
-            if let Ok(y) = val.parse::<usize>() {
-                return (1920..=2002).contains(&y);
-            }
-        }
-        "iyr" => {
-            if let Ok(y) = val.parse::<usize>() {
-                return (2010..=2020).contains(&y);
-            }
-        }
-        "eyr" => {
-            if let Ok(y) = val.parse::<usize>() {
-                return (2020..=2030).contains(&y);
-            }
-        }
-        "hgt" => {
-            if let Some(m) = hight.captures(val) {
-                if m[2] == *"cm" {
-                    if let Ok(v) = m[1].parse::<usize>() {
-                        return (150..=193).contains(&v);
-                    }
-                } else if m[2] == *"in" {
-                    if let Ok(v) = m[1].parse::<usize>() {
-                        return (59..=76).contains(&v);
-                    }
-                }
-            }
-        }
-        "hcl" => {
-            return hair.captures(val).is_some();
-        }
-        "ecl" => {
-            return eye.captures(val).is_some();
-        }
-        "pid" => {
-            return pid.captures(val).is_some();
-        }
-        _ => (),
-    }
-    false
 }
