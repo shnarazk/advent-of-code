@@ -1,63 +1,60 @@
-#![allow(unused_imports)]
+//! <https://adventofcode.com/2020/day/0>
 #![allow(dead_code)]
-use crate::y2020::traits::{Description, ProblemObject, ProblemSolver};
-// use crate::regex;
-// use std::collections::HashMap;
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+use {
+    crate::{
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::neighbors,
+    },
+    rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    serde::Serialize,
+    std::{
+        cmp::{Ordering, Reverse},
+        collections::{BinaryHeap, HashMap},
+        hash::BuildHasherDefault,
+    },
+};
 
-pub fn go(part: usize, desc: Description) {
-    dbg!(Setting::parse(desc).run(part));
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Puzzle {
+    line: Vec<()>,
 }
 
-#[derive(Debug, PartialEq)]
-struct Object {}
-
-impl ProblemObject for Object {
-    fn parse(_s: &str) -> Option<Self> {
-        None
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Setting {}
-
-impl ProblemSolver<Object, usize, usize> for Setting {
-    const YEAR: usize = 2021;
-    const DAY: usize = 0;
-    const DELIMITER: &'static str = "\n";
-    fn default() -> Self {
-        Setting {}
-    }
-    fn insert(&mut self, _object: Object) {}
-    fn part1(&mut self) -> usize {
-        0
-    }
-    fn part2(&mut self) -> usize {
-        0
-    }
-}
-
-#[cfg(feature = "y2020")]
-#[cfg(test)]
-mod test {
+mod parser {
     use {
-        super::*,
-        crate::y2020::traits::{Answer, Description},
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline, space1},
+            combinator::{alt, separated, seq},
+            PResult, Parser,
+        },
     };
 
-    #[test]
-    fn test_part1() {
-        const TEST1: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST1.to_string())).run(1),
-            Answer::Part1(0)
-        );
+    fn parse_line(s: &mut &str) -> PResult<()> {
+        ().parse_next(s)
     }
-    #[test]
-    fn test_part2() {
-        const TEST2: &str = "0\n1\n2";
-        assert_eq!(
-            Setting::parse(Description::TestData(TEST2.to_string())).run(2),
-            Answer::Part2(0)
-        );
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<()>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
+#[aoc(2020, 0)]
+impl AdventOfCode for Puzzle {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
+    }
+    fn end_of_data(&mut self) {
+        dbg!(&self.line);
+    }
+    fn part1(&mut self) -> Self::Output1 {
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        1
+    }
+    fn part2(&mut self) -> Self::Output2 {
+        2
     }
 }

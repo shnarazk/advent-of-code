@@ -1,29 +1,11 @@
 //! <https://adventofcode.com/2020/day/22>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{
         cmp::Ordering,
         collections::{HashSet, VecDeque},
     },
 };
-
-fn parse(block: &str) -> Option<VecDeque<usize>> {
-    let head = regex!(r"^Player (\d+):");
-    if head.captures(block).is_some() {
-        let mut q: VecDeque<usize> = VecDeque::new();
-        for l in block.split('\n').skip(1) {
-            if l.is_empty() {
-                break;
-            }
-            q.push_back(l.parse::<usize>().expect("panic"));
-        }
-        return Some(q);
-    }
-    None
-}
 
 type Player = VecDeque<usize>;
 type Config = (Player, Player);
@@ -56,25 +38,39 @@ pub struct Puzzle {
     cache: Cache,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_player(s: &mut &str) -> PResult<Vec<usize>> {
+        seq!(
+            _: "Player ",
+            _: parse_usize,
+            _: ":\n",
+            separated(1.., parse_usize, newline),
+        )
+        .map(|(s,)| s)
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<Vec<usize>>> {
+        separated(2..=2, parse_player, (newline, newline)).parse_next(s)
+    }
+}
+
 #[aoc(2020, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
-    fn parse(&mut self, buffer: String) -> Result<String, ParseError> {
-        let mut iter = buffer.split(Self::DELIMITER);
-        if let Some(text) = iter.next() {
-            if let Some(element) = parse(text) {
-                self.player1 = element;
-            }
-        }
-        if let Some(text) = iter.next() {
-            if let Some(element) = parse(text) {
-                self.player2 = element;
-            }
-        }
-        Ok("".to_string())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let mut v = parser::parse(&mut input.as_str())?;
+        self.player2 = VecDeque::from(v.pop().unwrap());
+        self.player1 = VecDeque::from(v.pop().unwrap());
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let mut stopper = None;
