@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/16>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 type Range = (String, usize, usize, usize, usize);
 
@@ -15,37 +12,57 @@ pub struct Puzzle {
     good_samples: Vec<Vec<usize>>,
 }
 
+mod parser {
+    use {
+        super::Range,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            token::take_until,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_range(str: &mut &str) -> PResult<Range> {
+        seq!(
+            take_until(1.., ": "),
+            _: ": ",
+            parse_usize,
+            _: "-",
+            parse_usize,
+            _: " or ",
+            parse_usize,
+            _: "-",
+            parse_usize,
+        )
+        .map(|(name, a, b, c, d)| (name.to_string(), a, b, c, d))
+        .parse_next(str)
+    }
+
+    fn parse_number_line(s: &mut &str) -> PResult<Vec<usize>> {
+        separated(1.., parse_usize, ",").parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<(Vec<Range>, Vec<usize>, Vec<Vec<usize>>)> {
+        seq!(
+            separated(1.., parse_range, newline),
+            _: "\n\nyour ticket:\n",
+            parse_number_line,
+            _: "\n\nnearby tickets:\n",
+            separated(1.., parse_number_line, newline)
+        )
+        .parse_next(s)
+    }
+}
+
 #[aoc(2020, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
-    fn parse(&mut self, body: String) -> Result<String, ParseError> {
-        let mut phase = 0;
-        for l in body.split('\n') {
-            match l {
-                "your ticket:" => {
-                    phase += 1;
-                }
-                "nearby tickets:" => {
-                    phase += 1;
-                }
-                "" => (),
-                _ if phase == 0 => {
-                    if let Some(r) = parse_range(l) {
-                        self.dic.push(r);
-                    }
-                }
-                _ if phase == 1 => {
-                    self.ticket = parse_sample(l);
-                }
-                _ if phase == 2 => {
-                    self.samples.push(parse_sample(l));
-                }
-                _ => (),
-            }
-        }
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (range, ticket, nearby) = parser::parse(&mut input.as_str())?;
+        self.dic = range;
+        self.ticket = ticket;
+        self.samples = nearby;
         // build cands
         for field in &self.ticket {
             let mut res: Vec<Range> = Vec::new();
@@ -56,7 +73,7 @@ impl AdventOfCode for Puzzle {
             }
             self.field_cands.push(res);
         }
-        Ok("".to_string())
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         // dbg!(&field_cands);
@@ -148,30 +165,4 @@ fn invalid(dic: &[Range], x: usize) -> Option<usize> {
     } else {
         Some(x)
     }
-}
-
-fn parse_range(str: &str) -> Option<Range> {
-    let line = regex!(r"^([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)$");
-    if let Some(m) = line.captures(str) {
-        if let Ok(a) = m[2].parse::<usize>() {
-            if let Ok(b) = m[3].parse::<usize>() {
-                if let Ok(c) = m[4].parse::<usize>() {
-                    if let Ok(d) = m[5].parse::<usize>() {
-                        return Some((m[1].to_string(), a, b, c, d));
-                    }
-                }
-            }
-        }
-    }
-    None
-}
-
-fn parse_sample(str: &str) -> Vec<usize> {
-    let mut vec: Vec<usize> = Vec::new();
-    for s in str.split(',') {
-        if let Ok(a) = s.parse::<usize>() {
-            vec.push(a)
-        }
-    }
-    vec
 }
