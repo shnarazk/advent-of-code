@@ -118,4 +118,58 @@ impl AdventOfCode for Puzzle {
         }
         unreachable!()
     }
+    fn serialize(&self) -> Option<String> {
+        let mut hist_ema: Vec<f64> = Vec::new();
+        let mut hist_value: Vec<f64> = Vec::new();
+        let mut hist_trend: Vec<f64> = Vec::new();
+        let mut goal: Option<isize> = None;
+
+        let decay_rate: f64 = 0.95;
+        let num_points = self.line.len();
+        let mut signal_rate_ema = 0.15;
+        for t in 1.. {
+            let res = self
+                .line
+                .par_iter()
+                .map(|&(pi, pj, si, sj)| {
+                    (
+                        (((t * si + pi) % self.size.0) + self.size.0) % self.size.0,
+                        (((t * sj + pj) % self.size.1) + self.size.1) % self.size.1,
+                    )
+                })
+                .collect::<HashSet<_, BuildHasherDefault<FxHasher>>>();
+            let num_connected = res
+                .par_iter()
+                .filter(|p| {
+                    p.neighbors4((0, 0), self.size)
+                        .iter()
+                        .any(|q| res.contains(q))
+                })
+                .count();
+            let r = num_connected as f64 / num_points as f64;
+            if 4.0 < r / signal_rate_ema && goal.is_none() {
+                goal = Some(t + 100);
+            }
+            hist_value.push(r);
+            hist_trend.push(r / signal_rate_ema);
+            signal_rate_ema *= decay_rate;
+            signal_rate_ema += (1.0 - decay_rate) * r;
+            hist_ema.push(signal_rate_ema);
+            if goal.is_some_and(|limit| limit < t) {
+                break;
+            }
+        }
+        #[derive(Serialize)]
+        struct Record {
+            ema: Vec<f64>,
+            value: Vec<f64>,
+            trend: Vec<f64>,
+        }
+        let record = Record {
+            ema: hist_ema,
+            value: hist_value,
+            trend: hist_trend,
+        };
+        serde_json::to_string(&record).map_or_else(|_| None, |v| Some(v))
+    }
 }
