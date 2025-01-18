@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/12>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Dir {
@@ -42,31 +39,6 @@ enum Instruction {
     F(usize),
 }
 
-impl Instruction {
-    fn from(str: &str) -> Option<Self> {
-        let re = regex!(r"^(N|S|E|W|L|R|F)(\d+)$");
-        if let Some(m) = re.captures(str) {
-            if let Ok(n) = &m[2].parse::<usize>() {
-                match &m[1] {
-                    "N" => Some(Instruction::N(*n)),
-                    "S" => Some(Instruction::S(*n)),
-                    "E" => Some(Instruction::E(*n)),
-                    "W" => Some(Instruction::W(*n)),
-                    "L" => Some(Instruction::L(*n)),
-                    "R" => Some(Instruction::R(*n)),
-                    "F" => Some(Instruction::F(*n)),
-                    _ => None,
-                }
-            } else {
-                // panic!("mnemonic.{}, sign.{}, val.{}", &m[1], &m[2], &m[3]);
-                None
-            }
-        } else {
-            None
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Puzzle {
     codes: Vec<Instruction>,
@@ -94,12 +66,40 @@ impl Default for Puzzle {
     }
 }
 
+mod parser {
+    use {
+        super::Instruction,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<Instruction> {
+        alt((
+            ("N", parse_usize).map(|(_, n)| Instruction::N(n)),
+            ("S", parse_usize).map(|(_, n)| Instruction::S(n)),
+            ("E", parse_usize).map(|(_, n)| Instruction::E(n)),
+            ("W", parse_usize).map(|(_, n)| Instruction::W(n)),
+            ("L", parse_usize).map(|(_, n)| Instruction::L(n)),
+            ("R", parse_usize).map(|(_, n)| Instruction::R(n)),
+            ("F", parse_usize).map(|(_, n)| Instruction::F(n)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<Instruction>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2020, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.codes.push(Instruction::from(block).ok_or(ParseError)?);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.codes = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         self.mode = 1;
