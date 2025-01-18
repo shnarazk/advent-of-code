@@ -60,3 +60,4 @@ draw(
         arrowlengthfrac=0.04,
     )
 )
+run(`pkill -9 gksqt`)

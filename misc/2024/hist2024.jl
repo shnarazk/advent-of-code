@@ -32,3 +32,4 @@ plot!(
     linewidth=2)
 
 savefig("hist2024.png")
+run(`pkill -9 gksqt`)

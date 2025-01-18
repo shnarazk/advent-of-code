@@ -29,3 +29,4 @@ plot!(
 )
 
 savefig("day14-ema.png")
+run(`pkill -9 gksqt`)

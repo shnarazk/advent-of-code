@@ -24,3 +24,4 @@ draw(
     g,
 )
 savefig("day23.png")
+run(`pkill -9 gksqt`)

@@ -47,3 +47,4 @@ plot!(
 )
 
 savefig("hist-$year.png")
+run(`pkill -9 gksqt`)

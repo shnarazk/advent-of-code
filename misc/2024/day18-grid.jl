@@ -35,3 +35,4 @@ heatmap(
     aspect_ratio=:equal
 )
 savefig("day18-grid.png")
+run(`pkill -9 gksqt`)
