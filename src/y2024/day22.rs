@@ -49,7 +49,7 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let matrix = self
             .line
-            .iter()
+            .par_iter()
             .map(|secret| {
                 sequence(*secret, self.threshold)
                     .iter()
@@ -58,7 +58,7 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         let trends = matrix
-            .iter()
+            .par_iter()
             .map(|seq| {
                 let mut hash: FxHashMap<[isize; 4], usize> =
                     HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
@@ -96,35 +96,23 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn mix(seed: &mut usize, value: usize) {
-    let ret = *seed ^ value;
-    *seed = ret;
-}
-
-fn prune(seed: &mut usize) {
-    let ret = *seed % 16777216;
-    *seed = ret;
-}
-fn next(secret: &mut usize) -> usize {
-    let s1 = *secret * 64;
-    mix(secret, s1);
-    prune(secret);
-    let s2 = *secret / 32;
-    mix(secret, s2);
-    prune(secret);
-    let s3 = *secret * 2048;
-    mix(secret, s3);
-    prune(secret);
-    *secret
+fn next(seed: usize) -> usize {
+    let s1 = ((seed * 64) ^ seed) % 16777216;
+    let s2 = ((s1 / 32) ^ s1) % 16777216;
+    ((s2 * 2048) ^ s2) % 16777216
 }
 
 fn generate(seed: usize, limit: usize) -> usize {
-    (0..limit).fold(seed, |mut n, _| next(&mut n))
+    (0..limit).fold(seed, |n, _| next(n))
 }
+
 fn sequence(seed: usize, limit: usize) -> Vec<usize> {
-    (0..limit).fold(vec![seed], |mut v, _| {
-        let mut n = *v.last().unwrap();
-        v.push(next(&mut n));
-        v
-    })
+    let mut v = Vec::with_capacity(limit + 1);
+    let mut n = seed;
+    v.push(n);
+    for _ in 0..limit {
+        n = next(n);
+        v.push(n);
+    }
+    v
 }
