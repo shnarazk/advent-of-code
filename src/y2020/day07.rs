@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2020/day/7>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashSet,
 };
 
@@ -19,31 +16,63 @@ pub struct Puzzle {
     links: HashSet<Link>,
 }
 
+mod parser {
+    use {
+        super::Link,
+        crate::parser::parse_usize,
+        std::collections::HashSet,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, opt, separated, seq},
+            token::take_until,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<Vec<Link>> {
+        seq!(
+            take_until(1.., " bags").map(|s: &str| s.to_string()),
+            _: " bags contain ",
+            alt((
+                separated(1..,
+                    seq!(
+                        parse_usize,
+                        _: " ",
+                        take_until(1.., " bag").map(|s : &str| s.to_string()),
+                        _: " bag",
+                        _: opt("s")
+                    ),
+                    ", "
+                ),
+                "no other bags".map(|_| Vec::new())
+            )),
+            _: "."
+        )
+        .map(|(outer, inners)| {
+            inners
+                .into_iter()
+                .map(|(amount, inner)| Link {
+                    outer: outer.clone(),
+                    inner,
+                    amount,
+                })
+                .collect()
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<HashSet<Link>> {
+        separated(1.., parse_line, newline)
+            .map(|v: Vec<Vec<Link>>| v.into_iter().flatten().collect::<HashSet<Link>>())
+            .parse_next(s)
+    }
+}
+
 #[aoc(2020, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let head = regex!(r"^([a-z]+ [a-z]+) bags? contain (.*)");
-        let prep = regex!(r"(\d+) ([a-z]+ [a-z]+) bags?(, (.*))?");
-        if let Some(head) = head.captures(block) {
-            let mut b: String = head[2].to_string();
-            while let Some(prep) = prep.captures(&b) {
-                self.links.insert(Link {
-                    outer: head[1].to_string(),
-                    inner: prep[2].to_string(),
-                    amount: prep[1].parse::<usize>().unwrap(),
-                });
-                if let Some(rest) = prep.get(4) {
-                    b = rest.as_str().to_string();
-                    if b == "." {
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.links = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let mut outers: HashSet<String> = HashSet::new();
