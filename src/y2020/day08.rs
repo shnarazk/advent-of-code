@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2020/day/8>
-use crate::{
-    framework::{aoc_at, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Instruction {
@@ -11,35 +8,7 @@ enum Instruction {
     Nop(isize),
 }
 
-/* impl ProblemObject for Instruction {
-    fn parse(line: &str) -> Option<Instruction> {
-        let re = regex!(r"^(acc|jmp|nop) ([+-])(\d+)$");
-        if let Some(m) = re.captures(line) {
-            let mnemonic = &m[1];
-            let val = match (&m[2], &m[3]) {
-                ("+", n) => n.parse::<isize>().ok(),
-                ("-", n) => n.parse::<isize>().map(|n| -n).ok(),
-                _ => None,
-            };
-            if let Some(n) = val {
-                return Instruction::from(mnemonic, n);
-            } else {
-                panic!("mnemonic.{}, sign.{}, val.{}", mnemonic, &m[2], &m[3]);
-            }
-        }
-        None
-    }
-} */
-
 impl Instruction {
-    fn from(mnemonic: &str, n: isize) -> Option<Self> {
-        match mnemonic {
-            "acc" => Some(Instruction::Acc(n)),
-            "jmp" => Some(Instruction::Jmp(n)),
-            "nop" => Some(Instruction::Nop(n)),
-            _ => None,
-        }
-    }
     fn flip(&self) -> Option<Instruction> {
         match self {
             Instruction::Acc(_) => None,
@@ -54,30 +23,39 @@ pub struct Puzzle {
     code: Vec<(Instruction, bool)>,
 }
 
+mod parser {
+    use {
+        super::Instruction,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, opt, separated},
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<(Instruction, bool)> {
+        alt((
+            ("acc ", opt('+'), parse_isize).map(|(_, _, n)| Instruction::Acc(n)),
+            ("jmp ", opt('+'), parse_isize).map(|(_, _, n)| Instruction::Jmp(n)),
+            ("nop ", opt('+'), parse_isize).map(|(_, _, n)| Instruction::Nop(n)),
+        ))
+        .map(|i| (i, false))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<(Instruction, bool)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2020, 8)]
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let re = regex!(r"^(acc|jmp|nop) ([+-])(\d+)$");
-        if let Some(m) = re.captures(block) {
-            let mnemonic = &m[1];
-            let val = match (&m[2], &m[3]) {
-                ("+", n) => n.parse::<isize>().ok(),
-                ("-", n) => n.parse::<isize>().map(|n| -n).ok(),
-                _ => None,
-            };
-            if let Some(n) = val {
-                if let Some(inst) = Instruction::from(mnemonic, n) {
-                    self.code.push((inst, false));
-                    return Ok(());
-                }
-            } else {
-                panic!("mnemonic.{}, sign.{}, val.{}", mnemonic, &m[2], &m[3]);
-            }
-        }
-        Err(ParseError)
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.code = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> isize {
         if let Some(result) = CPU::run1(&mut self.code) {
