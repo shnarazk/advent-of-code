@@ -170,6 +170,6 @@ impl AdventOfCode for Puzzle {
             value: hist_value,
             trend: hist_trend,
         };
-        serde_json::to_string(&record).map_or_else(|_| None, |v| Some(v))
+        serde_json::to_string(&record).ok()
     }
 }
