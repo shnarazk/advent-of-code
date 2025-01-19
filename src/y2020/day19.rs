@@ -1,10 +1,7 @@
 //! <https://adventofcode.com/2020/day/19>
 
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -27,53 +24,70 @@ pub struct Puzzle {
     message: Vec<Vec<char>>,
 }
 
+mod parser {
+    use {
+        super::Rule,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, repeat, separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_rule(s: &mut &str) -> PResult<(usize, Rule)> {
+        alt((
+            seq!(
+                parse_usize,
+                _: ": \"",
+                one_of('a'..='z'),
+                _: "\"\n"
+            )
+            .map(|(n, c)| (n, Rule::Match(c))),
+            seq!(
+                parse_usize,
+                _: ": ",
+                separated(1.., parse_usize, " "),
+                _: newline,
+            )
+            .map(|(n, v)| (n, Rule::Seq(v))),
+            seq!(
+                parse_usize,
+                _: ": ",
+                separated(1.., parse_usize, " "),
+                _: " | ",
+                separated(1.., parse_usize, " "),
+                _: newline,
+            )
+            .map(|(n, va, vb)| (n, Rule::Or(va, vb))),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse_message(s: &mut &str) -> PResult<Vec<char>> {
+        repeat(1.., alt(('a', 'b'))).parse_next(s)
+    }
+    #[allow(clippy::type_complexity)]
+    pub fn parse(s: &mut &str) -> PResult<(Vec<(usize, Rule)>, Vec<Vec<char>>)> {
+        seq!(
+            repeat(1.., parse_rule),
+            _: newline,
+            separated(1.., parse_message, newline)
+        )
+        .parse_next(s)
+    }
+}
+
 #[aoc(2020, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let r0 = regex!(r#"^(\d+): "(.)""#);
-        let r1 = regex!(r"^(\d+):(( \d+)+)$");
-        let r2 = regex!(r"^(\d+):(( \d+)+) \|(( \d+)+)$");
-        if let Some(m) = r0.captures(block) {
-            let i = m[1].parse::<usize>().expect("wrong");
-            let c = m[2].parse::<char>().expect("wrong");
-            self.rule.insert(i, Rule::Match(c));
-        } else if let Some(m) = r1.captures(block) {
-            let i = m[1].parse::<usize>().expect("wrong");
-            let mut vec: Vec<usize> = Vec::new();
-            for n in m[2].split_ascii_whitespace() {
-                vec.push(n.parse::<usize>().expect("strange"));
-            }
-            self.rule.insert(i, Rule::Seq(vec));
-        } else if let Some(m) = r2.captures(block) {
-            let i = m[1].parse::<usize>().expect("wrong");
-            let mut vec1: Vec<usize> = Vec::new();
-            for n in m[2].split_ascii_whitespace() {
-                vec1.push(n.parse::<usize>().expect("strange"));
-            }
-            let mut vec2: Vec<usize> = Vec::new();
-            for n in m[4].split_ascii_whitespace() {
-                vec2.push(n.parse::<usize>().expect("strange"));
-            }
-            self.rule.insert(i, Rule::Or(vec1, vec2));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (rules, messages) = parser::parse(&mut input.as_str())?;
+        let r = rules.iter().cloned().collect::<HashMap<usize, Rule>>();
+        self.rule = r;
+        self.message = messages;
+        Self::parsed()
     }
-    fn parse(&mut self, buffer: String) -> Result<String, ParseError> {
-        let mut iter = buffer.split("\n\n");
-        let rules = iter.next().unwrap();
-        if let Some(block) = iter.next() {
-            for line in block.split('\n') {
-                if line.is_empty() {
-                    break;
-                }
-                let cs = line.chars().collect::<Vec<char>>();
-                self.message.push(cs);
-            }
-        }
-        Ok(rules.to_string())
-    }
-    fn end_of_data(&mut self) {}
     fn part1(&mut self) -> usize {
         self.message
             .iter()
