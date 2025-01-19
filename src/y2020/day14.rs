@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2020/day/14>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -56,38 +53,58 @@ impl Default for Puzzle {
     }
 }
 
-#[aoc(2020, 14)]
-impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let mask = regex!(r"^mask = ((X|0|1)+)");
-        let set = regex!(r"^mem\[(\d+)\] = (\d+)");
-        if let Some(m) = mask.captures(block) {
-            let zeros = m[1]
-                .chars()
-                .fold(0, |sum, letter| sum * 2 + if letter == '0' { 1 } else { 0 });
-            let ones = m[1]
-                .chars()
-                .fold(0, |sum, letter| sum * 2 + if letter == '1' { 1 } else { 0 });
-            let wilds = m[1]
-                .chars()
-                .enumerate()
-                .fold(Vec::new(), |mut v, (i, letter)| {
-                    if letter == 'X' {
+mod parser {
+    use {
+        super::OP,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, repeat, separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> PResult<OP> {
+        alt((
+            seq!(_: "mask = ",
+                repeat(1.., one_of(['X', '0', '1']))
+            )
+            .map(|(v,): (Vec<char>,)| {
+                let zeros = v.iter().fold(0, |sum, letter| {
+                    sum * 2 + if *letter == '0' { 1 } else { 0 }
+                });
+                let ones = v.iter().fold(0, |sum, letter| {
+                    sum * 2 + if *letter == '1' { 1 } else { 0 }
+                });
+                let wilds = v.iter().enumerate().fold(Vec::new(), |mut v, (i, letter)| {
+                    if *letter == 'X' {
                         v.push(35 - i);
                     }
                     v
                 });
-            self.code.push(OP::Mask(zeros, ones, wilds));
-            return Ok(());
-        }
-        if let Some(m) = set.captures(block) {
-            let address = m[1].parse::<usize>().unwrap();
-            let val = m[2].parse::<usize>().unwrap();
-            self.code.push(OP::Set(address, val));
-            return Ok(());
-        }
-        Err(ParseError)
+                OP::Mask(zeros, ones, wilds)
+            }),
+            seq!(
+                _: "mem[",
+                parse_usize,
+                _: "] = ",
+                parse_usize)
+            .map(|(a, b)| OP::Set(a, b)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<OP>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
+#[aoc(2020, 14)]
+impl AdventOfCode for Puzzle {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.code = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let mut mem: HashMap<usize, usize> = HashMap::new();
