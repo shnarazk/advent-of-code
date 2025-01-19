@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2020/day/20>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::ops::Index,
 };
 
@@ -20,22 +17,39 @@ pub struct Puzzle {
     tile: Vec<Tile>,
 }
 
+mod parser {
+    use {
+        super::Tile,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{repeat, separated, seq},
+            token::one_of,
+            PResult, Parser,
+        },
+    };
+
+    fn parse_tile(s: &mut &str) -> PResult<Tile> {
+        seq!(
+            _: "Tile ",
+            parse_usize,
+            _: ":\n",
+            separated::<_, Vec<char>,_, _, _,_,_>(1.., repeat(1.., one_of(['.','#'])), newline),
+        )
+        .map(|(id, vec): (usize, Vec<Vec<char>>)| Tile::from(id, vec))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> PResult<Vec<Tile>> {
+        separated(1.., parse_tile, (newline, newline)).parse_next(s)
+    }
+}
+
 #[aoc(2020, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let re = regex!(r"^Tile (\d+):$");
-        let mut lines = block.split('\n').collect::<Vec<_>>();
-        if let Some(m) = re.captures(lines[0]) {
-            let id = m[1].parse::<usize>().expect("wrong");
-            if let Some(l) = lines.last() {
-                if l.is_empty() {
-                    lines.pop();
-                }
-            }
-            self.tile.push(Tile::from(id, &lines[1..]));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.tile = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let p = eval(&self.tile).expect("impossible");
@@ -213,27 +227,26 @@ impl Tile {
     /// use adventofcode::y2020::day20::*;
     /// assert_eq!(Tile::from(0, &vec!["...", "...", "..."]), Tile { id: 0, sign: [0, 0, 0,0 ], len: 3, image: vec!["...".to_string(), "...".to_string(), "...".to_string()] });
     /// ```
-    pub fn from(id: usize, block: &[&str]) -> Self {
-        let top = decode(&block[0].chars().collect::<Vec<char>>());
+    pub fn from(id: usize, block: Vec<Vec<char>>) -> Self {
+        let top = decode(&block[0]);
         let right = decode(
             &block
                 .iter()
-                .map(|l| l.chars().last().unwrap())
+                .map(|l| l.last().unwrap())
+                .cloned()
                 .collect::<Vec<char>>(),
         );
-        let bottom = decode(&block.last().unwrap().chars().collect::<Vec<char>>());
-        let left = decode(
-            &block
-                .iter()
-                .map(|l| l.chars().next().unwrap())
-                .collect::<Vec<char>>(),
-        );
+        let bottom = decode(block.last().unwrap());
+        let left = decode(&block.iter().map(|l| l[0]).collect::<Vec<char>>());
         assert_eq!(block.len(), block[0].len());
         Tile {
             id,
             sign: [top, right, bottom, left],
             len: block.len(),
-            image: block.iter().map(|s| s.to_string()).collect::<Vec<String>>(),
+            image: block
+                .iter()
+                .map(|s| s.iter().collect::<String>())
+                .collect::<Vec<String>>(),
         }
     }
     //
@@ -386,16 +399,26 @@ fn count_sharps(vec: &[String]) -> usize {
 }
 
 fn check_sea_monstar(image: &[String]) -> usize {
-    let monster_head = regex!(r"^..................#.");
-    let monster_body = regex!(r"^#....##....##....###");
-    let monster_down = regex!(r"^.#..#..#..#..#..#...");
+    let head = [18];
+    let body = [0, 5, 6, 11, 12, 17, 18, 19];
+    let down = [1, 4, 7, 10, 13, 16];
     let mut count = 0;
     let len = image.len();
     for (i, line) in image.iter().enumerate().take(len - 1).skip(1) {
         for j in 0..line.len() {
-            if monster_body.captures(&line[j..]).is_some()
-                && monster_head.captures(&image[i - 1][j..]).is_some()
-                && monster_down.captures(&image[i + 1][j..]).is_some()
+            if 20 < line[j..].len()
+                && line[j..]
+                    .chars()
+                    .enumerate()
+                    .all(|(i, c)| !body.contains(&i) || c == '#')
+                && image[i - 1][j..]
+                    .chars()
+                    .enumerate()
+                    .all(|(i, c)| !head.contains(&i) || c == '#')
+                && image[i + 1][j..]
+                    .chars()
+                    .enumerate()
+                    .all(|(i, c)| !down.contains(&i) || c == '#')
             {
                 count += 1;
             }
