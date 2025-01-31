@@ -10,7 +10,7 @@ use {
     winnow::{
         ascii::alpha1,
         combinator::{alt, preceded, repeat, repeat_till, terminated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -33,7 +33,7 @@ pub struct Puzzle {
     rating_settings: [HashSet<usize>; 4],
 }
 
-fn parse_rule1(str: &mut &str) -> PResult<Rule> {
+fn parse_rule1(str: &mut &str) -> ModalResult<Rule> {
     let var_str = alpha1(str)?;
     let op = alt(("<", ">")).parse_next(str)?;
     let val: usize = parse_usize.parse_next(str)?;
@@ -49,7 +49,7 @@ fn parse_rule1(str: &mut &str) -> PResult<Rule> {
     ))
 }
 
-fn parse_workflow(str: &mut &str) -> PResult<(Label, Vec<Rule>)> {
+fn parse_workflow(str: &mut &str) -> ModalResult<(Label, Vec<Rule>)> {
     let label = terminated(alpha1, "{").parse_next(str)?;
     let (mut v, last_label): (Vec<Rule>, &str) =
         repeat_till(0.., parse_rule1, terminated(alpha1, "}\n")).parse_next(str)?;
@@ -57,7 +57,7 @@ fn parse_workflow(str: &mut &str) -> PResult<(Label, Vec<Rule>)> {
     Ok((label.to_string(), v))
 }
 
-fn parse_setting(str: &mut &str) -> PResult<Vec<(String, usize)>> {
+fn parse_setting(str: &mut &str) -> ModalResult<Vec<(String, usize)>> {
     let x: usize = preceded("{x=", parse_usize).parse_next(str)?;
     let m: usize = preceded(",m=", parse_usize).parse_next(str)?;
     let a: usize = preceded(",a=", parse_usize).parse_next(str)?;
@@ -70,7 +70,7 @@ fn parse_setting(str: &mut &str) -> PResult<Vec<(String, usize)>> {
         ("s".to_string(), s as usize),
     ])
 }
-fn parse_settings(str: &mut &str) -> PResult<Vec<Vec<(String, usize)>>> {
+fn parse_settings(str: &mut &str) -> ModalResult<Vec<Vec<(String, usize)>>> {
     repeat(0.., parse_setting).parse_next(str)
 }
 

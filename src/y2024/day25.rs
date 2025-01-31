@@ -9,7 +9,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -20,7 +20,7 @@ pub struct Puzzle {
     keys: Vec<(usize, Vec<usize>)>,
 }
 
-fn parse_line(s: &mut &str) -> PResult<Vec<bool>> {
+fn parse_line(s: &mut &str) -> ModalResult<Vec<bool>> {
     repeat(1.., one_of(&['#', '.']))
         .map(|v: String| {
             v.chars()
@@ -34,11 +34,11 @@ fn parse_line(s: &mut &str) -> PResult<Vec<bool>> {
         .parse_next(s)
 }
 
-fn parse_maze(s: &mut &str) -> PResult<Vec<Vec<bool>>> {
+fn parse_maze(s: &mut &str) -> ModalResult<Vec<Vec<bool>>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Vec<Vec<bool>>>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Vec<bool>>>> {
     separated(1.., parse_maze, (newline, newline)).parse_next(s)
 }
 

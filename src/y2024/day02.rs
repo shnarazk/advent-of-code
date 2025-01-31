@@ -8,7 +8,7 @@ use {
     winnow::{
         ascii::{newline, space1},
         combinator::{repeat, separated, terminated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -17,7 +17,7 @@ pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }
 
-fn parse_line(str: &mut &str) -> PResult<Vec<usize>> {
+fn parse_line(str: &mut &str) -> ModalResult<Vec<usize>> {
     separated(1.., parse_usize, space1).parse_next(str)
 }
 

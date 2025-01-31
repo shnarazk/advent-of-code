@@ -50,15 +50,15 @@ mod parser {
         winnow::{
             ascii::{newline, space0, space1},
             combinator::{preceded, separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_sequence(s: &mut &str) -> PResult<Vec<usize>> {
+    fn parse_sequence(s: &mut &str) -> ModalResult<Vec<usize>> {
         separated(1.., parse_usize, ",").parse_next(s)
     }
 
-    fn parse_bingo(s: &mut &str) -> PResult<Board> {
+    fn parse_bingo(s: &mut &str) -> ModalResult<Board> {
         separated(
             5..=5,
             preceded(
@@ -70,7 +70,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<(Vec<usize>, Vec<Board>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<usize>, Vec<Board>)> {
         seq!(
             parse_sequence,
             _: (newline, newline),

@@ -7,7 +7,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{alt, separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -22,7 +22,7 @@ enum Direction {
 pub struct Puzzle {
     line: Vec<Direction>,
 }
-fn parse_line(s: &mut &str) -> PResult<Direction> {
+fn parse_line(s: &mut &str) -> ModalResult<Direction> {
     alt((
         seq!(_: "forward ", parse_usize).map(|(n,)| Direction::Forward(n)),
         seq!(_: "up ", parse_usize).map(|(n,)| Direction::Up(n)),
@@ -31,7 +31,7 @@ fn parse_line(s: &mut &str) -> PResult<Direction> {
     .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Direction>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Direction>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

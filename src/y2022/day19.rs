@@ -10,7 +10,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -161,7 +161,7 @@ pub struct Puzzle {
 }
 
 #[allow(clippy::type_complexity)]
-fn parse_line(s: &mut &str) -> PResult<(usize, usize, usize, usize, usize, usize, usize)> {
+fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, usize, usize, usize, usize, usize)> {
     seq!(
             _: "Blueprint ", parse_usize,
             _: ": Each ore robot costs ", parse_usize,
@@ -176,7 +176,7 @@ fn parse_line(s: &mut &str) -> PResult<(usize, usize, usize, usize, usize, usize
 }
 
 #[allow(clippy::type_complexity)]
-fn parse(s: &mut &str) -> PResult<Vec<(usize, usize, usize, usize, usize, usize, usize)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize, usize, usize, usize, usize)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

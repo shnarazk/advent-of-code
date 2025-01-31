@@ -11,7 +11,7 @@ use {
         ascii::newline,
         combinator::{alt, repeat, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -247,17 +247,17 @@ pub struct Puzzle {
     plane_size: usize,
 }
 
-fn parse_maze_line(s: &mut &str) -> PResult<Vec<char>> {
+fn parse_maze_line(s: &mut &str) -> ModalResult<Vec<char>> {
     repeat(1.., one_of(&['.', '#', ' '])).parse_next(s)
 }
 
-fn parse_maze(s: &mut &str) -> PResult<Vec<Vec<char>>> {
+fn parse_maze(s: &mut &str) -> ModalResult<Vec<Vec<char>>> {
     separated(1.., parse_maze_line, newline)
         .map(|v| dbg!(v))
         .parse_next(s)
 }
 
-fn parse_direction(s: &mut &str) -> PResult<Direction> {
+fn parse_direction(s: &mut &str) -> ModalResult<Direction> {
     alt((
         parse_usize.map(Direction::Go),
         'R'.map(|_| Direction::TurnRight),
@@ -266,11 +266,11 @@ fn parse_direction(s: &mut &str) -> PResult<Direction> {
     .parse_next(s)
 }
 
-fn parse_directions(s: &mut &str) -> PResult<Vec<Direction>> {
+fn parse_directions(s: &mut &str) -> ModalResult<Vec<Direction>> {
     repeat(1.., parse_direction).map(|v| dbg!(v)).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<(Vec<Vec<char>>, Vec<Direction>)> {
+fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<char>>, Vec<Direction>)> {
     seq!(parse_maze,  _: (newline, newline), parse_directions).parse_next(s)
 }
 

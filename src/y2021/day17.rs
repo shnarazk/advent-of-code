@@ -9,10 +9,10 @@ pub struct Puzzle {
 mod parser {
     use {
         crate::parser::parse_isize,
-        winnow::{combinator::seq, PResult, Parser},
+        winnow::{combinator::seq, ModalResult, Parser},
     };
 
-    pub fn parse(s: &mut &str) -> PResult<(isize, isize, isize, isize)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(isize, isize, isize, isize)> {
         seq!(
             _: "target area: x=",
             parse_isize,

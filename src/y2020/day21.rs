@@ -45,10 +45,10 @@ mod parser {
     use winnow::{
         ascii::{alpha1, newline},
         combinator::{separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     };
 
-    fn parse_line(s: &mut &str) -> PResult<(Vec<String>, Vec<String>)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(Vec<String>, Vec<String>)> {
         seq!(
             separated(1.., alpha1, " "),
             _: " (contains ",
@@ -64,7 +64,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<(Vec<String>, Vec<String>)>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(Vec<String>, Vec<String>)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

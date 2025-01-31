@@ -142,11 +142,11 @@ mod parser {
         winnow::{
             ascii::{alpha1, newline, space1},
             combinator::{separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<DataSegment> {
+    fn parse_line(s: &mut &str) -> ModalResult<DataSegment> {
         seq!(
             separated::<_,_, Vec<&str>,_,_,_,_>(1.., alpha1, space1),
             _: " | ",
@@ -159,7 +159,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<DataSegment>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<DataSegment>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

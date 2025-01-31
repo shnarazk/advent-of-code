@@ -13,7 +13,7 @@ use {
         ascii::newline,
         combinator::{alt, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -25,13 +25,13 @@ pub struct Puzzle {
     label_id: HashMap<String, usize>,
 }
 
-fn parse_name(s: &mut &str) -> PResult<String> {
+fn parse_name(s: &mut &str) -> ModalResult<String> {
     (one_of('A'..='Z'), one_of('A'..='Z'))
         .map(|(c1, c2)| format!("{c1}{c2}"))
         .parse_next(s)
 }
 
-fn parse_line(s: &mut &str) -> PResult<(String, usize, Vec<String>)> {
+fn parse_line(s: &mut &str) -> ModalResult<(String, usize, Vec<String>)> {
     seq!(
         _: "Valve ", parse_name,
         _: " has flow rate=", parse_usize,
@@ -43,7 +43,7 @@ fn parse_line(s: &mut &str) -> PResult<(String, usize, Vec<String>)> {
     .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<(String, usize, Vec<String>)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(String, usize, Vec<String>)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

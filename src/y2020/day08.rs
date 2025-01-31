@@ -30,11 +30,11 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{alt, opt, separated},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<(Instruction, bool)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(Instruction, bool)> {
         alt((
             ("acc ", opt('+'), parse_isize).map(|(_, _, n)| Instruction::Acc(n)),
             ("jmp ", opt('+'), parse_isize).map(|(_, _, n)| Instruction::Jmp(n)),
@@ -44,7 +44,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<(Instruction, bool)>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(Instruction, bool)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

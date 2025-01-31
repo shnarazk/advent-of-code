@@ -45,15 +45,15 @@ mod parser {
         winnow::{
             ascii::{newline, space1},
             combinator::{alt, separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_lit(s: &mut &str) -> PResult<Opr> {
+    fn parse_lit(s: &mut &str) -> ModalResult<Opr> {
         parse_isize.map(Opr::Lit).parse_next(s)
     }
 
-    fn parse_var(s: &mut &str) -> PResult<Opr> {
+    fn parse_var(s: &mut &str) -> ModalResult<Opr> {
         alt((
             "w".map(|_| Opr::Var('w')),
             "x".map(|_| Opr::Var('x')),
@@ -63,11 +63,11 @@ mod parser {
         .parse_next(s)
     }
 
-    fn parse_opr(s: &mut &str) -> PResult<Opr> {
+    fn parse_opr(s: &mut &str) -> ModalResult<Opr> {
         alt((parse_lit, parse_var)).parse_next(s)
     }
 
-    fn parse_inst(s: &mut &str) -> PResult<Inst> {
+    fn parse_inst(s: &mut &str) -> ModalResult<Inst> {
         alt((
             seq!( _: "inp ", parse_opr).map(|_| Inst::Inp),
             seq!( _: "add ", parse_opr, _: space1, parse_opr).map(|(_, o)| Inst::Add(o)),
@@ -79,7 +79,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<Inst>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Inst>> {
         separated(1.., parse_inst, newline).parse_next(s)
     }
 }

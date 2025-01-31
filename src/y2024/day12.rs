@@ -14,7 +14,7 @@ use {
     winnow::{
         ascii::{alpha1, newline},
         combinator::separated,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -151,7 +151,7 @@ impl Puzzle {
     }
 }
 
-fn parse<'a>(s: &'a mut &str) -> PResult<Vec<&'a str>> {
+fn parse<'a>(s: &'a mut &str) -> ModalResult<Vec<&'a str>> {
     separated(1.., alpha1, newline).parse_next(s)
 }
 

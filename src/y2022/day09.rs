@@ -9,7 +9,7 @@ use {
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -41,7 +41,7 @@ pub struct Puzzle {
     knots: Vec<(isize, isize)>,
 }
 
-fn parse_line(s: &mut &str) -> PResult<Dir> {
+fn parse_line(s: &mut &str) -> ModalResult<Dir> {
     seq!(one_of(&['R', 'U', 'L', 'D']), _: " ", parse_usize)
         .map(|(c, n)| match c {
             'R' => Dir::R(n),
@@ -53,7 +53,7 @@ fn parse_line(s: &mut &str) -> PResult<Dir> {
         .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Dir>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Dir>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

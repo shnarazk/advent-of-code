@@ -11,7 +11,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -34,7 +34,7 @@ pub struct Puzzle {
     threshold: usize,
 }
 
-fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
+fn parse_line(s: &mut &str) -> ModalResult<Vec<Kind>> {
     repeat(1.., one_of(&['#', '.', 'E', 'S']))
         .map(|v: String| {
             v.chars()
@@ -50,7 +50,7 @@ fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
         .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Vec<Kind>>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind>>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

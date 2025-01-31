@@ -9,7 +9,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -320,7 +320,7 @@ pub struct Puzzle {
     level2path: HashMap<(Kind2, Kind2), Vec<Vec<Kind2>>>,
 }
 
-fn parse_kind1(s: &mut &str) -> PResult<Kind1> {
+fn parse_kind1(s: &mut &str) -> ModalResult<Kind1> {
     one_of(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'A'])
         .map(|c| match c {
             '0' => Kind1::K0,
@@ -339,11 +339,11 @@ fn parse_kind1(s: &mut &str) -> PResult<Kind1> {
         .parse_next(s)
 }
 
-fn parse_line(s: &mut &str) -> PResult<Vec<Kind1>> {
+fn parse_line(s: &mut &str) -> ModalResult<Vec<Kind1>> {
     repeat(1.., parse_kind1).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Vec<Kind1>>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind1>>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

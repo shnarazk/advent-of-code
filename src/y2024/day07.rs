@@ -17,15 +17,15 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<(usize, Vec<usize>)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(usize, Vec<usize>)> {
         seq!(parse_usize, _: ": ", separated(1.., parse_usize, " "),).parse_next(s)
     }
 
-    pub fn parse(str: &mut &str) -> PResult<Vec<(usize, Vec<usize>)>> {
+    pub fn parse(str: &mut &str) -> ModalResult<Vec<(usize, Vec<usize>)>> {
         separated(1.., parse_line, newline).parse_next(str)
     }
 }

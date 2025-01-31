@@ -18,17 +18,17 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<usize> {
+    fn parse_line(s: &mut &str) -> ModalResult<usize> {
         seq!(_: "Player ", parse_usize, _: " starting position: ", parse_usize)
             .map(|(_, n)| n)
             .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<usize>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

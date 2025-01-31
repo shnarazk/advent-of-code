@@ -7,7 +7,7 @@ use {
     std::cmp::Ordering,
     winnow::{
         combinator::{alt, separated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -17,16 +17,16 @@ enum Expr {
     Array(Vec<Expr>),
 }
 
-fn parse_expr_num(input: &mut &str) -> PResult<Expr> {
+fn parse_expr_num(input: &mut &str) -> ModalResult<Expr> {
     let a: usize = parse_usize.parse_next(input)?;
     Ok(Expr::Num(a))
 }
 
-fn parse_expr(input: &mut &str) -> PResult<Expr> {
+fn parse_expr(input: &mut &str) -> ModalResult<Expr> {
     alt((parse_expr_array, parse_expr_num)).parse_next(input)
 }
 
-fn parse_expr_array(input: &mut &str) -> PResult<Expr> {
+fn parse_expr_array(input: &mut &str) -> ModalResult<Expr> {
     let _ = "[".parse_next(input)?;
     let e = separated(0.., parse_expr, ",").parse_next(input)?;
     let _ = "]".parse_next(input)?;

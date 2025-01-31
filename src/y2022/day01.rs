@@ -4,7 +4,7 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         parser::parse_usize,
     },
-    winnow::{ascii::newline, combinator::separated, PResult, Parser},
+    winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -12,10 +12,10 @@ pub struct Puzzle {
     line: Vec<Vec<usize>>,
 }
 
-fn parse_block(s: &mut &str) -> PResult<Vec<usize>> {
+fn parse_block(s: &mut &str) -> ModalResult<Vec<usize>> {
     separated(1.., parse_usize, newline).parse_next(s)
 }
-fn parse(s: &mut &str) -> PResult<Vec<Vec<usize>>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
     separated(1.., parse_block, (newline, newline)).parse_next(s)
 }
 

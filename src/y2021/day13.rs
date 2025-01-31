@@ -61,32 +61,32 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{alt, separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_dot(s: &mut &str) -> PResult<(usize, usize)> {
+    fn parse_dot(s: &mut &str) -> ModalResult<(usize, usize)> {
         seq!(parse_usize, _: ",", parse_usize)
             .map(|(x, y)| (y, x))
             .parse_next(s)
     }
 
-    fn parse_dots(s: &mut &str) -> PResult<Vec<(usize, usize)>> {
+    fn parse_dots(s: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
         separated(1.., parse_dot, newline).parse_next(s)
     }
 
-    fn parse_folding(s: &mut &str) -> PResult<(bool, usize)> {
+    fn parse_folding(s: &mut &str) -> ModalResult<(bool, usize)> {
         seq!(_: "fold along ", alt(("x", "y")), _: "=", parse_usize)
             .map(|(s, n)| (s == "x", n))
             .parse_next(s)
     }
 
-    fn parse_foldings(s: &mut &str) -> PResult<Vec<(bool, usize)>> {
+    fn parse_foldings(s: &mut &str) -> ModalResult<Vec<(bool, usize)>> {
         separated(1.., parse_folding, newline).parse_next(s)
     }
 
     #[allow(clippy::type_complexity)]
-    pub fn parse(s: &mut &str) -> PResult<(Vec<(usize, usize)>, Vec<(bool, usize)>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(usize, usize)>, Vec<(bool, usize)>)> {
         seq!(parse_dots, _: (newline, newline), parse_foldings).parse_next(s)
     }
 }

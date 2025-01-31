@@ -7,7 +7,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -67,7 +67,7 @@ impl Puzzle {
     }
 }
 
-fn parse_kind(s: &mut &str) -> PResult<Kind> {
+fn parse_kind(s: &mut &str) -> ModalResult<Kind> {
     one_of(&['w', 'u', 'b', 'r', 'g'])
         .map(|c| match c {
             'w' => Kind::White,
@@ -80,19 +80,19 @@ fn parse_kind(s: &mut &str) -> PResult<Kind> {
         .parse_next(s)
 }
 
-fn parse_subpattern(s: &mut &str) -> PResult<Vec<Kind>> {
+fn parse_subpattern(s: &mut &str) -> ModalResult<Vec<Kind>> {
     repeat(1.., parse_kind).parse_next(s)
 }
-fn parse_pattern(s: &mut &str) -> PResult<Vec<Vec<Kind>>> {
+fn parse_pattern(s: &mut &str) -> ModalResult<Vec<Vec<Kind>>> {
     separated(1.., parse_subpattern, ", ").parse_next(s)
 }
 
-fn parse_design(s: &mut &str) -> PResult<Vec<Kind>> {
+fn parse_design(s: &mut &str) -> ModalResult<Vec<Kind>> {
     repeat(1.., parse_kind).parse_next(s)
 }
 
 #[allow(clippy::type_complexity)]
-fn parse(s: &mut &str) -> PResult<(Vec<Vec<Kind>>, Vec<Vec<Kind>>)> {
+fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Kind>>, Vec<Vec<Kind>>)> {
     seq!(
         parse_pattern,
         _: newline,

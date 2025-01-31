@@ -13,7 +13,7 @@ use {
         ascii::newline,
         combinator::{repeat, repeat_till, separated, seq, terminated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -22,7 +22,7 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
-fn parse(s: &mut &str) -> PResult<()> {
+fn parse(s: &mut &str) -> ModalResult<()> {
     ().parse_next(s)
 }
 

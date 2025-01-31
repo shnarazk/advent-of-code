@@ -13,7 +13,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -38,14 +38,14 @@ impl Puzzle {
 }
 
 // p=0,4 v=3,-3
-fn parse_line(s: &mut &str) -> PResult<(isize, isize, isize, isize)> {
+fn parse_line(s: &mut &str) -> ModalResult<(isize, isize, isize, isize)> {
     seq!(
         _: "p=", parse_isize, _: ",", parse_isize,
         _: " v=", parse_isize, _: ",", parse_isize)
     .map(|(x, y, dx, dy)| (y, x, dy, dx))
     .parse_next(s)
 }
-fn parse(s: &mut &str) -> PResult<Vec<(isize, isize, isize, isize)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(isize, isize, isize, isize)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

@@ -5,21 +5,21 @@ use {
         ascii::{dec_int, dec_uint, digit1, space0},
         combinator::{repeat, separated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
-pub fn parse_dec(s: &mut &str) -> PResult<usize> {
+pub fn parse_dec(s: &mut &str) -> ModalResult<usize> {
     one_of(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
         .map(|c| (c as u8 - b'0') as usize)
         .parse_next(s)
 }
 
-pub fn parse_usize(str: &mut &str) -> PResult<usize> {
+pub fn parse_usize(str: &mut &str) -> ModalResult<usize> {
     dec_uint::<&str, usize, _>.parse_next(str)
 }
 
-pub fn parse_isize(str: &mut &str) -> PResult<isize> {
+pub fn parse_isize(str: &mut &str) -> ModalResult<isize> {
     dec_int::<&str, isize, _>.parse_next(str)
 }
 
@@ -35,7 +35,7 @@ pub fn parse_isize(str: &mut &str) -> PResult<isize> {
 /// assert_eq!(parser::to_usizes("", &[',']), Err(ParseError));
 /// ```
 pub fn to_usizes(line: &str, delimiters: &[char]) -> Result<Vec<usize>, ParseError> {
-    fn parse(s: &mut &str, delimiters: &[char]) -> PResult<Vec<usize>> {
+    fn parse(s: &mut &str, delimiters: &[char]) -> ModalResult<Vec<usize>> {
         let _ = space0.parse_next(s)?;
         separated(
             1..,
@@ -85,7 +85,7 @@ pub fn to_isize(line: &str) -> Result<isize, ParseError> {
 /// assert_eq!(parser::to_isizes("", &[',']), Err(ParseError));
 /// ```
 pub fn to_isizes(line: &str, delimiters: &[char]) -> Result<Vec<isize>, ParseError> {
-    fn parse(s: &mut &str, delimiters: &[char]) -> PResult<Vec<isize>> {
+    fn parse(s: &mut &str, delimiters: &[char]) -> ModalResult<Vec<isize>> {
         let _ = space0.parse_next(s)?;
         separated(
             1..,
@@ -107,7 +107,7 @@ pub fn to_isizes(line: &str, delimiters: &[char]) -> Result<Vec<isize>, ParseErr
 /// assert_eq!(parser::to_digits(""), Err(ParseError));
 /// ```
 pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
-    fn parse(s: &mut &str) -> PResult<Vec<usize>> {
+    fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
         let n = digit1.parse_next(s)?;
         Ok(n.chars()
             .map(|n| (n as u8 - b'0') as usize)
@@ -126,7 +126,7 @@ pub fn to_digits(line: &str) -> Result<Vec<usize>, ParseError> {
 /// assert_eq!(parser::to_binaries(""), Err(ParseError));
 /// ```
 pub fn to_binaries(line: &str) -> Result<Vec<bool>, ParseError> {
-    fn parse(s: &mut &str) -> PResult<Vec<bool>> {
+    fn parse(s: &mut &str) -> ModalResult<Vec<bool>> {
         let v: Vec<char> = repeat(1.., one_of(&['0', '1'])).parse_next(s)?;
         Ok(v.iter().map(|b| *b == '1').collect::<Vec<_>>())
     }

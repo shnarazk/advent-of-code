@@ -5,7 +5,7 @@ use {
         ascii::{dec_int, space0},
         combinator::alt,
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -125,13 +125,13 @@ impl Expr {
     }
 }
 
-fn a_number(input: &mut &str) -> PResult<Expr> {
+fn a_number(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let num: i64 = dec_int.parse_next(input)?;
     Ok(Expr::NUM(num as isize))
 }
 
-fn an_operator(input: &mut &str) -> PResult<Op> {
+fn an_operator(input: &mut &str) -> ModalResult<Op> {
     let _ = space0(input)?;
     let op = one_of(['+', '*', '-', '/']).parse_next(input)?;
     Ok(match op {
@@ -143,7 +143,7 @@ fn an_operator(input: &mut &str) -> PResult<Op> {
     })
 }
 
-fn a_term(input: &mut &str) -> PResult<Expr> {
+fn a_term(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let _ = "(".parse_next(input)?;
     let term = an_expr.parse_next(input)?;
@@ -151,7 +151,7 @@ fn a_term(input: &mut &str) -> PResult<Expr> {
     Ok(Expr::TERM(Box::new(term)))
 }
 
-fn an_expr(input: &mut &str) -> PResult<Expr> {
+fn an_expr(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let opr1 = alt((a_term, a_number)).parse_next(input)?;
     if let Ok((op, opr2)) = a_modifier(input) {
@@ -161,7 +161,7 @@ fn an_expr(input: &mut &str) -> PResult<Expr> {
     }
 }
 
-fn a_modifier(input: &mut &str) -> PResult<(Op, Expr)> {
+fn a_modifier(input: &mut &str) -> ModalResult<(Op, Expr)> {
     let _ = space0(input)?;
     let op = an_operator(input)?;
     let opr = an_expr(input)?;
@@ -170,7 +170,7 @@ fn a_modifier(input: &mut &str) -> PResult<(Op, Expr)> {
 
 // part 2
 
-fn subexpr(input: &mut &str) -> PResult<Expr> {
+fn subexpr(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let _ = "(".parse_next(input)?;
     let term = an_expr2(input)?;
@@ -178,7 +178,7 @@ fn subexpr(input: &mut &str) -> PResult<Expr> {
     Ok(Expr::TERM(Box::new(term)))
 }
 
-fn an_factor_operator(input: &mut &str) -> PResult<Op> {
+fn an_factor_operator(input: &mut &str) -> ModalResult<Op> {
     let _ = space0(input)?;
     let op = one_of(['+', '-']).parse_next(input)?;
     Ok(match op {
@@ -188,7 +188,7 @@ fn an_factor_operator(input: &mut &str) -> PResult<Op> {
     })
 }
 
-fn an_term_operator(input: &mut &str) -> PResult<Op> {
+fn an_term_operator(input: &mut &str) -> ModalResult<Op> {
     let _ = space0(input)?;
     let op = one_of(['*', '/']).parse_next(input)?;
     Ok(match op {
@@ -198,7 +198,7 @@ fn an_term_operator(input: &mut &str) -> PResult<Op> {
     })
 }
 
-fn factors(input: &mut &str) -> PResult<Expr> {
+fn factors(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let l = alt((subexpr, a_number)).parse_next(input)?;
     if let Ok(op) = an_factor_operator(input) {
@@ -209,7 +209,7 @@ fn factors(input: &mut &str) -> PResult<Expr> {
     }
 }
 
-fn terms(input: &mut &str) -> PResult<Expr> {
+fn terms(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     let l = factors(input)?;
     if let Ok(op) = an_term_operator(input) {
@@ -220,7 +220,7 @@ fn terms(input: &mut &str) -> PResult<Expr> {
     }
 }
 
-fn an_expr2(input: &mut &str) -> PResult<Expr> {
+fn an_expr2(input: &mut &str) -> ModalResult<Expr> {
     let _ = space0(input)?;
     terms.parse_next(input)
 }

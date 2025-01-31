@@ -11,7 +11,7 @@ use {
         collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
-    winnow::{ascii::newline, combinator::separated, PResult, Parser},
+    winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -20,7 +20,7 @@ pub struct Puzzle {
     threshold: usize,
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<usize>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
     separated(1.., parse_usize, newline).parse_next(s)
 }
 

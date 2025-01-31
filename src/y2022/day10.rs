@@ -7,7 +7,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{alt, separated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -27,21 +27,21 @@ pub struct Puzzle {
     state: Option<isize>,
 }
 
-fn parse_noop(s: &mut &str) -> PResult<Code> {
+fn parse_noop(s: &mut &str) -> ModalResult<Code> {
     "noop".map(|_| Code::Noop).parse_next(s)
 }
 
-fn parse_addx(s: &mut &str) -> PResult<Code> {
+fn parse_addx(s: &mut &str) -> ModalResult<Code> {
     ("addx ", parse_isize)
         .map(|(_, i)| Code::Addx(i))
         .parse_next(s)
 }
 
-fn parse_line(s: &mut &str) -> PResult<Code> {
+fn parse_line(s: &mut &str) -> ModalResult<Code> {
     alt((parse_noop, parse_addx)).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Code>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Code>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

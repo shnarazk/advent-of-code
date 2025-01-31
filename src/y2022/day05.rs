@@ -9,7 +9,7 @@ use {
     winnow::{
         ascii::{alpha1, newline, space1},
         combinator::{alt, separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -19,7 +19,7 @@ pub struct Puzzle {
     stacks: HashMap<usize, Vec<char>>,
 }
 
-fn parse_optional_cell(s: &mut &str) -> PResult<Option<char>> {
+fn parse_optional_cell(s: &mut &str) -> ModalResult<Option<char>> {
     let (x,) = alt((seq!(_:"[", alpha1, _: "]"), seq!(_:" ", " ", _:" "))).parse_next(s)?;
     if x == " " {
         Ok(None)
@@ -28,30 +28,30 @@ fn parse_optional_cell(s: &mut &str) -> PResult<Option<char>> {
     }
 }
 
-fn parse_config_line(s: &mut &str) -> PResult<Vec<Option<char>>> {
+fn parse_config_line(s: &mut &str) -> ModalResult<Vec<Option<char>>> {
     separated(1.., parse_optional_cell, " ").parse_next(s)
 }
 
-fn parse_config_ids(s: &mut &str) -> PResult<()> {
+fn parse_config_ids(s: &mut &str) -> ModalResult<()> {
     separated(1.., space1, parse_usize).parse_next(s)
 }
 
-fn parse_config(s: &mut &str) -> PResult<Vec<Vec<Option<char>>>> {
+fn parse_config(s: &mut &str) -> ModalResult<Vec<Vec<Option<char>>>> {
     seq!(separated(1.., parse_config_line, newline), _: newline, _: parse_config_ids)
         .map(|(t,)| t)
         .parse_next(s)
 }
 
-fn parse_move(s: &mut &str) -> PResult<(usize, usize, usize)> {
+fn parse_move(s: &mut &str) -> ModalResult<(usize, usize, usize)> {
     seq!(_: "move ", parse_usize, _: " from ", parse_usize, _: " to ", parse_usize).parse_next(s)
 }
 
-fn parse_moves(s: &mut &str) -> PResult<Vec<(usize, usize, usize)>> {
+fn parse_moves(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize)>> {
     separated(1.., parse_move, newline).parse_next(s)
 }
 
 #[allow(clippy::type_complexity)]
-fn parse(s: &mut &str) -> PResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize, usize)>)> {
+fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize, usize)>)> {
     seq!(parse_config, _: newline, _: newline, parse_moves).parse_next(s)
 }
 

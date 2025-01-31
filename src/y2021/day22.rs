@@ -17,11 +17,11 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{alt, separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<(bool, isize, isize, isize, isize, isize, isize)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(bool, isize, isize, isize, isize, isize, isize)> {
         seq!(
             alt(("on", "off")).map(|s| s == "on"),
             _: " x=", parse_isize,
@@ -35,7 +35,7 @@ mod parser {
     }
 
     #[allow(clippy::type_complexity)]
-    pub fn parse(s: &mut &str) -> PResult<Vec<(bool, isize, isize, isize, isize, isize, isize)>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(bool, isize, isize, isize, isize, isize, isize)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

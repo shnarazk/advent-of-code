@@ -21,15 +21,15 @@ mod parser {
             ascii::{alpha1, newline},
             combinator::{separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_template(s: &mut &str) -> PResult<String> {
+    fn parse_template(s: &mut &str) -> ModalResult<String> {
         alpha1.map(|s: &str| s.to_string()).parse_next(s)
     }
 
-    fn parse_rule(s: &mut &str) -> PResult<Rule> {
+    fn parse_rule(s: &mut &str) -> ModalResult<Rule> {
         seq!(
         one_of('A'..='Z'),
         one_of('A'..='Z'),
@@ -39,11 +39,11 @@ mod parser {
         .parse_next(s)
     }
 
-    fn parse_rules(s: &mut &str) -> PResult<Vec<Rule>> {
+    fn parse_rules(s: &mut &str) -> ModalResult<Vec<Rule>> {
         separated(1.., parse_rule, newline).parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<(String, Vec<Rule>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(String, Vec<Rule>)> {
         seq!(parse_template, _: (newline, newline), parse_rules).parse_next(s)
     }
 }

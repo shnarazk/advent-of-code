@@ -9,7 +9,7 @@ use {
         ascii::{newline, space1},
         combinator::{alt, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -104,7 +104,7 @@ pub struct Puzzle {
     line: Vec<Expr>,
 }
 
-fn parse_id(s: &mut &str) -> PResult<String> {
+fn parse_id(s: &mut &str) -> ModalResult<String> {
     seq!(
         one_of('a'..='z'),
         one_of('a'..='z'),
@@ -115,7 +115,7 @@ fn parse_id(s: &mut &str) -> PResult<String> {
     .parse_next(s)
 }
 
-fn parse_num(s: &mut &str) -> PResult<Expr> {
+fn parse_num(s: &mut &str) -> ModalResult<Expr> {
     seq!(
         parse_id,
         _: ": ",
@@ -125,7 +125,7 @@ fn parse_num(s: &mut &str) -> PResult<Expr> {
     .parse_next(s)
 }
 
-fn parse_term(s: &mut &str) -> PResult<Expr> {
+fn parse_term(s: &mut &str) -> ModalResult<Expr> {
     seq!(
         parse_id,
         _: ": ",
@@ -145,10 +145,10 @@ fn parse_term(s: &mut &str) -> PResult<Expr> {
     .parse_next(s)
 }
 
-fn parse_line(s: &mut &str) -> PResult<Expr> {
+fn parse_line(s: &mut &str) -> ModalResult<Expr> {
     alt((parse_num, parse_term)).parse_next(s)
 }
-fn parse(s: &mut &str) -> PResult<Vec<Expr>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Expr>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

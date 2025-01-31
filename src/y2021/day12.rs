@@ -90,11 +90,11 @@ mod parser {
             ascii::newline,
             combinator::{alt, repeat, separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_node(s: &mut &str) -> PResult<Node> {
+    fn parse_node(s: &mut &str) -> ModalResult<Node> {
         alt((
             "start".map(|_| Node::Start),
             "end".map(|_| Node::End),
@@ -103,11 +103,11 @@ mod parser {
         ))
         .parse_next(s)
     }
-    fn parse_line(s: &mut &str) -> PResult<(Node, Node)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(Node, Node)> {
         seq!((parse_node, _: "-", parse_node)).parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<(Node, Node)>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(Node, Node)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

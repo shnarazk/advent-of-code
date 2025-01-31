@@ -8,7 +8,7 @@ use {
     winnow::{
         ascii::{alphanumeric1, newline},
         combinator::{separated, terminated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -18,13 +18,13 @@ pub struct Puzzle {
     line: HashMap<String, (String, String)>,
 }
 
-fn parse_header(input: &mut &str) -> PResult<String> {
+fn parse_header(input: &mut &str) -> ModalResult<String> {
     let label = terminated(alphanumeric1, "\n\n").parse_next(input)?;
     Ok(label.to_string())
 }
 
 // fn parse(str: &str) -> IResult<&str, Data>;
-fn parse_block(input: &mut &str) -> PResult<(String, (String, String))> {
+fn parse_block(input: &mut &str) -> ModalResult<(String, (String, String))> {
     let label = terminated(alphanumeric1, " = (").parse_next(input)?;
     let child1 = terminated(alphanumeric1, ", ").parse_next(input)?;
     let child2 = terminated(alphanumeric1, ")").parse_next(input)?;

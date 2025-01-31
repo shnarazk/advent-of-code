@@ -25,11 +25,11 @@ mod parser {
             ascii::newline,
             combinator::{repeat, separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_tile(s: &mut &str) -> PResult<Tile> {
+    fn parse_tile(s: &mut &str) -> ModalResult<Tile> {
         seq!(
             _: "Tile ",
             parse_usize,
@@ -40,7 +40,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<Tile>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Tile>> {
         separated(1.., parse_tile, (newline, newline)).parse_next(s)
     }
 }

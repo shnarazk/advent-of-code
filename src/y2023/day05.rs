@@ -8,7 +8,7 @@ use {
     winnow::{
         ascii::{newline, space1, till_line_ending},
         combinator::{preceded, separated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -21,7 +21,7 @@ pub struct Puzzle {
     line: Vec<Vec<(usize, usize, usize)>>,
 }
 
-fn parse_line(str: &mut &str) -> PResult<Vec<usize>> {
+fn parse_line(str: &mut &str) -> ModalResult<Vec<usize>> {
     separated(1.., parse_usize, space1).parse_next(str)
 }
 
@@ -29,7 +29,7 @@ fn parse_line(str: &mut &str) -> PResult<Vec<usize>> {
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        fn parse_block(str: &mut &str) -> PResult<Vec<(usize, usize, usize)>> {
+        fn parse_block(str: &mut &str) -> ModalResult<Vec<(usize, usize, usize)>> {
             let _ = preceded(till_line_ending, newline).parse_next(str)?;
             let v: Vec<Vec<usize>> = separated(1.., parse_line, newline).parse_next(str)?;
             Ok(v.iter()

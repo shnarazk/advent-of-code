@@ -25,11 +25,11 @@ mod parser {
             ascii::newline,
             combinator::{alt, opt, separated, seq},
             token::take_until,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<Vec<Link>> {
+    fn parse_line(s: &mut &str) -> ModalResult<Vec<Link>> {
         seq!(
             take_until(1.., " bags").map(|s: &str| s.to_string()),
             _: " bags contain ",
@@ -61,7 +61,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<HashSet<Link>> {
+    pub fn parse(s: &mut &str) -> ModalResult<HashSet<Link>> {
         separated(1.., parse_line, newline)
             .map(|v: Vec<Vec<Link>>| v.into_iter().flatten().collect::<HashSet<Link>>())
             .parse_next(s)

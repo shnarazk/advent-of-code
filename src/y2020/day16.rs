@@ -20,11 +20,11 @@ mod parser {
             ascii::newline,
             combinator::{separated, seq},
             token::take_until,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_range(str: &mut &str) -> PResult<Range> {
+    fn parse_range(str: &mut &str) -> ModalResult<Range> {
         seq!(
             take_until(1.., ": "),
             _: ": ",
@@ -40,12 +40,12 @@ mod parser {
         .parse_next(str)
     }
 
-    fn parse_number_line(s: &mut &str) -> PResult<Vec<usize>> {
+    fn parse_number_line(s: &mut &str) -> ModalResult<Vec<usize>> {
         separated(1.., parse_usize, ",").parse_next(s)
     }
 
     #[allow(clippy::type_complexity)]
-    pub fn parse(s: &mut &str) -> PResult<(Vec<Range>, Vec<usize>, Vec<Vec<usize>>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<Range>, Vec<usize>, Vec<Vec<usize>>)> {
         seq!(
             separated(1.., parse_range, newline),
             _: "\n\nyour ticket:\n",

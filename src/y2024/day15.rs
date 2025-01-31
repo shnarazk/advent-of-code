@@ -11,7 +11,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -458,7 +458,7 @@ impl Puzzle {
     }
 }
 
-fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
+fn parse_line(s: &mut &str) -> ModalResult<Vec<Kind>> {
     repeat(1.., one_of(&['#', '.', 'O', '@']))
         .map(|v: String| {
             v.chars()
@@ -474,11 +474,11 @@ fn parse_line(s: &mut &str) -> PResult<Vec<Kind>> {
         .parse_next(s)
 }
 
-fn parse_maze(s: &mut &str) -> PResult<Vec<Vec<Kind>>> {
+fn parse_maze(s: &mut &str) -> ModalResult<Vec<Vec<Kind>>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 
-fn parse_moves_line(s: &mut &str) -> PResult<Vec<Direction>> {
+fn parse_moves_line(s: &mut &str) -> ModalResult<Vec<Direction>> {
     repeat(1.., one_of(&['^', '>', 'v', '<']))
         .map(|v: String| {
             v.chars()
@@ -494,13 +494,13 @@ fn parse_moves_line(s: &mut &str) -> PResult<Vec<Direction>> {
         .parse_next(s)
 }
 
-fn parse_moves(s: &mut &str) -> PResult<Vec<Direction>> {
+fn parse_moves(s: &mut &str) -> ModalResult<Vec<Direction>> {
     separated(1.., parse_moves_line, newline)
         .map(|v: Vec<Vec<Direction>>| v.iter().flatten().cloned().collect::<Vec<_>>())
         .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<(Vec<Vec<Kind>>, Vec<Direction>)> {
+fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Kind>>, Vec<Direction>)> {
     seq!(parse_maze, _: (newline, newline), parse_moves).parse_next(s)
 }
 

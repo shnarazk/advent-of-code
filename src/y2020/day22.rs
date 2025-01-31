@@ -44,11 +44,11 @@ mod parser {
         winnow::{
             ascii::newline,
             combinator::{separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_player(s: &mut &str) -> PResult<Vec<usize>> {
+    fn parse_player(s: &mut &str) -> ModalResult<Vec<usize>> {
         seq!(
             _: "Player ",
             _: parse_usize,
@@ -59,7 +59,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<Vec<usize>>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
         separated(2..=2, parse_player, (newline, newline)).parse_next(s)
     }
 }

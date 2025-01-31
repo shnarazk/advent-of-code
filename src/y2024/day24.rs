@@ -311,11 +311,11 @@ mod parser {
             ascii::newline,
             combinator::{alt, separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_wire(s: &mut &str) -> PResult<Wire> {
+    fn parse_wire(s: &mut &str) -> ModalResult<Wire> {
         (
             one_of('a'..='z'),
             one_of(('a'..='z', '0'..='9')),
@@ -325,7 +325,7 @@ mod parser {
             .parse_next(s)
     }
 
-    fn parse_gate(s: &mut &str) -> PResult<Gate> {
+    fn parse_gate(s: &mut &str) -> ModalResult<Gate> {
         alt(("AND", "OR", "XOR"))
             .map(|g| match g {
                 "AND" => Gate::And,
@@ -336,19 +336,19 @@ mod parser {
             .parse_next(s)
     }
 
-    fn parse_setting(s: &mut &str) -> PResult<(Wire, bool)> {
+    fn parse_setting(s: &mut &str) -> ModalResult<(Wire, bool)> {
         seq!(parse_wire, _: ": ", parse_usize)
             .map(|(w, b)| (w, b == 1))
             .parse_next(s)
     }
 
-    fn parse_connection(s: &mut &str) -> PResult<(Gate, Wire, Wire, Wire)> {
+    fn parse_connection(s: &mut &str) -> ModalResult<(Gate, Wire, Wire, Wire)> {
         seq!(parse_wire, _: " ", parse_gate, _: " ", parse_wire, _: " -> ", parse_wire)
             .map(|(in1, g, in2, out)| (g, in1, in2, out))
             .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<(Vec<(Wire, bool)>, Vec<(Gate, Wire, Wire, Wire)>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(Wire, bool)>, Vec<(Gate, Wire, Wire, Wire)>)> {
         seq!(
             separated(1.., parse_setting, newline),
             _: (newline, newline),

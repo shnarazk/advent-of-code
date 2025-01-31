@@ -9,7 +9,7 @@ use {
         ascii::{newline, space1},
         combinator::{alt, repeat, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -42,51 +42,51 @@ pub struct Puzzle {
     file_system: HashMap<String, Directory>,
 }
 
-fn parse_entry_name(s: &mut &str) -> PResult<String> {
+fn parse_entry_name(s: &mut &str) -> ModalResult<String> {
     repeat(1.., one_of(('a'..='z', 'A'..='Z', '0'..='9', '.'))).parse_next(s)
 }
 
-fn parse_ls_dir(s: &mut &str) -> PResult<Entry> {
+fn parse_ls_dir(s: &mut &str) -> ModalResult<Entry> {
     ("dir ", parse_entry_name)
         .map(|(_, path): (&str, String)| Entry::Dir(path))
         .parse_next(s)
 }
 
-fn parse_ls_file(s: &mut &str) -> PResult<Entry> {
+fn parse_ls_file(s: &mut &str) -> ModalResult<Entry> {
     (parse_usize, space1, parse_entry_name)
         .map(|(n, _, path): (usize, &str, String)| Entry::File(path, n))
         .parse_next(s)
 }
 
-fn parse_ls_output(s: &mut &str) -> PResult<Vec<Entry>> {
+fn parse_ls_output(s: &mut &str) -> ModalResult<Vec<Entry>> {
     separated(0.., alt((parse_ls_dir, parse_ls_file)), newline).parse_next(s)
 }
 
-fn parse_ls(s: &mut &str) -> PResult<Command> {
+fn parse_ls(s: &mut &str) -> ModalResult<Command> {
     ("$ ls\n", parse_ls_output)
         .map(|(_, b)| Command::Ls(b))
         .parse_next(s)
 }
 
-fn parse_cd_to(s: &mut &str) -> PResult<Command> {
+fn parse_cd_to(s: &mut &str) -> ModalResult<Command> {
     seq!("$ cd ", parse_entry_name)
         .map(|(_, path)| Command::CdTo(path))
         .parse_next(s)
 }
 
-fn parse_cd_up(s: &mut &str) -> PResult<Command> {
+fn parse_cd_up(s: &mut &str) -> ModalResult<Command> {
     "$ cd ..".map(|_| Command::CdUp).parse_next(s)
 }
 
-fn parse_cd_root(s: &mut &str) -> PResult<Command> {
+fn parse_cd_root(s: &mut &str) -> ModalResult<Command> {
     "$ cd /".map(|_| Command::CdRoot).parse_next(s)
 }
 
-fn parse_line(s: &mut &str) -> PResult<Command> {
+fn parse_line(s: &mut &str) -> ModalResult<Command> {
     alt((parse_ls, parse_cd_up, parse_cd_to, parse_cd_root)).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Command>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Command>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

@@ -11,7 +11,7 @@ use {
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 type Setting = (Dim2<usize>, Dim2<usize>, Dim2<usize>);
@@ -21,7 +21,7 @@ pub struct Puzzle {
     line: Vec<Setting>,
 }
 
-fn parse_button(s: &mut &str) -> PResult<Dim2<usize>> {
+fn parse_button(s: &mut &str) -> ModalResult<Dim2<usize>> {
     seq!(_: "Button ", _: one_of(['A', 'B']),
         _: ": X+", parse_usize,
         _: ", Y+", parse_usize,
@@ -29,7 +29,7 @@ fn parse_button(s: &mut &str) -> PResult<Dim2<usize>> {
     .parse_next(s)
 }
 
-fn parse_prize(s: &mut &str) -> PResult<Dim2<usize>> {
+fn parse_prize(s: &mut &str) -> ModalResult<Dim2<usize>> {
     seq!(_: "Prize",
         _: ": X=", parse_usize,
         _: ", Y=", parse_usize,
@@ -37,11 +37,11 @@ fn parse_prize(s: &mut &str) -> PResult<Dim2<usize>> {
     .parse_next(s)
 }
 
-fn parse_block(s: &mut &str) -> PResult<Setting> {
+fn parse_block(s: &mut &str) -> ModalResult<Setting> {
     seq!(parse_button, _: newline, parse_button, _: newline, parse_prize).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Setting>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Setting>> {
     separated(1.., parse_block, (newline, newline)).parse_next(s)
 }
 

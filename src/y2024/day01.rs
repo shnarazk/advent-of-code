@@ -10,7 +10,7 @@ use {
     winnow::{
         ascii::{dec_uint, newline, space1},
         combinator::{repeat, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -19,7 +19,7 @@ pub struct Puzzle {
     line: Vec<(usize, usize)>,
 }
 
-fn parse(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
+fn parse(str: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
     repeat(0.., seq!(parse_usize, _: space1, dec_uint, _: newline)).parse_next(str)
 }
 

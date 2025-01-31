@@ -8,7 +8,7 @@ use {
     winnow::{
         combinator::{alt, preceded, repeat, seq},
         token::any,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -24,30 +24,30 @@ enum Inst {
     Mul(usize, usize),
 }
 
-fn parse_inst0(str: &mut &str) -> PResult<Inst> {
+fn parse_inst0(str: &mut &str) -> ModalResult<Inst> {
     "do()".map(|_| Inst::Do).parse_next(str)
 }
 
-fn parse_inst1(str: &mut &str) -> PResult<Inst> {
+fn parse_inst1(str: &mut &str) -> ModalResult<Inst> {
     "don't()".map(|_| Inst::Dont).parse_next(str)
 }
 
-fn parse_inst2(str: &mut &str) -> PResult<Inst> {
+fn parse_inst2(str: &mut &str) -> ModalResult<Inst> {
     seq!(
         _: "mul(", parse_usize, _: ",", parse_usize, _: ")")
     .map(|(m1, m2)| Inst::Mul(m1, m2))
     .parse_next(str)
 }
 
-fn parse_inst(str: &mut &str) -> PResult<Inst> {
+fn parse_inst(str: &mut &str) -> ModalResult<Inst> {
     alt((parse_inst0, parse_inst1, parse_inst2)).parse_next(str)
 }
 
-fn parse_aux(str: &mut &str) -> PResult<Inst> {
+fn parse_aux(str: &mut &str) -> ModalResult<Inst> {
     alt((parse_inst, preceded(any, parse_aux))).parse_next(str)
 }
 
-fn parse(str: &mut &str) -> PResult<Vec<Inst>> {
+fn parse(str: &mut &str) -> ModalResult<Vec<Inst>> {
     repeat(0.., parse_aux).parse_next(str)
 }
 

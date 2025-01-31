@@ -32,11 +32,11 @@ mod parser {
             ascii::newline,
             combinator::{alt, repeat, separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_rule(s: &mut &str) -> PResult<(usize, Rule)> {
+    fn parse_rule(s: &mut &str) -> ModalResult<(usize, Rule)> {
         alt((
             seq!(
                 parse_usize,
@@ -65,11 +65,11 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse_message(s: &mut &str) -> PResult<Vec<char>> {
+    pub fn parse_message(s: &mut &str) -> ModalResult<Vec<char>> {
         repeat(1.., alt(('a', 'b'))).parse_next(s)
     }
     #[allow(clippy::type_complexity)]
-    pub fn parse(s: &mut &str) -> PResult<(Vec<(usize, Rule)>, Vec<Vec<char>>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(usize, Rule)>, Vec<Vec<char>>)> {
         seq!(
             repeat(1.., parse_rule),
             _: newline,

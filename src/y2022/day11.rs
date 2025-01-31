@@ -8,7 +8,7 @@ use {
         ascii::{newline, space1},
         combinator::{alt, separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -68,11 +68,11 @@ pub struct Puzzle {
     line: Vec<Monkey>,
 }
 
-fn parse_operation_target(s: &mut &str) -> PResult<Option<usize>> {
+fn parse_operation_target(s: &mut &str) -> ModalResult<Option<usize>> {
     alt(("old".map(|_a| None), parse_usize.map(Some))).parse_next(s)
 }
 
-fn parse_block(s: &mut &str) -> PResult<Monkey> {
+fn parse_block(s: &mut &str) -> ModalResult<Monkey> {
     seq!(
         _: "Monkey ", parse_usize, _: ":",
         _: "\n  Starting items: ", separated(1.., parse_usize, ", "),
@@ -94,7 +94,7 @@ fn parse_block(s: &mut &str) -> PResult<Monkey> {
     .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Monkey>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Monkey>> {
     separated(1.., parse_block, newline).parse_next(s)
 }
 

@@ -7,7 +7,7 @@ use {
     winnow::{
         ascii::{alpha1, newline},
         combinator::separated,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -28,7 +28,7 @@ const STENCILS: [[(isize, isize); 4]; 8] = [
     [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
 ];
 
-fn parse(str: &mut &str) -> PResult<Vec<Vec<char>>> {
+fn parse(str: &mut &str) -> ModalResult<Vec<Vec<char>>> {
     let v: Vec<&str> = separated(1.., alpha1, newline).parse_next(str)?;
     Ok(v.iter()
         .map(|v| v.chars().collect::<Vec<char>>())

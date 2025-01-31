@@ -11,7 +11,7 @@ use {
         ascii::{dec_uint, newline},
         combinator::{separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -109,18 +109,18 @@ impl Puzzle {
     }
 }
 
-fn parse_reg(s: &mut &str) -> PResult<usize> {
+fn parse_reg(s: &mut &str) -> ModalResult<usize> {
     seq!( _: "Register ", one_of(&['A', 'B', 'C']), _: ": ", parse_usize)
         .map(|(_, val)| val)
         .parse_next(s)
 }
-fn parse_program(s: &mut &str) -> PResult<Vec<u8>> {
+fn parse_program(s: &mut &str) -> ModalResult<Vec<u8>> {
     ("Program: ", separated(1.., dec_uint::<_, u8, _>, ","))
         .map(|(_, v)| v)
         .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<(usize, usize, usize, Vec<u8>)> {
+fn parse(s: &mut &str) -> ModalResult<(usize, usize, usize, Vec<u8>)> {
     seq!(
         parse_reg, _: newline,
         parse_reg, _: newline,

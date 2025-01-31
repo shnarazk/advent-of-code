@@ -13,11 +13,11 @@ mod parser {
             ascii::{alpha1, newline, space1},
             combinator::{separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<(usize, usize, char, String)> {
+    fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, char, String)> {
         seq!(
             parse_usize,
             _: "-",
@@ -31,7 +31,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<(usize, usize, char, String)>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize, char, String)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

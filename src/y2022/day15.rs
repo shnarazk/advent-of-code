@@ -9,7 +9,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -83,7 +83,7 @@ pub struct Puzzle {
     line: Vec<(Loc, Loc)>,
 }
 
-fn parse_line(s: &mut &str) -> PResult<(Loc, Loc)> {
+fn parse_line(s: &mut &str) -> ModalResult<(Loc, Loc)> {
     seq!(
         _: "Sensor at x=",
         parse_isize, _:", y=",
@@ -93,7 +93,7 @@ fn parse_line(s: &mut &str) -> PResult<(Loc, Loc)> {
     .parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<(Loc, Loc)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(Loc, Loc)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

@@ -61,11 +61,11 @@ mod parser {
             ascii::newline,
             combinator::{alt, repeat, separated, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<OP> {
+    fn parse_line(s: &mut &str) -> ModalResult<OP> {
         alt((
             seq!(_: "mask = ",
                 repeat(1.., one_of(['X', '0', '1']))
@@ -95,7 +95,7 @@ mod parser {
         .parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<OP>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<OP>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

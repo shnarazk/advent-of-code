@@ -13,7 +13,7 @@ use {
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -84,11 +84,11 @@ impl Puzzle {
     }
 }
 
-fn parse_line(input: &mut &str) -> PResult<Vec<char>> {
+fn parse_line(input: &mut &str) -> ModalResult<Vec<char>> {
     repeat(1.., one_of(['.', '#', '<', '^', '>', 'v'])).parse_next(input)
 }
 
-fn parse(input: &mut &str) -> PResult<Vec<Vec<char>>> {
+fn parse(input: &mut &str) -> ModalResult<Vec<Vec<char>>> {
     separated(1.., parse_line, newline).parse_next(input)
 }
 

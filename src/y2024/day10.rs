@@ -11,7 +11,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{repeat, repeat_till},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -78,12 +78,12 @@ impl Puzzle {
     }
 }
 
-fn parse_line(s: &mut &str) -> PResult<Vec<usize>> {
+fn parse_line(s: &mut &str) -> ModalResult<Vec<usize>> {
     let (v, _) = repeat_till(1.., parse_dec, newline).parse_next(s)?;
     Ok(v)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<Vec<usize>>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
     repeat(1.., parse_line).parse_next(s)
 }
 

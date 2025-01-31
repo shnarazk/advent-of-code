@@ -14,7 +14,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{repeat_till, separated},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -24,7 +24,7 @@ pub struct Puzzle {
     updates: Vec<Vec<usize>>,
 }
 
-fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
+fn parse_rule(str: &mut &str) -> ModalResult<(usize, usize)> {
     let a: usize = parse_usize.parse_next(str)?;
     let _ = "|".parse_next(str)?;
     let b: usize = parse_usize.parse_next(str)?;
@@ -32,17 +32,17 @@ fn parse_rule(str: &mut &str) -> PResult<(usize, usize)> {
     Ok((a, b))
 }
 
-fn parse_rules(str: &mut &str) -> PResult<Vec<(usize, usize)>> {
+fn parse_rules(str: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
     repeat_till(1.., parse_rule, newline)
         .map(|(v, _)| v)
         .parse_next(str)
 }
 
-fn parse_update(str: &mut &str) -> PResult<Vec<usize>> {
+fn parse_update(str: &mut &str) -> ModalResult<Vec<usize>> {
     separated(1.., parse_usize, ",").parse_next(str)
 }
 
-fn parse_updates(str: &mut &str) -> PResult<Vec<Vec<usize>>> {
+fn parse_updates(str: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
     separated(1.., parse_update, newline).parse_next(str)
 }
 

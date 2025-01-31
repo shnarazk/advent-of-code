@@ -11,7 +11,7 @@ use {
     winnow::{
         ascii::newline,
         combinator::{separated, seq},
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -23,10 +23,10 @@ pub struct Puzzle {
     bricks: usize,
 }
 
-fn parse_line(s: &mut &str) -> PResult<(usize, usize)> {
+fn parse_line(s: &mut &str) -> ModalResult<(usize, usize)> {
     seq!(parse_usize, _: ",", parse_usize).parse_next(s)
 }
-fn parse(s: &mut &str) -> PResult<Vec<(usize, usize)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 

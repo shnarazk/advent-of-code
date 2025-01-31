@@ -45,28 +45,28 @@ mod parser {
         winnow::{
             combinator::{alt, repeat, seq},
             token::one_of,
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
-    fn hexletter(s: &mut &str) -> PResult<char> {
+    fn hexletter(s: &mut &str) -> ModalResult<char> {
         one_of(('a'..='z', '0'..='9')).parse_next(s)
     }
 
-    fn parse_hight<'a>(s: &'a mut &str) -> PResult<(usize, &'a str)> {
+    fn parse_hight<'a>(s: &'a mut &str) -> ModalResult<(usize, &'a str)> {
         seq!(parse_usize, alt(("cm", "in"))).parse_next(s)
     }
 
-    fn parse_hair(s: &mut &str) -> PResult<Vec<char>> {
+    fn parse_hair(s: &mut &str) -> ModalResult<Vec<char>> {
         seq!(_:"#", repeat(5..=5, hexletter))
             .map(|(s,)| s)
             .parse_next(s)
     }
 
-    fn parse_eye<'a>(s: &'a mut &str) -> PResult<&'a str> {
+    fn parse_eye<'a>(s: &'a mut &str) -> ModalResult<&'a str> {
         alt(("amb", "blu", "brn", "gry", "grn", "hzl", "oth")).parse_next(s)
     }
 
-    fn parse_pid(s: &mut &str) -> PResult<usize> {
+    fn parse_pid(s: &mut &str) -> ModalResult<usize> {
         repeat(9..=9, parse_dec)
             .map(|v: Vec<usize>| v.iter().fold(0, |acc, x| acc * 10 + x))
             .parse_next(s)

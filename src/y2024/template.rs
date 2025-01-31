@@ -28,15 +28,15 @@ mod parser {
         winnow::{
             ascii::{alpha1, newline, space1},
             combinator::{alt, separated, seq},
-            PResult, Parser,
+            ModalResult, Parser,
         },
     };
 
-    fn parse_line(s: &mut &str) -> PResult<()> {
+    fn parse_line(s: &mut &str) -> ModalResult<()> {
         ().parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> PResult<Vec<()>> {
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<()>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }

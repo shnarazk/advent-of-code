@@ -9,7 +9,7 @@ use {
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        PResult, Parser,
+        ModalResult, Parser,
     },
 };
 
@@ -23,14 +23,14 @@ pub struct Puzzle {
     triplet: HashSet<(Node, Node, Node), BuildHasherDefault<FxHasher>>,
 }
 
-fn parse_node(s: &mut &str) -> PResult<Node> {
+fn parse_node(s: &mut &str) -> ModalResult<Node> {
     (one_of('a'..='z'), one_of('a'..='z')).parse_next(s)
 }
-fn parse_line(s: &mut &str) -> PResult<(Node, Node)> {
+fn parse_line(s: &mut &str) -> ModalResult<(Node, Node)> {
     seq!(parse_node, _:"-", parse_node).parse_next(s)
 }
 
-fn parse(s: &mut &str) -> PResult<Vec<(Node, Node)>> {
+fn parse(s: &mut &str) -> ModalResult<Vec<(Node, Node)>> {
     separated(1.., parse_line, newline).parse_next(s)
 }
 
