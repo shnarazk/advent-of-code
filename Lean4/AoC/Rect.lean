@@ -400,7 +400,9 @@ def of2DMatrix [BEq α]
   match h with
   | 0 =>
     let d := Dim2.mk 0 0
-    have : NonNegDim d := by simp [NonNegDim]
+    have : NonNegDim d := by
+      simp [NonNegDim]
+      constructor <;> exact Int.nonneg_of_normalize_eq_self rfl
     Rect.mk d #[] this (by rfl : d.area = #[].size)
   | _ =>
     let total : Nat := a.foldl (fun acc vec ↦ acc + vec.size) 0
@@ -408,11 +410,17 @@ def of2DMatrix [BEq α]
     let v : Array α := a.foldl Array.append #[]
     if hw : h * w = v.size then
       let d := Dim2.mk h w
-      have : NonNegDim d := by simp [NonNegDim]
+      have : NonNegDim d := by
+        simp [NonNegDim]
+        constructor
+        { exact Int.ofNat_zero_le h }
+        { exact Int.ofNat_zero_le w }
       Rect.mk d v this hw
     else
       let d := Dim2.mk 0 0
-      have : NonNegDim d := by simp [NonNegDim]
+      have : NonNegDim d := by
+        simp [NonNegDim]
+        constructor <;> exact Int.nonneg_of_normalize_eq_self rfl
       Rect.mk d #[] this (by rfl : d.area = #[].size)
 
 /--

@@ -6,12 +6,14 @@ version = "0.6.1"
 [[require]]
 name = "aesop"
 scope = "leanprover-community"
-version = "git#2689851f387bb2cef351e6825fe94a56a304ca13"
+tag = "v4.16.0"
+# version = "git#2689851f387bb2cef351e6825fe94a56a304ca13"
 
 [[require]]
 name = "batteries"
 scope = "leanprover-community"
-version = "git#e8dc5fc16c625fc4fe08f42d625523275ddbbb4b"
+tag = "v4.16.0"
+# version = "git#e8dc5fc16c625fc4fe08f42d625523275ddbbb4b"
 
 [[require]]
 name = "Cli"
@@ -23,7 +25,8 @@ rev = "e4d23db1b205e04589230eedbfe1439693dd3b9c"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-version = "git#29f9a66d622d9bab7f419120e22bb0d2598676ab"
+tag = "v4.16.0"
+# version = "git#29f9a66d622d9bab7f419120e22bb0d2598676ab"
 
 [[lean_lib]]
 name = "AoC"
