@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2019/day/3>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -12,29 +9,41 @@ pub struct Puzzle {
     line: Vec<Vec<(isize, isize)>>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(isize, isize)> {
+        alt((
+            seq!(_: "U", parse_isize).map(|(d,)| (-d, 0)),
+            seq!(_: "D", parse_isize).map(|(d,)| (d, 0)),
+            seq!(_: "L", parse_isize).map(|(d,)| (0, -d)),
+            seq!(_: "R", parse_isize).map(|(d,)| (0, d)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Vec<(isize, isize)>>> {
+        separated(
+            1..,
+            separated(1.., parse_line, ",").map(|v: Vec<(isize, isize)>| v),
+            newline,
+        )
+        .parse_next(s)
+    }
+}
+
 #[aoc(2019, 3)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // dbg!(&block);
-        let parser = regex!(r"^([URDL])(\d+)");
-        let mut vec = Vec::new();
-        for segment in block.split(',') {
-            if let Some(seg) = parser.captures(segment) {
-                match (&seg[1], seg[2].parse::<isize>()) {
-                    ("U", Ok(d)) => vec.push((-d, 0)),
-                    ("D", Ok(d)) => vec.push((d, 0)),
-                    ("L", Ok(d)) => vec.push((0, -d)),
-                    ("R", Ok(d)) => vec.push((0, d)),
-                    _ => panic!(),
-                }
-            }
-        }
-        self.line.push(vec);
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut checked: HashSet<(isize, isize)> = HashSet::new();
