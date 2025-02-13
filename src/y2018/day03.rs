@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/3>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -23,24 +20,45 @@ pub struct Puzzle {
     line: Vec<Claim>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Claim> {
+        seq!(
+            _: "#", parse_usize,
+            _: " @ ", parse_usize,
+            _: ",", parse_usize,
+            _: ": ", parse_usize,
+            _: "x", parse_usize,
+        )
+        .map(|(id, left, top, width, height)| Claim {
+            id,
+            left,
+            top,
+            width,
+            height,
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Claim>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2018, 3)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // #50 @ 718,864: 26x16
-        let parser = regex!(r"^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push(Claim {
-            id: segment[1].parse::<usize>()?,
-            left: segment[2].parse::<usize>()?,
-            top: segment[3].parse::<usize>()?,
-            width: segment[4].parse::<usize>()?,
-            height: segment[5].parse::<usize>()?,
-        });
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(self.line.len());
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut used: HashMap<Dim2, usize> = HashMap::new();
