@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2019/day/14>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -14,32 +11,47 @@ pub struct Puzzle {
     line: Vec<(Vec<ChemicalUnit>, ChemicalUnit)>,
 }
 
-fn parse_chemical_unit(s: &str) -> Result<ChemicalUnit, ParseError> {
-    let parser = regex!(r"^(\d+) ([A-Z]+)");
-    let segment = parser.captures(s).ok_or(ParseError)?;
-    Ok((segment[2].to_string(), segment[1].parse::<usize>()?))
-}
-
 #[derive(Debug, Default, Eq, PartialEq)]
 struct Resource<'a> {
     requirements: &'a [ChemicalUnit],
     amount: usize,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline, space1},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_chemical_unit(s: &mut &str) -> ModalResult<ChemicalUnit> {
+        seq!(parse_usize, _: space1, alpha1)
+            .map(|(n, s): (usize, &str)| (s.to_string(), n))
+            .parse_next(s)
+    }
+
+    fn parse_line(s: &mut &str) -> ModalResult<(Vec<ChemicalUnit>, ChemicalUnit)> {
+        seq!(
+            separated(1.., parse_chemical_unit, ", "),
+            _: " => ",
+            parse_chemical_unit
+        )
+        .parse_next(s)
+    }
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(Vec<ChemicalUnit>, ChemicalUnit)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2019, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^((\d+ [A-Z]+, )*)(\d+ [A-Z]+) => (\d+ [A-Z]+)");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let mut vec = segment[1]
-            .split(", ")
-            .filter(|seg| !seg.is_empty())
-            .map(|seg| parse_chemical_unit(seg).unwrap())
-            .collect::<Vec<ChemicalUnit>>();
-        vec.push(parse_chemical_unit(&segment[3])?);
-        self.line.push((vec, parse_chemical_unit(&segment[4])?));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let hash = self.make_hash();
