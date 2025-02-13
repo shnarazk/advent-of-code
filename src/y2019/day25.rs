@@ -3,7 +3,6 @@ use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
-        parser, regex,
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -13,18 +12,38 @@ pub struct Puzzle {
     line: Vec<isize>,
 }
 
+mod parser {
+    use {
+        crate::parser::{parse_isize, parse_usize},
+        winnow::{
+            combinator::{repeat_till, separated, seq},
+            token::any,
+            ModalResult, Parser,
+        },
+    };
+
+    pub fn parse_input(s: &mut &str) -> ModalResult<Vec<isize>> {
+        separated(1.., parse_isize, ",").parse_next(s)
+    }
+    pub fn parse_output(s: &mut &str) -> ModalResult<usize> {
+        seq!(
+            repeat_till(1.., any, " typing ").map(|_: (Vec<char>, &str)| ()),
+            parse_usize,
+            _: " on")
+        .map(|(_, s)| s)
+        .parse_next(s)
+    }
+}
+
 #[aoc(2019, 25)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = parser::to_isizes(block, &[','])?;
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse_input(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // let stdin = std::io::stdin();
         let verbose = !self.get_config().bench;
-        let parser = regex!(r" typing (\d{5,}) on");
-        // let mut buffer = String::new();
         let mut droid = Intcode::new(&self.line);
         let mut input: VecDeque<isize> = VecDeque::new();
         let mut output: VecDeque<isize> = VecDeque::new();
@@ -75,11 +94,11 @@ impl AdventOfCode for Puzzle {
             match droid.run(&mut input, &mut output) {
                 State::None => {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
-                    if let Some(found) = parser.captures(&message) {
+                    if let Ok(amount) = parser::parse_output(&mut message.as_str()) {
                         if verbose {
-                            println!("{}{}{}", color::RED, &found[1], color::RESET);
+                            println!("{}{}{}", color::RED, &amount, color::RESET);
                         }
-                        return found[1].parse::<usize>().unwrap();
+                        return amount;
                     }
                     if verbose {
                         print!("{}{}{}", color::GREEN, message, color::RESET);
