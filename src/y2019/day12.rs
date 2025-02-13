@@ -2,7 +2,6 @@
 use crate::{
     framework::{aoc, AdventOfCode, ParseError},
     math::lcm,
-    regex,
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -10,21 +9,32 @@ pub struct Puzzle {
     line: Vec<[isize; 6]>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<[isize; 6]> {
+        seq!( _: "<x=", parse_isize, _: ", y=", parse_isize, _: ", z=", parse_isize, _: ">")
+            .map(|(a, b, c)| [a, b, c, 0, 0, 0])
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<[isize; 6]>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2019, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r" *<x=(-?\d+), y=(-?\d+), z=(-?\d+)>");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push([
-            segment[1].parse::<isize>().unwrap(),
-            segment[2].parse::<isize>().unwrap(),
-            segment[3].parse::<isize>().unwrap(),
-            0,
-            0,
-            0,
-        ]);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut delta = Vec::new();
