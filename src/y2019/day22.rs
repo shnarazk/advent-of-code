@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2019/day/22>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Shuffle<const N: usize> {
@@ -56,23 +53,37 @@ pub struct Puzzle {
     line: Vec<Shuffle<0>>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::{parse_isize, parse_usize},
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_shuffle(s: &mut &str) -> ModalResult<Shuffle<0>> {
+        alt((
+            "deal into new stack".map(|_| Shuffle::Stack),
+            seq!(_: "cut ", parse_isize).map(|(n,): (isize,)| Shuffle::Cut(n)),
+            seq!(_: "deal with increment ", parse_usize)
+                .map(|(n,): (usize,)| Shuffle::Increment(n)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Shuffle<0>>> {
+        separated(1.., parse_shuffle, newline).parse_next(s)
+    }
+}
+
 #[aoc(2019, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let stack = regex!(r"^deal into new stack$");
-        let cut = regex!(r"^cut (-?\d+)$");
-        let increment = regex!(r"^deal with increment (\d+)$");
-        if stack.captures(block).is_some() {
-            self.line.push(Shuffle::Stack);
-        } else if let Some(segment) = cut.captures(block) {
-            let val: isize = segment[1].parse::<isize>()?;
-            self.line.push(Shuffle::Cut(val));
-        } else if let Some(segment) = increment.captures(block) {
-            let val: usize = segment[1].parse::<usize>()?;
-            self.line.push(Shuffle::Increment(val));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line.len());
