@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/7>
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -18,20 +15,36 @@ pub struct Puzzle {
     line: Vec<(char, char)>,
 }
 
+mod parser {
+    use winnow::{
+        ascii::newline,
+        combinator::{separated, seq},
+        token::one_of,
+        ModalResult, Parser,
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(char, char)> {
+        seq!(
+            _: "Step ",
+            one_of(|c: char| c.is_ascii_uppercase()),
+            _: " must be finished before step ",
+            one_of(|c: char| c.is_ascii_uppercase()),
+            _: " can begin.")
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(char, char)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2018, 7)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = usize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // Step L must be finished before step X can begin.
-        let parser = regex!(r"^Step (\w) must be finished before step (\w) can begin.");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].chars().next().unwrap(),
-            segment[2].chars().next().unwrap(),
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut succs: HashMap<char, Vec<char>> = HashMap::new();
