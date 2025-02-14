@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/4>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -55,52 +52,54 @@ pub struct Puzzle {
     line: Vec<Record>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::{parse_ndigits, parse_usize},
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_timestamp(s: &mut &str) -> ModalResult<Timestamp> {
+        seq!(
+            _: "[", parse_ndigits(4),
+            _: "-", parse_ndigits(2),
+            _: "-", parse_ndigits(2),
+            _: " ", parse_ndigits(2),
+            _: ":", parse_ndigits(2),
+            _: "]")
+        .map(|(a, b, c, d, e)| Timestamp {
+            year: a,
+            month: b,
+            day: c,
+            hour: d,
+            min: e,
+        })
+        .parse_next(s)
+    }
+    fn parse_record(s: &mut &str) -> ModalResult<Record> {
+        alt((
+            seq!(parse_timestamp, _: " Guard #", parse_usize, _: " begins shift")
+                .map(|(t, n): (Timestamp, usize)| Record::Start(t, n)),
+            seq!(parse_timestamp, _: " falls asleep").map(|(t,)| Record::Sleep(t, t.min)),
+            seq!(parse_timestamp, _: " wakes up").map(|(t,)| Record::Wake_(t, t.min)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Record>> {
+        separated(1.., parse_record, newline).parse_next(s)
+    }
+}
+
 #[aoc(2018, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        //  [1518-06-12 00:00] Guard #1231 begins shift
-        //  [1518-03-06 00:56] wakes up
-        //  [1518-05-30 00:14] falls asleep
-        let begin =
-            regex!(r"^\[(\d{4})\-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] Guard #(\d+) begins shift");
-        let sleep = regex!(r"^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] falls asleep");
-        let wakes = regex!(r"^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] wakes up");
-        if let Some(segment) = begin.captures(block) {
-            let timestamp = Timestamp {
-                year: segment[1].parse::<usize>()?,
-                month: segment[2].parse::<usize>()?,
-                day: segment[3].parse::<usize>()?,
-                hour: segment[4].parse::<usize>()?,
-                min: segment[5].parse::<usize>()?,
-            };
-            self.line
-                .push(Record::Start(timestamp, segment[6].parse::<usize>()?));
-            return Ok(());
-        } else if let Some(segment) = sleep.captures(block) {
-            let timestamp = Timestamp {
-                year: segment[1].parse::<usize>()?,
-                month: segment[2].parse::<usize>()?,
-                day: segment[3].parse::<usize>()?,
-                hour: segment[4].parse::<usize>()?,
-                min: segment[5].parse::<usize>()?,
-            };
-            self.line
-                .push(Record::Sleep(timestamp, segment[5].parse::<usize>()?));
-            return Ok(());
-        } else if let Some(segment) = wakes.captures(block) {
-            let timestamp = Timestamp {
-                year: segment[1].parse::<usize>()?,
-                month: segment[2].parse::<usize>()?,
-                day: segment[3].parse::<usize>()?,
-                hour: segment[4].parse::<usize>()?,
-                min: segment[5].parse::<usize>()?,
-            };
-            self.line
-                .push(Record::Wake_(timestamp, segment[5].parse::<usize>()?));
-            return Ok(());
-        }
-        Err(ParseError)
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.line.sort_by_key(|e| e.timestamp());

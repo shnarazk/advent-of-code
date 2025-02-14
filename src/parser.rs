@@ -4,6 +4,7 @@ use {
     winnow::{
         ascii::{dec_int, dec_uint, digit1, space0},
         combinator::{repeat, separated},
+        stream::Range,
         token::one_of,
         ModalResult, Parser,
     },
@@ -21,6 +22,22 @@ pub fn parse_usize(str: &mut &str) -> ModalResult<usize> {
 
 pub fn parse_isize(str: &mut &str) -> ModalResult<isize> {
     dec_int::<&str, isize, _>.parse_next(str)
+}
+
+pub fn parse_ndigits(
+    occurrences: impl Into<Range> + Copy,
+) -> impl FnMut(&mut &str) -> ModalResult<usize> {
+    move |input: &mut &str| {
+        repeat(occurrences, one_of(|c: char| c.is_ascii_digit()))
+            .map(|chars: Vec<char>| {
+                chars
+                    .into_iter()
+                    .collect::<String>()
+                    .parse::<usize>()
+                    .unwrap()
+            })
+            .parse_next(input)
+    }
 }
 
 /// Parse a line like '0,1,2,3,40' (delimiter == ',') after trimming it.
