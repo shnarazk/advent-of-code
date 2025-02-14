@@ -3,7 +3,6 @@ use {
     crate::{
         color,
         framework::{aoc, AdventOfCode, ParseError},
-        regex,
     },
     std::collections::{HashMap, HashSet},
 };
@@ -17,24 +16,33 @@ pub struct Puzzle {
     water_map: HashSet<Dim2>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(bool, usize, usize, usize)> {
+        seq!(alt(("x", "y")), _: "=", parse_usize, _: ", ",
+            _: alt(("x", "y")), _: "=", parse_usize, _: "..", parse_usize)
+        .map(|(x, a, b, c)| (x != "x", a, b, c))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(bool, usize, usize, usize)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2018, 17)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // x=550, y=1443..1454
-        let parser = regex!(r"^(x|y)=(\d+), (x|y)=(\d+)\.\.(\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        debug_assert!(
-            (&segment[1] == "x" && &segment[3] == "y")
-                || (&segment[1] == "y" && &segment[3] == "x")
-        );
-        self.line.push((
-            &segment[1] != "x",
-            segment[2].parse::<usize>()?,
-            segment[4].parse::<usize>()?,
-            segment[5].parse::<usize>()?,
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line.len());
