@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/10>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -12,20 +9,37 @@ pub struct Puzzle {
     line: Vec<Vec<isize>>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::{newline, space0},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Vec<isize>> {
+        seq!(_: "position=<", _: space0, parse_isize,
+            _: ",", _: space0, parse_isize,
+            _: "> velocity=<", _: space0, parse_isize,
+            _: ",", _: space0, parse_isize,
+            _: ">"
+        )
+        .map(|(a, b, c, d)| vec![a, b, c, d])
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Vec<isize>>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2018, 10)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // position=< 50781, -20123> velocity=<-5,  2>
-        let parser = regex!(r"^position=< *(-?\d+), +(-?\d+)> velocity=< *(-?\d+), +(-?\d+)>");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push(vec![
-            segment[1].parse::<isize>()?,
-            segment[2].parse::<isize>()?,
-            segment[3].parse::<isize>()?,
-            segment[4].parse::<isize>()?,
-        ]);
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut last: (usize, Vec<Vec<isize>>) = (usize::MAX, Vec::new());
