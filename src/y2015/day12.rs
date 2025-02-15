@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2015/day/12>
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     serde_json,
 };
 
@@ -19,35 +16,36 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     const DELIMITER: &'static str = "\n";
     fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        const PART1: bool = false;
-        if PART1 {
-            let non_digit = regex!(r"[^---0-9]+");
-            let mut after = non_digit.replace_all(block, " ").to_string();
-            after = after.trim().to_string();
-            self.line.push(
-                after
-                    .split(' ')
-                    .filter(|s| !s.is_empty())
-                    .map(|s| {
-                        if s.starts_with('-') {
-                            -s.chars()
-                                .skip(1)
-                                .collect::<String>()
-                                .parse::<isize>()
-                                .unwrap()
-                        } else {
-                            s.parse::<isize>().unwrap()
-                        }
-                    })
-                    .collect::<Vec<isize>>(),
-            );
-        } else {
-            self.raw.push(block.to_string());
-        }
+        let mut after = block
+            .chars()
+            .map(|c| {
+                if c == '-' || ('0'..='9').contains(&c) {
+                    c
+                } else {
+                    ' '
+                }
+            })
+            .collect::<String>();
+        after = after.trim().to_string();
+        self.line.push(
+            after
+                .split(' ')
+                .filter(|s| !s.is_empty())
+                .map(|s| {
+                    if s.starts_with('-') {
+                        -s.chars()
+                            .skip(1)
+                            .collect::<String>()
+                            .parse::<isize>()
+                            .unwrap()
+                    } else {
+                        s.parse::<isize>().unwrap()
+                    }
+                })
+                .collect::<Vec<isize>>(),
+        );
+        self.raw.push(block.to_string());
         Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut num: isize = 0;
