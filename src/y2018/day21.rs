@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/21>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -31,39 +28,6 @@ enum Inst {
     Eqir(usize, usize, usize),
     Eqri(usize, usize, usize),
     Eqrr(usize, usize, usize),
-}
-
-impl TryFrom<&str> for Inst {
-    type Error = ParseError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let parser = regex!(r"^(\w{4}) (\d+) (\d+) (\d+)$");
-        if let Some(segment) = parser.captures(value) {
-            let opr1 = segment[2].parse::<usize>()?;
-            let opr2 = segment[3].parse::<usize>()?;
-            let opr3 = segment[4].parse::<usize>()?;
-            match &segment[1] {
-                "addr" => Ok(Inst::Addr(opr1, opr2, opr3)),
-                "addi" => Ok(Inst::Addi(opr1, opr2, opr3)),
-                "mulr" => Ok(Inst::Mulr(opr1, opr2, opr3)),
-                "muli" => Ok(Inst::Muli(opr1, opr2, opr3)),
-                "banr" => Ok(Inst::Banr(opr1, opr2, opr3)),
-                "bani" => Ok(Inst::Bani(opr1, opr2, opr3)),
-                "bori" => Ok(Inst::Bori(opr1, opr2, opr3)),
-                "borr" => Ok(Inst::Borr(opr1, opr2, opr3)),
-                "setr" => Ok(Inst::Setr(opr1, opr2, opr3)),
-                "seti" => Ok(Inst::Seti(opr1, opr2, opr3)),
-                "gtir" => Ok(Inst::Gtir(opr1, opr2, opr3)),
-                "gtri" => Ok(Inst::Gtri(opr1, opr2, opr3)),
-                "gtrr" => Ok(Inst::Gtrr(opr1, opr2, opr3)),
-                "eqir" => Ok(Inst::Eqir(opr1, opr2, opr3)),
-                "eqri" => Ok(Inst::Eqri(opr1, opr2, opr3)),
-                "eqrr" => Ok(Inst::Eqrr(opr1, opr2, opr3)),
-                _ => Err(ParseError),
-            }
-        } else {
-            Err(ParseError)
-        }
-    }
 }
 
 impl Inst {
@@ -110,17 +74,71 @@ impl Inst {
     }
 }
 
+mod parser {
+    use {
+        super::Inst,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{newline, space1},
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_ip(s: &mut &str) -> ModalResult<usize> {
+        seq!(_: "#ip ", parse_usize).map(|(n,)| n).parse_next(s)
+    }
+
+    fn parse_inst(s: &mut &str) -> ModalResult<Inst> {
+        alt((
+            seq!(_: "addr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Addr(a, b, c)),
+            seq!(_: "addi ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Addi(a, b, c)),
+            seq!(_: "mulr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Mulr(a, b, c)),
+            seq!(_: "muli ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Muli(a, b, c)),
+            seq!(_: "banr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Banr(a, b, c)),
+            seq!(_: "bani ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Bani(a, b, c)),
+            seq!(_: "bori ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Bori(a, b, c)),
+            seq!(_: "borr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Borr(a, b, c)),
+            seq!(_: "setr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Setr(a, b, c)),
+            seq!(_: "seti ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Seti(a, b, c)),
+            seq!(_: "gtir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Gtir(a, b, c)),
+            seq!(_: "gtri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Gtri(a, b, c)),
+            seq!(_: "gtrr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Gtrr(a, b, c)),
+            seq!(_: "eqir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Eqir(a, b, c)),
+            seq!(_: "eqri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Eqri(a, b, c)),
+            seq!(_: "eqrr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                .map(|(a, b, c)| Inst::Eqrr(a, b, c)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(usize, Vec<Inst>)> {
+        seq!(parse_ip, _: newline, separated(1.., parse_inst, newline)).parse_next(s)
+    }
+}
+
 #[aoc(2018, 21)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^#ip (\d)");
-        if let Some(segment) = parser.captures(block) {
-            self.pc_index = segment[1].parse::<usize>()?;
-        } else {
-            self.line.push(Inst::try_from(block)?);
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (ip, insts) = parser::parse(&mut input.as_str())?;
+        self.pc_index = ip;
+        self.line = insts;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // for (i, c) in self.line.iter().enumerate() {
