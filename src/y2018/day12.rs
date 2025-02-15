@@ -1,35 +1,66 @@
 //! <https://adventofcode.com/2018/day/12>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
+
+type Rules = HashMap<Vec<bool>, bool>;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<bool>,
-    rules: HashMap<Vec<bool>, bool>,
+    rules: Rules,
+}
+
+mod parser {
+    use {
+        super::Rules,
+        std::collections::HashMap,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, repeat, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_data(s: &mut &str) -> ModalResult<Vec<bool>> {
+        seq!(_: "initial state: ", repeat(1.., alt(('.', '#'))))
+            .map(|(chars,): (Vec<char>,)| chars.iter().map(|c| *c == '#').collect())
+            .parse_next(s)
+    }
+
+    fn parse_rule(s: &mut &str) -> ModalResult<(Vec<bool>, bool)> {
+        seq!(repeat(5, alt(('.', '#'))), _: " => ", alt(('.', '#')))
+            .map(|(chars, c): (Vec<char>, char)| {
+                (
+                    chars.iter().map(|c| *c == '#').collect::<Vec<bool>>(),
+                    c == '#',
+                )
+            })
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<bool>, Rules)> {
+        seq!(
+            parse_data, _: (newline, newline), separated(1.., parse_rule, newline)
+        )
+        .map(|(data, rules): (Vec<bool>, Vec<(Vec<bool>, bool)>)| {
+            (
+                data,
+                rules.into_iter().collect::<HashMap<Vec<bool>, bool>>(),
+            )
+        })
+        .parse_next(s)
+    }
 }
 
 #[aoc(2018, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let parser = regex!(r"^initial state: (.+)\n\n((.|\n)+)$");
-        let segment = parser.captures(&input).ok_or(ParseError)?;
-        self.line = segment[1].chars().map(|c| c == '#').collect::<Vec<bool>>();
-        Ok(segment[2].to_string())
-    }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([.#]+) => ([.#]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.rules.insert(
-            segment[1].chars().map(|c| c == '#').collect::<Vec<bool>>(),
-            &segment[2] == "#",
-        );
-        Ok(())
+        let (data, rules) = parser::parse(&mut input.as_str())?;
+        self.line = data;
+        self.rules = rules;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut gen: HashSet<isize> = HashSet::new();
