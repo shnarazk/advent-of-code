@@ -141,11 +141,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     /// ## A typical implementation example
     /// ```ignore
     /// fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    ///     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    ///     let segment = parser.captures(input).ok_or(ParseError)?;
-    ///     for num in segment[1].split(',') {
-    ///         self.settings.push(num.parse::<usize>()?);
-    ///     }
+    ///     self.line = parser::parse(&mut input.as_str());
     ///     Self.parsed()
     /// }
     /// ```

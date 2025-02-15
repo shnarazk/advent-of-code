@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
         let mut after = block
             .chars()
             .map(|c| {
-                if c == '-' || ('0'..='9').contains(&c) {
+                if c == '-' || c.is_ascii_digit() {
                     c
                 } else {
                     ' '

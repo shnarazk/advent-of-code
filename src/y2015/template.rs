@@ -7,7 +7,6 @@ use {
         framework::{aoc, AdventOfCode, ParseError},
         geometric::neighbors,
     },
-    regex::Regex,
     std::collections::HashMap,
 };
 
