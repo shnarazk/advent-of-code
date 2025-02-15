@@ -1,10 +1,6 @@
 //! <https://adventofcode.com/2018/day/23>
 use {
-    crate::{
-        // color,
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
 
@@ -54,21 +50,38 @@ pub struct Puzzle {
     radius: usize,
 }
 
+mod parser {
+    use {
+        super::Nanobot,
+        crate::parser::{parse_isize, parse_usize},
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_nanobot(s: &mut &str) -> ModalResult<Nanobot> {
+        seq!(
+            _: "pos=<", parse_isize,
+            _: ",", parse_isize,
+            _: ",", parse_isize,
+            _: ">, r=", parse_usize
+        )
+        .map(|(a, b, c, d): (isize, isize, isize, usize)| ((a, b, c), d))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Nanobot>> {
+        separated(1.., parse_nanobot, newline).parse_next(s)
+    }
+}
+
 #[aoc(2018, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(-?\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            (
-                segment[1].parse::<isize>()?,
-                segment[2].parse::<isize>()?,
-                segment[3].parse::<isize>()?,
-            ),
-            segment[4].parse::<usize>()?,
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.num_robots = self.line.len();
