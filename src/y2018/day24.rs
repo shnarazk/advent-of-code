@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2018/day/24>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -245,72 +242,116 @@ impl Puzzle {
     }
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        std::collections::HashSet,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_attack_type(s: &mut &str) -> ModalResult<AttackType> {
+        alt((
+            "cold".value(AttackType::Cold),
+            "bludgeoning".value(AttackType::Bludgeoning),
+            "fire".value(AttackType::Fire),
+            "radiation".value(AttackType::Radiation),
+            "slashing".value(AttackType::Slashing),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_property_block1(s: &mut &str) -> ModalResult<(bool, HashSet<AttackType>)> {
+        alt((
+            seq!(_: "weak to ", separated(1.., parse_attack_type, ", ").map(|v: Vec<AttackType>| v)).map(|(v,)| (false, v.into_iter().collect::<HashSet<AttackType>>())),
+            seq!(_: "immune to ", separated(1.., parse_attack_type, ", ").map(|v: Vec<AttackType>| v)).map(|(v,)| (true, v.into_iter().collect::<HashSet<AttackType>>())),
+        )).parse_next(s)
+    }
+
+    fn parse_property_block(
+        s: &mut &str,
+    ) -> ModalResult<(HashSet<AttackType>, HashSet<AttackType>)> {
+        alt((
+            seq!(
+                _: " (",
+                separated(1.., parse_property_block1, "; ").map(|v: Vec<(bool, HashSet<AttackType>)>| {
+                    let v1 = v.iter().find(|(b, _)| !b).map_or(HashSet::new(), |(_, e)| e.clone());
+                    let v2 = v.iter().find(|(b, _)| *b).map_or(HashSet::new(), |(_, e)| e.clone());
+                    (v1, v2)
+                }),
+                _: ") ")
+                .map(|(h,)| h),
+            " ".value((HashSet::new(), HashSet::new())),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_group(s: &mut &str) -> ModalResult<Group> {
+        seq!(
+            parse_usize,
+            _: " units each with ", parse_usize,
+            _: " hit points",
+            parse_property_block,
+            _: "with an attack that does ", parse_usize,
+            _: " ",  parse_attack_type,
+           _: " damage at initiative ", parse_usize)
+        .map(
+            |(units, hitpoints, (weak_to, immune_to), damage, attack_type, initiative)| Group {
+                id: 0,
+                units,
+                hitpoints,
+                weak_to,
+                immune_to,
+                damage,
+                attack: attack_type,
+                initiative,
+            },
+        )
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<Group>, Vec<Group>)> {
+        seq!(
+            _: "Immune System:\n", separated(1.., parse_group, newline),
+            _: "\n\nInfection:\n", separated(1.., parse_group, newline)
+        )
+        .map(|(immunes, infections): (Vec<Group>, Vec<Group>)| {
+            (
+                immunes
+                    .iter()
+                    .enumerate()
+                    .map(|(i, g)| Group {
+                        id: i as isize + 1,
+                        ..g.clone()
+                    })
+                    .collect(),
+                infections
+                    .iter()
+                    .enumerate()
+                    .map(|(i, g)| Group {
+                        id: -(i as isize) - 1,
+                        ..g.clone()
+                    })
+                    .collect(),
+            )
+        })
+        .parse_next(s)
+    }
+}
+
 #[aoc(2018, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // 801 units each with 4706 hit points (weak to radiation) with an attack that does 116 bludgeoning damage at initiative 1
-        // 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
-        let set_type = regex!("^(Immune System:|Infection:|)$");
-        if let Some(set_type) = set_type.captures(block) {
-            match &set_type[1] {
-                "Immune System:" => {
-                    self.reading_type_is_immune = true;
-                }
-                "Infection:" => {
-                    self.reading_type_is_immune = false;
-                }
-                _ => (),
-            }
-            return Ok(());
-        }
-        let parser = regex!(
-            r"^(\d+) units each with (\d+) hit points( \([^)]+\))? with an attack that does (\d+) (\w+) damage at initiative (\d+)$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // dbg!(&segment);
-        let mut weak_to: HashSet<AttackType> = HashSet::new();
-        let mut immune_to: HashSet<AttackType> = HashSet::new();
-        let parser2 = regex!(r"(weak|immune) to (.*)$");
-        if let Some(attrs) = segment.get(3) {
-            for attr in attrs.as_str().split(';') {
-                let target = attr.trim().trim_matches('(').trim_matches(')');
-                let attributes = parser2.captures(target).ok_or(ParseError)?;
-                if &attributes[1] == "weak" {
-                    for word in attributes[2].split(", ") {
-                        weak_to.insert(AttackType::try_from(word).unwrap());
-                    }
-                } else {
-                    for word in attributes[2].split(", ") {
-                        immune_to.insert(AttackType::try_from(word).unwrap());
-                    }
-                }
-            }
-        }
-        if self.reading_type_is_immune {
-            self.immune.push(Group {
-                id: (self.immune.len() + 1) as isize,
-                units: segment[1].parse::<usize>()?,
-                hitpoints: segment[2].parse::<usize>()?,
-                weak_to,
-                immune_to,
-                attack: AttackType::try_from(&segment[5]).map_err(|_| ParseError)?,
-                damage: segment[4].parse::<usize>()?,
-                initiative: segment[6].parse::<usize>()?,
-            });
-        } else {
-            self.infection.push(Group {
-                id: -((self.infection.len() + 1) as isize),
-                units: segment[1].parse::<usize>()?,
-                hitpoints: segment[2].parse::<usize>()?,
-                weak_to,
-                immune_to,
-                attack: AttackType::try_from(&segment[5]).map_err(|_| ParseError)?,
-                damage: segment[4].parse::<usize>()?,
-                initiative: segment[6].parse::<usize>()?,
-            });
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (immunes, infections) = parser::parse(&mut input.as_str())?;
+        self.immune = immunes;
+        self.infection = infections;
+        dbg!(&self.immune.len());
+        dbg!(&self.infection.len());
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut remains = self.remains();
@@ -362,28 +403,27 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         // let mut ng = 70;
         // let mut ok = 1000;
-        let mut units = 0;
         // while ng + 1 < ok {
         // for med in 1568..1574 {
-        for med in 1..80 {
+        for boost in 1..80 {
             let mut w = self.clone();
             // let med = (ng + ok) / 2;
             for g in w.immune.iter_mut() {
-                g.damage += med;
+                g.damage += boost;
             }
             let tmp = w.part1();
             if let Some(result) = w.got_happy_end() {
                 if result {
-                    // println!("ok at {med}, {tmp}");
+                    // println!("ok at {boost}, {tmp}");
                     // ok = med;
-                    units = tmp;
+                    return tmp;
                 } else {
-                    // println!("no at {med}, {tmp}");
+                    // println!("no at {boost}, {tmp}");
                     // ng = m, 95 < staged;
                 }
             } else if tmp == 0 {
                 // println!(
-                //     "loop at {med}, {}",
+                //     "loop at {boost}, {}",
                 //     w.immune.iter().map(|g| g.units).sum::<usize>()
                 // );
                 // ng = med;
@@ -392,6 +432,6 @@ impl AdventOfCode for Puzzle {
             }
             // dbg!(ng, ok, tmp);
         }
-        units
+        unreachable!()
     }
 }
