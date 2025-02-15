@@ -1,40 +1,83 @@
 //! <https://adventofcode.com/2018/day/16>
 
 use {
-    crate::{
-        // color,
-        framework::{aoc, AdventOfCode, ParseError},
-        parser,
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
+
+type Rule = ([usize; 4], [usize; 4], [usize; 4]);
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Vec<usize>>,
-    rules: Vec<([usize; 4], [usize; 4], [usize; 4])>,
+    rules: Vec<Rule>,
     input_mode: usize,
     input_buffer: Vec<[usize; 4]>,
     op_map: [usize; 16],
 }
 
+mod parser {
+    use {
+        super::Rule,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{newline, space1},
+            combinator::{repeat, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_rule(s: &mut &str) -> ModalResult<Rule> {
+        seq!(
+            _: "Before: [",
+            separated(4, parse_usize, ", "),
+            _: "]\n",
+            separated(4, parse_usize, space1),
+            _: "\nAfter:  [",
+            separated(4, parse_usize, ", "),
+            _: "]\n",
+        )
+        .map(|(v1, v2, v3): (Vec<usize>, Vec<usize>, Vec<usize>)| {
+            (
+                [v1[0], v1[1], v1[2], v1[3]],
+                [v2[0], v2[1], v2[2], v2[3]],
+                [v3[0], v3[1], v3[2], v3[3]],
+            )
+        })
+        .parse_next(s)
+    }
+
+    fn parse_rules(s: &mut &str) -> ModalResult<Vec<Rule>> {
+        separated(1.., parse_rule, newline).parse_next(s)
+    }
+
+    fn parse_data(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
+        separated(
+            1..,
+            separated(1.., parse_usize, space1).map(|v: Vec<usize>| v),
+            newline,
+        )
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<Rule>, Vec<Vec<usize>>)> {
+        seq!(
+            parse_rules,
+            repeat(2.., newline).map(|_: Vec<char>| ()),
+            parse_data
+        )
+        .map(|(r, _, d)| (r, d))
+        .parse_next(s)
+    }
+}
+
 #[aoc(2018, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.input_mode = 0;
-        let mut segment = input.split("\n\n\n\n");
-        let rules = segment.next().ok_or(ParseError)?;
-        for l in rules.split('\n') {
-            self.parse_rule(l)?;
-        }
-        let data = segment.next().ok_or(ParseError)?;
-        Ok(data.to_string())
-    }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(parser::to_usizes(block, &[' ', ','])?);
-        Ok(())
+        let (rules, data) = parser::parse(&mut input.as_str())?;
+        self.rules = rules;
+        self.line = data;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: [usize; 4] = [0; 4];
@@ -67,39 +110,6 @@ impl AdventOfCode for Puzzle {
 }
 
 impl Puzzle {
-    fn parse_rule(&mut self, block: &str) -> Result<(), ParseError> {
-        match self.input_mode {
-            0 => {
-                let parser = regex!(r"^Before: \[([0-9, ]+)\]$");
-                let segment = parser.captures(block).ok_or(ParseError)?;
-                debug_assert!(self.input_buffer.is_empty());
-                let v = parser::to_usizes(&segment[1], &[' ', ','])?;
-                self.input_buffer.push([v[0], v[1], v[2], v[3]]);
-                self.input_mode = 1;
-            }
-            1 => {
-                let v = parser::to_usizes(block, &[' ', ','])?;
-                self.input_buffer.push([v[0], v[1], v[2], v[3]]);
-                self.input_mode = 2;
-            }
-            2 => {
-                let parser = regex!(r"^After:  \[([0-9, ]+)\]$");
-                let segment = parser.captures(block).ok_or(ParseError)?;
-                let v = parser::to_usizes(&segment[1], &[' ', ','])?;
-                let t2 = [v[0], v[1], v[2], v[3]];
-                let t1 = self.input_buffer.pop().unwrap();
-                let t0 = self.input_buffer.pop().unwrap();
-                self.rules.push((t0, t1, t2));
-                self.input_mode = 3;
-            }
-            3 => {
-                debug_assert!(block.is_empty());
-                self.input_mode = 0;
-            }
-            _ => unreachable!(),
-        }
-        Ok(())
-    }
     fn determine_op_code(&mut self) -> HashMap<usize, usize> {
         let mut result: HashMap<(usize, usize), usize> = HashMap::new();
         let mut fail: HashMap<(usize, usize), usize> = HashMap::new();
