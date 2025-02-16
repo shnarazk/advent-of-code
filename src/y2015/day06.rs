@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2015/day/6>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Code {
@@ -16,26 +13,38 @@ pub struct Puzzle {
     line: Vec<Code>,
 }
 
+mod parser {
+    use {
+        super::Code,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Code> {
+        alt((
+            seq!(_: "toggle ", parse_usize, _: ",", parse_usize, _: " through ", parse_usize, _: ",", parse_usize)
+                .map(|(x1, y1, x2, y2)| Code::Toggle(x1, y1, x2, y2)),
+            seq!(_: "turn off " , parse_usize, _: ",", parse_usize, _: " through ", parse_usize, _: ",", parse_usize)
+                .map(|( x1, y1,  x2,  y2)| Code::TurnOff(x1, y1, x2, y2)),
+            seq!(_: "turn on " , parse_usize, _: ",", parse_usize, _: " through ", parse_usize, _: ",", parse_usize)
+                .map(|( x1, y1,  x2, y2)| Code::TurnOn(x1, y1, x2, y2)),
+        )).parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Code>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 6)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser =
-            regex!(r"^(toggle|turn off|turn on) ([0-9]+),([0-9]+) through ([0-9]+),([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let num: Vec<usize> = (2..=5)
-            .map(|i| segment[i].parse::<usize>().expect("-"))
-            .collect();
-        self.line.push(match &segment[1] {
-            "toggle" => Code::Toggle(num[0], num[1], num[2], num[3]),
-            "turn off" => Code::TurnOff(num[0], num[1], num[2], num[3]),
-            "turn on" => Code::TurnOn(num[0], num[1], num[2], num[3]),
-            _ => unreachable!(),
-        });
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut lights: [[bool; 1000]; 1000] = [[false; 1000]; 1000];
