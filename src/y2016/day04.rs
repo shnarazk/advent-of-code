@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2016/day/04>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -13,32 +10,60 @@ pub struct Puzzle {
     line: Vec<(HashMap<char, usize>, usize, Vec<char>, Vec<Vec<char>>)>,
 }
 
-#[aoc(2016, 4)]
-impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([0-9]+)\[([a-z]+)\]$");
-        let mut letters: HashMap<char, usize> = HashMap::new();
-        let mut sector_id: usize = 0;
-        let mut checksum: Vec<char> = Vec::new();
-        let mut tokens: Vec<Vec<char>> = Vec::new();
-        for token in block.split('-') {
-            if let Some(segment) = parser.captures(token) {
-                sector_id = segment[1].parse::<usize>()?;
-                checksum = segment[2].chars().collect::<Vec<char>>();
-                break;
-            } else {
-                tokens.push(token.chars().collect::<Vec<_>>());
-                for c in token.chars() {
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        std::collections::HashMap,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    #[allow(clippy::type_complexity)]
+    fn parse_line(
+        s: &mut &str,
+    ) -> ModalResult<(HashMap<char, usize>, usize, Vec<char>, Vec<Vec<char>>)> {
+        seq!(
+            separated(1.., alpha1, '-').map(|v: Vec<&str>| v),
+            _: "-",
+            parse_usize,
+            _: "[",
+            alpha1,
+            _: "]"
+        )
+        .map(|(v, sector_id, checksum)| {
+            let mut letters: HashMap<char, usize> = HashMap::new();
+            for s in v.iter() {
+                for c in s.chars() {
                     *letters.entry(c).or_insert(0) += 1;
                 }
             }
-        }
-        self.line.push((letters, sector_id, checksum, tokens));
-        Ok(())
+            let tokens: Vec<Vec<char>> = v.iter().map(|s| s.chars().collect()).collect();
+            (
+                letters,
+                sector_id,
+                checksum.chars().collect::<Vec<char>>(),
+                tokens,
+            )
+        })
+        .parse_next(s)
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+
+    #[allow(clippy::type_complexity)]
+    pub fn parse(
+        s: &mut &str,
+    ) -> ModalResult<Vec<(HashMap<char, usize>, usize, Vec<char>, Vec<Vec<char>>)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
+#[aoc(2016, 4)]
+impl AdventOfCode for Puzzle {
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
