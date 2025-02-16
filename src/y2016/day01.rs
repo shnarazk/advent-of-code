@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2016/day/01>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashSet,
 };
 
@@ -18,22 +15,34 @@ pub struct Puzzle {
     line: Vec<Turn>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            combinator::{alt, separated},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Turn> {
+        alt((
+            ('L', parse_usize).map(|(_, n)| Turn::Left(n)),
+            ('R', parse_usize).map(|(_, n)| Turn::Right(n)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Turn>> {
+        separated(1.., parse_line, ", ").parse_next(s)
+    }
+}
+
 #[aoc(2016, 1)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = ", ";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([LR])([0-9]+)\n?$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let dist = segment[2].parse::<usize>()?;
-        self.line.push(match &segment[1] {
-            "L" => Turn::Left(dist),
-            "R" => Turn::Right(dist),
-            _ => unreachable!(),
-        });
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut rot: isize = 0;
