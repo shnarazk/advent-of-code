@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2017/day/21>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -214,25 +211,32 @@ pub struct Puzzle {
     rule: Rule,
 }
 
+mod parser {
+    use winnow::{
+        ascii::newline,
+        combinator::{repeat, separated, seq},
+        token::one_of,
+        ModalResult, Parser,
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(Vec<bool>, Vec<bool>)> {
+        seq!(
+            repeat(1.., one_of(('.', '/', '#'))).map(|v: Vec<char>| v.iter().filter(|c| **c != '/').map(|c| *c == '#').collect::<Vec<bool>>()),
+             _: " => ",
+            repeat(1.., one_of(('.', '/', '#'))).map(|v: Vec<char>| v.iter().filter(|c| **c != '/').map(|c| *c == '#').collect::<Vec<bool>>()),
+        ).parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(Vec<bool>, Vec<bool>)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2017, 21)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([.#/]+) => ([.#/]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1]
-                .chars()
-                .filter(|c| *c != '/')
-                .map(|c| c == '#')
-                .collect::<Vec<_>>(),
-            segment[2]
-                .chars()
-                .filter(|c| *c != '/')
-                .map(|c| c == '#')
-                .collect::<Vec<_>>(),
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for l in self.line.iter() {
