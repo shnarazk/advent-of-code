@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2016/day/08>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Op {
@@ -16,35 +13,38 @@ pub struct Puzzle {
     line: Vec<Op>,
 }
 
+mod parser {
+    use {
+        super::Op,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_op(s: &mut &str) -> ModalResult<Op> {
+        alt((
+            seq!(_: "rect ", parse_usize, _: "x", parse_usize).map(|(w, h)| Op::Rect(w, h)),
+            seq!(_: "rotate row y=", parse_usize, _: " by ", parse_usize)
+                .map(|(y, x)| Op::RotateRow(y, x)),
+            seq!(_: "rotate column x=", parse_usize, _:" by ", parse_usize)
+                .map(|(x, y)| Op::RotateCol(x, y)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Op>> {
+        separated(1.., parse_op, newline).parse_next(s)
+    }
+}
+
 #[aoc(2016, 8)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let rect = regex!(r"rect (\d+)x(\d+)");
-        if let Some(segment) = rect.captures(block) {
-            self.line.push(Op::Rect(
-                segment[1].parse::<usize>()?,
-                segment[2].parse::<usize>()?,
-            ));
-            return Ok(());
-        }
-        let rot_row = regex!(r"rotate row y=(\d+) by (\d+)");
-        if let Some(segment) = rot_row.captures(block) {
-            self.line.push(Op::RotateRow(
-                segment[1].parse::<usize>()?,
-                segment[2].parse::<usize>()?,
-            ));
-            return Ok(());
-        }
-        let rot_col = regex!(r"rotate column x=(\d+) by (\d+)");
-        if let Some(segment) = rot_col.captures(block) {
-            self.line.push(Op::RotateCol(
-                segment[1].parse::<usize>()?,
-                segment[2].parse::<usize>()?,
-            ));
-            return Ok(());
-        }
-        Err(ParseError)
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = 6;
