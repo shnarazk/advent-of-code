@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2015/day/7>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -68,60 +65,51 @@ pub struct Puzzle {
     line: Vec<Code>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_id(s: &mut &str) -> ModalResult<Id> {
+        alt((
+            parse_usize.map(Id::Const),
+            alpha1.map(|s: &str| Id::Wire(s.to_string())),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_line(s: &mut &str) -> ModalResult<Code> {
+        alt((
+            seq!(parse_id, _: " -> ", parse_id).map(|(a, b)| Code::Input(a, b)),
+            seq!(parse_id, _: " AND ", parse_id, _: " -> ", parse_id)
+                .map(|(a, b, c)| Code::And(a, b, c)),
+            seq!(parse_id, _: " OR ", parse_id, _: " -> ", parse_id)
+                .map(|(a, b, c)| Code::Or(a, b, c)),
+            seq!(parse_id, _: " LSHIFT ", parse_usize, _: " -> ", parse_id)
+                .map(|(a, b, c)| Code::LShift(a, b, c)),
+            seq!(parse_id, _: " RSHIFT ", parse_usize, _: " -> ", parse_id)
+                .map(|(a, b, c)| Code::RShift(a, b, c)),
+            seq!(_: "NOT ", parse_id, _: " -> ", parse_id).map(|(a, b)| Code::Not(a, b)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Code>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<Option<String>, ParseError> {
-    //     let parser: Regex = Regex::new(r"^(.+)\n\n((.|\n)+)$").expect("wrong");
-    //     let segment = parser.captures(input).ok_or(ParseError)?;
-    //     for num in segment[1].split(',') {
-    //         let _value = num.parse::<usize>()?;
-    //     }
-    //     Ok(Some(segment[2].to_string()))
-    // }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser1 = regex!(r"^([0-9]+|[a-z]+) -> ([a-z]+)$");
-        let parser2 = regex!(r"^([0-9]+|[a-z]+) (AND|OR) ([0-9]+|[a-z]+) -> ([a-z]+)$");
-        let parser3 = regex!(r"^([0-9]+|[a-z]+) (LSHIFT|RSHIFT) ([0-9]+) -> ([a-z]+)$");
-        let parser4 = regex!(r"^NOT ([a-z]+) -> ([a-z]+)$");
-        if let Ok(segment) = parser1.captures(block).ok_or(ParseError) {
-            let op1: Id = Id::try_from(&segment[1])?;
-            let op2: Id = Id::try_from(&segment[2])?;
-            self.line.push(Code::Input(op1, op2));
-            return Ok(());
-        }
-        if let Ok(segment) = parser2.captures(block).ok_or(ParseError) {
-            let op1: Id = Id::try_from(&segment[1])?;
-            let op2: Id = Id::try_from(&segment[3])?;
-            let op3: Id = Id::try_from(&segment[4])?;
-            self.line.push(match &segment[2] {
-                "AND" => Code::And(op1, op2, op3),
-                "OR" => Code::Or(op1, op2, op3),
-                _ => unreachable!(),
-            });
-            return Ok(());
-        }
-        if let Ok(segment) = parser3.captures(block).ok_or(ParseError) {
-            let op1: Id = Id::try_from(&segment[1])?;
-            let op2: Id = Id::try_from(&segment[4])?;
-            self.line.push(match &segment[2] {
-                "LSHIFT" => Code::LShift(op1, segment[3].parse::<usize>()?, op2),
-                "RSHIFT" => Code::RShift(op1, segment[3].parse::<usize>()?, op2),
-                _ => unreachable!(),
-            });
-            return Ok(());
-        }
-        if let Ok(segment) = parser4.captures(block).ok_or(ParseError) {
-            let op1: Id = Id::try_from(&segment[1])?;
-            let op2: Id = Id::try_from(&segment[2])?;
-            self.line.push(Code::Not(op1, op2));
-            return Ok(());
-        }
-        dbg!(block);
-        Err(ParseError)
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut value: HashMap<String, usize> = HashMap::new();
