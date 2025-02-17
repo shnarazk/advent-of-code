@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/017/day/7>
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -33,32 +30,38 @@ pub struct Puzzle {
     line: Vec<Tree>,
 }
 
+mod parser {
+    use {
+        super::Tree,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_tree(s: &mut &str) -> ModalResult<Tree> {
+        alt((
+            seq!(alpha1, _: " (", parse_usize, _: ") -> ", separated(1.., alpha1, ", ").map(|v: Vec<&str>| v.iter().map(|s| s.to_string()).collect::<Vec<_>>()))
+                            .map(|(s, n, v)| Tree::Node(s.to_string(), n, v)),
+            seq!(alpha1, _: " (", parse_usize, _: ")").map(|(s, n)| Tree::Leaf(s.to_string(), n)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Tree>> {
+        separated(1.., parse_tree, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2017, 7)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = usize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // dqyjg (65)
-        let parser1 = regex!(r"^(\w+) \((\d+)\)$");
-        // pqtboz (207) -> ayvns, codwosk
-        let parser2 = regex!(r"^(\w+) \((\d+)\) -> ((\w+, )+\w+)$");
-        if let Some(segment) = parser1.captures(block) {
-            self.line.push(Tree::Leaf(
-                segment[1].to_string(),
-                segment[2].parse::<usize>()?,
-            ));
-        } else if let Some(segment) = parser2.captures(block) {
-            self.line.push(Tree::Node(
-                segment[1].to_string(),
-                segment[2].parse::<usize>()?,
-                segment[3]
-                    .split(", ")
-                    .map(|s| s.to_string())
-                    .collect::<Vec<_>>(),
-            ))
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut parent: HashMap<String, String> = HashMap::new();
