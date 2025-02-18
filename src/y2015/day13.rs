@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2015/day/13>
 use {
-    crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc_at, AdventOfCode, ParseError},
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
 };
@@ -14,26 +11,37 @@ pub struct Puzzle {
     line: Vec<(String, String, isize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(String, String, isize)> {
+        seq!(
+            alpha1, _:  " would ", alt(("gain ", "lose ")).map(|s| s == "gain "), parse_isize,
+            _: " happiness units by sitting next to ", alpha1, _: "."
+        )
+        .map(|(a, b, n, c)| (a.to_string(), c.to_string(), if b { n } else { -n }))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(String, String, isize)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2015, 13)]
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^([A-Z][a-z]+) would (gain|lose) ([0-9]+) happiness units by sitting next to ([A-Z][a-z]+)\.$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].to_string(),
-            segment[4].to_string(),
-            if &segment[2] == "gain" {
-                segment[3].parse::<isize>()?
-            } else {
-                -segment[3].parse::<isize>()?
-            },
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (p1, p2, _) in self.line.iter() {
