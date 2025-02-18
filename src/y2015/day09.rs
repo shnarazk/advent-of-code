@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2015/day/9>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{HashMap, HashSet},
 };
 
@@ -60,18 +57,32 @@ pub struct Puzzle {
     cities: HashSet<String>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(String, String, usize)> {
+        seq!(alpha1, _: " to ", alpha1, _: " = ", parse_usize)
+            .map(|(a, b, c)| (a.to_string(), b.to_string(), c))
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(String, String, usize)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 9)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^([A-za-z]+) to ([A-za-z]+) = ([0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].to_string(),
-            segment[2].to_string(),
-            segment[3].parse::<usize>()?,
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (c0, c1, d) in self.line.iter() {
