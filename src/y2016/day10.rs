@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2016/day/10>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -24,38 +21,42 @@ pub struct Puzzle {
     line: Vec<Op>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+    fn parse_target(s: &mut &str) -> ModalResult<Destination> {
+        alt((
+            seq!(_: "bot ",  parse_usize).map(|(id,)| Destination::Bot(id)),
+            seq!(_: "output ",  parse_usize).map(|(id,)| Destination::Output(id)),
+        ))
+        .parse_next(s)
+    }
+    fn parse_op(s: &mut &str) -> ModalResult<Op> {
+        alt((
+            seq!(_: "bot ", parse_usize, _: " gives low to ", parse_target, _: " and high to ", parse_target).map(|(n, d1, d2)| Op::Wire(n, d1, d2)),
+            seq!(_: "value ", parse_usize, _: " goes to bot ", parse_usize)
+                .map(|(a, b)| Op::Val(a, b)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Op>> {
+        separated(1.., parse_op, newline).parse_next(s)
+    }
+}
+
 #[aoc(2016, 10)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser1 =
-            regex!(r"bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)");
-        let parser2 = regex!(r"value (\d+) goes to bot (\d+)");
-        if let Some(segment) = parser1.captures(block) {
-            let id1 = segment[3].parse::<usize>()?;
-            let id2 = segment[5].parse::<usize>()?;
-            let dest1 = if &segment[2] == "bot" {
-                Destination::Bot(id1)
-            } else {
-                Destination::Output(id1)
-            };
-            let dest2 = if &segment[4] == "bot" {
-                Destination::Bot(id2)
-            } else {
-                Destination::Output(id2)
-            };
-            self.line
-                .push(Op::Wire(segment[1].parse::<usize>()?, dest1, dest2));
-            return Ok(());
-        }
-        if let Some(segment) = parser2.captures(block) {
-            self.line.push(Op::Val(
-                segment[1].parse::<usize>()?,
-                segment[2].parse::<usize>()?,
-            ));
-            return Ok(());
-        }
-        Err(ParseError)
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<usize, (Destination, Destination)> = HashMap::new();
