@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2017/day/8>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -31,35 +28,89 @@ pub struct Puzzle {
     line: Vec<Inst>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_inst(s: &mut &str) -> ModalResult<Inst> {
+        alt((
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " < ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::LessThan,
+                cond_val,
+            }),
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " <= ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::LessEqual,
+                cond_val,
+            }),
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " <= ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::LessEqual,
+                cond_val,
+            }),
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " == ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::Equal,
+                cond_val,
+            }),
+            seq!(alpha1,  alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " != ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::NotEqual,
+                cond_val,
+            }),
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " > ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::GreaterThan,
+                cond_val,
+            }),
+            seq!(alpha1, alt((" inc ", " dec ")).map(|s| s == " inc "), parse_isize, _: " if ", alpha1, _: " >= ", parse_isize)
+            .map(|(register, inc, offset, cond_reg, cond_val)| Inst {
+                register: register.to_string(),
+                offset: if inc { offset } else { -offset },
+                cond_reg: cond_reg.to_string(),
+                cond_cmp: Compare::GreaterEqual,
+                cond_val,
+            }),
+        ))
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Inst>> {
+        separated(1.., parse_inst, newline).parse_next(s)
+    }
+}
+
 #[aoc(2017, 8)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^(\w+) (inc|dec) (-?\d+) if (\w+) (>=?|==|!=|<=?) (-?\d+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let mut offset = segment[3].parse::<isize>()?;
-        if &segment[2] == "dec" {
-            offset *= -1;
-        }
-        let cond_cmp: Compare = match &segment[5] {
-            "<" => Compare::LessThan,
-            "<=" => Compare::LessEqual,
-            "==" => Compare::Equal,
-            "!=" => Compare::NotEqual,
-            ">" => Compare::GreaterThan,
-            ">=" => Compare::GreaterEqual,
-            _ => unreachable!(),
-        };
-        let cond_val: isize = segment[6].parse::<isize>()?;
-        self.line.push(Inst {
-            register: segment[1].to_string(),
-            offset,
-            cond_reg: segment[4].to_string(),
-            cond_cmp,
-            cond_val,
-        });
-        // self.line.push(segment[0].parse::<_>());
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut reg: HashMap<String, isize> = HashMap::new();
