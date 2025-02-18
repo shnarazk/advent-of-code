@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2017/day/20>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
 
@@ -37,33 +34,37 @@ pub struct Puzzle {
     line: Vec<Particle>,
 }
 
+mod parser {
+    use {
+        super::Particle,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Particle> {
+        seq!(_: "p=<", parse_isize, _: ",", parse_isize, _: ",", parse_isize, _: ">, v=<", parse_isize, _: ",", parse_isize, _: ",", parse_isize, _: ">, a=<", parse_isize, _: ",", parse_isize, _: ",", parse_isize, _: ">")
+            .map(|(p1, p2, p3, v1, v2, v3, a1, a2, a3)| Particle {
+               position: (p1, p2, p3),
+               velocity: (v1, v2, v3),
+               accelerate: (a1, a2, a3) }
+            )
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Particle>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2017, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        // p=<77,625,94>, v=<-13,-62,14>, a=<1,3,-2>
-        let parser = regex!(
-            r"^p=<(-?\d+),(-?\d+),(-?\d+)>, v=<(-?\d+),(-?\d+),(-?\d+)>, a=<(-?\d+),(-?\d+),(-?\d+)>$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push(Particle {
-            position: (
-                segment[1].parse::<isize>()?,
-                segment[2].parse::<isize>()?,
-                segment[3].parse::<isize>()?,
-            ),
-            velocity: (
-                segment[4].parse::<isize>()?,
-                segment[5].parse::<isize>()?,
-                segment[6].parse::<isize>()?,
-            ),
-            accelerate: (
-                segment[7].parse::<isize>()?,
-                segment[8].parse::<isize>()?,
-                segment[9].parse::<isize>()?,
-            ),
-        });
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut mi = 0;
