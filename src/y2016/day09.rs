@@ -1,32 +1,38 @@
 //! <https://adventofcode.com/2016/day/09>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: String,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{ascii::alpha0, combinator::seq, ModalResult, Parser},
+    };
+
+    pub fn parse_line(s: &mut &str) -> ModalResult<(String, usize, usize)> {
+        seq!(alpha0, _: "(", parse_usize, _: "x", parse_usize, _: ")")
+            .map(|(s, a, b)| (s.to_string(), a, b))
+            .parse_next(s)
+    }
+}
+
 #[aoc(2016, 9)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = block.to_string();
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = input.chars().filter(|c| *c != '\n').collect();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: &str = self.line.trim();
         let mut length = 0;
-        let parser = regex!(r"([^(]*)\((\d+)x(\d+)\)");
-        while let Some(segment) = parser.captures(buffer) {
-            let len = segment[2].parse::<usize>().unwrap();
-            let rep = segment[3].parse::<usize>().unwrap();
-            length += segment[1].len() + len * rep;
-            buffer = &buffer[segment[0].len() + len..];
+        while let Ok((segment, len, rep)) = parser::parse_line(&mut buffer) {
+            length += segment.len() + len * rep;
+            buffer = &buffer[len..];
         }
-        length += buffer.len();
         length
     }
     fn part2(&mut self) -> Self::Output2 {
@@ -34,16 +40,17 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn span_len(mut buffer: &str) -> usize {
+fn span_len(buffer: &str) -> usize {
+    let mut b = buffer;
+    let mut p = b;
     let mut length = 0;
-    let parser = regex!(r"([^(]*)\((\d+)x(\d+)\)");
-    while let Some(segment) = parser.captures(buffer) {
-        let len = segment[2].parse::<usize>().unwrap();
-        let rep = segment[3].parse::<usize>().unwrap();
-        length +=
-            segment[1].len() + rep * span_len(&buffer[segment[0].len()..segment[0].len() + len]);
-        buffer = &buffer[segment[0].len() + len..];
+    loop {
+        if let Ok((segment, len, rep)) = parser::parse_line(&mut b) {
+            length += segment.len() + rep * span_len(&b[0..len]);
+            b = &b[len..];
+            p = b;
+        } else {
+            return length + p.len();
+        }
     }
-    length += buffer.len();
-    length
 }
