@@ -1,27 +1,68 @@
 //! <https://adventofcode.com/2017/day/23>
 use {
-    crate::{
-        // color::REVERT,
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::HashMap,
 };
+
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+enum Val {
+    Reg(char),
+    Lit(isize),
+}
+
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+enum Inst {
+    Set(Val, Val),
+    Sub(Val, Val),
+    Mul(Val, Val),
+    Jnz(Val, Val),
+}
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<Inst>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            token::one_of,
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_val(s: &mut &str) -> ModalResult<Val> {
+        alt((
+            one_of(|c: char| c.is_ascii_lowercase()).map(Val::Reg),
+            parse_isize.map(Val::Lit),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_inst(s: &mut &str) -> ModalResult<Inst> {
+        alt((
+            seq!(_: "set ", parse_val, _: " ", parse_val).map(|(a, b)| Inst::Set(a, b)),
+            seq!(_: "sub ", parse_val, _: " ", parse_val).map(|(a, b)| Inst::Sub(a, b)),
+            seq!(_: "mul ", parse_val, _: " ", parse_val).map(|(a, b)| Inst::Mul(a, b)),
+            seq!(_: "jnz ", parse_val, _: " ", parse_val).map(|(a, b)| Inst::Jnz(a, b)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Inst>> {
+        separated(1.., parse_inst, newline).parse_next(s)
+    }
+}
+
 #[aoc(2017, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(Inst::try_from(block)?);
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut processor: Runtime = Runtime::initialize(-1, &self.line);
@@ -147,79 +188,5 @@ impl Runtime {
         } else {
             Some(self.debug_counter)
         }
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-enum Val {
-    Reg(char),
-    Lit(isize),
-}
-
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-enum Inst {
-    Set(Val, Val),
-    Sub(Val, Val),
-    Mul(Val, Val),
-    Jnz(Val, Val),
-}
-
-impl TryFrom<&str> for Inst {
-    type Error = ParseError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        // dbg!(value);
-        let arg2ll = regex!(r"^([[:lower:]]{3}) (-?[[:digit:]]+) (-?[[:digit:]]+)$");
-        let arg2lr = regex!(r"^([[:lower:]]{3}) (-?[[:digit:]]+) ([[:lower:]])$");
-        let arg2rl = regex!(r"^([[:lower:]]{3}) ([[:lower:]]) (-?[[:digit:]]+)$");
-        let arg2rr = regex!(r"^([[:lower:]]{3}) ([[:lower:]]) ([[:lower:]])$");
-        if let Some(segment) = arg2ll.captures(value) {
-            let op1: Val = Val::Lit(segment[2].parse::<isize>()?);
-            let op2: Val = Val::Lit(segment[3].parse::<isize>()?);
-            let ins = match &segment[1] {
-                "set" => Inst::Set(op1, op2),
-                "sub" => Inst::Sub(op1, op2),
-                "mul" => Inst::Mul(op1, op2),
-                "jnz" => Inst::Jnz(op1, op2),
-                _ => unreachable!(),
-            };
-            return Ok(ins);
-        }
-        if let Some(segment) = arg2lr.captures(value) {
-            let op1: Val = Val::Lit(segment[2].parse::<isize>()?);
-            let op2: Val = Val::Reg(segment[3].chars().next().ok_or(ParseError)?);
-            let ins = match &segment[1] {
-                "set" => Inst::Set(op1, op2),
-                "sub" => Inst::Sub(op1, op2),
-                "mul" => Inst::Mul(op1, op2),
-                "jnz" => Inst::Jnz(op1, op2),
-                _ => unreachable!(),
-            };
-            return Ok(ins);
-        }
-        if let Some(segment) = arg2rl.captures(value) {
-            let op1: Val = Val::Reg(segment[2].chars().next().ok_or(ParseError)?);
-            let op2: Val = Val::Lit(segment[3].parse::<isize>()?);
-            let ins = match &segment[1] {
-                "set" => Inst::Set(op1, op2),
-                "sub" => Inst::Sub(op1, op2),
-                "mul" => Inst::Mul(op1, op2),
-                "jnz" => Inst::Jnz(op1, op2),
-                _ => unreachable!(),
-            };
-            return Ok(ins);
-        }
-        if let Some(segment) = arg2rr.captures(value) {
-            let op1: Val = Val::Reg(segment[2].chars().next().ok_or(ParseError)?);
-            let op2: Val = Val::Reg(segment[3].chars().next().ok_or(ParseError)?);
-            let ins = match &segment[1] {
-                "set" => Inst::Set(op1, op2),
-                "sub" => Inst::Sub(op1, op2),
-                "mul" => Inst::Mul(op1, op2),
-                "jnz" => Inst::Jnz(op1, op2),
-                _ => unreachable!(),
-            };
-            return Ok(ins);
-        }
-        Err(ParseError)
     }
 }
