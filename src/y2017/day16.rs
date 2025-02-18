@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2017/day/16>
-use crate::{
-    framework::{aoc_at, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Dance {
@@ -11,49 +8,43 @@ enum Dance {
     Partner(usize, usize),
 }
 
-impl TryFrom<&str> for Dance {
-    type Error = ParseError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        fn to_16(val: &str) -> Result<usize, ParseError> {
-            if let Some(c) = val.chars().next() {
-                Ok(((c as u8) - b'a') as usize)
-            } else {
-                Err(ParseError)
-            }
-        }
-        let spin = regex!(r"^s(\d+)");
-        let exchange = &regex!(r"^x(\d+)/(\d+)$");
-        let partner = regex!(r"^p([a-p])/([a-p])$");
-        if let Some(segment) = spin.captures(value) {
-            Ok(Dance::Spin(segment[1].parse::<usize>()?))
-        } else if let Some(segment) = exchange.captures(value) {
-            Ok(Dance::Exchange(
-                segment[1].parse::<usize>()?,
-                segment[2].parse::<usize>()?,
-            ))
-        } else if let Some(segment) = partner.captures(value) {
-            Ok(Dance::Partner(to_16(&segment[1])?, to_16(&segment[2])?))
-        } else {
-            Err(ParseError)
-        }
-    }
-}
-
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
     line: Vec<Dance>,
+}
+
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            combinator::{alt, separated, seq},
+            token::one_of,
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<Dance> {
+        alt((
+            seq!(_: "s", parse_usize).map(|(n,)| Dance::Spin(n)),
+            seq!(_: "x", parse_usize, _: "/", parse_usize).map(|(a, b)| Dance::Exchange(a, b)),
+            seq!(_: "p", one_of(|c: char| c.is_ascii_lowercase()), _: "/", one_of(|c: char| c.is_ascii_lowercase())).map(|(a, b)| Dance::Partner((a as u8 - b'a') as usize, (b as u8 - b'a') as usize)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Dance>> {
+        separated(1.., parse_line, ",").parse_next(s)
+    }
 }
 
 #[aoc_at(2017, 16)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        for seg in block.split(',') {
-            self.line.push(Dance::try_from(seg)?);
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let m = 16;
