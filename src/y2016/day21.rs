@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2016/day/21>
-use crate::{
-    framework::{aoc_at, AdventOfCode, ParseError},
-    parser, regex,
-};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 use std::collections::VecDeque;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -19,47 +16,44 @@ pub struct Puzzle {
     line: Vec<OpCode>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, opt, separated, seq},
+            token::one_of,
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_opcode(s: &mut &str) -> ModalResult<OpCode> {
+        alt((
+            seq!(_: "swap position ", parse_usize, _: " with position ", parse_usize)
+                .map(|(a, b)| OpCode::Swap0(a, b)),
+            seq!(_: "swap letter ", one_of(|c: char| c.is_ascii_lowercase()), _: " with letter ", one_of(|c: char| c.is_ascii_lowercase())).map(|(a, b)| OpCode::Swap1(a as u8, b as u8)),
+            seq!(_: "reverse positions ", parse_usize, _: " through ", parse_usize).map(|(a, b)| OpCode::Reverse(a, b)),
+            seq!(_: "rotate left ", parse_usize, _: (" step", opt('s'))).map(|(n,)| OpCode::Rotate0(false, n)),
+            seq!(_: "rotate right ", parse_usize, _: (" step", opt('s'))).map(|(n,)| OpCode::Rotate0(true, n)),
+            seq!(_: "move position ", parse_usize, _: " to position ", parse_usize).map(|(a, b)| OpCode::Move(a, b)),
+            seq!(_: "rotate based on position of letter ", one_of(|c: char| c.is_ascii_lowercase())).map(|(c,):( char,)| OpCode::Rotate1(c as u8)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<OpCode>> {
+        separated(1.., parse_opcode, newline).parse_next(s)
+    }
+}
+
 #[aoc_at(2016, 21)]
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let rule0 = regex!(r"swap position (\d+) with position (\d+)");
-        let rule1 = regex!(r"swap letter ([[:alpha:]]) with letter ([[:alpha:]])");
-        let rule2 = regex!(r"reverse positions (\d+) through (\d+)");
-        let rule3 = regex!(r"rotate (left|right) (\d+) steps?");
-        let rule4 = regex!(r"move position (\d+) to position (\d+)");
-        let rule5 = regex!(r"rotate based on position of letter ([[:alpha:]])");
-        if let Some(segment) = rule0.captures(block) {
-            let arg1 = parser::to_usize(&segment[1])?;
-            let arg2 = parser::to_usize(&segment[2])?;
-            self.line.push(OpCode::Swap0(arg1, arg2));
-        }
-        if let Some(segment) = rule1.captures(block) {
-            let arg1 = segment[1].chars().next().unwrap();
-            let arg2 = segment[2].chars().next().unwrap();
-            self.line.push(OpCode::Swap1(arg1 as u8, arg2 as u8));
-        }
-        if let Some(segment) = rule2.captures(block) {
-            let arg1 = parser::to_usize(&segment[1])?;
-            let arg2 = parser::to_usize(&segment[2])?;
-            self.line.push(OpCode::Reverse(arg1, arg2));
-        }
-        if let Some(segment) = rule3.captures(block) {
-            let arg = parser::to_usize(&segment[2])?;
-            self.line.push(OpCode::Rotate0(segment[1] == *"right", arg));
-        }
-        if let Some(segment) = rule4.captures(block) {
-            let arg1 = parser::to_usize(&segment[1])?;
-            let arg2 = parser::to_usize(&segment[2])?;
-            self.line.push(OpCode::Move(arg1, arg2));
-        }
-        if let Some(segment) = rule5.captures(block) {
-            let arg1 = segment[1].chars().next().unwrap();
-            self.line.push(OpCode::Rotate1(arg1 as u8));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut phrase: VecDeque<u8> = VecDeque::from(b"abcdefgh".to_vec());
