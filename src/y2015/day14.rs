@@ -1,29 +1,38 @@
 //! <https://adventofcode.com/2015/day/14>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<(String, usize, usize, usize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<(String, usize, usize, usize)> {
+        seq!(alpha1, _: " can fly ", parse_usize, _: " km/s for ", parse_usize,
+            _: " seconds, but then must rest for ", parse_usize, _: " seconds.")
+        .map(|(n, a, b, c)| (n.to_string(), a, b, c))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(String, usize, usize, usize)>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^([A-Za-z]+) can fly ([0-9]+) km/s for ([0-9]+) seconds, but then must rest for ([0-9]+) seconds\.$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push((
-            segment[1].to_string(),
-            segment[2].parse::<usize>()?,
-            segment[3].parse::<usize>()?,
-            segment[4].parse::<usize>()?,
-        ));
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let t = 2503;
