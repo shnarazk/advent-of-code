@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2016/day/12>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Val {
@@ -80,47 +77,48 @@ impl Puzzle {
         }
     }
 }
+
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            token::one_of,
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_val(s: &mut &str) -> ModalResult<Val> {
+        alt((
+            one_of(|c: char| c.is_ascii_lowercase()).map(|c| Val::Reg(c as u8 - b'a')),
+            parse_isize.map(Val::Lit),
+        ))
+        .parse_next(s)
+    }
+
+    fn parse_line(s: &mut &str) -> ModalResult<Code> {
+        alt((
+            seq!(_: "cpy ", parse_val, _: " ", parse_val).map(|(a, b)| Code::Cpy(a, b)),
+            seq!(_: "inc ", parse_val).map(|(a,)| Code::Inc(a)),
+            seq!(_: "dec ", parse_val).map(|(a,)| Code::Dec(a)),
+            seq!(_: "jnz ", parse_val, _: " ", parse_val).map(|(a, b)| Code::Jnz(a, b)),
+            seq!(_: "tgl ", parse_val).map(|(a,)| Code::Tgl(a)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Code>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2016, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parse_val = |s: &str| {
-            let c: char = s.chars().next().unwrap();
-            if c.is_ascii_alphabetic() {
-                Val::Reg(c as u8 - b'a')
-            } else {
-                Val::Lit(s.parse::<isize>().unwrap())
-            }
-        };
-        if let Ok(code) = regex!(r"^cpy ([a-z]|-?\d+) ([a-z]|-?\d+)$")
-            .captures(block)
-            .ok_or(ParseError)
-        {
-            self.line
-                .push(Code::Cpy(parse_val(&code[1]), parse_val(&code[2])));
-        } else if let Ok(code) = regex!(r"^inc ([a-z]|-?\d+)$")
-            .captures(block)
-            .ok_or(ParseError)
-        {
-            self.line.push(Code::Inc(parse_val(&code[1])));
-        } else if let Ok(code) = regex!(r"^dec ([a-z]|-?\d+)$")
-            .captures(block)
-            .ok_or(ParseError)
-        {
-            self.line.push(Code::Dec(parse_val(&code[1])));
-        } else if let Ok(code) = regex!(r"^jnz ([a-z]|-?\d+) ([a-z]|-?\d+)$")
-            .captures(block)
-            .ok_or(ParseError)
-        {
-            self.line
-                .push(Code::Jnz(parse_val(&code[1]), parse_val(&code[2])));
-        } else if let Ok(code) = regex!(r"^tgl ([a-z]|-?\d+)$")
-            .captures(block)
-            .ok_or(ParseError)
-        {
-            self.line.push(Code::Tgl(parse_val(&code[1])));
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.run();
