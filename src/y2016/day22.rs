@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2016/day/22>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::collections::{binary_heap::BinaryHeap, HashSet},
 };
 
@@ -12,33 +9,49 @@ pub struct Puzzle {
     line: Vec<(usize, usize, usize, usize, usize, usize)>,
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{newline, space1},
+            combinator::{repeat_till, separated, seq},
+            token::any,
+            ModalResult, Parser,
+        },
+    };
+
+    #[allow(clippy::type_complexity)]
+    fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, usize, usize, usize, usize)> {
+        seq!(
+            _: "/dev/grid/node-x", parse_usize, _: "-y", parse_usize, _: space1,
+            parse_usize, _: ("T", space1),
+            parse_usize, _: ("T", space1),
+            parse_usize, _: ("T", space1),
+            parse_usize, _: "%",
+        )
+        .map(|(a, b, c, d, e, f)| (b, a, c, d, e, f))
+        .parse_next(s)
+    }
+
+    #[allow(clippy::type_complexity)]
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize, usize, usize, usize)>> {
+        seq!(
+            _: (
+                repeat_till(1.., any, newline).map(|_: (Vec<char>, char)| ()),
+                repeat_till(1.., any, newline).map(|_: (Vec<char>, char)| ()),
+            ),
+            separated(1.., parse_line, newline)
+        )
+        .map(|(v,)| v)
+        .parse_next(s)
+    }
+}
+
 #[aoc(2016, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let parser = regex!(r"^.+\n.+\n((.|\n)+)$");
-        let segment = parser.captures(&input).ok_or(ParseError)?;
-        Ok(segment[1].to_string())
-    }
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"/dev/grid/node-x(\d+)-y(\d+) +(\d+)T +(\d+)T +(\d+)T +(\d+)%$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        let site = (
-            segment[2].parse::<usize>()?, // y
-            segment[1].parse::<usize>()?, // x
-            segment[3].parse::<usize>()?,
-            segment[4].parse::<usize>()?,
-            segment[5].parse::<usize>()?,
-            segment[6].parse::<usize>()?,
-        );
-        self.line.push(site);
-        // if 17 != site.0 && 100 < site.2.min(site.3) {
-        //     dbg!(site);
-        // }
-        // if 0 == site.3 {
-        //     dbg!(site);
-        // }
-        Ok(())
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.line.sort_unstable();
