@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2015/day/16>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Sue {
@@ -24,43 +21,57 @@ pub struct Puzzle {
     line: Vec<Sue>,
 }
 
+mod parser {
+    use {
+        super::*,
+        crate::parser::parse_usize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_sue(s: &mut &str) -> ModalResult<Sue> {
+        seq!(
+            _: "Sue ", parse_usize, _: ": ",
+            separated(1.., seq!(alpha1, _: ": ", parse_usize), ", ")
+        )
+        .map(|(n, v): (usize, Vec<(&str, usize)>)| {
+            let mut sue = Sue {
+                id: n,
+                ..Sue::default()
+            };
+            for (prop, val) in v {
+                match prop {
+                    "children" => sue.children = Some(val),
+                    "cats" => sue.cats = Some(val),
+                    "samoyeds" => sue.samoyeds = Some(val),
+                    "pomeranians" => sue.pomeranians = Some(val),
+                    "akitas" => sue.akitas = Some(val),
+                    "vizslas" => sue.vizslas = Some(val),
+                    "goldfish" => sue.goldfish = Some(val),
+                    "trees" => sue.trees = Some(val),
+                    "cars" => sue.cars = Some(val),
+                    "perfumes" => sue.perfumes = Some(val),
+                    _ => panic!(),
+                }
+            }
+            sue
+        })
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Sue>> {
+        separated(1.., parse_sue, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(r"^Sue ([0-9]+): (([a-z]+: [0-9]+, )*[a-z]+: [0-9]+)$");
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        // print!("{:>4} - ", segment[1].parse::<usize>()?);
-        let mut sue: Sue = Sue {
-            id: segment[1].parse::<usize>()?,
-            ..Sue::default()
-        };
-        for seg in segment[2].split(',') {
-            let mut tokens = seg.split(':');
-            let prop = tokens.next().ok_or(ParseError)?.trim();
-            let val = tokens.next().ok_or(ParseError)?.trim().parse::<usize>()?;
-            // print!("{:>12}: {:>3} ", prop, val);
-            match prop {
-                "children" => sue.children = Some(val),
-                "cats" => sue.cats = Some(val),
-                "samoyeds" => sue.samoyeds = Some(val),
-                "pomeranians" => sue.pomeranians = Some(val),
-                "akitas" => sue.akitas = Some(val),
-                "vizslas" => sue.vizslas = Some(val),
-                "goldfish" => sue.goldfish = Some(val),
-                "trees" => sue.trees = Some(val),
-                "cars" => sue.cars = Some(val),
-                "perfumes" => sue.perfumes = Some(val),
-                _ => panic!(),
-            }
-        }
-        // println!();
-        self.line.push(sue);
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
-        // assert_eq!(self.line.len(), 500);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
