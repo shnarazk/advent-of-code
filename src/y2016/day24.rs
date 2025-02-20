@@ -21,7 +21,7 @@ pub struct Puzzle {
 
 #[aoc(2016, 24)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         for l in s.lines() {
             let mut line = Vec::new();
             let j = self.line.len();

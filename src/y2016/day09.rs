@@ -22,7 +22,7 @@ mod parser {
 
 #[aoc(2016, 9)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.chars().filter(|c| *c != '\n').collect();
         Self::parsed()
     }
