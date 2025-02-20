@@ -22,8 +22,8 @@ impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
+    fn parse(&mut self, _block: String) -> Result<String, ParseError> {
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // for j in 1..=6 {

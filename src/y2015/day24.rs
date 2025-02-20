@@ -13,12 +13,22 @@ pub struct Puzzle {
 }
 type Cand = (usize, usize, [bool; 29], usize);
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
+    };
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
+        separated(1.., parse_usize, newline).parse_next(s)
+    }
+}
 #[aoc(2015, 24)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.parse::<usize>()?);
-        Ok(())
+    fn parse(&mut self, block: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut block.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.reverse();
