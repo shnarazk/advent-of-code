@@ -14,7 +14,7 @@ pub struct Puzzle {
 #[aoc(2023, 3)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let cs = block.chars().collect::<Vec<_>>();
         let mut acc: Option<usize> = None;
         let mut pos_start = 0;

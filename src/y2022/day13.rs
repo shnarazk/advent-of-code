@@ -76,7 +76,7 @@ pub struct Puzzle {
 #[aoc(2022, 13)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut lines = block.split('\n').collect::<Vec<_>>();
         self.line.push((
             parse_expr(&mut lines[0]).expect("!!!!"),

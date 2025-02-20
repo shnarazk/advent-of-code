@@ -118,7 +118,7 @@ const DIST_FROM_ROOM: [[usize; 7]; 4] = [
 #[aoc(2021, 23)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         self.line
             .append(&mut block.trim().chars().collect::<Vec<char>>());
         Ok(())

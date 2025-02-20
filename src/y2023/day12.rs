@@ -15,7 +15,7 @@ pub struct Puzzle {
 #[aoc(2023, 12)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut tuple = (Vec::new(), Vec::new());
         for (i, segment) in block.split(' ').enumerate() {
             if i == 1 {

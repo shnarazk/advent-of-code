@@ -166,7 +166,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     /// }
     /// ```
     #[allow(unused_variables)]
-    fn insert(&mut self, s: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, s: &str) -> Result<(), ParseError> {
         Ok(())
     }
     /// An optional function to wrap up initialization.
@@ -210,7 +210,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
         if !remains.is_empty() {
             for block in remains.split(Self::DELIMITER) {
                 if !block.is_empty() {
-                    instance.insert(block)?;
+                    instance.parse_block(block)?;
                 }
             }
         }

@@ -13,7 +13,7 @@ pub struct Puzzle {
 #[aoc(2023, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut vecs: [Vec<usize>; 2] = [Vec::new(), Vec::new()];
         for (i, segment) in block.split(':').nth(1).unwrap().split(" | ").enumerate() {
             vecs[i] = parser::to_usizes(segment, &[' ']).unwrap();

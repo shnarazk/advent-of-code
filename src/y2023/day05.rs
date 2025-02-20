@@ -28,7 +28,7 @@ fn parse_line(str: &mut &str) -> ModalResult<Vec<usize>> {
 #[aoc(2023, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         fn parse_block(str: &mut &str) -> ModalResult<Vec<(usize, usize, usize)>> {
             let _ = preceded(till_line_ending, newline).parse_next(str)?;
             let v: Vec<Vec<usize>> = separated(1.., parse_line, newline).parse_next(str)?;

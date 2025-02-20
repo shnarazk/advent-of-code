@@ -19,7 +19,7 @@ impl Default for Puzzle {
 #[aoc(2020, 5)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         if block.is_empty() {
             return Ok(());
         }

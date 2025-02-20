@@ -48,7 +48,7 @@ pub struct Puzzle {
 #[aoc(2023, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let v = block
             .split('~')
             .map(|s| parser::to_usizes(s, &[',']).unwrap())

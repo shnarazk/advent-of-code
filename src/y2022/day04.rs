@@ -19,7 +19,7 @@ fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, usize, usize)> {
 #[aoc(2022, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let s = block.to_string();
         let p = &mut s.as_str();
         self.line.push(parse_line(p)?);

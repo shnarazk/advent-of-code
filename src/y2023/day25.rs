@@ -24,7 +24,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let b = block.split(": ").collect::<Vec<&str>>();
         let others = b[1].split(' ').map(|s| s.to_string()).collect::<Vec<_>>();
         self.names.insert(b[0].to_string());

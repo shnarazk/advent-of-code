@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         self.expr.push(block.to_string());
         Ok(())
     }

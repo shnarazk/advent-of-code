@@ -61,7 +61,7 @@ pub struct Puzzle {
 #[aoc(2018, 22)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn end_of_data(&mut self) {

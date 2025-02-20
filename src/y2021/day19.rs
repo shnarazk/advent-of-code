@@ -228,7 +228,7 @@ impl Puzzle {
 #[aoc(2021, 19)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut v = Vec::new();
         for line in block.split('\n').skip(1) {
             if line.is_empty() {

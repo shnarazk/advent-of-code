@@ -51,7 +51,7 @@ impl<'a> Module {
 #[aoc(2023, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let segment = block.split(" -> ").collect::<Vec<_>>();
         let mut label = segment[0].chars();
         let (module_type, module_name) = match label.next().unwrap() {

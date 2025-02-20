@@ -29,7 +29,7 @@ pub struct Puzzle {
 #[aoc(2015, 10)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut n = block.parse::<usize>()?;
         let mut vec: Vec<usize> = Vec::new();
         while 0 < n {

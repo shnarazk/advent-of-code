@@ -20,7 +20,7 @@ pub struct Puzzle {
 #[aoc(2023, 21)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         if let Some(i) = block.chars().enumerate().find(|(_, c)| *c == 'S') {
             self.start = (self.line.len(), i.0);
         }

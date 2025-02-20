@@ -184,7 +184,7 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
 #[aoc(2018, 20)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         // dbg!(block);
         self.line = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
         Ok(())

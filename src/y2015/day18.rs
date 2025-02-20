@@ -12,7 +12,7 @@ pub struct Puzzle {
 #[aoc(2015, 18)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         self.line.push(block.chars().collect::<Vec<char>>());
         Ok(())
     }

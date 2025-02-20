@@ -107,7 +107,7 @@ mod parser {
 #[aoc(2020, 4)]
 impl AdventOfCode for Puzzle {
     const DELIMITER: &'static str = "\n\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
         let mut dic: HashMap<String, String> = HashMap::new();
         for kv in block.split_ascii_whitespace() {
             let k_v = kv.split(':').collect::<Vec<_>>();

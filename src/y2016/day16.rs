@@ -11,7 +11,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
     const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, _block: &str) -> Result<(), ParseError> {
+    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
         Ok(())
     }
     fn end_of_data(&mut self) {
