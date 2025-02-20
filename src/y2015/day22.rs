@@ -1,9 +1,6 @@
 //! <https://adventofcode.com/2015/day/22>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
 
@@ -98,19 +95,24 @@ impl Puzzle {
     }
 }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{combinator::seq, ModalResult, Parser},
+    };
+
+    pub fn parse(s: &mut &str) -> ModalResult<(usize, usize)> {
+        seq!(_: "Hit Points: ", parse_usize, _: "\nDamage: ", parse_usize).parse_next(s)
+    }
+}
+
 #[aoc(2015, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let hp = regex!(r"^Hit Points: (\d+)$");
-        let damage = regex!(r"^Damage: (\d+)$");
-        if let Ok(segment) = hp.captures(block).ok_or(ParseError) {
-            self.boss.hit_point = segment[1].parse::<usize>()?;
-        }
-        if let Ok(segment) = damage.captures(block).ok_or(ParseError) {
-            self.boss.damage = segment[1].parse::<usize>()?;
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (hp, damage) = parser::parse(&mut input.as_str())?;
+        self.boss.hit_point = hp;
+        self.boss.damage = damage;
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.player.hit_point = 49;
