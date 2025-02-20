@@ -29,25 +29,6 @@ pub mod y2024;
 
 pub use aoc_macro::aoc_arms;
 
-#[cfg(any(
-    feature = "y2023",
-    feature = "y2022",
-    feature = "y2021",
-    feature = "y2020",
-    feature = "y2019",
-    feature = "y2018",
-    feature = "y2017",
-    feature = "y2016",
-    feature = "y2015",
-))]
-#[macro_export]
-macro_rules! regex {
-    ($re:literal $(,)?) => {{
-        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-        RE.get_or_init(|| regex::Regex::new($re).unwrap())
-    }};
-}
-
 ///
 /// ```
 /// use adventofcode::progress;
