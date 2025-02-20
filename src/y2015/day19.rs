@@ -1,13 +1,7 @@
 //! <https://adventofcode.com/2015/day/19>
 use {
-    crate::{
-        // color,
-        framework::{aoc, AdventOfCode, ParseError},
-        regex,
-    },
-    regex::Regex,
-    std::collections::HashMap,
-    std::collections::HashSet,
+    crate::framework::{aoc, AdventOfCode, ParseError},
+    std::collections::{hash_map::Entry, HashMap, HashSet},
 };
 
 #[derive(Clone, Debug, Default)]
@@ -18,59 +12,64 @@ pub struct Puzzle {
     rule: Vec<(String, Vec<String>)>,
 }
 
-fn parse_atoms(mut stream: Vec<String>, line: &str) -> Vec<String> {
-    let atom = regex!(r"^([A-Z][^A-Z]*)(.*)$");
-    if let Some(segment) = atom.captures(line) {
-        stream.push(segment[1].to_string());
-        return parse_atoms(stream, &segment[2]);
+mod parser {
+    use winnow::{
+        ascii::newline,
+        combinator::{repeat, separated, seq},
+        token::one_of,
+        ModalResult, Parser,
+    };
+
+    fn parse_atom(s: &mut &str) -> ModalResult<String> {
+        (
+            one_of(|c: char| c.is_ascii_uppercase() || c == 'e'),
+            repeat(0.., one_of(|c: char| c.is_ascii_lowercase())),
+        )
+            .map(|(c, v): (char, Vec<char>)| {
+                let mut s = String::new();
+                s.push(c);
+                v.iter().for_each(|c| {
+                    s.push(*c);
+                });
+                s
+            })
+            .parse_next(s)
     }
-    stream
+
+    fn parse_rule(s: &mut &str) -> ModalResult<(String, Vec<String>)> {
+        seq!(parse_atom, _: " => ", repeat(1.., parse_atom)).parse_next(s)
+    }
+
+    #[allow(clippy::type_complexity)]
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(String, Vec<String>)>, Vec<String>)> {
+        seq!(
+            separated(1.., parse_rule, newline),
+            _: "\n\n",
+            repeat(1.., parse_atom)
+        )
+        .parse_next(s)
+    }
 }
 
 #[aoc(2015, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let rule = regex!(r"^([A-Z][a-zA-Z]*) => ([A-Z][a-zA-Z]*)$");
-        let bigbang = regex!(r"^e => ([A-Z][a-zA-Z]*)$");
-        let string = regex!(r"^([A-Z][a-zA-Z]+)$");
-        if let Some(segment) = rule.captures(block) {
-            let prec = parse_atoms(Vec::new(), &segment[1]);
-            let post = parse_atoms(Vec::new(), &segment[2]);
-            assert!(prec.len() == 1, "{:?}", prec);
-            for w in prec.iter() {
-                if !self.dic.contains_key(w) {
-                    self.dic.insert(w.to_string(), self.num_atom);
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        let (rules, medicine) = parser::parse(&mut input.as_str())?;
+        self.rule = rules;
+        self.line = medicine;
+        for (from, tos) in self.rule.iter() {
+            if let Entry::Vacant(entry) = self.dic.entry(from.clone()) {
+                entry.insert(self.num_atom);
+                self.num_atom += 1;
+            }
+            for to in tos.iter() {
+                if let Entry::Vacant(entry) = self.dic.entry(to.clone()) {
+                    entry.insert(self.num_atom);
                     self.num_atom += 1;
                 }
             }
-            for w in post.iter() {
-                if !self.dic.contains_key(w) {
-                    self.dic.insert(w.to_string(), self.num_atom);
-                    self.num_atom += 1;
-                }
-            }
-            self.rule.push((prec[0].to_string(), post));
-        } else if let Some(segment) = bigbang.captures(block) {
-            let post = parse_atoms(Vec::new(), &segment[1]);
-            for w in post.iter() {
-                if !self.dic.contains_key(w) {
-                    self.dic.insert(w.to_string(), self.num_atom);
-                    self.num_atom += 1;
-                }
-            }
-            self.rule.push(("e".to_string(), post));
-        } else if let Some(segment) = string.captures(block) {
-            let string = parse_atoms(Vec::new(), &segment[0]);
-            for w in string.iter() {
-                if !self.dic.contains_key(w) {
-                    self.dic.insert(w.to_string(), self.num_atom);
-                    self.num_atom += 1;
-                }
-            }
-            self.line = string;
         }
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.dic.insert("e".to_string(), self.num_atom);
@@ -131,7 +130,6 @@ impl AdventOfCode for Puzzle {
         let mut counter = 0;
         for _ in 0..56 {
             for (from, pat) in unique_terminators.iter() {
-                let re = Regex::new(pat).unwrap();
                 let c = counter;
                 counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
                 if c != counter {
@@ -139,7 +137,7 @@ impl AdventOfCode for Puzzle {
                     //     .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
                     //     .to_string();
                     // println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
-                    m = re.replace_all(&m, from).to_string();
+                    m = m.replace(pat, from);
                 }
             }
         }
@@ -224,7 +222,6 @@ impl AdventOfCode for Puzzle {
         let mut counter = 0;
         for _ in 0..56 {
             for (from, pat) in unique_terminators.iter() {
-                let re = Regex::new(pat).unwrap();
                 let c = counter;
                 counter += (0..m.len()).filter(|i| m[*i..].starts_with(pat)).count();
                 if c != counter {
@@ -232,7 +229,8 @@ impl AdventOfCode for Puzzle {
                     //     .replace_all(&m, format!("{}{}{}", color::RED, pat, color::RESET))
                     //     .to_string();
                     // println!("{:>3};{:>8} => {:<2}: {}", counter, pat, from, p);
-                    m = re.replace_all(&m, from).to_string();
+                    // m = re.replace_all(&m, from).to_string();
+                    m = m.replace(pat, from);
                 }
             }
         }
