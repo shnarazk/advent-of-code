@@ -108,8 +108,8 @@ mod parser {
 
 #[aoc(2015, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (hp, damage) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (hp, damage) = parser::parse(&mut input)?;
         self.boss.hit_point = hp;
         self.boss.damage = damage;
         Self::parsed()

@@ -28,7 +28,7 @@ pub struct Puzzle {
 
 #[aoc(2015, 10)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         let mut n = s.trim().parse::<usize>()?;
         while 0 < n {
             self.line.push(n % 10);

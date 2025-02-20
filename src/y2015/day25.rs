@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/25>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{aoc_at, AdventOfCode};
 
 fn at(j: usize, i: usize) -> usize {
     (1..j + i - 1).sum::<usize>() + i
@@ -21,10 +21,6 @@ pub struct Puzzle {}
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse(&mut self, _block: String) -> Result<String, ParseError> {
-        Self::parsed()
-    }
     fn end_of_data(&mut self) {
         // for j in 1..=6 {
         //     for i in 1..=6 {

@@ -14,7 +14,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         for l in s.lines() {
             let mut after = l
                 .chars()

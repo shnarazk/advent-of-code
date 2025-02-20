@@ -28,8 +28,7 @@ fn to_basement(vec: &[char], level: isize) -> isize {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn parse(&mut self, block: String) -> Result<String, ParseError> {
+    fn parse(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
         Self::parsed()
     }

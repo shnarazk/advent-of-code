@@ -25,9 +25,8 @@ mod parser {
 }
 #[aoc(2015, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse(&mut self, block: String) -> Result<String, ParseError> {
-        self.line = parser::parse(&mut block.as_str())?;
+    fn parse(&mut self, mut block: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut block)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
