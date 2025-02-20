@@ -28,17 +28,14 @@ pub struct Puzzle {
 
 #[aoc(2015, 10)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut n = block.parse::<usize>()?;
-        let mut vec: Vec<usize> = Vec::new();
+    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+        let mut n = s.trim().parse::<usize>()?;
         while 0 < n {
-            vec.push(n % 10);
+            self.line.push(n % 10);
             n /= 10;
         }
-        vec.reverse();
-        self.line = vec;
-        Ok(())
+        self.line.reverse();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.iterate(self.line.clone(), 40)

@@ -14,38 +14,39 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut after = block
-            .chars()
-            .map(|c| {
-                if c == '-' || c.is_ascii_digit() {
-                    c
-                } else {
-                    ' '
-                }
-            })
-            .collect::<String>();
-        after = after.trim().to_string();
-        self.line.push(
-            after
-                .split(' ')
-                .filter(|s| !s.is_empty())
-                .map(|s| {
-                    if s.starts_with('-') {
-                        -s.chars()
-                            .skip(1)
-                            .collect::<String>()
-                            .parse::<isize>()
-                            .unwrap()
+    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+        for l in s.lines() {
+            let mut after = l
+                .chars()
+                .map(|c| {
+                    if c == '-' || c.is_ascii_digit() {
+                        c
                     } else {
-                        s.parse::<isize>().unwrap()
+                        ' '
                     }
                 })
-                .collect::<Vec<isize>>(),
-        );
-        self.raw.push(block.to_string());
-        Ok(())
+                .collect::<String>();
+            after = after.trim().to_string();
+            self.line.push(
+                after
+                    .split(' ')
+                    .filter(|s| !s.is_empty())
+                    .map(|s| {
+                        if s.starts_with('-') {
+                            -s.chars()
+                                .skip(1)
+                                .collect::<String>()
+                                .parse::<isize>()
+                                .unwrap()
+                        } else {
+                            s.parse::<isize>().unwrap()
+                        }
+                    })
+                    .collect::<Vec<isize>>(),
+            );
+            self.raw.push(l.to_string());
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut num: isize = 0;

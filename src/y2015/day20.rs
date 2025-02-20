@@ -1,15 +1,11 @@
 //! <https://adventofcode.com/2015/day/20>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{aoc, AdventOfCode};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {}
 
 #[aoc(2015, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn part1(&mut self) -> Self::Output1 {
         const INPUT: usize = 34000000;
         for n in 2..INPUT {
