@@ -23,7 +23,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
     fn parse_block(&mut self, _: &str) -> Result<(), ParseError> {
         Ok(())
     }

@@ -25,11 +25,12 @@ pub struct Puzzle {
 
 #[aoc(2017, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let v = parser::to_usizes(block, &['/'])?;
-        self.line.push((v[0], v[1]));
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let v = parser::to_usizes(l, &['/'])?;
+            self.line.push((v[0], v[1]));
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.maximize_bridge(Bridge::default())
