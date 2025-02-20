@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/15>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     core::cmp::Reverse,
     std::collections::{BinaryHeap, HashMap, HashSet},
 };
@@ -300,11 +300,9 @@ impl Puzzle {
 
 #[aoc(2018, 15)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input.lines().map(|line| line.as_bytes().to_vec()).collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let mut count = 1;

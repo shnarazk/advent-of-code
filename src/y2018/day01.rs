@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/1>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         parser,
     },
     std::collections::HashSet,
@@ -16,10 +16,11 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(parser::to_isize(block)?);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            self.line.push(parser::to_isize(l)?);
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().copied().sum::<isize>()

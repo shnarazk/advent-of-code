@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/11>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         geometric::Dim2,
     },
     std::collections::HashMap,
@@ -17,10 +17,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.grid_serial_number = block.parse::<usize>()?;
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.grid_serial_number = input.trim().parse::<usize>()?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let map = self.build_value_power_level_map();

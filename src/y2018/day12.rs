@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/12>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::{HashMap, HashSet},
 };
 
@@ -17,9 +17,9 @@ mod parser {
         super::Rules,
         std::collections::HashMap,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, repeat, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -56,18 +56,18 @@ mod parser {
 
 #[aoc(2018, 12)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (data, rules) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (data, rules) = parser::parse(&mut input)?;
         self.line = data;
         self.rules = rules;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut gen: HashSet<isize> = HashSet::new();
+        let mut cur_gen: HashSet<isize> = HashSet::new();
         let mut new_gen: HashSet<isize> = HashSet::new();
         for (i, b) in self.line.iter().enumerate() {
             if *b {
-                gen.insert(i as isize);
+                cur_gen.insert(i as isize);
             }
         }
         // print!(" 0: ");
@@ -76,20 +76,20 @@ impl AdventOfCode for Puzzle {
         // }
         // println!();
         for _g in 1..=20 {
-            let left: isize = *gen.iter().min().unwrap_or(&0);
-            let right: isize = *gen.iter().max().unwrap_or(&0);
+            let left: isize = *cur_gen.iter().min().unwrap_or(&0);
+            let right: isize = *cur_gen.iter().max().unwrap_or(&0);
             for i in left - 4..=right + 4 {
                 if let Some(true) = self.rules.get(&vec![
-                    gen.contains(&(i - 2)),
-                    gen.contains(&(i - 1)),
-                    gen.contains(&i),
-                    gen.contains(&(i + 1)),
-                    gen.contains(&(i + 2)),
+                    cur_gen.contains(&(i - 2)),
+                    cur_gen.contains(&(i - 1)),
+                    cur_gen.contains(&i),
+                    cur_gen.contains(&(i + 1)),
+                    cur_gen.contains(&(i + 2)),
                 ]) {
                     new_gen.insert(i);
                 }
             }
-            std::mem::swap(&mut gen, &mut new_gen);
+            std::mem::swap(&mut cur_gen, &mut new_gen);
             new_gen.clear();
             // print!("{g:>2}: ");
             // for i in left - 4..right + 4 {
@@ -97,14 +97,14 @@ impl AdventOfCode for Puzzle {
             // }
             // println!();
         }
-        gen.iter().sum::<isize>() as usize
+        cur_gen.iter().sum::<isize>() as usize
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut gen: HashSet<isize> = HashSet::new();
+        let mut cur_gen: HashSet<isize> = HashSet::new();
         let mut new_gen: HashSet<isize> = HashSet::new();
         for (i, b) in self.line.iter().enumerate() {
             if *b {
-                gen.insert(i as isize);
+                cur_gen.insert(i as isize);
             }
         }
         // print!(" 0: ");
@@ -114,20 +114,20 @@ impl AdventOfCode for Puzzle {
         // println!();
         // It's glider.
         for _g in 1..=90 {
-            let left: isize = *gen.iter().min().unwrap_or(&0);
-            let right: isize = *gen.iter().max().unwrap_or(&0);
+            let left: isize = *cur_gen.iter().min().unwrap_or(&0);
+            let right: isize = *cur_gen.iter().max().unwrap_or(&0);
             for i in left - 4..=right + 4 {
                 if let Some(true) = self.rules.get(&vec![
-                    gen.contains(&(i - 2)),
-                    gen.contains(&(i - 1)),
-                    gen.contains(&i),
-                    gen.contains(&(i + 1)),
-                    gen.contains(&(i + 2)),
+                    cur_gen.contains(&(i - 2)),
+                    cur_gen.contains(&(i - 1)),
+                    cur_gen.contains(&i),
+                    cur_gen.contains(&(i + 1)),
+                    cur_gen.contains(&(i + 2)),
                 ]) {
                     new_gen.insert(i);
                 }
             }
-            std::mem::swap(&mut gen, &mut new_gen);
+            std::mem::swap(&mut cur_gen, &mut new_gen);
             new_gen.clear();
             // print!("{g:>2}: ");
             // for i in -10..140 {
@@ -136,6 +136,6 @@ impl AdventOfCode for Puzzle {
             // println!();
         }
         let remain = 50000000000 - 90;
-        gen.iter().sum::<isize>() as usize + gen.len() * remain
+        cur_gen.iter().sum::<isize>() as usize + cur_gen.len() * remain
     }
 }

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/25>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         parser,
     },
     std::collections::HashMap,
@@ -16,10 +16,11 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(parser::to_isizes(block, &[','])?);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            self.line.push(parser::to_isizes(l, &[','])?);
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut constellation: HashMap<usize, usize> = HashMap::new();

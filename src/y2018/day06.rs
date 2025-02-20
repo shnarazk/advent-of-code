@@ -1,16 +1,14 @@
 //! <https://adventofcode.com/2018/day/6>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::collections::{HashMap, HashSet},
 };
 
 macro_rules! mdist {
-    ($a: expr, $b: expr) => {{
-        $a.0.abs_diff($b.0) + $a.1.abs_diff($b.1)
-    }};
+    ($a: expr, $b: expr) => {{ $a.0.abs_diff($b.0) + $a.1.abs_diff($b.1) }};
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -20,11 +18,12 @@ pub struct Puzzle {
 
 #[aoc(2018, 6)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let v = parser::to_usizes(block, &[' ', ','])?;
-        self.line.push((v[1], v[0]));
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let v = parser::to_usizes(l, &[' ', ','])?;
+            self.line.push((v[1], v[0]));
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.line.iter().map(|(y, _)| *y).min().expect("strange");
