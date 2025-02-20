@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2015/day/15>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    parser, regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Ingredient {
@@ -19,23 +16,42 @@ pub struct Puzzle {
     line: Vec<Ingredient>,
 }
 
+mod parser {
+    use {
+        super::Ingredient,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::{alpha1, newline},
+            combinator::{separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_ingredient(s: &mut &str) -> ModalResult<Ingredient> {
+        seq!(alpha1, _: ": capacity ", parse_isize, _: ", durability ", parse_isize, _: ", flavor ", parse_isize, _: ", texture ", parse_isize, _: ", calories ", parse_isize)
+            .map(
+                |(name, capacity, durability, flavor, texture, calories)| Ingredient {
+                    name: name.to_string(),
+                    capacity,
+                    durability,
+                    flavor,
+                    texture,
+                    calories,
+                },
+            )
+            .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Ingredient>> {
+        separated(1.., parse_ingredient, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 15)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let parser = regex!(
-            r"^([A-Za-z]+): capacity (-?[0-9]+), durability (-?[0-9]+), flavor (-?[0-9]+), texture (-?[0-9]+), calories (-?[0-9]+)$"
-        );
-        let segment = parser.captures(block).ok_or(ParseError)?;
-        self.line.push(Ingredient {
-            name: segment[1].to_string(),
-            capacity: parser::to_isize(&segment[2])?,
-            durability: parser::to_isize(&segment[3])?,
-            flavor: parser::to_isize(&segment[4])?,
-            texture: parser::to_isize(&segment[5])?,
-            calories: parser::to_isize(&segment[6])?,
-        });
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut rank_max: usize = 0;
