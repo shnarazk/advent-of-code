@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/17>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{aoc_at, AdventOfCode},
     md5::{Digest, Md5},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
@@ -16,10 +16,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = usize;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn end_of_data(&mut self) {
         self.line = String::from("gdjjyniy");
     }

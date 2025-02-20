@@ -21,20 +21,21 @@ pub struct Puzzle {
 
 #[aoc(2016, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut line = Vec::new();
-        let j = self.line.len();
-        for (i, c) in block.chars().enumerate() {
-            if c.is_ascii_digit() {
-                self.targets.push(((c as u8 - b'0') as usize, (j, i)));
-                line.push(true);
-            } else {
-                line.push(c == '.');
+    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+        for l in s.lines() {
+            let mut line = Vec::new();
+            let j = self.line.len();
+            for (i, c) in l.chars().enumerate() {
+                if c.is_ascii_digit() {
+                    self.targets.push(((c as u8 - b'0') as usize, (j, i)));
+                    line.push(true);
+                } else {
+                    line.push(c == '.');
+                }
             }
+            self.line.push(line);
         }
-        self.line.push(line);
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.height = self.line.len();

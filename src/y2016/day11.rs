@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/11>
 
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{aoc, AdventOfCode},
     std::collections::{BinaryHeap, HashSet},
 };
 
@@ -125,17 +125,12 @@ impl<const N: usize> State<N> {
         list.into_iter()
     }
 }
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Puzzle {
-    line: Vec<()>,
-}
+pub struct Puzzle {}
 
 #[aoc(2016, 11)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn part1(&mut self) -> Self::Output1 {
         // The 0 floor: a strontium G, a strontium M, a plutonium G, a plutonium M.
         // The 1 floor: a thulium G, a ruthenium G, a ruthenium M, a curium G, a curium M.

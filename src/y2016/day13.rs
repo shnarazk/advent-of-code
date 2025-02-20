@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/13>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{aoc, AdventOfCode},
         geometric,
     },
     std::{
@@ -19,10 +19,6 @@ pub struct Puzzle {
 
 #[aoc(2016, 13)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn end_of_data(&mut self) {
         self.line = 1364;
     }

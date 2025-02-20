@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/14>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{aoc, AdventOfCode},
     md5::{Digest, Md5},
     std::collections::VecDeque,
 };
@@ -12,10 +12,6 @@ pub struct Puzzle {
 
 #[aoc(2016, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn part1(&mut self) -> Self::Output1 {
         let limit = 64;
         let mut passed = 0;

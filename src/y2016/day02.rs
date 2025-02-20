@@ -13,10 +13,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.trim().chars().collect::<Vec<char>>());
-        Ok(())
+    fn parse(&mut self, s: String) -> Result<String, ParseError> {
+        self.line = s.lines().map(|l| l.chars().collect()).collect();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut key: Vec<usize> = Vec::new();
