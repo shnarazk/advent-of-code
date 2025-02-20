@@ -24,7 +24,7 @@ impl Puzzle {
 
 #[aoc(2024, 8)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.plane = input
             .split('\n')
             .filter(|l| !l.is_empty())

@@ -134,8 +134,8 @@ fn parse(s: &mut &str) -> ModalResult<(usize, usize, usize, Vec<u8>)> {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = usize;
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (r1, r2, r3, code) = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (r1, r2, r3, code) = parse(&mut input)?;
         self.reg = [r1, r2, r3];
         self.code = code;
         Self::parsed()

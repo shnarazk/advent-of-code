@@ -362,8 +362,8 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (wires, links) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (wires, links) = parser::parse(&mut input)?;
         self.input_wire = wires;
         let mut wire_names_tmp: FxHashSet<Wire> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();

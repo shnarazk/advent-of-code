@@ -506,9 +506,8 @@ fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Kind>>, Vec<Direction>)> {
 
 #[aoc(2024, 15)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let s = &mut input.as_str();
-        let (maze, moves) = parse(s)?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (maze, moves) = parse(&mut input)?;
         self.mapping = Rect::from_vec(maze);
         self.moves = moves;
         Self::parsed()

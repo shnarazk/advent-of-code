@@ -47,9 +47,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Setting>> {
 
 #[aoc(2024, 13)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let s = &mut input.as_str();
-        self.line = parse(s)?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {

@@ -46,8 +46,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Vec<bool>>>> {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let line = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let line = parse(&mut input)?;
         self.line = line.into_iter().map(Rect::from_vec).collect::<Vec<_>>();
         Self::parsed()
     }

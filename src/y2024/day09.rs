@@ -18,8 +18,8 @@ pub struct Puzzle {
 
 #[aoc(2024, 9)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::to_digits(input.as_str())?;
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = parser::to_digits(input)?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {

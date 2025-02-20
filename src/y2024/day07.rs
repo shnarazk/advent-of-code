@@ -32,9 +32,8 @@ mod parser {
 
 #[aoc(2024, 7)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let p = &mut input.as_str();
-        self.line = parser::parse(p)?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
