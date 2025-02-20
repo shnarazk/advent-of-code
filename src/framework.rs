@@ -129,42 +129,23 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
-    /// delimiter between data blocks
-    const DELIMITER: &'static str = "\n";
     /// A function used at the end of `parse` to declare to parse the input correctly
-    fn parsed() -> Result<String, ParseError> {
-        Ok("".to_string())
+    fn parsed() -> Result<(), ParseError> {
+        Ok(())
     }
     /// An optional function to parse all from the contents an input file.
     /// It must return the remains as `Ok(remains as String)`.
     /// In particular, it returns `Ok("")` if it parsed everything.
     /// ## A typical implementation example
     /// ```ignore
-    /// fn parse(&mut self, input: String) -> Result<String, ParseError> {
-    ///     self.line = parser::parse(&mut input.as_str());
+    /// fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    ///     self.line = parser::parse(&mut input);
     ///     Self.parsed()
     /// }
     /// ```
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        Ok(input)
+    fn parse(&mut self, mut _input: &str) -> Result<(), ParseError> {
+        Ok(())
     }
-    /// called by getting a new data block
-    /// ## A typical implementation example
-    /// ```ignore
-    /// fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    ///     let parser: Regex = Regex::new(r"^(down|up) ([0-9]+)$").expect("wrong");
-    ///     let segment = parser.captures(s).ok_or(ParseError)?;
-    ///     let num: usize = segment[2].parse::<usize>()?;
-    ///     let segment = match &segment[1] {
-    ///         "down" => Object::Down(num),
-    ///         "up" => Object::Up(num),
-    ///         _ => return;
-    ///     }
-    ///     self.data.push(segment);;
-    ///     self.num_data += 1;
-    ///     Ok(())
-    /// }
-    /// ```
     #[allow(unused_variables)]
     fn parse_block(&mut self, s: &str) -> Result<(), ParseError> {
         Ok(())
@@ -206,14 +187,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     fn run(config: ConfigAoC) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(config)?;
-        let remains = instance.parse(contents)?;
-        if !remains.is_empty() {
-            for block in remains.split(Self::DELIMITER) {
-                if !block.is_empty() {
-                    instance.parse_block(block)?;
-                }
-            }
-        }
+        instance.parse(contents.as_str())?;
         instance.end_of_data();
         Ok(instance)
     }
