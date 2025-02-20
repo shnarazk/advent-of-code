@@ -46,13 +46,13 @@ pub struct Puzzle {
 
 #[aoc(2017, 11)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = block
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .trim()
             .split(',')
             .map(|s| Direction::try_from(s).expect("parse error"))
             .collect::<Vec<_>>();
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut dir: (isize, isize) = (0, 0);

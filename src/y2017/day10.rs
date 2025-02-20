@@ -17,14 +17,10 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = parser::to_usizes(block, &[','])?;
-        self.strn = block.trim().to_string();
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line.len());
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = parser::to_usizes(input, &[','])?;
+        self.strn = input.trim().to_string();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let m: usize = 256;

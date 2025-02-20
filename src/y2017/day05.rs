@@ -9,10 +9,11 @@ pub struct Puzzle {
 
 #[aoc(2017, 5)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.parse::<isize>()?);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            self.line.push(l.parse::<isize>()?);
+        }
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.len = self.line.len();

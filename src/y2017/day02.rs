@@ -8,15 +8,22 @@ pub struct Puzzle {
 
 #[aoc(2017, 2)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(
-            block
-                .split_ascii_whitespace()
-                .map(|t| t.parse::<usize>().unwrap())
-                .collect::<Vec<_>>(),
-        );
-        Ok(())
+    fn parse(&mut self, block: &str) -> Result<(), ParseError> {
+        self.line = block
+            .lines()
+            .map(|l| {
+                l.split_ascii_whitespace()
+                    .map(|t| t.parse::<usize>().unwrap())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        // self.line.push(
+        //     block
+        //         .split_ascii_whitespace()
+        //         .map(|t| t.parse::<usize>().unwrap())
+        //         .collect::<Vec<_>>(),
+        // );
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line);

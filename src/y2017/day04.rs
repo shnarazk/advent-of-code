@@ -11,11 +11,12 @@ pub struct Puzzle {
 
 #[aoc(2017, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.chars().map(|c| c as u8).collect())
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().filter(|p| is_valid(p)).count()

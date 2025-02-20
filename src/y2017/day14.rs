@@ -11,10 +11,9 @@ pub struct Puzzle {
 
 #[aoc(2017, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = block.trim().to_string();
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input.trim().to_string();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut count: usize = 0;
