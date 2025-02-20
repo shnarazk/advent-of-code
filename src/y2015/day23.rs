@@ -1,8 +1,5 @@
 //! <https://adventofcode.com/2015/day/23>
-use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
-    parser, regex,
-};
+use crate::framework::{aoc, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Inst {
@@ -19,42 +16,41 @@ pub struct Puzzle {
     line: Vec<Inst>,
 }
 
+mod parser {
+    use {
+        super::Inst,
+        crate::parser::parse_isize,
+        winnow::{
+            ascii::newline,
+            combinator::{alt, separated, seq},
+            ModalResult, Parser,
+        },
+    };
+
+    fn parse_inst(s: &mut &str) -> ModalResult<Inst> {
+        alt((
+            seq!(_: "hlf ", alt(('a', 'b'))).map(|(a,)| Inst::Hlf(a as u8 - b'a')),
+            seq!(_: "tpl ", alt(('a', 'b'))).map(|(a,)| Inst::Tpl(a as u8 - b'a')),
+            seq!(_: "inc ", alt(('a', 'b'))).map(|(a,)| Inst::Inc(a as u8 - b'a')),
+            seq!(_: "jmp ", parse_isize).map(|(a,)| Inst::Jmp(a)),
+            seq!(_: "jie ", alt(('a', 'b')), _: ", ", parse_isize)
+                .map(|(a, b)| Inst::Jie(a as u8 - b'a', b)),
+            seq!(_: "jio ", alt(('a', 'b')), _: ", ", parse_isize)
+                .map(|(a, b)| Inst::Jio(a as u8 - b'a', b)),
+        ))
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<Inst>> {
+        separated(1.., parse_inst, newline).parse_next(s)
+    }
+}
+
 #[aoc(2015, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-        let hlf = regex!(r"^hlf ([ab])$");
-        let tpl = regex!(r"^tpl ([ab])$");
-        let inc = regex!(r"^inc ([ab])$");
-        let jmp = regex!(r"^jmp ([+-]?[0-9]+)$");
-        let jie = regex!(r"^jie ([ab]), ([+-]?[0-9]+)$");
-        let jio = regex!(r"^jio ([ab]), ([+-]?[0-9]+)$");
-        if let Ok(segment) = hlf.captures(block).ok_or(ParseError) {
-            self.line
-                .push(Inst::Hlf(segment[1].chars().next().unwrap() as u8 - b'a'));
-        } else if let Ok(segment) = tpl.captures(block).ok_or(ParseError) {
-            self.line
-                .push(Inst::Tpl(segment[1].chars().next().unwrap() as u8 - b'a'));
-        } else if let Ok(segment) = inc.captures(block).ok_or(ParseError) {
-            self.line
-                .push(Inst::Inc(segment[1].chars().next().unwrap() as u8 - b'a'));
-        } else if let Ok(segment) = jmp.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Jmp(parser::to_isize(&segment[1])?));
-        } else if let Ok(segment) = jie.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Jie(
-                segment[1].chars().next().unwrap() as u8 - b'a',
-                parser::to_isize(&segment[2])?,
-            ));
-        } else if let Ok(segment) = jio.captures(block).ok_or(ParseError) {
-            self.line.push(Inst::Jio(
-                segment[1].chars().next().unwrap() as u8 - b'a',
-                parser::to_isize(&segment[2])?,
-            ));
-        } else {
-            // dbg!(block);
-            return Err(ParseError);
-        }
-        Ok(())
+    fn parse(&mut self, input: String) -> Result<String, ParseError> {
+        self.line = parser::parse(&mut input.as_str())?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut reg: [usize; 2] = [0, 0];
