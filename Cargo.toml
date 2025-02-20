@@ -1,11 +1,11 @@
 [package]
 name = "adventofcode"
-version = "0.25.1"
+version = "0.25.2"
 authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
-edition = "2021"
+edition = "2024"
 autobins = false
 default-run = "adventofcode"
-rust-version = "1.83"
+rust-version = "1.85"
 
 [[bin]]
 name = "adventofcode"
