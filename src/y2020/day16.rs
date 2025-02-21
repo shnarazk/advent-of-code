@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2020/day/16>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 type Range = (String, usize, usize, usize, usize);
 
@@ -17,10 +17,10 @@ mod parser {
         super::Range,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
             token::take_until,
-            ModalResult, Parser,
         },
     };
 
@@ -59,8 +59,8 @@ mod parser {
 
 #[aoc(2020, 16)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (range, ticket, nearby) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (range, ticket, nearby) = parser::parse(&mut input)?;
         self.dic = range;
         self.ticket = ticket;
         self.samples = nearby;

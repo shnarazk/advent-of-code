@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2020/day/24>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -94,14 +94,12 @@ pub struct Puzzle {
 
 #[aoc(2020, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.flip(location(&dirs_from(block)));
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            self.flip(location(&dirs_from(l)));
+        }
+        Self::parsed()
     }
-    // fn insert(&mut self, loc: Location) {
-    //     self.flip(loc);
-    // }
     fn part1(&mut self) -> usize {
         self.count()
     }

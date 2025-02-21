@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/21>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         progress,
     },
     splr::*,
@@ -43,9 +43,9 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
+        ModalResult, Parser,
         ascii::{alpha1, newline},
         combinator::{separated, seq},
-        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<(Vec<String>, Vec<String>)> {
@@ -73,8 +73,8 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let data = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let data = parser::parse(&mut input)?;
         for (ingredients, allergens) in data {
             let mut num_ingredient = self.ingredients.len();
             for ing in ingredients.iter() {

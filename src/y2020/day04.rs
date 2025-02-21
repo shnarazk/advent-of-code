@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2020/day/4>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -13,24 +13,14 @@ const KEYS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
 
 impl Rule {
     fn check_keys(&self) -> bool {
-        self.dic
-            .keys()
-            .filter(|k| KEYS.contains(&k.as_str()))
-            .count()
-            == 7
+        KEYS.iter().all(|key| self.dic.contains_key(*key))
     }
     fn check_values(&self) -> bool {
-        let mut count = 0;
-        for key in &KEYS {
-            if let Some(val) = self.dic.get(key.to_owned()) {
-                if parser::valid(key, val) {
-                    count += 1;
-                } else {
-                    // dbg!((key, val));
-                }
-            }
-        }
-        KEYS.len() == count
+        KEYS.iter().all(|key| {
+            self.dic
+                .get(key.to_owned())
+                .is_some_and(|val| parser::valid(key, val))
+        })
     }
 }
 
@@ -43,9 +33,9 @@ mod parser {
     use {
         crate::parser::{parse_dec, parse_usize},
         winnow::{
+            ModalResult, Parser,
             combinator::{alt, repeat, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
     fn hexletter(s: &mut &str) -> ModalResult<char> {
@@ -57,7 +47,7 @@ mod parser {
     }
 
     fn parse_hair(s: &mut &str) -> ModalResult<Vec<char>> {
-        seq!(_:"#", repeat(5..=5, hexletter))
+        seq!(_: '#', repeat(6, hexletter))
             .map(|(s,)| s)
             .parse_next(s)
     }
@@ -67,38 +57,34 @@ mod parser {
     }
 
     fn parse_pid(s: &mut &str) -> ModalResult<usize> {
-        repeat(9..=9, parse_dec)
+        repeat(9, parse_dec)
             .map(|v: Vec<usize>| v.iter().fold(0, |acc, x| acc * 10 + x))
             .parse_next(s)
     }
 
-    pub fn valid(key: &str, val: &str) -> bool {
-        let s = val.to_string();
+    pub fn valid(key: &str, mut val: &str) -> bool {
         match key {
             "byr" => val
                 .parse::<usize>()
-                .map_or_else(|_| false, |y| (1920..=2002).contains(&y)),
+                .is_ok_and(|y| (1920..=2002).contains(&y)),
             "iyr" => val
                 .parse::<usize>()
-                .map_or_else(|_| false, |y| (2010..=2020).contains(&y)),
+                .is_ok_and(|y| (2010..=2020).contains(&y)),
             "eyr" => val
                 .parse::<usize>()
-                .map_or_else(|_| false, |y| (2020..=2030).contains(&y)),
-            "hgt" => parse_hight(&mut s.as_str()).map_or_else(
-                |_| false,
-                |(m, u)| {
-                    if u == "cm" {
-                        (150..=193).contains(&m)
-                    } else if u == "in" {
-                        (59..=76).contains(&m)
-                    } else {
-                        unreachable!()
-                    }
-                },
-            ),
-            "hcl" => parse_hair(&mut s.as_str()).is_ok(),
-            "ecl" => parse_eye(&mut s.as_str()).is_ok(),
-            "pid" => parse_pid(&mut s.as_str()).is_ok(),
+                .is_ok_and(|y| (2020..=2030).contains(&y)),
+            "hgt" => parse_hight(&mut val).is_ok_and(|(m, u)| {
+                if u == "cm" {
+                    (150..=193).contains(&m)
+                } else if u == "in" {
+                    (59..=76).contains(&m)
+                } else {
+                    unreachable!()
+                }
+            }),
+            "hcl" => val.len() == 7 && parse_hair(&mut val).is_ok(),
+            "ecl" => val.len() == 3 && parse_eye(&mut val).is_ok(),
+            "pid" => val.len() == 9 && parse_pid(&mut val).is_ok(),
             _ => unreachable!(),
         }
     }
@@ -106,20 +92,29 @@ mod parser {
 
 #[aoc(2020, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut dic: HashMap<String, String> = HashMap::new();
-        for kv in block.split_ascii_whitespace() {
-            let k_v = kv.split(':').collect::<Vec<_>>();
-            dic.insert(k_v[0].to_string(), k_v[1].to_string());
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input
+            .split("\n\n")
+            .map(|l| l.trim())
+            .filter(|l| !l.is_empty())
+        {
+            let mut dic: HashMap<String, String> = HashMap::new();
+            for kv in l.split_ascii_whitespace() {
+                let k_v = kv.split(':').collect::<Vec<_>>();
+                dic.insert(k_v[0].to_string(), k_v[1].to_string());
+            }
+            self.entry.push(Rule { dic });
         }
-        self.entry.push(Rule { dic });
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         self.entry.iter().filter(|r| r.check_keys()).count()
     }
     fn part2(&mut self) -> usize {
-        self.entry.iter().filter(|r| r.check_values()).count()
+        self.entry
+            .iter()
+            .filter(|r| r.check_keys())
+            .filter(|r| r.check_values())
+            .count()
     }
 }

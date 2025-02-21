@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/15>
 #![allow(unused_imports)]
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -14,14 +14,16 @@ pub struct Puzzle {
 
 #[aoc(2020, 15)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = ",";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        if let Ok(n) = block.trim().parse::<usize>() {
-            self.clock += 1;
-            *self.dic.entry(n).or_insert(0) = self.clock;
-            self.last = n;
+    // const DELIMITER: &'static str = ",";
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for block in input.split(',') {
+            if let Ok(n) = block.trim().parse::<usize>() {
+                self.clock += 1;
+                *self.dic.entry(n).or_insert(0) = self.clock;
+                self.last = n;
+            }
         }
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         self.run_to(2020)

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/19>
 
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -29,10 +29,10 @@ mod parser {
         super::Rule,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, repeat, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 
@@ -81,8 +81,8 @@ mod parser {
 
 #[aoc(2020, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (rules, messages) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (rules, messages) = parser::parse(&mut input)?;
         let r = rules.iter().cloned().collect::<HashMap<usize, Rule>>();
         self.rule = r;
         self.message = messages;

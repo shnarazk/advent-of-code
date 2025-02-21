@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2020/day/25>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc_at};
 
 #[derive(Clone, Debug, Default)]
 pub struct Puzzle {
@@ -11,14 +11,14 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        if self.card == 0 {
-            self.card = block.parse::<usize>().unwrap();
-        } else {
-            self.door = block.parse::<usize>().unwrap();
-        }
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        let l = input
+            .lines()
+            .map(|s| s.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+        self.card = l[0];
+        self.door = l[1];
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         day25(5764801, 17807724);

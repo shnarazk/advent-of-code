@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2020/day/20>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::ops::Index,
 };
 
@@ -22,10 +22,10 @@ mod parser {
         super::Tile,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{repeat, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 
@@ -47,8 +47,8 @@ mod parser {
 
 #[aoc(2020, 20)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.tile = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.tile = parser::parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> usize {
@@ -170,11 +170,7 @@ impl Tile {
     /// ```
     pub fn transpose(&self, n: usize, flip: usize) -> [usize; 4] {
         let rot = |x, r| {
-            if r {
-                flip_bits(self.len, x)
-            } else {
-                x
-            }
+            if r { flip_bits(self.len, x) } else { x }
         };
         // rotate part
         let mut result = [0; 4];

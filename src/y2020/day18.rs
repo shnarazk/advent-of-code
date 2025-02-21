@@ -1,11 +1,11 @@
 //! <https://adventofcode.com/2020/day/18>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     winnow::{
+        ModalResult, Parser,
         ascii::{dec_int, space0},
         combinator::alt,
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -35,10 +35,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.expr.push(block.to_string());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.expr = input.lines().map(|l| l.to_string()).collect();
+        Self::parsed()
     }
     fn part1(&mut self) -> isize {
         let mut result = 0;

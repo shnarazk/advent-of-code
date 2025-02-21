@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2020/day/5>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Puzzle {
@@ -18,27 +18,25 @@ impl Default for Puzzle {
 
 #[aoc(2020, 5)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        if block.is_empty() {
-            return Ok(());
-        }
-        let chs = block.chars().collect::<Vec<char>>();
-        let row = chs[..7]
-            .iter()
-            .map(|c| (*c == 'B') as usize)
-            .fold(0, |t, n| t * 2 + n);
-        let col = chs[7..]
-            .iter()
-            .map(|c| (*c == 'R') as usize)
-            .fold(0, |t, n| t * 2 + n);
-        let sid = row * 8 + col;
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let chs = l.chars().collect::<Vec<char>>();
+            let row = chs[..7]
+                .iter()
+                .map(|c| (*c == 'B') as usize)
+                .fold(0, |t, n| t * 2 + n);
+            let col = chs[7..]
+                .iter()
+                .map(|c| (*c == 'R') as usize)
+                .fold(0, |t, n| t * 2 + n);
+            let sid = row * 8 + col;
 
-        self.seats[sid] = true;
-        if self.max_sid < sid {
-            self.max_sid = sid;
+            self.seats[sid] = true;
+            if self.max_sid < sid {
+                self.max_sid = sid;
+            }
         }
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         self.max_sid

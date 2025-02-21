@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2020/day/17>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim2,
     },
     std::{collections::HashSet, hash::Hash},
@@ -15,11 +15,12 @@ pub struct Puzzle {
 
 #[aoc(2020, 17)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| line.chars().map(|c| c == '#').collect::<Vec<_>>())
+            .collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let offset_y = ((self.line.len() - 1) / 2) as isize;
