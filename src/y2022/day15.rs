@@ -1,15 +1,15 @@
 //! <https://adventofcode.com/2022/day/15>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim2,
         parser::parse_isize,
     },
     std::collections::HashSet,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
-        ModalResult, Parser,
     },
 };
 
@@ -99,8 +99,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(Loc, Loc)>> {
 
 #[aoc(2022, 15)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -108,13 +108,13 @@ impl AdventOfCode for Puzzle {
         let mut on_target: HashSet<isize> = HashSet::new();
         let mut bands = Vec::new();
         for p in self.line.iter() {
-            if let Some(len) = mdist(&p.0, &p.1).checked_sub(p.0 .1.abs_diff(target)) {
-                let range_on_target = (p.0 .0 - len as isize, p.0 .0 + len as isize);
+            if let Some(len) = mdist(&p.0, &p.1).checked_sub(p.0.1.abs_diff(target)) {
+                let range_on_target = (p.0.0 - len as isize, p.0.0 + len as isize);
                 // println!("{i}-th{:?}:range {:?}", p.0, &range_on_target);
                 bands.push(range_on_target);
             }
-            if p.1 .1 == target {
-                on_target.insert(p.1 .0);
+            if p.1.1 == target {
+                on_target.insert(p.1.0);
             }
         }
         bands.sort();

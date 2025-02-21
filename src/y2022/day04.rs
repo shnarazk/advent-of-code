@@ -1,10 +1,10 @@
 //! <https://adventofcode.com/2022/day/4>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
-    winnow::{combinator::seq, ModalResult, Parser},
+    winnow::{ModalResult, Parser, combinator::seq},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -18,12 +18,11 @@ fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, usize, usize)> {
 
 #[aoc(2022, 4)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let s = block.to_string();
-        let p = &mut s.as_str();
-        self.line.push(parse_line(p)?);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for mut l in input.lines() {
+            self.line.push(parse_line(&mut l)?);
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

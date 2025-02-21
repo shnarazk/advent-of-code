@@ -2,16 +2,16 @@
 use {
     crate::{
         // color,
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, Vec2},
         parser::parse_usize,
     },
     std::collections::HashMap,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{alt, repeat, separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -163,16 +163,16 @@ impl Seeker {
                         let to = affine.get(&self.jump_parameters()).unwrap();
                         let offset = self.position_in_plane();
                         let new_position = (
-                            to.0 .0 * self.plane_size
-                                + match to.1 .0 {
+                            to.0.0 * self.plane_size
+                                + match to.1.0 {
                                     -1 => self.plane_size - offset - 1,
                                     0 => 0,
                                     1 => offset,
                                     2 => self.plane_size - 1,
                                     _ => unreachable!(),
                                 },
-                            to.0 .1 * self.plane_size
-                                + match to.1 .1 {
+                            to.0.1 * self.plane_size
+                                + match to.1.1 {
                                     -1 => self.plane_size - offset - 1,
                                     0 => 0,
                                     1 => offset,
@@ -253,7 +253,7 @@ fn parse_maze_line(s: &mut &str) -> ModalResult<Vec<char>> {
 
 fn parse_maze(s: &mut &str) -> ModalResult<Vec<Vec<char>>> {
     separated(1.., parse_maze_line, newline)
-        .map(|v| dbg!(v))
+        .map(|v| v)
         .parse_next(s)
 }
 
@@ -267,7 +267,7 @@ fn parse_direction(s: &mut &str) -> ModalResult<Direction> {
 }
 
 fn parse_directions(s: &mut &str) -> ModalResult<Vec<Direction>> {
-    repeat(1.., parse_direction).map(|v| dbg!(v)).parse_next(s)
+    repeat(1.., parse_direction).map(|v| v).parse_next(s)
 }
 
 fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<char>>, Vec<Direction>)> {
@@ -276,8 +276,8 @@ fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<char>>, Vec<Direction>)> {
 
 #[aoc(2022, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (maze, moves) = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (maze, moves) = parse(&mut input)?;
         self.line = maze;
         self.path = moves;
         Self::parsed()

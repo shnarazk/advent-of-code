@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2022/day/3>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -11,26 +11,17 @@ pub struct Puzzle {
 
 #[aoc(2022, 3)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let v = block.chars().map(|c| c as u8).collect::<Vec<u8>>();
-        let len = v.len();
-        self.line
-            .push((v[0..len / 2].to_vec(), v[len / 2..len].to_vec()));
-        // println!(
-        //     "{}({}) => {}, {}",
-        //     block,
-        //     len,
-        //     v[0..len / 2].iter().map(|c| *c as char).collect::<String>(),
-        //     v[len / 2..len]
-        //         .iter()
-        //         .map(|c| *c as char)
-        //         .collect::<String>(),
-        // );
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| {
+                let v = l.trim().chars().map(|c| c as u8).collect::<Vec<_>>();
+                let len = v.len();
+                let (left, right) = v.split_at(len / 2);
+                (left.to_vec(), right.to_vec())
+            })
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut count = 0;

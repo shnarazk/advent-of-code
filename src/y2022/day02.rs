@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2022/day/2>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -8,14 +8,15 @@ pub struct Puzzle {
 
 #[aoc(2022, 2)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let chars = block.chars().collect::<Vec<_>>();
-        self.line.push((chars[0], chars[2]));
-        Ok(())
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| {
+                let chars = l.chars().collect::<Vec<_>>();
+                (chars[0], chars[2])
+            })
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         #[allow(clippy::identity_op)]

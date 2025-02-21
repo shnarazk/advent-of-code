@@ -1,13 +1,13 @@
 //! <https://adventofcode.com/2022/day/13>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     std::cmp::Ordering,
     winnow::{
-        combinator::{alt, separated},
         ModalResult, Parser,
+        combinator::{alt, separated},
     },
 };
 
@@ -75,13 +75,18 @@ pub struct Puzzle {
 
 #[aoc(2022, 13)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut lines = block.split('\n').collect::<Vec<_>>();
-        self.line.push((
-            parse_expr(&mut lines[0]).expect("!!!!"),
-            parse_expr(&mut lines[1]).expect("!!!!"),
-        ));
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .split("\n\n")
+            .filter(|block| !block.is_empty())
+            .map(|block| {
+                let mut lines = block.lines().collect::<Vec<_>>();
+                (
+                    parse_expr(&mut lines[0]).unwrap(),
+                    parse_expr(&mut lines[1]).unwrap(),
+                )
+            })
+            .collect();
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {

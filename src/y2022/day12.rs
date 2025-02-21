@@ -2,7 +2,7 @@
 
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric,
     },
     std::{
@@ -28,19 +28,20 @@ struct State {
 
 #[aoc(2022, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(
-            block
-                .chars()
-                .map(|c| match c {
-                    'S' => 1000,
-                    'E' => 2000,
-                    _ => c as usize - 'a' as usize,
-                })
-                .collect::<Vec<_>>(),
-        );
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| {
+                line.chars()
+                    .map(|c| match c {
+                        'S' => 1000,
+                        'E' => 2000,
+                        _ => c as usize - 'a' as usize,
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {

@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2022/day/11>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     winnow::{
+        ModalResult, Parser,
         ascii::{newline, space1},
         combinator::{alt, separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -100,8 +100,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Monkey>> {
 
 #[aoc(2022, 11)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {

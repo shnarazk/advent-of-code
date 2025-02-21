@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2022/day/24>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
     },
     std::{
@@ -56,10 +56,12 @@ impl Puzzle {
 
 #[aoc(2022, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.chars().collect::<Vec<char>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| line.chars().collect::<Vec<char>>())
+            .collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.height = self.line.len() - 2;

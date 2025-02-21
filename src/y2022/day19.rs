@@ -2,15 +2,15 @@
 
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
         progress,
     },
     std::collections::{BinaryHeap, HashMap},
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
-        ModalResult, Parser,
     },
 };
 
@@ -182,8 +182,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize, usize, usize, us
 
 #[aoc(2022, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let line = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let line = parse(&mut input)?;
         self.line = line
             .iter()
             .map(|(n0, n1, n2, n3, n4, n5, n6)| Blueprint {

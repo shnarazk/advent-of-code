@@ -2,14 +2,14 @@
 use {
     crate::{
         array::rotate_clockwise,
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         parser::parse_usize,
     },
     std::collections::HashMap,
     winnow::{
+        ModalResult, Parser,
         ascii::{alpha1, newline, space1},
         combinator::{alt, separated, seq},
-        ModalResult, Parser,
     },
 };
 
@@ -59,8 +59,8 @@ fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (mc, moves) = parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (mc, moves) = parse(&mut input)?;
         let maze_config = rotate_clockwise(mc);
         for (n, config) in maze_config.iter().enumerate() {
             let stack = config.iter().flatten().cloned().collect::<Vec<_>>();

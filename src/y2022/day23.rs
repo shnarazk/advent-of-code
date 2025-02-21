@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2022/day/23>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
     },
     std::collections::{HashMap, HashSet},
@@ -17,11 +17,12 @@ pub struct Puzzle {
 
 #[aoc(2022, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c == '#').collect::<Vec<_>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.chars().map(|c| c == '#').collect())
+            .collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().rev().enumerate() {
