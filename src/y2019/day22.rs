@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2019/day/22>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Shuffle<const N: usize> {
@@ -58,9 +58,9 @@ mod parser {
         super::*,
         crate::parser::{parse_isize, parse_usize},
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -81,8 +81,8 @@ mod parser {
 
 #[aoc(2019, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/20>
 use crate::geometric::neighbors4;
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -39,11 +39,12 @@ impl Ord for State {
 
 #[aoc(2019, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.chars().map(|c| c as u8).collect::<Vec<u8>>())
+            .collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (y, l) in self.line.iter().enumerate() {
@@ -117,10 +118,11 @@ impl AdventOfCode for Puzzle {
             self.portal.insert(v[0].0, v[1].1);
             self.portal.insert(v[1].0, v[0].1);
         }
-        debug_assert!(self
-            .gate
-            .iter()
-            .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str())));
+        debug_assert!(
+            self.gate
+                .iter()
+                .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str()))
+        );
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

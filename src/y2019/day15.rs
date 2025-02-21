@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/15>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::{
@@ -109,10 +109,9 @@ impl From<isize> for Cell {
 
 #[aoc(2019, 15)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = parser::to_isizes(block, &[','])?;
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = parser::to_isizes(input, &[','])?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Location, Cell> = HashMap::new();

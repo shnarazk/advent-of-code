@@ -2,7 +2,7 @@
 use {
     crate::{
         color,
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
     },
     std::collections::{HashMap, VecDeque},
 };
@@ -16,9 +16,9 @@ mod parser {
     use {
         crate::parser::{parse_isize, parse_usize},
         winnow::{
+            ModalResult, Parser,
             combinator::{repeat_till, separated, seq},
             token::any,
-            ModalResult, Parser,
         },
     };
 
@@ -37,8 +37,8 @@ mod parser {
 
 #[aoc(2019, 25)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::parse_input(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse_input(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {

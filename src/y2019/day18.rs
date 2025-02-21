@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/18>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors4,
         progress,
     },
@@ -49,11 +49,14 @@ pub struct Puzzle {
 
 #[aoc(2019, 18)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c as u8).collect::<Vec<u8>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.chars().map(|c| c as u8).collect::<Vec<u8>>())
+            .collect();
+        // self.line
+        //     .push(input.chars().map(|c| c as u8).collect::<Vec<u8>>());
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (j, v) in self.line.iter().enumerate() {
