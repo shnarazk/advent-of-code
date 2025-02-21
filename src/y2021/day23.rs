@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/23>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         progress,
     },
     std::{
@@ -117,11 +117,12 @@ const DIST_FROM_ROOM: [[usize; 7]; 4] = [
 
 #[aoc(2021, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .append(&mut block.trim().chars().collect::<Vec<char>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .flat_map(|l| l.trim().chars().collect::<Vec<char>>())
+            .collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.line.retain(|c| *c != '#' && *c != '.');

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/4>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::borrow::Cow,
 };
 
@@ -48,9 +48,9 @@ mod parser {
         super::Board,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space0, space1},
             combinator::{preceded, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -82,8 +82,8 @@ mod parser {
 
 #[aoc(2021, 4)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (hands, boards) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (hands, boards) = parser::parse(&mut input)?;
         self.hands = hands;
         self.board = boards;
         Self::parsed()

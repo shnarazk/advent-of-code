@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2021/day/13>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 fn folding_x(vec: &[Vec<bool>], pos: usize) -> Vec<Vec<bool>> {
     let mut result: Vec<Vec<bool>> = Vec::new();
@@ -59,9 +59,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -93,8 +93,8 @@ mod parser {
 
 #[aoc(2021, 13)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let (dots, foldings) = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (dots, foldings) = parser::parse(&mut input)?;
         self.line = dots;
         self.folding = foldings;
         Self::parsed()

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/7>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     parser,
 };
 
@@ -11,10 +11,9 @@ pub struct Puzzle {
 
 #[aoc(2021, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.config = parser::to_usizes(block, &[','])?;
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.config = parser::to_usizes(input, &[','])?;
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let vec = &self.config;

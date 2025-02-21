@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/24>
 
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     std::{cmp::Ordering, fmt, fmt::Write},
 };
 
@@ -43,9 +43,9 @@ mod parser {
         super::{Inst, Opr},
         crate::parser::parse_isize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space1},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -89,8 +89,8 @@ impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
 
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
         Self::parsed()
     }
     fn end_of_data(&mut self) {

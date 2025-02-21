@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/9>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     geometric,
 };
 
@@ -34,16 +34,17 @@ impl Puzzle {
 
 #[aoc(2021, 9)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(
-            block
-                .trim()
-                .chars()
-                .map(|c| c.to_digit(10).unwrap() as usize)
-                .collect::<Vec<usize>>(),
-        );
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| {
+                line.trim()
+                    .chars()
+                    .map(|c| c.to_digit(10).unwrap() as usize)
+                    .collect::<Vec<usize>>()
+            })
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         // dbg!(&self.line);

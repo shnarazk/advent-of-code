@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/22>
 use std::collections::HashSet;
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     itertools::Itertools,
     std::collections::HashMap,
 };
@@ -15,9 +15,9 @@ mod parser {
     use {
         crate::parser::parse_isize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -35,15 +35,17 @@ mod parser {
     }
 
     #[allow(clippy::type_complexity)]
-    pub fn parse(s: &mut &str) -> ModalResult<Vec<(bool, isize, isize, isize, isize, isize, isize)>> {
+    pub fn parse(
+        s: &mut &str,
+    ) -> ModalResult<Vec<(bool, isize, isize, isize, isize, isize, isize)>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
 }
 
 #[aoc(2021, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
         Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -144,7 +146,7 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
 
-        for (to, ref x1, x2, y1, ref y2, ref z1, z2) in self.line.iter() {
+        for (to, x1, x2, y1, y2, z1, z2) in self.line.iter() {
             let i1 = *to_index_z.get(z1).unwrap();
             let i2 = *to_index_z.get(&(*z2 + 1)).unwrap();
             let j1 = *to_index_y.get(y1).unwrap();

@@ -2,7 +2,7 @@
 use {
     crate::{
         color,
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
     },
     std::fmt,
 };
@@ -200,16 +200,17 @@ pub struct Puzzle {
 
 #[aoc(2021, 18)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let str = &block.chars().filter(|c| *c != ',').collect::<Vec<_>>();
-        let (node, _rest) = Tree::from(str);
-        if let Tree::List(mut v) = node {
-            if let Some(node) = v.pop() {
-                self.line.push(node);
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for block in input.lines() {
+            let str = &block.chars().filter(|c| *c != ',').collect::<Vec<_>>();
+            let (node, _rest) = Tree::from(str);
+            if let Tree::List(mut v) = node {
+                if let Some(node) = v.pop() {
+                    self.line.push(node);
+                }
             }
         }
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // for (i, l) in self.line.iter().enumerate() {

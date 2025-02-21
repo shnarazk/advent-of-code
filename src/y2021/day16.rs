@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/16>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     parser,
 };
 
@@ -11,37 +11,38 @@ pub struct Puzzle {
 
 #[aoc(2021, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        if block.chars().all(|c| ['0', '1'].contains(&c)) {
-            self.line.push(parser::to_binaries(block)?);
-        } else {
-            self.line.push(
-                block
-                    .chars()
-                    .flat_map(|c| match c {
-                        '0' => vec![false, false, false, false],
-                        '1' => vec![false, false, false, true],
-                        '2' => vec![false, false, true, false],
-                        '3' => vec![false, false, true, true],
-                        '4' => vec![false, true, false, false],
-                        '5' => vec![false, true, false, true],
-                        '6' => vec![false, true, true, false],
-                        '7' => vec![false, true, true, true],
-                        '8' => vec![true, false, false, false],
-                        '9' => vec![true, false, false, true],
-                        'A' => vec![true, false, true, false],
-                        'B' => vec![true, false, true, true],
-                        'C' => vec![true, true, false, false],
-                        'D' => vec![true, true, false, true],
-                        'E' => vec![true, true, true, false],
-                        'F' => vec![true, true, true, true],
-                        _ => panic!(),
-                    })
-                    .collect::<Vec<_>>(),
-            );
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for block in input.lines() {
+            if block.chars().all(|c| ['0', '1'].contains(&c)) {
+                self.line.push(parser::to_binaries(block)?);
+            } else {
+                self.line.push(
+                    block
+                        .chars()
+                        .flat_map(|c| match c {
+                            '0' => vec![false, false, false, false],
+                            '1' => vec![false, false, false, true],
+                            '2' => vec![false, false, true, false],
+                            '3' => vec![false, false, true, true],
+                            '4' => vec![false, true, false, false],
+                            '5' => vec![false, true, false, true],
+                            '6' => vec![false, true, true, false],
+                            '7' => vec![false, true, true, true],
+                            '8' => vec![true, false, false, false],
+                            '9' => vec![true, false, false, true],
+                            'A' => vec![true, false, true, false],
+                            'B' => vec![true, false, true, true],
+                            'C' => vec![true, true, false, false],
+                            'D' => vec![true, true, false, true],
+                            'E' => vec![true, true, true, false],
+                            'F' => vec![true, true, true, true],
+                            _ => panic!(),
+                        })
+                        .collect::<Vec<_>>(),
+                );
+            }
         }
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line);

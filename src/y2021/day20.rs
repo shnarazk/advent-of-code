@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/20>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     geometric,
 };
 
@@ -12,20 +12,21 @@ pub struct Puzzle {
 
 #[aoc(2021, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let first_block = self.enhancer.is_empty();
-        for l in block.split('\n') {
-            if l.is_empty() {
-                continue;
-            }
-            if first_block {
-                self.enhancer.append(&mut l.chars().collect::<Vec<char>>());
-            } else {
-                self.image.push(l.chars().collect::<Vec<char>>());
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for block in input.split("\n\n").filter(|b| !b.is_empty()) {
+            let first_block = self.enhancer.is_empty();
+            for l in block.split('\n') {
+                if l.is_empty() {
+                    continue;
+                }
+                if first_block {
+                    self.enhancer.append(&mut l.chars().collect::<Vec<char>>());
+                } else {
+                    self.image.push(l.chars().collect::<Vec<char>>());
+                }
             }
         }
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         // println!("{}", self.enhancer.iter().collect::<String>());

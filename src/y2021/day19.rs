@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/19>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::collections::HashMap,
@@ -227,23 +227,25 @@ impl Puzzle {
 
 #[aoc(2021, 19)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut v = Vec::new();
-        for line in block.split('\n').skip(1) {
-            if line.is_empty() {
-                continue;
+    // const DELIMITER: &'static str = "\n\n";
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for block in input.split("\n\n").filter(|l| !l.is_empty()) {
+            let mut v = Vec::new();
+            for line in block.split('\n').skip(1) {
+                if line.is_empty() {
+                    continue;
+                }
+                let r = parser::to_isizes(line, &[','])?;
+                if r.len() == 2 {
+                    v.push([r[0], r[1], 0]);
+                } else {
+                    v.push([r[0], r[1], r[2]]);
+                }
             }
-            let r = parser::to_isizes(line, &[','])?;
-            if r.len() == 2 {
-                v.push([r[0], r[1], 0]);
-            } else {
-                v.push([r[0], r[1], r[2]]);
-            }
+            let n = self.line.len();
+            self.line.push(Block { id: n, pos: v });
         }
-        let n = self.line.len();
-        self.line.push(Block { id: n, pos: v });
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         merge(self.line.clone()).0.len()
