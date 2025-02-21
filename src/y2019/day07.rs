@@ -2,7 +2,7 @@
 
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         math::permutations,
         parser,
     },
@@ -17,10 +17,9 @@ pub struct Puzzle {
 
 #[aoc(2019, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = parser::to_isizes(block, &[','])?;
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = parser::to_isizes(input, &[','])?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut highest_score = 0;
@@ -130,9 +129,7 @@ impl Puzzle {
                         memory[memory[pc + $offset] as usize]
                     }
                 }};
-                ($offset: expr, true) => {{
-                    memory[pc + $offset] as usize
-                }};
+                ($offset: expr, true) => {{ memory[pc + $offset] as usize }};
             }
             match op {
                 1 => {
@@ -220,9 +217,7 @@ impl Puzzle {
                         self.line[self.line[self.pc + $offset] as usize]
                     }
                 }};
-                ($offset: expr, true) => {{
-                    self.line[self.pc + $offset] as usize
-                }};
+                ($offset: expr, true) => {{ self.line[self.pc + $offset] as usize }};
             }
             match op {
                 1 => {

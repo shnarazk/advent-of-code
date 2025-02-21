@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/10>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         math::gcd,
     },
     std::collections::{HashMap, HashSet, VecDeque},
@@ -14,11 +14,14 @@ pub struct Puzzle {
 
 #[aoc(2019, 10)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line
-            .push(block.chars().map(|c| c == '#').collect::<Vec<bool>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| line.chars().map(|c| c == '#').collect::<Vec<bool>>())
+            .collect();
+        // self.line
+        //     .push(input.chars().map(|c| c == '#').collect::<Vec<bool>>());
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let _height = self.line.len();

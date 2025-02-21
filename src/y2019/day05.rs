@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2019/day/5>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     parser,
 };
 
@@ -11,10 +11,9 @@ pub struct Puzzle {
 
 #[aoc(2019, 5)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line = parser::to_isizes(block, &[','])?;
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = parser::to_isizes(input, &[','])?;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let input = 1;
@@ -41,9 +40,7 @@ impl AdventOfCode for Puzzle {
                         self.line[self.line[pc + $offset] as usize]
                     }
                 }};
-                ($offset: expr, true) => {{
-                    self.line[pc + $offset] as usize
-                }};
+                ($offset: expr, true) => {{ self.line[pc + $offset] as usize }};
             }
             match op {
                 1 => {
@@ -97,9 +94,7 @@ impl AdventOfCode for Puzzle {
                         self.line[self.line[pc + $offset] as usize]
                     }
                 }};
-                ($offset: expr, true) => {{
-                    self.line[pc + $offset] as usize
-                }};
+                ($offset: expr, true) => {{ self.line[pc + $offset] as usize }};
             }
             match op {
                 1 => {
