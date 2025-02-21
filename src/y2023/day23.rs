@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2023/day/23>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
         progress,
     },
     serde::Serialize,
     std::{
         cmp::Reverse,
-        collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+        collections::{BinaryHeap, HashMap, HashSet, hash_map::Entry},
     },
 };
 
@@ -43,10 +43,12 @@ impl Ord for Route {
 
 #[aoc(2023, 23)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.bytes().collect::<Vec<_>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.bytes().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.size = (self.line.len(), self.line[0].len());

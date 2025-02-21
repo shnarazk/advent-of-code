@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/12>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::{cmp::Ordering, collections::HashMap},
@@ -14,28 +14,29 @@ pub struct Puzzle {
 
 #[aoc(2023, 12)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut tuple = (Vec::new(), Vec::new());
-        for (i, segment) in block.split(' ').enumerate() {
-            if i == 1 {
-                let nums = parser::to_usizes(segment, &[',']).unwrap();
-                tuple.1 = nums;
-            } else {
-                let vals = segment
-                    .chars()
-                    .map(|c| match c {
-                        '.' => 0,
-                        '#' => 1,
-                        '?' => 2,
-                        _ => unreachable!(),
-                    })
-                    .collect::<Vec<usize>>();
-                tuple.0 = vals;
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let mut tuple = (Vec::new(), Vec::new());
+            for (i, segment) in l.split(' ').enumerate() {
+                if i == 1 {
+                    let nums = parser::to_usizes(segment, &[',']).unwrap();
+                    tuple.1 = nums;
+                } else {
+                    let vals = segment
+                        .chars()
+                        .map(|c| match c {
+                            '.' => 0,
+                            '#' => 1,
+                            '?' => 2,
+                            _ => unreachable!(),
+                        })
+                        .collect::<Vec<usize>>();
+                    tuple.0 = vals;
+                }
             }
+            self.line.push(tuple);
         }
-        self.line.push(tuple);
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

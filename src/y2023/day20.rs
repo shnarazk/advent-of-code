@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/20>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         math::crt,
     },
     serde::Serialize,
@@ -50,27 +50,30 @@ impl<'a> Module {
 
 #[aoc(2023, 20)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let segment = block.split(" -> ").collect::<Vec<_>>();
-        let mut label = segment[0].chars();
-        let (module_type, module_name) = match label.next().unwrap() {
-            '%' => (ModuleType::FlipFlop, label.collect::<String>()),
-            '&' => (ModuleType::Conjunction, label.collect::<String>()),
-            'b' if segment[0] == "broadcaster" => (ModuleType::Broadcast, segment[0].to_string()),
-            _ => unreachable!(),
-        };
-        let dests = segment[1]
-            .split(", ")
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>();
-        let module = Module {
-            module_type,
-            dests,
-            ..Module::default()
-        };
-        self.modules.insert(module_name, module);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let segment = l.split(" -> ").collect::<Vec<_>>();
+            let mut label = segment[0].chars();
+            let (module_type, module_name) = match label.next().unwrap() {
+                '%' => (ModuleType::FlipFlop, label.collect::<String>()),
+                '&' => (ModuleType::Conjunction, label.collect::<String>()),
+                'b' if segment[0] == "broadcaster" => {
+                    (ModuleType::Broadcast, segment[0].to_string())
+                }
+                _ => unreachable!(),
+            };
+            let dests = segment[1]
+                .split(", ")
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>();
+            let module = Module {
+                module_type,
+                dests,
+                ..Module::default()
+            };
+            self.modules.insert(module_name, module);
+        }
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let mut map: HashMap<String, Vec<String>> = HashMap::new();
@@ -124,13 +127,14 @@ impl AdventOfCode for Puzzle {
                     .map(|(t, _)| *t)
                     .collect::<Vec<_>>();
                 // println!("{}{:?}", upstream, seq);
-                assert!(seq
-                    .windows(2)
-                    .map(|v| v[1] - v[0])
-                    .collect::<Vec<_>>()
-                    .windows(2)
-                    .map(|v| v[1] - v[0])
-                    .all(|v| v == 0));
+                assert!(
+                    seq.windows(2)
+                        .map(|v| v[1] - v[0])
+                        .collect::<Vec<_>>()
+                        .windows(2)
+                        .map(|v| v[1] - v[0])
+                        .all(|v| v == 0)
+                );
                 (seq[1] - seq[0], seq[0])
             })
             .collect::<Vec<_>>();

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/22>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim3,
         parser,
     },
@@ -47,20 +47,21 @@ pub struct Puzzle {
 
 #[aoc(2023, 22)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let v = block
-            .split('~')
-            .map(|s| parser::to_usizes(s, &[',']).unwrap())
-            .map(|v| (v[0], v[1], v[2]))
-            .collect::<Vec<_>>();
-        debug_assert!(v[0].0 <= v[1].0 && v[0].1 <= v[1].1 && v[0].2 <= v[1].2);
-        let blk = Block {
-            pos: v[0],
-            shape: (v[1].0 - v[0].0, v[1].1 - v[0].1, v[1].2 - v[0].2),
-        };
-        self.blocks.push(blk);
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let v = l
+                .split('~')
+                .map(|s| parser::to_usizes(s, &[',']).unwrap())
+                .map(|v| (v[0], v[1], v[2]))
+                .collect::<Vec<_>>();
+            debug_assert!(v[0].0 <= v[1].0 && v[0].1 <= v[1].1 && v[0].2 <= v[1].2);
+            let blk = Block {
+                pos: v[0],
+                shape: (v[1].0 - v[0].0, v[1].1 - v[0].1, v[1].2 - v[0].2),
+            };
+            self.blocks.push(blk);
+        }
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         stabilize(&mut self.blocks);

@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2023/day/8>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         math,
     },
     std::collections::HashMap,
     winnow::{
+        ModalResult, Parser,
         ascii::{alphanumeric1, newline},
         combinator::{separated, terminated},
-        ModalResult, Parser,
     },
 };
 
@@ -33,21 +33,16 @@ fn parse_block(input: &mut &str) -> ModalResult<(String, (String, String))> {
 
 #[aoc(2023, 8)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let str = &mut input.as_str();
-        let label = parse_header(str)?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let label = parse_header(&mut input)?;
         self.head = label.chars().collect::<Vec<_>>();
         let v: Vec<(String, (String, String))> =
-            separated(1.., parse_block, newline).parse_next(str)?;
+            separated(1.., parse_block, newline).parse_next(&mut input)?;
         self.line = v
             .iter()
             .cloned()
             .collect::<HashMap<String, (String, String)>>();
-        Ok("".to_string())
-    }
-    fn parse_block(&mut self, _block: &str) -> Result<(), ParseError> {
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.traverse("AAA")

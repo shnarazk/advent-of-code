@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/18>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
     },
     itertools::Itertools,
@@ -17,41 +17,42 @@ pub struct Puzzle {
 
 #[aoc(2023, 18)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut dir: Dim2<isize> = (0, 0);
-        let mut dist = 0;
-        for (i, b) in block.split(' ').enumerate() {
-            match i {
-                0 => {
-                    dir = match b {
-                        "U" => (-1, 0),
-                        "L" => (0, -1),
-                        "R" => (0, 1),
-                        "D" => (1, 0),
-                        _ => unreachable!(),
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let mut dir: Dim2<isize> = (0, 0);
+            let mut dist = 0;
+            for (i, b) in l.split(' ').enumerate() {
+                match i {
+                    0 => {
+                        dir = match b {
+                            "U" => (-1, 0),
+                            "L" => (0, -1),
+                            "R" => (0, 1),
+                            "D" => (1, 0),
+                            _ => unreachable!(),
+                        }
                     }
+                    1 => dist = b.parse::<usize>().unwrap(),
+                    2 => {
+                        let str = b.trim().chars().collect::<Vec<char>>();
+                        assert_eq!(str.len(), 9);
+                        let dists = str.iter().skip(2).take(5).collect::<String>();
+                        let dist = usize::from_str_radix(&dists, 16)?;
+                        let dir = match str[7] {
+                            '0' => (0, 1),
+                            '1' => (1, 0),
+                            '2' => (0, -1),
+                            '3' => (-1, 0),
+                            _ => unreachable!(),
+                        };
+                        self.line2.push((dir, dist));
+                    }
+                    _ => unreachable!(),
                 }
-                1 => dist = b.parse::<usize>().unwrap(),
-                2 => {
-                    let str = b.trim().chars().collect::<Vec<char>>();
-                    assert_eq!(str.len(), 9);
-                    let dists = str.iter().skip(2).take(5).collect::<String>();
-                    let dist = usize::from_str_radix(&dists, 16)?;
-                    let dir = match str[7] {
-                        '0' => (0, 1),
-                        '1' => (1, 0),
-                        '2' => (0, -1),
-                        '3' => (-1, 0),
-                        _ => unreachable!(),
-                    };
-                    self.line2.push((dir, dist));
-                }
-                _ => unreachable!(),
             }
+            self.line.push((dir, dist));
         }
-        self.line.push((dir, dist));
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();
@@ -98,7 +99,6 @@ impl AdventOfCode for Puzzle {
         let mut dicx: HashSet<isize> = HashSet::new();
         dicy.insert(0);
         dicx.insert(0);
-        dbg!(self.line2.len());
         for (dir, dist) in self.line2.iter() {
             pos.0 += dir.0 * (*dist as isize);
             pos.1 += dir.1 * (*dist as isize);

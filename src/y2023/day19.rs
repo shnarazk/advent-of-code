@@ -1,16 +1,16 @@
 //! <https://adventofcode.com/2023/day/19>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     itertools::Itertools,
     serde_json,
     std::collections::{HashMap, HashSet},
     winnow::{
+        ModalResult, Parser,
         ascii::alpha1,
         combinator::{alt, preceded, repeat, repeat_till, terminated},
-        ModalResult, Parser,
     },
 };
 
@@ -76,11 +76,10 @@ fn parse_settings(str: &mut &str) -> ModalResult<Vec<Vec<(String, usize)>>> {
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        let p = &mut input.as_str();
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         #[allow(clippy::type_complexity)]
         let (workflows, _): (Vec<(Label, Vec<Rule>)>, &str) =
-            repeat_till(0.., parse_workflow, "\n").parse_next(p)?;
+            repeat_till(0.., parse_workflow, "\n").parse_next(&mut input)?;
         self.rules = workflows
             .iter()
             .cloned()
@@ -103,13 +102,13 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        let settings: Vec<Vec<(Label, usize)>> = parse_settings(p)?;
+        let settings: Vec<Vec<(Label, usize)>> = parse_settings(&mut input)?;
         // repeat(parse_setting).parse_next(remain1)?;
         self.settings = settings
             .iter()
             .map(|v| v.iter().cloned().collect())
             .collect::<Vec<HashMap<Var, Val>>>();
-        Ok("".to_string())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for i in 0..4 {

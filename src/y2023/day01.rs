@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2023/day/1>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -40,39 +40,40 @@ impl Default for Puzzle {
 
 #[aoc(2023, 1)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let b = block.bytes().collect::<Vec<_>>();
-        let len = b.len();
-        for dir in [0, 1] {
-            let scale = 10 - dir * 9;
-            let mut not_found = true;
-            for ii in 0..len {
-                let i = if dir == 1 { len - ii - 1 } else { ii };
-                let mut value = self.table[b[i] as usize];
-                if value == 0 {
-                    continue;
-                }
-                if value < 10 {
-                    value *= scale;
-                    if not_found {
-                        self.sum2 += value;
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let b = l.bytes().collect::<Vec<_>>();
+            let len = b.len();
+            for dir in [0, 1] {
+                let scale = 10 - dir * 9;
+                let mut not_found = true;
+                for ii in 0..len {
+                    let i = if dir == 1 { len - ii - 1 } else { ii };
+                    let mut value = self.table[b[i] as usize];
+                    if value == 0 {
+                        continue;
                     }
-                    self.sum1 += value;
-                    break;
-                }
-                if not_found {
-                    for (j, r) in self.subst.iter().enumerate() {
-                        if b[i..].starts_with(r) {
-                            self.sum2 += scale * (j + 1);
-                            not_found = false;
-                            break;
+                    if value < 10 {
+                        value *= scale;
+                        if not_found {
+                            self.sum2 += value;
+                        }
+                        self.sum1 += value;
+                        break;
+                    }
+                    if not_found {
+                        for (j, r) in self.subst.iter().enumerate() {
+                            if b[i..].starts_with(r) {
+                                self.sum2 += scale * (j + 1);
+                                not_found = false;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.sum1

@@ -3,7 +3,7 @@
 //    Map mirrors to bitmaps of energized positions, then merorize it.
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricAddition},
     },
     std::collections::HashSet,
@@ -32,10 +32,9 @@ impl Beam {
 
 #[aoc(2023, 16)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(block.trim().chars().collect::<Vec<_>>());
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input.lines().map(|l| l.chars().collect()).collect();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         self.size = (self.line.len() as isize, self.line[0].len() as isize);

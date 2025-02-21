@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/7>
 
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     itertools::Itertools,
     std::{cmp::Ordering, collections::HashMap},
 };
@@ -62,35 +62,36 @@ pub struct Puzzle {
 
 #[aoc(2023, 7)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let mut iter = block.split(' ');
-        let cs = iter.next().unwrap().chars();
-        let bid = iter.next().unwrap().parse::<usize>().unwrap();
-        let card1 = cs
-            .clone()
-            .map(|c| match c {
-                'T' => 10,
-                'J' => 11,
-                'Q' => 12,
-                'K' => 13,
-                'A' => 14,
-                _ => c as u8 - b'0',
-            })
-            .collect::<Vec<u8>>();
-        let card2 = cs
-            .map(|c| match c {
-                'J' => 0,
-                'T' => 10,
-                'Q' => 12,
-                'K' => 13,
-                'A' => 14,
-                _ => c as u8 - b'0',
-            })
-            .collect::<Vec<u8>>();
-        self.line1.push(Hand { card: card1, bid });
-        self.line2.push(Hand { card: card2, bid });
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let mut iter = l.split(' ');
+            let cs = iter.next().unwrap().chars();
+            let bid = iter.next().unwrap().parse::<usize>().unwrap();
+            let card1 = cs
+                .clone()
+                .map(|c| match c {
+                    'T' => 10,
+                    'J' => 11,
+                    'Q' => 12,
+                    'K' => 13,
+                    'A' => 14,
+                    _ => c as u8 - b'0',
+                })
+                .collect::<Vec<u8>>();
+            let card2 = cs
+                .map(|c| match c {
+                    'J' => 0,
+                    'T' => 10,
+                    'Q' => 12,
+                    'K' => 13,
+                    'A' => 14,
+                    _ => c as u8 - b'0',
+                })
+                .collect::<Vec<u8>>();
+            self.line1.push(Hand { card: card1, bid });
+            self.line2.push(Hand { card: card2, bid });
+        }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         evaluate(&self.line1)

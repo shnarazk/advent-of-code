@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/24>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, Dim3},
         parser,
     },
@@ -15,20 +15,24 @@ pub struct Puzzle {
 
 #[aoc(2023, 24)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let b = block.split(" @ ").collect::<Vec<&str>>();
-        self.line.push((
-            {
-                let v = parser::to_isizes(b[0], &[' ', ',']).unwrap();
-                (v[0], v[1], v[2])
-            },
-            {
-                let v = parser::to_isizes(b[1], &[' ', ',']).unwrap();
-                (v[0], v[1], v[2])
-            },
-        ));
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| {
+                let b = l.split(" @ ").collect::<Vec<&str>>();
+                (
+                    {
+                        let v = parser::to_isizes(b[0], &[' ', ',']).unwrap();
+                        (v[0], v[1], v[2])
+                    },
+                    {
+                        let v = parser::to_isizes(b[1], &[' ', ',']).unwrap();
+                        (v[0], v[1], v[2])
+                    },
+                )
+            })
+            .collect();
+        Self::parsed()
     }
     // fn end_of_data(&mut self) { dbg!(self.line.len()); }
     fn serialize(&self) -> Option<String> {
@@ -146,27 +150,27 @@ impl AdventOfCode for Puzzle {
             at = (b.1.0 - vx) * (a.0.1 - b.0.1) - (b.1.1 - vy) * (a.0.0 - b.0.0)
                    / ((b.1.1 - vy) * (a.1.0 - vx) - (b.1.0 - vx) * (a.1.1 - vy))
         */
-        let at = ((b.1 .0 - vx) * (a.0 .1 - b.0 .1) - (b.1 .1 - vy) * (a.0 .0 - b.0 .0))
-            / ((b.1 .1 - vy) * (a.1 .0 - vx) - (b.1 .0 - vx) * (a.1 .1 - vy));
+        let at = ((b.1.0 - vx) * (a.0.1 - b.0.1) - (b.1.1 - vy) * (a.0.0 - b.0.0))
+            / ((b.1.1 - vy) * (a.1.0 - vx) - (b.1.0 - vx) * (a.1.1 - vy));
         dbg!(at);
 
-        let pos_x = (a.0 .0 + a.1 .0 * at) - vx * at;
-        let pos_y = (a.0 .1 + a.1 .1 * at) - vy * at;
-        let pos_z = (a.0 .2 + a.1 .2 * at) - vz * at;
+        let pos_x = (a.0.0 + a.1.0 * at) - vx * at;
+        let pos_y = (a.0.1 + a.1.1 * at) - vy * at;
+        let pos_z = (a.0.2 + a.1.2 * at) - vz * at;
         (pos_x + pos_y + pos_z) as usize
     }
 }
 
 fn intersect_in_plane(a: (Dim2<f64>, Dim2<f64>), b: (Dim2<f64>, Dim2<f64>)) -> Option<Dim2<f64>> {
-    let f = b.1 .1 * a.1 .0 - b.1 .0 * a.1 .1;
-    let g = a.1 .1 * b.1 .0 - a.1 .0 * b.1 .1;
+    let f = b.1.1 * a.1.0 - b.1.0 * a.1.1;
+    let g = a.1.1 * b.1.0 - a.1.0 * b.1.1;
     if f == 0.0 || g == 0.0 {
         return None;
     }
-    let ta = (b.1 .0 * (a.0 .1 - b.0 .1) - b.1 .1 * (a.0 .0 - b.0 .0)) / f;
-    let tb = (a.1 .0 * (b.0 .1 - a.0 .1) - a.1 .1 * (b.0 .0 - a.0 .0)) / g;
+    let ta = (b.1.0 * (a.0.1 - b.0.1) - b.1.1 * (a.0.0 - b.0.0)) / f;
+    let tb = (a.1.0 * (b.0.1 - a.0.1) - a.1.1 * (b.0.0 - a.0.0)) / g;
     if ta < 0.0 || tb < 0.0 {
         return None;
     }
-    Some((a.1 .0 * ta + a.0 .0, a.1 .1 * ta + a.0 .1))
+    Some((a.1.0 * ta + a.0.0, a.1.1 * ta + a.0.1))
 }

@@ -2,8 +2,8 @@
 use {
     crate::{
         // color,
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors8, Dim2},
+        framework::{AdventOfCode, ParseError, aoc},
+        geometric::{Dim2, neighbors8},
     },
     std::collections::{HashMap, HashSet},
 };
@@ -31,25 +31,27 @@ pub struct Puzzle {
 
 #[aoc(2023, 10)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let l = block
-            .trim()
-            .chars()
-            .map(|c| match c {
-                '|' => Pipe(vec![(-1, 0), (1, 0)]),
-                '-' => Pipe(vec![(0, -1), (0, 1)]),
-                'L' => Pipe(vec![(-1, 0), (0, 1)]),
-                'J' => Pipe(vec![(-1, 0), (0, -1)]),
-                '7' => Pipe(vec![(1, 0), (0, -1)]),
-                'F' => Pipe(vec![(1, 0), (0, 1)]),
-                '.' => Pipe(vec![]),
-                'S' => Pipe(vec![START]),
-                _ => unreachable!(),
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|line| {
+                line.trim()
+                    .chars()
+                    .map(|c| match c {
+                        '|' => Pipe(vec![(-1, 0), (1, 0)]),
+                        '-' => Pipe(vec![(0, -1), (0, 1)]),
+                        'L' => Pipe(vec![(-1, 0), (0, 1)]),
+                        'J' => Pipe(vec![(-1, 0), (0, -1)]),
+                        '7' => Pipe(vec![(1, 0), (0, -1)]),
+                        'F' => Pipe(vec![(1, 0), (0, 1)]),
+                        '.' => Pipe(vec![]),
+                        'S' => Pipe(vec![START]),
+                        _ => unreachable!(),
+                    })
+                    .collect::<Vec<Pipe>>()
             })
-            .collect::<Vec<Pipe>>();
-        self.line.push(l);
-        Ok(())
+            .collect::<Vec<Vec<Pipe>>>();
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         for (y, l) in self.line.iter().enumerate() {

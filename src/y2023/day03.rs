@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2023/day/3>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -13,36 +13,37 @@ pub struct Puzzle {
 
 #[aoc(2023, 3)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let cs = block.chars().collect::<Vec<_>>();
-        let mut acc: Option<usize> = None;
-        let mut pos_start = 0;
-        for (j, c) in cs.iter().enumerate() {
-            if c.is_ascii_digit() {
-                let n = (*c as u8 - b'0') as usize;
-                if let Some(a) = acc {
-                    acc = Some(a * 10 + n);
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let cs = l.chars().collect::<Vec<_>>();
+            let mut acc: Option<usize> = None;
+            let mut pos_start = 0;
+            for (j, c) in cs.iter().enumerate() {
+                if c.is_ascii_digit() {
+                    let n = (*c as u8 - b'0') as usize;
+                    if let Some(a) = acc {
+                        acc = Some(a * 10 + n);
+                    } else {
+                        acc = Some(n);
+                        pos_start = j;
+                    }
                 } else {
-                    acc = Some(n);
-                    pos_start = j;
-                }
-            } else {
-                if *c != '.' {
-                    self.symbol.push((self.line, j, *c));
-                }
-                if let Some(n) = acc {
-                    // dbg!((self.line, pos_start, j), n);
-                    self.number.insert((self.line, pos_start, j - 1), n);
-                    acc = None;
+                    if *c != '.' {
+                        self.symbol.push((self.line, j, *c));
+                    }
+                    if let Some(n) = acc {
+                        // dbg!((self.line, pos_start, j), n);
+                        self.number.insert((self.line, pos_start, j - 1), n);
+                        acc = None;
+                    }
                 }
             }
+            if let Some(n) = acc {
+                self.number.insert((self.line, pos_start, cs.len()), n);
+            }
+            self.line += 1;
         }
-        if let Some(n) = acc {
-            self.number.insert((self.line, pos_start, cs.len()), n);
-        }
-        self.line += 1;
-        Ok(())
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.number

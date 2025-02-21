@@ -2,7 +2,7 @@
 use {
     crate::{
         array::{rotate_clockwise, transpose},
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
     },
     std::collections::HashMap,
 };
@@ -14,19 +14,20 @@ pub struct Puzzle {
 
 #[aoc(2023, 14)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(
-            block
-                .chars()
-                .map(|c| match c {
-                    'O' => 1,
-                    '#' => 2,
-                    _ => 0,
-                })
-                .collect::<Vec<_>>(),
-        );
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| {
+                l.chars()
+                    .map(|c| match c {
+                        'O' => 1,
+                        '#' => 2,
+                        _ => 0,
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         count(&add_force(self.line.clone()))

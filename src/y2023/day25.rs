@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/25>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         progress,
     },
     itertools::Itertools,
@@ -23,16 +23,17 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        let b = block.split(": ").collect::<Vec<&str>>();
-        let others = b[1].split(' ').map(|s| s.to_string()).collect::<Vec<_>>();
-        self.names.insert(b[0].to_string());
-        for name in others.iter() {
-            self.names.insert(name.to_string());
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        for l in input.lines() {
+            let b = l.split(": ").collect::<Vec<&str>>();
+            let others = b[1].split(' ').map(|s| s.to_string()).collect::<Vec<_>>();
+            self.names.insert(b[0].to_string());
+            for name in others.iter() {
+                self.names.insert(name.to_string());
+            }
+            self.line.insert(b[0].to_string(), others);
         }
-        self.line.insert(b[0].to_string(), others);
-        Ok(())
+        Self::parsed()
     }
     fn end_of_data(&mut self) {
         let names = self
@@ -98,7 +99,7 @@ impl AdventOfCode for Puzzle {
         unreachable!()
     }
     fn part2(&mut self) -> Self::Output2 {
-        "Happy holiday!".to_string()
+        "Happy holidays!".to_string()
     }
 }
 impl Puzzle {

@@ -4,9 +4,8 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors,
-        parser,
     },
     serde::Serialize,
     std::collections::HashMap,
@@ -23,15 +22,31 @@ pub struct Puzzle {
 //     }
 // }
 
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ModalResult, Parser,
+            ascii::{alpha1, newline, space1},
+            combinator::{alt, separated, seq},
+        },
+    };
+
+    fn parse_line(s: &mut &str) -> ModalResult<()> {
+        ().parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<Vec<()>> {
+        separated(1.., parse_line, newline).parse_next(s)
+    }
+}
+
 #[aoc(2023, 0)]
 impl AdventOfCode for Puzzle {
-    // const DELIMITER: &'static str = "\n";
-    // fn header(&mut self, input: String) -> Result<String, ParseError> {
-    //     Ok("".to_string())
-    // }
-    // fn insert(&mut self, block: &str) -> Result<(), ParseError> {
-    //     Ok(())
-    // }
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
+        Self::parsed()
+    }
     fn end_of_data(&mut self) {
         dbg!(&self.line);
     }

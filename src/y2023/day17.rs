@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2023/day/17>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, Direction, GeometricAddition, GeometricRotation},
     },
     std::{
@@ -69,16 +69,12 @@ impl Crucible {
 
 #[aoc(2023, 17)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        self.line.push(
-            block
-                .trim()
-                .bytes()
-                .map(|c| (c - b'0') as usize)
-                .collect::<Vec<_>>(),
-        );
-        Ok(())
+    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+        self.line = input
+            .lines()
+            .map(|l| l.bytes().map(|c| (c - b'0') as usize).collect())
+            .collect();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.search(false)

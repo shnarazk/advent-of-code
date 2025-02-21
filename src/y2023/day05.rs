@@ -1,15 +1,7 @@
 //! <https://adventofcode.com/2023/day/5>
 use {
-    crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        parser::parse_usize,
-    },
+    crate::framework::{AdventOfCode, ParseError, aoc},
     itertools::Itertools,
-    winnow::{
-        ascii::{newline, space1, till_line_ending},
-        combinator::{preceded, separated},
-        ModalResult, Parser,
-    },
 };
 
 // A half-open range implementation
@@ -21,30 +13,45 @@ pub struct Puzzle {
     line: Vec<Vec<(usize, usize, usize)>>,
 }
 
-fn parse_line(str: &mut &str) -> ModalResult<Vec<usize>> {
-    separated(1.., parse_usize, space1).parse_next(str)
+mod parser {
+    use {
+        crate::parser::parse_usize,
+        winnow::{
+            ModalResult, Parser,
+            ascii::{alpha1, newline, space1},
+            combinator::{separated, seq},
+        },
+    };
+
+    fn parse_seeds(s: &mut &str) -> ModalResult<Vec<usize>> {
+        seq!(_: "seeds: ",  separated(1.., parse_usize, space1))
+            .map(|(v,)| v)
+            .parse_next(s)
+    }
+
+    fn parse_block(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize)>> {
+        seq!(
+            _: (alpha1, "-to-", alpha1, " map:\n"),
+            separated(1.., separated(3, parse_usize, " ").map(|v: Vec<usize>| (v[0], v[1], v[1] + v[2])), newline)
+                .map(|v: Vec<(usize, usize, usize)>| v)
+        )
+        .map(|(v,)| v)
+        .parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<usize>, Vec<Vec<(usize, usize, usize)>>)> {
+        seq!(parse_seeds, _: (newline, newline), separated(1.., parse_block, (newline, newline)))
+            .parse_next(s)
+    }
 }
 
 #[aoc(2023, 5)]
 impl AdventOfCode for Puzzle {
-    const DELIMITER: &'static str = "\n\n";
-    fn parse_block(&mut self, block: &str) -> Result<(), ParseError> {
-        fn parse_block(str: &mut &str) -> ModalResult<Vec<(usize, usize, usize)>> {
-            let _ = preceded(till_line_ending, newline).parse_next(str)?;
-            let v: Vec<Vec<usize>> = separated(1.., parse_line, newline).parse_next(str)?;
-            Ok(v.iter()
-                .map(|l| (l[0], l[1], (l[1] + l[2])))
-                .collect::<Vec<_>>())
-        }
-        if block.starts_with("seeds:") {
-            let vals = &mut block.split(": ").nth(1).unwrap().trim();
-            self.seeds = parse_line(vals).expect("error");
-            return Ok(());
-        }
-        let p = block.to_string();
-        let v = parse_block(&mut p.as_str())?;
-        self.line.push(v);
-        Ok(())
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        let (seeds, rules) = parser::parse(&mut input)?;
+        self.seeds = seeds;
+        self.line = rules;
+        Self::parsed()
     }
     #[allow(clippy::unnecessary_lazy_evaluations)]
     fn part1(&mut self) -> Self::Output1 {
