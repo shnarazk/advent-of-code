@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/16>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Sue {
@@ -26,9 +26,9 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline},
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -77,16 +77,16 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .filter(|sue| {
-                sue.children.map_or(true, |v| v == 3)
-                    && sue.cats.map_or(true, |v| v == 7)
-                    && sue.samoyeds.map_or(true, |v| v == 2)
-                    && sue.pomeranians.map_or(true, |v| v == 3)
-                    && sue.akitas.map_or(true, |v| v == 0)
-                    && sue.vizslas.map_or(true, |v| v == 0)
-                    && sue.goldfish.map_or(true, |v| v == 5)
-                    && sue.trees.map_or(true, |v| v == 3)
-                    && sue.cars.map_or(true, |v| v == 2)
-                    && sue.perfumes.map_or(true, |v| v == 1)
+                sue.children.is_none_or(|v| v == 3)
+                    && sue.cats.is_none_or(|v| v == 7)
+                    && sue.samoyeds.is_none_or(|v| v == 2)
+                    && sue.pomeranians.is_none_or(|v| v == 3)
+                    && sue.akitas.is_none_or(|v| v == 0)
+                    && sue.vizslas.is_none_or(|v| v == 0)
+                    && sue.goldfish.is_none_or(|v| v == 5)
+                    && sue.trees.is_none_or(|v| v == 3)
+                    && sue.cars.is_none_or(|v| v == 2)
+                    && sue.perfumes.is_none_or(|v| v == 1)
             })
             .map(|sue| sue.id)
             .max()
@@ -97,16 +97,16 @@ impl AdventOfCode for Puzzle {
             .line
             .iter()
             .filter(|sue| {
-                sue.children.map_or(true, |v| v == 3)
-                    && sue.cats.map_or(true, |v| v > 7)
-                    && sue.samoyeds.map_or(true, |v| v == 2)
-                    && sue.pomeranians.map_or(true, |v| v < 3)
-                    && sue.akitas.map_or(true, |v| v == 0)
-                    && sue.vizslas.map_or(true, |v| v == 0)
-                    && sue.goldfish.map_or(true, |v| v < 5)
-                    && sue.trees.map_or(true, |v| v > 3)
-                    && sue.cars.map_or(true, |v| v == 2)
-                    && sue.perfumes.map_or(true, |v| v == 1)
+                sue.children.is_none_or(|v| v == 3)
+                    && sue.cats.is_none_or(|v| v > 7)
+                    && sue.samoyeds.is_none_or(|v| v == 2)
+                    && sue.pomeranians.is_none_or(|v| v < 3)
+                    && sue.akitas.is_none_or(|v| v == 0)
+                    && sue.vizslas.is_none_or(|v| v == 0)
+                    && sue.goldfish.is_none_or(|v| v < 5)
+                    && sue.trees.is_none_or(|v| v > 3)
+                    && sue.cars.is_none_or(|v| v == 2)
+                    && sue.perfumes.is_none_or(|v| v == 1)
             })
             .collect::<Vec<_>>();
         // dbg!(&they);
