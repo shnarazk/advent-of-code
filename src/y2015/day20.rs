@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/20>
-use crate::framework::{aoc, AdventOfCode};
+use crate::framework::{AdventOfCode, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {}

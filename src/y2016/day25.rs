@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2016/day/25>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc_at};
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Val {
@@ -100,10 +100,10 @@ mod parser {
         super::*,
         crate::parser::parse_isize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 

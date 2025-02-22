@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/19>
 
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -74,19 +74,13 @@ impl Inst {
 
 fn execute<'b>(op: &Inst, register: &[usize; 6], out: &'b mut [usize; 6]) -> &'b mut [usize; 6] {
     macro_rules! reg {
-        ($num: expr) => {{
-            register[*$num]
-        }};
+        ($num: expr) => {{ register[*$num] }};
     }
     macro_rules! set {
-        ($num: expr) => {{
-            *$num
-        }};
+        ($num: expr) => {{ *$num }};
     }
     macro_rules! val {
-        ($num: expr) => {{
-            *$num
-        }};
+        ($num: expr) => {{ *$num }};
     }
     out[..6].copy_from_slice(&register[..6]);
     assert_eq!(&register, &out);
@@ -123,9 +117,9 @@ mod parser {
         super::Inst,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space1},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 

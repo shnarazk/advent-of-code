@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/05>
 use {
-    crate::framework::{aoc_at, AdventOfCode},
+    crate::framework::{AdventOfCode, aoc_at},
     md5::{Digest, Md5},
     std::fmt::Write,
 };

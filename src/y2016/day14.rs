@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/14>
 use {
-    crate::framework::{aoc, AdventOfCode},
+    crate::framework::{AdventOfCode, aoc},
     md5::{Digest, Md5},
     std::collections::VecDeque,
 };

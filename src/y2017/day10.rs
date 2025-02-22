@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2017/day/10>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         parser,
     },
     std::fmt::Write,

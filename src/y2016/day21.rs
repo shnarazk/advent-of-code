@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2016/day/21>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc_at};
 use std::collections::VecDeque;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -21,10 +21,10 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, opt, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 

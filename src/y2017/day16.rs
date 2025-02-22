@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2017/day/16>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc_at};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Dance {
@@ -18,9 +18,9 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             combinator::{alt, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 

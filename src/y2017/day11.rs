@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2017/day/11>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum Direction {

@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/8>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 fn count(vec: &[char]) -> usize {
     if let Some(ch) = vec.first() {

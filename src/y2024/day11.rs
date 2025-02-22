@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/11>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     rayon::prelude::*,

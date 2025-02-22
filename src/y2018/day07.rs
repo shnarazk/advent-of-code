@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/7>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     std::collections::{HashMap, HashSet},
 };
 
@@ -17,10 +17,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<(char, char)> {

@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/11>
-use crate::framework::{aoc_at, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc_at};
 
 fn valid(vec: &[char]) -> bool {
     vec.windows(3)

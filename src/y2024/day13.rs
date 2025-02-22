@@ -1,17 +1,17 @@
 //! <https://adventofcode.com/2024/day/13>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
         parser::parse_usize,
     },
     rayon::prelude::*,
     serde::Serialize,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 type Setting = (Dim2<usize>, Dim2<usize>, Dim2<usize>);

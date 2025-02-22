@@ -2,11 +2,11 @@
 use {
     crate::framework::*,
     winnow::{
+        ModalResult, Parser,
         ascii::{dec_int, dec_uint, digit1, space0},
         combinator::{repeat, separated},
         stream::Range,
         token::one_of,
-        ModalResult, Parser,
     },
 };
 

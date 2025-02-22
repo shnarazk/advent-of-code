@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/6>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, PartialEq)]
 enum Code {
@@ -18,9 +18,9 @@ mod parser {
         super::Code,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 

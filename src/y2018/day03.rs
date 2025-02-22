@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/3>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::{HashMap, HashSet},
 };
 
@@ -25,9 +25,9 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/16>
 
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -21,9 +21,9 @@ mod parser {
         super::Rule,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space1},
             combinator::{repeat, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -189,19 +189,13 @@ fn execute_as<'a, 'b>(
     out: &'b mut [usize; 4],
 ) -> &'b mut [usize; 4] {
     macro_rules! reg {
-        ($num: expr) => {{
-            register[code[$num]]
-        }};
+        ($num: expr) => {{ register[code[$num]] }};
     }
     macro_rules! set {
-        ($num: expr) => {{
-            code[$num]
-        }};
+        ($num: expr) => {{ code[$num] }};
     }
     macro_rules! val {
-        ($num: expr) => {{
-            code[$num]
-        }};
+        ($num: expr) => {{ code[$num] }};
     }
     out[..4].copy_from_slice(&register[..4]);
     debug_assert_eq!(&register, &out);

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/09>
 
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -10,7 +10,7 @@ pub struct Puzzle {
 mod parser {
     use {
         crate::parser::parse_usize,
-        winnow::{ascii::alpha0, combinator::seq, ModalResult, Parser},
+        winnow::{ModalResult, Parser, ascii::alpha0, combinator::seq},
     };
 
     pub fn parse_line(s: &mut &str) -> ModalResult<(String, usize, usize)> {

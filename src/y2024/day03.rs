@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2024/day/3>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     serde::Serialize,
     winnow::{
+        ModalResult, Parser,
         combinator::{alt, preceded, repeat, seq},
         token::any,
-        ModalResult, Parser,
     },
 };
 

@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/15>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct Ingredient {
@@ -21,9 +21,9 @@ mod parser {
         super::Ingredient,
         crate::parser::parse_isize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline},
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 

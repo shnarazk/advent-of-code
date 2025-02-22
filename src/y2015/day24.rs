@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/24>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         progress,
     },
     std::{cmp::Reverse, collections::BinaryHeap},
@@ -16,7 +16,7 @@ type Cand = (usize, usize, [bool; 29], usize);
 mod parser {
     use {
         crate::parser::parse_usize,
-        winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
+        winnow::{ModalResult, Parser, ascii::newline, combinator::separated},
     };
 
     pub fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/14>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 

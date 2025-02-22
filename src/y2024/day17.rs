@@ -1,17 +1,17 @@
 //! <https://adventofcode.com/2024/day/17>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         parser::parse_usize,
     },
     itertools::Itertools,
     serde::Serialize,
     std::{cmp::Reverse, collections::BinaryHeap},
     winnow::{
+        ModalResult, Parser,
         ascii::{dec_uint, newline},
         combinator::{separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 

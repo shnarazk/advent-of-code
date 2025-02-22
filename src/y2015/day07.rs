@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2015/day/7>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -70,9 +70,9 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -119,18 +119,20 @@ impl AdventOfCode for Puzzle {
             // assert!(count < 20);
             if code.determined(&value) {
                 // println!("{:?} => {:?}", code, code.determined(&value));
-                assert!(match code {
-                    Code::Input(op1, Id::Wire(s)) => value.insert(s, op1.get(&value)),
-                    Code::And(op1, op2, Id::Wire(s)) =>
-                        value.insert(s, op1.get(&value) & op2.get(&value)),
-                    Code::Or(op1, op2, Id::Wire(s)) =>
-                        value.insert(s, op1.get(&value) | op2.get(&value)),
-                    Code::LShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) << n),
-                    Code::RShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) >> n),
-                    Code::Not(op1, Id::Wire(s)) => value.insert(s, !op1.get(&value)),
-                    _ => None,
-                }
-                .is_none());
+                assert!(
+                    match code {
+                        Code::Input(op1, Id::Wire(s)) => value.insert(s, op1.get(&value)),
+                        Code::And(op1, op2, Id::Wire(s)) =>
+                            value.insert(s, op1.get(&value) & op2.get(&value)),
+                        Code::Or(op1, op2, Id::Wire(s)) =>
+                            value.insert(s, op1.get(&value) | op2.get(&value)),
+                        Code::LShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) << n),
+                        Code::RShift(op1, n, Id::Wire(s)) => value.insert(s, op1.get(&value) >> n),
+                        Code::Not(op1, Id::Wire(s)) => value.insert(s, !op1.get(&value)),
+                        _ => None,
+                    }
+                    .is_none()
+                );
             } else {
                 self.line.insert(0, code);
             }

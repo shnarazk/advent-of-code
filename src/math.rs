@@ -1,9 +1,5 @@
 pub fn gcd(x: usize, y: usize) -> usize {
-    if y == 0 {
-        x
-    } else {
-        gcd(y, x % y)
-    }
+    if y == 0 { x } else { gcd(y, x % y) }
 }
 
 pub fn lcm(x: usize, y: usize) -> usize {

@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/10>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 fn formatter1(mut vec: &[usize]) -> Vec<usize> {
     let mut v = Vec::new();

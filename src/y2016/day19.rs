@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/19>
 use crate::{
-    framework::{aoc, AdventOfCode, ParseError},
+    framework::{AdventOfCode, ParseError, aoc},
     parser,
 };
 

@@ -1,16 +1,16 @@
 //! <https://adventofcode.com/2024/day/1>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     itertools::Itertools,
     serde::Serialize,
     std::collections::HashMap,
     winnow::{
+        ModalResult, Parser,
         ascii::{dec_uint, newline, space1},
         combinator::{repeat, seq},
-        ModalResult, Parser,
     },
 };
 

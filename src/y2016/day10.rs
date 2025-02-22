@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/10>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -26,9 +26,9 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
     fn parse_target(s: &mut &str) -> ModalResult<Destination> {

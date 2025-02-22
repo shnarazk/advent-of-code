@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/16>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
         rect::Rect,
     },
@@ -13,10 +13,10 @@ use {
         hash::BuildHasherDefault,
     },
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 

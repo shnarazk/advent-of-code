@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/01>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashSet,
 };
 
@@ -20,8 +20,8 @@ mod parser {
         super::*,
         crate::parser::parse_usize,
         winnow::{
-            combinator::{alt, separated},
             ModalResult, Parser,
+            combinator::{alt, separated},
         },
     };
 

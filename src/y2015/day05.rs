@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/5>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 fn is_nice(s: &str) -> bool {
     3 <= s

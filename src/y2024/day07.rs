@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2024/day/7>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
@@ -15,9 +15,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 
