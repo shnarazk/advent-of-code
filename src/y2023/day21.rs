@@ -27,12 +27,10 @@ impl AdventOfCode for Puzzle {
             self.line
                 .push(l.chars().map(|c| c == '#').collect::<Vec<_>>());
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let height = self.line.len();
         let width = self.line[0].len();
         self.cycle_len = height + width;
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.line).ok()

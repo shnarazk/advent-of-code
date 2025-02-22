@@ -20,9 +20,6 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(l.parse::<isize>()?);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.len = self.line.len();
         self.index_zero = self
             .line
@@ -35,8 +32,8 @@ impl AdventOfCode for Puzzle {
         for n in self.line.iter() {
             *count.entry(*n).or_insert(0) += 1;
         }
-        // dbg!(count.get(&0));
         // assert!(count.values().all(|c| *c == 1));
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut next: Vec<usize> = (0..self.len)

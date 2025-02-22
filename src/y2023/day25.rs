@@ -33,9 +33,6 @@ impl AdventOfCode for Puzzle {
             }
             self.line.insert(b[0].to_string(), others);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let names = self
             .names
             .iter()
@@ -55,6 +52,7 @@ impl AdventOfCode for Puzzle {
             self.hash.entry(*from).or_default().push((i, *to));
             self.hash.entry(*to).or_default().push((i, *from));
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.link).ok()

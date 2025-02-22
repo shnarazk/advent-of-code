@@ -47,9 +47,6 @@ impl AdventOfCode for Puzzle {
         self.line = parser::parse(&mut input)?;
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         1
     }

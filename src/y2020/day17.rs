@@ -20,9 +20,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().map(|c| c == '#').collect::<Vec<_>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let offset_y = ((self.line.len() - 1) / 2) as isize;
         let offset_x = ((self.line[0].len() - 1) / 2) as isize;
         for (y, l) in self.line.iter().enumerate() {
@@ -33,6 +30,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         World::<LOC>::solve(&self.map)

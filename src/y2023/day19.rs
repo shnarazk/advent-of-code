@@ -108,9 +108,6 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|v| v.iter().cloned().collect())
             .collect::<Vec<HashMap<Var, Val>>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for i in 0..4 {
             let mut it = self.rating_settings[i].iter().sorted();
             let beg = *it.next().unwrap();
@@ -122,6 +119,7 @@ impl AdventOfCode for Puzzle {
                 self.rating_settings[i].insert(4001);
             }
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(

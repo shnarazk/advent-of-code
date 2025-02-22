@@ -212,11 +212,6 @@ impl AdventOfCode for Puzzle {
         }
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        // for (i, l) in self.line.iter().enumerate() {
-        //     println!("{:>2} {:?}", i, &l);
-        // }
-    }
     fn part1(&mut self) -> Self::Output1 {
         self.line.reverse();
         let mut transformed = self.line.pop().unwrap(); // l.clone().explode();

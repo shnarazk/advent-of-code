@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/22>
 use {
     crate::{
-        framework::{AdventOfCode, aoc},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric,
     },
     std::{
@@ -60,7 +60,7 @@ pub struct Puzzle {
 
 #[aoc(2018, 22)]
 impl AdventOfCode for Puzzle {
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.depth = 3066;
         self.target = (726, 13);
         // self.depth = 510;
@@ -69,6 +69,7 @@ impl AdventOfCode for Puzzle {
         // assert_eq!(self.erosion_level(&(0, 1)), 17317);
         // assert_eq!(self.erosion_level(&(1, 1)), 1805);
         // assert_eq!(self.erosion_level(&(10, 10)), 510);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let target = self.target;

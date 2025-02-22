@@ -16,10 +16,8 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.vec.push(l.parse::<usize>()?);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.len = if 100 < self.vec.len() { 25 } else { 5 };
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let len = self.len;

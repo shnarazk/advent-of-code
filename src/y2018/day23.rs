@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/23>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
 
@@ -55,9 +55,9 @@ mod parser {
         super::Nanobot,
         crate::parser::{parse_isize, parse_usize},
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -81,9 +81,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.num_robots = self.line.len();
         self.radius = self
             .line
@@ -93,6 +90,7 @@ impl AdventOfCode for Puzzle {
             .unwrap()
             .next_power_of_two();
         // dbg!(self.num_robots, self.radius);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let strongest: (&usize, &Dim3) = self.line.iter().map(|(p, r)| (r, p)).max().unwrap();

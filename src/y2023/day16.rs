@@ -34,10 +34,8 @@ impl Beam {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.lines().map(|l| l.chars().collect()).collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.size = (self.line.len() as isize, self.line[0].len() as isize);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.count(Beam {

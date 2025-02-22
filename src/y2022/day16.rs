@@ -51,9 +51,6 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(String, usize, Vec<String>)>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut id = 0;
         for (label, _flow, linked) in self.line.iter() {
             if let Entry::Vacant(e) = self.label_id.entry(label.clone()) {
@@ -81,6 +78,7 @@ impl AdventOfCode for Puzzle {
         }
 
         self.initialize_distances();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let aa = *self.label_id.get("AA").unwrap();

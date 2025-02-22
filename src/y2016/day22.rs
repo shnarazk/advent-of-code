@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/22>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    std::collections::{binary_heap::BinaryHeap, HashSet},
+    crate::framework::{AdventOfCode, ParseError, aoc},
+    std::collections::{HashSet, binary_heap::BinaryHeap},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -13,10 +13,10 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space1},
             combinator::{repeat_till, separated, seq},
             token::any,
-            ModalResult, Parser,
         },
     };
 
@@ -51,9 +51,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.line.sort_unstable();
         let mut w = 0;
         for cell in self.line.iter() {
@@ -63,6 +60,7 @@ impl AdventOfCode for Puzzle {
         for (i, site) in self.line.iter().enumerate() {
             debug_assert_eq!(i, site.0 * width + site.1);
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.sort_unstable_by_key(|line| line.4);

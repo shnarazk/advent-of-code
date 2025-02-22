@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/22>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser::parse_usize,
     },
     rayon::prelude::*,
@@ -11,7 +11,7 @@ use {
         collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
-    winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
+    winnow::{ModalResult, Parser, ascii::newline, combinator::separated},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -28,17 +28,8 @@ fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        // let mut secret = 123;
-        // dbg!(next(&mut secret));
-        // dbg!(next(&mut secret));
-        // dbg!(next(&mut secret));
-        // dbg!(next(&mut secret));
-        // dbg!(next(&mut secret));
-        // dbg!(next(&mut secret));
         self.threshold = self.get_config().alt.as_ref().map_or(2000, |_| 2000);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

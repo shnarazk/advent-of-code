@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2015/day/13>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     itertools::Itertools,
     std::collections::{HashMap, HashSet},
 };
@@ -15,9 +15,9 @@ mod parser {
     use {
         crate::parser::parse_isize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -41,14 +41,11 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (p1, p2, _) in self.line.iter() {
             self.person.insert(p1.to_string());
             self.person.insert(p2.to_string());
         }
-        // dbg!(&self.person);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut likes: HashMap<(&str, &str), isize> = HashMap::new();

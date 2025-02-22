@@ -54,14 +54,12 @@ impl AdventOfCode for Puzzle {
         let (template, rules) = parser::parse(&mut input)?;
         self.template = template.chars().collect();
         self.line = rules.into_iter().collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (l, r, m) in self.line.iter() {
             self.rule.insert((*l, *r), *m);
             self.atom.insert(*l);
             self.atom.insert(*r);
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut now = self.template.clone();

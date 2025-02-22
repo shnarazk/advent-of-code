@@ -171,9 +171,6 @@ impl AdventOfCode for Puzzle {
         self.line = parser::to_isizes(input, &[','])?;
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line.len());
-    }
     fn part1(&mut self) -> Self::Output1 {
         let map: HashMap<Location, u8> = self.recognize();
         // for y in -1..46 {

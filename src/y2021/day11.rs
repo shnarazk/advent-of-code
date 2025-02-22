@@ -102,11 +102,9 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(parser::to_digits(l)?);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.step = 100;

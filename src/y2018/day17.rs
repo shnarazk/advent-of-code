@@ -2,7 +2,7 @@
 use {
     crate::{
         color,
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
     },
     std::collections::{HashMap, HashSet},
 };
@@ -20,9 +20,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -42,9 +42,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         // dbg!(&self.line.len());
         for (horizontal, base, from, to) in self.line.iter() {
             for i in *from..=*to {
@@ -52,7 +49,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert(p);
             }
         }
-        // dbg!(self.map.len());
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();

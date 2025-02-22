@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2018/day/9>
-use crate::framework::{AdventOfCode, aoc};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -9,7 +9,7 @@ pub struct Puzzle {
 
 #[aoc(2018, 9)]
 impl AdventOfCode for Puzzle {
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         // 410 players; last marble is worth 72059 points
         self.players = 410;
         self.points = 72059;
@@ -19,6 +19,7 @@ impl AdventOfCode for Puzzle {
         // self.points = 1618;
         // self.players = 9;
         // self.points = 25;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut points = vec![0; self.players];

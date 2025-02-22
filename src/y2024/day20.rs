@@ -1,17 +1,17 @@
 //! <https://adventofcode.com/2024/day/20>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
         rect::Rect,
     },
     rayon::prelude::*,
     serde::Serialize,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -80,9 +80,6 @@ impl AdventOfCode for Puzzle {
             }
         }
         *mapping = Rect::from_vec(line).map(|c| *c != Kind::Wall);
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.dist = Rect::new(self.size, usize::MAX);
         let mut pos: Vec2 = self.start;
         let mut dist: usize = 0;
@@ -99,6 +96,7 @@ impl AdventOfCode for Puzzle {
         }
         self.dist[self.goal] = dist;
         self.threshold = self.get_config().alt.as_ref().map_or(100, |_| 64);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         const POS: [Vec2; 4] = [(-2, 0), (0, -2), (0, 2), (2, 0)];

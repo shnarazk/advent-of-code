@@ -280,9 +280,6 @@ impl AdventOfCode for Puzzle {
         let (maze, moves) = parse(&mut input)?;
         self.line = maze;
         self.path = moves;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 if *c != ' ' {
@@ -343,6 +340,7 @@ impl AdventOfCode for Puzzle {
             self.plane_size, 50,
             "This problem is configured just for the real problem."
         );
+        Self::parsed()
     }
     fn dump(&self) {
         let affine = HashMap::from(FLIP_TABLE);

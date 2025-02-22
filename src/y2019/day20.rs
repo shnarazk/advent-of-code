@@ -44,9 +44,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c as u8).collect::<Vec<u8>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (y, l) in self.line.iter().enumerate() {
             for (x, c) in l.iter().enumerate() {
                 match *c {
@@ -123,6 +120,7 @@ impl AdventOfCode for Puzzle {
                 .iter()
                 .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str()))
         );
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

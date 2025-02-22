@@ -61,9 +61,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().collect::<Vec<char>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.height = self.line.len() - 2;
         self.width = self.line[0].len() - 2;
         self.start.1 = self.line[0]
@@ -94,6 +91,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert((j, i), *c);
             }
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         // let time = 13;

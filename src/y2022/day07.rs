@@ -94,9 +94,6 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Command>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut pwd = "/".to_string();
         for line in self.line.iter() {
             match line {
@@ -151,6 +148,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.inject_total_size("/");
+        Self::parsed()
     }
     fn dump(&self) {
         for dir in self.file_system.values() {

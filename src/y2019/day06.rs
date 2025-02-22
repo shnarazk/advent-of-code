@@ -35,13 +35,10 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
         for (a, b) in self.line.iter() {
             self.orbit.insert((a.clone(), b.clone()));
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut to_visit: Vec<(String, usize)> = vec![("COM".to_string(), 0)];

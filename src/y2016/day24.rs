@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/24>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors4,
     },
     std::{
@@ -35,9 +35,6 @@ impl AdventOfCode for Puzzle {
             }
             self.line.push(line);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.height = self.line.len();
         self.width = self.line[0].len();
         self.targets.sort_unstable();
@@ -88,6 +85,7 @@ impl AdventOfCode for Puzzle {
         //     }
         //     println!("\t{:?}", self.targets[i]);
         // }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let goal = self.targets.len();

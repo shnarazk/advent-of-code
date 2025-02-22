@@ -4,13 +4,13 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors,
     },
     std::collections::HashMap,
 };
 
-#[derive(Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<()>,
 }
@@ -19,9 +19,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline, space1},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -34,14 +34,11 @@ mod parser {
     }
 }
 
-#[aoc(2021, X)]
+#[aoc(2021, 0)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: String) -> Result<String, ParseError> {
-        self.line = parser::parse(&mut input.as_str())?;
+    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+        self.line = parser::parse(&mut input)?;
         Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         0

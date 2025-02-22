@@ -48,9 +48,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.bytes().collect::<Vec<_>>())
             .collect::<Vec<_>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.size = (self.line.len(), self.line[0].len());
         let branching = self.branch_map();
         self.branch_positions = self
@@ -76,6 +73,7 @@ impl AdventOfCode for Puzzle {
         for (i, (y, x)) in self.branch_positions.iter().enumerate() {
             self.branch_index[*y][*x] = Some(i);
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         #[derive(Debug, Default, Eq, PartialEq, Serialize)]

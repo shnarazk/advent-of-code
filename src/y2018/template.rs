@@ -4,7 +4,7 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors,
     },
     rustc_data_structures::fx::{FxHashMap, FxHasher},
@@ -25,9 +25,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{alpha1, newline, space1},
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -45,9 +45,6 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();

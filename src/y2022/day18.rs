@@ -23,9 +23,6 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(parser::to_usizes(l, &[','])?);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for dim3 in self.line.iter_mut() {
             // the real data contains values that require isize. So give them offsets!
             dim3[0] += OFFSET;
@@ -36,6 +33,7 @@ impl AdventOfCode for Puzzle {
             debug_assert!(0 < dim3[2] && dim3[2] < L, "{}", dim3[2]);
             self.map.insert((dim3[0], dim3[1], dim3[2]));
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.map

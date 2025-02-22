@@ -302,9 +302,6 @@ impl Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.lines().map(|line| line.as_bytes().to_vec()).collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut count = 1;
         for (j, l) in self.line.iter_mut().enumerate() {
             for (i, c) in l.iter_mut().enumerate() {
@@ -330,6 +327,7 @@ impl AdventOfCode for Puzzle {
         self.height = self.line.len();
         self.width = self.line[0].len();
         self.elf_power = ATTACK_POWER;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render(None);

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2024/day/21>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
@@ -11,10 +11,10 @@ use {
         hash::{BuildHasherDefault, Hash},
     },
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -126,9 +126,6 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind1>>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.lv1 = [
             ((Kind1::K0, Kind1::K2), Kind2::U),
             ((Kind1::K0, Kind1::KA), Kind2::R),
@@ -181,6 +178,7 @@ impl AdventOfCode for Puzzle {
         .iter()
         .cloned()
         .collect::<HashMap<_, _, BuildHasherDefault<FxHasher>>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.search(2)

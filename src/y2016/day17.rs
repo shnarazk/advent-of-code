@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2016/day/17>
 use {
-    crate::framework::{aoc_at, AdventOfCode},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     md5::{Digest, Md5},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
@@ -16,8 +16,9 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = usize;
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = String::from("gdjjyniy");
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let valid_range = 0..=3;

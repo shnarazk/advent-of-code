@@ -22,9 +22,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c == '#').collect())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().rev().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 if *c {
@@ -32,6 +29,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     #[allow(dead_code)]
     fn dump(&self) {

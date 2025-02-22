@@ -1,11 +1,11 @@
 //! <https://adventofcode.com/2024/day/24>
 #![allow(clippy::type_complexity)]
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     itertools::Itertools,
     petgraph::{
-        dot::{Config, Dot},
         Graph,
+        dot::{Config, Dot},
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
@@ -242,7 +242,7 @@ impl Descriptor {
         let mut swaps = self.overrides.clone();
         if swaps
             .iter()
-            .any(|pair| [w1, w2].contains(&pair.0 .0) || [w1, w2].contains(&pair.1 .0))
+            .any(|pair| [w1, w2].contains(&pair.0.0) || [w1, w2].contains(&pair.1.0))
         {
             return None;
         }
@@ -293,8 +293,8 @@ fn build_swapped_pair((pick1, pick2): (WireRef, WireRef)) -> (GateSpec, GateSpec
     let spec1 = specs.iter().find(|(o, _)| **o == p1).unwrap();
     let spec2 = specs.iter().find(|(o, _)| **o == p2).unwrap();
     (
-        (p1, (spec1.1 .0, spec1.1 .1, spec1.1 .2)),
-        (p2, (spec2.1 .0, spec2.1 .1, spec2.1 .2)),
+        (p1, (spec1.1.0, spec1.1.1, spec1.1.2)),
+        (p2, (spec2.1.0, spec2.1.1, spec2.1.2)),
     )
 }
 
@@ -308,10 +308,10 @@ mod parser {
         super::{Gate, Wire},
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 
@@ -386,13 +386,11 @@ impl AdventOfCode for Puzzle {
         if PROPAGATION_TABLE.get().is_none() {
             PROPAGATION_TABLE.set(propagation_table).unwrap();
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let input_bits = self.input_wire.iter().filter(|(g, _)| g.0 == b'x').count();
         if INPUT_BITS.get().is_none() {
             INPUT_BITS.set(input_bits).unwrap();
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         let mut data = PROPAGATION_TABLE
@@ -484,12 +482,16 @@ impl AdventOfCode for Puzzle {
         let (d_tree, _) = checker.wire_trees(true, false);
         let adder = checker.build_adder();
         for i in 1..input_bits {
-            assert!(adder
-                .check_flow(&d_tree, ord_to_wire(i, b'x'), Role::Input(i))
-                .is_empty());
-            assert!(adder
-                .check_flow(&d_tree, ord_to_wire(i, b'y'), Role::Input(i))
-                .is_empty());
+            assert!(
+                adder
+                    .check_flow(&d_tree, ord_to_wire(i, b'x'), Role::Input(i))
+                    .is_empty()
+            );
+            assert!(
+                adder
+                    .check_flow(&d_tree, ord_to_wire(i, b'y'), Role::Input(i))
+                    .is_empty()
+            );
         }
         result
             .iter()

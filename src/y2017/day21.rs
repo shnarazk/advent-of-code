@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/21>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -213,10 +213,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated, seq},
         token::one_of,
-        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<(Vec<bool>, Vec<bool>)> {
@@ -236,9 +236,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for l in self.line.iter() {
             // println!("{:?} => {:?}", l.0, l.1,);
             if l.0.len() == 4 {
@@ -257,6 +254,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut grid: Plane = Plane {

@@ -30,9 +30,6 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<Loc>>()
             })
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for line in self.line.iter() {
             for start_end in line.windows(2) {
                 let dx: isize = (start_end[1].0 as isize - start_end[0].0 as isize).signum();
@@ -49,6 +46,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert(start_end[1]);
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let num_wall = self.map.len();

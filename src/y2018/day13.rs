@@ -58,9 +58,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c as u8).collect::<Vec<u8>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (y, l) in self.line.iter_mut().enumerate() {
             for (x, c) in l.iter_mut().enumerate() {
                 match c {
@@ -116,6 +113,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render();

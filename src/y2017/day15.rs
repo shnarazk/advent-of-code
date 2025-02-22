@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2017/day/15>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -11,9 +11,9 @@ mod parser {
     use {
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -32,10 +32,8 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.factor = (16807, 48271);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let m = 2147483647;

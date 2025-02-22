@@ -97,9 +97,6 @@ impl AdventOfCode for Puzzle {
         let (dots, foldings) = parser::parse(&mut input)?;
         self.line = dots;
         self.folding = foldings;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let height = self.line.iter().map(|(y, _)| y).max().unwrap() + 1;
         let width = self.line.iter().map(|(_, x)| x).max().unwrap() + 1;
         self.grid = Vec::new();
@@ -110,6 +107,7 @@ impl AdventOfCode for Puzzle {
         for (j, i) in self.line.iter() {
             self.grid[*j][*i] = true;
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut r = self.grid.clone();

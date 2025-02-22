@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/8>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
     },
     serde::Serialize,
@@ -30,9 +30,6 @@ impl AdventOfCode for Puzzle {
             .filter(|l| !l.is_empty())
             .map(|l| l.chars().collect::<Vec<char>>())
             .collect::<Vec<_>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (i, l) in self.plane.iter().enumerate() {
             for (j, &c) in l.iter().enumerate() {
                 if c != '.' {
@@ -41,6 +38,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.size = (self.plane.len() as isize, self.plane[0].len() as isize);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         for (i, (p, f1)) in self.antenna.iter().enumerate() {

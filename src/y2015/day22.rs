@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2015/day/22>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::{cmp::Reverse, collections::BinaryHeap},
 };
 
@@ -61,14 +61,14 @@ impl Puzzle {
                 for (kind, _) in SPELL.iter().enumerate() {
                     if let Some(remain) = &mut new_state.player.state[kind] {
                         assert!(*remain != 0);
-                        new_state.player.hit_point += SPELL[kind].2 .0;
+                        new_state.player.hit_point += SPELL[kind].2.0;
                         new_state.boss.hit_point = new_state
                             .boss
                             .hit_point
-                            .checked_sub(SPELL[kind].2 .1)
+                            .checked_sub(SPELL[kind].2.1)
                             .ok_or(GameState::Won(new_state.used_mana))?;
-                        armor += ((kind == 2) as usize) * SPELL[kind].2 .2;
-                        new_state.player.mana += SPELL[kind].2 .3;
+                        armor += ((kind == 2) as usize) * SPELL[kind].2.2;
+                        new_state.player.mana += SPELL[kind].2.3;
                         if 1 == *remain {
                             new_state.player.state[kind] = None;
                         } else {
@@ -98,7 +98,7 @@ impl Puzzle {
 mod parser {
     use {
         crate::parser::parse_usize,
-        winnow::{combinator::seq, ModalResult, Parser},
+        winnow::{ModalResult, Parser, combinator::seq},
     };
 
     pub fn parse(s: &mut &str) -> ModalResult<(usize, usize)> {
@@ -112,12 +112,10 @@ impl AdventOfCode for Puzzle {
         let (hp, damage) = parser::parse(&mut input)?;
         self.boss.hit_point = hp;
         self.boss.damage = damage;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.player.hit_point = 49;
         self.player.mana = 500;
         self.boss.hit_point -= 1;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut to_visit: BinaryHeap<Reverse<Puzzle>> = BinaryHeap::new();

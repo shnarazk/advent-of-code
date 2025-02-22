@@ -86,15 +86,13 @@ impl AdventOfCode for Puzzle {
         let (hands, boards) = parser::parse(&mut input)?;
         self.hands = hands;
         self.board = boards;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.num_col = self.board[0][0].len();
         self.num_row = self.board[0].len();
         self.order.clone_from(&self.hands);
         for (i, h) in self.hands.iter().enumerate() {
             self.order[*h] = i;
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         let x: Vec<(usize, usize)> = self

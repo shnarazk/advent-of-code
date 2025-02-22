@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2017/day/2>
-use crate::framework::{aoc, AdventOfCode, ParseError};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -24,9 +24,6 @@ impl AdventOfCode for Puzzle {
         //         .collect::<Vec<_>>(),
         // );
         Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

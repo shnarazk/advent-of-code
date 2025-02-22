@@ -54,11 +54,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c as u8).collect::<Vec<u8>>())
             .collect();
-        // self.line
-        //     .push(input.chars().map(|c| c as u8).collect::<Vec<u8>>());
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (j, v) in self.line.iter().enumerate() {
             for (i, c) in v.iter().enumerate() {
                 self.map.insert((j, i), *c);
@@ -75,6 +70,7 @@ impl AdventOfCode for Puzzle {
             .filter(|c| b'a' <= **c && **c <= b'z')
             .copied()
             .collect::<Vec<u8>>();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let n_keys = self.keys.len();

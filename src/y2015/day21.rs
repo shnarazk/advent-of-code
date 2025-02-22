@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2015/day/21>
-use crate::framework::{aoc, AdventOfCode};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 const WEAPONS: [(&str, usize, usize, usize); 5] = [
     //Weapons:    Cost  Damage  Armor
@@ -102,7 +102,7 @@ pub struct Puzzle {
 
 #[aoc(2015, 21)]
 impl AdventOfCode for Puzzle {
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         for (weapon, w) in WEAPONS.iter().enumerate() {
             for (armor, a) in ARMOR.iter().enumerate() {
                 for (ring, r) in RINGS.iter().enumerate() {
@@ -117,6 +117,7 @@ impl AdventOfCode for Puzzle {
         }
         self.invetories.sort_by_key(|i| i.cost);
         // dbg!(&self.invetories);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         for i in self.invetories.iter() {

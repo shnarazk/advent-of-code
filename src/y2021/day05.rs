@@ -47,9 +47,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.max_x = self
             .line
             .iter()
@@ -65,6 +62,7 @@ impl AdventOfCode for Puzzle {
         for _ in 0..=self.max_y {
             self.count.push(vec![0; self.max_x + 1]);
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         for ds in self.line.iter() {

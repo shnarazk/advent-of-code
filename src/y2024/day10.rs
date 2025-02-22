@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/10>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
         parser::parse_dec,
         rect::Rect,
@@ -9,9 +9,9 @@ use {
     serde::Serialize,
     std::collections::{HashMap, HashSet},
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, repeat_till},
-        ModalResult, Parser,
     },
 };
 
@@ -91,9 +91,6 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.size.0 = self.line.len() as isize;
         self.size.1 = self.line[0].len() as isize;
         self.plane = Rect::new(self.size, 0);
@@ -105,6 +102,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut memo: HashMap<Vec2, HashSet<Vec2>> = HashMap::new();

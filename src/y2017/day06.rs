@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2017/day/6>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::collections::{HashMap, HashSet},
@@ -17,10 +17,8 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_usizes(input, &['\t', ' '])?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.len = self.line.len();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut visited: HashSet<Vec<usize>> = HashSet::new();

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2015/day/3>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -15,9 +15,6 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
         Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        // dbg!(&self.line);
     }
     fn part1(&mut self) -> Self::Output1 {
         self.hash.insert((0, 0), 1);

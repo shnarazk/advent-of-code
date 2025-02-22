@@ -122,10 +122,8 @@ impl AdventOfCode for Puzzle {
             .lines()
             .flat_map(|l| l.trim().chars().collect::<Vec<char>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.line.retain(|c| *c != '#' && *c != '.');
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let goal: P1 = P1 {

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2018/day/4>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::{HashMap, HashSet},
 };
 
@@ -57,9 +57,9 @@ mod parser {
         super::*,
         crate::parser::{parse_ndigits, parse_usize},
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{alt, separated, seq},
-            ModalResult, Parser,
         },
     };
 
@@ -99,10 +99,8 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.line.sort_by_key(|e| e.timestamp());
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut guard: Option<usize> = None;

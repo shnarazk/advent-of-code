@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/22>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::{HashMap, HashSet},
 };
 
@@ -72,9 +72,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().map(|c| c == '#').collect())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         // dbg!(self.line.len());
         for (j, line) in self.line.iter().enumerate() {
             for (i, b) in line.iter().enumerate() {
@@ -85,7 +82,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        // dbg!(self.infection_map.len());
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let len = self.line.len();

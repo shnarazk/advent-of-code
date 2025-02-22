@@ -146,14 +146,6 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     fn parse(&mut self, mut _input: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    /// An optional function to wrap up initialization.
-    /// ## A typical implementation example
-    /// ```ignore
-    /// fn end_of_data(&mut self) {
-    ///     self.num_data = self.data.len();
-    /// }
-    /// ```
-    fn end_of_data(&mut self) {}
     /// # UNDER THE HOOD
     fn load(config: ConfigAoC) -> Result<String, ParseError> {
         fn load_file(file_name: String) -> Result<String, ParseError> {
@@ -184,7 +176,6 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
         let mut instance = Self::default();
         let contents = Self::load(config)?;
         instance.parse(contents.as_str())?;
-        instance.end_of_data();
         Ok(instance)
     }
     /// the solver for part1

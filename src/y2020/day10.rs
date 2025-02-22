@@ -12,10 +12,8 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.vec.push(l.parse::<usize>()?);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.vec.insert(0, 0);
+        Self::parsed()
     }
     fn part1(&mut self) -> usize {
         self.vec.sort_unstable();

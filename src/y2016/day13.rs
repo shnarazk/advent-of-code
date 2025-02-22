@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2016/day/13>
 use {
     crate::{
-        framework::{aoc, AdventOfCode},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric,
     },
     std::{
@@ -19,8 +19,9 @@ pub struct Puzzle {
 
 #[aoc(2016, 13)]
 impl AdventOfCode for Puzzle {
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = 1364;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Dim2, bool> = HashMap::new();

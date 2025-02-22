@@ -67,11 +67,6 @@ impl AdventOfCode for Puzzle {
         }
         Self::parsed()
     }
-    fn end_of_data(&mut self) {
-        // for l in self.line.iter() {
-        //     println!{"{:?}", &l};
-        // }
-    }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();
         let width = self.line[0].len();

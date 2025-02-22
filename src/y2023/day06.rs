@@ -21,9 +21,6 @@ impl AdventOfCode for Puzzle {
                 parser::to_usizes(s, &[' ']).unwrap()
             })
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (i, t) in self.line[0].iter().enumerate() {
             self.setting1.push((*t, self.line[1][i]));
         }
@@ -39,6 +36,7 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         self.setting2 = (s2[0], s2[1]);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.setting1

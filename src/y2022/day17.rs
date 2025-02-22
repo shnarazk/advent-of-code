@@ -26,9 +26,6 @@ impl AdventOfCode for Puzzle {
             .chars()
             .map(|c| (c == '>') as usize as isize * 2 - 1)
             .collect::<Vec<isize>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.shape = [
             vec![(0, 0), (1, 0), (2, 0), (3, 0)],
             vec![(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
@@ -50,6 +47,7 @@ impl AdventOfCode for Puzzle {
             vec![(0, 0)],
             vec![(0, 0), (1, 0)],
         ];
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut wind = self.line.iter().cycle();

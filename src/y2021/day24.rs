@@ -91,25 +91,9 @@ impl AdventOfCode for Puzzle {
 
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.jit = self.build();
         debug_assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
-        // println!("pass");
-        // for n in (0..14).rev() {
-        //     print!(
-        //         "{}, ",
-        //         26usize.pow(
-        //             self.jit
-        //                 .iter()
-        //                 .take(13 - n)
-        //                 .map(|(k, _, _)| if *k == 26 { -1 } else { 1 })
-        //                 .sum::<isize>() as u32
-        //         ),
-        //     );
-        // }
-        // println!();
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.direction = Some(Ordering::Greater);

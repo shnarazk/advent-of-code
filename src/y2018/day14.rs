@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2018/day/14>
-use crate::framework::{AdventOfCode, aoc};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -8,8 +8,9 @@ pub struct Puzzle {
 
 #[aoc(2018, 14)]
 impl AdventOfCode for Puzzle {
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = 635041;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.line = 2018;

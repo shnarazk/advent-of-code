@@ -61,9 +61,6 @@ impl AdventOfCode for Puzzle {
             };
             self.blocks.push(blk);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         stabilize(&mut self.blocks);
         self.supported = (0..self.blocks.len())
             .map(|i| {
@@ -82,6 +79,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.supported).ok()

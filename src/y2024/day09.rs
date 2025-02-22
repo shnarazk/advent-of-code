@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/9>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     serde::Serialize,
@@ -20,9 +20,6 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_digits(input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (i, x) in self.line.iter().enumerate() {
             if i % 2 == 0 {
                 self.file_len.push(*x);
@@ -30,6 +27,7 @@ impl AdventOfCode for Puzzle {
                 self.free_len.push(*x);
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let disc_len = self.line.iter().cloned().sum::<usize>();

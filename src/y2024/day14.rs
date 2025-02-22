@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/14>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
         parser::parse_isize,
         progress_picture,
@@ -11,9 +11,9 @@ use {
     serde::Serialize,
     std::{cmp::Ordering, collections::HashSet, hash::BuildHasherDefault},
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
-        ModalResult, Parser,
     },
 };
 
@@ -53,13 +53,11 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(isize, isize, isize, isize)>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.size = match &self.get_config().alt {
             Some(x) if x.as_str() == "0" => (7, 11),
             _ => (103, 101),
         };
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let t = 100;

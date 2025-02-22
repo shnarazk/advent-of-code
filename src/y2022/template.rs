@@ -4,16 +4,16 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors,
         parser,
     },
     std::collections::HashMap,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, repeat_till, separated, seq, terminated},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -32,9 +32,6 @@ impl AdventOfCode for Puzzle {
     //     // self.line = parse(&mut input.as_str())?;
     //     Self::parsed()
     // }
-    fn end_of_data(&mut self) {
-        dbg!(&self.line);
-    }
     fn part1(&mut self) -> Self::Output1 {
         1
     }

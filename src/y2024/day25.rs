@@ -1,15 +1,15 @@
 //! <https://adventofcode.com/2024/day/25>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         rect::Rect,
     },
     serde::Serialize,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -49,9 +49,6 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         let line = parse(&mut input)?;
         self.line = line.into_iter().map(Rect::from_vec).collect::<Vec<_>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for r in self.line.iter() {
             if r.iter().filter(|((i, _), _)| *i == 0).all(|(_, b)| *b) {
                 let v = r.transpose().to_vec();
@@ -73,6 +70,7 @@ impl AdventOfCode for Puzzle {
                 self.keys.push((r.size.0 as usize, w));
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut count = 0;

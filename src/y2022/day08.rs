@@ -17,15 +17,12 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c as usize - '0' as usize).collect())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (y, l) in self.line.iter().enumerate() {
             for (x, h) in l.iter().enumerate() {
                 self.map.insert((y, x), *h);
             }
         }
-        // dbg!(&self.map);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

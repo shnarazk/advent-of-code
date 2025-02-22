@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2024/day/18>
 use {
     crate::{
-        framework::{aoc_at, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc_at},
         geometric::*,
         parser::parse_usize,
         rect::Rect,
@@ -9,9 +9,9 @@ use {
     serde::Serialize,
     std::{cmp::Reverse, collections::BinaryHeap},
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
-        ModalResult, Parser,
     },
 };
 
@@ -36,9 +36,6 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         match &self.get_config().alt {
             Some(x) if x.as_str() == "0" => {
                 self.size = (7, 7);
@@ -53,6 +50,7 @@ impl AdventOfCode for Puzzle {
         for p in self.line.iter().take(self.bricks) {
             self.mapping[(p.1 as isize, p.0 as isize)] = false;
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(self).ok()

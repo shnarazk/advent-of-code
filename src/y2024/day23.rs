@@ -1,15 +1,15 @@
 //! <https://adventofcode.com/2024/day/23>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     itertools::Itertools,
     rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
     std::{collections::HashSet, hash::BuildHasherDefault},
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -40,9 +40,6 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut nodes: FxHashSet<Node> = HashSet::<Node, BuildHasherDefault<FxHasher>>::default();
         for (na, nb) in self.line.iter() {
             nodes.insert(*na);
@@ -51,6 +48,7 @@ impl AdventOfCode for Puzzle {
                 .insert(if na < nb { (*na, *nb) } else { (*nb, *na) });
         }
         self.nodes = nodes.iter().sorted().cloned().collect::<Vec<_>>();
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         let data = self

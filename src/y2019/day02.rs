@@ -17,12 +17,10 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_isizes(input, &[','])?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (i, v) in self.line.iter().enumerate() {
             self.memory.insert(i, *v);
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.memory.insert(1, 12);

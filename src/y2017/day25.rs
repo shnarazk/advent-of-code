@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/25>
 use {
-    crate::framework::{AdventOfCode, aoc_at},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     std::collections::HashMap,
 };
 
@@ -23,7 +23,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn end_of_data(&mut self) {
+    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         // Begin in state A.
         // Perform a diagnostic checksum after 12172063 steps.
         self.step = 12172063;
@@ -172,6 +172,7 @@ impl AdventOfCode for Puzzle {
             next_state: b'A',
         });
         // dbg!(&self.line);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut tape: HashMap<isize, usize> = HashMap::new();

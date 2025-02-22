@@ -1,17 +1,17 @@
 //! <https://adventofcode.com/2024/day/15>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::*,
         progress_picture,
         rect::Rect,
     },
     serde::Serialize,
     winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated, seq},
         token::one_of,
-        ModalResult, Parser,
     },
 };
 
@@ -133,11 +133,12 @@ impl Puzzle {
         }
         // progress_picture!(s);
         println!("{s}");
-        assert!(s
-            .chars()
-            .collect::<Vec<_>>()
-            .windows(2)
-            .all(|v| (v[0] != '[' || v[1] == ']') && (v[1] != ']' || v[0] == '[')));
+        assert!(
+            s.chars()
+                .collect::<Vec<_>>()
+                .windows(2)
+                .all(|v| (v[0] != '[' || v[1] == ']') && (v[1] != ']' || v[0] == '['))
+        );
     }
 }
 
@@ -510,9 +511,6 @@ impl AdventOfCode for Puzzle {
         let (maze, moves) = parse(&mut input)?;
         self.mapping = Rect::from_vec(maze);
         self.moves = moves;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut pos = (0, 0);
         for (p, k) in self.mapping.iter() {
             if *k == Kind::Robot {
@@ -522,6 +520,7 @@ impl AdventOfCode for Puzzle {
         }
         self.mapping[pos] = Kind::Empty;
         self.next_move = 0;
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         for t in 0..self.moves.len() {

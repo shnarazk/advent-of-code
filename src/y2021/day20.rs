@@ -26,17 +26,8 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
-        // println!("{}", self.enhancer.iter().collect::<String>());
-        // println!("{:?}", &self.image);
-        // for v in self.image.iter() {
-        //     println!({}",v.iter().collect::<String>());
-        // }
-        // println!("{}", self.enhancer[..70].iter().collect::<String>());
-        // println!("{}", self.enhancer[441..512].iter().collect::<String>());
         debug_assert_eq!(self.enhancer.len(), 512);
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut image = self.image.clone();

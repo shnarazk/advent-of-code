@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2017/day/19>
 use {
-    crate::framework::{aoc_at, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc_at},
     std::collections::HashMap,
 };
 
@@ -21,9 +21,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().map(|c| c as u8).collect::<Vec<_>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (j, l) in self.line.iter().enumerate() {
             for (i, c) in l.iter().enumerate() {
                 if *c != b' ' {
@@ -31,6 +28,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         let start_position: Location = {

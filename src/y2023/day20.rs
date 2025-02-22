@@ -73,9 +73,6 @@ impl AdventOfCode for Puzzle {
             };
             self.modules.insert(module_name, module);
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         let mut map: HashMap<String, Vec<String>> = HashMap::new();
         for (from, m) in self.modules.iter() {
             for to in m.dests.iter() {
@@ -91,6 +88,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<HashMap<String, bool>>();
             }
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.modules.iter().collect::<Vec<_>>()).ok()

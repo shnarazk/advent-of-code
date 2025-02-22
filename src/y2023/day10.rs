@@ -51,9 +51,6 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<Pipe>>()
             })
             .collect::<Vec<Vec<Pipe>>>();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (y, l) in self.line.iter().enumerate() {
             for (x, p) in l.iter().enumerate() {
                 if p.0 == vec![START] {
@@ -62,6 +59,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
+        Self::parsed()
     }
     fn serialize(&self) -> Option<String> {
         let mut hash: HashSet<Dim2<usize>> = HashSet::new();

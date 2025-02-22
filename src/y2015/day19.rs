@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/19>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
-    std::collections::{hash_map::Entry, HashMap, HashSet},
+    crate::framework::{AdventOfCode, ParseError, aoc},
+    std::collections::{HashMap, HashSet, hash_map::Entry},
 };
 
 #[derive(Clone, Debug, Default)]
@@ -14,10 +14,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated, seq},
         token::one_of,
-        ModalResult, Parser,
     };
 
     fn parse_atom(s: &mut &str) -> ModalResult<String> {
@@ -69,9 +69,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
+
         self.dic.insert("e".to_string(), self.num_atom);
         self.num_atom += 1;
         // dbg!(&self.rule);
@@ -143,6 +141,7 @@ impl AdventOfCode for Puzzle {
         }
         // println!("212;     NAl => e : NAl");
         // println!("212;              : e");
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         // dbg!(&self.rule);
@@ -268,9 +267,11 @@ impl Puzzle {
             .iter()
             .map(|s| *self.dic.get(s).unwrap())
             .collect::<Vec<usize>>();
-        dbg!((0..medicine.len())
-            .filter(|i| rule.iter().any(|(atom, _)| medicine[*i] == *atom))
-            .count());
+        dbg!(
+            (0..medicine.len())
+                .filter(|i| rule.iter().any(|(atom, _)| medicine[*i] == *atom))
+                .count()
+        );
         let mut bag: HashSet<Vec<usize>> = HashSet::new();
         let mut new_bag: HashSet<Vec<usize>> = HashSet::new();
         bag.insert(vec![0]);
@@ -284,11 +285,13 @@ impl Puzzle {
                             new_string.insert(i, *x);
                         }
                         if new_string.starts_with(&medicine) {
-                            dbg!(new_string
-                                .iter()
-                                .map(|n| to_mnemonic[*n])
-                                .collect::<Vec<&str>>()
-                                .join(""));
+                            dbg!(
+                                new_string
+                                    .iter()
+                                    .map(|n| to_mnemonic[*n])
+                                    .collect::<Vec<&str>>()
+                                    .join("")
+                            );
                             return i;
                         }
                         if new_string.len() < medicine.len() {

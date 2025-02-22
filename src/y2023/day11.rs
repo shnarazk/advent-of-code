@@ -22,9 +22,6 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().map(|c| c == '#').collect::<Vec<_>>())
             .collect();
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         self.trans_x = self.line[0].iter().map(|_| 1).collect::<Vec<usize>>();
         for l in self.line.iter() {
             let mut found = false;
@@ -36,6 +33,7 @@ impl AdventOfCode for Puzzle {
             }
             self.trans_y.push(!found as usize);
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.scale_up(2);

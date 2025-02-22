@@ -116,13 +116,11 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
-    }
-    fn end_of_data(&mut self) {
         for (from, to) in self.line.iter() {
             self.path.insert((from.clone(), to.clone()));
             self.path.insert((to.clone(), from.clone()));
         }
+        Self::parsed()
     }
     fn part1(&mut self) -> Self::Output1 {
         self.count_to(vec![&Node::End])
