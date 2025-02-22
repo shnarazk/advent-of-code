@@ -30,7 +30,7 @@ mod parser {
 
 #[aoc(2017, 15)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         self.factor = (16807, 48271);
         Ok(())

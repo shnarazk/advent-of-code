@@ -9,7 +9,7 @@ pub struct Puzzle {
 
 #[aoc(2018, 9)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         // 410 players; last marble is worth 72059 points
         self.players = 410;
         self.points = 72059;

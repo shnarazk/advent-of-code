@@ -200,7 +200,7 @@ pub struct Puzzle {
 
 #[aoc(2021, 18)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for block in input.lines() {
             let str = &block.chars().filter(|c| *c != ',').collect::<Vec<_>>();
             let (node, _rest) = Tree::from(str);

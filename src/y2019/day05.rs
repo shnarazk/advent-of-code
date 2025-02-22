@@ -11,7 +11,7 @@ pub struct Puzzle {
 
 #[aoc(2019, 5)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_isizes(input, &[','])?;
         Ok(())
     }

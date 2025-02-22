@@ -30,7 +30,7 @@ fn satisfy(lvls: &[usize]) -> bool {
 
 #[aoc(2024, 2)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = repeat(0.., terminated(parse_line, newline)).parse_next(&mut input)?;
         Ok(())
     }

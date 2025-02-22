@@ -102,7 +102,7 @@ pub struct Puzzle {
 
 #[aoc(2015, 21)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         for (weapon, w) in WEAPONS.iter().enumerate() {
             for (armor, a) in ARMOR.iter().enumerate() {
                 for (ring, r) in RINGS.iter().enumerate() {

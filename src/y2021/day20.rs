@@ -12,7 +12,7 @@ pub struct Puzzle {
 
 #[aoc(2021, 20)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for block in input.split("\n\n").filter(|b| !b.is_empty()) {
             let first_block = self.enhancer.is_empty();
             for l in block.split('\n') {

@@ -39,7 +39,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         for (p1, p2, _) in self.line.iter() {
             self.person.insert(p1.to_string());

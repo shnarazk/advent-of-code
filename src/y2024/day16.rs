@@ -105,7 +105,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind>>> {
 
 #[aoc(2024, 16)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let line = parse(&mut input)?;
         let Puzzle {
             mapping,

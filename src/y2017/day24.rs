@@ -25,7 +25,7 @@ pub struct Puzzle {
 
 #[aoc(2017, 24)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let v = parser::to_usizes(l, &['/'])?;
             self.line.push((v[0], v[1]));

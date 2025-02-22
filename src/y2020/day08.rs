@@ -53,7 +53,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.code = parser::parse(&mut input)?;
         Ok(())
     }

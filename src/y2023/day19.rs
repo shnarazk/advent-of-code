@@ -76,7 +76,7 @@ fn parse_settings(str: &mut &str) -> ModalResult<Vec<Vec<(String, usize)>>> {
 
 #[aoc(2023, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         #[allow(clippy::type_complexity)]
         let (workflows, _): (Vec<(Label, Vec<Rule>)>, &str) =
             repeat_till(0.., parse_workflow, "\n").parse_next(&mut input)?;

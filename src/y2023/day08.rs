@@ -33,7 +33,7 @@ fn parse_block(input: &mut &str) -> ModalResult<(String, (String, String))> {
 
 #[aoc(2023, 8)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let label = parse_header(&mut input)?;
         self.head = label.chars().collect::<Vec<_>>();
         let v: Vec<(String, (String, String))> =

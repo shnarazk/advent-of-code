@@ -17,7 +17,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_usizes(input, &[','])?;
         self.strn = input.trim().to_string();
         Ok(())

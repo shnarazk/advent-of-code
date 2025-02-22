@@ -93,7 +93,7 @@ mod parser {
 
 #[aoc(2021, 13)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (dots, foldings) = parser::parse(&mut input)?;
         self.line = dots;
         self.folding = foldings;

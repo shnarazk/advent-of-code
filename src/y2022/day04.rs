@@ -18,7 +18,7 @@ fn parse_line(s: &mut &str) -> ModalResult<(usize, usize, usize, usize)> {
 
 #[aoc(2022, 4)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for mut l in input.lines() {
             self.line.push(parse_line(&mut l)?);
         }

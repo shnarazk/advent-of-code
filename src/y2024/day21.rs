@@ -124,7 +124,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind1>>> {
 
 #[aoc(2024, 21)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         self.lv1 = [
             ((Kind1::K0, Kind1::K2), Kind2::U),

@@ -38,7 +38,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(Node, Node)>> {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         let mut nodes: FxHashSet<Node> = HashSet::<Node, BuildHasherDefault<FxHasher>>::default();
         for (na, nb) in self.line.iter() {

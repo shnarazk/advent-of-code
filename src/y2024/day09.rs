@@ -18,7 +18,7 @@ pub struct Puzzle {
 
 #[aoc(2024, 9)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_digits(input)?;
         for (i, x) in self.line.iter().enumerate() {
             if i % 2 == 0 {

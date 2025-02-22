@@ -32,7 +32,7 @@ impl Beam {
 
 #[aoc(2023, 16)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.lines().map(|l| l.chars().collect()).collect();
         self.size = (self.line.len() as isize, self.line[0].len() as isize);
         Ok(())

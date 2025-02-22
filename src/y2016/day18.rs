@@ -8,7 +8,7 @@ pub struct Puzzle {
 
 #[aoc(2016, 18)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s.trim().chars().map(|c| c == '^').collect::<Vec<_>>();
         Ok(())
     }

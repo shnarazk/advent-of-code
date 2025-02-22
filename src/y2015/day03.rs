@@ -12,7 +12,7 @@ pub struct Puzzle {
 
 #[aoc(2015, 3)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, block: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
         Ok(())
     }

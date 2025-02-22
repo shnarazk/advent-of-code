@@ -60,7 +60,7 @@ pub struct Puzzle {
 
 #[aoc(2018, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         self.depth = 3066;
         self.target = (726, 13);
         // self.depth = 510;

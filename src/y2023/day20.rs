@@ -50,7 +50,7 @@ impl<'a> Module {
 
 #[aoc(2023, 20)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let segment = l.split(" -> ").collect::<Vec<_>>();
             let mut label = segment[0].chars();

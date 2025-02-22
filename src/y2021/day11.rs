@@ -98,7 +98,7 @@ impl Puzzle {
 
 #[aoc(2021, 11)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             self.line.push(parser::to_digits(l)?);
         }

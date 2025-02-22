@@ -17,7 +17,7 @@ pub struct Puzzle {
 
 #[aoc(2023, 2)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for mut l in input.lines() {
             self.index += 1;
             fn parse_color(block: &mut &str) -> ModalResult<(String, usize)> {

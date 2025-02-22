@@ -13,7 +13,7 @@ pub struct Puzzle {
 
 #[aoc(2023, 3)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let cs = l.chars().collect::<Vec<_>>();
             let mut acc: Option<usize> = None;

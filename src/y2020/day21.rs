@@ -73,7 +73,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let data = parser::parse(&mut input)?;
         for (ingredients, allergens) in data {
             let mut num_ingredient = self.ingredients.len();

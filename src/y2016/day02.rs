@@ -13,7 +13,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s.lines().map(|l| l.chars().collect()).collect();
         Ok(())
     }

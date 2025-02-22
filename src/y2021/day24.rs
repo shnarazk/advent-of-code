@@ -89,7 +89,7 @@ impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
 
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         self.jit = self.build();
         debug_assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));

@@ -276,7 +276,7 @@ fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<char>>, Vec<Direction>)> {
 
 #[aoc(2022, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (maze, moves) = parse(&mut input)?;
         self.line = maze;
         self.path = moves;

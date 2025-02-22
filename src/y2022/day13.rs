@@ -75,7 +75,7 @@ pub struct Puzzle {
 
 #[aoc(2022, 13)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input
             .split("\n\n")
             .filter(|block| !block.is_empty())

@@ -19,7 +19,7 @@ pub struct Puzzle {
 
 #[aoc(2023, 21)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             if let Some(i) = l.chars().enumerate().find(|(_, c)| *c == 'S') {
                 self.start = (self.line.len(), i.0);

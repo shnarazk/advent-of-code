@@ -10,7 +10,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = "10001110011110000"
             .chars()
             .map(|c| c == '1')

@@ -114,7 +114,7 @@ mod parser {
 
 #[aoc(2021, 12)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         for (from, to) in self.line.iter() {
             self.path.insert((from.clone(), to.clone()));

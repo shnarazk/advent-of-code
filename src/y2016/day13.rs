@@ -19,7 +19,7 @@ pub struct Puzzle {
 
 #[aoc(2016, 13)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = 1364;
         Ok(())
     }

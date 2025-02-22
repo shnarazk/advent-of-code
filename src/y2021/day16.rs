@@ -11,7 +11,7 @@ pub struct Puzzle {
 
 #[aoc(2021, 16)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for block in input.lines() {
             if block.chars().all(|c| ['0', '1'].contains(&c)) {
                 self.line.push(parser::to_binaries(block)?);

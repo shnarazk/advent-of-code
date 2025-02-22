@@ -9,7 +9,7 @@ pub struct Puzzle {
 
 #[aoc(2020, 11)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.data = input
             .lines()
             .map(|line| line.chars().collect::<Vec<char>>())

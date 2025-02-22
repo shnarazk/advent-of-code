@@ -15,7 +15,7 @@ pub struct Puzzle {
 
 #[aoc(2019, 2)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_isizes(input, &[','])?;
         for (i, v) in self.line.iter().enumerate() {
             self.memory.insert(i, *v);

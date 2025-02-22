@@ -300,7 +300,7 @@ impl Puzzle {
 
 #[aoc(2018, 15)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.lines().map(|line| line.as_bytes().to_vec()).collect();
         let mut count = 1;
         for (j, l) in self.line.iter_mut().enumerate() {

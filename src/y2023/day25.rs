@@ -23,7 +23,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let b = l.split(": ").collect::<Vec<&str>>();
             let others = b[1].split(' ').map(|s| s.to_string()).collect::<Vec<_>>();

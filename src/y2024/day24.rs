@@ -362,7 +362,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (wires, links) = parser::parse(&mut input)?;
         self.input_wire = wires;
         let mut wire_names_tmp: FxHashSet<Wire> =

@@ -26,7 +26,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<usize>> {
 
 #[aoc(2024, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         self.threshold = self.get_config().alt.as_ref().map_or(2000, |_| 2000);
         Ok(())

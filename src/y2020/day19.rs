@@ -81,7 +81,7 @@ mod parser {
 
 #[aoc(2020, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (rules, messages) = parser::parse(&mut input)?;
         let r = rules.iter().cloned().collect::<HashMap<usize, Rule>>();
         self.rule = r;

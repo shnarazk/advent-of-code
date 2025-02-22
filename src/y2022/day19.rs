@@ -182,7 +182,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(usize, usize, usize, usize, usize, us
 
 #[aoc(2022, 19)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let line = parse(&mut input)?;
         self.line = line
             .iter()

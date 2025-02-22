@@ -43,7 +43,7 @@ impl Ord for Route {
 
 #[aoc(2023, 23)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input
             .lines()
             .map(|l| l.bytes().collect::<Vec<_>>())

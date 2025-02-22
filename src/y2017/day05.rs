@@ -9,7 +9,7 @@ pub struct Puzzle {
 
 #[aoc(2017, 5)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             self.line.push(l.parse::<isize>()?);
         }

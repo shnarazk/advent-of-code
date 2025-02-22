@@ -35,7 +35,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         self.expr = input.lines().map(|l| l.to_string()).collect();
         Ok(())
     }

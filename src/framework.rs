@@ -129,17 +129,15 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
-    /// An optional function to parse all from the contents an input file.
-    /// It must return the remains as `Ok(remains as String)`.
-    /// In particular, it returns `Ok("")` if it parsed everything.
+    /// Parse all from the contents an input file then some post-processing.
     /// ## A typical implementation example
     /// ```ignore
-    /// fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    /// fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
     ///     self.line = parser::parse(&mut input);
-    ///     Self.parsed()
+    ///     Ok(())
     /// }
     /// ```
-    fn parse(&mut self, mut _input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut _input: &str) -> Result<(), ParseError> {
         Ok(())
     }
     /// # UNDER THE HOOD
@@ -171,7 +169,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     fn run(config: ConfigAoC) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(config)?;
-        instance.parse(contents.as_str())?;
+        instance.prepare(contents.as_str())?;
         Ok(instance)
     }
     /// the solver for part1

@@ -25,7 +25,7 @@ mod parser {
 }
 #[aoc(2015, 24)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut block: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut block: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut block)?;
         Ok(())
     }

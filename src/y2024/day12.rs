@@ -157,7 +157,7 @@ fn parse<'a>(s: &'a mut &str) -> ModalResult<Vec<&'a str>> {
 
 #[aoc(2024, 12)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let v = parse(&mut input)?;
         self.mapping = Rect::from_vec(
             v.iter()

@@ -94,7 +94,7 @@ fn parse(input: &mut &str) -> ModalResult<Vec<Vec<char>>> {
 
 #[aoc(2024, 6)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.mapping = parse(&mut input)?;
         self.size.0 = self.mapping.len() as isize;
         self.size.1 = self.mapping[0].len() as isize;

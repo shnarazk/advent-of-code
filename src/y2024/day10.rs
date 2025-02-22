@@ -89,7 +89,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<usize>>> {
 
 #[aoc(2024, 10)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         self.size.0 = self.line.len() as isize;
         self.size.1 = self.line[0].len() as isize;

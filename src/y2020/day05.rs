@@ -18,7 +18,7 @@ impl Default for Puzzle {
 
 #[aoc(2020, 5)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let chs = l.chars().collect::<Vec<char>>();
             let row = chs[..7]

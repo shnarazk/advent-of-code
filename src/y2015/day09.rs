@@ -80,7 +80,7 @@ mod parser {
 
 #[aoc(2015, 9)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         for (c0, c1, d) in self.line.iter() {
             self.path.insert((c0.to_string(), c1.to_string()), *d);

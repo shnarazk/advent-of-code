@@ -17,7 +17,7 @@ pub struct Puzzle {
 
 #[aoc(2023, 18)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             let mut dir: Dim2<isize> = (0, 0);
             let mut dist = 0;

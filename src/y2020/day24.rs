@@ -94,7 +94,7 @@ pub struct Puzzle {
 
 #[aoc(2020, 24)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, input: &str) -> Result<(), ParseError> {
         for l in input.lines() {
             self.flip(location(&dirs_from(l)));
         }

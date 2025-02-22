@@ -29,7 +29,7 @@ mod parser {
 
 #[aoc(2021, 17)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (x1, x2, y1, y2) = parser::parse(&mut input)?;
         self.line
             .push((y1.max(y2), y1.min(y2), x1.min(x2), x1.max(x2)));

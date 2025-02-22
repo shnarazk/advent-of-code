@@ -59,7 +59,7 @@ fn parse(s: &mut &str) -> ModalResult<(Vec<Vec<Option<char>>>, Vec<(usize, usize
 impl AdventOfCode for Puzzle {
     type Output1 = String;
     type Output2 = String;
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         let (mc, moves) = parse(&mut input)?;
         let maze_config = rotate_clockwise(mc);
         for (n, config) in maze_config.iter().enumerate() {

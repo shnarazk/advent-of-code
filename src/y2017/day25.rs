@@ -23,7 +23,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     type Output1 = usize;
     type Output2 = String;
-    fn parse(&mut self, _: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, _: &str) -> Result<(), ParseError> {
         // Begin in state A.
         // Perform a diagnostic checksum after 12172063 steps.
         self.step = 12172063;

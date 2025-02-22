@@ -49,7 +49,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(String, usize, Vec<String>)>> {
 
 #[aoc(2022, 16)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         let mut id = 0;
         for (label, _flow, linked) in self.line.iter() {

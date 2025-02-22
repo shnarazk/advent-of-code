@@ -99,7 +99,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(Loc, Loc)>> {
 
 #[aoc(2022, 15)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         Ok(())
     }

@@ -28,7 +28,7 @@ fn to_basement(vec: &[char], level: isize) -> isize {
 impl AdventOfCode for Puzzle {
     type Output1 = isize;
     type Output2 = isize;
-    fn parse(&mut self, block: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
         Ok(())
     }

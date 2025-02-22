@@ -51,7 +51,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(isize, isize, isize, isize)>> {
 
 #[aoc(2024, 14)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         self.size = match &self.get_config().alt {
             Some(x) if x.as_str() == "0" => (7, 11),

@@ -11,7 +11,7 @@ pub struct Puzzle {
 
 #[aoc(2016, 7)]
 impl AdventOfCode for Puzzle {
-    fn parse(&mut self, s: &str) -> Result<(), ParseError> {
+    fn prepare(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s
             .lines()
             .map(|l| l.chars().map(|c| c as u8).collect())
