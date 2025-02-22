@@ -166,7 +166,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
-    fn run(config: ConfigAoC) -> Result<Self, ParseError> {
+    fn build(config: ConfigAoC) -> Result<Self, ParseError> {
         let mut instance = Self::default();
         let contents = Self::load(config)?;
         instance.prepare(contents.as_str())?;
@@ -255,7 +255,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
         match config.part {
             0 => {
                 assert!(config.serialize);
-                Self::run(config).expect(&parse_error).dump();
+                Self::build(config).expect(&parse_error).dump();
                 Answer::Dump
             }
             1 => {
@@ -267,7 +267,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::run(config).expect(&parse_error).part1())
+                Answer::Part1(Self::build(config).expect(&parse_error).part1())
             }
             2 => {
                 println!(
@@ -278,7 +278,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::run(config).expect(&parse_error).part2())
+                Answer::Part2(Self::build(config).expect(&parse_error).part2())
             }
             3 => {
                 println!(
@@ -289,7 +289,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
-                let solver = Self::run(config.clone()).expect(&parse_error);
+                let solver = Self::build(config.clone()).expect(&parse_error);
                 let ans1 = solver.clone().part1();
                 let ans2 = solver.clone().part2();
                 Answer::Answers(ans1, ans2)
