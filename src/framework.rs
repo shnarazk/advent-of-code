@@ -146,10 +146,6 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     fn parse(&mut self, mut _input: &str) -> Result<(), ParseError> {
         Ok(())
     }
-    #[allow(unused_variables)]
-    fn parse_block(&mut self, s: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     /// An optional function to wrap up initialization.
     /// ## A typical implementation example
     /// ```ignore

@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2018/day/22>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, aoc},
         geometric,
     },
     std::{
@@ -60,9 +60,6 @@ pub struct Puzzle {
 
 #[aoc(2018, 22)]
 impl AdventOfCode for Puzzle {
-    fn parse_block(&mut self, _: &str) -> Result<(), ParseError> {
-        Ok(())
-    }
     fn end_of_data(&mut self) {
         self.depth = 3066;
         self.target = (726, 13);
