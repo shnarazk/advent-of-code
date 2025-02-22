@@ -39,6 +39,7 @@ mod parser {
         .parse_next(s)
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn parse(s: &mut &str) -> ModalResult<(Vec<usize>, Vec<Vec<(usize, usize, usize)>>)> {
         seq!(parse_seeds, _: (newline, newline), separated(1.., parse_block, (newline, newline)))
             .parse_next(s)
