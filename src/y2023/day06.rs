@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         self.setting2 = (s2[0], s2[1]);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.setting1

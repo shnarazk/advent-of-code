@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
             .chars()
             .map(|c| (c as u8 - b'0') as i32)
             .collect::<Vec<i32>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let base_pattern: Vec<i32> = vec![0, 1, 0, -1];

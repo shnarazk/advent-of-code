@@ -13,7 +13,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.trim().to_string();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for i in 0.. {

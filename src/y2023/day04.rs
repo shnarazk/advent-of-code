@@ -21,7 +21,7 @@ impl AdventOfCode for Puzzle {
             self.card.push(vecs);
             self.amount.push(1);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.card

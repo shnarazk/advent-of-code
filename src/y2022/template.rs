@@ -30,7 +30,7 @@ fn parse(s: &mut &str) -> ModalResult<()> {
 impl AdventOfCode for Puzzle {
     // fn parse(&mut self, input: String) -> Result<String, ParseError> {
     //     // self.line = parse(&mut input.as_str())?;
-    //     Self::parsed()
+    //     Ok(())
     // }
     fn part1(&mut self) -> Self::Output1 {
         1

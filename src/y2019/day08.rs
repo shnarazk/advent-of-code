@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
             .chars()
             .map(|c| c as u8 - b'0')
             .collect::<Vec<u8>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let width = 25;

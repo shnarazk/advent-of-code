@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
                 char: l.chars().collect::<Vec<char>>(),
             })
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.count_for_slope(1, 3)

@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
                 (chars[0], chars[2])
             })
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         #[allow(clippy::identity_op)]

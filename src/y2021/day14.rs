@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
             self.atom.insert(*l);
             self.atom.insert(*r);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut now = self.template.clone();

@@ -35,7 +35,7 @@ impl AdventOfCode for Puzzle {
             n /= 10;
         }
         self.line.reverse();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.iterate(self.line.clone(), 40)

@@ -86,7 +86,7 @@ impl AdventOfCode for Puzzle {
         let r = rules.iter().cloned().collect::<HashMap<usize, Rule>>();
         self.rule = r;
         self.message = messages;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.message

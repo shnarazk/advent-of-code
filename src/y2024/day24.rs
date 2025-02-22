@@ -390,7 +390,7 @@ impl AdventOfCode for Puzzle {
         if INPUT_BITS.get().is_none() {
             INPUT_BITS.set(input_bits).unwrap();
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         let mut data = PROPAGATION_TABLE

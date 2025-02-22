@@ -42,7 +42,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .cloned()
             .collect::<HashMap<String, (String, String)>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.traverse("AAA")

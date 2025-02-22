@@ -46,7 +46,7 @@ impl AdventOfCode for Puzzle {
             );
             self.raw.push(l.to_string());
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut num: isize = 0;

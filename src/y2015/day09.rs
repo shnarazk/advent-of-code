@@ -88,7 +88,7 @@ impl AdventOfCode for Puzzle {
             self.cities.insert(c0.to_string());
             self.cities.insert(c1.to_string());
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.cities

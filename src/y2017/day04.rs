@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().map(|c| c as u8).collect())
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().filter(|p| is_valid(p)).count()

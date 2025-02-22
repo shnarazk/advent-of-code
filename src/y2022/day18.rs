@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
             debug_assert!(0 < dim3[2] && dim3[2] < L, "{}", dim3[2]);
             self.map.insert((dim3[0], dim3[1], dim3[2]));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.map

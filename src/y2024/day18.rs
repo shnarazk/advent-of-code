@@ -50,7 +50,7 @@ impl AdventOfCode for Puzzle {
         for p in self.line.iter().take(self.bricks) {
             self.mapping[(p.1 as isize, p.0 as isize)] = false;
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(self).ok()

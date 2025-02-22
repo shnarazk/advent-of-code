@@ -17,7 +17,7 @@ impl AdventOfCode for Puzzle {
             self.vec.push(l.parse::<usize>()?);
         }
         self.len = if 100 < self.vec.len() { 25 } else { 5 };
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let len = self.len;

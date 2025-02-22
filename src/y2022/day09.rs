@@ -61,7 +61,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Dir>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for dir in self.line.clone().iter() {

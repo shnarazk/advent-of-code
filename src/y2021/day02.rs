@@ -39,7 +39,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Direction>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut horizontal: usize = 0;

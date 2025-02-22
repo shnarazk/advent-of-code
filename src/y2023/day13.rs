@@ -17,7 +17,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().map(evaluate).sum::<usize>()

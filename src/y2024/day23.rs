@@ -48,7 +48,7 @@ impl AdventOfCode for Puzzle {
                 .insert(if na < nb { (*na, *nb) } else { (*nb, *na) });
         }
         self.nodes = nodes.iter().sorted().cloned().collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         let data = self

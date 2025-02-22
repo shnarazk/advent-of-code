@@ -101,7 +101,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<(Loc, Loc)>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let target = 2_000_000; // 10;

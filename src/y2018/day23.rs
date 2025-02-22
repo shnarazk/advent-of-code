@@ -90,7 +90,7 @@ impl AdventOfCode for Puzzle {
             .unwrap()
             .next_power_of_two();
         // dbg!(self.num_robots, self.radius);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let strongest: (&usize, &Dim3) = self.line.iter().map(|(p, r)| (r, p)).max().unwrap();

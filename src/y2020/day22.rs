@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
         let mut v = parser::parse(&mut input)?;
         self.player2 = VecDeque::from(v.pop().unwrap());
         self.player1 = VecDeque::from(v.pop().unwrap());
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut stopper = None;

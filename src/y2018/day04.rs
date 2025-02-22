@@ -100,7 +100,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
         self.line.sort_by_key(|e| e.timestamp());
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut guard: Option<usize> = None;

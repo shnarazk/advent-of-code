@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
         for mut l in input.lines() {
             self.line.push(parse_line(&mut l)?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

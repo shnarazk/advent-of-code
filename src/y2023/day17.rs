@@ -74,7 +74,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.bytes().map(|c| (c - b'0') as usize).collect())
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.search(false)

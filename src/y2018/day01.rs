@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(parser::to_isize(l)?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().copied().sum::<isize>()

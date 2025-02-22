@@ -105,7 +105,7 @@ impl AdventOfCode for Puzzle {
             }
             self.entry.push(Rule { dic });
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.entry.iter().filter(|r| r.check_keys()).count()

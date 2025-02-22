@@ -13,7 +13,7 @@ impl AdventOfCode for Puzzle {
             self.vec.push(l.parse::<usize>()?);
         }
         self.vec.insert(0, 0);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.vec.sort_unstable();

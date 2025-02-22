@@ -14,7 +14,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.hash.insert((0, 0), 1);

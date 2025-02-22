@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().collect::<Vec<char>>())
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut grid = Grid {

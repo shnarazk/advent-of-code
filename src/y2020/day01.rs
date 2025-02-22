@@ -12,7 +12,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.val.push(l.parse::<usize>()?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         for i in &self.val {

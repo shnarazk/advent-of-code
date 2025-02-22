@@ -38,7 +38,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| l.chars().collect::<Vec<char>>())
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         // for l in self.line.iter() {

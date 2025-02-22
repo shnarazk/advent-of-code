@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
             let v = parser::to_usizes(l, &[' ', ','])?;
             self.line.push((v[1], v[0]));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.line.iter().map(|(y, _)| *y).min().expect("strange");

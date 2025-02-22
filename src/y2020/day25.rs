@@ -18,7 +18,7 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         self.card = l[0];
         self.door = l[1];
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         day25(5764801, 17807724);

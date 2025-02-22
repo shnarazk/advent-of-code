@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.grid_serial_number = input.trim().parse::<usize>()?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let map = self.build_value_power_level_map();

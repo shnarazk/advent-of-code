@@ -38,7 +38,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.size = (self.plane.len() as isize, self.plane[0].len() as isize);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for (i, (p, f1)) in self.antenna.iter().enumerate() {

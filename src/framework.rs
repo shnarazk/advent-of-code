@@ -129,10 +129,6 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     type Output2: fmt::Debug + PartialEq;
     const YEAR: usize;
     const DAY: usize;
-    /// A function used at the end of `parse` to declare to parse the input correctly
-    fn parsed() -> Result<(), ParseError> {
-        Ok(())
-    }
     /// An optional function to parse all from the contents an input file.
     /// It must return the remains as `Ok(remains as String)`.
     /// In particular, it returns `Ok("")` if it parsed everything.

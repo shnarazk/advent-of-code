@@ -79,7 +79,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.supported).ok()

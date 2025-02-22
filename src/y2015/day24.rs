@@ -27,7 +27,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut block: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut block)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.reverse();

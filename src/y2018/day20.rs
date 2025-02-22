@@ -185,7 +185,7 @@ fn parse_to_branch(string: &[u8], start: usize) -> Result<(Rege, usize), ParseEr
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.chars().map(|c| c as u8).collect::<Vec<u8>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.push(b')');

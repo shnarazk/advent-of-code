@@ -42,7 +42,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.vec = parser::to_usizes(l, &[','])?;
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut vec = self.vec.clone();

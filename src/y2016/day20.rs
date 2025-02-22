@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
             let input = parser::to_usizes(l, &['-'])?;
             self.line.push((input[0], input[1]));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut result = usize::MAX;

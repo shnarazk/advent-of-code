@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut bus: usize = self.bus[0].0;

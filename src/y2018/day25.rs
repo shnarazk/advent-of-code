@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(parser::to_isizes(l, &[','])?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut constellation: HashMap<usize, usize> = HashMap::new();

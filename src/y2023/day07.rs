@@ -91,7 +91,7 @@ impl AdventOfCode for Puzzle {
             self.line1.push(Hand { card: card1, bid });
             self.line2.push(Hand { card: card2, bid });
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         evaluate(&self.line1)

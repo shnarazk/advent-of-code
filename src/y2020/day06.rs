@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
             }
             self.dic.push((n, dic));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.dic.iter().map(|(_, h)| h.len()).sum()

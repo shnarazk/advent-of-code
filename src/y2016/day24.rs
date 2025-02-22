@@ -85,7 +85,7 @@ impl AdventOfCode for Puzzle {
         //     }
         //     println!("\t{:?}", self.targets[i]);
         // }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let goal = self.targets.len();

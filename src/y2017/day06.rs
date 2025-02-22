@@ -18,7 +18,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_usizes(input, &['\t', ' '])?;
         self.len = self.line.len();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut visited: HashSet<Vec<usize>> = HashSet::new();

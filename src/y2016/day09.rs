@@ -24,7 +24,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = input.chars().filter(|c| *c != '\n').collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: &str = self.line.trim();

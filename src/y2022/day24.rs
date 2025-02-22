@@ -91,7 +91,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert((j, i), *c);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         // let time = 13;

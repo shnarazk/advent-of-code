@@ -351,7 +351,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Vec<Kind1>>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: String) -> Result<String, ParseError> {
         self.line = parse(&mut input.as_str())?;
-        Self::parsed()
+        Ok(())
     }
     fn end_of_data(&mut self) {
         // dbg!(&self.line);

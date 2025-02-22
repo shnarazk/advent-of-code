@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|l| parser::to_isizes(l, &[' ']).unwrap())
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter_mut().map(|v| extrapolate(v)).sum::<isize>() as usize

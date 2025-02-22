@@ -29,7 +29,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     #[allow(dead_code)]
     fn dump(&self) {

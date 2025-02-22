@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
             .filter(|c| b'a' <= **c && **c <= b'z')
             .copied()
             .collect::<Vec<u8>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let n_keys = self.keys.len();

@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
             .chars()
             .map(|c| c == '1')
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let disk_size = 272;

@@ -62,7 +62,7 @@ impl AdventOfCode for Puzzle {
         for _ in 0..=self.max_y {
             self.count.push(vec![0; self.max_x + 1]);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         for ds in self.line.iter() {

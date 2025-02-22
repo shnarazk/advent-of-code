@@ -520,7 +520,7 @@ impl AdventOfCode for Puzzle {
         }
         self.mapping[pos] = Kind::Empty;
         self.next_move = 0;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for t in 0..self.moves.len() {

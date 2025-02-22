@@ -45,7 +45,7 @@ impl AdventOfCode for Puzzle {
             self.person.insert(p1.to_string());
             self.person.insert(p2.to_string());
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut likes: HashMap<(&str, &str), isize> = HashMap::new();

@@ -70,7 +70,7 @@ fn num_edges2(
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_usizes(input, &[' ']).expect("ng");
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.par_iter().map(|&n| num_edges(25, 0, n)).sum()

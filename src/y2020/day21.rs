@@ -95,7 +95,7 @@ impl AdventOfCode for Puzzle {
                 allergens,
             });
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let verbose = !self.get_config().bench;

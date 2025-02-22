@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
             self.line.push(l.parse::<isize>()?);
         }
         self.len = self.line.len();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pc: isize = 0;

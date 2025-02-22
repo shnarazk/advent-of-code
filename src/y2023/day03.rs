@@ -43,7 +43,7 @@ impl AdventOfCode for Puzzle {
             }
             self.line += 1;
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.number

@@ -44,7 +44,7 @@ impl AdventOfCode for Puzzle {
                 self.hash.insert((i as isize, j as isize), *c);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.hash

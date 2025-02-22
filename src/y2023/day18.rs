@@ -52,7 +52,7 @@ impl AdventOfCode for Puzzle {
             }
             self.line.push((dir, dist));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Dim2<isize>, usize> = HashMap::new();

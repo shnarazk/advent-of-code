@@ -27,7 +27,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         debug_assert_eq!(self.enhancer.len(), 512);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut image = self.image.clone();

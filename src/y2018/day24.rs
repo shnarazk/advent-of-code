@@ -351,7 +351,7 @@ impl AdventOfCode for Puzzle {
         self.infection = infections;
         dbg!(&self.immune.len());
         dbg!(&self.infection.len());
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut remains = self.remains();

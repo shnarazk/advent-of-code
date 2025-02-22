@@ -74,7 +74,7 @@ impl AdventOfCode for Puzzle {
             }
             self.field_cands.push(res);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         // dbg!(&field_cands);

@@ -93,7 +93,7 @@ impl AdventOfCode for Puzzle {
         self.line = parser::parse(&mut input)?;
         self.jit = self.build();
         debug_assert!(self.check(vec![9, 9, 9, 1, 1, 9, 8, 3, 9, 4, 9, 5, 8, 4]));
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.direction = Some(Ordering::Greater);

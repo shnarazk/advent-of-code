@@ -115,7 +115,7 @@ impl AdventOfCode for Puzzle {
         self.player.hit_point = 49;
         self.player.mana = 500;
         self.boss.hit_point -= 1;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut to_visit: BinaryHeap<Reverse<Puzzle>> = BinaryHeap::new();

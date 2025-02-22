@@ -32,7 +32,7 @@ impl AdventOfCode for Puzzle {
                 )
             })
             .collect();
-        Self::parsed()
+        Ok(())
     }
     // fn end_of_data(&mut self) { dbg!(self.line.len()); }
     fn serialize(&self) -> Option<String> {

@@ -108,7 +108,7 @@ impl AdventOfCode for Puzzle {
         let (pattern, designs) = parse(&mut input)?;
         self.pattern = pattern;
         self.designs = designs;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.designs

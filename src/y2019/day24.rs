@@ -16,7 +16,7 @@ impl AdventOfCode for Puzzle {
             .lines()
             .map(|line| line.chars().map(|c| c == '#').collect())
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut visited: HashSet<u32> = HashSet::new();

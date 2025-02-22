@@ -59,7 +59,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         let mut hash: HashSet<Dim2<usize>> = HashSet::new();

@@ -113,7 +113,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut pos = Some(self.guard.0);

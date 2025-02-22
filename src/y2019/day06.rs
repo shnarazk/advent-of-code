@@ -38,7 +38,7 @@ impl AdventOfCode for Puzzle {
         for (a, b) in self.line.iter() {
             self.orbit.insert((a.clone(), b.clone()));
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut to_visit: Vec<(String, usize)> = vec![("COM".to_string(), 0)];

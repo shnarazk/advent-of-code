@@ -24,7 +24,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<isize>>()
             })
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut sum: usize = self

@@ -52,7 +52,7 @@ impl AdventOfCode for Puzzle {
             self.hash.entry(*from).or_default().push((i, *to));
             self.hash.entry(*to).or_default().push((i, *from));
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.link).ok()

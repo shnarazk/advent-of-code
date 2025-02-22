@@ -21,7 +21,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = 1364;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Dim2, bool> = HashMap::new();

@@ -21,7 +21,7 @@ impl AdventOfCode for Puzzle {
             .collect();
         // self.line
         //     .push(input.chars().map(|c| c == '#').collect::<Vec<bool>>());
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let _height = self.line.len();

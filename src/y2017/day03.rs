@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(l.trim().parse::<usize>()?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut distance = 0;

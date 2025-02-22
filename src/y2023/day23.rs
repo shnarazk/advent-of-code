@@ -73,7 +73,7 @@ impl AdventOfCode for Puzzle {
         for (i, (y, x)) in self.branch_positions.iter().enumerate() {
             self.branch_index[*y][*x] = Some(i);
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         #[derive(Debug, Default, Eq, PartialEq, Serialize)]

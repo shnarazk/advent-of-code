@@ -57,7 +57,7 @@ impl AdventOfCode for Puzzle {
             Some(x) if x.as_str() == "0" => (7, 11),
             _ => (103, 101),
         };
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let t = 100;

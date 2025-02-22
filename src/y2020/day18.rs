@@ -37,7 +37,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.expr = input.lines().map(|l| l.to_string()).collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> isize {
         let mut result = 0;

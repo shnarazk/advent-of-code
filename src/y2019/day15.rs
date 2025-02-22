@@ -111,7 +111,7 @@ impl From<isize> for Cell {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_isizes(input, &[','])?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut map: HashMap<Location, Cell> = HashMap::new();

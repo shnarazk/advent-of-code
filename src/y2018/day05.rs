@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
                 }
             })
             .collect::<Vec<isize>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.len(0)

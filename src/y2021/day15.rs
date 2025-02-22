@@ -65,7 +65,7 @@ impl AdventOfCode for Puzzle {
         for l in input.lines() {
             self.line.push(parser::to_digits(l)?);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

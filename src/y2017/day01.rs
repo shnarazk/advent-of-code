@@ -14,7 +14,7 @@ impl AdventOfCode for Puzzle {
             .chars()
             .map(|c| (c as u8 - b'0') as usize)
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut data = self.line.clone();

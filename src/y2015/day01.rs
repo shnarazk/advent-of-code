@@ -30,7 +30,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     fn parse(&mut self, block: &str) -> Result<(), ParseError> {
         self.line = block.chars().collect::<Vec<char>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         floor(&self.line)

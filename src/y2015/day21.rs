@@ -117,7 +117,7 @@ impl AdventOfCode for Puzzle {
         }
         self.invetories.sort_by_key(|i| i.cost);
         // dbg!(&self.invetories);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for i in self.invetories.iter() {

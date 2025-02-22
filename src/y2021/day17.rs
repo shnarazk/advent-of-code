@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
         let (x1, x2, y1, y2) = parser::parse(&mut input)?;
         self.line
             .push((y1.max(y2), y1.min(y2), x1.min(x2), x1.max(x2)));
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut result: isize = 0;

@@ -44,7 +44,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<usize>>()
             })
             .collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         // dbg!(&self.line);

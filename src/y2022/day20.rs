@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
             *count.entry(*n).or_insert(0) += 1;
         }
         // assert!(count.values().all(|c| *c == 1));
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut next: Vec<usize> = (0..self.len)

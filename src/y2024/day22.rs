@@ -29,7 +29,7 @@ impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
         self.threshold = self.get_config().alt.as_ref().map_or(2000, |_| 2000);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

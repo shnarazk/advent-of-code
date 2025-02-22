@@ -52,7 +52,7 @@ impl AdventOfCode for Puzzle {
         let (seeds, rules) = parser::parse(&mut input)?;
         self.seeds = seeds;
         self.line = rules;
-        Self::parsed()
+        Ok(())
     }
     #[allow(clippy::unnecessary_lazy_evaluations)]
     fn part1(&mut self) -> Self::Output1 {

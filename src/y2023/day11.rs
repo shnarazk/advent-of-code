@@ -33,7 +33,7 @@ impl AdventOfCode for Puzzle {
             }
             self.trans_y.push(!found as usize);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.scale_up(2);

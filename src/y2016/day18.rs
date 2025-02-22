@@ -10,7 +10,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s.trim().chars().map(|c| c == '^').collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut work = self.line.clone();

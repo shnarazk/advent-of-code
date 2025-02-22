@@ -169,7 +169,7 @@ impl Add for Location {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.line = parser::to_isizes(input, &[','])?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let map: HashMap<Location, u8> = self.recognize();

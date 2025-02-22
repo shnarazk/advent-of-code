@@ -148,7 +148,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         self.inject_total_size("/");
-        Self::parsed()
+        Ok(())
     }
     fn dump(&self) {
         for dir in self.file_system.values() {

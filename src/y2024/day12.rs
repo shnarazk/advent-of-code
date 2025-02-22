@@ -164,7 +164,7 @@ impl AdventOfCode for Puzzle {
                 .map(|l| l.chars().collect::<Vec<char>>())
                 .collect::<Vec<_>>(),
         );
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut accum: Rect<bool> = self.mapping.map(|_| false);

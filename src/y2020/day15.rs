@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
                 self.last = n;
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.run_to(2020)

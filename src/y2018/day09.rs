@@ -19,7 +19,7 @@ impl AdventOfCode for Puzzle {
         // self.points = 1618;
         // self.players = 9;
         // self.points = 25;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut points = vec![0; self.players];

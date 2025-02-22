@@ -131,7 +131,7 @@ impl AdventOfCode for Puzzle {
         }
         *mapping = Rect::from_vec(line).map(|c| *c != Kind::Wall);
         *dir = Direction::EAST;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut best = usize::MAX;

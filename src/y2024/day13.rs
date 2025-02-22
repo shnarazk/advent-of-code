@@ -49,7 +49,7 @@ fn parse(s: &mut &str) -> ModalResult<Vec<Setting>> {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.par_iter().map(|(a, b, g)| solve(g, a, b)).sum()

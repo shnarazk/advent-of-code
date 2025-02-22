@@ -10,7 +10,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, _: &str) -> Result<(), ParseError> {
         self.line = 635041;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.line = 2018;

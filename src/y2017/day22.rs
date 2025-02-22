@@ -82,7 +82,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let len = self.line.len();

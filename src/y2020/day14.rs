@@ -104,7 +104,7 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.code = parser::parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let mut mem: HashMap<usize, usize> = HashMap::new();

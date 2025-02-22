@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
         let (data, rules) = parser::parse(&mut input)?;
         self.line = data;
         self.rules = rules;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut cur_gen: HashSet<isize> = HashSet::new();

@@ -61,7 +61,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = usize;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut parent: HashMap<String, String> = HashMap::new();

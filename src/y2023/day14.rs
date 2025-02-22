@@ -27,7 +27,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<Vec<_>>()
             })
             .collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         count(&add_force(self.line.clone()))

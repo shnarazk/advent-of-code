@@ -13,7 +13,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, input: &str) -> Result<(), ParseError> {
         self.config = parser::to_usizes(input, &[','])?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let vec = &self.config;

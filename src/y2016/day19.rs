@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
         for l in s.lines() {
             self.input = parser::to_usize(l)?;
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.input = 5;

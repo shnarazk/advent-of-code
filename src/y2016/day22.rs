@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
         for (i, site) in self.line.iter().enumerate() {
             debug_assert_eq!(i, site.0 * width + site.1);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.sort_unstable_by_key(|line| line.4);

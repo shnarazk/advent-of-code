@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
                 self.max_sid = sid;
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         self.max_sid

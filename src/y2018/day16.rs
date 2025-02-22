@@ -77,7 +77,7 @@ impl AdventOfCode for Puzzle {
         let (rules, data) = parser::parse(&mut input)?;
         self.rules = rules;
         self.line = data;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut buffer: [usize; 4] = [0; 4];

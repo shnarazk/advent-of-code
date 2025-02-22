@@ -245,7 +245,7 @@ impl AdventOfCode for Puzzle {
             let n = self.line.len();
             self.line.push(Block { id: n, pos: v });
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         merge(self.line.clone()).0.len()

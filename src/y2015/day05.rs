@@ -56,7 +56,7 @@ pub struct Puzzle {
 impl AdventOfCode for Puzzle {
     fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s.lines().map(|l| l.to_string()).collect::<Vec<_>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line.iter().filter(|s| is_nice(s)).count()

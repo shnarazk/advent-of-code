@@ -50,7 +50,7 @@ impl AdventOfCode for Puzzle {
             }
             self.result2 += maxs.0 * maxs.1 * maxs.2;
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.result1

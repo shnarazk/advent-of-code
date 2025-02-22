@@ -88,7 +88,7 @@ impl AdventOfCode for Puzzle {
                     .collect::<HashMap<String, bool>>();
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(&self.modules.iter().collect::<Vec<_>>()).ok()

@@ -172,7 +172,7 @@ impl AdventOfCode for Puzzle {
             next_state: b'A',
         });
         // dbg!(&self.line);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut tape: HashMap<isize, usize> = HashMap::new();

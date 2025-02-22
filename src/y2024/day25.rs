@@ -70,7 +70,7 @@ impl AdventOfCode for Puzzle {
                 self.keys.push((r.size.0 as usize, w));
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut count = 0;

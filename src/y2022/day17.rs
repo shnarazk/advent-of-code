@@ -47,7 +47,7 @@ impl AdventOfCode for Puzzle {
             vec![(0, 0)],
             vec![(0, 0), (1, 0)],
         ];
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut wind = self.line.iter().cycle();

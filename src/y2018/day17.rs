@@ -49,7 +49,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert(p);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let min_y = self.map.iter().map(|(y, _)| *y).min().unwrap();

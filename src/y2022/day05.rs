@@ -67,7 +67,7 @@ impl AdventOfCode for Puzzle {
             self.stacks.insert(n + 1, stack);
         }
         self.line = moves;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let Puzzle { line, stacks } = self;

@@ -20,7 +20,7 @@ impl AdventOfCode for Puzzle {
         for (i, v) in self.line.iter().enumerate() {
             self.memory.insert(i, *v);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.memory.insert(1, 12);

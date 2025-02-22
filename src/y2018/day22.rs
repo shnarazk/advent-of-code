@@ -69,7 +69,7 @@ impl AdventOfCode for Puzzle {
         // assert_eq!(self.erosion_level(&(0, 1)), 17317);
         // assert_eq!(self.erosion_level(&(1, 1)), 1805);
         // assert_eq!(self.erosion_level(&(10, 10)), 510);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let target = self.target;

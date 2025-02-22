@@ -178,7 +178,7 @@ impl AdventOfCode for Puzzle {
         .iter()
         .cloned()
         .collect::<HashMap<_, _, BuildHasherDefault<FxHasher>>>();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.search(2)

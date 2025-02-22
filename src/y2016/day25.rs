@@ -138,7 +138,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         for i in 1.. {

@@ -92,7 +92,7 @@ impl AdventOfCode for Puzzle {
         for (i, h) in self.hands.iter().enumerate() {
             self.order[*h] = i;
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> usize {
         let x: Vec<(usize, usize)> = self

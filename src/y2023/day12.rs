@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
             }
             self.line.push(tuple);
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

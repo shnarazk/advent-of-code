@@ -96,7 +96,7 @@ impl AdventOfCode for Puzzle {
         }
         self.dist[self.goal] = dist;
         self.threshold = self.get_config().alt.as_ref().map_or(100, |_| 64);
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         const POS: [Vec2; 4] = [(-2, 0), (0, -2), (0, 2), (2, 0)];

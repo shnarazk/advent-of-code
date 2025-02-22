@@ -102,7 +102,7 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut memo: HashMap<Vec2, HashSet<Vec2>> = HashMap::new();

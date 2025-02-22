@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = isize;
     fn parse(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.code = parser::parse(&mut input)?;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> isize {
         if let Some(result) = CPU::run1(&mut self.code) {

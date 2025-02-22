@@ -15,7 +15,7 @@ impl AdventOfCode for Puzzle {
     type Output2 = String;
     fn parse(&mut self, s: &str) -> Result<(), ParseError> {
         self.line = s.lines().map(|l| l.chars().collect()).collect();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut key: Vec<usize> = Vec::new();

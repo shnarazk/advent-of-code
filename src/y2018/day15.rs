@@ -327,7 +327,7 @@ impl AdventOfCode for Puzzle {
         self.height = self.line.len();
         self.width = self.line[0].len();
         self.elf_power = ATTACK_POWER;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         // self.render(None);

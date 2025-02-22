@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
         //         .map(|t| t.parse::<usize>().unwrap())
         //         .collect::<Vec<_>>(),
         // );
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line

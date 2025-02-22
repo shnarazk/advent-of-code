@@ -138,7 +138,7 @@ impl AdventOfCode for Puzzle {
         let (r1, r2, r3, code) = parse(&mut input)?;
         self.reg = [r1, r2, r3];
         self.code = code;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.run();

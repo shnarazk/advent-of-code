@@ -46,7 +46,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert(start_end[1]);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let num_wall = self.map.len();

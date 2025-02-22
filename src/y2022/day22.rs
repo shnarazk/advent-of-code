@@ -340,7 +340,7 @@ impl AdventOfCode for Puzzle {
             self.plane_size, 50,
             "This problem is configured just for the real problem."
         );
-        Self::parsed()
+        Ok(())
     }
     fn dump(&self) {
         let affine = HashMap::from(FLIP_TABLE);

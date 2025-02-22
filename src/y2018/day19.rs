@@ -176,7 +176,7 @@ impl AdventOfCode for Puzzle {
         let (ip, insts) = parser::parse(&mut input)?;
         self.pc_index = ip;
         self.line = insts;
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let mut register: [usize; 6] = [0; 6];

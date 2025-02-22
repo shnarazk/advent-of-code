@@ -119,7 +119,7 @@ impl AdventOfCode for Puzzle {
                 self.rating_settings[i].insert(4001);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn serialize(&self) -> Option<String> {
         serde_json::to_string(

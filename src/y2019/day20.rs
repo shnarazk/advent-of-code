@@ -120,7 +120,7 @@ impl AdventOfCode for Puzzle {
                 .iter()
                 .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str()))
         );
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

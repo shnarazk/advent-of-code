@@ -22,7 +22,7 @@ impl AdventOfCode for Puzzle {
                 self.map.insert((y, x), *h);
             }
         }
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();

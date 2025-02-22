@@ -78,7 +78,7 @@ impl AdventOfCode for Puzzle {
         }
 
         self.initialize_distances();
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         let aa = *self.label_id.get("AA").unwrap();

@@ -141,7 +141,7 @@ impl AdventOfCode for Puzzle {
         }
         // println!("212;     NAl => e : NAl");
         // println!("212;              : e");
-        Self::parsed()
+        Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         // dbg!(&self.rule);
