@@ -201,7 +201,7 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
       let lastHeight : Nat := (y - last_y).toNat
       let windows2 := List.zip l.dropLast l.tail
       let _line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
-        |>.enum
+        |>.enumerate
         |>.filter (fun p ↦ p.fst % 2 == 0)
         |>.map (·.snd)
         |> sum

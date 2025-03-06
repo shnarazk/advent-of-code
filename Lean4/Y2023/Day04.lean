@@ -42,8 +42,8 @@ def evaluate (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)
   | [] => counts.foldr (. + .) 0
   | List.cons line table' =>
     let found   := line.snd.filter (line.fst.contains ·)
-    let num     := counts.get! n
-    let counts' := (List.iota found.length).foldr (fun k c => c.modify (n + k) (. + num)) counts
+    let num     := counts[n]!
+    let counts' := (List.range' 1 found.length).reverse.foldr (fun k c => c.modify (n + k) (. + num)) counts
     evaluate (n + 1) counts' table'
 
 def solve (lines : Array String) : Nat :=

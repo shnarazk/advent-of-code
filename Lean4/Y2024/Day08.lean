@@ -51,7 +51,7 @@ def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
     else []
 
 def solve (input : Input) : Nat :=
-  input.anntena.enum.map
+  input.anntena.enumerate.map
     (fun (i, a1) ↦ input.anntena.drop (i + 1) |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
     |>.flatten
     |> HashSet.ofList
@@ -71,7 +71,7 @@ def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
     else []
 
 def solve (input : Input) : Nat :=
-    input.anntena.enum.map
+    input.anntena.enumerate.map
     (fun (i, a1) ↦ input.anntena.drop (i + 1) |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
     |>.flatten
     |> HashSet.ofList

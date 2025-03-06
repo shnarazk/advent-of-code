@@ -84,9 +84,9 @@ def parse : String → Option Input := AoCParser.parse parser
           (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Idx₂) else h)
           h)
         (HashSet.empty : HashSet Idx₂)
-      let p := v.enum.flatMap
+      let p := v.enumerate.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
-          |>.get! 0
+          |> (·[0]!)
       let size := (v.size, v[0]!.size)
       return Input.mk v h (p.1, p.2) Dir.N size
 

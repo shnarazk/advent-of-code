@@ -68,9 +68,9 @@ namespace Part2
 partial def seek (start len target : Nat) (free_start free_len : Array Nat)
     : (Nat × Nat) × Array Nat × Array Nat :=
   if free_start.getD target start ≥ start then ((start, len), free_start, free_len)
-  else if len > free_len.get! target then seek start len (target + 1) free_start free_len
+  else if len > free_len[target]! then seek start len (target + 1) free_start free_len
     else
-      let start'      := free_start.get! target
+      let start'      := free_start[target]!
       let free_start' := free_start.modify target (· + len)
       let free_len'   := free_len.modify target (· - len)
       ((start', len), free_start', free_len')
@@ -98,7 +98,7 @@ def solve (input : Input) : Nat :=
   let target_files := file_start.zip file_len.toList |>.reverse
   swap target_files free_start free_len
    |>.reverse
-   |>.enum
+   |>.enumerate
    |>.map (fun (id, (start, len)) ↦ List.range len |>.map (fun i ↦ (start + i) * id) |> sum)
    |> sum
 

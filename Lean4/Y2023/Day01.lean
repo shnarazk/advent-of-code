@@ -27,7 +27,7 @@ def mnemonic (s : List Char) : Char :=
   else if (String.toList "seven").isPrefixOf s then '7'
   else if (String.toList "eight").isPrefixOf s then '8'
   else if (String.toList "nine" ).isPrefixOf s then '9'
-  else s.get! 0
+  else s[0]!
 
 def solve (lines : Array String) : Nat :=
   lines.map (fun s =>

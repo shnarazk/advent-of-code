@@ -143,7 +143,7 @@ def map_of (size : Dim2) (locs : List Dim2) : Array PropagateState :=
 def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array PropagateState :=
   makeNeighbors size (n.toUInt64 / size.snd,  n.toUInt64 % size.snd)
     |>.foldl
-      (fun m q ↦ match m.get! (size.snd * q.fst + q.snd).toNat with
+      (fun m q ↦ match m[(size.snd * q.fst + q.snd).toNat]! with
         | .Unknown => m.set! (size.snd * q.fst + q.snd).toNat .ToExpand
         | _ => m)
       (self.set! n .Propagated)
@@ -212,7 +212,7 @@ def solve (m: Rect Circuit) : Nat :=
   List.range shape.fst.toNat
     |>.foldl (fun sum y ↦
       List.range shape.snd.toNat
-        |>.filter (fun x ↦ PropagateState.Unknown == a_map.get! (size.snd.toNat * y * 2 + x * 2))
+        |>.filter (fun x ↦ PropagateState.Unknown == a_map[size.snd.toNat * y * 2 + x * 2]!)
         |>.length
         |> (· + sum))
       0

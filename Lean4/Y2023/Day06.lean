@@ -46,7 +46,7 @@ def parser : Parser (List Race) := do
   let t ← ptime <* eol
   let d ← pdist
   let m := List.transpose [t.toList, d.toList]
-  return (List.map (fun r => Race.new (r.get! 0) (r.get! 1)) m)
+  return (List.map (fun r => Race.new r[0]! r[1]!) m)
 
 def parse (data : String) :=
   match Parser.run parser data with
@@ -69,7 +69,7 @@ def Part2.solve (data : String) : Nat :=
           (fun n d => n * 10 + d.toNat - '0'.toNat)
           0
           (l.toList.filter Char.isDigit))
-  let r := Race.new (x.get! 0) (x.get! 1)
+  let r := Race.new x[0]! x[1]!
   r.evaluate
 
 def solve := AocProblem.config 2023 6 some Part1.solve Part2.solve

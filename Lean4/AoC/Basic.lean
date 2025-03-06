@@ -172,8 +172,7 @@ open Accumulation
 -- #eval sum [1, 3, 5]
 -- #eval product [1, 3, 5]
 
-@[deprecated "Use the native `List.enum` instead of enumerate" (since := "2024-11-01")]
-def List.enumerate (a : List α) : List (Nat × α) := a.enum
+def List.enumerate (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) => (i, x))
 -- List.zip (List.range a.length) a
 -- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
@@ -182,7 +181,6 @@ def Array.enum (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.si
 
 example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
 
-@[deprecated "Use `Array.enum` instead of 'Array.enumerate`" (since := "2024-11-01")]
 alias Array.enumerate := Array.enum
 
 -- #eval #[2, 4, 5].enum

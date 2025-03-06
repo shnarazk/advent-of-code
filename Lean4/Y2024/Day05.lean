@@ -47,7 +47,7 @@ namespace Part1
 def solve (input : Input) : Nat :=
   input.updates.toList.filter
       (fun v ↦
-        let occurs := v.toList.enum.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
+        let occurs := v.toList.enumerate.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
         input.rules.all (fun (a, b) ↦
           let i := occurs.get? a
           let j := occurs.get? b
@@ -73,7 +73,7 @@ partial def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :
 def solve (input : Input) : Nat :=
   input.updates.toList.filter
       (fun v ↦
-        let occurs := v.toList.enum.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
+        let occurs := v.toList.enumerate.map (fun (a, b) ↦ (b, a)) |> Std.HashMap.ofList
         !input.rules.all (fun (a, b) ↦
           let i := occurs.get? a
           let j := occurs.get? b

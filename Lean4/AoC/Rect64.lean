@@ -107,7 +107,7 @@ def validIndex? [BEq α] (self : Rect α) (p : Dim2) : Bool :=
   (self.width * p.1 + p.2).toNat < self.vector.size
 
 @[inline] def get? [BEq α] [Inhabited α] (self : Rect α) (p : Dim2) : Option α :=
-  self.vector.get? (self.width * p.1 + p.2).toNat
+  self.vector[(self.width * p.1 + p.2).toNat]?
 
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
