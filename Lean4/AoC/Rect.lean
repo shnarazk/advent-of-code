@@ -274,7 +274,7 @@ lemma coerce_mul (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a * b).toNat = a
     rw [←add_mul]
   }
 
-lemma int_mul_int_eq_nat_mul_nat : ∀ y x : Int, 0 ≤ y → 0 ≤ x → y.toNat * x.toNat = (y * x).toNat := by
+/- lemma int_mul_int_eq_nat_mul_nat : ∀ y x : Int, 0 ≤ y → 0 ≤ x → y.toNat * x.toNat = (y * x).toNat := by
   intro y x hy hx
   induction' y with y y'
   { simp ; rw [←coerce_mul y x hx] ; rfl }
@@ -294,6 +294,7 @@ lemma toList_length_eq_area : ∀ p : Dim2, 0 ≤ p → (toList p).length = p.ar
   rw [int_mul_int_eq_nat_mul_nat]
   exact P₁
   exact P₂
+-/
 
 end Dim2
 
@@ -434,7 +435,7 @@ def of2DMatrix [BEq α]
       simp only [Fin.ofNat']
       exact Nat.mod_lt (self.shape.index p) h
     let index := ↑(Fin.ofNat' self.vector.size (self.shape.index p))
-    self.vector.get index valid
+    self.vector[index]'valid
   else
     default
 

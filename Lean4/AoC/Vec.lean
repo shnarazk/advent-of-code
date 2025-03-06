@@ -101,9 +101,7 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
   ⟨
     (((↑ v.1) : Int), ((↑ v.2) : Int)),
     by
-      constructor
-      { simp ; exact Int.ofNat_zero_le v.fst }
-      { simp ; exact Int.ofNat_zero_le v.snd }
+      constructor <;> { simp }
   ⟩
 -- def v : Vec₂ := (1, 1)
 -- def d : Idx₂ := ⟨(1, 1), by exact ⟨rfl, rfl⟩⟩
@@ -224,7 +222,7 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
 
 @[inline] def get? [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  self.vector.get? (self.width * i.1 + i.2)
+  self.vector[self.width * i.1 + i.2]?
 
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
@@ -335,10 +333,7 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
 @[inline] def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
   if let some i := RectIndexMaybe.toIndex₂? p then
         if h: 0 ≤ Int.ofNat i.1 ∧ 0 ≤ Int.ofNat i.2 ∧ i.2 < self.width ∧ self.toIndex₁ i < self.vector.size
-          then some ⟨
-              ((↑ i) : Vec₂),
-              by constructor ; { simp ; exact h.left } ; { simp ; exact h.right.left }
-            ⟩
+          then some ⟨((↑ i) : Vec₂), by constructor <;> { simp }⟩
           else none
     else none
 
