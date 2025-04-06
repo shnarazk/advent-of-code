@@ -109,7 +109,7 @@ impl Tree {
         fn go_down(tree: &Tree) -> (Tree, bool) {
             match tree {
                 Tree::Num(n) if 9 < *n => (
-                    Tree::List(vec![Tree::Num(n / 2), Tree::Num((n + 1) / 2)]),
+                    Tree::List(vec![Tree::Num(n / 2), Tree::Num(n.div_ceil(2))]),
                     true,
                 ),
                 Tree::List(v) => {

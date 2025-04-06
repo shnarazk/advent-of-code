@@ -111,7 +111,7 @@ impl AdventOfCode for Puzzle {
         for i in 0..4 {
             let mut it = self.rating_settings[i].iter().sorted();
             let beg = *it.next().unwrap();
-            let end = *it.last().unwrap();
+            let end = *it.next_back().unwrap();
             if 1 < beg {
                 self.rating_settings[i].insert(1);
             }

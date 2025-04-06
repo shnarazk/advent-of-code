@@ -145,7 +145,7 @@ impl AdventOfCode for Puzzle {
         me.part1();
         me.trail
             .par_iter()
-            .filter(|(p, pre)| pre.map_or(false, |pre| self.clone().is_loop(**p, pre)))
+            .filter(|(p, pre)| pre.is_some_and(|pre| self.clone().is_loop(**p, pre)))
             .count()
     }
 }

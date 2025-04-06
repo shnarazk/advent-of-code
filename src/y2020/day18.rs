@@ -84,11 +84,7 @@ impl Expr {
         }
     }
     fn parse2(input: &mut &str) -> Option<Expr> {
-        if let Ok(e) = terms(input) {
-            Some(e)
-        } else {
-            None
-        }
+        terms(input).ok()
     }
     // for part 1
     fn traverse(&self, op: Op, acum: isize) -> isize {
