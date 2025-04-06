@@ -194,7 +194,7 @@ def height [BEq α] (self : Rect α) : Nat := self.vector.size / self.width
 - return a new instance fitting to the given Dim2
 -/
 def ofDim2 [BEq α] (h w : Nat) (default : α) : Rect α :=
-  Rect.mk w (Array.mkArray (h * w) default)
+  Rect.mk w (Array.replicate (h * w) default)
 
 /--
 - return a new instance of Rect by converting from an 2D array

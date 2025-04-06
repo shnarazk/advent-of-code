@@ -16,7 +16,7 @@ def toHashMap (source : String) : Std.HashMap String Nat :=
         hash
         items
     )
-    (Std.HashMap.empty.insert "«id»" id)
+    (Std.HashMap.emptyWithCapacity.insert "«id»" id)
     items_in_bags
   where
     id := ((List.getD (source.split (. == ':')) 0 "-1").drop 5).trim.toNat!

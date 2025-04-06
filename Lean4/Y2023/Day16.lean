@@ -102,7 +102,7 @@ partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_v
       |> uncurry (traverse r)
 
 def evaluate (r : Rect Kind) (start : (Dim2 × Dir)): Nat :=
-  traverse r Std.HashSet.empty [start]
+  traverse r Std.HashSet.emptyWithCapacity [start]
     |>.vector
     |>.filter (· == Kind.P)
     |>.size

@@ -82,7 +82,7 @@ def height [BEq α] (self : Rect α) : UInt64 := self.vector.size.toUInt64 / sel
 - return a new instance fitting to the given Dim2
 -/
 def ofDim2 [BEq α] (h w : UInt64) (default : α) : Rect α :=
-  Rect.mk w (Array.mkArray (h * w).toNat default)
+  Rect.mk w (Array.replicate (h * w).toNat default)
 
 /--
 - return a new instance of Rect by converting from an 2D array

@@ -94,7 +94,7 @@ partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (th
 
 def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
-  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.empty
+  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
     (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
       (fun (b a : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd)
         < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
@@ -158,7 +158,7 @@ partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (th
 
 def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
-  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.empty
+  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
     (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
       (fun (b a : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd)
         < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))

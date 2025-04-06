@@ -57,7 +57,7 @@ instance : ToString Rule where
 abbrev Rules := HashMap String Rule
 
 def makeInstruction (a : Array Rule) : Rules :=
-  a.foldl (fun h d ↦ h.insert d.label d) HashMap.empty
+  a.foldl (fun h d ↦ h.insert d.label d) HashMap.emptyWithCapacity
 
 abbrev Setting := HashMap String Nat
 
@@ -93,7 +93,7 @@ def prating := do
 
 def pratings := do
   let rs ← pchar '{' *> sepBy1 prating (pchar ',') <* pchar '}'
-  let h := rs.foldl (fun h p ↦ HashMap.insert h (Prod.fst p) (Prod.snd p)) (HashMap.empty : HashMap String Nat)
+  let h := rs.foldl (fun h p ↦ HashMap.insert h (Prod.fst p) (Prod.snd p)) (HashMap.emptyWithCapacity : HashMap String Nat)
   return h
 -- #eval AoCParser.parse (sepBy1 pratings eol) "{x=768,m=2655}\n{x=167,m=44}"
 

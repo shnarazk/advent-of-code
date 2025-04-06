@@ -47,7 +47,7 @@ open Std
 
 def solve (input : Input) : Nat :=
   let hash := input.line.map (·.2)
-    |>.foldl (fun h i ↦ h.insert i (1 + h.getD i 0)) Std.HashMap.empty
+    |>.foldl (fun h i ↦ h.insert i (1 + h.getD i 0)) Std.HashMap.emptyWithCapacity
   input.line.map (·.1)
     |>.map (fun i ↦ i * hash.getD i 0)
     |> sum

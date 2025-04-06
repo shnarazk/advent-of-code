@@ -310,11 +310,11 @@ structure Plane (α : Type) [BEq α] [Hashable α] where
 deriving Repr
 
 instance [BEq α] [Hashable α] :
-    Inhabited (Plane α) where default := Plane.mk Std.HashMap.empty
+    Inhabited (Plane α) where default := Plane.mk Std.HashMap.emptyWithCapacity
 
 def Plane.empty [BEq α] [Hashable α]
     (capacity : optParam Nat 8) : Plane α :=
-  { mapping := Std.HashMap.empty capacity }
+  { mapping := Std.HashMap.emptyWithCapacity capacity }
 
 example : (Plane.empty : Plane Nat) = (default : Plane Nat) := by simp [default, Plane.empty]
 
@@ -388,8 +388,8 @@ def new [BEq α]
 - return a new instance fitting to the given Dim2
 -/
 def ofDim2 [BEq α] (g : Dim2) (h : NonNegDim g) (default : α) : Rect α :=
-  let v := Array.mkArray (g.area) default
-  have p : v.size = g.area := by exact Array.size_mkArray g.area default
+  let v := Array.replicate (g.area) default
+  have p : v.size = g.area := by exact Array.size_replicate
   Rect.mk g v h (symm p)
 
 /--

@@ -55,7 +55,7 @@ def solve (input : Input) : Nat :=
   let disc := input.line
     |>.enum
     |>.flatMap
-      (fun (i, l) ↦ Array.mkArray l (if i % 2 == 0 then some ((i + 1) / 2) else none))
+      (fun (i, l) ↦ Array.replicate l (if i % 2 == 0 then some ((i + 1) / 2) else none))
   swap disc 0 (disc.size - 1)
    |>.enum
    |>.map (fun (i, v) ↦ i * v.unwrapOr 0)

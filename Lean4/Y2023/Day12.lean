@@ -5,7 +5,7 @@ import «AoC».Parser
 namespace Y2023.Day12
 
 open Accumulation
-open Batteries CoP
+open Std CoP
 
 structure Data where
   pattern : Array Char
@@ -45,7 +45,7 @@ def match_sequence
   | 0 => (hash, 0)
   | limit' + 1 =>
     let key := (target.foldl (fun s e => s.push e) "", rule.length)
-    match hash.find? key with
+    match hash.get? key with
     | some combinations => (hash, combinations)
     | none =>
       let key := (target.foldl (fun s e => s.push e) "", rule.length)
@@ -91,7 +91,7 @@ termination_by target.length + limit
 -- #eval match_sequence HashMap.empty 100 "?#?#?".toList [3] |>.snd
 
 def Part1.evaluate (conf : Data) : Nat :=
-  match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (2 * conf.pattern.size) conf.pattern.toList conf.rule.toList
+  match_sequence (HashMap.emptyWithCapacity : HashMap (String × Nat) Nat) (2 * conf.pattern.size) conf.pattern.toList conf.rule.toList
   |>.snd
 
 def Part2.evaluate (conf : Data) : Nat :=
@@ -99,7 +99,7 @@ def Part2.evaluate (conf : Data) : Nat :=
   let pattern := String.intercalate "?" [p, p, p, p, p]
   let r := conf.rule.toList
   let rule := [r, r, r, r, r].flatten
-  match_sequence (HashMap.empty : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
+  match_sequence (HashMap.emptyWithCapacity : HashMap (String × Nat) Nat) (10 * conf.pattern.size) pattern.toList rule
     |>.snd
 
 def solve := AocProblem.config 2023 12 parser.parse

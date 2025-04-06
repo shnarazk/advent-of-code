@@ -47,7 +47,7 @@ def evaluate (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)
     evaluate (n + 1) counts' table'
 
 def solve (lines : Array String) : Nat :=
-  evaluate 0 (Array.mkArray lines.size 1) (lines.toList.map parsed)
+  evaluate 0 (Array.replicate lines.size 1) (lines.toList.map parsed)
 
 end Part2
 

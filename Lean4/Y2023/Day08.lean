@@ -3,7 +3,7 @@ import «AoC».Parser
 
 namespace Y2023.Day08
 
-open Batteries
+open Std
 
 structure Puzzle where
   path     : List Char
@@ -25,7 +25,7 @@ def parser := do
   let branches  ← sepBy1 pbranch eol
   let hash := branches.foldl
     (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
-    HashMap.empty
+    HashMap.emptyWithCapacity
   return Puzzle.mk path.toList hash
 
 def parse := AoCParser.parse parser
@@ -36,7 +36,7 @@ def trace₁ : Puzzle → Nat → Nat → String → Nat
   | _     ,      _,  step, "ZZZ" => step
   | _     ,       0, step,     _ => step
   | puzzle, lim + 1, step,   pos =>
-    let (left, right) := puzzle.branches.find! pos
+    let (left, right) := puzzle.branches.get! pos
     let dir := puzzle.path[step % puzzle.path.length]!
     trace₁ puzzle lim (step + 1) <| if dir == 'L' then left else right
 
@@ -50,7 +50,7 @@ def trace₂ (puzzle : Puzzle) (limit : Nat) (step : Nat) (pos : String) : Nat :
     if pos.endsWith "Z" then
       step
     else
-      let (left, right) := puzzle.branches.find! pos
+      let (left, right) := puzzle.branches.get! pos
       let dir := puzzle.path[step % puzzle.path.length]!
       trace₂ puzzle lim (step + 1) <| if dir == 'L' then left else right
 

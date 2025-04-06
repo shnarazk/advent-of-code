@@ -168,7 +168,7 @@ private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kin
       loopTo' next n (memory.insert next i') i'
 termination_by n - i
 
-def loopTo (self : Rect Kind) (n : Nat) : Nat := loopTo' self n Std.HashMap.empty 0 |>.evaluate
+def loopTo (self : Rect Kind) (n : Nat) : Nat := loopTo' self n Std.HashMap.emptyWithCapacity 0 |>.evaluate
 
 def solve (as : Array (Rect Kind)) : Nat := as.map (loopTo · 1000000000) |> sum
 

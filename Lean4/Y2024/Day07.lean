@@ -9,7 +9,7 @@ abbrev Input := Array (Nat × Array Nat)
 def expand (ops : Array (Nat → Nat → Nat)) (vals : HashSet Nat) (b threshold : Nat) : HashSet Nat :=
   vals.fold
     (fun acc val ↦ ops.map (· val b) |>.filter (· <= threshold) |>.foldl (·.insert ·) acc)
-    HashSet.empty
+    HashSet.emptyWithCapacity
 
 namespace parser
 
@@ -28,7 +28,7 @@ end parser
 
 def exp (ops : Array (Nat → Nat → Nat)) (threshold : Nat)
     (l : List Nat)
-    (subs : HashSet Nat := HashSet.empty.insert 0)
+    (subs : HashSet Nat := HashSet.emptyWithCapacity.insert 0)
     : Nat :=
   match l with
     | [] => if subs.contains threshold then threshold else 0

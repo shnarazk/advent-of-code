@@ -113,7 +113,7 @@ def parse : String → Option Input := AoCParser.parse parser
     let v ← parse_lines
     let h := v.toList.enumerate.map (fun (i, l) ↦ l.toList.enumerate.map (fun (x : Nat × Char) ↦ (((i : Int), (x.1 : Int)), x.2)))
       |>.flatten
-    return Input.mk (h.foldl (fun h (p, v) ↦ h.insert p v) Std.HashMap.empty)
+    return Input.mk (h.foldl (fun h (p, v) ↦ h.insert p v) Std.HashMap.emptyWithCapacity)
 -- #eval parse "ABC\nXYZ"
 
 end parser

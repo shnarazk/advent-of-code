@@ -68,7 +68,7 @@ def solve (data : Input) : Nat :=
           boxes.modify (Part1.hasher tag.toList.toArray) (assoc_erase · tag)
         else dbgTrace ("unparsable: " ++ str) (fun _ ↦ boxes)
       )
-      (Array.mkArray 256 [])
+      (Array.replicate 256 [])
     |>.foldl
         (fun (acc, index) al ↦
           al.foldl (fun (acc, i) (_, val) ↦ (acc + index * i * val, i + 1)) (acc, 1)

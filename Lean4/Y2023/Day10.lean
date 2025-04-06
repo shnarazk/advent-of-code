@@ -138,7 +138,7 @@ instance : Inhabited PropagateState where default := .Unknown
 def map_of (size : Dim2) (locs : List Dim2) : Array PropagateState :=
   locs.foldl
     (fun map pos ↦ map.set! (size.snd * pos.fst + pos.snd).toNat PropagateState.Wall)
-    (Array.mkArray (size.fst.toNat * size.snd.toNat) PropagateState.Unknown)
+    (Array.replicate (size.fst.toNat * size.snd.toNat) PropagateState.Unknown)
 
 def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array PropagateState :=
   makeNeighbors size (n.toUInt64 / size.snd,  n.toUInt64 % size.snd)

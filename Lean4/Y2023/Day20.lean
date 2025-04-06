@@ -107,7 +107,7 @@ def Circuit.new (rules : Array Rule) : Circuit :=
         c)
     (rules.foldl
       (fun c r => c.insert r.module.label (r.module, r.dests))
-      (Circuit.mk HashMap.empty 0 0))
+      (Circuit.mk HashMap.emptyWithCapacity 0 0))
 
 abbrev Queue := Std.Queue Pulse
 
@@ -164,7 +164,7 @@ def pmodule := pbroadcaster <|> pflipflop <|> pconjunction
       return Mdl.FlipFlop l false
     pconjunction := do
       let l ← pchar '&' *> alphabets
-      return Mdl.Conjunction l HashMap.empty
+      return Mdl.Conjunction l HashMap.emptyWithCapacity
 
 -- #eval AoCParser.parse pmodule "broadcaster"
 -- #eval AoCParser.parse pmodule "%a"
@@ -219,7 +219,7 @@ partial def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
 Return a subcircuit consisted of all modules to compute root's value.
 -/
 def subcircuit (circuit : Circuit) (root : Label) : Circuit :=
-  Circuit.mk (subcircuit' circuit HashMap.empty [root]) 0 0
+  Circuit.mk (subcircuit' circuit HashMap.emptyWithCapacity [root]) 0 0
 
 abbrev CircuitState := List Mdl × List Bool
 
@@ -244,7 +244,7 @@ partial def findLoop' (dest : Label) (circuit : Circuit) (history : HashMap Circ
 return loop_length × intro_length
 -/
 def findLoop (circuit : Circuit) (port : Label): Nat × Nat :=
-  findLoop' port circuit HashMap.empty 1
+  findLoop' port circuit HashMap.emptyWithCapacity 1
 
 /-
 `rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.

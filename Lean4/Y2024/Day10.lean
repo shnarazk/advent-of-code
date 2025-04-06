@@ -25,7 +25,7 @@ namespace Part1
 
 partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
-    (result : HashSet Vec₂ := HashSet.empty)
+    (result : HashSet Vec₂ := HashSet.emptyWithCapacity)
     : Nat :=
   match toVisit with
   | [] => result.size

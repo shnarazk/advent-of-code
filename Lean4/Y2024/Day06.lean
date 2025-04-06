@@ -61,7 +61,7 @@ def isLoop (self : Input) (pos : Idx₂) (pre: Idx₂ × Dir) : Bool :=
       guardPos := pre.1,
       guardDir := pre.2,
       obstruction := (self.obstruction.insert pos) }
-  self'.loop HashSet.empty pre.1
+  self'.loop HashSet.emptyWithCapacity pre.1
 
 end Input
 
@@ -83,7 +83,7 @@ def parse : String → Option Input := AoCParser.parse parser
         (fun h (i, l) ↦ l.enum.foldl
           (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Idx₂) else h)
           h)
-        (HashSet.empty : HashSet Idx₂)
+        (HashSet.emptyWithCapacity : HashSet Idx₂)
       let p := v.enumerate.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
           |> (·[0]!)
@@ -107,14 +107,14 @@ partial def traceMove (self : Input) (pre : Option (Idx₂ × Dir)) (hash : Hash
 
 namespace Part1
 
-def solve (input : Input) : Nat := traceMove input none HashMap.empty |>.size
+def solve (input : Input) : Nat := traceMove input none HashMap.emptyWithCapacity |>.size
 
 end Part1
 
 namespace Part2
 
 def solve (input : Input) : Nat :=
-  traceMove input none HashMap.empty
+  traceMove input none HashMap.emptyWithCapacity
     |>.filter (fun pos pre ↦ if let some p := pre then (input.isLoop pos p) else false)
     |>.size
 

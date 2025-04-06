@@ -125,7 +125,7 @@ end AocProblem
 Return an array consisting of elements in `a`
 -/
 def unique (a : Array α) [BEq α] [Hashable α] : Array α :=
-  let hash := Array.foldl (·.insert ·) (Std.HashSet.empty : Std.HashSet α) a
+  let hash := Array.foldl (·.insert ·) (Std.HashSet.emptyWithCapacity : Std.HashSet α) a
   hash.toArray
 
 -- #eval unique #[1, 0, 2, 1, 3, 2]

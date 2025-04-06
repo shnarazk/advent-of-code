@@ -11,10 +11,10 @@
       {
         devShells.default = pkgs.mkShell {
           packages = [
-            pkgs.bashInteractive
+            # pkgs.bashInteractive
             pkgs.elan
             # pkgs.nodejs_22
-            pkgs.tokei
+            # pkgs.tokei
             pkgs.vscodium
           ];
         };
