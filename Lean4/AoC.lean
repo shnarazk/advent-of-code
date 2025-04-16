@@ -1,6 +1,6 @@
 -- This module serves as the root of the `AoC` library.
 -- Import modules here that should be built as part of the library.
-import Aesop
+-- import Aesop
 import Batteries
 import Cli
 import «AoC».Basic
@@ -11,6 +11,19 @@ import «Y2024»
 
 open AoC
 open Cli
+
+/--
+  Measures the execution time of a monadic computation.
+
+  Given a monadic computation, this function returns both the result of the computation
+  and the time it took to execute in nanoseconds.
+-/
+@[inline]
+def elapsedTime {α : Type} {m : Type → Type u} [Monad m] [MonadLiftT BaseIO m] (x : m α) : m (α × Nat) := do
+  let beg ← IO.monoNanosNow
+  let val ← x
+  let fin ← IO.monoNanosNow
+  return (val, fin - beg)
 
 def events
     : Batteries.AssocList Nat (Nat × (Nat → Option String → IO AocProblem))
@@ -53,8 +66,8 @@ def run (year: Nat) (day : Nat) (extra : Option String) : IO (Option AocProblem)
     | some (days, solver) =>
        if day ≤ days
         then
-          let (res, time) ← Aesop.time <| solver day extra
-          do pure (some { res with time := (Float.ofNat time.nanos) / 1000000.0 })
+          let (res, time) ← elapsedTime <| solver day extra
+          do pure (some { res with time := time.toFloat  / 1000000.0 })
         else do
           IO.println s!"{Color.red}Y{year} day{day} has not been solved!{Color.reset}"
           pure none

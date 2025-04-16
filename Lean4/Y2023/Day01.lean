@@ -1,4 +1,5 @@
 import «AoC».Basic
+import Batteries.Data.List.Basic
 
 namespace Y2023.Day01
 open Accumulation
