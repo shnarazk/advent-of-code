@@ -41,7 +41,8 @@ end parser
 
 namespace Part1
 
-partial def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
+partial
+def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
   let next := a + offset
   if next <₀ size then [next] else []
 
@@ -61,7 +62,8 @@ end Part1
 
 namespace Part2
 
-partial def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
+partial
+def inbound_antinodes' (size a offset : Vec₂) : List Vec₂ :=
   let next := a + offset
   if next <₀ size then [next] ++ inbound_antinodes' size next offset else []
 

@@ -34,17 +34,20 @@ end parser
 
 namespace Part1
 
-partial def nextEmpty (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
+partial
+def nextEmpty (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
   if disc.getD i none == none then i
     else if i == limit then limit
     else nextEmpty disc limit (i + 1)
 
-partial def nextUsed (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
+partial
+def nextUsed (disc : Array (Option Nat)) (limit i : Nat) : Nat :=
     if let some _ := disc.getD i (some 0) then i
       else if i == limit then limit
       else nextUsed disc limit (i - 1)
 
-partial def swap (disc : Array (Option Nat)) (left right : Nat) : Array (Option Nat) :=
+partial
+def swap (disc : Array (Option Nat)) (left right : Nat) : Array (Option Nat) :=
   if left ≥ right then disc
     else
       let l := nextEmpty disc (disc.size - 1) left
@@ -65,7 +68,8 @@ end Part1
 
 namespace Part2
 
-partial def seek (start len target : Nat) (free_start free_len : Array Nat)
+partial
+def seek (start len target : Nat) (free_start free_len : Array Nat)
     : (Nat × Nat) × Array Nat × Array Nat :=
   if free_start.getD target start ≥ start then ((start, len), free_start, free_len)
   else if len > free_len[target]! then seek start len (target + 1) free_start free_len
@@ -75,7 +79,8 @@ partial def seek (start len target : Nat) (free_start free_len : Array Nat)
       let free_len'   := free_len.modify target (· - len)
       ((start', len), free_start', free_len')
 
-partial def swap (files : List (Nat × Nat)) (free_start free_len : Array Nat) : List (Nat × Nat) :=
+partial
+def swap (files : List (Nat × Nat)) (free_start free_len : Array Nat) : List (Nat × Nat) :=
   match files with
     | [] => []
     | (start, len) :: remain =>

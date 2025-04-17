@@ -23,7 +23,8 @@ end parser
 
 namespace Part1
 
-partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
+partial
+def expand (rect : Rect Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
     (result : HashSet Vec₂ := HashSet.emptyWithCapacity)
     : Nat :=
@@ -47,7 +48,8 @@ end Part1
 
 namespace Part2
 
-partial def expand (rect : Rect Nat) (toVisit : List Idx₂)
+partial
+def expand (rect : Rect Nat) (toVisit : List Idx₂)
     (visited : Rect Bool := rect.map (K false))
     (count : Nat := 0)
     : Nat :=

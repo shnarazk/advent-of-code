@@ -135,7 +135,8 @@ instance : RectIndexMaybe (Nat × Nat) where
 
 -- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
 
-partial def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
+partial
+def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
 
 def toList' (p : Idx₂) : List Idx₂ :=
   let i : Vec₂ := ↑ p
@@ -162,7 +163,8 @@ deriving Hashable, Repr
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.width == b.width && a.vector == b.vector
 
-private def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
+private
+def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
     ([] : List (List α))
   else
@@ -212,7 +214,8 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
-@[inline] def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
+@[inline]
+def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   self.vector.getD (self.width * i.1 + i.2) default
 
@@ -220,14 +223,16 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (self.width * i.1 + i.2) < self.vector.size
 
-@[inline] def get? [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
+@[inline]
+def get? [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   self.vector[self.width * i.1 + i.2]?
 
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-@[inline] def set [BEq α] [RectIndex β] (self : Rect α) (p : β) (val : α) : Rect α :=
+@[inline]
+def set [BEq α] [RectIndex β] (self : Rect α) (p : β) (val : α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   let ix := self.width * i.1 + i.2
   Rect.mk self.width (self.vector.set! ix val)
@@ -235,11 +240,13 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-@[inline] def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Rect α :=
+@[inline]
+def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
 
-@[inline] def swap [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
+@[inline]
+def swap [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   let j : Nat × Nat := RectIndex.toIndex₂ q
   { self with
@@ -266,7 +273,8 @@ def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
         else none
     else none
 
-private partial def findIdxOnSubarray [BEq α]
+private partial
+def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=
   if pred (sa.get limit)
@@ -279,8 +287,7 @@ private partial def findIdxOnSubarray [BEq α]
 /--
 - search an element in a specific row
 -/
-def findIdxInRow? [BEq α]
-    (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
+def findIdxInRow? [BEq α] (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * p.width
   let t := (i + 1) * p.width
   let sa := p.vector.toSubarray f t
@@ -324,13 +331,15 @@ def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
 def area [BEq α] (self : Rect α) : Nat := self.vector.size
 
 -- @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
-@[inline] def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : Nat :=
+@[inline]
+def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : Nat :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (frame.width * i.fst + i.snd)
 
 /-- convert from `Vec2` to valid `Dim2` or `None`
 -/
-@[inline] def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
+@[inline]
+def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
   if let some i := RectIndexMaybe.toIndex₂? p then
         if h: 0 ≤ Int.ofNat i.1 ∧ 0 ≤ Int.ofNat i.2 ∧ i.2 < self.width ∧ self.toIndex₁ i < self.vector.size
           then some ⟨((↑ i) : Vec₂), by constructor <;> { simp }⟩
@@ -338,16 +347,19 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
     else none
 
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
-@[inline] def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
+@[inline]
+def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
   (n / frame.width, n % frame.width)
 
-@[inline] def enum {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array ((Nat × Nat) × α) :=
+@[inline]
+def enum {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array ((Nat × Nat) × α) :=
   Array.range self.vector.size
     |>.filterMap (fun i ↦
         let p := self.ofIndex₁ i
         if let some val := self.get? p then some (p, val) else none)
 --
-@[inline] def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (Nat × Nat) :=
+@[inline]
+def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (Nat × Nat) :=
   Array.range self.vector.size |>.map (fun i ↦ self.ofIndex₁ i)
 
 -- def v := #[true, false, true, false]

@@ -37,6 +37,7 @@ def solve (lines : Array String) : Nat := sum $ lines.map evaluate
 end Part1
 
 namespace Part2
+
 def evaluate (n : Nat) (counts : Array Nat) (table : List (List Nat × List Nat)) : Nat :=
   match table with
   | [] => counts.foldr (. + .) 0

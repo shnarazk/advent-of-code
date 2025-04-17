@@ -40,7 +40,8 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
           none)
   cands[0]!
 
-partial def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
+partial
+def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
   match to_visit with
   | [] => r
   | pos :: to_visit' =>

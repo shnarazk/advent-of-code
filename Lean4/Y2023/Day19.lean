@@ -110,7 +110,8 @@ end parser
 
 namespace Part1
 
-partial def execute (rules : Rules) (setting : Setting) : Target → Option Nat
+partial
+def execute (rules : Rules) (setting : Setting) : Target → Option Nat
   | Target.Accept => some <| setting.values.foldl (· + ·) 0
   | Target.Reject => some 0
   | Target.Chain label =>
@@ -138,7 +139,8 @@ end Part1
 
 namespace Part2
 
-partial def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Target → Nat
+partial
+def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Target → Nat
   | Target.Accept => range.map (fun (b, e) ↦ e - b + 1) |> product
   | Target.Reject => 0
   | Target.Chain label =>

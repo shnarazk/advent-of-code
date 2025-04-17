@@ -56,10 +56,12 @@ lemma dim2_zero_add (p : Dim2) : (0 : Int) + p = p  := by simp [(· + ·)] ; sim
 lemma dim2_add_zero (p : Dim2) : p + (0 : Int) = p  := by simp [(· + ·)] ; simp [Add.add]
 example : (Dim2.mk 3 7) * (8 : Int) = Dim2.mk 24 56 := by rfl
 
-private def Dim2.lt (a b : Dim2) := a.1 < b.1 ∧ a.2 < b.2
+private
+def Dim2.lt (a b : Dim2) := a.1 < b.1 ∧ a.2 < b.2
 instance : LT Dim2 where lt := Dim2.lt
 
-private def Dim2.le (a b : Dim2) := a.1 ≤ b.1 ∧ a.2 ≤ b.2
+private
+def Dim2.le (a b : Dim2) := a.1 ≤ b.1 ∧ a.2 ≤ b.2
 instance : LE Dim2 where le := Dim2.le
 
 example : Dim2.mk 3 (-2) = ({ x := -2, y := 3 } : Dim2) := by rfl
@@ -355,7 +357,8 @@ deriving Hashable, Repr
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.shape == b.shape && a.vector == b.vector
 
-private def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
+private
+def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
     ([] : List (List α))
   else
@@ -381,7 +384,7 @@ namespace Rect
 - return a new Rect
 -/
 def new [BEq α]
-    (g : Dim2) (vec : Array α) (h1 : NonNegDim g) (h2 : g.area = vec.size): Rect α :=
+    (g : Dim2) (vec : Array α) (h1 : NonNegDim g) (h2 : g.area = vec.size) : Rect α :=
   Rect.mk g vec h1 h2
 
 /--
@@ -395,8 +398,7 @@ def ofDim2 [BEq α] (g : Dim2) (h : NonNegDim g) (default : α) : Rect α :=
 /--
 - return a new instance of Rect by converting from an 2D array
 -/
-def of2DMatrix [BEq α]
-  (a : Array (Array α)) : Rect α :=
+def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
   have h : Nat := a.size
   match h with
   | 0 =>
@@ -427,8 +429,8 @@ def of2DMatrix [BEq α]
 /--
 - return the `(i,j)`-th element of Mat1 instance
 -/
-@[inline] def get [BEq α]
-    (self : Rect α) (p : Dim2) (default : α) : α :=
+@[inline]
+def get [BEq α] (self : Rect α) (p : Dim2) (default : α) : α :=
   if h : 0 < self.vector.size then
     have : NeZero self.vector.size := by exact NeZero.of_pos h
     have valid : ↑(Fin.ofNat' self.vector.size (self.shape.index p)) < self.vector.size := by
@@ -439,12 +441,11 @@ def of2DMatrix [BEq α]
   else
     default
 
-def validIndex? [BEq α]
-    (self : Rect α) (p : Dim2) : Bool :=
+def validIndex? [BEq α] (self : Rect α) (p : Dim2) : Bool :=
   0 ≤ p.y && p.y < self.shape.y && 0 ≤ p.x && p.x < self.shape.x
 
-@[inline] def get? [BEq α] [Inhabited α]
-    (self : Rect α) (p : Dim2) : Option α :=
+@[inline]
+def get? [BEq α] [Inhabited α] (self : Rect α) (p : Dim2) : Option α :=
   if self.validIndex? p then
     self.get p default |> some
   else
@@ -453,8 +454,8 @@ def validIndex? [BEq α]
 /--
 - set the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-@[inline] def set [BEq α]
-    (self : Rect α) (p : Dim2) (val : α) : Rect α :=
+@[inline]
+def set [BEq α] (self : Rect α) (p : Dim2) (val : α) : Rect α :=
   let ix := self.shape.index p
   let v := self.vector.set! ix val
   if h : self.shape.area = v.size
@@ -464,12 +465,12 @@ def validIndex? [BEq α]
 /--
 - modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
 -/
-@[inline] def modify [BEq α]
-  (self : Rect α) (p : Dim2) (f : α → α) (default : α) : Rect α :=
+@[inline]
+def modify [BEq α] (self : Rect α) (p : Dim2) (f : α → α) (default : α) : Rect α :=
   self.set p <| f <| self.get p default
 
-@[inline] def swap [BEq α] [Inhabited α]
-  (self : Rect α) (p q : Dim2) : Rect α :=
+@[inline]
+def swap [BEq α] [Inhabited α] (self : Rect α) (p q : Dim2) : Rect α :=
   let a := self.get p default
   let b := self.get q default
   self.set p b |>.set q a
@@ -490,7 +491,8 @@ def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Dim2 :=
   | some i => some (Dim2.mk (i / p.shape.x) (i % p.shape.x))
   | none => none
 
-private partial def findIdxOnSubarray [BEq α]
+private partial
+def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=
   if pred (sa.get limit)
@@ -521,16 +523,14 @@ def findIdxInRow? [BEq α]
 def foldl {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
-def foldlRows {β : Type} [BEq α]
-    (self : Rect α) (f : β → α → β) (init : β) : Array β :=
+def foldlRows {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : β) : Array β :=
   Array.range self.shape.y.toNat
     |> .map (fun i =>
       self.vector.toSubarray i (i + self.shape.x.toNat)
         |> Array.ofSubarray
         |>.foldl f init)
 
-def mapRows {β : Type} [BEq α]
-    (self : Rect α) (f : Array α → β) :  Array β :=
+def mapRows {β : Type} [BEq α] (self : Rect α) (f : Array α → β) :  Array β :=
   Array.range (self.vector.size / self.shape.x.toNat)
     |> .map (fun i => self.vector.toSubarray i (i + self.shape.x.toNat) |> Array.ofSubarray |> f)
 
