@@ -4,15 +4,9 @@ defaultTargets = ["aoc"]
 version = "0.6.1"
 
 [[require]]
-name = "aesop"
-scope = "leanprover-community"
-rev = "v4.19.0-rc3"
-# version = "git#2689851f387bb2cef351e6825fe94a56a304ca13"
-
-[[require]]
 name = "batteries"
 scope = "leanprover-community"
-rev = "v4.19.0-rc3"
+# rev = "v4.19.0-rc3"
 # version = "git#e8dc5fc16c625fc4fe08f42d625523275ddbbb4b"
 
 [[require]]

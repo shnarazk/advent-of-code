@@ -31,7 +31,8 @@ def includes (self : Input) (pos : Vec₂) : Option Idx₂ :=
 def nextPos (self : Input) : Option Idx₂ :=
   self.includes <| self.guardPos + self.guardDir.asVec₂
 
-partial def loop (self : Input) (trail : HashSet (Idx₂ × Dir)) (pos : Option Idx₂) : Bool :=
+partial
+def loop (self : Input) (trail : HashSet (Idx₂ × Dir)) (pos : Option Idx₂) : Bool :=
   match pos with
     | none   => false
     | some p =>
@@ -92,7 +93,8 @@ def parse : String → Option Input := AoCParser.parse parser
 
 end parser
 
-partial def traceMove (self : Input) (pre : Option (Idx₂ × Dir)) (hash : HashMap Idx₂ (Option (Idx₂ × Dir)))
+partial
+def traceMove (self : Input) (pre : Option (Idx₂ × Dir)) (hash : HashMap Idx₂ (Option (Idx₂ × Dir)))
     : HashMap Idx₂ (Option (Idx₂ × Dir)) :=
   let hash' := if hash.contains self.guardPos then hash else hash.insert self.guardPos pre
   match self.nextPos with

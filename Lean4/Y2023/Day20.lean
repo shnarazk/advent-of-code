@@ -129,7 +129,8 @@ instance : ToString Circuit where toString self := s!"{self.pulse_l}:{self.pulse
 Caveat: `partial` is not a silver-bullet.
 We need to rewrite to use a decreasing counter explicitly.
 -/
-private partial def run_pulse' (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) (limit : Nat) : Circuit × List Bool :=
+private partial
+def run_pulse' (circuit : Circuit) (queue : Queue) (dest_port : Label) (outputs : List Bool) (limit : Nat) : Circuit × List Bool :=
   match limit with
   | 0 => (circuit, outputs)
   | n + 1 =>
@@ -190,7 +191,8 @@ end parser
 
 namespace Part1
 
-partial def runUpto (circuit : Circuit) : Nat → Circuit
+partial
+def runUpto (circuit : Circuit) : Nat → Circuit
   | 0 => circuit
   | n + 1 => circuit.run_pulse "output" |> (runUpto ·.fst n)
 
@@ -201,7 +203,8 @@ end Part1
 
 namespace Part2
 
-partial def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
+partial
+def subcircuit' (circuit : Circuit) (visited : HashMap Label Node) :
     List Label → HashMap Label Node
   | [] => visited
   | root :: to_visit =>
@@ -225,7 +228,8 @@ abbrev CircuitState := List Mdl × List Bool
 
 def LOOP_LIMIT := 8000
 
-partial def findLoop' (dest : Label) (circuit : Circuit) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
+partial
+def findLoop' (dest : Label) (circuit : Circuit) (history : HashMap CircuitState Nat) (n : Nat) : Nat × Nat :=
   if LOOP_LIMIT < n then
     dbg s!"findLoop' dest:{dest}, n:{n} h:{history.size}" (0, 0)
   else

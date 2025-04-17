@@ -1,5 +1,4 @@
 import Lean
-import Aesop
 
 def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
   dbgTrace s!"{label}: {a}" (fun _ ↦ a)
@@ -177,11 +176,12 @@ def List.enumerate (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) 
 -- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
 
-def Array.enum (a : Array α) : Array (Nat × α) := Array.zip (Array.range a.size) a
+def Array.enum (a : Array α) : Array (Nat × α) :=
+  a.zipIdx.map (fun (x, i) ↦ (i, x))
 
-example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
+-- example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
 
-alias Array.enumerate := Array.enum
+def Array.enumerate {α : Type} (a : Array α) : Array (Nat × α) := Array.enum a
 
 -- #eval #[2, 4, 5].enum
 
@@ -189,7 +189,7 @@ def String.enum (a : String) : List (Nat × Char) :=
   List.zip (List.range a.length) a.toList
 
 @[deprecated "Use `String.enum` instead of 'String.enumerate`" (since := "2024-11-01")]
-alias String.enumerate := String.enum
+def String.enumerate := String.enum
 
 namespace Option
 

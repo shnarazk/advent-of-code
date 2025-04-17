@@ -86,7 +86,8 @@ end parser
 def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
   visited.toList.foldl (fun r (p, _) ↦ r.set p Kind.P) self
 
-partial def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
+partial
+def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
     : Rect Kind :=
   if to_visit.isEmpty then
     injectTrace r visited

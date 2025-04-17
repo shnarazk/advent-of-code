@@ -71,7 +71,8 @@ def next_states (r : Rect Nat) (state : State) : List State :=
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
+partial
+def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
     (visited : Std.HashMap (Dim2 × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
   if let (some state, to_visit') := to_visit.extractMax then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
@@ -134,7 +135,8 @@ def next_states (r : Rect Nat) (state : State) : List State :=
 variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
-partial def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
+partial
+def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
     (visited : Std.HashMap (Dim2 × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
     (to_visit :BinaryHeap f) : Nat :=
   if let (some state, to_visit') := to_visit.extractMax then

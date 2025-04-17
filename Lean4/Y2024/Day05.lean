@@ -59,7 +59,8 @@ end Part1
 
 namespace Part2
 
-partial def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
+partial
+def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
   let uppers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.2)
   let lowers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.1)
   let cands := lowers.filter (fun n ↦ !uppers.contains n)

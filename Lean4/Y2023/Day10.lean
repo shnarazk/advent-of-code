@@ -152,7 +152,8 @@ def expand (self : Array PropagateState) (size : Dim2) (n : Nat) : Array Propaga
 - Switch to 1D scan from 28 scan
 -- #eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
 -/
-partial def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState :=
+partial
+def loop (m : Array PropagateState) (size : Dim2) : Array PropagateState :=
   let r := m.foldl
     (fun (i, m, u) p ↦ (
       i + 1, if p == PropagateState.ToExpand then (expand m size i, true) else (m, u)))
