@@ -19,15 +19,15 @@ end Part1
 namespace Part2
 
 def mnemonic (s : List Char) : Char :=
-  if      (String.toList "one"  ).isPrefixOf s then '1'
-  else if (String.toList "two"  ).isPrefixOf s then '2'
-  else if (String.toList "three").isPrefixOf s then '3'
-  else if (String.toList "four" ).isPrefixOf s then '4'
-  else if (String.toList "five" ).isPrefixOf s then '5'
-  else if (String.toList "six"  ).isPrefixOf s then '6'
-  else if (String.toList "seven").isPrefixOf s then '7'
-  else if (String.toList "eight").isPrefixOf s then '8'
-  else if (String.toList "nine" ).isPrefixOf s then '9'
+  if        "one".toList.isPrefixOf s then '1'
+  else if   "two".toList.isPrefixOf s then '2'
+  else if "three".toList.isPrefixOf s then '3'
+  else if  "four".toList.isPrefixOf s then '4'
+  else if  "five".toList.isPrefixOf s then '5'
+  else if   "six".toList.isPrefixOf s then '6'
+  else if "seven".toList.isPrefixOf s then '7'
+  else if "eight".toList.isPrefixOf s then '8'
+  else if  "nine".toList.isPrefixOf s then '9'
   else s[0]!
 
 def solve (lines : Array String) : Nat :=
