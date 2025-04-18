@@ -107,20 +107,14 @@ instance : SubNegMonoid Dim2 where
     intro a b
     simp
     constructor
-    {
-      symm
+    { symm
       calc
-        -((↑a + 1) * b.y) = -(↑a + 1) * b.y
-          := by exact Int.neg_mul_eq_neg_mul (↑a + 1) b.y
-        _ = Int.negSucc a * b.y := by exact rfl
-    }
-    {
-      symm
+        -((↑a + 1) * b.y) = -(↑a + 1) * b.y := by exact Int.neg_mul_eq_neg_mul (↑a + 1) b.y
+        _ = Int.negSucc a * b.y := by exact rfl }
+    { symm
       calc
-        -((↑a + 1) * b.x) = -(↑a + 1) * b.x
-          := by exact Int.neg_mul_eq_neg_mul (↑a + 1) b.x
-        _ = Int.negSucc a * b.x := by exact rfl
-    }
+        -((↑a + 1) * b.x) = -(↑a + 1) * b.x := by exact Int.neg_mul_eq_neg_mul (↑a + 1) b.x
+        _ = Int.negSucc a * b.x := by exact rfl }
 
 instance : AddCommMonoid Dim2 where
   add_comm := by intro a b ; simp [HAdd.hAdd] ; simp [Add.add] ; constructor <;> rw [add_comm]
@@ -210,8 +204,7 @@ lemma range_list_trim (n k i : Nat) (h₁ : i < (range_list (n + k)).length) (h�
     (range_list (n + k))[i] = (range_list n)[i] := by
   induction' k with k₀ ih
   { simp }
-  {
-    simp [←Nat.add_assoc]
+  { simp [←Nat.add_assoc]
     have h1 : i < (range_list (n + k₀)).length := by
       rw [range_list_length_is_n] at h₂
       rw [range_list_length_is_n]
@@ -222,8 +215,7 @@ lemma range_list_trim (n k i : Nat) (h₁ : i < (range_list (n + k)).length) (h�
       have h2 : i < n + k₀ := by exact Nat.lt_add_right k₀ h₂
       exact Nat.lt_add_right 1 h2
     rw [range_list_induction (n + k₀) i h1 h2]
-    apply ih
-  }
+    apply ih }
 
 def join' {α : Type} : List (List α) → List α
   | [] => []
@@ -243,7 +235,7 @@ def toList (p : Dim2) : List (Dim2) :=
   (toList' (p.y.toNat, p.x.toNat)).map (fun q ↦ (Dim2.mk q.1 q.2))
 
 lemma cp_length₁ (x : Nat) :
-    (List.length ∘ (fun (y : Nat) ↦ (range_list x).map (y, ·))) = fun y ↦ List.length ((range_list x).map (y, ·)) := by
+    (List.length ∘(fun (y : Nat) ↦ (range_list x).map (y, ·))) = fun y ↦ List.length ((range_list x).map (y, ·)) := by
   exact rfl
 
 lemma toList'_length (p : Nat × Nat) : (toList' p).length = p.1 * p.2 := by
@@ -263,8 +255,7 @@ lemma coerce_add (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a + b).toNat = a
 lemma coerce_mul (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a * b).toNat = a * b.toNat := by
   induction' a with a ih
   { simp }
-  {
-    have : Int.ofNat (a + 1) = Int.ofNat a + 1 := by exact rfl
+  { have : Int.ofNat (a + 1) = Int.ofNat a + 1 := by exact rfl
     rw [this, add_mul]
     have h1 : 0 ≤ Int.ofNat a * b := by
       have h1₁ : 0 ≤ Int.ofNat a := by exact Int.zero_le_ofNat a
@@ -273,8 +264,7 @@ lemma coerce_mul (a : Nat) (b : Int) (h : 0 ≤ b) : (Int.ofNat a * b).toNat = a
     rw [Int.toNat_add h1 h2, ih]
     simp
     nth_rewrite 2 [←one_mul b.toNat]
-    rw [←add_mul]
-  }
+    rw [←add_mul] }
 
 /- lemma int_mul_int_eq_nat_mul_nat : ∀ y x : Int, 0 ≤ y → 0 ≤ x → y.toNat * x.toNat = (y * x).toNat := by
   intro y x hy hx
@@ -314,30 +304,26 @@ deriving Repr
 instance [BEq α] [Hashable α] :
     Inhabited (Plane α) where default := Plane.mk Std.HashMap.emptyWithCapacity
 
-def Plane.empty [BEq α] [Hashable α]
-    (capacity : optParam Nat 8) : Plane α :=
-  { mapping := Std.HashMap.emptyWithCapacity capacity }
+def Plane.empty [BEq α] [Hashable α] (capacity : optParam Nat 8) : Plane α :=
+  {mapping := Std.HashMap.emptyWithCapacity capacity}
 
 example : (Plane.empty : Plane Nat) = (default : Plane Nat) := by simp [default, Plane.empty]
 
-def Plane.get [BEq α] [Hashable α]
-    (self : Plane α) (p : Dim2) (default : α) : α :=
+def Plane.get [BEq α] [Hashable α] (self : Plane α) (p : Dim2) (default : α) : α :=
   self.mapping.getD (AsDim2.asDim2 p) (default : α)
 
-def Plane.set [BEq α] [Hashable α]
-    (self : Plane α) (p : Dim2) (a : α) : Plane α :=
-  { self with mapping := self.mapping.insert (AsDim2.asDim2 p) a }
+def Plane.set [BEq α] [Hashable α] (self : Plane α) (p : Dim2) (a : α) : Plane α :=
+  {self with mapping := self.mapping.insert (AsDim2.asDim2 p) a}
 
 def Plane.modify [BEq α] [Hashable α]
     (self : Plane α) (p : Dim2) (f : α → α) (default : α): Plane α :=
-  { self with
-    mapping := self.mapping.insert p (f (self.mapping.getD p default)) }
+  {self with mapping := self.mapping.insert p (f (self.mapping.getD p default))}
 
 example [BEq α] [Hashable α] (p : Plane α) (y x : Nat) (a : α) :
     p.set (Dim2.mk y x) a = p.set (y, x) a := by simp
 
 example [BEq α] [Hashable α] (p : Plane α) (q : Dim2) (a default : α) :
-      (p.set q a).get q default = a  := by
+      (p.set q a).get q default = a := by
   simp [Plane.set, AsDim2.asDim2, Plane.get]
 
 /--
@@ -360,12 +346,11 @@ instance [BEq α] : BEq (Rect α) where
 private
 def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
-    ([] : List (List α))
+    []
+  else if n < l.length then
+    (l.take n) :: fold_n n (l.drop n) h
   else
-    if n < l.length then
-      (l.take n) :: fold_n n (l.drop n) h
-    else
-      ([l] : List (List α))
+    [l]
 
 -- #eval fold_n 3 #[0, 2, 3, 10, 12, 19, 20, 22, 23].toList (by simp)
 
@@ -416,8 +401,8 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
       have : NonNegDim d := by
         simp [NonNegDim]
         constructor
-        { exact Int.ofNat_zero_le h }
-        { exact Int.ofNat_zero_le w }
+        {exact Int.ofNat_zero_le h}
+        {exact Int.ofNat_zero_le w}
       Rect.mk d v this hw
     else
       let d := Dim2.mk 0 0
@@ -505,8 +490,7 @@ def findIdxOnSubarray [BEq α]
 /--
 - search an element in a specific row
 -/
-def findIdxInRow? [BEq α]
-    (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
+def findIdxInRow? [BEq α] (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * p.shape.x.toNat
   let t := (i + 1) * p.shape.x.toNat
   let sa := p.vector.toSubarray f t
@@ -547,11 +531,13 @@ def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
 def area [BEq α] (self : Rect α) : Nat := self.shape.area
 
 -- @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
-@[inline] def toIndex {α : Type} [BEq α] (frame : Rect α) (p : Dim2) : Nat :=
+@[inline]
+def toIndex {α : Type} [BEq α] (frame : Rect α) (p : Dim2) : Nat :=
   p.y.toNat * frame.shape.x.toNat + p.x.toNat
 
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
-@[inline] def ofIndex {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Dim2 :=
+@[inline]
+def ofIndex {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Dim2 :=
   Dim2.mk (n / frame.shape.x.toNat) (n % frame.shape.x.toNat)
 
 end Rect

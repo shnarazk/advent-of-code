@@ -63,11 +63,9 @@ partial
 def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
   let uppers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.2)
   let lowers := rules.filter (fun (a, b) ↦ (l.contains a) && (l.contains b)) |>.map (·.1)
-  let cands := lowers.filter (fun n ↦ !uppers.contains n)
-         |> (Std.HashSet.ofArray ·)
-         |>.toArray
+  let cands := lowers.filter (!uppers.contains ·) |> (Std.HashSet.ofArray ·) |>.toArray
   match cands with
-   | #[] => l
+    | #[] => l
     | #[top] => [top].append (topologySort rules (l.filter (· != top)))
     | _ => panic! s!"impossible {cands}"
 
