@@ -32,7 +32,7 @@ name = "Y2024"
 [[lean_exe]]
 name = "aoc"
 root = "AoC"
-# moreLinkArgs = ["-O3", "-UNDEBUG"]
+moreLinkArgs = ["-O2", "-UNDEBUG"]
 buildType = "release"
 
 [[lean_exe]]
