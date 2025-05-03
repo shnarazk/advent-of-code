@@ -32,7 +32,6 @@ instance : LawfulHashable Dim2 where
 instance : EquivBEq Dim2 where
   symm  := by intro a b h ; exact BEq.symm h
   trans := by intro a b h ; exact PartialEquivBEq.trans
-  refl  := by intro a ; exact beq_iff_eq.mpr rfl
 
 def dim2_add_dim2 (a b : Dim2) : Dim2 := Dim2.mk (a.y + b.y) (a.x + b.x)
 instance instHAdddDim2 : HAdd Dim2 Dim2 Dim2 where hAdd := dim2_add_dim2
@@ -177,7 +176,8 @@ theorem index_index'_is_id (size : Dim2) (h : 0 < size.x) : ∀ p : Dim2, 0 ≤ 
     calc (p.y * size.x + p.x) % size.x
       _ = p.x % size.x := by rw [mod_cancel p.y p.x size.x]
       _ = p.x := by exact Int.emod_eq_of_lt Qx PSx
-  rw [X, Y]
+  rw [X]
+  rw [Int.emod_eq_of_lt Qx' PSx]
 
 open Nat
 
