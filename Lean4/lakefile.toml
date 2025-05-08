@@ -5,8 +5,10 @@ version = "0.6.1"
 
 [[require]]
 name = "batteries"
-scope = "leanprover-community"
-rev = "v4.20.0-rc5"
+# scope = "leanprover-community"
+git = "git@github.com:shnarazk/batteries.git"
+rev = "main"
+# rev = "v4.20.0-rc5"
 
 [[require]]
 name = "Cli"
