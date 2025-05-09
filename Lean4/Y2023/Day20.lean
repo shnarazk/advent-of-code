@@ -1,4 +1,4 @@
-import Mathlib.Data.Nat.ModEq
+import Mathlib.Data.Nat.ModEq  -- for Chinese Reminder Theorem
 import «AoC».Basic
 import «AoC».Combinator
 import «AoC».Parser
