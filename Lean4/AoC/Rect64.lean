@@ -243,12 +243,22 @@ def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array Dim2 :=
   Array.range self.vector.size
     |>.map (fun i ↦ self.ofIndex₁ i.toUInt64)
 
+/--
+ - return a list of all valid `(row, column)` index pairs of the Rect in row-major order
+ - rows range from 0 to `self.height - 1`
+ - columns range from 0 to `self.width - 1`
+-/
+def indices {α : Type} [BEq α] [Inhabited α] (self : Rect α) : List Dim2 :=
+  List.range (self.height.toNat)
+    |>.flatMap (fun y ↦ List.range (self.width.toNat)
+    |>.map (y.toUInt64, ·.toUInt64))
+
 end Rect
 
-def v := #[true, false, true, false]
+-- def v := #[true, false, true, false]
 
-def x := Rect.mk 2 v
-def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
+-- def x := Rect.mk 2 v
+-- def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
 
 -- #check x
 -- #eval x
