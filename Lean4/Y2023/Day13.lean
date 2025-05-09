@@ -7,12 +7,6 @@ def cuts (g : UInt64) : List Nat := List.range g.toNat |>.drop 1
 
 namespace TwoDimensionalVector64.Dim2
 
-def cutsₕ (g : Dim2) : List Nat := List.range g.fst.toNat |>.drop 1
-def cutsᵥ (g : Dim2) : List Nat := List.range g.snd.toNat |>.drop 1
-
--- #eval (Dim2.mk 4 2).cutsₕ
--- #eval (Dim2.mk 4 2).cutsᵥ
-
 end TwoDimensionalVector64.Dim2
 
 namespace TwoDimensionalVector64.Rect
