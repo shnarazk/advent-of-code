@@ -1,5 +1,5 @@
 //! <https://adventofcode.com/2022/day/25>
-use crate::framework::{AdventOfCode, ParseError, aoc_at};
+use crate::framework::{aoc_at, AdventOfCode, ParseError};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -31,13 +31,12 @@ impl AdventOfCode for Puzzle {
             .line
             .iter()
             .map(|n| {
-                let v = n
+                n
                     .iter()
                     .rev()
                     .enumerate()
                     .fold(0, |acc, (i, k)| acc + k * 5_isize.pow(i as u32))
-                    as usize;
-                v
+                    as usize
             })
             .sum();
         let mut buffer: Vec<char> = Vec::new();

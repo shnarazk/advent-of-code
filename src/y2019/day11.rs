@@ -2,7 +2,7 @@
 
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
+        framework::{aoc, AdventOfCode, ParseError},
         parser,
     },
     std::collections::HashMap,
@@ -192,12 +192,11 @@ impl Default for Env {
 
 impl Env {
     pub fn hanle_input(&mut self) -> isize {
-        let input = if let Some(color) = self.panel.get(&self.location) {
+        if let Some(color) = self.panel.get(&self.location) {
             color.0 as usize as isize
         } else {
             0
-        };
-        input
+        }
     }
     pub fn hanle_output(&mut self, output: isize) {
         // dbg!(output);

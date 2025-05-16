@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/4>
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::borrow::Cow,
 };
 
@@ -15,11 +15,11 @@ pub struct Puzzle {
     num_row: usize,
 }
 
-fn col_at(vec: &[Vec<usize>], at: usize) -> Cow<Vec<usize>> {
+fn col_at(vec: &[Vec<usize>], at: usize) -> Cow<[usize]> {
     Cow::Owned(vec.iter().map(|l| l[at]).collect::<Vec<usize>>())
 }
 
-fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<Vec<usize>> {
+fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<[usize]> {
     Cow::Borrowed(&vec[at])
 }
 
@@ -48,9 +48,9 @@ mod parser {
         super::Board,
         crate::parser::parse_usize,
         winnow::{
-            ModalResult, Parser,
             ascii::{newline, space0, space1},
             combinator::{preceded, separated, seq},
+            ModalResult, Parser,
         },
     };
 
