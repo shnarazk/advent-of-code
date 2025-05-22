@@ -17,5 +17,8 @@ open("../data/2024/input-day01.txt", "r") do file
     end
     sort!(data1)
     sort!(data2)
+    # part1
     map(((a, b),) -> abs(a - b), zip(data1, data2)) |> sum |> println
+    # part2
+    map(x -> x * sum(data2 .== x), data1) |> sum |> println
 end
