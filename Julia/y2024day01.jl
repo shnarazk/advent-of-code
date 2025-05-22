@@ -3,11 +3,19 @@
 # Pkg.add("ParserCombinator")
 using ParserCombinator
 
+pint = p"\d+" > s -> parse(Int, s)
+pspaces = Drop(p"[ \t]*")
+pline = pint + pspaces + pint
+
 open("../data/2024/input-day01.txt", "r") do file
-    for line in first(eachline(file), 10)
-        println(line)
-        println(parse_one(line, p"\d+">d -> parse(Int, d))[1])
-        # Why doesn't parse_one return Error<Int, something>?
-        # I dont like it.
+    data1 = []
+    data2 = []
+    for line in eachline(file)
+        parsed = parse_one(line, pline)
+        push!(data1, parsed[1])
+        push!(data2, parsed[2])
     end
+    sort!(data1)
+    sort!(data2)
+    map(((a, b),) -> abs(a - b), zip(data1, data2)) |> sum |> println
 end
