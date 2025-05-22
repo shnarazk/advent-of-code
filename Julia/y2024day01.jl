@@ -2,12 +2,12 @@
 # using Pkg
 # Pkg.add("ParserCombinator")
 using ParserCombinator
+include(joinpath(@__DIR__, "AocParser.jl"))
+using .AoCParser: pint, pspaces
 
-pint = p"\d+" > s -> parse(Int, s)
-pspaces = Drop(p"[ \t]*")
 pline = pint + pspaces + pint
 
-function main()
+function run()
     open("../data/2024/input-day01.txt", "r") do file
         data1 = []
         data2 = []
@@ -25,7 +25,6 @@ function main()
     end
 end
 
-
-@time r = main()
+@time r = run()
 
 println(r)
