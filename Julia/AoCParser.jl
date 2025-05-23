@@ -1,10 +1,11 @@
 module AoCParser
 using ParserCombinator
-export pint, pfloat, pspaces, pnewline, pints
+export 🔎int, 🔎float, 🔎spaces, 🔎newline, 🔎ints
 
-pint = p"\d+" > s -> parse(Int, s)
-pfloat = p"\d+\.\d*" > s -> parse(Float64, s)
-pspaces = Drop(p"[ \t]*")
-pnewline = Drop(p"\n")
-pints = Repeat(pint + pspaces)
+🔎int = p"\d+" > s -> parse(Int, s)
+🔎float = p"\d+\.\d*" > s -> parse(Float64, s)
+🔎spaces = Drop(p"[ \t]*")
+🔎newline = Drop(p"\n")
+🔎ints = Repeat(🔎int + 🔎spaces)
+
 end

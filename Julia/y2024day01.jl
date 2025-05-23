@@ -5,23 +5,22 @@ using ParserCombinator
 include("AoCParser.jl")
 using .AoCParser
 
-pline = pint + pspaces + pint
+🔎line = 🔎int + 🔎spaces + 🔎int
 
-function run()
+function run()::NamedTuple{(:part1, :part2), Tuple{Int, Int}}
     open("../data/2024/input-day01.txt", "r") do file
         data1 = []
         data2 = []
         for line in eachline(file)
-            parsed = parse_one(line, pline)
+            parsed = parse_one(line, 🔎line)
             push!(data1, parsed[1])
             push!(data2, parsed[2])
         end
         sort!(data1)
         sort!(data2)
-        # part1
-        map(((a, b),) -> abs(a - b), zip(data1, data2)) |> sum |> println
-        # part2
-        map(x -> x * sum(data2 .== x), data1) |> sum |> println
+        part1 = map(((a, b),) -> abs(a - b), zip(data1, data2)) |> sum
+        part2 = map(x -> x * sum(data2 .== x), data1) |> sum
+        return (part1 = part1, part2 = part2)
     end
 end
 
