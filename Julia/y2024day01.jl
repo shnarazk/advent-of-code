@@ -2,8 +2,8 @@
 # using Pkg
 # Pkg.add("ParserCombinator")
 using ParserCombinator
-include(joinpath(@__DIR__, "AocParser.jl"))
-using .AoCParser: pint, pspaces
+include("AoCParser.jl")
+using .AoCParser
 
 pline = pint + pspaces + pint
 
