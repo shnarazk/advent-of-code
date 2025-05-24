@@ -6,14 +6,14 @@ export 🔎int, 🔎float, 🔎spaces, 🔎newline, 🔎ints
 """
 🔎int
 
-Parser that matches one or more digits (`\d+`) and converts the matched string to an `Int`.
+Parser that matches one or more digits (`\\d+`) and converts the matched string to an `Int`.
 """
 🔎int = PInt()
 
 """
 🔎float
 
-Parser that matches a floating-point number (one or more digits, a dot, and zero or more digits, `\d+\.\d*`) and converts the matched string to a `Float64`.
+Parser that matches a floating-point number (one or more digits, a dot, and zero or more digits, `\\d+\\.\\d*`) and converts the matched string to a `Float64`.
 """
 🔎float = PFloat64()
 
