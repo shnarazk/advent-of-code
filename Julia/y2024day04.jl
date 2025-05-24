@@ -1,7 +1,4 @@
 #!/usr/bin/env julia
-using ParserCombinator
-include("AoCParser.jl")
-using .AoCParser
 
 function part1(m::Matrix{Char})::Int
     count(map(
@@ -19,7 +16,13 @@ function part1(m::Matrix{Char})::Int
 end
 
 function part2(m::Matrix{Char})::Int
-    size(m, 1)
+    count(
+        function ((i, j),)
+            m[i, j] == 'A' &&
+                ((m[i-1, j-1] == 'M' && m[i+1, j+1] == 'S') || (m[i-1, j-1] == 'S' && m[i+1, j+1] == 'M')) &&
+                ((m[i-1, j+1] == 'M' && m[i+1, j-1] == 'S') || (m[i-1, j+1] == 'S' && m[i+1, j-1] == 'M'))
+        end,
+        [(i, j) for i in 2:size(m, 1)-1 for j in 2:size(m, 2)-1])
 end
 
 function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
