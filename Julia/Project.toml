@@ -1,0 +1,11 @@
+name = "AoCParser"
+uuid = "c21bd61f-93ee-4f93-83a0-1f39f786f208"
+authors = ["Narazaki Shuji <shujinarazaki@protonmail.com>"]
+version = "0.1.0"
+
+[deps]
+ParserCombinator = "7f66c5e1-8e48-5e8a-9bc3-1a0b5f5cdfb3"
+
+[compat]
+julia = "1"
+ParserCombinator = "0.5"
