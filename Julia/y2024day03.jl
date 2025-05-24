@@ -40,7 +40,7 @@ end
 function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     open("../data/2024/input-day03.txt", "r") do file
         mem = read(file, String)
-        return (part1=check1(mem), part2=check2(mem))
+        (part1=check1(mem), part2=check2(mem))
     end
 end
 

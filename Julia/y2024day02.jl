@@ -23,7 +23,7 @@ function run()::NamedTuple{(:part1, :part2), Tuple{Int, Int}}
             s -> map(t -> Int.(parse_one(t, 🔎ints)), s)
         part1 = map(check1, lines) |> sum
         part2 = map(check2, lines) |> sum
-        return (part1, part2)
+        (part1, part2)
     end
 end
 

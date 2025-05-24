@@ -12,7 +12,7 @@ function run()::NamedTuple{(:part1, :part2), Tuple{Int, Int}}
         #     s -> map(t -> Int.(parse_one(t, 🔎ints)), s)
         part1 = 0
         part2 = 0
-        return (part1, part2)
+        (part1, part2)
     end
 end
 
