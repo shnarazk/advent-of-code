@@ -23,14 +23,23 @@ function total_order(m::Vector{Tuple{Int,Int}}, range::Vector{Int})::Vector{Int}
     end
 end
 
-function ordered(order::Array{Int}, pages::Array{Int})::Bool
-    pages == [x for x in order if in(x, pages)]
+function ordered(order::Array{Int}, pages::Array{Int})::Array{Int}
+    [x for x in order if in(x, pages)]
 end
 
 function check1(rules::Vector{Tuple{Int,Int}}, pages::Vector{Int})::Int
     o = total_order([r for r in rules if in(r[1], pages) && in(r[2], pages)], pages)
-    if ordered(o, pages)
+    if pages == ordered(o, pages)
         pages[length(pages)÷2+1]
+    else
+        0
+    end
+end
+
+function check2(rules::Vector{Tuple{Int,Int}}, pages::Vector{Int})::Int
+    o = total_order([r for r in rules if in(r[1], pages) && in(r[2], pages)], pages)
+    if (p = ordered(o, pages)) != pages
+        p[length(p)÷2+1]
     else
         0
     end
@@ -40,7 +49,7 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     open("../data/2024/input-day05.txt", "r") do file
         (rules, updates) = read(file, String) |> s -> parse_one(s, 🔎data)[1]
         part1 = map(p -> check1(rules, p), updates) |> sum
-        part2 = length(updates)
+        part2 = map(p -> check2(rules, p), updates) |> sum
         (part1, part2)
     end
 end
