@@ -23,6 +23,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Collections", package: "swift-collections"),
         .product(name: "Parsing", package: "swift-parsing"),
+        "Y2024",
         "Y2023",
         "Y2022",
         "Y2016",
@@ -36,6 +37,7 @@ let package = Package(
         .product(name: "Parsing", package: "swift-parsing"),
       ]
     ),
+    .target(name: "Y2024", dependencies: []),
     .target(name: "Y2023", dependencies: []),
     .target(name: "Y2022", dependencies: []),
     .target(name: "Y2016", dependencies: []),

@@ -5,6 +5,7 @@ import Foundation
 import Y2016
 import Y2022
 import Y2023
+import Y2024
 
 @main
 struct Aoc: ParsableCommand, Decodable {
@@ -34,6 +35,11 @@ struct Aoc: ParsableCommand, Decodable {
     let data: String = try String(contentsOf: URL(fileURLWithPath: dataFile))
     let beg = Date()
     switch year {
+    case 2024:
+      switch day {
+      case 5: Y2024.day05(data)
+      default: fatalError()
+      }
     case 2023:
       switch day {
       case 1: Y2023.day01(data)
