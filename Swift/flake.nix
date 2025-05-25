@@ -8,7 +8,13 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in {
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.bashInteractive pkgs.swift-format pkgs.entr ];
+        packages = [
+          pkgs.bashInteractive
+          pkgs.swift
+          pkgs.swift-format
+          pkgs.swiftpm
+          pkgs.entr
+        ];
       };
     });
 }
