@@ -28,6 +28,14 @@ let package = Package(
         "Y2016",
       ]
     ),
+    .executableTarget(
+      name: "parser1",
+      dependencies: [
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "Collections", package: "swift-collections"),
+        .product(name: "Parsing", package: "swift-parsing"),
+      ]
+    ),
     .target(name: "Y2023", dependencies: []),
     .target(name: "Y2022", dependencies: []),
     .target(name: "Y2016", dependencies: []),
