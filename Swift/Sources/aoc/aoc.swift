@@ -10,7 +10,7 @@ import Y2024
 @main
 struct Aoc: ParsableCommand, Decodable {
   @Option(help: "year (4 digits)")
-  public var year: Int = 2023
+  public var year: Int = 2024
 
   @Argument(help: "day [1-25]")
   public var day: Int = 0
