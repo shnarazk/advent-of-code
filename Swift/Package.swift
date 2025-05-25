@@ -12,6 +12,7 @@ let package = Package(
       url: "https://github.com/apple/swift-collections.git",
       .upToNextMinor(from: "1.0.0")
     ),
+    .package(url: "https://github.com/pointfreeco/swift-parsing", from: "0.7.0"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,6 +22,7 @@ let package = Package(
       dependencies: [
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Collections", package: "swift-collections"),
+        .product(name: "Parsing", package: "swift-parsing"),
         "Y2023",
         "Y2022",
         "Y2016",
