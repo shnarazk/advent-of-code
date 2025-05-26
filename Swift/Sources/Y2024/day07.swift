@@ -1,7 +1,7 @@
 //
 //  day07.swift
 //  aoc
-
+import Foundation
 import Parsing
 
 func part1(_ line: (Int, [Int])) -> Int {
@@ -20,6 +20,44 @@ func part1(_ line: (Int, [Int])) -> Int {
             let y = s * n
             if y <= line.0 {
                 tmp.insert(y)
+            }
+        }
+        values = tmp
+    }
+    if values.contains(line.0) {
+        return line.0
+    } else {
+        return 0
+    }
+}
+
+func scale(_ n: Int, _ m: Int, _ x: Int) -> Int {
+    if x < 10 {
+        return n * 10 + m
+    }
+    return scale(n * 10, m, x / 10)
+}
+
+func part2(_ line: (Int, [Int])) -> Int {
+    var values: Set<Int> = Set()
+    for n in line.1 {
+        if values.isEmpty {
+            values.insert(n)
+            continue
+        }
+        var tmp: Set<Int> = Set()
+        for s in values {
+            let x = s + n
+            if x <= line.0 {
+                tmp.insert(x)
+            }
+            let y = s * n
+            if y <= line.0 {
+                tmp.insert(y)
+            }
+            let z = scale(s, n, n)
+            if z <= line.0 {
+                tmp.insert(z)
             }
         }
         values = tmp
@@ -53,9 +91,10 @@ public func day07(_ data: String) {
     }
     do {
         let data = try parser.parse(data)
-        print("\(data)")
         let sum1 = data.reduce(into: 0) { acc, line in acc += part1(line) }
+        let sum2 = data.reduce(into: 0) { acc, line in acc += part2(line) }
         print("Part1: \(sum1)")
+        print("Part2: \(sum2)")
     } catch {
         print(error)
     }
