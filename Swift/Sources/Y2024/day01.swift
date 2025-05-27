@@ -1,6 +1,4 @@
-import Parsing
-
-public func day(_ data: String) {
+public func day01(_ data: String) {
     let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
     func part1(_ lines: [String.SubSequence]) {
         // var lines = lines
