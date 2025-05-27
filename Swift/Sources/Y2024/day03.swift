@@ -18,15 +18,14 @@ let flip: some Parser<Substring, Bool> = Parse {
 
 func part1(_ data: String) -> Int {
     var sum = 0
-    for i in 0..<data.count {
-        if data[data.index(data.startIndex, offsetBy: i)] != "m" {
-            continue
-        }
+    var i = data.startIndex
+    while i < data.endIndex {
+        var str = data[i...]
         do {
-            var str = data.dropFirst(i)
             let (a, b) = try mul.parse(&str)
             sum += a * b
         } catch {}
+        i = data.index(after: i)
     }
     return sum
 }
@@ -34,20 +33,23 @@ func part1(_ data: String) -> Int {
 func part2(_ data: String) -> Int {
     var sum = 0
     var mode = true
-    for i in 0..<data.count {
+    var i = data.startIndex
+    while i < data.endIndex {
+        var str = data[i...]
         do {
-            var str = data.dropFirst(i)
             let (a, b) = try mul.parse(&str)
             if mode {
                 sum += a * b
             }
+            i = data.index(after: i)
             continue
         } catch {}
         do {
-            var str = data.dropFirst(i)
             mode = try flip.parse(&str)
+            i = data.index(after: i)
             continue
         } catch {}
+        i = data.index(after: i)
     }
     return sum
 }
