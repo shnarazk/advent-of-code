@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "94E95E19-4FE1-4198-A150-DBD0EFEAB4EE",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "commandLineArgumentEntries" : [
+      {
+        "argument" : "--year 2024"
+      },
+      {
+        "argument" : "7"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:",
+      "identifier" : "aoc",
+      "name" : "aoc"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "aoc-test",
+        "name" : "aoc-test"
+      }
+    }
+  ],
+  "version" : 1
+}
