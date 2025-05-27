@@ -42,6 +42,7 @@ struct Aoc: ParsableCommand, Decodable {
             case 2: Y2024.day02(data)
             case 5: Y2024.day05(data)
             case 7: Y2024.day07(data)
+            case 9: Y2024.day09(data)
             default: fatalError()
             }
         case 2023:
