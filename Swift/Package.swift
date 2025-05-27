@@ -31,7 +31,6 @@ let package = Package(
                     package: "swift-argument-parser"
                 ),
                 .product(name: "Collections", package: "swift-collections"),
-                .product(name: "Parsing", package: "swift-parsing"),
                 .target(name: "Y2016"),
                 .target(name: "Y2022"),
                 .target(name: "Y2023"),
@@ -49,7 +48,10 @@ let package = Package(
                 .product(name: "Parsing", package: "swift-parsing"),
             ]
         ),
-        .target(name: "Y2024", dependencies: []),
+        .target(name: "Y2024", dependencies: [
+            .product(name: "Parsing", package: "swift-parsing"),
+            .product(name: "Collections", package: "swift-collections"),
+        ]),
         .target(name: "Y2023", dependencies: []),
         .target(name: "Y2022", dependencies: []),
         .target(name: "Y2016", dependencies: []),
