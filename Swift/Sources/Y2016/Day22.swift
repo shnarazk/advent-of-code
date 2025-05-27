@@ -1,6 +1,6 @@
 import Foundation
 
-func day22() {
+public func day22(_ data: String) {
   var line: [(Int, Int, Int, Int)] = []
   let inputFile: String = "../data/2016/input-day22.txt"
 

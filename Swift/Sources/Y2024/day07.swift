@@ -31,11 +31,14 @@ func part1(_ line: (Int, [Int])) -> Int {
     }
 }
 
-func scale(_ n: Int, _ m: Int, _ x: Int) -> Int {
-    if x < 10 {
-        return n * 10 + m
+public func append_digits(_ a: Int, _ b: Int) -> Int {
+    func step(_ n: Int, _ x: Int) -> Int {
+        if x < 10 {
+            return n * 10 + b
+        }
+        return step(n * 10, x / 10)
     }
-    return scale(n * 10, m, x / 10)
+    return step(a, b)
 }
 
 func part2(_ line: (Int, [Int])) -> Int {
@@ -55,7 +58,7 @@ func part2(_ line: (Int, [Int])) -> Int {
             if y <= line.0 {
                 tmp.insert(y)
             }
-            let z = scale(s, n, n)
+            let z = append_digits(s, n)
             if z <= line.0 {
                 tmp.insert(z)
             }

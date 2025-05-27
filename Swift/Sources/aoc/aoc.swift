@@ -66,7 +66,7 @@ struct Aoc: ParsableCommand, Decodable {
             switch day {
             case 18: Y2016.day18(data)
             case 19: Y2016.day19(data)
-            // case 2: Y2016.day02(data)
+            case 22: Y2016.day22(data)
             default: fatalError()
             }
         default: fatalError()
