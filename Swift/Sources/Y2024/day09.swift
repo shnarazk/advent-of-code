@@ -36,9 +36,26 @@ func points(_ data: [Record]) -> Int {
 
 func part1(_ data: [Record]) {
     var mem = data
-    // var lines = lines
-    let p = points(mem)
-    print("Part1: \(p)")
+    var points = 0
+    for i in 0...data.last!.pos + data.last!.length {
+        if i < mem.first!.pos {
+            points += i * mem.last!.id
+            if mem.last!.length == 1 {
+                mem.removeLast(1)
+                if mem.isEmpty {
+                    break
+                }
+            } else {
+                mem[mem.count - 1] = (mem.last!.pos, mem.last!.id, mem.last!.length - 1)
+            }
+        } else {
+            points += i * mem.first!.id
+            if mem.first!.pos + mem.first!.length - 1 == i {
+                mem.removeFirst(1)
+            }
+        }
+    }
+    print("Part1: \(points)")
 }
 
 func part2(_ data: [Record]) {
@@ -69,8 +86,6 @@ public func day09(_ data: String) {
     }
 
     let initplaces = decode(input)
-    print(initplaces)
-
     part1(initplaces)
     part2(initplaces)
 }
