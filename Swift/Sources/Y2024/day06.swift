@@ -1,3 +1,5 @@
+import Utils
+
 private typealias Cursor = (pos: (Int, Int), dir: (Int, Int))
 
 private func turn_right(_ dir: (Int, Int)) -> (Int, Int) {
@@ -18,13 +20,6 @@ private func add(_ a: Cursor) -> (Int, Int) {
     add(a.pos, a.dir)
 }
 
-func within(_ me: (Int, Int), in size: (Int, Int)) -> (Int, Int)? {
-    if 0 <= me.0 && me.0 < size.0 && 0 <= me.1 && me.1 < size.1 {
-        me
-    } else {
-        nil
-    }
-}
 private func part1(
     _ size: (Int, Int),
     _ mirrors: Set<[Int]>,
