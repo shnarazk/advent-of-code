@@ -25,32 +25,83 @@ func within(_ me: (Int, Int), in size: (Int, Int)) -> (Int, Int)? {
         nil
     }
 }
-private func part1(_ size: (Int, Int), _ mirrors: Set<[Int]>, _ start: (Int, Int))
-    -> Int
+private func part1(
+    _ size: (Int, Int),
+    _ mirrors: Set<[Int]>,
+    _ start: Cursor,
+    _ passing: Set<[Int]>,
+    _ looping: Set<[Int]>
+)
+    -> Int?
 {
-    var passing: Set<[Int]> = Set()
-    var now: Cursor = (pos: start, dir: (-1, 0))
+    var passing = passing
+    var looping = looping
+    var now: Cursor = start
     passing.insert([now.pos.0, now.pos.1])
+    looping.insert([now.pos.0, now.pos.1, now.dir.0, now.dir.1])
     while within(add(now), in: size) != nil {
         var pos = add(now.pos, now.dir)
         var dir = now.dir
         if mirrors.contains([pos.0, pos.1]) {
             dir = turn_right(dir)
             pos = add(now.pos, dir)
+            if mirrors.contains([pos.0, pos.1]) {
+                dir = turn_right(dir)
+                pos = add(now.pos, dir)
+            }
+        }
+        if looping.contains([pos.0, pos.1, dir.0, dir.1]) {
+            return nil
         }
         now = (pos, dir)
         // print(now)
         passing.insert([now.pos.0, now.pos.1])
-
+        looping.insert([now.pos.0, now.pos.1, now.dir.0, now.dir.1])
     }
-
     return passing.count
 }
 
-private func part2(_ size: (Int, Int), _ mirror: Set<[Int]>, _ start: (Int, Int))
+private func part2(
+    _ size: (Int, Int),
+    _ mirrors: Set<[Int]>,
+    _ start: Cursor,
+    _ passing: Set<[Int]>,
+    _ looping: Set<[Int]>
+)
     -> Int
 {
-    0
+    var count = 0
+    var passing = passing
+    var looping = looping
+    var now: Cursor = start
+    passing.insert([now.pos.0, now.pos.1])
+    looping.insert([now.pos.0, now.pos.1, now.dir.0, now.dir.1])
+    while within(add(now), in: size) != nil {
+        var pos = add(now.pos, now.dir)
+        var dir = now.dir
+        if mirrors.contains([pos.0, pos.1]) {
+            dir = turn_right(dir)
+            pos = add(now.pos, dir)
+            if mirrors.contains([pos.0, pos.1]) {
+                dir = turn_right(dir)
+                pos = add(now.pos, dir)
+            }
+        }
+        do {
+            var m = mirrors
+            m.insert([pos.0, pos.1])
+            let tmp = (pos: now.pos, dir: dir)
+            if !passing.contains([pos.0, pos.1])
+                && part1(size, m, tmp, passing, looping) == nil
+            {
+                count += 1
+            }
+        }
+        now = (pos, dir)
+        passing.insert([now.pos.0, now.pos.1])
+        looping.insert([now.pos.0, now.pos.1, now.dir.0, now.dir.1])
+    }
+    return count
 }
 
 public func day06(_ data: String) {
@@ -68,8 +119,11 @@ public func day06(_ data: String) {
             }
         }
     }
-    let sum1 = part1(size, mirrors, start)
-    let sum2 = part2(size, mirrors, start)
+    let now: Cursor = (pos: start, dir: (-1, 0))
+    let passing: Set<[Int]> = Set([[now.pos.0, now.pos.1]])
+    let looping: Set<[Int]> = Set([[now.pos.0, now.pos.1, now.dir.0, now.dir.1]])
+    let sum1 = part1(size, mirrors, now, passing, looping)!
+    let sum2 = part2(size, mirrors, now, passing, looping)
     print("Part1: \(sum1)")
     print("Part2: \(sum2)")
 }
