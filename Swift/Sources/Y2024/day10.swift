@@ -1,4 +1,13 @@
+import Utils
+
 private func part1(_ size: (Int, Int), _ grid: [[Int]]) -> Int {
+    var to_visit: Set<Pos> = Set()
+    var visited: Set<Pos> = Set()
+    while !to_visit.isEmpty {
+        let pos = to_visit.removeFirst()
+        let h = grid[pos.y][pos.x]
+
+    }
     return 0
 }
 
