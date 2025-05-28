@@ -4,7 +4,7 @@
 import Foundation
 import Parsing
 
-func part1(_ line: (Int, [Int])) -> Int {
+private func part1(_ line: (Int, [Int])) -> Int {
     var values: Set<Int> = Set()
     for n in line.1 {
         if values.isEmpty {
@@ -41,7 +41,7 @@ public func append_digits(_ a: Int, _ b: Int) -> Int {
     return step(a, b)
 }
 
-func part2(_ line: (Int, [Int])) -> Int {
+private func part2(_ line: (Int, [Int])) -> Int {
     var values: Set<Int> = Set()
     for n in line.1 {
         if values.isEmpty {

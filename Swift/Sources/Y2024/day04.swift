@@ -1,4 +1,8 @@
-func part1(_ lines: [[Character]]) -> Int {
+//
+// day04.swift
+// aoc
+
+private func part1(_ lines: [[Character]]) -> Int {
     var count = 0
     for l in lines {
         for i in 0...l.count - 4 {
@@ -38,7 +42,7 @@ func part1(_ lines: [[Character]]) -> Int {
     return count
 }
 
-func part2(_ lines: [[Character]]) -> Int {
+private func part2(_ lines: [[Character]]) -> Int {
     var count = 0
     for i in 1...lines.count - 2 {
         for j in 1...lines[0].count - 2 {

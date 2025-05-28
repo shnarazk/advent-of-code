@@ -1,6 +1,6 @@
 import Parsing
 
-func part1(_ data: String) -> Int {
+private func part1(_ data: String) -> Int {
     let mul: some Parser<Substring, (Int, Int)> = Parse {
         "mul("
         Int.parser()
@@ -21,7 +21,7 @@ func part1(_ data: String) -> Int {
     return sum
 }
 
-func part2(_ data: String) -> Int {
+private func part2(_ data: String) -> Int {
     let mul: some Parser<Substring, (Int, Int)> = Parse {
         "mul("
         Int.parser()

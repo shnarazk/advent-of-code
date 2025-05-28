@@ -5,7 +5,7 @@
 
 import Parsing
 
-func part1(_ seq: [Int]) -> Int {
+private func part1(_ seq: [Int]) -> Int {
     var inc = true
     var dec = true
     if seq.count < 2 {
@@ -25,7 +25,7 @@ func part1(_ seq: [Int]) -> Int {
     return inc || dec ? 1 : 0
 }
 
-func part2(_ seq: [Int]) -> Int {
+private func part2(_ seq: [Int]) -> Int {
     if part1(seq) == 1 {
         return 1
     }

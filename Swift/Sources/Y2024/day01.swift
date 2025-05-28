@@ -1,12 +1,12 @@
 import Parsing
 
-func part1(_ left: [Int], _ right: [Int]) -> Int {
+private func part1(_ left: [Int], _ right: [Int]) -> Int {
     let l = left.sorted()
     let r = right.sorted()
     return zip(l, r).reduce(0) { $0 + abs($1.0 - $1.1) }
 }
 
-func part2(_ left: [Int], _ right: [Int]) -> Int {
+private func part2(_ left: [Int], _ right: [Int]) -> Int {
     let keys = right.reduce(into: [Int: Int]()) {
         $0[$1] = $0[$1, default: 0] + 1
     }

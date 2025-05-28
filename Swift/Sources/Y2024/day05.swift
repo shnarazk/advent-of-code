@@ -1,6 +1,6 @@
 import Parsing
 
-func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
+private func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     var range = pages
     func swap(to: Int, by rules: [(Int, Int)]) {
         let pivot: Int = range[..<to].partition { p in !rules.contains { p == $0.0 } }
@@ -10,21 +10,21 @@ func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     }
     swap(to: range.count, by: rules)
     return range
-//    let unrestricted: [Int] = pages.filter { node in rules.allSatisfy { rule in node != rule.0 } }
-//    if unrestricted.isEmpty {
-//        return pages
-//    } else {
-//        let rs = rules.filter { !unrestricted.contains($0.1) }
-//        return total_order(pages.filter { !unrestricted.contains($0) }, by: rs) + unrestricted
-//    }
+    //    let unrestricted: [Int] = pages.filter { node in rules.allSatisfy { rule in node != rule.0 } }
+    //    if unrestricted.isEmpty {
+    //        return pages
+    //    } else {
+    //        let rs = rules.filter { !unrestricted.contains($0.1) }
+    //        return total_order(pages.filter { !unrestricted.contains($0) }, by: rs) + unrestricted
+    //    }
 }
 
-func ordered(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
+private func ordered(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     let rs = rules.filter { pages.contains($0.0) && pages.contains($0.1) }
     return total_order(pages, by: rs)
 }
 
-func part1(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
+private func part1(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
     if ordered(pages, by: rules) == pages {
         return pages[pages.count / 2]
     } else {
@@ -32,7 +32,7 @@ func part1(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
     }
 }
 
-func part2(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
+private func part2(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
     let os = ordered(pages, by: rules)
     if os != pages {
         return os[os.count / 2]

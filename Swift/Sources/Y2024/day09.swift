@@ -6,7 +6,7 @@ import Foundation
 
 typealias Record = (pos: Int, id: Int, length: Int)
 
-func decode(_ line: [Int]) -> [Record] {
+private func decode(_ line: [Int]) -> [Record] {
     var map = [Record]()
     func step(_ l: Int, _ status: (Int, Int, Bool)) -> (Int, Int, Bool) {
         if status.2 {
@@ -23,7 +23,7 @@ func decode(_ line: [Int]) -> [Record] {
 }
 
 /// Return the score
-func points(_ data: [Record]) -> Int {
+private func points(_ data: [Record]) -> Int {
     var p: Int = 0
     for r in data {
         let s = r.pos
@@ -34,7 +34,7 @@ func points(_ data: [Record]) -> Int {
     return p
 }
 
-func part1(_ data: [Record]) {
+private func part1(_ data: [Record]) {
     var mem = data
     var points = 0
     for i in 0...data.last!.pos + data.last!.length {
@@ -58,7 +58,7 @@ func part1(_ data: [Record]) {
     print("Part1: \(points)")
 }
 
-func part2(_ data: [Record]) {
+private func part2(_ data: [Record]) {
     var mem = data
     for r in data[1...].reversed() {
         for i in 0..<mem.count - 1 {
