@@ -1,22 +1,13 @@
 import Parsing
 
-let mul: some Parser<Substring, (Int, Int)> = Parse {
-    "mul("
-    Int.parser()
-    ","
-    Int.parser()
-    ")"
-}
-
-let flip: some Parser<Substring, Bool> = Parse {
-    "do"
-    OneOf {
-        "()".map { true }
-        "n't()".map { false }
-    }
-}
-
 func part1(_ data: String) -> Int {
+    let mul: some Parser<Substring, (Int, Int)> = Parse {
+        "mul("
+        Int.parser()
+        ","
+        Int.parser()
+        ")"
+    }
     var sum = 0
     var i = data.startIndex
     while i < data.endIndex {
@@ -31,6 +22,20 @@ func part1(_ data: String) -> Int {
 }
 
 func part2(_ data: String) -> Int {
+    let mul: some Parser<Substring, (Int, Int)> = Parse {
+        "mul("
+        Int.parser()
+        ","
+        Int.parser()
+        ")"
+    }
+    let flip: some Parser<Substring, Bool> = Parse {
+        "do"
+        OneOf {
+            "()".map { true }
+            "n't()".map { false }
+        }
+    }
     var sum = 0
     var mode = true
     var i = data.startIndex

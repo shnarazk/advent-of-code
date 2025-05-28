@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -48,10 +48,12 @@ let package = Package(
                 .product(name: "Parsing", package: "swift-parsing"),
             ]
         ),
-        .target(name: "Y2024", dependencies: [
-            .product(name: "Parsing", package: "swift-parsing"),
-            .product(name: "Collections", package: "swift-collections"),
-        ]),
+        .target(
+            name: "Y2024",
+            dependencies: [
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Collections", package: "swift-collections"),
+            ]),
         .target(name: "Y2023", dependencies: []),
         .target(name: "Y2022", dependencies: []),
         .target(name: "Y2016", dependencies: []),
