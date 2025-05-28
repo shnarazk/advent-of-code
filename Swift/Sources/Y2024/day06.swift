@@ -1,6 +1,6 @@
-typealias Cursor = (pos: (Int, Int), dir: (Int, Int))
+private typealias Cursor = (pos: (Int, Int), dir: (Int, Int))
 
-func turn_right(_ dir: (Int, Int)) -> (Int, Int) {
+private func turn_right(_ dir: (Int, Int)) -> (Int, Int) {
     switch dir {
     case (-1, 0): (0, 1)
     case (0, 1): (1, 0)
@@ -10,11 +10,11 @@ func turn_right(_ dir: (Int, Int)) -> (Int, Int) {
     }
 }
 
-func add(_ a: (Int, Int), _ b: (Int, Int)) -> (Int, Int) {
+private func add(_ a: (Int, Int), _ b: (Int, Int)) -> (Int, Int) {
     (a.0 + b.0, a.1 + b.1)
 }
 
-func add(_ a: Cursor) -> (Int, Int) {
+private func add(_ a: Cursor) -> (Int, Int) {
     add(a.pos, a.dir)
 }
 
