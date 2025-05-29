@@ -8,8 +8,27 @@ public struct Pos: Comparable, Hashable, Sendable {
         self.x = x
     }
     public static var zero: Pos {
-        get {
-            ._zero
+        ._zero
+    }
+    public static var north: Pos {
+        Pos(y: -1, x: 0)
+    }
+    public static var east: Pos {
+        Pos(y: 0, x: 1)
+    }
+    public static var south: Pos {
+        Pos(y: 1, x: 0)
+    }
+    public static var west: Pos {
+        Pos(y: 0, x: -1)
+    }
+    public func turn_right() -> Pos {
+        switch self {
+        case .north: .east
+        case .east: .south
+        case .south: .west
+        case .west: .north
+        default: .zero
         }
     }
     /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to (y, x)
