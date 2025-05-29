@@ -1,7 +1,7 @@
 import Utils
 
 private func part1_aux(_ size: (Int, Int), _ grid: [[Int]], _ start: Pos) -> Int {
-    let boundary = Pos.asBound(size)
+    let boundary = Pos.asBoundary(size)
     var to_visit: Set<Pos> = Set([start])
     var visited: Set<Pos> = Set()
     var goals: Set<Pos> = Set()
@@ -26,7 +26,7 @@ private func part1(_ size: (Int, Int), _ grid: [[Int]], _ starts: [Pos]) -> Int 
     starts.reduce(0) { $0 + part1_aux(size, grid, $1) }
 }
 private func part2_aux(_ size: (Int, Int), _ grid: [[Int]], _ start: Pos) -> Int {
-    let boundary = Pos.asBound(size)
+    let boundary = Pos.asBoundary(size)
     var to_visit: [Pos] = [start]
     var goals: Int = 0
     while !to_visit.isEmpty {

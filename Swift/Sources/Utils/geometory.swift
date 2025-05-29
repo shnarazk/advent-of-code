@@ -13,11 +13,11 @@ public struct Pos: Comparable, Hashable, Sendable {
         }
     }
     /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to (y, x)
-    public static func asBound(y: Int, x: Int) -> Pos {
+    public static func asBoundary(y: Int, x: Int) -> Pos {
         Pos(y: y - 1, x: x - 1)
     }
     /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to `p`
-    public static func asBound(_ p: (Int, Int)) -> Pos {
+    public static func asBoundary(_ p: (Int, Int)) -> Pos {
         Pos(y: p.0 - 1, x: p.1 - 1)
     }
     /// Pos.zero <= self <= size
