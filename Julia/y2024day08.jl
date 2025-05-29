@@ -1,14 +1,16 @@
 #!/usr/bin/env julia
+#
+const D2 = CartesianIndex{2}
 
-function within(s::Tuple, p::Tuple)::Union{Tuple{Int,Int},Nothing}
-    if all((1, 1) .<= p .<= s)
+function within(s::D2, p::D2)::Union{D2,Nothing}
+    if all((1, 1) .<= Tuple(p) .<= Tuple(s))
         p
     else
         nothing
     end
 end
 
-function part1(s::Tuple, antennas::Dict{Char,Vector{Tuple{Int,Int}}})::Int
+function part1(s::D2, antennas::Dict{Char,Vector{D2}})::Int
     set = Set()
     for (_, l) in antennas
         for (i, p1) in enumerate(l)
@@ -28,19 +30,19 @@ function part1(s::Tuple, antennas::Dict{Char,Vector{Tuple{Int,Int}}})::Int
     length(set)
 end
 
-function part2(s::Tuple, antennas::Dict{Char,Vector{Tuple{Int,Int}}})::Int
+function part2(s::D2, antennas::Dict{Char,Vector{D2}})::Int
     set = Set()
     for (_, l) in antennas
         for (i, p1) in enumerate(l)
             for (j, p2) in enumerate(l)
                 if i < j
                     diff = p1 .- p2
-                    d = (0, 0)
+                    d = CartesianIndex(0, 0)
                     while (p = within(s, p2 .- d)) !== nothing
                         push!(set, p)
                         d = d .+ diff
                     end
-                    d = (0, 0)
+                    d = CartesianIndex(0, 0)
                     while (p = within(s, p1 .+ d)) !== nothing
                         push!(set, p)
                         d = d .+ diff
@@ -56,13 +58,13 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     open("../data/2024/input-day08.txt", "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m = hcat(map(collect, lines)...) |> permutedims |> Matrix
-        s = size(m)
-        antennas = Dict{Char,Vector{Tuple{Int,Int}}}()
+        s = CartesianIndex(size(m))
+        antennas = Dict{Char,Vector{D2}}()
         for i in axes(m, 1), j in axes(m, 2)
             c = m[i, j]
             if c != '.'
-                l = get(antennas, c, Tuple{Int,Int}[])
-                antennas[c] = push!(l, (i, j))
+                l = get(antennas, c, D2[])
+                antennas[c] = push!(l, CartesianIndex(i, j))
             end
         end
         (part1(s, antennas), part2(s, antennas))
