@@ -10,10 +10,11 @@ import Testing
 
 struct UtilsTests {
 
-    @Test("Check Pos (Utils geometory")
+    @Test("Check Pos (Utils geometory)")
     func test_pos() throws {
         #expect(Pos(y: 1, x: 1).within(Pos(y: 2, x: 2))! == Pos(y: 1, x: 1))
         #expect(Pos(y: 1, x: -1) + Pos(y: 2, x: 5) == Pos(y: 3, x: 4))
+        #expect(Pos(y: 1, x: -1) - Pos(y: 2, x: 5) == Pos(y: -1, x: -6))
     }
 
     @Test("check within function (Utils geometory)")

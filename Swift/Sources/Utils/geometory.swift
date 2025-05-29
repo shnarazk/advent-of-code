@@ -1,3 +1,4 @@
+/// implementation of 2D point as struct
 public struct Pos: Hashable {
     public let y: Int
     public let x: Int
