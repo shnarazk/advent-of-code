@@ -5,7 +5,7 @@ using ParserCombinator
 include("AoCParser.jl")
 using .AoCParser
 
-🔎equation = 🔎int + E": " + Repeat(🔎int + E" ") + 🔎int |> s -> (s[1], Int.(s[2:end]))
+🔎equation = 🔎int + E": " + Repeat(🔎int + E" ", backtrack=false) + 🔎int |> s -> (s[1], Int.(s[2:end]))
 
 function part1(eq::Tuple)::Int
     ans = eq[1]
