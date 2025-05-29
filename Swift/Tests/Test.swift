@@ -48,6 +48,15 @@ struct UtilsTests {
             [Pos(y: 1, x: 2), Pos(y: 2, x: 1)]
         )
     }
+    @Test("Pos 4 dirs (Utils geometory)")
+    func test_pos_dirs() throws {
+        #expect(Pos.north + Pos.south == Pos.zero)
+        #expect(Pos.east + Pos.west == Pos.zero)
+        #expect(Pos.north.turn_right() == Pos.east)
+        #expect(Pos.east.turn_right() == Pos.south)
+        #expect(Pos.south.turn_right() == Pos.west)
+        #expect(Pos.west.turn_right() == Pos.north)
+    }
 
     @Test("within function (Utils geometory)")
     func test_within() throws {
