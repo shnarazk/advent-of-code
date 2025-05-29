@@ -12,8 +12,21 @@ public struct Pos: Comparable, Hashable, Sendable {
             ._zero
         }
     }
+    /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to (y, x)
+    public func asBound(y: Int, x: Int) -> Pos {
+        Pos(y: y - 1, x: x - 1)
+    }
+    /// Pos.zero <= self <= size
     public func within(_ size: Pos) -> Pos? {
-        if 0 <= self.y && self.y < size.y && 0 <= self.x && self.x < size.x {
+        if 0 <= self.y && self.y <= size.y && 0 <= self.x && self.x <= size.x {
+            self
+        } else {
+            nil
+        }
+    }
+    /// (0, 0) <= self < (y,x)
+    public func within(y: Int, x: Int) -> Pos? {
+        if 0 <= self.y && self.y < y && 0 <= self.x && self.x < x {
             self
         } else {
             nil
@@ -39,6 +52,14 @@ public struct Pos: Comparable, Hashable, Sendable {
             return Pos(y: self.y + 1, x: 0)
         }
         return nil
+    }
+    public func neighbors4(bound: Pos) -> [Pos] {
+        [
+            self + Pos(y: -1, x: 0),
+            self + Pos(y: 0, x: 1),
+            self + Pos(y: 1, x: 0),
+            self + Pos(y: 0, x: -1),
+        ].compactMap { $0.within(bound) }
     }
 }
 
