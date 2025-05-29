@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 #
+include("AoCUtils.jl")
 
 const Record = NamedTuple{(:id,:pos,:len),Tuple{Int,Int,Int}}
 
@@ -28,7 +29,7 @@ function part2(init::Vector{Record})::Int
 end
 
 function run()::NamedTuple{(:part1,:part2),Tuple{Int,Int}}
-    open("../data/2024/input-day09-0.txt", "r") do file
+    open(datafile(2024, 9), "r") do file
         mem::Vector{Record} = read(file, String) |>
             strip |>
             collect |>
