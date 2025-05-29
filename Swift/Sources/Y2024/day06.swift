@@ -70,9 +70,8 @@ private func part2(
         do {
             var m = mirrors
             m.insert(pos)
-            let tmp = (pos: now.pos, dir: dir)
             if !passing.contains(pos)
-                && part1(size, m, tmp, passing, looping) == nil
+                && part1(size, m, (pos: now.pos, dir: dir), passing, looping) == nil
             {
                 count += 1
             }
