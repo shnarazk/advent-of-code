@@ -13,11 +13,19 @@ struct UtilsTests {
     @Test("Check Pos (Utils geometory)")
     func test_pos() throws {
         #expect(Pos(y: 1, x: 1).within(Pos(y: 2, x: 2))! == Pos(y: 1, x: 1))
+        #expect(Pos.zero + Pos.zero == Pos(y: 0, x: 0))
         #expect(Pos(y: 1, x: -1) + Pos(y: 2, x: 5) == Pos(y: 3, x: 4))
         #expect(Pos(y: 1, x: -1) - Pos(y: 2, x: 5) == Pos(y: -1, x: -6))
     }
 
-    @Test("check within function (Utils geometory)")
+    @Test("Check Pos iteration (Utils geometory)")
+    func test_pos_next() throws {
+        #expect(Pos(y: 1, x: 1).next(upto: Pos(y: 2, x: 5)) == Pos(y: 1, x: 2))
+        #expect(Pos(y: 1, x: 3).next(upto: Pos(y: 4, x: 3)) == Pos(y: 2, x: 0))
+        #expect(Pos(y: 4, x: 3).next(upto: Pos(y: 4, x: 3)) == nil)
+    }
+
+    @Test("Check within function (Utils geometory)")
     func test_within() throws {
         #expect(within((1, 1), in: (2, 2)) ?? (-1, -1) == (1, 1))
         #expect(within((-1, 1), in: (2, 2)) == nil)
@@ -27,7 +35,7 @@ struct UtilsTests {
 
 struct Y2024Tests {
 
-    @Test("check append_digits (y2024 day07)")
+    @Test("Check append_digits (y2024 day07)")
     func test1() throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
         #expect(Y2024.append_digits(0, 12) == 12)
