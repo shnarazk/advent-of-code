@@ -19,6 +19,22 @@ private struct Bag: Conversion {
     var amount: Int
 }
 
+private func part1(_ data: [(Int, [[Bag]])]) -> Int {
+    var sum = 0
+    for (id, games) in data {
+        var dic: [String: Int] = [:]
+        for game in games {
+            for b in game {
+                dic[b.color] = max(dic[b.color, default: 0], b.amount)
+            }
+        }
+        if 12 < dic["red", default: 0] || 13 < dic["green", default: 0] || 14 < dic["blue", default: 0] {
+            continue
+        }
+        sum += id
+    }
+    return sum
+}
 private func part2(_ data: [(Int, [[Bag]])]) -> Int {
     var sum = 0
     for (_, games) in data {
@@ -69,6 +85,8 @@ public func day02(_ data: String) {
     }
     do {
         let data = try parser.parse(data)
+        let sum1 = part1(data)
+        print("Part 1: \(sum1)")
         let sum2 = part2(data)
         print("Part 2: \(sum2)")
     }
