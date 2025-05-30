@@ -57,7 +57,13 @@ let package = Package(
                 .product(name: "Collections", package: "swift-collections"),
                 .target(name: "Utils")
             ]),
-        .target(name: "Y2023", dependencies: []),
+        .target(
+            name: "Y2023",
+            dependencies: [
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Collections", package: "swift-collections"),
+                .target(name: "Utils")
+            ]),
         .target(name: "Y2022", dependencies: []),
         .target(name: "Y2016", dependencies: []),
         .testTarget(
@@ -71,6 +77,7 @@ let package = Package(
                 .product(name: "Parsing", package: "swift-parsing"),
                 .target(name: "Utils"),
                 .target(name: "Y2024"),
+                .target(name: "Y2023"),
             ]
         ),
     ]
