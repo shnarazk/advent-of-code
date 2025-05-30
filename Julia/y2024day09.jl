@@ -50,7 +50,30 @@ function part1(init::Vector{Record})::Int
 end
 
 function part2(init::Vector{Record})::Int
-    0
+    mem = copy(init)
+    for r in reverse(init[2:end])
+        for i in 1:length(mem) - 1
+            gap = mem[i + 1].pos - (mem[i].pos + mem[i].len)
+            if r.len <= gap
+                pos = mem[i].pos + mem[i].len
+                if r.pos < pos
+                    continue
+                end
+                mem = filter(e -> e.id != r.id, mem)
+                insert!(mem, i + 1, (id = r.id, pos, len = r.len))
+                break
+            end
+        end
+    end
+    # collect points
+    p = 0
+    for r in mem
+        s = r.pos
+        for i in 0:r.len - 1
+            p += (s + i) * r.id
+        end
+    end
+    p
 end
 
 function run()::NamedTuple{(:part1,:part2),Tuple{Int,Int}}
