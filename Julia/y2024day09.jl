@@ -14,6 +14,8 @@ function decode(v::Vector{Int})::Vector{Record}
             push!(memmap, (id, pos, len))
             id += 1
             pos += len
+        else
+            pos += len
         end
         at_disk = !at_disk
     end
@@ -21,7 +23,30 @@ function decode(v::Vector{Int})::Vector{Record}
 end
 
 function part1(init::Vector{Record})::Int
-    0
+    mem = copy(init)
+    points::Int = 0
+    for i in 0:(init[end].pos + init[end].len)
+        if i < mem[1].pos
+            points += i * mem[end].id
+            if mem[end].len == 1
+                pop!(mem) # remove the last element
+                if isempty(mem)
+                    break
+                end
+            else
+                mem[end] = (id = mem[end].id, pos = mem[end].pos, len = mem[end].len - 1)
+            end
+        else
+            points += i * mem[1].id
+            if mem[1].pos + mem[1].len - 1 == i
+                popfirst!(mem)
+                if isempty(mem)
+                    break
+                end
+            end
+        end
+    end
+    points
 end
 
 function part2(init::Vector{Record})::Int
@@ -35,7 +60,6 @@ function run()::NamedTuple{(:part1,:part2),Tuple{Int,Int}}
             collect |>
             s -> map(c -> c - '0', s) |>
             decode
-        println(mem)
         (part1(mem), part2(mem))
     end
 end
