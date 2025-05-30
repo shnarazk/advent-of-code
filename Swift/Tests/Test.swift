@@ -36,16 +36,20 @@ struct UtilsTests {
     @Test("Pos neighbors (Utils geometory)")
     func test_pos_neighbors() throws {
         #expect(
-            Pos(y: 1, x: 1).neighbors4(bound: Pos(y: 2, x: 5)) ==
-            [Pos(y: 0, x: 1), Pos(y: 1, x: 2), Pos(y: 2, x: 1), Pos(y: 1, x: 0)]
+            Pos(y: 1, x: 1).neighbors4(bound: Pos(y: 2, x: 5)) == [
+                Pos(y: 0, x: 1), Pos(y: 1, x: 2), Pos(y: 2, x: 1),
+                Pos(y: 1, x: 0),
+            ]
         )
         #expect(
-            Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 3, x: 2)) ==
-            [Pos(y: 1, x: 2), Pos(y: 3, x: 2), Pos(y: 2, x: 1)]
+            Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 3, x: 2)) == [
+                Pos(y: 1, x: 2), Pos(y: 3, x: 2), Pos(y: 2, x: 1),
+            ]
         )
         #expect(
-            Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 2, x: 2)) ==
-            [Pos(y: 1, x: 2), Pos(y: 2, x: 1)]
+            Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 2, x: 2)) == [
+                Pos(y: 1, x: 2), Pos(y: 2, x: 1),
+            ]
         )
     }
     @Test("Pos 4 dirs (Utils geometory)")
@@ -58,6 +62,18 @@ struct UtilsTests {
         #expect(Pos.west.turn_right() == Pos.north)
     }
 
+    @Test("Pos as Index for 2D array (Utils geometory)")
+    func test_pos_as_index() throws {
+        var m: [[Int]] = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+
+        #expect(m[Pos(y: 0, x: 2)] == m[0][2])
+        #expect(m[Pos(y: 2, x: 2)] == m[2][2])
+
+        m[Pos(y: 1, x: 1)] = 88
+        #expect(m[1][1] == 88)
+        #expect(m[Pos(y: 1, x: 1)] == 88)
+
+    }
     @Test("within function (Utils geometory)")
     func test_within() throws {
         #expect(within((1, 1), in: (2, 2)) ?? (-1, -1) == (1, 1))

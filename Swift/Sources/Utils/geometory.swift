@@ -86,6 +86,29 @@ public struct Pos: Comparable, Hashable, Sendable {
     }
 }
 
+extension Array where Element: Collection, Element.Index == Int {
+    /// allow `my2D[pos]`
+    public subscript(_ pos: Pos) -> Element.Element {
+        get {
+            return self[pos.y][pos.x]
+        }
+    }
+}
+// Use Pos as index for [[T]]
+// only on Arrays whose Element is a MutableCollection (e.g. another Array)
+// whose indices are Ints
+extension Array where Element: MutableCollection, Element.Index == Int {
+    /// allow `my2D[pos]`
+    public subscript(_ pos: Pos) -> Element.Element {
+        get {
+            return self[pos.y][pos.x]
+        }
+        set {
+            self[pos.y][pos.x] = newValue
+        }
+    }
+}
+
 public func within(_ me: (Int, Int), in size: (Int, Int)) -> (Int, Int)? {
     if 0 <= me.0 && me.0 < size.0 && 0 <= me.1 && me.1 < size.1 {
         me
