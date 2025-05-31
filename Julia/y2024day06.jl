@@ -1,54 +1,38 @@
-#!/usr/bin/env julia
+using AoC, AoC.Geometry, AoC.Dir
 
-function turn(dir::Vector{Int})::Vector{Int}
-    if dir == [-1, 0]
-        [0, 1]
-    elseif dir == [0, 1]
-        [1, 0]
-    elseif dir == [1, 0]
-        [0, -1]
-    elseif dir == [0, -1]
-        [-1, 0]
-    else
-        error()
-    end
-end
-
-function included(m::Matrix{T}, pos::Vector{Int})::Bool where {T}
-    all([1, 1] .<= pos .<= size(m))
-end
+const Cursor = NamedTuple{(:pos, :dir),Tuple{Dim2,Dim2}}
 
 function part1(m::Matrix{Char})::Int
-    # println(collect(Tuple(findfirst(==('^'), m))))
-    cursor = (pos=collect(Tuple(findfirst(==('^'), m))), dir=[-1, 0])
-    passed = fill(false, size(m))
-    passed[cursor.pos...] = true
-    while included(m, cursor.pos + cursor.dir)
+    boundary = Dim2(size(m)...)
+    cursor::Cursor = (pos=findfirst(==('^'), m), dir=Dir.U)
+    passed = Set([cursor.pos])
+    while within(cursor.pos + cursor.dir, boundary) !== nothing
         pos = cursor.pos + cursor.dir
         dir = cursor.dir
-        if m[pos...] == '#'
-            dir = turn(dir)
+        if m[pos] == '#'
+            dir = turn_right(dir)
             pos = cursor.pos + dir
-            @assert m[pos...] != '#'
+            @assert m[pos] != '#'
         end
         cursor = (pos=pos, dir=dir)
-        passed[pos...] = true
+        push!(passed, pos)
     end
-    sum(passed)
+    length(passed)
 end
 
-function is_loop(m::Matrix{Char}, cursor::NamedTuple, passed::Set)::Bool
+function is_loop(m::Matrix{Char}, cursor::Cursor, passed::Set)::Bool
     m = copy(m)
-    m[(cursor.pos + cursor.dir)...] = '#'
+    boundary = Dim2(size(m)...)
+    m[cursor.pos+cursor.dir] = '#'
     passed = copy(passed)
-    while included(m, cursor.pos + cursor.dir)
+    while within(cursor.pos + cursor.dir, boundary) !== nothing
         pos = cursor.pos + cursor.dir
         dir = cursor.dir
-        if m[pos...] == '#'
-            dir = turn(dir)
+        if m[pos] == '#'
+            dir = turn_right(dir)
             pos = cursor.pos + dir
-            if m[pos...] == '#'
-                dir = turn(dir)
+            if m[pos] == '#'
+                dir = turn_right(dir)
                 pos = cursor.pos + dir
             end
         end
@@ -63,16 +47,17 @@ function is_loop(m::Matrix{Char}, cursor::NamedTuple, passed::Set)::Bool
 end
 
 function part2(m::Matrix{Char})::Int
+    boundary = Dim2(size(m)...)
     loops = Set()
-    cursor = (pos=collect(Tuple(findfirst(==('^'), m))), dir=[-1, 0])
-    passed = Set([cursor])
-    while included(m, cursor.pos + cursor.dir)
+    cursor::Cursor = (pos=findfirst(==('^'), m), dir=Dir.U)
+    passed::Set{Cursor} = Set([cursor])
+    while within(cursor.pos + cursor.dir, boundary) !== nothing
         pos = cursor.pos + cursor.dir
         dir = cursor.dir
-        if m[pos...] == '#'
-            dir = turn(dir)
+        if m[pos] == '#'
+            dir = turn_right(dir)
             pos = cursor.pos + dir
-            @assert m[pos...] != '#'
+            @assert m[pos] != '#'
             cursor = (pos=cursor.pos, dir=dir)
         end
         if all(c -> c.pos != pos, passed) && is_loop(m, cursor, passed)
@@ -84,14 +69,12 @@ function part2(m::Matrix{Char})::Int
     length(loops)
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
-    open("../data/2024/input-day06.txt", "r") do file
+function run()::ANS
+    open(datafile(2024, 6), "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m = hcat(map(collect, lines)...) |> permutedims |> Matrix
         (part1(m), part2(m))
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

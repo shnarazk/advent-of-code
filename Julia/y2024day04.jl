@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+using AoC
 
 function part1(m::Matrix{Char})::Int
     count(map(
@@ -25,14 +25,12 @@ function part2(m::Matrix{Char})::Int
         [(i, j) for i in 2:size(m, 1)-1 for j in 2:size(m, 2)-1])
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
-    open("../data/2024/input-day04.txt", "r") do file
+function run()::ANS
+    open(datafile(2024, 4), "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m = hcat(map(collect, lines)...) |> permutedims |> Matrix
         (part1(m), part2(m))
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

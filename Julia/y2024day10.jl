@@ -1,7 +1,4 @@
-#!/usr/bin/env julia
-#
-include("AoCUtils.jl")
-include("Geometory.jl")
+using AoC, AoC.Geometry
 
 function part1_aux(m::Matrix{Int}, start::Dim2)::Int
     boundary = Dim2(size(m))
@@ -53,7 +50,7 @@ function part2(m::Matrix{Int}, starts::Vector{Dim2})::Int
     map(s -> part2_aux(m, s), starts) |> sum
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
+function run()::ANS
     open(datafile(2024, 10), "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m::Matrix{Int} = hcat(map(collect, lines)...) |>
@@ -61,13 +58,10 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
                          Matrix |>
                          m -> map(e -> e - '0', m)
         starts = filter(p -> m[p] == 0, collect(CartesianIndices(m)))
-        # println("starts: $(length(starts))")
         sum1 = part1(m, starts)
         sum2 = part2(m, starts)
         (sum1, sum2)
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

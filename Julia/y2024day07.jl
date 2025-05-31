@@ -1,9 +1,4 @@
-#!/usr/bin/env julia
-# using Pkg
-# Pkg.add("ParserCombinator")
-using ParserCombinator
-include("AoCParser.jl")
-using .AoCParser
+using AoC, AoC.Parser, ParserCombinator
 
 🔎equation = 🔎int + E": " + Repeat(🔎int + E" ", backtrack=false) + 🔎int |> s -> (s[1], Int.(s[2:end]))
 
@@ -28,11 +23,7 @@ function part1(eq::Tuple)::Int
             values = tmp
         end
     end
-    if ans in values
-        ans
-    else
-        0
-    end
+    ans in values ? ans : 0
 end
 
 function part2(eq::Tuple)::Int
@@ -61,15 +52,11 @@ function part2(eq::Tuple)::Int
             values = tmp
         end
     end
-    if ans in values
-        ans
-    else
-        0
-    end
+    ans in values ? ans : 0
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
-    open("../data/2024/input-day07.txt", "r") do file
+function run()::ANS
+    open(datafile(2024, 7), "r") do file
         equations = String.(eachline(file)) |>
                     s -> filter(!isempty, s) |>
                          s -> map(t -> parse_one(t, 🔎equation)[1], s)
@@ -77,6 +64,4 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

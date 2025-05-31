@@ -1,0 +1,25 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.11.5"
+manifest_format = "2.0"
+project_hash = "b684bed510eddcea1cfb1ee1710a11009f64f811"
+
+[[deps.AutoHashEquals]]
+git-tree-sha1 = "4ec6b48702dacc5994a835c1189831755e4e76ef"
+uuid = "15f4f7f2-30c1-5605-9d31-71845cf9641f"
+version = "2.2.0"
+
+[[deps.ParserCombinator]]
+deps = ["AutoHashEquals", "Printf"]
+git-tree-sha1 = "5f2ab6899c7a056d475194d03393299e61a0425c"
+uuid = "fae87a5f-d1ad-5cf0-8f61-c941e1580b46"
+version = "2.2.1"
+
+[[deps.Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+version = "1.11.0"
+
+[[deps.Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+version = "1.11.0"
