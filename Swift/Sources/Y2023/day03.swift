@@ -5,11 +5,11 @@
 import Utils
 
 private struct Num {
-    let start_pos: Pos
-    let end_pos: Pos
+    let beg: Pos
+    let end: Pos
     let val: Int
     func adjacent(_ p: Pos) -> Bool {
-        start_pos.y - 1 <= p.y && p.y <= end_pos.y + 1 && start_pos.x - 1 <= p.x && p.x <= end_pos.x + 1
+        beg.y - 1 <= p.y && p.y <= end.y + 1 && beg.x - 1 <= p.x && p.x <= end.x + 1
     }
 }
 
@@ -21,18 +21,16 @@ private func part1(_ nums: [Num], _ symbols: [Pos]) -> Int {
 private func part2(_ nums: [Num], _ symbols: [Pos]) -> Int {
     symbols.map { sym in
         let ns = nums.filter { $0.adjacent(sym) }
-        return ns.count == 2 ? ns.map { $0.val } .reduce(1) { $0 * $1 } : 0
+        return ns.count == 2 ? ns.map { $0.val }.reduce(1) { $0 * $1 } : 0
     }
     .reduce(0, +)
 }
 
 public func day03(_ data: String) {
-    let grid: [[Character]] = Array(
-        data.split(separator: "\n", omittingEmptySubsequences: true)
-    )
-    .map {
-        Array($0).map { $0 as Character }  //  /* Int(($0 as Character).asciiValue! - Character("0").asciiValue!) */ }
-    }
+    let grid: [[Character]] = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
+        .map {
+            Array($0).map { $0 as Character }
+        }
     var symbols: [Pos] = []
     var nums: [Num] = []
 
@@ -52,14 +50,14 @@ public func day03(_ data: String) {
                     symbols.append(Pos(y: i, x: j))
                 }
                 if let n = picked {
-                    nums.append(Num(start_pos: pos!, end_pos: Pos(y: pos!.y, x: j-1), val: n))
+                    nums.append(Num(beg: pos!, end: Pos(y: pos!.y, x: j - 1), val: n))
                     picked = nil
                     pos = nil
                 }
             }
         }
         if let n = picked {
-            nums.append(Num(start_pos: pos!, end_pos: Pos(y: pos!.y, x: l.count - 1), val: n))
+            nums.append(Num(beg: pos!, end: Pos(y: pos!.y, x: l.count - 1), val: n))
         }
     }
     let sum1 = part1(nums, symbols)
