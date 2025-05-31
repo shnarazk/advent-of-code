@@ -1,5 +1,5 @@
 using Test
-using AoC
+using AoC, AoC.Geometry
 
 @testset "(y2024day08) within function tests" begin
     # standard size

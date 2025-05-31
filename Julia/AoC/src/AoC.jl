@@ -1,12 +1,9 @@
 module AoC
 import ParserCombinator
 include("Parser.jl")
-include("Geometory.jl")
-# using .Geometory
+include("Geometry.jl")
 
 const ANS=NamedTuple{(:part1, :part2), Tuple{Int, Int}}
-
-# greet() = print("Hello World!!")
 
 function datafile(year, day)::String
     basedir = ENV["AOC_DIR"]
@@ -36,6 +33,7 @@ function parallel_map(f, A::AbstractVector)
 end
 
 export ANS, datafile, parallel_map
-export Parser # 🔎int, 🔎float, 🔎spaces, 🔎newline, 🔎ints
-export Geometory #, within, neighbors4
-end # module AoC
+export Parser
+export Geometry
+
+end

@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-using AoC, AoC.Geometory
+using AoC, AoC.Geometry
 
 function part1_aux(m::Matrix{Int}, start::Dim2)::Int
     boundary = Dim2(size(m))

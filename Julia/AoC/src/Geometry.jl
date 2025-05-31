@@ -1,4 +1,4 @@
-module Geometory
+module Geometry
 
 export Dim2, Dim2_zero, Dim2_unit
 export Dim2_up, Dim2_right, Dim2_down, Dim2_left
@@ -18,11 +18,7 @@ function within(pos::Dim2, boundary::Dim2)Union{Dim2,Nothing}
     # Dim2_unit <= pos <= boundary
     # Even this does not.
     # if all(collect(Tuple(Dim2_unit)) .<= collect(Tuple(pos)) .<= collect(Tuple(boundary)))
-    if all(a -> Dim2_unit[a] <= pos[a] <= boundary[a], 1:2)
-        pos
-    else
-        nothing
-    end
+    all(a -> Dim2_unit[a] <= pos[a] <= boundary[a], 1:2) ? pos : nothing
 end
 
 # println([Dim2_zero .<= Dim2(1, 1),
