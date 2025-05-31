@@ -19,4 +19,4 @@ function run()::ANS
     end
 end
 
-@time r = println(run())
+@time println(run())
