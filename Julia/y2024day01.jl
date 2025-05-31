@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC, AoC.Parser, ParserCombinator
 
 🔎line = 🔎int + 🔎spaces + 🔎int
@@ -17,7 +15,7 @@ function run()::ANS
         sort!(data2)
         part1 = map(((a, b),) -> abs(a - b), zip(data1, data2)) |> sum
         part2 = map(x -> x * sum(data2 .== x), data1) |> sum
-        (part1 = part1, part2 = part2)
+        (part1=part1, part2=part2)
     end
 end
 

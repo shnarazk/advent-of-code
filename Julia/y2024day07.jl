@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC, AoC.Parser, ParserCombinator
 
 🔎equation = 🔎int + E": " + Repeat(🔎int + E" ", backtrack=false) + 🔎int |> s -> (s[1], Int.(s[2:end]))

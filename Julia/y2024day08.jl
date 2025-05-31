@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC, AoC.Geometry
 
 function part1(s::Dim2, antennas::Dict{Char,Vector{Dim2}})::Int

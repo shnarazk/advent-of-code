@@ -2,8 +2,9 @@ module AoC
 import ParserCombinator
 include("Parser.jl")
 include("Geometry.jl")
+include("Dir.jl")
 
-const ANS=NamedTuple{(:part1, :part2), Tuple{Int, Int}}
+const ANS = NamedTuple{(:part1, :part2),Tuple{Int,Int}}
 
 function datafile(year, day)::String
     basedir = ENV["AOC_DIR"]
@@ -35,5 +36,6 @@ end
 export ANS, datafile, parallel_map
 export Parser
 export Geometry
+export Dir
 
 end

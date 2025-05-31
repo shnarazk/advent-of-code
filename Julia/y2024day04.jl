@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC
 
 function part1(m::Matrix{Char})::Int

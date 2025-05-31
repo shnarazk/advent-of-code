@@ -1,8 +1,6 @@
-#!/usr/bin/env julia
-
 using AoC
 
-const Record = NamedTuple{(:id,:pos,:len),Tuple{Int,Int,Int}}
+const Record = NamedTuple{(:id, :pos, :len),Tuple{Int,Int,Int}}
 
 function decode(v::Vector{Int})::Vector{Record}
     at_disk = true
@@ -25,7 +23,7 @@ end
 function part1(init::Vector{Record})::Int
     mem = copy(init)
     points::Int = 0
-    for i in 0:(init[end].pos + init[end].len)
+    for i in 0:(init[end].pos+init[end].len)
         if i < mem[1].pos
             points += i * mem[end].id
             if mem[end].len == 1
@@ -34,7 +32,7 @@ function part1(init::Vector{Record})::Int
                     break
                 end
             else
-                mem[end] = (id = mem[end].id, pos = mem[end].pos, len = mem[end].len - 1)
+                mem[end] = (id=mem[end].id, pos=mem[end].pos, len=mem[end].len - 1)
             end
         else
             points += i * mem[1].id
@@ -52,15 +50,15 @@ end
 function part2(init::Vector{Record})::Int
     mem = copy(init)
     for r in reverse(init[2:end])
-        for i in 1:length(mem) - 1
-            gap = mem[i + 1].pos - (mem[i].pos + mem[i].len)
+        for i in 1:length(mem)-1
+            gap = mem[i+1].pos - (mem[i].pos + mem[i].len)
             if r.len <= gap
                 pos = mem[i].pos + mem[i].len
                 if r.pos < pos
                     continue
                 end
                 mem = filter(e -> e.id != r.id, mem)
-                insert!(mem, i + 1, (id = r.id, pos, len = r.len))
+                insert!(mem, i + 1, (id=r.id, pos, len=r.len))
                 break
             end
         end
@@ -69,7 +67,7 @@ function part2(init::Vector{Record})::Int
     p = 0
     for r in mem
         s = r.pos
-        for i in 0:r.len - 1
+        for i in 0:r.len-1
             p += (s + i) * r.id
         end
     end
@@ -79,10 +77,10 @@ end
 function run()::ANS
     open(datafile(2024, 9), "r") do file
         mem::Vector{Record} = read(file, String) |>
-            strip |>
-            collect |>
-            s -> map(c -> c - '0', s) |>
-            decode
+                              strip |>
+                              collect |>
+                              s -> map(c -> c - '0', s) |>
+                                   decode
         (part1(mem), part2(mem))
     end
 end

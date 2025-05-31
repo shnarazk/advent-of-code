@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC, AoC.Parser, ParserCombinator
 
 🔎target = Alt(

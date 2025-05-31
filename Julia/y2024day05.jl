@@ -1,12 +1,10 @@
-#!/usr/bin/env julia
-
 using AoC, AoC.Parser, ParserCombinator
 
 🔎rules = Repeat(🔎int + E"|" + 🔎int + 🔎newline |>
-        s -> (Int(s[1]), Int(s[2])), backtrack = false) |>
-    s -> convert.(Tuple{Int,Int}, s)
-🔎pages = Repeat(🔎int + E",", backtrack = false) + 🔎int |> s -> Int.(s)
-🔎updates = Repeat(🔎pages + 🔎newline, backtrack = false) + 🔎pages |> s -> s
+                s -> (Int(s[1]), Int(s[2])), backtrack=false) |>
+         s -> convert.(Tuple{Int,Int}, s)
+🔎pages = Repeat(🔎int + E",", backtrack=false) + 🔎int |> s -> Int.(s)
+🔎updates = Repeat(🔎pages + 🔎newline, backtrack=false) + 🔎pages |> s -> s
 🔎data = 🔎rules + 🔎newline + 🔎updates |> s -> (s[1], s[2])
 
 function total_order(m::Vector{Tuple{Int,Int}}, range::Vector{Int})::Vector{Int}
