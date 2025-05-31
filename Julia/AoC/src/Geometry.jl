@@ -13,7 +13,7 @@ const Dim2_right::Dim2 = CartesianIndex(0, 1)
 const Dim2_down::Dim2 = CartesianIndex(1, 0)
 const Dim2_left::Dim2 = CartesianIndex(0, -1)
 
-function within(pos::Dim2, boundary::Dim2)Union{Dim2,Nothing}
+function within(pos::Dim2, boundary::Dim2)::Union{Dim2,Nothing}
     # The following does not work well due to axis oredr
     # Dim2_unit <= pos <= boundary
     # Even this does not.
