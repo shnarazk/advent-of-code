@@ -1,14 +1,11 @@
 #!/usr/bin/env julia
-# using Pkg
-# Pkg.add("ParserCombinator")
-using ParserCombinator
-include("AoCParser.jl")
-using .AoCParser
+
+using AoC, AoC.Parser, ParserCombinator
 
 🔎line = 🔎int + 🔎spaces + 🔎int
 
-function run()::NamedTuple{(:part1, :part2), Tuple{Int, Int}}
-    open("../data/2024/input-day01.txt", "r") do file
+function run()::ANS
+    open(datafile(2024, 1), "r") do file
         data1 = []
         data2 = []
         for line in eachline(file)
@@ -24,6 +21,4 @@ function run()::NamedTuple{(:part1, :part2), Tuple{Int, Int}}
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

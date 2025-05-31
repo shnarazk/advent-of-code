@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-#
-include("AoCUtils.jl")
+
+using AoC
 
 const Record = NamedTuple{(:id,:pos,:len),Tuple{Int,Int,Int}}
 
@@ -76,7 +76,7 @@ function part2(init::Vector{Record})::Int
     p
 end
 
-function run()::NamedTuple{(:part1,:part2),Tuple{Int,Int}}
+function run()::ANS
     open(datafile(2024, 9), "r") do file
         mem::Vector{Record} = read(file, String) |>
             strip |>
@@ -87,6 +87,4 @@ function run()::NamedTuple{(:part1,:part2),Tuple{Int,Int}}
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

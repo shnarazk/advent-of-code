@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
-using ParserCombinator
-include("AoCParser.jl")
-using .AoCParser
+
+using AoC, AoC.Parser, ParserCombinator
 
 🔎target = Alt(
     Drop(E"mul(") + 🔎int + Drop(E",") + 🔎int + Drop(E")") |> x -> x[1] * x[2],
@@ -37,13 +36,11 @@ function check2(l::String)::Int
     sum
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
-    open("../data/2024/input-day03.txt", "r") do file
+function run()::ANS
+    open(datafile(2024, 3), "r") do file
         mem = read(file, String)
         (part1=check1(mem), part2=check2(mem))
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

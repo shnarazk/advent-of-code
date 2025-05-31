@@ -1,4 +1,8 @@
-# export Dim2, Dir, Up, Right, Down, Left, pos, turn
+module Geometory
+
+export Dim2, Dim2_zero, Dim2_unit
+export Dim2_up, Dim2_right, Dim2_down, Dim2_left
+export within, turn_right, neighbors4
 
 const Dim2 = CartesianIndex{2}
 
@@ -59,3 +63,4 @@ end
 # println("the problem is $xx")
 # error()
 # end
+end

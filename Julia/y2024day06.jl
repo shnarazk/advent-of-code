@@ -1,5 +1,7 @@
 #!/usr/bin/env julia
 
+using AoC
+
 function turn(dir::Vector{Int})::Vector{Int}
     if dir == [-1, 0]
         [0, 1]
@@ -84,7 +86,7 @@ function part2(m::Matrix{Char})::Int
     length(loops)
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
+function run()::ANS
     open("../data/2024/input-day06.txt", "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m = hcat(map(collect, lines)...) |> permutedims |> Matrix
@@ -92,6 +94,4 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())

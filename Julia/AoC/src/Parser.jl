@@ -1,4 +1,4 @@
-module AoCParser
+module Parser
 
 using ParserCombinator
 export 🔎int, 🔎float, 🔎spaces, 🔎newline, 🔎ints

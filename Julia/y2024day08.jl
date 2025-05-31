@@ -1,15 +1,11 @@
 #!/usr/bin/env julia
-#
-include("AoCUtils.jl")
+
+using AoC
 
 const D2 = CartesianIndex{2}
 
 function within(s::D2, p::D2)::Union{D2,Nothing}
-    if all((1, 1) .<= Tuple(p) .<= Tuple(s))
-        p
-    else
-        nothing
-    end
+    all((1, 1) .<= Tuple(p) .<= Tuple(s)) ? p : nothing
 end
 
 function part1(s::D2, antennas::Dict{Char,Vector{D2}})::Int
@@ -56,7 +52,7 @@ function part2(s::D2, antennas::Dict{Char,Vector{D2}})::Int
     length(set)
 end
 
-function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
+function run()::ANS
     open(datafile(2024, 8), "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
         m = hcat(map(collect, lines)...) |> permutedims |> Matrix
@@ -73,6 +69,4 @@ function run()::NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     end
 end
 
-@time r = run()
-
-println(r)
+@time println(run())
