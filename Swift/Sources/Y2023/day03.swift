@@ -4,9 +4,26 @@
 //
 import Utils
 
-struct Num {
+private struct Num {
     let start_pos: Pos
+    let end_pos: Pos
     let val: Int
+    func adjacent(_ p: Pos) -> Bool {
+        start_pos.y - 1 <= p.y && p.y <= end_pos.y + 1 && start_pos.x - 1 <= p.x && p.x <= end_pos.x + 1
+    }
+}
+
+private func part1(_ nums: [Num], _ symbols: [Pos]) -> Int {
+    nums.map { num in !symbols.allSatisfy { sym in !num.adjacent(sym) } ? num.val : 0 }
+        .reduce(0, +)
+}
+
+private func part2(_ nums: [Num], _ symbols: [Pos]) -> Int {
+    symbols.map { sym in
+        let ns = nums.filter { $0.adjacent(sym) }
+        return ns.count == 2 ? ns.map { $0.val } .reduce(1) { $0 * $1 } : 0
+    }
+    .reduce(0, +)
 }
 
 public func day03(_ data: String) {
@@ -35,21 +52,18 @@ public func day03(_ data: String) {
                     symbols.append(Pos(y: i, x: j))
                 }
                 if let n = picked {
-                    nums.append(Num(start_pos: pos!, val: n))
+                    nums.append(Num(start_pos: pos!, end_pos: Pos(y: pos!.y, x: j-1), val: n))
                     picked = nil
                     pos = nil
                 }
             }
         }
         if let n = picked {
-            nums.append(Num(start_pos: pos!, val: n))
+            nums.append(Num(start_pos: pos!, end_pos: Pos(y: pos!.y, x: l.count - 1), val: n))
         }
     }
-    print(grid)
-    print(nums)
-    print(symbols)
-    let sum1 = 0  // part1(size, grid, starts)
-    let sum2 = 0  // part2(size, grid, starts)
+    let sum1 = part1(nums, symbols)
+    let sum2 = part2(nums, symbols)
     print("Part1: \(sum1)")
     print("Part2: \(sum2)")
 }
