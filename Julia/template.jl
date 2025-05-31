@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 using AoC
 
 function run()::ANS
@@ -7,9 +5,9 @@ function run()::ANS
         # lines = String.(eachline(file)) |>
         #     s -> filter(!isempty, s) |>
         #     s -> map(t -> Int.(parse_one(t, 🔎ints)), s)
-        part1 = 0
-        part2 = 0
-        (part1, part2)
+        sum1 = 0
+        sum2 = 0
+        (part1=sum1, part2=sum2)
     end
 end
 
