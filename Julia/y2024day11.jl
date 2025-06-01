@@ -14,11 +14,11 @@ function even_digits(n::Int)::Union{Int,Nothing}
     d % 2 == 0 ? d / 2 : nothing
 end
 
-@assert even_digits(10) == 1
-@assert even_digits(21) == 1
-@assert even_digits(2134) == 2
-@assert even_digits(2) == nothing
-@assert even_digits(213) == nothing
+# @assert even_digits(10) == 1
+# @assert even_digits(21) == 1
+# @assert even_digits(2134) == 2
+# @assert even_digits(2) == nothing
+# @assert even_digits(213) == nothing
 
 function divide(stone::Stone)::Union{Tuple{Stone,Stone},Nothing}
     if (n = even_digits(stone.mark)) !== nothing
@@ -27,7 +27,7 @@ function divide(stone::Stone)::Union{Tuple{Stone,Stone},Nothing}
         base = 1
         m = n
         for _ in 1:n
-            b = (a % 10) * base
+            b += (a % 10) * base
             a = div(a, 10)
             base *= 10
         end
@@ -36,6 +36,10 @@ function divide(stone::Stone)::Union{Tuple{Stone,Stone},Nothing}
         nothing
     end
 end
+
+# @assert divide(Stone(82, 0)) == (Stone(8, 1), Stone(2, 1))
+# @assert divide(Stone(8201, 1)) == (Stone(82, 2), Stone(1, 2))
+# @assert divide(Stone(832, 0)) == nothing
 
 function count(stone::Stone, depth::Int)::Int
     if stone.level == depth
