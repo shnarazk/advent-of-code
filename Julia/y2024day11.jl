@@ -41,29 +41,39 @@ end
 # @assert divide(Stone(8201, 1)) == (Stone(82, 2), Stone(1, 2))
 # @assert divide(Stone(832, 0)) == nothing
 
-function count(stone::Stone, depth::Int)::Int
+function count(stone::Stone, depth::Int, memo::Dict{Stone, Int})::Int
+    ret = 0
     if stone.level == depth
-        1
+        return 1
+    elseif (cached = get(memo, stone, nothing)) !== nothing
+        return cached
     elseif stone.mark == 0
-        count(Stone(1, stone.level + 1), depth)
+        ret = count(Stone(1, stone.level + 1), depth, memo)
     elseif (p = divide(stone)) !== nothing
-        count(p[1], depth) + count(p[2], depth)
+        ret = count(p[1], depth, memo) + count(p[2], depth, memo)
     else
-        count(Stone(stone.mark * 2024, stone.level + 1), depth)
+        ret =  count(Stone(stone.mark * 2024, stone.level + 1), depth, memo)
     end
+    memo[stone] = ret
+    ret
 end
 
 function part1(data::Vector{Stone})::Int
-    map(s -> count(s, 25), data) |> sum
+    memo::Dict{Stone,Int} = Dict()
+    map(s -> count(s, 25, memo), data) |> sum
+end
+
+function part2(data::Vector{Stone})::Int
+    memo::Dict{Stone,Int} = Dict()
+    map(s -> count(s, 75, memo), data) |> sum
 end
 
 function run()::ANS
     open(datafile(2024, 11), "r") do file
         data = read(file, String) |> strip |> s -> Int.(parse_one(s, 🔎ints)) |>
             s -> map(n -> Stone(n, 0), s)
-        println(data)
         sum1 = part1(data)
-        sum2 = 0
+        sum2 = part2(data)
         (part1=sum1, part2=sum2)
     end
 end
