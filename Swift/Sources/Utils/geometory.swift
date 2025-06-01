@@ -77,12 +77,7 @@ public struct Pos: Comparable, Hashable, Sendable {
         return nil
     }
     public func neighbors4(bound: Pos) -> [Pos] {
-        [
-            self + Pos(y: -1, x: 0),
-            self + Pos(y: 0, x: 1),
-            self + Pos(y: 1, x: 0),
-            self + Pos(y: 0, x: -1),
-        ].compactMap { $0.within(bound) }
+        [self + .north, self + .east, self + .south, self + .west].compactMap { $0.within(bound) }
     }
 }
 
