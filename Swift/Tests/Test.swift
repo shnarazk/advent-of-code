@@ -80,15 +80,11 @@ struct UtilsTests {
         #expect(within((-1, 1), in: (2, 2)) == nil)
         #expect(within((1, 8), in: (2, 2)) == nil)
     }
-}
-
-struct Y2024Tests {
 
     @Test("append_digits function (y2024 day07)")
-    func test1() throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        #expect(Y2024.append_digits(0, 12) == 12)
-        #expect(Y2024.append_digits(10, 12) == 1012)
-        #expect(Y2024.append_digits(120, 34) == 12034)
+    func test_append_digits() throws {
+        #expect(append_digits(0, 12) == 12)
+        #expect(append_digits(10, 12) == 1012)
+        #expect(append_digits(120, 34) == 12034)
     }
 }

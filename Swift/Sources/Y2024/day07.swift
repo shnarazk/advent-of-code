@@ -3,6 +3,7 @@
 //  aoc
 import Foundation
 import Parsing
+import Utils
 
 private func part1(_ line: (Int, [Int])) -> Int {
     var values: Set<Int> = Set()
@@ -29,16 +30,6 @@ private func part1(_ line: (Int, [Int])) -> Int {
     } else {
         return 0
     }
-}
-
-public func append_digits(_ a: Int, _ b: Int) -> Int {
-    func step(_ n: Int, _ x: Int) -> Int {
-        if x < 10 {
-            return n * 10 + b
-        }
-        return step(n * 10, x / 10)
-    }
-    return step(a, b)
 }
 
 private func part2(_ line: (Int, [Int])) -> Int {
