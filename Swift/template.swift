@@ -1,16 +1,21 @@
 import Parsing
 
-public func day(_ data: String) {
-    let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
-    func part1(_ lines: [String.SubSequence]) {
-        // var lines = lines
-        print("Part1: \(1)")
-    }
+private func part1() -> Int {
+    0
+}
 
-    func part2(_ lines: [String.SubSequence]) {
-        // var lines = lines
-        print("Part2: \(2)")
+private func part2() -> Int {
+    0
+}
+
+public func day(_ data: String) {
+    do {
+        let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
+        let sum1 = part1(cards)
+        let sum2 = part2(cards)
+        print("Part 1: \(sum1)")
+        print("Part 2: \(sum2)")
+    } catch {
+        print(error)
     }
-    part1(lines)
-    part2(lines)
 }
