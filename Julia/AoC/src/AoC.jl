@@ -3,6 +3,7 @@ import ParserCombinator
 include("Parser.jl")
 include("Geometry.jl")
 include("Dir.jl")
+include("Math.jl")
 
 const ANS = NamedTuple{(:part1, :part2),Tuple{Int,Int}}
 
@@ -37,5 +38,6 @@ export ANS, datafile, parallel_map
 export Parser
 export Geometry
 export Dir
+export Math
 
 end
