@@ -79,16 +79,16 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--year 2024"
+            argument = "--year 2023"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "11"
+            argument = "7"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "0"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
