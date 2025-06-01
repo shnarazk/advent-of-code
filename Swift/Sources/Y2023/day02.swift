@@ -5,6 +5,7 @@
 
 import Parsing
 
+@DebugDescription
 private struct Bag: Conversion {
     func apply(_ input: (String, Int)) throws -> Bag {
         Bag(color: input.0, amount: input.1)
@@ -17,6 +18,9 @@ private struct Bag: Conversion {
 
     var color: String
     var amount: Int
+    var debugDescription: String {
+        "(\(self.amount) \(self.color))"
+    }
 }
 
 private func part1(_ data: [(Int, [[Bag]])]) -> Int {
