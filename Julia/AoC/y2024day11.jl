@@ -1,5 +1,4 @@
 using AoC, AoC.Parser, ParserCombinator
-using Debugger
 
 struct Stone
     mark::Int
@@ -73,7 +72,6 @@ function run()::ANS
     open(datafile(2024, 11), "r") do file
         data = read(file, String) |> strip |> s -> Int.(parse_one(s, 🔎ints)) |>
             s -> map(n -> Stone(n, 0), s)
-        @bp
         sum1 = part1(data)
         sum2 = part2(data)
         (part1=sum1, part2=sum2)

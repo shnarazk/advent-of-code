@@ -4,11 +4,9 @@ authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 version = "0.1.0"
 
 [deps]
-Debugger = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
 ParserCombinator = "fae87a5f-d1ad-5cf0-8f61-c941e1580b46"
 
 [compat]
-Debugger = "0.7.12"
 ParserCombinator = "2.2.1"
 
 [extras]
