@@ -8,19 +8,19 @@ name = "batteries"
 # scope = "leanprover-community"
 git = "git@github.com:shnarazk/batteries.git"
 rev = "main"
-# rev = "v4.20.0-rc5"
+# rev = "v4.20.0"
 
 [[require]]
 name = "Cli"
 scope = "leanprover"
-# version = "git#e4d23db1b205e04589230eedbfe1439693dd3b9c"
 git = "git@github.com:leanprover/lean4-cli.git"
 rev = "main"
+# version = "git#e4d23db1b205e04589230eedbfe1439693dd3b9c"
 
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-# rev = "v4.20.0"
+rev = "v4.20.0"
 
 [[lean_lib]]
 name = "AoC"
