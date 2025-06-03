@@ -1,4 +1,5 @@
 /// implementation of 2D point as struct
+@DebugDescription///
 public struct Pos: Comparable, Hashable, Sendable {
     public let y: Int
     public let x: Int
@@ -6,6 +7,9 @@ public struct Pos: Comparable, Hashable, Sendable {
     public init(y: Int, x: Int) {
         self.y = y
         self.x = x
+    }
+    var debugDescription: String {
+        "(\(x), \(y))"
     }
     public static var zero: Pos {
         ._zero
