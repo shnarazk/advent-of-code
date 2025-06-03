@@ -9,9 +9,8 @@ private struct Rule {
     var len: Int
     var mapTo: Int
     var to: Int {
-        from + len
+        from + len - 1
     }
-
 }
 
 @DebugDescription
@@ -23,16 +22,19 @@ private struct Segment {
     var debugDescription: String {
         "(from: \(from),len: \(len))"
     }
-
     /// closed end
     var to: Int {
         from + len - 1
     }
     init(from: Int, len: Int) {
+        assert(0 <= from)
+        assert(0 < len)
         self.from = from
         self.len = len
     }
     init(from: Int, to: Int) {
+        assert(0 <= from)
+        assert(to >= from)
         self.from = from
         self.len = to - from + 1
     }
@@ -46,7 +48,8 @@ private struct Segment {
         }
         //        [.self.]
         //  [..rule..]
-        if rule.from < self.from && self.from <= rule.to && rule.to < self.to {
+        if rule.from <= self.from && self.from <= rule.to && rule.to < self.to {
+            assert(self.len == Segment(from: self.from, to: rule.to).len + Segment(from: rule.to + 1, to: self.to).len)
             return (
                 [Segment(from: self.from, to: rule.to)],
                 [Segment(from: rule.to + 1, to: self.to)]
@@ -54,12 +57,17 @@ private struct Segment {
         }
         //        [.self.]
         //   [....rule.....]
-        if rule.from < self.from && self.to <= rule.to {
+        if rule.from <= self.from && self.to <= rule.to {
             return ([self], [])
         }
         //        [.self.]
         //         [rule]
-        if self.from <= rule.from && rule.to < self.to {
+        if self.from < rule.from && rule.to < self.to {
+            assert(
+                self.len == Segment(from: rule.from, to: rule.to).len
+                + Segment(from: self.from, to: rule.from - 1).len
+                + Segment(from: rule.to + 1, to: self.to).len
+            )
             return (
                 [Segment(from: rule.from, to: rule.to)],
                 [
@@ -70,7 +78,8 @@ private struct Segment {
         }
         //        [.self.]
         //         [..rule..]
-        if self.from <= rule.from && self.to <= rule.to {
+        if self.from < rule.from && rule.from <= self.to && self.to <= rule.to {
+            assert(self.len == Segment(from: rule.from, to: self.to).len + Segment(from: self.from, to: rule.from - 1).len)
             return (
                 [Segment(from: rule.from, to: self.to)],
                 [Segment(from: self.from, to: rule.from - 1)]
@@ -83,18 +92,8 @@ private struct Segment {
         }
         fatalError()
     }
-    func divide(at: Int) -> [Segment]? {
-        if from < at && at < from + len {
-            [
-                Segment(from: self.from, len: at - self.from),
-                Segment(from: at, len: self.len - at),
-            ]
-        } else {
-            nil
-        }
-    }
     func shift(_ rule: Rule) -> Segment {
-        Segment(from: self.from + (rule.to - rule.from), len: self.len)
+        Segment(from: self.from + (rule.mapTo - rule.from), len: self.len)
     }
 }
 
@@ -151,7 +150,6 @@ public func day05(_ data: String) {
         " "
         Int.parser()
     }.map { Rule(from: $1, len: $2, mapTo: $0) }
-
     let seeds_parser: some Parser<Substring, [Int]> = Parse {
         "seeds: "
         ints
