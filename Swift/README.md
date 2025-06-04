@@ -11,7 +11,7 @@ sequenceDiagram
     participant S as AoC Solver
   end
     participant D as SwiftData
-    participant V as SwiftUI + Chart
+    participant V as SwiftUI + Charts
 
   S->>P: read
   S->>D: serialize
