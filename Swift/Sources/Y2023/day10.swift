@@ -4,6 +4,9 @@
 //
 import Parsing
 import Utils
+import SwiftUI
+import Charts
+import SwiftData
 
 @DebugDescription
 private struct Cursor {
@@ -65,6 +68,17 @@ private func part1(_ grid: [[Character]]) -> (Int, [Pos]) {
     fatalError()
 }
 
+@Model
+class Y2023D10State {
+    @Attribute(.unique) var name: String
+    var val1: Double
+    init(name: String, val1: Double) {
+        self.name = name
+        self.val1 = val1
+    }
+}
+
+@MainActor
 private func part2(_ input: [[Character]], _ trace: [Pos]) -> Int {
     let height = input.count
     let width = input[0].count
@@ -97,9 +111,36 @@ private func part2(_ input: [[Character]], _ trace: [Pos]) -> Int {
         }
         print()
     }
+    do {
+        let container = try ModelContainer(for: Y2023D10State.self)
+        let context = container.mainContext
+        let state = Y2023D10State(name: "test", val1: Double(count) / Double(height * width))
+        context.insert(state)
+        try context.save()
+    }
+    catch {
+        print(error)
+    }
     return count
 }
 
+private func load(_ data: String) -> [[Character]] {
+    let parser: some Parser<Substring, [[Character]]> = Many {
+        Prefix {
+            $0 != "\n"
+        }.map { Array($0) }
+    } separator: {
+        "\n"
+    }
+    do {
+        return try parser.parse(data).filter { !$0.isEmpty }
+    } catch {
+        print(error)
+        fatalError()
+    }
+}
+
+@MainActor
 public func day10(_ data: String) {
     let parser: some Parser<Substring, [[Character]]> = Many {
         Prefix {
@@ -118,4 +159,33 @@ public func day10(_ data: String) {
     } catch {
         print(error)
     }
+}
+
+struct ContentView: View {
+    // @Environment(\.modelContext) private var context
+    @Query var data: [Y2023D10State]
+    var body: some View {
+        VStack {
+            Chart {
+                BarMark(
+                    x: .value("Shape Type", "loaded"),
+                    y: .value("Total Count", data[0].val1)
+                )
+                BarMark(
+                    x: .value("Shape Type", "something"),
+                    y: .value("Total Count", 1)
+                )
+            }
+            Image(systemName: "globe")
+                .imageScale(.large)
+                .foregroundStyle(.tint)
+            Text("Hello, world!")
+        }
+        .padding()
+    }
+}
+
+#Preview {
+    ContentView()
+        .modelContainer(for: [Y2023D10State.self])
 }

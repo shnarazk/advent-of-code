@@ -8,7 +8,7 @@ import Y2023
 import Y2024
 
 @main
-struct Aoc: ParsableCommand, Decodable {
+struct Aoc: @preconcurrency ParsableCommand, Decodable {
     @Option(help: "year (4 digits)")
     public var year: Int = 2024
 
@@ -30,7 +30,7 @@ struct Aoc: ParsableCommand, Decodable {
         }
     }
 
-    public func run() throws {
+    @MainActor public func run() throws {
         print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)
