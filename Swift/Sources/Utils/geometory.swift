@@ -14,6 +14,9 @@ public struct Pos: Comparable, Hashable, Sendable {
     public static var zero: Pos {
         ._zero
     }
+    public static var unit: Pos {
+        Pos(y: 1, x: 1)
+    }
     public static var north: Pos {
         Pos(y: -1, x: 0)
     }
@@ -64,6 +67,12 @@ public struct Pos: Comparable, Hashable, Sendable {
     }
     public static func - (lhs: Pos, rhs: Pos) -> Pos {
         Pos(y: lhs.y - rhs.y, x: lhs.x - rhs.x)
+    }
+    public static func * (lhs: Pos, rhs: Int) -> Pos {
+        Pos(y: lhs.y * rhs, x: lhs.x * rhs)
+    }
+    public static func / (lhs: Pos, rhs: Int) -> Pos {
+        Pos(y: lhs.y / rhs, x: lhs.x / rhs)
     }
     public static func < (lhs: Pos, rhs: Pos) -> Bool {
         lhs.y < rhs.y && lhs.x < rhs.x

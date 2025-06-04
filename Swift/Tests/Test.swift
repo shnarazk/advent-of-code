@@ -15,6 +15,8 @@ struct UtilsTests {
         #expect(Pos.zero + Pos.zero == Pos(y: 0, x: 0))
         #expect(Pos(y: 1, x: -1) + Pos(y: 2, x: 5) == Pos(y: 3, x: 4))
         #expect(Pos(y: 1, x: -1) - Pos(y: 2, x: 5) == Pos(y: -1, x: -6))
+        #expect(Pos(y: 3, x: -2) * -3 == Pos(y: -9, x: 6))
+        #expect(Pos(y: 8, x: 12) / 3 == Pos(y: 2, x: 4))
     }
 
     @Test("Pos boundary (Utils geometory)")

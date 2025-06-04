@@ -30,11 +30,14 @@ private struct Cursor {
         default: nil
         }
     }
-    static func goOn(start: Pos, dir: Pos, grid: [[Character]]) -> Cursor? {
+    static func goOn(start: Pos, dir: Pos, grid: [[Character]]) -> (Cursor, [Pos])? {
+        var trace: [Pos] = [start]
         var c = Cursor(pos: start + dir, dir: dir)
+        trace.append(c.pos)
         while let next = c.goForward(grid) {
+            trace.append(next.pos)
             if next.pos == start {
-                return next
+                return (next, trace)
             }
             c = next
         }
@@ -42,7 +45,7 @@ private struct Cursor {
     }
 }
 
-private func part1(_ grid: [[Character]]) -> Int {
+private func part1(_ grid: [[Character]]) -> (Int, [Pos]) {
     let start: Pos =
         if let (i, s) = grid.enumerated().first(
             where: {
@@ -53,17 +56,48 @@ private func part1(_ grid: [[Character]]) -> Int {
         } else {
             fatalError(#function)
         }
-    if let v = Cursor.goOn(start: start, dir: .north, grid: grid) {
-        return (v.steps + 1) / 2
+    if let (v, trace) = Cursor.goOn(start: start, dir: .north, grid: grid) {
+        return ((v.steps + 1) / 2, trace)
     }
-    if let h = Cursor.goOn(start: start, dir: .east, grid: grid) {
-        return (h.steps + 1) / 2
+    if let (h, trace) = Cursor.goOn(start: start, dir: .east, grid: grid) {
+        return ((h.steps + 1) / 2, trace)
     }
     fatalError()
 }
 
-private func part2(_ input: [[Character]]) -> Int {
-    0
+private func part2(_ input: [[Character]], _ trace: [Pos]) -> Int {
+    let height = input.count
+    let width = input[0].count
+    let boundary = Pos(y: (height + 1) * 2, x: (width + 1) * 2)
+    // Scale up the grid
+    var map2: Set<Pos> = []
+    for i in 0..<(trace.count - 1) {
+        map2.insert(Pos.unit + trace[i] * 2)
+        map2.insert(Pos.unit + trace[i] + trace[i + 1])
+    }
+    // traverse
+    var to_visit: Set<Pos> = [Pos(y: 0, x: 0)]
+    while let p = to_visit.popFirst() {
+        if map2.contains(p) {
+            continue
+        }
+        map2.insert(p)
+        for q in p.neighbors4(bound: boundary) {
+            if !map2.contains(q) {
+                to_visit.insert(q)
+            }
+        }
+    }
+    var count = 0
+    for i in 0..<height {
+        for j in 0..<width {
+            if !map2.contains(Pos(y: 2 * i + 1, x: 2 * j + 1)) {
+                count += 1
+            }
+        }
+        print()
+    }
+    return count
 }
 
 public func day10(_ data: String) {
@@ -77,8 +111,8 @@ public func day10(_ data: String) {
     do {
         let input = try parser.parse(data).filter { !$0.isEmpty }
         // assert(input.allSatisfy { $0.allSatisfy { $0 != "S" } })
-        let sum1 = part1(input)
-        let sum2 = part2(input)
+        let (sum1, trace) = part1(input)
+        let sum2 = part2(input, trace)
         print("Part 1: \(sum1)")
         print("Part 2: \(sum2)")
     } catch {
