@@ -4,6 +4,9 @@
 //
 import Parsing
 import Utils
+import SwiftUI
+import Charts
+import SwiftData
 
 @DebugDescription
 private struct Robot {
@@ -39,34 +42,64 @@ private func part1(robots: [Robot], boundary: Pos) -> Int {
     return map.0 * map.1 * map.2 * map.3
 }
 
+@Model
+class Y2024D14State {
+    @Attribute(.unique) var time: Int
+    var rate: Double
+    var isMax: Bool = false
+    init(time: Int, rate: Double, isMax: Bool) {
+        self.time = time
+        self.rate = rate
+        self.isMax = isMax
+    }
+}
+
+@MainActor
 private func part2(robots: [Robot], boundary: Pos) -> Int {
     let decayRate = 0.95
     let numPoints = Double(robots.count)
     var signalRateEMA = 1.0
-    var peak = signalRateEMA
-    for t in 0... {
-        let map =
+    var peakMax: Double = 0
+    var peakMin: Double = 10.0
+    do {
+        let container = try ModelContainer(for: Y2024D14State.self)
+        let context = container.mainContext
+
+        for t in 0... {
+            let map =
             Set(robots
-            .map {
-                ((($0.vec * t + $0.pos) % boundary) + boundary) % boundary
-            })
-        let numConnected = map.filter {
-            !$0.neighbors4(bound: boundary).allSatisfy { !map.contains($0) }
-        } .count
-        let r = Double(numConnected) / numPoints
-        if peak < r / signalRateEMA {
-            peak = r / signalRateEMA
+                .map {
+                    ((($0.vec * t + $0.pos) % boundary) + boundary) % boundary
+                })
+            let numConnected = map.filter {
+                !$0.neighbors4(bound: boundary).allSatisfy { !map.contains($0) }
+            } .count
+            let r = Double(numConnected) / numPoints
+            let trend = r / signalRateEMA
+            if peakMax < trend {
+                peakMax = trend
+                context.insert(Y2024D14State(time: t, rate: trend, isMax: true))
+                try context.save()
+            }
+            if r / peakMax < peakMin {
+                peakMin = r / peakMax
+                context.insert(Y2024D14State(time: t, rate: trend, isMax: false))
+                try context.save()
+            }
+            if 3.0 < r / signalRateEMA {
+                return t
+            }
+            signalRateEMA *= decayRate
+            signalRateEMA += r * (1.0 - decayRate)
         }
-        if 3.0 < r / signalRateEMA {
-            return t
-        }
-        signalRateEMA *= decayRate
-        signalRateEMA += r * (1.0 - decayRate)
+        fatalError()
+    } catch {
+        print(error)
+        fatalError()
     }
-    fatalError()
 }
 
-public func day14(_ data: String) {
+@MainActor public func day14(_ data: String) {
     let is_test = Array(data.split(separator: "\n", omittingEmptySubsequences: true)).count == 12
     let boundary: Pos = is_test ? Pos(y: 7, x: 11) : Pos(y: 103, x: 101)
     let robot: some Parser<Substring, Robot> = Parse {
@@ -95,4 +128,33 @@ public func day14(_ data: String) {
     } catch {
         print(error)
     }
+}
+
+struct ContentView: View {
+    @Query var data: [Y2024D14State]
+    var body: some View {
+        VStack {
+            Chart(data, id: \.time) {
+                 PointMark(
+                    x: .value("Steps", $0.time),
+                    y: .value("Signal ratio", $0.rate)
+                 )
+                 .foregroundStyle(by: .value("Family", $0.isMax ? "max" : "min"))
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 7))
+            }
+            .chartYAxis {
+                AxisMarks(values: .automatic(desiredCount: 5))
+            }
+
+            Text("Step-Peak signal ratio")
+        }
+        .padding()
+    }
+}
+
+#Preview {
+    ContentView()
+        .modelContainer(for: [Y2024D14State.self])
 }
