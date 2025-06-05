@@ -21,7 +21,6 @@ private func part1(_ seq: [Int]) -> Int {
             return 0
         }
     }
-    // print(seq)
     return inc || dec ? 1 : 0
 }
 

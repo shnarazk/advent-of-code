@@ -6,7 +6,6 @@ import Utils
 
 private class Solver {
     let boundary: Pos
-    /// converted from Rust
     let mapping: [Pos: Character]
     var accum: [Pos: Bool] = [:]
     init(boundary: Pos, mapping: [Pos: Character], accum: [Pos: Bool]) {

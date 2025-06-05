@@ -64,7 +64,6 @@ public func day10(_ data: String) {
             }
         }
     }
-    // print(grid)
     let sum1 = part1(size, grid, starts)
     let sum2 = part2(size, grid, starts)
     print("Part1: \(sum1)")

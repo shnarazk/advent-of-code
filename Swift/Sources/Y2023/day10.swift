@@ -109,7 +109,6 @@ private func part2(_ input: [[Character]], _ trace: [Pos]) -> Int {
                 count += 1
             }
         }
-        print()
     }
     do {
         let container = try ModelContainer(for: Y2023D10State.self)

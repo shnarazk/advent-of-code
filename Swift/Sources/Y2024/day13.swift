@@ -7,13 +7,13 @@ import Utils
 
 @DebugDescription
 private struct Claw {
-let buttonA: Pos
+    let buttonA: Pos
     let buttonB: Pos
     let prize: Pos
     var debugDescription: String {
         "(\(buttonA) + \(buttonB) => \(prize))"
     }
-    var solve:Int {
+    var solve: Int {
         if buttonA.x * buttonB.y != buttonA.y * buttonB.x {
             let tmp1 = abs(buttonA.x * buttonB.y - buttonA.y * buttonB.x)
             let tmp2 = abs(buttonB.y * prize.x - buttonB.x * prize.y)
@@ -35,7 +35,11 @@ private func part1(_ data: [Claw]) -> Int {
 
 private func part2(_ data: [Claw]) -> Int {
     data.reduce(0) {
-        let tmp = Claw(buttonA: $1.buttonA, buttonB: $1.buttonB, prize: $1.prize + 10_000_000_000_000)
+        let tmp = Claw(
+            buttonA: $1.buttonA,
+            buttonB: $1.buttonB,
+            prize: $1.prize + 10_000_000_000_000
+        )
         return $0 + tmp.solve
     }
 }
