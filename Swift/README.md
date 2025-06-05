@@ -13,8 +13,8 @@ sequenceDiagram
     participant D as SwiftData
     participant V as SwiftUI + Charts
 
-  S->>P: read
+  P->>S: read
   S->>D: serialize
-  V->>D: fetch
+  D->>V: fetch
 
 ```
