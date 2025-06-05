@@ -65,8 +65,14 @@ public struct Pos: Comparable, Hashable, Sendable {
     public static func + (lhs: Pos, rhs: Pos) -> Pos {
         Pos(y: lhs.y + rhs.y, x: lhs.x + rhs.x)
     }
+    public static func + (lhs: Pos, rhs: Int) -> Pos {
+        Pos(y: lhs.y + rhs, x: lhs.x + rhs)
+    }
     public static func - (lhs: Pos, rhs: Pos) -> Pos {
         Pos(y: lhs.y - rhs.y, x: lhs.x - rhs.x)
+    }
+    public static func - (lhs: Pos, rhs: Int) -> Pos {
+        Pos(y: lhs.y - rhs, x: lhs.x - rhs)
     }
     public static func * (lhs: Pos, rhs: Pos) -> Pos {
         Pos(y: lhs.y * rhs.y, x: lhs.x * rhs.x)
