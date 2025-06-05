@@ -35,7 +35,7 @@ private func part1(_ data: [Claw]) -> Int {
 
 private func part2(_ data: [Claw]) -> Int {
     data.reduce(0) {
-        var tmp = Claw(buttonA: $1.buttonA, buttonB: $1.buttonB, prize: $1.prize + 10_000_000_000_000)
+        let tmp = Claw(buttonA: $1.buttonA, buttonB: $1.buttonB, prize: $1.prize + 10_000_000_000_000)
         return $0 + tmp.solve
     }
 }
