@@ -124,22 +124,6 @@ private func part2(_ input: [[Character]], _ trace: [Pos]) -> Int {
     return count
 }
 
-private func load(_ data: String) -> [[Character]] {
-    let parser: some Parser<Substring, [[Character]]> = Many {
-        Prefix {
-            $0 != "\n"
-        }.map { Array($0) }
-    } separator: {
-        "\n"
-    }
-    do {
-        return try parser.parse(data).filter { !$0.isEmpty }
-    } catch {
-        print(error)
-        fatalError()
-    }
-}
-
 @MainActor
 public func day10(_ data: String) {
     let parser: some Parser<Substring, [[Character]]> = Many {
