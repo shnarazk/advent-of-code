@@ -39,8 +39,31 @@ private func part1(robots: [Robot], boundary: Pos) -> Int {
     return map.0 * map.1 * map.2 * map.3
 }
 
-private func part2() -> Int {
-    0
+private func part2(robots: [Robot], boundary: Pos) -> Int {
+    let decayRate = 0.95
+    let numPoints = Double(robots.count)
+    var signalRateEMA = 1.0
+    var peak = signalRateEMA
+    for t in 0... {
+        let map =
+            Set(robots
+            .map {
+                ((($0.vec * t + $0.pos) % boundary) + boundary) % boundary
+            })
+        let numConnected = map.filter {
+            !$0.neighbors4(bound: boundary).allSatisfy { !map.contains($0) }
+        } .count
+        let r = Double(numConnected) / numPoints
+        if peak < r / signalRateEMA {
+            peak = r / signalRateEMA
+        }
+        if 3.0 < r / signalRateEMA {
+            return t
+        }
+        signalRateEMA *= decayRate
+        signalRateEMA += r * (1.0 - decayRate)
+    }
+    fatalError()
 }
 
 public func day14(_ data: String) {
@@ -66,7 +89,7 @@ public func day14(_ data: String) {
     do {
         let input = try parser.parse(data)
         let sum1 = part1(robots: input, boundary: boundary)
-        let sum2 = part2()
+        let sum2 = part2(robots: input, boundary: boundary)
         print("Part 1: \(sum1)")
         print("Part 2: \(sum2)")
     } catch {
