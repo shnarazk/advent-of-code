@@ -1,7 +1,7 @@
-import Parsing
-import SwiftUI
-import SwiftData
 import Grape
+import Parsing
+import SwiftData
+import SwiftUI
 
 private func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     var range = pages
@@ -118,10 +118,16 @@ public func day05(_ data: String) {
         let sum2 = (updates.map { part2($0, by: rules) }).reduce(0, +)
         print("Part1: \(sum1)")
         print("Part2: \(sum2)")
+        do {
+            let c1 = try ModelContainer(for: Y2024D05Node.self)
+            try c1.mainContext.delete(model: Y2024D05Node.self)
+            let c2 = try ModelContainer(for: Y2024D05Link.self)
+            try c2.mainContext.delete(model: Y2024D05Link.self)
+        }
         let container = try ModelContainer(for: Y2024D05State.self)
         try container.mainContext.delete(model: Y2024D05State.self)
         let context = container.mainContext
-        let nodeSet: Set<Int> = Set(rules.flatMap{ [$0.0, $0.1] })
+        let nodeSet: Set<Int> = Set(rules.flatMap { [$0.0, $0.1] })
         let nodes = nodeSet.enumerated().map { (i, n) in
             Y2024D05Node(id: i, val: n, size: 4.0)
         }
@@ -129,9 +135,11 @@ public func day05(_ data: String) {
         let links = rules.enumerated().map { (i, link) in
             Y2024D05Link(id: i, pre: val2id[link.0, default: 0], post: val2id[link.1, default: 0])
         }
-
-        context.insert(Y2024D05State(nodes: nodes, links: links))
-        try context.save()
+        let s = Y2024D05State(nodes: nodes, links: links)
+        context.insert(s)
+        if context.hasChanges {
+            try context.save()
+        }
     } catch {
         print("\(error)")
     }
@@ -142,18 +150,21 @@ private struct Content1View: View {
     var body: some View {
         VStack {
             ForceDirectedGraph {
-                Series(data[0].nodes) { node in
+                Series(data.first?.nodes ?? []) { node in
                     AnnotationNodeMark(id: node.id, radius: node.size) {
                         Text(String(node.val))
                     }
                 }
-                Series(data[0].links) { link in
+                Series(data.first?.links ?? []) { link in
                     LinkMark(from: link.pre, to: link.post)
+                        .linkShape(ArrowLineLink(arrowSize: 10, arrowAngle: .degrees(15), arrowCornerRadius: 8.0)
+                        )
+                        .stroke(.red)
                 }
             } force: {
-                .manyBody()
-                .link(originalLength: 50.0)
-                .center()
+                .manyBody(strength: 1.0)
+                .link(originalLength: 200.0, stiffness: .weightedByDegree { _, _ in 0.98 })
+                    .center()
             }
         }
         .padding()
