@@ -10,9 +10,9 @@
       devShells.default = pkgs.mkShell {
         packages = [
           pkgs.bashInteractive
-          pkgs.swift
+          # pkgs.swift
           pkgs.swift-format
-          pkgs.swiftpm
+          # pkgs.swiftpm
           pkgs.entr
         ];
       };
