@@ -77,6 +77,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
             case 4: Y2022.day04(data)
             case 5: Y2022.day05(data)
             case 6: Y2022.day06(data)
+            case 7: Y2022.day07(data)
             case 8: Y2022.day08(data)
             case 9: Y2022.day09(data)
             case 10: Y2022.day10(data)
