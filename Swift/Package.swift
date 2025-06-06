@@ -68,7 +68,12 @@ let package = Package(
                 .target(name: "Utils"),
             ]
         ),
-        .target(name: "Y2022", dependencies: []),
+        .target(
+            name: "Y2022",
+            dependencies: [
+                .product(name: "Parsing", package: "swift-parsing")
+            ]
+        ),
         .target(name: "Y2016", dependencies: []),
         .testTarget(
             name: "aoc-test",
