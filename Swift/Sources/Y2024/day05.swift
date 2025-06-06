@@ -119,14 +119,17 @@ public func day05(_ data: String) {
         print("Part1: \(sum1)")
         print("Part2: \(sum2)")
         let container = try ModelContainer(for: Y2024D05State.self)
+        try container.mainContext.delete(model: Y2024D05State.self)
         let context = container.mainContext
         let nodeSet: Set<Int> = Set(rules.flatMap{ [$0.0, $0.1] })
         let nodes = nodeSet.enumerated().map { (i, n) in
             Y2024D05Node(id: i, val: n, size: 4.0)
         }
+        let val2id: [Int: Int] = nodes.reduce(into: [:]) { acc, n in acc[n.val] = n.id }
         let links = rules.enumerated().map { (i, link) in
-            Y2024D05Link(id: i, pre: link.0, post: link.1)
+            Y2024D05Link(id: i, pre: val2id[link.0, default: 0], post: val2id[link.1, default: 0])
         }
+
         context.insert(Y2024D05State(nodes: nodes, links: links))
         try context.save()
     } catch {
@@ -138,9 +141,6 @@ private struct Content1View: View {
     @Query var data: [Y2024D05State]
     var body: some View {
         VStack {
-            ForEach(data[0].nodes, id: \.id) {
-                Text("\($0)")
-            }
             ForceDirectedGraph {
                 Series(data[0].nodes) { node in
                     AnnotationNodeMark(id: node.id, radius: node.size) {
