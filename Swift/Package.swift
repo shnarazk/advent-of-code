@@ -19,6 +19,7 @@ let package = Package(
             url: "https://github.com/pointfreeco/swift-parsing",
             from: "0.7.0"
         ),
+        .package(url: "https://github.com/swiftgraphs/Grape", from: "1.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -55,15 +56,18 @@ let package = Package(
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
-                .target(name: "Utils")
-            ]),
+                .product(name: "Grape", package: "Grape"),
+                .target(name: "Utils"),
+            ]
+        ),
         .target(
             name: "Y2023",
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
-                .target(name: "Utils")
-            ]),
+                .target(name: "Utils"),
+            ]
+        ),
         .target(name: "Y2022", dependencies: []),
         .target(name: "Y2016", dependencies: []),
         .testTarget(

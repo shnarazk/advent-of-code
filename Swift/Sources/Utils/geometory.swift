@@ -1,5 +1,6 @@
 /// implementation of 2D point as struct
-@DebugDescription///
+///
+@DebugDescription
 public struct Pos: Comparable, Hashable, Sendable {
     public let y: Int
     public let x: Int

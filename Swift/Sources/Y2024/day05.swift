@@ -1,4 +1,7 @@
 import Parsing
+import SwiftUI
+import SwiftData
+import Grape
 
 private func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     var range = pages
@@ -41,6 +44,41 @@ private func part2(_ pages: [Int], by rules: [(Int, Int)]) -> Int {
     }
 }
 
+@Model
+class Y2024D05Node {
+    @Attribute(.unique) var id: Int
+    var val: Int
+    var size: Double
+    init(id: Int, val: Int, size: Double = 4.0) {
+        self.id = id
+        self.val = val
+        self.size = size
+    }
+}
+
+@Model
+class Y2024D05Link {
+    @Attribute(.unique) var id: Int
+    var pre: Int
+    var post: Int
+    init(id: Int, pre: Int, post: Int) {
+        self.id = id
+        self.pre = pre
+        self.post = post
+    }
+}
+
+@Model
+class Y2024D05State {
+    var nodes: [Y2024D05Node]
+    var links: [Y2024D05Link]
+    init(nodes: [Y2024D05Node], links: [Y2024D05Link]) {
+        self.nodes = nodes
+        self.links = links
+    }
+}
+
+@MainActor
 public func day05(_ data: String) {
     let rule_parser: some Parser<Substring, (Int, Int)> = Parse(input: Substring.self) {
         Int.parser()
@@ -80,7 +118,49 @@ public func day05(_ data: String) {
         let sum2 = (updates.map { part2($0, by: rules) }).reduce(0, +)
         print("Part1: \(sum1)")
         print("Part2: \(sum2)")
+        let container = try ModelContainer(for: Y2024D05State.self)
+        let context = container.mainContext
+        let nodeSet: Set<Int> = Set(rules.flatMap{ [$0.0, $0.1] })
+        let nodes = nodeSet.enumerated().map { (i, n) in
+            Y2024D05Node(id: i, val: n, size: 4.0)
+        }
+        let links = rules.enumerated().map { (i, link) in
+            Y2024D05Link(id: i, pre: link.0, post: link.1)
+        }
+        context.insert(Y2024D05State(nodes: nodes, links: links))
+        try context.save()
     } catch {
         print("\(error)")
     }
+}
+
+private struct Content1View: View {
+    @Query var data: [Y2024D05State]
+    var body: some View {
+        VStack {
+            ForEach(data[0].nodes, id: \.id) {
+                Text("\($0)")
+            }
+            ForceDirectedGraph {
+                Series(data[0].nodes) { node in
+                    AnnotationNodeMark(id: node.id, radius: node.size) {
+                        Text(String(node.val))
+                    }
+                }
+                Series(data[0].links) { link in
+                    LinkMark(from: link.pre, to: link.post)
+                }
+            } force: {
+                .manyBody()
+                .link(originalLength: 50.0)
+                .center()
+            }
+        }
+        .padding()
+    }
+}
+
+#Preview {
+    Content1View()
+        .modelContainer(for: Y2024D05State.self)
 }

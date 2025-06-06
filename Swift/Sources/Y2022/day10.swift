@@ -107,7 +107,7 @@ public func day10(_ data: String) {
         let sum1 = part1(input)
         print("Part 1: \(sum1)")
         print("Part 2:")
-        part2(input)
+        let _ = part2(input)
     } catch {
         print(error)
     }
