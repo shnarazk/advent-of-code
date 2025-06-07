@@ -1,4 +1,4 @@
-using AoC, AoC.Geometry
+using AoC, AoC.Geometry, AoC.Dir
 
 function part1_aux(m::Matrix{Int}, start::Dim2)::Int
     boundary = Dim2(size(m))
