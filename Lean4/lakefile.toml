@@ -1,5 +1,5 @@
 name = "AoC"
-testRunner = "Benchmark"
+testRunner = "testDriver"
 defaultTargets = ["aoc"]
 version = "0.6.1"
 
@@ -40,3 +40,10 @@ buildType = "release"
 [[lean_exe]]
 name = "lint"
 srcDir = "scripts"
+
+[[lean_exe]]
+name = "testDriver"
+# globs = [".+"]
+root = "testDriver"
+srcDir = "tests"
+leanOptions = { linter.unusedVariables = true }
