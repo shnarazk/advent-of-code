@@ -7,19 +7,13 @@ private func total_order(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
     var range = pages
     func swap(to: Int, by rules: [(Int, Int)]) {
         let pivot: Int = range[..<to].partition { p in !rules.contains { p == $0.0 } }
+        if pivot == 0 || pivot == to { return }
         if 0 < pivot {
             swap(to: pivot, by: rules.filter { !range[pivot..<to].contains($0.1) })
         }
     }
     swap(to: range.count, by: rules)
     return range
-    //    let unrestricted: [Int] = pages.filter { node in rules.allSatisfy { rule in node != rule.0 } }
-    //    if unrestricted.isEmpty {
-    //        return pages
-    //    } else {
-    //        let rs = rules.filter { !unrestricted.contains($0.1) }
-    //        return total_order(pages.filter { !unrestricted.contains($0) }, by: rs) + unrestricted
-    //    }
 }
 
 private func ordered(_ pages: [Int], by rules: [(Int, Int)]) -> [Int] {
@@ -127,8 +121,9 @@ public func day05(_ data: String) {
         let container = try ModelContainer(for: Y2024D05State.self)
         try container.mainContext.delete(model: Y2024D05State.self)
         let context = container.mainContext
-        let nodeSet: Set<Int> = Set(rules.flatMap { [$0.0, $0.1] })
-        let nodes = nodeSet.enumerated().map { (i, n) in
+        let pages = Array(Set(rules.flatMap { [$0.0, $0.1] }))
+        let pseudoOrderedPages = ordered(pages, by: rules)
+        let nodes = pseudoOrderedPages.enumerated().map { (i, n) in
             Y2024D05Node(id: i, val: n, size: 4.0)
         }
         let val2id: [Int: Int] = nodes.reduce(into: [:]) { acc, n in acc[n.val] = n.id }
@@ -147,6 +142,7 @@ public func day05(_ data: String) {
 
 private struct Content1View: View {
     @Query var data: [Y2024D05State]
+    @State var displayNodes: Double = 50
     var body: some View {
         VStack {
             ForceDirectedGraph {
@@ -155,19 +151,26 @@ private struct Content1View: View {
                         Text(String(node.val))
                     }
                 }
-                Series(data.first?.links ?? []) { link in
-                    LinkMark(from: link.pre, to: link.post)
+                Series((data.first?.links ?? []).filter {
+                    link in
+                    return link.pre < Int(displayNodes) && link.post < Int(displayNodes)
+                }) { link in
+                    LinkMark(from: link.post, to: link.pre)
                         .linkShape(ArrowLineLink(arrowSize: 10, arrowAngle: .degrees(15), arrowCornerRadius: 8.0)
                         )
                         .stroke(.red)
                 }
             } force: {
-                .manyBody(strength: 1.0)
-                .link(originalLength: 200.0, stiffness: .weightedByDegree { _, _ in 0.98 })
+                .manyBody(strength: -10)
+                .link(originalLength: 100.0, stiffness: .weightedByDegree { _, _ in 0.98 })
                     .center()
             }
+            // TODO: re-simulate after changes of displayed nodes and edges
         }
         .padding()
+        Slider(value: $displayNodes, in: 2...Double(data.first?.nodes.count ?? 2), label: { Text("Number of pages")}, minimumValueLabel: { Text("\(Int(displayNodes))")}, maximumValueLabel: { Text("full set")})
+            .padding(.horizontal)
+            .padding(.bottom)
     }
 }
 
