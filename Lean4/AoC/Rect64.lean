@@ -170,7 +170,7 @@ def findIdxInRow? [BEq α]
   let sa := p.vector.toSubarray f t
   if h : sa.size ≠ 0 then
     have : NeZero sa.size := by simp [neZero_iff, h]
-    findIdxOnSubarray sa (Fin.ofNat' sa.size (t - f - 1)) (Fin.ofNat' sa.size 1) pred
+    findIdxOnSubarray sa (Fin.ofNat sa.size (t - f - 1)) (Fin.ofNat sa.size 1) pred
       |>.map (i, ·)
   else
     none
