@@ -144,7 +144,7 @@ public func day10(_ data: String) {
     }
 }
 
-struct ContentView: View {
+private struct ContentView: View {
     // @Environment(\.modelContext) private var context
     @Query var data: [Y2023D10State]
     var body: some View {

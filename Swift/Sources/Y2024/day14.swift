@@ -130,7 +130,7 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
     }
 }
 
-struct ContentView: View {
+private struct ContentView: View {
     @Query var data: [Y2024D14State]
     var body: some View {
         VStack {

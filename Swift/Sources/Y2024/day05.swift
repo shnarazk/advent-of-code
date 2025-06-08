@@ -140,41 +140,72 @@ public func day05(_ data: String) {
     }
 }
 
-private struct Content1View: View {
-    @Query var data: [Y2024D05State]
-    @State var displayNodes: Double = 50
+private struct GraphView: View {
+    var nodes: [Y2024D05Node]
+    var links: [Y2024D05Link]
+    var body: some View {
+        ForceDirectedGraph {
+            Series(nodes) { node in
+                AnnotationNodeMark(id: node.id, radius: node.size) {
+                    Text(String(node.val))
+                }
+            }
+            Series(links) { link in
+                LinkMark(from: link.post, to: link.pre)
+                    .linkShape(
+                        ArrowLineLink(
+                            arrowSize: 10,
+                            arrowAngle: .degrees(10),
+                            arrowCornerRadius: 8.0
+                        )
+                    )
+                    .stroke(.red)
+            }
+        } force: {
+            .manyBody(strength: -80)
+                .link(originalLength: 60.0, stiffness: .weightedByDegree { _, _ in 0.9 })
+                .center()
+        }
+    }
+}
+
+private struct ContentView: View {
+    @Query var store: [Y2024D05State]
+    @State var displayNodes: Double = 49
     var body: some View {
         VStack {
-            ForceDirectedGraph {
-                Series(data.first?.nodes ?? []) { node in
-                    AnnotationNodeMark(id: node.id, radius: node.size) {
-                        Text(String(node.val))
-                    }
-                }
-                Series((data.first?.links ?? []).filter {
-                    link in
-                    return link.pre < Int(displayNodes) && link.post < Int(displayNodes)
-                }) { link in
-                    LinkMark(from: link.post, to: link.pre)
-                        .linkShape(ArrowLineLink(arrowSize: 10, arrowAngle: .degrees(15), arrowCornerRadius: 8.0)
+            if 0 < store.count {
+                VStack {
+                    GraphView(
+                        nodes: Array(
+                            store.first!.nodes.filter { node in node.id < Int(displayNodes) }
+                        ),
+                        links: Array(
+                            store.first!.links.filter { link in
+                                link.post < Int(displayNodes) && link.pre < Int(displayNodes)
+                            }
                         )
-                        .stroke(.red)
+                    )
+                    .padding()
+                    Slider(
+                        value: $displayNodes,
+                        in: 2...Double(store.first!.nodes.count),
+                        label: { Text("Number of pages \(Int(displayNodes))") },
+                        minimumValueLabel: { Text("single") },
+                        maximumValueLabel: { Text("all (\(store.first!.nodes.count))") },
+                    )
+                    .padding(.horizontal)
+                    .padding(.bottom)
                 }
-            } force: {
-                .manyBody(strength: -10)
-                .link(originalLength: 100.0, stiffness: .weightedByDegree { _, _ in 0.98 })
-                    .center()
+            } else {
+                Text("no data")
             }
-            // TODO: re-simulate after changes of displayed nodes and edges
         }
-        .padding()
-        Slider(value: $displayNodes, in: 2...Double(data.first?.nodes.count ?? 2), label: { Text("Number of pages")}, minimumValueLabel: { Text("\(Int(displayNodes))")}, maximumValueLabel: { Text("full set")})
-            .padding(.horizontal)
-            .padding(.bottom)
+
     }
 }
 
 #Preview {
-    Content1View()
+    ContentView()
         .modelContainer(for: Y2024D05State.self)
 }
