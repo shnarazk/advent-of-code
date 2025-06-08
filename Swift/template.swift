@@ -17,7 +17,7 @@ public func day(_ data: String) {
         "\n"
     }
     do {
-//        let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
+        // let lines = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
         let input = try parser.parse(data)
         let sum1 = part1()
         let sum2 = part2()
@@ -25,5 +25,6 @@ public func day(_ data: String) {
         print("Part 2: \(sum2)")
     } catch {
         print(error)
+        fatalError()
     }
 }
