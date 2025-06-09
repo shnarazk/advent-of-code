@@ -5,22 +5,30 @@
 import Parsing
 import Utils
 
+private enum Kind {
+    case empty
+    case wall
+    case box
+    case robot
+    case boxH
+}
+
 private class Solver {
-    var mapping: [[Character]]
+    var mapping: [[Kind]]
     var moves: [Pos]
     var pos: Pos
     // var dir: Pos
     // var posHalf: Bool
-    init(mapping: [[Character]], moves: [Pos]) {
+    init(mapping: [[Kind]], moves: [Pos]) {
         self.mapping = mapping
         self.moves = moves
         // self.next_move = next_move
         self.pos = .east  // pos
         done: for (i, l) in mapping.enumerated() {
             for (j, c) in l.enumerated() {
-                if c == "@" {
+                if c == .robot {
                     pos = Pos(y: i, x: j)
-                    self.mapping[pos] = "."
+                    self.mapping[pos] = .empty
                     break done
                 }
             }
@@ -32,12 +40,12 @@ private class Solver {
         let dir = moves[ix]
         let next = pos + dir
         var p = next
-        while mapping[p] == "O" {
+        while mapping[p] == .box {
             p = p + dir
         }
-        if mapping[p] == "." {
-            mapping[p] = "O"
-            mapping[next] = "."
+        if mapping[p] == .empty {
+            mapping[p] = .box
+            mapping[next] = .empty
             pos = next
             // print("Moved to \(pos)")
         }
@@ -45,7 +53,7 @@ private class Solver {
     func evaluate1() -> Int {
         mapping.enumerated().reduce(0) { acc, il in
             il.1.enumerated().reduce(acc) { acc, jc in
-                acc + (jc.1 == "O" ? il.0 * 100 + jc.0 : 0)
+                acc + (jc.1 == .box ? il.0 * 100 + jc.0 : 0)
             }
         }
     }
@@ -57,27 +65,134 @@ private class Solver {
                     print("@", terminator: "")
                     continue
                 }
-                print(c, terminator: "")
+                let ch =
+                    switch c {
+                    case .empty: "."
+                    case .wall: "#"
+                    case .box: "O"
+                    default: " "
+                    }
+                print(ch, terminator: "")
             }
             print()
         }
     }
-    func unsupportedE(pos: Pos, kind: Bool) -> Bool {
-        if kind {
+    func unsupportedE(_ pos: Pos, half: Bool) -> Bool {
+        if !half {
             switch mapping[pos] {
-            case " ": true
-            case "#": false
-            // case "O": true
-            default: false
+            case .empty: true
+            case .wall: false
+            case .box: self.unsupportedE(pos + .east, half: half)
+            case .boxH: true
+            default: fatalError()
             }
         } else {
-
+            switch mapping[pos] {
+            case .empty: true
+            case .wall: false
+            case .box: fatalError()
+            case .boxH: self.unsupportedE(pos + .east, half: half)
+            default: fatalError()
+            }
         }
-        return false
+    }
+    func unsupportedW(_ pos: Pos, half: Bool) -> Bool {
+        if !half {
+            switch mapping[pos] {
+            case .empty:
+                let w = pos + .west
+                return mapping[w] != .boxH || self.unsupportedW(w, half: false)
+            case .wall: return false
+            case .box: return self.unsupportedW(pos + .west, half: true)
+            case .boxH:
+                let w = pos + .west
+                return mapping[w] != .boxH || self.unsupportedW(w, half: false)
+            default: fatalError()
+            }
+        } else {
+            switch mapping[pos] {
+            case .empty: return true
+            case .wall: return false
+            case .box: return self.unsupportedE(pos + .east, half: half)
+            case .boxH: fatalError()
+            default: fatalError()
+            }
+        }
+    }
+    func unsupportedS(_ pos: Pos, half: Bool) -> Bool {
+        if !half {
+            switch mapping[pos] {
+            case .empty:
+            case .boxH:
+                let w = pos + .west
+                let s1 = pos + .south + .west
+                let s2 = pos + .south
+                return mapping[w] != .boxH
+                    || (self.unsupportedS(s1, half: true) && self.unsupportedS(s2, half: false))
+            case .wall: return false
+            case .box:
+                let s = pos + .south
+                return self.unsupportedW(s, half: false) && self.unsupportedW(s, half: true)
+            default: fatalError()
+            }
+        } else {
+            switch mapping[pos] {
+            case .empty: return true
+            case .wall: return false
+            case .box:
+                let s = pos + .south
+                return self.unsupportedW(s, half: false) && self.unsupportedW(s, half: true)
+            case .boxH:
+                let s1 = pos + .south
+                let s2 = pos + .south + .east
+                return self.unsupportedS(s1, half: true) && self.unsupportedS(s2, half: false)
+            default: fatalError()
+            }
+        }
+    }
+    func unsupportedN(_ pos: Pos, half: Bool) -> Bool {
+        if !half {
+            switch mapping[pos] {
+            case .wall: return false
+            case .empty:
+            case .boxH:
+                let w = pos + .west
+                let n1 = pos + .north
+                let n2 = pos + .north + .west
+                return mapping[w] != .boxH
+                    || (self.unsupportedN(n1, half: false) && self.unsupportedN(n2, half: true))
+            case .box:
+                let n = pos + .north
+                return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
+            default: fatalError()
+            }
+        } else {
+            switch mapping[pos] {
+            case .empty: return true
+            case .wall: return false
+            case .box:
+                let n = pos + .north
+                return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
+            case .boxH:
+                let n1 = pos + .north
+                let n2 = pos + .north + .east
+                return self.unsupportedN(n1, half: true) && self.unsupportedN(n2, half: false)
+            default: fatalError()
+            }
+        }
+    }
+    func unsupported(_ pos: Pos, dir: Pos, half: Bool, direction: Pos) -> Bool {
+        switch direction {
+            case .north: self.unsupportedN(pos, half: half)
+            case .east: self.unsupportedE(pos, half: half)
+            case .south: self.unsupportedS(pos, half: half)
+            case .west: self.unsupportedW(pos, half: half)
+            default: fatalError()
+        }
     }
 }
 
-private func part1(mapping: [[Character]], moves: [Pos]) -> Int {
+private func part1(mapping: [[Kind]], moves: [Pos]) -> Int {
     let solver = Solver(mapping: mapping, moves: moves)
     for t in 0..<moves.count {
         // print("Move: \(moves[t])")
@@ -93,12 +208,24 @@ private func part2() -> Int {
 }
 
 public func day15(_ data: String) {
-    let grid: some Parser<Substring, [[Character]]> = Parse {
+    let grid: some Parser<Substring, [[Kind]]> = Parse {
         Many {
             Prefix(1...) { ["#", ".", "O", "@"].contains($0) }
-                .map { Array(String($0)) }
         } separator: {
             "\n"
+        }
+    }.map {
+        $0.map {
+            $0.map {
+                switch $0 {
+                case ".": Kind.empty
+                case "#": .wall
+                case "O": .box
+                case "@": .robot
+                default: fatalError()
+                }
+            }
+
         }
     }
     let moves: some Parser<Substring, [Pos]> = Parse {
@@ -115,7 +242,7 @@ public func day15(_ data: String) {
             }
         }
     }
-    let parser: some Parser<Substring, ([[Character]], [Pos])> = Parse {
+    let parser: some Parser<Substring, ([[Kind]], [Pos])> = Parse {
         grid
         moves
     }
