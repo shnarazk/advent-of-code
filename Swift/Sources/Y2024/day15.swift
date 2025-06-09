@@ -183,11 +183,151 @@ private class Solver {
     }
     func unsupported(_ pos: Pos, dir: Pos, half: Bool, direction: Pos) -> Bool {
         switch direction {
-            case .north: self.unsupportedN(pos, half: half)
-            case .east: self.unsupportedE(pos, half: half)
-            case .south: self.unsupportedS(pos, half: half)
-            case .west: self.unsupportedW(pos, half: half)
-            default: fatalError()
+        case .north: self.unsupportedN(pos, half: half)
+        case .east: self.unsupportedE(pos, half: half)
+        case .south: self.unsupportedS(pos, half: half)
+        case .west: self.unsupportedW(pos, half: half)
+        default: fatalError()
+        }
+    }
+    func shiftE(_ pos: Pos, half: Bool) {
+        if !half {
+            switch mapping[pos] {
+            case .box:
+                self.shiftE(pos + .east, half: half)
+                mapping[pos] = .boxH
+            default:
+                return
+            }
+        } else {
+            switch mapping[pos] {
+            case .boxH:
+                self.shiftE(pos + .east, half: half)
+                mapping[pos] = .boxH
+            default:
+                return
+            }
+        }
+    }
+    func shiftW(_ pos: Pos, half: Bool) {
+        if !half {
+            switch mapping[pos] {
+            case .empty:
+                let w = pos + .west
+                if mapping[w] == .boxH {
+                    self.shiftW(w, half: false)
+                    mapping[w] = .box
+                }
+            case .box:
+                let w = pos + .west
+                self.shiftW(w, half: true)
+                mapping[pos] = .empty
+                mapping[w] = .boxH
+            case .boxH:
+                let w = pos + .west
+                if mapping[w] == .boxH {
+                    self.shiftW(w, half: false)
+                    mapping[w] = .box
+                }
+            default:
+                return
+            }
+        } else {
+            switch mapping[pos] {
+            case .box:
+                let w = pos + .west
+                self.shiftE(w, half: half)
+                mapping[pos] = .empty
+                mapping[w] = .boxH
+            default:
+                return
+            }
+        }
+    }
+    func shiftS(_ pos: Pos, half: Bool) {
+        if !half {
+            switch mapping[pos] {
+            case .empty:
+            case .boxH:
+                let w = pos + .west
+                let s1 = pos + .south + .west
+                let s2 = pos + .south
+                if mapping[w] == .boxH {
+                    self.shiftS(s1, half: true)
+                    self.shiftS(s2, half: false)
+                    mapping[w] = .empty
+                    mapping[s1] = .boxH
+                }
+            case .box:
+                let s = pos + .south
+                self.shiftS(s, half: false)
+                self.shiftS(s, half: true)
+                mapping[pos] = .empty
+                mapping[s] = .box
+            default:
+                return
+            }
+        } else {
+            switch mapping[pos] {
+            case .boxH:
+                let s1 = pos + .south
+                let s2 = pos + .south + .east
+                self.shiftS(s1, half: true)
+                self.shiftS(s2, half: false)
+                mapping[pos] = .empty
+                mapping[s1] = .boxH
+            case .box:
+                let s = pos + .south
+                self.shiftS(s, half: false)
+                self.shiftS(s, half: true)
+                mapping[pos] = .empty
+                mapping[s] = .boxH
+            default:
+                return
+            }
+        }
+    }
+    func shiftN(_ pos: Pos, half: Bool) {
+        if !half {
+            switch mapping[pos] {
+            case .empty:
+            case .boxH:
+                let w = pos + .west
+                let n1 = pos + .north + .west
+                let n2 = pos + .north
+                if mapping[w] == .boxH {
+                    self.shiftN(n1, half: true)
+                    self.shiftN(n2, half: false)
+                    mapping[w] = .empty
+                    mapping[n1] = .boxH
+                }
+            case .box:
+                let n = pos + .north
+                self.shiftN(n, half: false)
+                self.shiftN(n, half: true)
+                mapping[pos] = .empty
+                mapping[n] = .box
+            default:
+                return
+            }
+        } else {
+            switch mapping[pos] {
+            case .boxH:
+                let n1 = pos + .north
+                let n2 = pos + .north + .east
+                self.shiftN(n1, half: true)
+                self.shiftN(n2, half: false)
+                mapping[pos] = .empty
+                mapping[n1] = .boxH
+            case .box:
+                let n = pos + .north
+                self.shiftN(n, half: false)
+                self.shiftN(n, half: true)
+                mapping[pos] = .empty
+                mapping[n] = .box
+            default:
+                return
+            }
         }
     }
 }
