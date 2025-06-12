@@ -37,7 +37,10 @@ let package = Package(
                 .target(name: "Y2022"),
                 .target(name: "Y2023"),
                 .target(name: "Y2024"),
-            ]
+            ],
+//            swiftSettings: [
+//                .unsafeFlags(["-Xfrontend", "-enable-debug-dylib"])
+//            ]
         ),
         .executableTarget(
             name: "parser1",
