@@ -13,11 +13,11 @@ private enum Kind {
     case boxH
     func asChar2() -> (Character, Character, Character?) {
         return switch self {
-            case .empty: (".", ".", nil)
-            case .wall: ("#", "#", nil)
-            case .box: ("[", "]", nil)
-            case .robot: ("@", ".", nil)
-            case .boxH: (".", "[", "]")
+        case .empty: (".", ".", nil)
+        case .wall: ("#", "#", nil)
+        case .box: ("[", "]", nil)
+        case .robot: ("@", ".", nil)
+        case .boxH: (".", "[", "]")
         }
     }
 }
@@ -86,20 +86,21 @@ private class Solver {
         }
     }
     func unsupportedE(_ pos: Pos, half: Bool) -> Bool {
+        let e = pos + .east
         if !half {
-            switch mapping[pos] {
+            return switch mapping[pos] {
             case .empty: true
             case .wall: false
-            case .box: self.unsupportedE(pos + .east, half: half)
+            case .box: self.unsupportedE(e, half: half)
             case .boxH: true
             default: fatalError()
             }
         } else {
-            switch mapping[pos] {
+            return switch mapping[pos] {
             case .empty: true
             case .wall: false
             case .box: fatalError()
-            case .boxH: self.unsupportedE(pos + .east, half: half)
+            case .boxH: self.unsupportedE(e, half: half)
             default: fatalError()
             }
         }
@@ -107,18 +108,18 @@ private class Solver {
     func unsupportedW(_ pos: Pos, half: Bool) -> Bool {
         let w = pos + .west
         if !half {
-            switch mapping[pos] {
-            case .empty: return mapping[w] != .boxH || self.unsupportedW(w, half: false)
-            case .wall: return false
-            case .box: return self.unsupportedW(w, half: true)
-            case .boxH: return mapping[w] != .boxH || self.unsupportedW(w, half: false)
+            return switch mapping[pos] {
+            case .empty: mapping[w] != .boxH || self.unsupportedW(w, half: false)
+            case .wall: false
+            case .box: self.unsupportedW(w, half: true)
+            case .boxH: mapping[w] != .boxH || self.unsupportedW(w, half: false)
             default: fatalError()
             }
         } else {
-            switch mapping[pos] {
-            case .empty: return true
-            case .wall: return false
-            case .box: return self.unsupportedW(w, half: half)
+            return switch mapping[pos] {
+            case .empty: true
+            case .wall: false
+            case .box: self.unsupportedW(w, half: half)
             case .boxH: fatalError()
             default: fatalError()
             }
@@ -158,7 +159,7 @@ private class Solver {
                 let w = pos + .west
                 let nw = pos + .north + .west
                 return mapping[w] != .boxH
-                    || (self.unsupportedN(nw, half: false) && self.unsupportedN(n, half: true))
+                    || (self.unsupportedN(nw, half: true) && self.unsupportedN(n, half: false))
             case .box: return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
             default: fatalError()
             }
@@ -187,18 +188,21 @@ private class Solver {
         let e = pos + .east
         if !half {
             switch mapping[pos] {
+            case .empty: return
             case .box:
                 self.shiftE(e, half: half)
                 mapping[pos] = .boxH
-            default: return
+            case .boxH: return
+            default: fatalError()
             }
         } else {
             switch mapping[pos] {
+            case .empty: return
             case .boxH:
                 self.shiftE(e, half: half)
                 mapping[pos] = .empty
                 mapping[e] = .box
-            default: return
+            default: fatalError()
             }
         }
     }
@@ -220,10 +224,11 @@ private class Solver {
                     self.shiftW(w, half: false)
                     mapping[w] = .box
                 }
-            default: return
+            default: fatalError()
             }
         } else {
             switch mapping[pos] {
+            case .empty: return
             case .box:
                 self.shiftW(w, half: half)
                 mapping[pos] = .empty
@@ -250,24 +255,23 @@ private class Solver {
                 self.shiftS(s, half: true)
                 mapping[pos] = .empty
                 mapping[s] = .box
-            default:
-                return
+            default: fatalError()
             }
         } else {
             switch mapping[pos] {
+            case .empty: return
             case .boxH:
                 let se = pos + .south + .east
                 self.shiftS(s, half: true)
                 self.shiftS(se, half: false)
                 mapping[pos] = .empty
-                mapping[se] = .boxH
+                mapping[s] = .boxH
             case .box:
                 self.shiftS(s, half: false)
                 self.shiftS(s, half: true)
                 mapping[pos] = .empty
                 mapping[s] = .box
-            default:
-                return
+            default: fatalError()
             }
         }
     }
@@ -289,11 +293,11 @@ private class Solver {
                 self.shiftN(n, half: true)
                 mapping[pos] = .empty
                 mapping[n] = .box
-            default:
-                return
+            default: fatalError()
             }
         } else {
             switch mapping[pos] {
+            case .empty: return
             case .boxH:
                 let ne = pos + .north + .east
                 self.shiftN(n, half: true)
@@ -305,8 +309,7 @@ private class Solver {
                 self.shiftN(n, half: true)
                 mapping[pos] = .empty
                 mapping[n] = .box
-            default:
-                return
+            default: fatalError()
             }
         }
     }
@@ -352,7 +355,7 @@ private class Solver {
     }
     func dump2() {
         func str(_ ch: Character?) -> String {
-            guard let ch = ch else { return  "" }
+            guard let ch = ch else { return "" }
             return String(ch)
         }
         for (i, l) in mapping.enumerated() {
@@ -393,7 +396,7 @@ private func part1(mapping: [[Kind]], moves: [Pos]) -> Int {
         solver.press(t)
         // solver.dump()
     }
-    solver.dump()
+    // solver.dump()
     return solver.evaluate1()
 }
 private func part2(mapping: [[Kind]], moves: [Pos]) -> Int {
@@ -402,7 +405,7 @@ private func part2(mapping: [[Kind]], moves: [Pos]) -> Int {
         // print("Move: \(moves[t])")
         solver.press2(t)
     }
-    solver.dump2()
+    // solver.dump2()
     return solver.evaluate2()
 }
 
