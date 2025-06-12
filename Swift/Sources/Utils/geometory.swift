@@ -99,6 +99,10 @@ public struct Pos: Comparable, Hashable, Sendable {
     public static func <= (lhs: Pos, rhs: Pos) -> Bool {
         lhs.y <= rhs.y && lhs.x <= rhs.x
     }
+    /// L1 norm or Manhattan distance
+    public func l1Norm() -> Int {
+        abs(self.y) + abs(self.x)
+    }
     public func next(upto bound: Pos) -> Pos? {
         if self.x < bound.x {
             return Pos(y: self.y, x: self.x + 1)

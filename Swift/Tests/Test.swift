@@ -76,6 +76,15 @@ struct UtilsTests {
         #expect(m[Pos(y: 1, x: 1)] == 88)
 
     }
+
+    @Test("Pos l1Norm")
+    func test_pos_l1Norm() throws {
+        #expect(Pos(y: 0, x: 0).l1Norm() == 0)
+        #expect(Pos(y: 0, x: 2).l1Norm() == 2)
+        #expect(Pos(y: -3, x: 0).l1Norm() == 3)
+        #expect(Pos(y: 5, x: -4).l1Norm() == 9)
+    }
+
     @Test("within function (Utils geometory)")
     func test_within() throws {
         #expect(within((1, 1), in: (2, 2)) ?? (-1, -1) == (1, 1))
