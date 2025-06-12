@@ -11,13 +11,21 @@ private enum Kind {
     case box
     case robot
     case boxH
+    func asChar2() -> (Character, Character, Character?) {
+        return switch self {
+            case .empty: (".", ".", nil)
+            case .wall: ("#", "#", nil)
+            case .box: ("[", "]", nil)
+            case .robot: ("@", ".", nil)
+            case .boxH: (".", "[", "]")
+        }
+    }
 }
 
 private class Solver {
     var mapping: [[Kind]]
     var moves: [Pos]
     var pos: Pos
-    // var dir: Pos = .zero
     var posHalf: Bool = false
     init(mapping: [[Kind]], moves: [Pos]) {
         self.mapping = mapping
@@ -117,61 +125,51 @@ private class Solver {
         }
     }
     func unsupportedS(_ pos: Pos, half: Bool) -> Bool {
+        let s = pos + .south
         if !half {
             switch mapping[pos] {
             case .wall: return false
             case .empty, .boxH:
                 let w = pos + .west
-                let s1 = pos + .south + .west
-                let s2 = pos + .south
+                let sw = pos + .south + .west
                 return mapping[w] != .boxH
-                    || (self.unsupportedS(s1, half: true) && self.unsupportedS(s2, half: false))
-            case .box:
-                let s = pos + .south
-                return self.unsupportedS(s, half: false) && self.unsupportedS(s, half: true)
+                    || (self.unsupportedS(sw, half: true) && self.unsupportedS(s, half: false))
+            case .box: return self.unsupportedS(s, half: false) && self.unsupportedS(s, half: true)
             default: fatalError()
             }
         } else {
             switch mapping[pos] {
             case .empty: return true
             case .wall: return false
-            case .box:
-                let s = pos + .south
-                return self.unsupportedS(s, half: false) && self.unsupportedS(s, half: true)
+            case .box: return self.unsupportedS(s, half: false) && self.unsupportedS(s, half: true)
             case .boxH:
-                let s1 = pos + .south
-                let s2 = pos + .south + .east
-                return self.unsupportedS(s1, half: true) && self.unsupportedS(s2, half: false)
+                let se = pos + .south + .east
+                return self.unsupportedS(s, half: true) && self.unsupportedS(se, half: false)
             default: fatalError()
             }
         }
     }
     func unsupportedN(_ pos: Pos, half: Bool) -> Bool {
+        let n = pos + .north
         if !half {
             switch mapping[pos] {
             case .wall: return false
             case .empty, .boxH:
                 let w = pos + .west
-                let n1 = pos + .north
-                let n2 = pos + .north + .west
+                let nw = pos + .north + .west
                 return mapping[w] != .boxH
-                    || (self.unsupportedN(n1, half: false) && self.unsupportedN(n2, half: true))
-            case .box:
-                let n = pos + .north
-                return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
+                    || (self.unsupportedN(nw, half: false) && self.unsupportedN(n, half: true))
+            case .box: return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
             default: fatalError()
             }
         } else {
             switch mapping[pos] {
             case .empty: return true
             case .wall: return false
-            case .box:
-                let n = pos + .north
-                return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
+            case .box: return self.unsupportedN(n, half: false) && self.unsupportedN(n, half: true)
             case .boxH:
-                let n1 = pos + .north
-                let n2 = pos + .north + .east
-                return self.unsupportedN(n1, half: true) && self.unsupportedN(n2, half: false)
+                let ne = pos + .north + .east
+                return self.unsupportedN(n, half: true) && self.unsupportedN(ne, half: false)
             default: fatalError()
             }
         }
@@ -186,21 +184,21 @@ private class Solver {
         }
     }
     func shiftE(_ pos: Pos, half: Bool) {
+        let e = pos + .east
         if !half {
             switch mapping[pos] {
             case .box:
-                self.shiftE(pos + .east, half: half)
+                self.shiftE(e, half: half)
                 mapping[pos] = .boxH
-            default:
-                return
+            default: return
             }
         } else {
             switch mapping[pos] {
             case .boxH:
-                self.shiftE(pos + .east, half: half)
-                mapping[pos] = .boxH
-            default:
-                return
+                self.shiftE(e, half: half)
+                mapping[pos] = .empty
+                mapping[e] = .box
+            default: return
             }
         }
     }
@@ -235,20 +233,19 @@ private class Solver {
         }
     }
     func shiftS(_ pos: Pos, half: Bool) {
+        let s = pos + .south
         if !half {
             switch mapping[pos] {
             case .empty, .boxH:
                 let w = pos + .west
-                let s1 = pos + .south + .west
-                let s2 = pos + .south
+                let sw = pos + .south + .west
                 if mapping[w] == .boxH {
-                    self.shiftS(s1, half: true)
-                    self.shiftS(s2, half: false)
+                    self.shiftS(sw, half: true)
+                    self.shiftS(s, half: false)
                     mapping[w] = .empty
-                    mapping[s1] = .boxH
+                    mapping[sw] = .boxH
                 }
             case .box:
-                let s = pos + .south
                 self.shiftS(s, half: false)
                 self.shiftS(s, half: true)
                 mapping[pos] = .empty
@@ -259,14 +256,12 @@ private class Solver {
         } else {
             switch mapping[pos] {
             case .boxH:
-                let s1 = pos + .south
-                let s2 = pos + .south + .east
-                self.shiftS(s1, half: true)
-                self.shiftS(s2, half: false)
+                let se = pos + .south + .east
+                self.shiftS(s, half: true)
+                self.shiftS(se, half: false)
                 mapping[pos] = .empty
-                mapping[s1] = .boxH
+                mapping[se] = .boxH
             case .box:
-                let s = pos + .south
                 self.shiftS(s, half: false)
                 self.shiftS(s, half: true)
                 mapping[pos] = .empty
@@ -277,20 +272,19 @@ private class Solver {
         }
     }
     func shiftN(_ pos: Pos, half: Bool) {
+        let n = pos + .north
         if !half {
             switch mapping[pos] {
             case .empty, .boxH:
                 let w = pos + .west
-                let n1 = pos + .north + .west
-                let n2 = pos + .north
+                let nw = pos + .north + .west
                 if mapping[w] == .boxH {
-                    self.shiftN(n1, half: true)
-                    self.shiftN(n2, half: false)
+                    self.shiftN(nw, half: true)
+                    self.shiftN(n, half: false)
                     mapping[w] = .empty
-                    mapping[n1] = .boxH
+                    mapping[nw] = .boxH
                 }
             case .box:
-                let n = pos + .north
                 self.shiftN(n, half: false)
                 self.shiftN(n, half: true)
                 mapping[pos] = .empty
@@ -301,14 +295,12 @@ private class Solver {
         } else {
             switch mapping[pos] {
             case .boxH:
-                let n1 = pos + .north
-                let n2 = pos + .north + .east
-                self.shiftN(n1, half: true)
-                self.shiftN(n2, half: false)
+                let ne = pos + .north + .east
+                self.shiftN(n, half: true)
+                self.shiftN(ne, half: false)
                 mapping[pos] = .empty
-                mapping[n1] = .boxH
+                mapping[n] = .boxH
             case .box:
-                let n = pos + .north
                 self.shiftN(n, half: false)
                 self.shiftN(n, half: true)
                 mapping[pos] = .empty
@@ -353,9 +345,43 @@ private class Solver {
                 } else if jc.1 == .boxH {
                     acc + il.0 * 100 + jc.0 * 2 + 1
                 } else {
-                    0
+                    acc
                 }
             }
+        }
+    }
+    func dump2() {
+        func str(_ ch: Character?) -> String {
+            guard let ch = ch else { return  "" }
+            return String(ch)
+        }
+        for (i, l) in mapping.enumerated() {
+            var s: String = ""
+            var follow: Character? = nil
+            for (j, c) in l.enumerated() {
+                let p = Pos(y: i, x: j)
+                if p == pos {
+                    if self.posHalf {
+                        s.append(str(follow ?? "."))
+                        s.append("@")
+                        follow = nil
+                    } else if c == .boxH {
+                        let (_, b, f) = Kind.boxH.asChar2()
+                        s.append("@")
+                        s.append(str(b))
+                        follow = f
+                    } else {
+                        s.append("@.")
+                        follow = nil
+                    }
+                    continue
+                }
+                let (a, b, f) = c.asChar2()
+                s.append(follow ?? a)
+                s.append(b)
+                follow = f
+            }
+            print(s)
         }
     }
 }
@@ -375,9 +401,8 @@ private func part2(mapping: [[Kind]], moves: [Pos]) -> Int {
     for t in 0..<moves.count {
         // print("Move: \(moves[t])")
         solver.press2(t)
-        // solver.dump()
     }
-    // solver.dump()
+    solver.dump2()
     return solver.evaluate2()
 }
 
