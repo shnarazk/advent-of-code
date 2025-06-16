@@ -8,7 +8,7 @@ import Foundation
 import SwiftData
 
 public func getAoCModelConfiguration() -> ModelConfiguration {
-    let appGroupID = "group.com.yourdomain.sharedgroup"
+    let appGroupID = "com.shnarazk.sharedgroup.aoc"
     let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
     let storeURL = containerURL.appendingPathComponent("AdventOfCode.sqlite")
     if #available(macOS 15, *) {
