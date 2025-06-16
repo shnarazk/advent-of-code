@@ -43,6 +43,17 @@ let package = Package(
 //            ]
         ),
         .executableTarget(
+            name: "AoCCharts",
+            dependencies: [
+                .product(name: "Collections", package: "swift-collections"),
+                .target(name: "Utils"),
+                .target(name: "Y2016"),
+                .target(name: "Y2022"),
+                .target(name: "Y2023"),
+                .target(name: "Y2024"),
+            ],
+        ),
+        .executableTarget(
             name: "parser1",
             dependencies: [
                 .product(

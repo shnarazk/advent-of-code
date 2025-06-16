@@ -1,12 +1,12 @@
+import Charts
 //
 //  day14.swift
 //  aoc
 //
 import Parsing
-import Utils
-import SwiftUI
-import Charts
 import SwiftData
+import SwiftUI
+import Utils
 
 @DebugDescription
 private struct Robot {
@@ -43,7 +43,7 @@ private func part1(robots: [Robot], boundary: Pos) -> Int {
 }
 
 @Model
-class Y2024D14State {
+public class Y2024D14State {
     @Attribute(.unique) var time: Int
     var rate: Double
     var isMax: Bool = false
@@ -62,18 +62,24 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
     var peakMax: Double = 0
     var peakMin: Double = 10.0
     do {
-        let container = try ModelContainer(for: Y2024D14State.self)
+        let container: ModelContainer = {
+            let config = getAoCModelConfiguration()
+            return try! ModelContainer(for: Y2024D14State.self, configurations: config)
+        }()
+        // let container = try ModelContainer(for: Y2024D14State.self)
         let context = container.mainContext
 
         for t in 0... {
             let map =
-            Set(robots
-                .map {
-                    ((($0.vec * t + $0.pos) % boundary) + boundary) % boundary
-                })
+                Set(
+                    robots
+                        .map {
+                            ((($0.vec * t + $0.pos) % boundary) + boundary) % boundary
+                        }
+                )
             let numConnected = map.filter {
                 !$0.neighbors4(bound: boundary).allSatisfy { !map.contains($0) }
-            } .count
+            }.count
             let r = Double(numConnected) / numPoints
             let trend = r / signalRateEMA
             if peakMax < trend {
@@ -130,16 +136,17 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
     }
 }
 
-private struct ContentView: View {
-    @Query var data: [Y2024D14State]
-    var body: some View {
+public struct Y2024Day14View: View {
+    @Query public var data: [Y2024D14State]
+    public init() {}
+    public var body: some View {
         VStack {
             Chart(data, id: \.time) {
-                 PointMark(
+                PointMark(
                     x: .value("Steps", $0.time),
                     y: .value("Signal ratio", $0.rate)
-                 )
-                 .foregroundStyle(by: .value("Family", $0.isMax ? "max" : "min"))
+                )
+                .foregroundStyle(by: .value("Family", $0.isMax ? "max" : "min"))
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 7))
@@ -155,6 +162,8 @@ private struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .modelContainer(for: [Y2024D14State.self])
+    Y2024Day14View()
+        .modelContainer(
+            ModelContainer(for: Y2024D14State.self, configurations: getAoCModelConfiguration())
+        )
 }
