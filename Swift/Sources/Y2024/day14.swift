@@ -162,8 +162,10 @@ public struct Y2024Day14View: View {
 }
 
 #Preview {
+    let container: ModelContainer = {
+        let config = getAoCModelConfiguration()
+        return try! ModelContainer(for: Y2024D14State.self, configurations: config)
+    }()
     Y2024Day14View()
-        .modelContainer(
-            ModelContainer(for: Y2024D14State.self, configurations: getAoCModelConfiguration())
-        )
+        .modelContainer(container)
 }
