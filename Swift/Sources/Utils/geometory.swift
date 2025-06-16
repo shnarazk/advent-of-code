@@ -112,8 +112,12 @@ public struct Pos: Comparable, Hashable, Sendable {
         }
         return nil
     }
+    /// `bound` is the open end.
     public func neighbors4(bound: Pos) -> [Pos] {
         [self + .north, self + .east, self + .south, self + .west].compactMap { $0.within(bound) }
+    }
+    public static func boundary<T>(of m: [[T]]) -> Pos {
+        Pos(y: m.count, x: m[0].count)
     }
 }
 
