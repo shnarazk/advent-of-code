@@ -21,6 +21,13 @@ struct UtilsTests {
 
     @Test("Pos boundary (Utils geometory)")
     func test_pos_boundary() throws {
+        #expect(Pos.boundary(of: [[]] as [[Int]]) == Pos(y: 0, x: -1))
+        #expect(Pos.boundary(of: [[1 as Int,2,3]]) == Pos(y: 0, x: 2))
+        #expect(Pos.boundary(of: [[1 as Int],[2],[3]]) == Pos(y: 2, x: 0))
+    }
+
+    @Test("Pos within (Utils geometory)")
+    func test_pos_within() throws {
         #expect(Pos(y: 1, x: 1).within(Pos(y: 2, x: 2))! == Pos(y: 1, x: 1))
         #expect(Pos(y: 2, x: 2).within(Pos(y: 2, x: 2))! == Pos(y: 2, x: 2))
         #expect(Pos(y: 2, x: 2).within(y: 3, x: 3)! == Pos(y: 2, x: 2))
@@ -52,6 +59,12 @@ struct UtilsTests {
             Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 2, x: 2)) == [
                 Pos(y: 1, x: 2), Pos(y: 2, x: 1),
             ]
+        )
+        #expect(
+            Pos(y: 2, x: 2).neighbors4(bound: Pos(y: 1, x: 1)) == []
+        )
+        #expect(
+            Pos(y: 0, x: 0).neighbors4(bound: Pos(y: 1, x: 0)) == [Pos(y: 1, x: 0)]
         )
     }
     @Test("Pos 4 dirs (Utils geometory)")

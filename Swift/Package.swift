@@ -9,17 +9,20 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apple/swift-argument-parser",
-            from: "1.0.0"
-        ),
-        .package(
-            url: "https://github.com/apple/swift-collections.git",
             .upToNextMinor(from: "1.0.0")
         ),
         .package(
-            url: "https://github.com/pointfreeco/swift-parsing",
-            from: "0.7.0"
+            url: "https://github.com/apple/swift-collections.git",
+            .upToNextMinor(from: "1.2.0")
         ),
-        .package(url: "https://github.com/swiftgraphs/Grape", from: "1.1.0"),
+        .package(
+            url: "https://github.com/pointfreeco/swift-parsing",
+            .upToNextMinor(from: "0.14.0")
+        ),
+        .package(
+            url: "https://github.com/swiftgraphs/Grape",
+            .upToNextMinor(from: "1.1.0")
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -38,9 +41,9 @@ let package = Package(
                 .target(name: "Y2023"),
                 .target(name: "Y2024"),
             ],
-//            swiftSettings: [
-//                .unsafeFlags(["-Xfrontend", "-enable-debug-dylib"])
-//            ]
+            //            swiftSettings: [
+            //                .unsafeFlags(["-Xfrontend", "-enable-debug-dylib"])
+            //            ]
         ),
         .executableTarget(
             name: "AoCCharts",
@@ -85,7 +88,8 @@ let package = Package(
         .target(
             name: "Y2022",
             dependencies: [
-                .product(name: "Parsing", package: "swift-parsing")
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Collections", package: "swift-collections"),
             ]
         ),
         .target(name: "Y2016", dependencies: []),

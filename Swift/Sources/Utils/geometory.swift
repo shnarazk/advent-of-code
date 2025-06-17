@@ -116,8 +116,9 @@ public struct Pos: Comparable, Hashable, Sendable {
     public func neighbors4(bound: Pos) -> [Pos] {
         [self + .north, self + .east, self + .south, self + .west].compactMap { $0.within(bound) }
     }
+    // return Pos(y: 2, x:2) from [[1,2,3], [4,5,6], [7,8,9]]
     public static func boundary<T>(of m: [[T]]) -> Pos {
-        Pos(y: m.count, x: m[0].count)
+        Pos(y: m.count - 1, x: m[0].count - 1)
     }
 }
 

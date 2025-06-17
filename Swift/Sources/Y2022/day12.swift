@@ -2,30 +2,44 @@
 //  day12.swift
 //  aoc
 //
+import Collections
 import Parsing
 import Utils
 
-private struct State: Equatable, Hashable {
-    let cost: Int
+@DebugDescription
+private struct State: Comparable, Equatable, Hashable {
+    let steps: Int
     let pos: Pos
+    var debugDescription: String {
+        "(\(pos), \(steps))"
+    }
+    static func == (lhs: State, rhs: State) -> Bool {
+        lhs.steps == rhs.steps && lhs.pos == rhs.pos
+    }
+    static func < (lhs: State, rhs: State) -> Bool {
+        lhs.steps < rhs.steps
+    }
 }
 
-private func part1(_ grid: [[Int]], start: Pos, end: Pos) -> Int {
+private func part1(_ grid: [[Int]], start: Pos, goal: Pos) -> Int {
     let boundary = Pos.boundary(of: grid)
-    var toVisit: Set<State> = Set([State(cost:0, pos: start)])
-    var visited: Set<State> = Set()
-    while let p = toVisit.popFirst() {
-        if p.pos == end {
-            return 0
+    var visited: [Pos: Int] = [:]
+    var toVisit: Heap<State> = [State(steps: 0, pos: start)]
+    while let p = toVisit.popMin() {
+        if visited[p.pos, default: p.steps + 1] <= p.steps {
+            continue
         }
-        visited.insert(p)
+        visited[p.pos] = p.steps
+        if p.pos == goal {
+            continue
+        }
         for q in p.pos.neighbors4(bound: boundary) {
-            if !visited.contains(State(cost: p.cost + 1, pos: q)) {
-                toVisit.insert(State(cost: p.cost + 1, pos: q))
+            if grid[q] <= grid[p.pos] + 1 /* && p.cost < visited[q, default: p.cost + 1] */ {
+                toVisit.insert(State(steps: p.steps + 1, pos: q))
             }
         }
     }
-    return 0
+    return visited[goal, default: -1]
 }
 
 private func part2() -> Int {
@@ -38,9 +52,9 @@ public func day12(_ data: String) {
     let grid: [[Int]] = lines.map {
         $0.map {
             return switch $0 {
-            case "S": 1000
-            case "E": 2000
-            default: Int($0.asciiValue! - Character("a").asciiValue!)
+            case "S": 0
+            case "E": 27
+            default: Int($0.asciiValue! - Character("a").asciiValue! + 1)
             }
         }
     }
@@ -49,13 +63,13 @@ public func day12(_ data: String) {
     for (i, l) in grid.enumerated() {
         for (j, c) in l.enumerated() {
             switch c {
-            case 1000: start = Pos(y: i, x: j)
-            case 2000: end = Pos(y: i, x: j)
+            case 0: start = Pos(y: i, x: j)
+            case 27: end = Pos(y: i, x: j)
             default: ()
             }
         }
     }
-    let sum1 = part1(grid, start: start, end: end)
+    let sum1 = part1(grid, start: start, goal: end)
     let sum2 = part2()
     print("Part 1: \(sum1)")
     print("Part 2: \(sum2)")
