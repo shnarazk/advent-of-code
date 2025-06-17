@@ -42,8 +42,25 @@ private func part1(_ height: [[Int]], start: Pos, goal: Pos) -> Int {
     fatalError()
 }
 
-private func part2() -> Int {
-    0
+private func part2(_ height: [[Int]], start: Pos, goal: Pos) -> Int {
+    let boundary = Pos.boundary(of: height)
+    var visited: Set<Pos> = Set()
+    var toVisit: Heap<State> = [State(steps: 0, pos: goal)]
+    while let p = toVisit.popMin() {
+        if height[p.pos] == 0 {
+            return p.steps
+        }
+        if visited.contains(p.pos) {
+            continue
+        }
+        visited.insert(p.pos)
+        for q in p.pos.neighbors4(bound: boundary) {
+            if height[p.pos] - 1 <= height[q] && !visited.contains(q) {
+                toVisit.insert(State(steps: p.steps + 1, pos: q))
+            }
+        }
+    }
+    fatalError()
 }
 
 public func day12(_ data: String) {
@@ -66,7 +83,7 @@ public func day12(_ data: String) {
         }
     }
     let sum1 = part1(grid, start: start, goal: goal)
-    let sum2 = part2()
+    let sum2 = part2(grid, start: start, goal: goal)
     print("Part 1: \(sum1)")
     print("Part 2: \(sum2)")
 }
