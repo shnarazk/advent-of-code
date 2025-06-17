@@ -90,6 +90,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
+                .target(name: "Utils"),
             ]
         ),
         .target(name: "Y2016", dependencies: []),

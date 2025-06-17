@@ -21,25 +21,25 @@ private struct State: Comparable, Equatable, Hashable {
     }
 }
 
-private func part1(_ grid: [[Int]], start: Pos, goal: Pos) -> Int {
-    let boundary = Pos.boundary(of: grid)
-    var visited: [Pos: Int] = [:]
+private func part1(_ height: [[Int]], start: Pos, goal: Pos) -> Int {
+    let boundary = Pos.boundary(of: height)
+    var visited: Set<Pos> = Set()
     var toVisit: Heap<State> = [State(steps: 0, pos: start)]
     while let p = toVisit.popMin() {
-        if visited[p.pos, default: p.steps + 1] <= p.steps {
-            continue
-        }
-        visited[p.pos] = p.steps
         if p.pos == goal {
+            return p.steps
+        }
+        if visited.contains(p.pos) {
             continue
         }
+        visited.insert(p.pos)
         for q in p.pos.neighbors4(bound: boundary) {
-            if grid[q] <= grid[p.pos] + 1 /* && p.cost < visited[q, default: p.cost + 1] */ {
+            if height[q] <= height[p.pos] + 1 && !visited.contains(q) {
                 toVisit.insert(State(steps: p.steps + 1, pos: q))
             }
         }
     }
-    return visited[goal, default: -1]
+    fatalError()
 }
 
 private func part2() -> Int {
@@ -49,27 +49,23 @@ private func part2() -> Int {
 public func day12(_ data: String) {
     let lines: [[Character]] = Array(data.split(separator: "\n", omittingEmptySubsequences: true))
         .map { Array($0) }
-    let grid: [[Int]] = lines.map {
-        $0.map {
-            return switch $0 {
-            case "S": 0
-            case "E": 27
-            default: Int($0.asciiValue! - Character("a").asciiValue! + 1)
-            }
-        }
-    }
     var start = Pos.zero
-    var end = Pos.zero
-    for (i, l) in grid.enumerated() {
-        for (j, c) in l.enumerated() {
+    var goal = Pos.zero
+    let grid: [[Int]] = lines.enumerated().map { (i, l) in
+        l.enumerated().map { (j, c) in
             switch c {
-            case 0: start = Pos(y: i, x: j)
-            case 27: end = Pos(y: i, x: j)
-            default: ()
+            case "S":
+                start = Pos(y: i, x: j)
+                return 0
+            case "E":
+                goal = Pos(y: i, x: j)
+                return 25
+            default:
+                return Int(c.asciiValue! - Character("a").asciiValue!)
             }
         }
     }
-    let sum1 = part1(grid, start: start, goal: end)
+    let sum1 = part1(grid, start: start, goal: goal)
     let sum2 = part2()
     print("Part 1: \(sum1)")
     print("Part 2: \(sum2)")
