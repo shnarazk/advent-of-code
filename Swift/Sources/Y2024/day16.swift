@@ -11,18 +11,20 @@ private struct Raindeer: Comparable, Hashable {
     var pos: Pos
     var dir: Pos
     var cost: Int
+    var route: [State]
     var debugDescription: String {
         "\(pos)-\(dir)"
     }
     /// Return a new instance?
     func move(to: Pos) -> Raindeer? {
         let v = to - pos
+        let r = route + [State(from: self)]
         if v == dir {
-            return Raindeer(pos: to, dir: dir, cost: cost + 1)
+            return Raindeer(pos: to, dir: dir, cost: cost + 1, route: r)
         } else if v == dir.turnRight() {
-            return Raindeer(pos: to, dir: dir.turnRight(), cost: cost + 1001)
+            return Raindeer(pos: to, dir: dir.turnRight(), cost: cost + 1001, route: r)
         } else if v == dir.turnLeft() {
-            return Raindeer(pos: to, dir: dir.turnLeft(), cost: cost + 1001)
+            return Raindeer(pos: to, dir: dir.turnLeft(), cost: cost + 1001, route: r)
         } else {
             return nil
         }
@@ -35,6 +37,10 @@ private struct Raindeer: Comparable, Hashable {
 private struct State: Hashable {
     let pos: Pos
     let dir: Pos
+    init(start: Pos) {
+        self.pos = start
+        self.dir = .east
+    }
     init(from r: Raindeer) {
         self.pos = r.pos
         self.dir = r.dir
@@ -43,7 +49,7 @@ private struct State: Hashable {
 
 private func part1(_ grid: [[Bool]], start: Pos, end: Pos) -> Int {
     let boundary: Pos = Pos.boundary(of: grid)
-    var toVisit: Heap<Raindeer> = [Raindeer(pos: start, dir: .east, cost: 0)]
+    var toVisit: Heap<Raindeer> = [Raindeer(pos: start, dir: .east, cost: 0, route: [])]
     var visited: Set<State> = Set()
     while let r = toVisit.popMin() {
         if r.pos == end {
@@ -60,11 +66,45 @@ private func part1(_ grid: [[Bool]], start: Pos, end: Pos) -> Int {
             }
         }
     }
-    return 0
+    fatalError()
 }
 
-private func part2() -> Int {
-    0
+private func part2(_ grid: [[Bool]], start: Pos, end: Pos) -> Int {
+    let boundary: Pos = Pos.boundary(of: grid)
+    let raindeer = Raindeer(pos: start, dir: .east, cost: 0, route: [State(start: start)])
+    var toVisit: Heap<Raindeer> = [raindeer]
+    var visited: [State: Int] = [:]
+    var best: Int? = nil
+    var bests: Set<State> = Set()
+    while let r = toVisit.popMin() {
+        if r.pos == end {
+            if best ?? r.cost == r.cost {
+                best = r.cost
+                for p in r.route {
+                    bests.insert(p)
+                }
+                bests.insert(State(from: r))
+            }
+            continue
+        }
+        let s = State(from: r)
+        if visited[s, default: r.cost + 1] < r.cost {
+            continue
+        } else if visited[s, default: r.cost + 1] == r.cost && bests.contains(s) {
+            // This is not performant. Since we use heap, candidates run in parallel.
+            for p in r.route {
+                bests.insert(p)
+            }
+            continue
+        }
+        visited[s] = r.cost
+        for n in r.pos.neighbors4(bound: boundary) {
+            if !grid[n], let s = r.move(to: n) {
+                toVisit.insert(s)
+            }
+        }
+    }
+    return Set(bests.map { $0.pos }).count
 }
 
 public func day16(_ data: String) {
@@ -90,7 +130,7 @@ public func day16(_ data: String) {
         }
     }
     let sum1 = part1(grid, start: start, end: end)
-    let sum2 = part2()
+    let sum2 = part2(grid, start: start, end: end)
     print("Part 1: \(sum1)")
     print("Part 2: \(sum2)")
 }

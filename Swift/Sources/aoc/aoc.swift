@@ -36,7 +36,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)
         )
-        if test.isEmpty {
+        if test.isEmpty && false {
             saveDescription(year: year, day: day, variant: nil, text: "", force: false)
         }
         let beg = Date()
