@@ -2,6 +2,13 @@
 ///
 @DebugDescription
 public struct Pos: Comparable, Hashable, Sendable {
+    public func negate() -> Pos {
+        Pos(y: -y, x: -x)
+    }
+    public func abs() -> Pos {
+        Pos(y: Swift.abs(y), x: Swift.abs(x))
+    }
+
     public let y: Int
     public let x: Int
     private static let _zero: Pos = Pos(y: 0, x: 0)
@@ -30,13 +37,22 @@ public struct Pos: Comparable, Hashable, Sendable {
     public static var west: Pos {
         Pos(y: 0, x: -1)
     }
-    public func turn_right() -> Pos {
+    public func turnRight() -> Pos {
         switch self {
         case .north: .east
         case .east: .south
         case .south: .west
         case .west: .north
         default: .zero
+        }
+    }
+    public func turnLeft() -> Pos {
+        switch self {
+            case .west: .south
+            case .south: .east
+            case .east: .north
+            case .north: .west
+            default: .zero
         }
     }
     /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to (y, x)
@@ -101,7 +117,7 @@ public struct Pos: Comparable, Hashable, Sendable {
     }
     /// L1 norm or Manhattan distance
     public func l1Norm() -> Int {
-        abs(self.y) + abs(self.x)
+        Swift.abs(self.y) + Swift.abs(self.x)
     }
     public func next(upto bound: Pos) -> Pos? {
         if self.x < bound.x {

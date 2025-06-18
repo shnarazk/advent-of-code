@@ -71,10 +71,15 @@ struct UtilsTests {
     func test_pos_dirs() throws {
         #expect(Pos.north + Pos.south == Pos.zero)
         #expect(Pos.east + Pos.west == Pos.zero)
-        #expect(Pos.north.turn_right() == Pos.east)
-        #expect(Pos.east.turn_right() == Pos.south)
-        #expect(Pos.south.turn_right() == Pos.west)
-        #expect(Pos.west.turn_right() == Pos.north)
+        #expect(Pos.north.turnRight() == Pos.east)
+        #expect(Pos.east.turnRight() == Pos.south)
+        #expect(Pos.south.turnRight() == Pos.west)
+        #expect(Pos.west.turnRight() == Pos.north)
+        #expect(Pos.north.turnLeft() == Pos.west)
+        #expect(Pos.east.turnLeft() == Pos.north)
+        #expect(Pos.south.turnLeft() == Pos.east)
+        #expect(Pos.west.turnLeft() == Pos.south)
+        #expect(Pos.zero.turnLeft() == Pos.zero)
     }
 
     @Test("Pos as Index for 2D array (Utils geometory)")

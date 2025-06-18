@@ -24,10 +24,10 @@ private func part1(
     while var pos = add(now).within(boundary) {
         var dir = now.dir
         if mirrors.contains(pos) {
-            dir = dir.turn_right()
+            dir = dir.turnRight()
             pos = now.pos + dir
             if mirrors.contains(pos) {
-                dir = dir.turn_right()
+                dir = dir.turnRight()
                 pos = now.pos + dir
             }
         }
@@ -60,10 +60,10 @@ private func part2(
     while var pos = add(now).within(boundary) {
         var dir = now.dir
         if mirrors.contains(pos) {
-            dir = dir.turn_right()
+            dir = dir.turnRight()
             pos = now.pos + dir
             if mirrors.contains(pos) {
-                dir = dir.turn_right()
+                dir = dir.turnRight()
                 pos = now.pos + dir
             }
         }

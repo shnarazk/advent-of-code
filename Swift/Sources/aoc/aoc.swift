@@ -2,6 +2,7 @@
 // https://docs.swift.org/swift-book
 import ArgumentParser
 import Foundation
+import Utils
 import Y2016
 import Y2022
 import Y2023
@@ -35,6 +36,9 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)
         )
+        if test.isEmpty {
+            saveDescription(year: year, day: day, variant: nil, text: "", force: false)
+        }
         let beg = Date()
         switch year {
         case 2024:
@@ -54,6 +58,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
             case 13: Y2024.day13(data)
             case 14: Y2024.day14(data)
             case 15: Y2024.day15(data)
+            case 16: Y2024.day16(data)
             default: fatalError()
             }
         case 2023:

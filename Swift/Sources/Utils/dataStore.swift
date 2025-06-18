@@ -16,9 +16,9 @@ public class AoCDescription {
     public var answer1: String?
     public var answer2: String?
     public init(year: Int, day: Int, variant: String?, text: String, desc: String = "") {
-        let d = day < 10 ? "0" : ""
+        let d = String(format: "%02d", day)
         let v = if let variant { "-\(variant)" } else { "" }
-        self.aocId = "\(year)-\(d)\(day)\(v)"
+        self.aocId = "\(year)-\(d)\(v)"
         self.year = year
         self.day = day
         self.variant = variant
