@@ -55,19 +55,20 @@ public class Y2024D14State {
 }
 
 @MainActor
-private func part2(robots: [Robot], boundary: Pos) -> Int {
+private func part2(robots: [Robot], boundary: Pos, _ save: Bool) -> Int {
     let decayRate = 0.95
     let numPoints = Double(robots.count)
     var signalRateEMA = 1.0
     var peakMax: Double = 0
     var peakMin: Double = 10.0
     do {
-        let container: ModelContainer = {
+        var container: ModelContainer? = nil
+        if save {
             let config = getAoCModelConfiguration()
-            return try! ModelContainer(for: Y2024D14State.self, configurations: config)
-        }()
+            container = try! ModelContainer(for: Y2024D14State.self, configurations: config)
+        }
         // let container = try ModelContainer(for: Y2024D14State.self)
-        let context = container.mainContext
+        let context: ModelContext? = if let container { container.mainContext } else { nil }
 
         for t in 0... {
             let map =
@@ -84,13 +85,17 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
             let trend = r / signalRateEMA
             if peakMax < trend {
                 peakMax = trend
-                context.insert(Y2024D14State(time: t, rate: trend, isMax: true))
-                try context.save()
+                if let context {
+                    context.insert(Y2024D14State(time: t, rate: trend, isMax: true))
+                    try context.save()
+                }
             }
             if r / peakMax < peakMin {
                 peakMin = r / peakMax
-                context.insert(Y2024D14State(time: t, rate: trend, isMax: false))
-                try context.save()
+                if let context {
+                    context.insert(Y2024D14State(time: t, rate: trend, isMax: false))
+                    try context.save()
+                }
             }
             if 3.0 < r / signalRateEMA {
                 return t
@@ -105,7 +110,7 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
     }
 }
 
-@MainActor public func day14(_ data: String) {
+@MainActor public func day14(_ data: String, _ save: Bool) {
     let is_test = Array(data.split(separator: "\n", omittingEmptySubsequences: true)).count == 12
     let boundary: Pos = is_test ? Pos(y: 7, x: 11) : Pos(y: 103, x: 101)
     let robot: some Parser<Substring, Robot> = Parse {
@@ -128,7 +133,7 @@ private func part2(robots: [Robot], boundary: Pos) -> Int {
     do {
         let input = try parser.parse(data)
         let sum1 = part1(robots: input, boundary: boundary)
-        let sum2 = part2(robots: input, boundary: boundary)
+        let sum2 = part2(robots: input, boundary: boundary, save)
         print("Part 1: \(sum1)")
         print("Part 2: \(sum2)")
     } catch {

@@ -19,6 +19,10 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
     @Option(help: "part [0-3]")
     public var part: Int = 0
 
+
+    @Option(help: "store the input data to the shared storage")
+    public var save: Bool = false
+
     @Argument(help: "surfix part of file name for tests")
     public var test: String = ""
 
@@ -36,7 +40,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)
         )
-        if test.isEmpty && false {
+        if test.isEmpty && save {
             saveDescription(year: year, day: day, variant: nil, text: "", force: false)
         }
         let beg = Date()
@@ -56,7 +60,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
             case 11: Y2024.day11(data)
             case 12: Y2024.day12(data)
             case 13: Y2024.day13(data)
-            case 14: Y2024.day14(data)
+            case 14: Y2024.day14(data, save)
             case 15: Y2024.day15(data)
             case 16: Y2024.day16(data)
             default: fatalError()
