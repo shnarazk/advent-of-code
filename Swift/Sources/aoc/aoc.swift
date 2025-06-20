@@ -19,8 +19,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
     @Option(help: "part [0-3]")
     public var part: Int = 0
 
-
-    @Option(help: "store the input data to the shared storage")
+    @Flag(help: "store the input data to the shared storage")
     public var save: Bool = false
 
     @Argument(help: "surfix part of file name for tests")
@@ -36,6 +35,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
     }
 
     @MainActor public func run() throws {
+        print(save)
         print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)

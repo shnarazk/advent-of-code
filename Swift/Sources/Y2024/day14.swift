@@ -55,19 +55,19 @@ public class Y2024D14State {
 }
 
 @MainActor
-private func part2(robots: [Robot], boundary: Pos, _ save: Bool) -> Int {
+private func part2(robots: [Robot], boundary: Pos, _ modelConfig: ModelConfiguration?) -> Int {
     let decayRate = 0.95
     let numPoints = Double(robots.count)
     var signalRateEMA = 1.0
     var peakMax: Double = 0
     var peakMin: Double = 10.0
     do {
-        var container: ModelContainer? = nil
-        if save {
-            let config = getAoCModelConfiguration()
-            container = try! ModelContainer(for: Y2024D14State.self, configurations: config)
-        }
-        // let container = try ModelContainer(for: Y2024D14State.self)
+        let container: ModelContainer? =
+            if let modelConfig {
+                try! ModelContainer(for: Y2024D14State.self, configurations: modelConfig)
+            } else {
+                nil
+            }
         let context: ModelContext? = if let container { container.mainContext } else { nil }
 
         for t in 0... {

@@ -69,7 +69,7 @@ private func part1(_ grid: [[Character]]) -> (Int, [Pos]) {
 }
 
 @Model
-class Y2023D10State {
+public class Y2023D10State {
     @Attribute(.unique) var name: String
     var val1: Double
     init(name: String, val1: Double) {
@@ -144,10 +144,11 @@ public func day10(_ data: String) {
     }
 }
 
-private struct ContentView: View {
+public struct Y2023Day10View: View {
     // @Environment(\.modelContext) private var context
     @Query var data: [Y2023D10State]
-    var body: some View {
+    public init() {}
+    public var body: some View {
         VStack {
             Chart {
                 BarMark(
@@ -169,6 +170,6 @@ private struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    Y2023Day10View()
         .modelContainer(for: [Y2023D10State.self])
 }

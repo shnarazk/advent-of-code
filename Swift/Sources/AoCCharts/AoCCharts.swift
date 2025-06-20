@@ -5,41 +5,67 @@
 import SwiftData
 import SwiftUI
 import Utils
+import Y2023
 import Y2024
-
-enum TargetGraph {
-    case Y2025Day14
-}
 
 @available(macOS 26.0, *)
 @MainActor
 @main
-struct AoCCharts: App {
-    private let container: ModelContainer = {
-        let config = getAoCModelConfiguration()
-        return try! ModelContainer(for: Y2024D14State.self, configurations: config)
-    }()
-    @State private var targetGrsph: TargetGraph = .Y2025Day14
+struct AoCChartsApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationSplitView {
-                List {
-                    Section(header: Text("y2024")) {
-                        Text("day14")
-                    }
-                }
-            } detail: {
-                switch targetGrsph {
-                case .Y2025Day14:
-                    Y2024Day14View()
-                        .modelContainer(container)
-                }
-
-            }
+            AoCCharts()
         }
     }
 }
 
-//#Preview {
-//    AoCCharts()
-//}
+struct AoCCharts: View {
+    private let modelConf: ModelConfiguration = getAoCModelConfiguration()
+    var body: some View {
+            NavigationSplitView {
+                List {
+                    Section(header: Text("y2024")) {
+                        NavigationLink {
+                            Y2024Day14View()
+                                .modelContainer(
+                                    try! ModelContainer(
+                                        for: Y2024D14State.self,
+                                        configurations: modelConf
+                                    )
+                                )
+                        } label: {
+                            Text("day14")
+                        }
+                        NavigationLink {
+                            Text("ok")
+                        } label: {
+                            Text("WIP")
+                        }
+                    }
+                    Section(header: Text("2023")) {
+                        NavigationLink {
+                            Y2023Day10View()
+                                .modelContainer(
+                                    try! ModelContainer(
+                                        for: Y2023D10State.self,
+                                        configurations: modelConf
+                                    )
+                                )
+                        } label: {
+                            Text("day10")
+                        }
+                        NavigationLink {
+
+                        } label: {
+                            Text("WIP")
+                        }
+                    }
+                }
+            } detail: {
+            }
+        }
+    }
+
+#Preview {
+    AoCCharts()
+}
