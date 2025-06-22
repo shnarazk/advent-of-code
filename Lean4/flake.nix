@@ -15,7 +15,7 @@
             pkgs.elan
             # pkgs.nodejs_22
             # pkgs.tokei
-            pkgs.vscodium
+            # pkgs.vscodium
           ];
         };
       });
