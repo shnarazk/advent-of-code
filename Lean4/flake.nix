@@ -55,6 +55,7 @@
               plugins.cmp.autoEnableSources = true;
               plugins.lean.enable = true;
               plugins.lean.autoLoad = true;
+              plugins.lean.leanPackage = null;
               plugins.lean.settings.mappings = true;
               plugins.lean.settings.progress_bars.enable = false;
               plugins.lualine.enable = true;
