@@ -100,9 +100,7 @@ impl AdventOfCode for Puzzle {
         }
         debug_assert_eq!(16, result.len());
         result.iter().fold(String::new(), |mut s, v| {
-            write!(s, "{}", &format!("{:#x}", v)[2..])
-                .map(|_| s)
-                .unwrap()
+            write!(s, "{}", &format!("{v:#x}")[2..]).map(|_| s).unwrap()
         })
     }
 }

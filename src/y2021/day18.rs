@@ -25,7 +25,7 @@ impl fmt::Debug for Tree {
                             format!("{}{}{}", color::GREEN, n, color::RESET)
                         }
                     } else {
-                        format!("{}", n)
+                        format!("{n}")
                     }
                 }
                 Tree::List(v) => {
@@ -45,7 +45,7 @@ impl fmt::Debug for Tree {
             }
         }
         match self {
-            Tree::Num(n) => write!(f, "{}", n),
+            Tree::Num(n) => write!(f, "{n}"),
             Tree::List(_) => write!(f, "{}", leveled(self, 0)),
         }
     }
@@ -76,7 +76,7 @@ impl Tree {
                 ']' => {
                     return (Tree::List(tree), &str[1..]);
                 }
-                _ => panic!("{:?}", str),
+                _ => panic!("{str:?}"),
             }
         }
         debug_assert!(!tree.is_empty());

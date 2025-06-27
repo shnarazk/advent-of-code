@@ -52,7 +52,7 @@ impl AdventOfCode for Puzzle {
         let mut num: isize = 0;
         for l in self.line.iter() {
             num = l.iter().sum::<isize>();
-            println!("{}", num);
+            println!("{num}");
         }
         num
     }

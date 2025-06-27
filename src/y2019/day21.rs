@@ -36,7 +36,7 @@ impl AdventOfCode for Puzzle {
             *output.last().unwrap() as usize
         } else {
             let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
-            print!("{}", illustration);
+            print!("{illustration}");
             0
         }
     }
@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
             *output.last().unwrap() as usize
         } else {
             let illustration = output.iter().map(|c| *c as u8 as char).collect::<String>();
-            print!("{}", illustration);
+            print!("{illustration}");
             0
         }
     }

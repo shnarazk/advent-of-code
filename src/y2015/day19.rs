@@ -103,7 +103,7 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .filter(|(from, _)| *from != "e")
                     .map(|(_, chs)| chs.iter().cloned().collect::<String>())
-                    .map(|to2| format!("{}{}", to1, to2))
+                    .map(|to2| format!("{to1}{to2}"))
                     .collect::<Vec<String>>()
             })
             .collect::<Vec<String>>();
@@ -203,7 +203,7 @@ impl AdventOfCode for Puzzle {
                     .iter()
                     .filter(|(from, _)| *from != "e")
                     .map(|(_, chs)| chs.iter().cloned().collect::<String>())
-                    .map(|to2| format!("{}{}", to1, to2))
+                    .map(|to2| format!("{to1}{to2}"))
                     .collect::<Vec<String>>()
             })
             .collect::<Vec<String>>();

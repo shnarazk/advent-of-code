@@ -51,7 +51,7 @@ impl Grid {
     fn show(&self) {
         for v in self.loc.iter() {
             for c in v.iter() {
-                print!("{}", c);
+                print!("{c}");
             }
             println!();
         }

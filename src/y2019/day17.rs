@@ -19,8 +19,8 @@ enum Segment {
 impl std::fmt::Debug for Segment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Segment::L(n) => write!(f, "L{}", n),
-            Segment::R(n) => write!(f, "R{}", n),
+            Segment::L(n) => write!(f, "L{n}"),
+            Segment::R(n) => write!(f, "R{n}"),
         }
     }
 }

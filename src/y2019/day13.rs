@@ -236,7 +236,7 @@ impl Env {
                             "o"
                         }
                     };
-                    print!("{}", d);
+                    print!("{d}");
                 } else {
                     print!(" ");
                 }

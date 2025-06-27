@@ -195,7 +195,7 @@ impl Puzzle {
                 for r in ROTATE.iter() {
                     let n = matrix_product(r, m);
                     newm.push(n);
-                    assert!(ROTATIONS.contains(&n), "{:?} <= {:?} {:?}", n, r, m,);
+                    assert!(ROTATIONS.contains(&n), "{n:?} <= {r:?} {m:?}");
                 }
             }
             for m in newm.iter() {
@@ -213,12 +213,12 @@ impl Puzzle {
                 print!(
                     "[{}], ",
                     v.iter()
-                        .map(|n| format!("{:>2}", n))
+                        .map(|n| format!("{n:>2}"))
                         .collect::<Vec<_>>()
                         .join(","),
                 );
             }
-            println!(" ], // {:2>}", i);
+            println!(" ], // {i:2>}");
         }
         println!("];");
         panic!();

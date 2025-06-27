@@ -218,7 +218,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
             }
             let mut file =
                 File::create(&output).unwrap_or_else(|_| panic!("fail to open {output}"));
-            writeln!(file, "{}", json).expect("fail to save");
+            writeln!(file, "{json}").expect("fail to save");
             println!(
                 "{}# write JSON data on {}{}",
                 color::MAGENTA,

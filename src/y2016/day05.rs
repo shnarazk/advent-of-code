@@ -30,7 +30,7 @@ impl AdventOfCode for Puzzle {
             }
         }
         ans.iter().fold(String::new(), |mut s, n| {
-            write!(s, "{:x}", n).map(|_| s).unwrap()
+            write!(s, "{n:x}").map(|_| s).unwrap()
         })
     }
     fn part2(&mut self) -> Self::Output2 {

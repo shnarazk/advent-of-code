@@ -14,8 +14,8 @@ enum Opr {
 impl fmt::Debug for Opr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Opr::Lit(n) => write!(f, "{:_>3}", n),
-            Opr::Var(c) => write!(f, "_{}", c),
+            Opr::Lit(n) => write!(f, "{n:_>3}"),
+            Opr::Var(c) => write!(f, "_{c}"),
         }
     }
 }
@@ -130,10 +130,10 @@ impl Puzzle {
     #[allow(dead_code)]
     fn dump_z(&self, ans: &[usize]) {
         let mut z = 0;
-        print!("{}, ", z);
+        print!("{z}, ");
         for (pc, w) in ans.iter().enumerate() {
             z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, *w);
-            print!("{}, ", z);
+            print!("{z}, ");
         }
         assert_eq!(z, 0);
         println!();

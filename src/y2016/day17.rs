@@ -100,10 +100,7 @@ impl<'a> Hasher<'a> {
         let key = format!("{}{path}", self.seed);
         self.hasher.update(&key);
         let result = self.hasher.finalize_reset();
-        let phrase = format!("{:x}", result)
-            .chars()
-            .take(4)
-            .collect::<Vec<char>>();
+        let phrase = format!("{result:x}").chars().take(4).collect::<Vec<char>>();
         let is_open = |c: &char, d: char| ['b', 'c', 'd', 'e', 'f'].contains(c).then_some(d);
         [
             is_open(&phrase[0], 'U'),

@@ -87,9 +87,7 @@ fn deduce(pattern: &[Vec<char>], table: &[usize; 7]) -> [usize; 7] {
     }
     assert!(
         real_mnemonic.iter().all(|k| k.is_some()),
-        "{:?}\n{:?}",
-        pattern,
-        real_mnemonic
+        "{pattern:?}\n{real_mnemonic:?}"
     );
     [
         real_mnemonic[0].unwrap(),
@@ -133,7 +131,7 @@ fn segments_to_num(vec: &[usize]) -> usize {
     if vec.len() == 6 && vec.iter().all(|d| [0, 1, 2, 3, 5, 6].contains(d)) {
         return 9;
     }
-    panic!("{:?}", vec);
+    panic!("{vec:?}");
 }
 
 mod parser {

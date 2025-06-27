@@ -245,7 +245,7 @@ impl Puzzle {
             if v.is_empty() {
                 println!();
             } else {
-                println!(" {:?}", v);
+                println!(" {v:?}");
             }
         }
     }

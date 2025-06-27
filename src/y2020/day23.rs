@@ -89,7 +89,7 @@ impl Puzzle {
         let mut s: String = String::new();
         while self.next_cup[i] != 1 {
             i = self.next_cup[i];
-            s.push_str(&format!("{}", i));
+            s.push_str(&format!("{i}"));
         }
         s
     }

@@ -23,7 +23,7 @@ impl AdventOfCode for Puzzle {
         for i in 0..1000 {
             hasher.update(format!("{salt}{i}"));
             let result = hasher.finalize_reset();
-            let phrase = format!("{:x}", result);
+            let phrase = format!("{result:x}");
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -40,7 +40,7 @@ impl AdventOfCode for Puzzle {
             // generate
             hasher.update(format!("{}{}", salt, check + 1000));
             let result = hasher.finalize_reset();
-            let phrase = format!("{:x}", result);
+            let phrase = format!("{result:x}");
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -81,11 +81,11 @@ impl AdventOfCode for Puzzle {
             let mut result = hasher.finalize_reset();
             {
                 for _ in 0..2016 {
-                    hasher.update(format!("{:x}", result));
+                    hasher.update(format!("{result:x}"));
                     result = hasher.finalize_reset();
                 }
             }
-            let phrase = format!("{:x}", result);
+            let phrase = format!("{result:x}");
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -103,11 +103,11 @@ impl AdventOfCode for Puzzle {
             let mut result = hasher.finalize_reset();
             {
                 for _ in 0..2016 {
-                    hasher.update(format!("{:x}", result));
+                    hasher.update(format!("{result:x}"));
                     result = hasher.finalize_reset();
                 }
             }
-            let phrase = format!("{:x}", result);
+            let phrase = format!("{result:x}");
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()

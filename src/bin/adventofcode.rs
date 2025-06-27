@@ -137,7 +137,7 @@ fn bench(config: ConfigAoC) {
     let output = format!("{}/{}/execution_time.json", JSON_DUMP_DIR, config.year);
     if let Ok(json) = serde_json::to_string(&results) {
         let mut file = File::create(&output).expect("fail to open");
-        writeln!(file, "{}", json).expect("fail to save");
+        writeln!(file, "{json}").expect("fail to save");
         println!(
             "{}# write JSON data on {}{}",
             color::MAGENTA,
