@@ -13,10 +13,11 @@ namespace TwoDimensionalVector64.Rect
 
 variable (r : Rect Bool)
 
-def mirroredₕ (p : Dim2) (h : Nat) : Option Dim2 :=
+def mirroredₕ (p : Dim2) (h' : Nat) : Option Dim2 :=
+  let h : UInt64 := h'.toUInt64
   if p.1 < h then
     let y' : UInt64 := h + h - p.1 - 1
-    if y' < r.height.toNat then some (y', p.2) else none
+    if y' < r.height then some (y', p.2) else none
   else
     let y' := p.1 - h
     if h < y' + 1 then none else some (h - y' - 1, p.2)
@@ -30,12 +31,13 @@ def mirroredₕ (p : Dim2) (h : Nat) : Option Dim2 :=
 /--
 Return optinal Dim2 that locates on the mirrored position.
 -/
-def mirroredᵥ (p : Dim2) (v : Nat) : Option Dim2 :=
+def mirroredᵥ (p : Dim2) (v' : Nat) : Option Dim2 :=
+  let v : UInt64 := v'.toUInt64
   if p.2 < v then
-    let x' : UInt64 := (v + v).toUInt64 - p.2 - 1
+    let x' : UInt64 := (v + v) - p.2 - 1
     if x' < r.width then some (p.1, x') else none
   else
-    let x' : UInt64 := p.2 - v.toUInt64
+    let x' : UInt64 := p.2 - v
     if v < x' + 1 then none else some (p.1, v - x' - 1)
 
 -- #eval r99.mirroredᵥ (Dim2.mk 4 5) 4
