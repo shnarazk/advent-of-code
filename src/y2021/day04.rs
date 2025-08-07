@@ -15,11 +15,11 @@ pub struct Puzzle {
     num_row: usize,
 }
 
-fn col_at(vec: &[Vec<usize>], at: usize) -> Cow<[usize]> {
+fn col_at(vec: &[Vec<usize>], at: usize) -> Cow<'_, [usize]> {
     Cow::Owned(vec.iter().map(|l| l[at]).collect::<Vec<usize>>())
 }
 
-fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<[usize]> {
+fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<'_, [usize]> {
     Cow::Borrowed(&vec[at])
 }
 

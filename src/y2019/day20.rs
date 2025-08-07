@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/20>
 use crate::geometric::neighbors4;
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -27,7 +27,7 @@ struct State {
 
 impl PartialOrd for State {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cost.cmp(&other.cost))
+        Some(self.cmp(other))
     }
 }
 
@@ -115,11 +115,10 @@ impl AdventOfCode for Puzzle {
             self.portal.insert(v[0].0, v[1].1);
             self.portal.insert(v[1].0, v[0].1);
         }
-        debug_assert!(
-            self.gate
-                .iter()
-                .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str()))
-        );
+        debug_assert!(self
+            .gate
+            .iter()
+            .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str())));
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {

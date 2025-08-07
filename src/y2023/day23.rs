@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2023/day/23>
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
+        framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, GeometricMath},
         progress,
     },
     serde::Serialize,
     std::{
         cmp::Reverse,
-        collections::{BinaryHeap, HashMap, HashSet, hash_map::Entry},
+        collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
     },
 };
 
@@ -31,7 +31,7 @@ struct Route {
 
 impl PartialOrd for Route {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cost.cmp(&other.cost))
+        Some(self.cmp(other))
     }
 }
 

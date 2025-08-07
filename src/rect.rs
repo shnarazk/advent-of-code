@@ -94,7 +94,7 @@ impl<T: Clone + Default + Sized> Rect<T> {
     pub fn size(&self) -> &Vec2 {
         &self.size
     }
-    pub fn iter(&self) -> Vec2Iter<T> {
+    pub fn iter(&self) -> Vec2Iter<'_, T> {
         Vec2Iter {
             vec: &self.vec,
             max_j: self.size.1,
