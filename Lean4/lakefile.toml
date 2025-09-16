@@ -8,7 +8,7 @@ name = "batteries"
 scope = "leanprover-community"
 # git = "git@github.com:shnarazk/batteries.git"
 # rev = "main"
-# rev = "v4.22.0-rc3"
+rev = "v4.24.0-rc1"
 
 [[require]]
 name = "Cli"
@@ -20,7 +20,8 @@ rev = "main"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "master"
+# rev = "master"
+rev = "v4.24.0-rc1"
 # rev = "v4.22.0-rc2"
 
 [[lean_lib]]
