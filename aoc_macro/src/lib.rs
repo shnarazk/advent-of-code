@@ -1,8 +1,8 @@
 use {
     proc_macro::TokenStream,
-    quote::{quote, ToTokens},
+    quote::{ToTokens, quote},
     std::str::FromStr,
-    syn::{parse::*, parse_macro_input, ImplItem, ItemImpl},
+    syn::{ImplItem, ItemImpl, parse::*, parse_macro_input},
 };
 mod color;
 
@@ -80,11 +80,12 @@ pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     fn to_usize(token: &syn::ExprLit) -> usize {
-        if let syn::Lit::Int(ref lit_int) = token.lit {
-            if let Ok(n) = lit_int.base10_parse::<usize>() {
-                return n;
-            }
+        if let syn::Lit::Int(ref lit_int) = token.lit
+            && let Ok(n) = lit_int.base10_parse::<usize>()
+        {
+            return n;
         }
+
         panic!();
     }
     let vars = parse_macro_input!(attrs as Args);
