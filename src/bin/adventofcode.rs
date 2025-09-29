@@ -19,6 +19,8 @@ use adventofcode::y2022;
 use adventofcode::y2023;
 #[cfg(feature = "y2024")]
 use adventofcode::y2024;
+#[cfg(feature = "y2025")]
+use adventofcode::y2025;
 use serde::Serialize;
 
 use {
@@ -71,6 +73,8 @@ fn run_solver(mut config: ConfigAoC) {
         2023 => aoc_arms!(2023),
         #[cfg(feature = "y2024")]
         2024 => aoc_arms!(2024),
+        #[cfg(feature = "y2025")]
+        2025 => aoc_arms!(2025),
         _ => println!("invalid year: {}", config.year),
     };
     let end = Instant::now();
@@ -116,6 +120,8 @@ fn bench(config: ConfigAoC) {
                 2023 => aoc_arms!(2023),
                 #[cfg(feature = "y2024")]
                 2024 => aoc_arms!(2024),
+                #[cfg(feature = "y2025")]
+                2025 => aoc_arms!(2025),
                 _ => println!("invalid year for benchmark: {}", config.year),
             }
             let end = Instant::now();
