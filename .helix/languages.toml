@@ -11,3 +11,6 @@ name = "day1"
 request = "launch"
 completion = [ { name = "binary", completion = "filename" } ]
 args = { program = "{0}", args = ["1"]}
+
+[language-server.rust-analyzer.config.files]
+watcher = "client"
