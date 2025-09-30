@@ -115,9 +115,10 @@ impl<const N: usize> State<N> {
                     .flatten()
                 {
                     if f < (FLOORS as u8)
-                        && let Some(state) = self.move_floor(f, i, j) {
-                            list.push(state);
-                        }
+                        && let Some(state) = self.move_floor(f, i, j)
+                    {
+                        list.push(state);
+                    }
                 }
             }
         }

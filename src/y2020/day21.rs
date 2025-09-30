@@ -157,10 +157,11 @@ impl AdventOfCode for Puzzle {
 impl Puzzle {
     fn var_of(&self, ing: &str, all: &str) -> i32 {
         if let Some(ni) = self.ingredients.get(ing)
-            && let Some(na) = self.allergens.get(all) {
-                let num_alls = self.allergens.len();
-                return (ni * num_alls + na + 1) as i32;
-            }
+            && let Some(na) = self.allergens.get(all)
+        {
+            let num_alls = self.allergens.len();
+            return (ni * num_alls + na + 1) as i32;
+        }
         0
     }
     fn make_cnf(&self) -> Vec<Vec<i32>> {

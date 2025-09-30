@@ -168,38 +168,39 @@ impl Puzzle {
             return Some(x);
         }
         if let Some(p1_head) = self.player1.pop_front()
-            && let Some(p2_head) = self.player2.pop_front() {
-                let append_to_p1: bool = {
-                    if p1_head <= self.player1.len() && p2_head <= self.player2.len() {
-                        let mut child = Puzzle {
-                            player1: self.player1.clone(),
-                            player2: self.player2.clone(),
-                            ..Default::default()
-                        };
-                        child.player1.truncate(p1_head);
-                        child.player2.truncate(p2_head);
-                        // println!(
-                        //     "{:>width$}",
-                        //     ">",
-                        //     width = child.player1.len() + child.player2.len()
-                        // );
-                        let mut stopper = None;
-                        while child.check_winner(stopper).is_none() {
-                            stopper = child.round_part2();
-                        }
-                        child.check_winner(stopper).expect("impossible") == 1
-                    } else {
-                        p2_head < p1_head
+            && let Some(p2_head) = self.player2.pop_front()
+        {
+            let append_to_p1: bool = {
+                if p1_head <= self.player1.len() && p2_head <= self.player2.len() {
+                    let mut child = Puzzle {
+                        player1: self.player1.clone(),
+                        player2: self.player2.clone(),
+                        ..Default::default()
+                    };
+                    child.player1.truncate(p1_head);
+                    child.player2.truncate(p2_head);
+                    // println!(
+                    //     "{:>width$}",
+                    //     ">",
+                    //     width = child.player1.len() + child.player2.len()
+                    // );
+                    let mut stopper = None;
+                    while child.check_winner(stopper).is_none() {
+                        stopper = child.round_part2();
                     }
-                };
-                if append_to_p1 {
-                    self.player1.push_back(p1_head);
-                    self.player1.push_back(p2_head);
+                    child.check_winner(stopper).expect("impossible") == 1
                 } else {
-                    self.player2.push_back(p2_head);
-                    self.player2.push_back(p1_head);
+                    p2_head < p1_head
                 }
+            };
+            if append_to_p1 {
+                self.player1.push_back(p1_head);
+                self.player1.push_back(p2_head);
+            } else {
+                self.player2.push_back(p2_head);
+                self.player2.push_back(p1_head);
             }
+        }
         None
     }
 }

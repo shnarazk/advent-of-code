@@ -88,9 +88,10 @@ impl AdventOfCode for Puzzle {
                 let on = self.is_pulling(y as isize, x as isize);
                 if span == 0 && on {
                     if let Some(xx) = border.get(&(y - 99))
-                        && x + 99 <= *xx {
-                            return x * 10_000 + (y - 99);
-                        }
+                        && x + 99 <= *xx
+                    {
+                        return x * 10_000 + (y - 99);
+                    }
                     span = 1;
                     start_x = x - 1;
                 } else if 0 < span {

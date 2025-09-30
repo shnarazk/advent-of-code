@@ -66,9 +66,10 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> isize {
         for i in 0..self.code.len() {
             if let Some(mut variant) = flip(&self.code, i)
-                && let Some(result) = CPU::run2(&mut variant) {
-                    return result.accumulator;
-                }
+                && let Some(result) = CPU::run2(&mut variant)
+            {
+                return result.accumulator;
+            }
         }
         0
     }

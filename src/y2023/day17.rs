@@ -106,9 +106,11 @@ impl Puzzle {
         while let Some(Reverse(c)) = to_visit.pop() {
             if threshold <= c.dist
                 && let Some(d) = visited.get(&(c.pos, c.dir))
-                    && d.0 <= c.cost && d.1 <= c.dist {
-                        continue;
-                    }
+                && d.0 <= c.cost
+                && d.1 <= c.dist
+            {
+                continue;
+            }
             if cost <= c.cost {
                 continue;
             }

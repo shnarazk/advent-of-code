@@ -1,14 +1,14 @@
 //! <https://adventofcode.com/2023/day/23>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, GeometricMath},
         progress,
     },
     serde::Serialize,
     std::{
         cmp::Reverse,
-        collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+        collections::{BinaryHeap, HashMap, HashSet, hash_map::Entry},
     },
 };
 

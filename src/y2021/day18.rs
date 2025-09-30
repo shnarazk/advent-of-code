@@ -205,9 +205,10 @@ impl AdventOfCode for Puzzle {
             let str = &block.chars().filter(|c| *c != ',').collect::<Vec<_>>();
             let (node, _rest) = Tree::from(str);
             if let Tree::List(mut v) = node
-                && let Some(node) = v.pop() {
-                    self.line.push(node);
-                }
+                && let Some(node) = v.pop()
+            {
+                self.line.push(node);
+            }
         }
         Ok(())
     }

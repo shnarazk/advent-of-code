@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2019/day/20>
 use crate::geometric::neighbors4;
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -78,30 +78,31 @@ impl AdventOfCode for Puzzle {
                                 self.gate.entry(portal_name).or_default().push(locs);
                             }
                         } else if let Some(h) = self.map.get(&(y, x - 1))
-                            && b'A' <= *h && *h <= b'Z' {
-                                let portal_name =
-                                    [*h, *c].iter().map(|c| *c as char).collect::<String>();
-                                // seek an open passage around.
-                                let locs: (Location, Location) = if 2 <= x
-                                    && self.line[y][x - 2] == b'.'
-                                {
-                                    ((y, x - 1), (y, x - 2))
-                                } else if x + 1 < self.line[0].len() && self.line[y][x + 1] == b'.'
-                                {
-                                    ((y, x), (y, x + 1))
-                                } else {
-                                    unreachable!()
-                                };
-                                if portal_name == "AA" {
-                                    self.portal.insert((0, 0), locs.1);
-                                } else {
-                                    self.map.insert(locs.0, b'*');
-                                }
-                                if portal_name == "ZZ" {
-                                    self.portal.insert(locs.1, (0, 0));
-                                }
-                                self.gate.entry(portal_name).or_default().push(locs);
+                            && b'A' <= *h
+                            && *h <= b'Z'
+                        {
+                            let portal_name =
+                                [*h, *c].iter().map(|c| *c as char).collect::<String>();
+                            // seek an open passage around.
+                            let locs: (Location, Location) = if 2 <= x
+                                && self.line[y][x - 2] == b'.'
+                            {
+                                ((y, x - 1), (y, x - 2))
+                            } else if x + 1 < self.line[0].len() && self.line[y][x + 1] == b'.' {
+                                ((y, x), (y, x + 1))
+                            } else {
+                                unreachable!()
+                            };
+                            if portal_name == "AA" {
+                                self.portal.insert((0, 0), locs.1);
+                            } else {
+                                self.map.insert(locs.0, b'*');
                             }
+                            if portal_name == "ZZ" {
+                                self.portal.insert(locs.1, (0, 0));
+                            }
+                            self.gate.entry(portal_name).or_default().push(locs);
+                        }
                     }
                     b'.' | b'#' => {
                         self.map.insert((y, x), *c);
@@ -114,10 +115,11 @@ impl AdventOfCode for Puzzle {
             self.portal.insert(v[0].0, v[1].1);
             self.portal.insert(v[1].0, v[0].1);
         }
-        debug_assert!(self
-            .gate
-            .iter()
-            .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str())));
+        debug_assert!(
+            self.gate
+                .iter()
+                .all(|(k, v)| v.len() == 2 || ["AA", "ZZ"].contains(&k.as_str()))
+        );
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {

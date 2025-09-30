@@ -32,9 +32,10 @@ impl Puzzle {
     }
     fn fetch(&mut self) -> Option<(u8, u8)> {
         if let Some(a) = self.code.get(self.ip).copied()
-            && let Some(b) = self.code.get(self.ip + 1).copied() {
-                return Some((a, b));
-            }
+            && let Some(b) = self.code.get(self.ip + 1).copied()
+        {
+            return Some((a, b));
+        }
         None
     }
     fn combo_opland(&self, d: u8) -> usize {

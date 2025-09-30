@@ -192,10 +192,11 @@ impl Creature {
             for ad in DIRS.iter() {
                 let q = (pos.0 + ad.0, pos.1 + ad.1);
                 if let Some(d) = table.get(&q)
-                    && *d < dist_so_far {
-                        dist_so_far = *d;
-                        r = q;
-                    }
+                    && *d < dist_so_far
+                {
+                    dist_so_far = *d;
+                    r = q;
+                }
             }
             debug_assert_ne!(r, *pos);
             // println!(" - creatue at {:?} moves to {:?}", pos, r);

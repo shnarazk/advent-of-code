@@ -124,14 +124,15 @@ impl AdventOfCode for Puzzle {
         let mut result = 0;
         while count < 200 {
             if let Some(mut q) = queue.pop_front()
-                && !q.is_empty() {
-                    count += 1;
-                    if let Some(vaporized) = q.pop_front() {
-                        result = vaporized.1 + vaporized.2 * 100;
-                        // println!("{:?}", vaporized);
-                    }
-                    queue.push_back(q);
+                && !q.is_empty()
+            {
+                count += 1;
+                if let Some(vaporized) = q.pop_front() {
+                    result = vaporized.1 + vaporized.2 * 100;
+                    // println!("{:?}", vaporized);
                 }
+                queue.push_back(q);
+            }
         }
         result
     }

@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2021/day/4>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::borrow::Cow,
 };
 
@@ -48,9 +48,9 @@ mod parser {
         super::Board,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::{newline, space0, space1},
             combinator::{preceded, separated, seq},
-            ModalResult, Parser,
         },
     };
 

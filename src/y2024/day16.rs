@@ -151,10 +151,11 @@ impl AdventOfCode for Puzzle {
             visited[pos] = Some(cost);
             for d in DIRECTIONS.iter() {
                 if let Some(q) = pos.add(d.as_vec2()).included((0, 0), self.size)
-                    && self.mapping[q] {
-                        let c = cost + if dir == *d { 1 } else { 1001 };
-                        to_visit.push(Reverse((c, *q, *d)));
-                    }
+                    && self.mapping[q]
+                {
+                    let c = cost + if dir == *d { 1 } else { 1001 };
+                    to_visit.push(Reverse((c, *q, *d)));
+                }
             }
         }
         best
@@ -199,10 +200,11 @@ impl AdventOfCode for Puzzle {
             }
             for d in DIRECTIONS.iter() {
                 if let Some(q) = pos.add(d.as_vec2()).included((0, 0), self.size)
-                    && self.mapping[q] {
-                        let c = cost + if dir == *d { 1 } else { 1001 };
-                        to_visit.push(Reverse((c, ((*q, *d), p))));
-                    }
+                    && self.mapping[q]
+                {
+                    let c = cost + if dir == *d { 1 } else { 1001 };
+                    to_visit.push(Reverse((c, ((*q, *d), p))));
+                }
             }
         }
         count_points(&visited, self.goal)

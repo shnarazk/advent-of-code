@@ -2,7 +2,7 @@
 
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         parser,
     },
     std::collections::HashMap,

@@ -67,16 +67,18 @@ impl Puzzle {
             trail.insert(self.guard);
             pos = self.next_pos();
             if let Some(p) = pos
-                && self.plane[&p] {
+                && self.plane[&p]
+            {
+                self.turn();
+                pos = self.next_pos();
+                if let Some(p) = pos
+                    && self.plane[&p]
+                {
                     self.turn();
                     pos = self.next_pos();
-                    if let Some(p) = pos
-                        && self.plane[&p] {
-                            self.turn();
-                            pos = self.next_pos();
-                        }
-                    // There is no possibility of U-shaped obstructions!
                 }
+                // There is no possibility of U-shaped obstructions!
+            }
         }
         false
     }
@@ -123,17 +125,18 @@ impl AdventOfCode for Puzzle {
             self.guard.0 = p;
             pos = self.next_pos();
             if let Some(p) = pos
-                && self.plane[&p] {
-                    self.turn();
-                    pos = self.next_pos();
-                    // there's no chains of obstructions.
-                    // if let Some(p) = pos {
-                    //     if self.hash.contains(&p) {
-                    //         self.turn();
-                    //         pos = self.next_pos();
-                    //     }
-                    // }
-                }
+                && self.plane[&p]
+            {
+                self.turn();
+                pos = self.next_pos();
+                // there's no chains of obstructions.
+                // if let Some(p) = pos {
+                //     if self.hash.contains(&p) {
+                //         self.turn();
+                //         pos = self.next_pos();
+                //     }
+                // }
+            }
         }
         self.trail.len()
     }
