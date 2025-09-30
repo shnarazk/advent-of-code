@@ -269,14 +269,12 @@ impl Puzzle {
                 // }
                 // println!();
                 // */
-                if let Inst::Div(Opr::Lit(a1)) = self.line[i + 4] {
-                    if let Inst::Add(Opr::Lit(a2)) = self.line[i + 5] {
-                        if let Inst::Add(Opr::Lit(a3)) = self.line[i + 15] {
+                if let Inst::Div(Opr::Lit(a1)) = self.line[i + 4]
+                    && let Inst::Add(Opr::Lit(a2)) = self.line[i + 5]
+                        && let Inst::Add(Opr::Lit(a3)) = self.line[i + 15] {
                             // println!("{:>3},{:>3},{:>3}", a1, a2, a3);
                             jit.push((a1, a2, a3));
                         }
-                    }
-                }
             }
         }
         // for l in jit.iter() {

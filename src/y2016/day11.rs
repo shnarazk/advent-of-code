@@ -114,11 +114,10 @@ impl<const N: usize> State<N> {
                     .into_iter()
                     .flatten()
                 {
-                    if f < (FLOORS as u8) {
-                        if let Some(state) = self.move_floor(f, i, j) {
+                    if f < (FLOORS as u8)
+                        && let Some(state) = self.move_floor(f, i, j) {
                             list.push(state);
                         }
-                    }
                 }
             }
         }

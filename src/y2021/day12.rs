@@ -50,14 +50,13 @@ impl Puzzle {
     fn count_to2(&self, path: Vec<&Node>, favorite: Option<&Node>) -> usize {
         let here: &Node = path.last().unwrap();
         if *here == Node::Start {
-            if let Some(f) = favorite {
-                if path.iter().filter(|n| **n == f).count() == 2 {
+            if let Some(f) = favorite
+                && path.iter().filter(|n| **n == f).count() == 2 {
                     // let mut p = path.clone();
                     // p.reverse();
                     // println!("{:?} -- {:?}", p, f);
                     return 1;
                 }
-            }
             return 0;
         }
         let mut count = 0;

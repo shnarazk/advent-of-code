@@ -85,7 +85,7 @@ impl Puzzle {
     fn update_cycle(&mut self, n: usize) {
         for _ in 0..n {
             self.cycle += 1;
-            if 20 <= self.cycle && (self.cycle - 20) % 40 == 0 {
+            if 20 <= self.cycle && (self.cycle - 20).is_multiple_of(40) {
                 self.auto_sum += self.signal_strength();
             }
         }

@@ -30,7 +30,7 @@ impl std::fmt::Debug for Plane {
 }
 impl Plane {
     fn divide(&self) -> Divided {
-        if self.size % 2 == 0 {
+        if self.size.is_multiple_of(2) {
             let mut result = Vec::new();
             let block_len = self.size / 2;
             let size = self.size;
@@ -46,7 +46,7 @@ impl Plane {
                 result.push(Plane2(pack));
             }
             return Divided::By2(result);
-        } else if self.size % 3 == 0 {
+        } else if self.size.is_multiple_of(3) {
             let mut result = Vec::new();
             let block_len = self.size / 3;
             let size = self.size;

@@ -71,7 +71,7 @@ impl AdventOfCode for Puzzle {
                     pc = (pc as isize + o - 1) as usize;
                 }
                 Inst::Jie(r, o) => {
-                    if reg[*r as usize] % 2 == 0 {
+                    if reg[*r as usize].is_multiple_of(2) {
                         pc = (pc as isize + o - 1) as usize;
                     }
                 }
@@ -104,7 +104,7 @@ impl AdventOfCode for Puzzle {
                     pc = (pc as isize + o - 1) as usize;
                 }
                 Inst::Jie(r, o) => {
-                    if reg[*r as usize] % 2 == 0 {
+                    if reg[*r as usize].is_multiple_of(2) {
                         pc = (pc as isize + o - 1) as usize;
                     }
                 }

@@ -77,8 +77,8 @@ impl AdventOfCode for Puzzle {
                                 }
                                 self.gate.entry(portal_name).or_default().push(locs);
                             }
-                        } else if let Some(h) = self.map.get(&(y, x - 1)) {
-                            if b'A' <= *h && *h <= b'Z' {
+                        } else if let Some(h) = self.map.get(&(y, x - 1))
+                            && b'A' <= *h && *h <= b'Z' {
                                 let portal_name =
                                     [*h, *c].iter().map(|c| *c as char).collect::<String>();
                                 // seek an open passage around.
@@ -102,7 +102,6 @@ impl AdventOfCode for Puzzle {
                                 }
                                 self.gate.entry(portal_name).or_default().push(locs);
                             }
-                        }
                     }
                     b'.' | b'#' => {
                         self.map.insert((y, x), *c);

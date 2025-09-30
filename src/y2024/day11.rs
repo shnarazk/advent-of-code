@@ -18,7 +18,7 @@ pub struct Puzzle {
 fn even_digits(n: usize) -> Option<(usize, usize)> {
     fn aux(n: usize, digits: usize, origin: usize) -> Option<(usize, usize)> {
         if n < 10 {
-            if digits % 2 == 0 {
+            if digits.is_multiple_of(2) {
                 let half = 10_usize.pow(digits as u32 / 2);
                 Some((origin / half, origin % half))
             } else {

@@ -87,7 +87,7 @@ impl Iterator for Generator {
         let mut n = self.value;
         loop {
             n = (n * self.factor) % self.modulo;
-            if n % self.check == 0 {
+            if n.is_multiple_of(self.check) {
                 self.value = n;
                 return Some(n & self.mask);
             }

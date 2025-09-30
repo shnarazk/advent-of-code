@@ -209,7 +209,7 @@ impl Tile {
                 return false;
             }
         }
-        if 0 < loc % align {
+        if !loc.is_multiple_of(align) {
             let (left, r, f) = &placed[loc - 1];
             if self.transpose(rotate, flip)[Dir::LEFT.as_index()]
                 != left.transpose(*r, *f)[Dir::LEFT.opposite()]

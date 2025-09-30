@@ -121,8 +121,8 @@ impl AdventOfCode for Puzzle {
             {
                 let workers_jobs = workers.iter().map(|w| w.working).collect::<Vec<_>>();
                 for w in workers.iter_mut() {
-                    if let Some(job) = w.working {
-                        if w.finish_at == second {
+                    if let Some(job) = w.working
+                        && w.finish_at == second {
                             result.push(job);
                             w.working = None;
                             if let Some(v) = succs.get(&job) {
@@ -136,7 +136,6 @@ impl AdventOfCode for Puzzle {
                                 }
                             }
                         }
-                    }
                 }
             }
             if available.is_empty() && workers.iter().all(|w| w.working.is_none()) {

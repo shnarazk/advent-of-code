@@ -71,7 +71,7 @@ fn get(map: &mut HashMap<Dim2, bool>, x: usize, y: usize, key: usize) -> bool {
     }
     let b = {
         let sum = x * x + 3 * x + 2 * x * y + y + y * y + key;
-        sum.count_ones() % 2 == 0
+        sum.count_ones().is_multiple_of(2)
     };
     map.insert((x, y), b);
     b

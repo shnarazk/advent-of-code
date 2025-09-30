@@ -88,12 +88,11 @@ impl AdventOfCode for Puzzle {
             }
             let mut next: HashSet<Dim> = HashSet::new();
             for from in self.map.iter() {
-                if let Some(to) = targets.get(from) {
-                    if *counts.get(to).unwrap() == 1 {
+                if let Some(to) = targets.get(from)
+                    && *counts.get(to).unwrap() == 1 {
                         next.insert(*to);
                         continue;
                     }
-                }
                 next.insert(*from);
             }
             std::mem::swap(&mut self.map, &mut next);
@@ -149,13 +148,12 @@ impl AdventOfCode for Puzzle {
             let mut next: HashSet<Dim> = HashSet::new();
             let mut moved = false;
             for from in self.map.iter() {
-                if let Some(to) = targets.get(from) {
-                    if *counts.get(to).unwrap() == 1 {
+                if let Some(to) = targets.get(from)
+                    && *counts.get(to).unwrap() == 1 {
                         moved |= from != to;
                         next.insert(*to);
                         continue;
                     }
-                }
                 next.insert(*from);
             }
             if !moved {

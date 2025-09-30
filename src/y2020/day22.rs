@@ -167,8 +167,8 @@ impl Puzzle {
         if let Some(x) = self.cache.saw(&self.player1, &self.player2) {
             return Some(x);
         }
-        if let Some(p1_head) = self.player1.pop_front() {
-            if let Some(p2_head) = self.player2.pop_front() {
+        if let Some(p1_head) = self.player1.pop_front()
+            && let Some(p2_head) = self.player2.pop_front() {
                 let append_to_p1: bool = {
                     if p1_head <= self.player1.len() && p2_head <= self.player2.len() {
                         let mut child = Puzzle {
@@ -200,7 +200,6 @@ impl Puzzle {
                     self.player2.push_back(p1_head);
                 }
             }
-        }
         None
     }
 }

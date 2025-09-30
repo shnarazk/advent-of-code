@@ -116,15 +116,14 @@ impl AdventOfCode for Puzzle {
                     beg = Some(*b);
                 }
                 Record::Wake_(ts, e) => {
-                    if let Some(g) = guard {
-                        if let Some(b) = beg {
+                    if let Some(g) = guard
+                        && let Some(b) = beg {
                             if *e < b {
                                 panic!();
                             }
                             *total.entry(g).or_insert(0) += e - b;
                             days.entry(g).or_default().insert(ts.as_day());
                         }
-                    }
                     beg = None;
                 }
             }
@@ -150,13 +149,12 @@ impl AdventOfCode for Puzzle {
                     beg = Some(*b);
                 }
                 Record::Wake_(_ts, e) => {
-                    if guard == Some(id_max) {
-                        if let Some(b) = beg {
+                    if guard == Some(id_max)
+                        && let Some(b) = beg {
                             for p in &mut minute[b..*e] {
                                 *p += 1;
                             }
                         }
-                    }
                     beg = None;
                 }
             }
@@ -186,15 +184,14 @@ impl AdventOfCode for Puzzle {
                     beg = Some(*b);
                 }
                 Record::Wake_(_ts, e) => {
-                    if let Some(g) = guard {
-                        if let Some(b) = beg {
+                    if let Some(g) = guard
+                        && let Some(b) = beg {
                             debug_assert!(b < *e);
                             *total.entry(g).or_insert(0) += e - b;
                             for t in b..*e {
                                 minite_report.entry(g).or_insert([0; 60])[t] += 1;
                             }
                         }
-                    }
                     beg = None;
                 }
             }

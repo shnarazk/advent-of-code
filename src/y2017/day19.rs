@@ -45,11 +45,10 @@ impl AdventOfCode for Puzzle {
         let mut direction: Location = (1, 0);
         let mut letters: Vec<u8> = Vec::new();
         while let Some(p) = to_visit {
-            if let Some(c) = self.map.get(&p) {
-                if b'A' <= *c && *c <= b'Z' {
+            if let Some(c) = self.map.get(&p)
+                && b'A' <= *c && *c <= b'Z' {
                     letters.push(*c);
                 }
-            }
             let mut next = (p.0 + direction.0, p.1 + direction.1);
             if self.map.contains_key(&next) {
                 to_visit = Some(next);
