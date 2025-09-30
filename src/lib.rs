@@ -26,6 +26,8 @@ pub mod y2022;
 pub mod y2023;
 #[cfg(feature = "y2024")]
 pub mod y2024;
+#[cfg(feature = "y2025")]
+pub mod y2025;
 
 pub use aoc_macro::aoc_arms;
 
