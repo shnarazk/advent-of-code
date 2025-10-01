@@ -142,7 +142,7 @@ fn bench(config: ConfigAoC) {
         .collect::<Vec<_>>();
     let output = format!("{}/{}/execution_time.json", JSON_DUMP_DIR, config.year);
     if let Ok(json) = serde_json::to_string(&results) {
-        let mut file = File::create(&output).expect("fail to open");
+        let mut file = File::create(&output).expect(&format!("fail to open {output}"));
         writeln!(file, "{json}").expect("fail to save");
         println!(
             "{}# write JSON data on {}{}",
