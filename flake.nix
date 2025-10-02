@@ -12,9 +12,9 @@
           pkgs.bashInteractive
           pkgs.cargo-watch
           pkgs.graphviz
-          pkgs.lldb_19
+          pkgs.lldb_21
           pkgs.libiconv
-          pkgs.samply
+          pkgs.samply # a profiler
           pkgs.tokei
         ];
       };
