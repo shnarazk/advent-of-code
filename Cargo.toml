@@ -16,7 +16,7 @@ aoc_macro = { version = "^0.2", path = "aoc_macro" }
 clap = { version = "^4.5", features = ["derive"] }
 itertools = { version = "^0.14" }
 md-5 = { version = "^0.10", optional = true }
-petgraph = { version = "0.8", optional = true }
+# petgraph = { version = "0.8", optional = true }
 # plotters = { version = "0.3.7", features = ["histogram"] }
 rayon = { version = "^1.10", optional = true }
 rustc_data_structures = "^0.1"
@@ -26,10 +26,10 @@ splr = { version = "^0.17", optional = true }
 winnow = "^0.7"
 
 [features]
-default = ["y2025"]
-# default = ["y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
+# default = ["y2025"]
+default = ["y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
 y2025 = ["rayon"]
-y2024 = ["petgraph", "rayon"]
+y2024 = ["rayon"]
 y2023 = []
 y2022 = []
 y2021 = []
