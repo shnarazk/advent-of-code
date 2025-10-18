@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 AoC = "d3ea9ae9-af4a-410f-a534-06eea3ee9a32"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 ParserCombinator = "fae87a5f-d1ad-5cf0-8f61-c941e1580b46"
 
 [sources]
@@ -12,6 +13,7 @@ AoC = {path = "./AoC"}
 
 [compat]
 AoC = "0.1.0"
+IJulia = "1.31.0"
 ParserCombinator = "2.2.1"
 
 [extras]
