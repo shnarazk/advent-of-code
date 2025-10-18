@@ -3,10 +3,10 @@
 use {
     crate::framework::{AdventOfCode, ParseError, aoc_at},
     itertools::Itertools,
-    petgraph::{
-        Graph,
-        dot::{Config, Dot},
-    },
+    // petgraph::{
+    //     dot::{Config, Dot},
+    //    Graph,
+    // },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     serde::Serialize,
     std::{
@@ -392,6 +392,7 @@ impl AdventOfCode for Puzzle {
         }
         Ok(())
     }
+    /*
     fn serialize(&self) -> Option<String> {
         let mut data = PROPAGATION_TABLE
             .get()
@@ -436,6 +437,7 @@ impl AdventOfCode for Puzzle {
         );
         serde_json::to_string(&data).ok()
     }
+    */
     fn part1(&mut self) -> Self::Output1 {
         let input_bits = *INPUT_BITS.get().unwrap();
         let x = self
