@@ -20,8 +20,8 @@ rev = "main"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "master"
-# rev = "v4.25.0-rc1"
+# rev = "master"
+rev = "v4.25.0-rc1"
 
 [[lean_lib]]
 name = "AoC"

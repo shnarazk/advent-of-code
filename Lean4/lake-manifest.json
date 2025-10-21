@@ -8,7 +8,7 @@
    "rev": "da2fd30c91aa177fc00c364d00e2c55334a5b32b",
    "name": "mathlib",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "master",
+   "inputRev": "v4.25.0-rc1",
    "inherited": false,
    "configFile": "lakefile.lean"},
   {"url": "git@github.com:leanprover/lean4-cli.git",
