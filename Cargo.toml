@@ -12,7 +12,7 @@ name = "adventofcode"
 path = "src/bin/adventofcode.rs"
 
 [dependencies]
-aoc_macro = { version = "^0.2", path = "aoc_macro" }
+aoc_macro = { version = "^0.3", path = "aoc_macro" }
 clap = { version = "^4.5", features = ["derive"] }
 itertools = { version = "^0.14" }
 md-5 = { version = "^0.10", optional = true }
