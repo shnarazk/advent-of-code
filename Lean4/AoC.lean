@@ -46,7 +46,7 @@ def formatFloat (f : Float) (precision : Nat) : String :=
 -- #eval formatFloat (-123.456789) 4  -- Outputs "-123.4568"
 
 def String.up_to_depth (depth : Nat) (s : String) (sep : Char := '/') : String :=
-  s.split (· == sep)
+  s.splitToList (· == sep)
   |>.reverse
   |>.take depth
   |>.reverse

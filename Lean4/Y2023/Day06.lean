@@ -64,7 +64,7 @@ def Part1.solve (data : String) : String :=
     "parse error"
 
 def Part2.solve (data : String) : Nat :=
-  let x := (data.split (. == '\n')).map (fun l =>
+  let x := (data.splitToList (. == '\n')).map (fun l =>
       List.foldl
           (fun n d => n * 10 + d.toNat - '0'.toNat)
           0

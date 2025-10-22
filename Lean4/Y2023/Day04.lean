@@ -7,12 +7,12 @@ open Accumulation
 def parsed (source : String) : List Nat × List Nat :=
   (toNats targets, toNats cands)
   where
-    body    := (String.split source (. == ':')).getD 1 ""
-    parts   := body.split (. == '|')
+    body    := (String.splitToList source (. == ':')).getD 1 ""
+    parts   := body.splitToList (. == '|')
     targets := parts.getD 0 "no num"
     cands   := parts.getD 1 "no name"
     toNats  := fun (s : String) =>
-      let pair := String.split s.trim (. == ' ')
+      let pair := String.splitToList s.trim (. == ' ')
       let numbers := pair.filter (fun s => s != "")
       numbers.map String.toNat!
 

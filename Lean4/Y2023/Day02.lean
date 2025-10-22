@@ -19,12 +19,12 @@ def toHashMap (source : String) : Std.HashMap String Nat :=
     (Std.HashMap.emptyWithCapacity.insert "«id»" id)
     items_in_bags
   where
-    id := ((List.getD (source.split (. == ':')) 0 "-1").drop 5).trim.toNat!
-    body := List.getD (source.split (. == ':')) 1 ""
-    turns := body.split (. == ';')
-    items_in_bags := turns.map (fun b => b.split (. == ','))
+    id := ((List.getD (source.splitToList (. == ':')) 0 "-1").drop 5).trim.toNat!
+    body := List.getD (source.splitToList (. == ':')) 1 ""
+    turns := body.splitToList (. == ';')
+    items_in_bags := turns.map (fun b => b.splitToList (. == ','))
     association := fun s =>
-      let pair := String.split s.trim (· == ' ')
+      let pair := String.splitToList s.trim (· == ' ')
       let value := (pair.getD 0 "no num").trim.toNat!
       let label := (pair.getD 1 "no name").trim
       (label, value)
