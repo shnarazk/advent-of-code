@@ -1,5 +1,6 @@
-import Mathlib.Tactic.Basic
-import Mathlib.Tactic.Coe
+-- import Mathlib.Tactic.Basic
+-- import Mathlib.Tactic.Coe
+import Std.Data.HashMap
 
 namespace Dim2
 
@@ -20,10 +21,12 @@ def turn : Dir → Dir
   | Dir.W => Dir.N
 -- #eval Dir.E.turn
 
+/-
 lemma turn_four_times_eq_self : ∀ d : Dir, d.turn.turn.turn.turn = d := by
   intro d
   dsimp [turn]
   cases d <;> simp
+-/
 
 def asVec₂ : Dir → (Int × Int)
   | Dir.N => (-1,  0)
