@@ -1,6 +1,6 @@
-import Mathlib.Data.Nat.ModEq  -- for Chinese Reminder Theorem
 import «AoC».Basic
 import «AoC».Combinator
+import «AoC».Math
 import «AoC».Parser
 
 namespace Y2023.Day20
@@ -250,19 +250,9 @@ return loop_length × intro_length
 def findLoop (circuit : Circuit) (port : Label): Nat × Nat :=
   findLoop' port circuit HashMap.emptyWithCapacity 1
 
-/-
-`rx` is the output of module `dh` and `dh` is a Conjunction module with four inputs.
-So we need the cycle lengths of each input module states.
-By using Chinese remain theorem, we can get the answer.
-It is implemented as `Nat.chineseRemainder'` in Mathlib.Data.Nat.ModEq.
-- {m n a b : ℕ} (h : a ≡ b [MOD n.gcd m]) : { k // k ≡ a [MOD n] ∧ k ≡ b [MOD m] }
--/
--- #eval Nat.chineseRemainder (by rfl : (21 : Nat).Coprime 19) 4 5
 def crt (m n a b : Nat) : Nat :=
-  if h : m.Coprime n then
-    let c := Nat.chineseRemainder h a b
-    if c == (0 : Nat) then m.lcm n else c
-  else dbg s!"crt {m} {n} {a} {b} =>" $ m + a
+  let c := chinese_remainder_theorem ⟨(↑m : Int), (↑a : Int)⟩ ⟨(↑n : Int), (↑b : Int)⟩ |>.snd |>.toNat
+  if c == (0 : Nat) then m.lcm n else c
 -- #eval crt 21 17 4 5
 -- #eval (277 - 4) / 21
 -- #eval 21 * 13 + 4
