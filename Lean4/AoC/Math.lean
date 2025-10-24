@@ -1,7 +1,7 @@
 partial
 def gcd (x y : Int) : Int := if y = 0 then x else gcd y (x % y)
 
-#eval gcd 10 5
+-- #eval gcd 10 5
 
 partial
 def lcm (x y : Int) : Int := (x * y) % gcd x y
@@ -28,5 +28,5 @@ def chinese_remainder_theorem (aq_ar bq_br : Int × Int) : Int × Int :=
     let m := if nar < nbr then nbr - nar else bq + nbr - nar
     ⟨aq * bq, aq * m + ar⟩
 
-#eval chinese_remainder_theorem ⟨5, 4⟩ ⟨2, 0⟩ |>.snd
-#eval chinese_remainder_theorem ⟨21, 4⟩ ⟨17, 5⟩ |>.snd
+-- #eval chinese_remainder_theorem ⟨5, 4⟩ ⟨2, 0⟩ |>.snd
+-- #eval chinese_remainder_theorem ⟨21, 4⟩ ⟨17, 5⟩ |>.snd
