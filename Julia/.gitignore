@@ -1,0 +1,28 @@
+# Ignore build artifacts and Julia compilation caches
+
+# PackageCompiler and other build outputs
+/build/
+build/
+/build/sysimages/
+/dist/
+/out/
+
+# Julia compilation caches (precompiled .ji files)
+**/*.ji
+
+# If a local Julia depot ends up inside the repo (uncommon but safe to ignore)
+.julia/
+
+# Legacy/commonly generated deps artifacts (BinDeps/BinaryBuilder/etc.)
+/deps/deps.jl
+/deps/build.log
+/deps/downloads/
+/deps/usr/
+/deps/src/
+/deps/*.dylib
+/deps/*.dll
+/deps/*.so
+
+# Documentation build artifacts (Documenter.jl)
+/docs/build/
+/docs/site/
