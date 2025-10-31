@@ -45,6 +45,7 @@ impl AdventOfCode for Puzzle {
             // calculate gravities
             for i in 0..self.line.len() {
                 for j in i + 1..self.line.len() {
+                    #[allow(clippy::needless_range_loop)]
                     for axis in 0..3 {
                         let d = (self.line[j][axis] - self.line[i][axis]).signum();
                         delta[i][axis] += d;
@@ -90,6 +91,7 @@ impl AdventOfCode for Puzzle {
             // calculate gravities
             for i in 0..self.line.len() {
                 for j in i + 1..self.line.len() {
+                    #[allow(clippy::needless_range_loop)]
                     for axis in 0..3 {
                         let d = (self.line[j][axis] - self.line[i][axis]).signum();
                         delta[i][axis] += d;
