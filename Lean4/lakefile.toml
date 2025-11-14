@@ -8,7 +8,7 @@ name = "batteries"
 scope = "leanprover-community"
 # git = "git@github.com:shnarazk/batteries.git"
 # rev = "main"
-rev = "v4.25.0-rc2"
+rev = "v4.25.0"
 
 [[require]]
 name = "Cli"
