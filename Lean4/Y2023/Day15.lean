@@ -61,7 +61,7 @@ def assoc_erase (al : AssocList) (tag : String) : AssocList :=
 def solve (data : Input) : Nat :=
   data.foldl
       (fun boxes ac ↦
-        let str : String := String.mk ac.toList
+        let str : String := String.ofList ac.toList
         if let some (tag, val) := parser.parse_box str then
           boxes.modify (Part1.hasher tag.toList.toArray) (assoc_insert · tag val)
         else if let some tag := parser.parse_ers str then
