@@ -1,6 +1,8 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
 
 namespace Y2024.Day04
 
@@ -135,6 +137,6 @@ def solve (input : Input) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2024 04 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2024 04 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day04

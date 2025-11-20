@@ -1,8 +1,10 @@
-import Std
-import Std.Internal.Parsec
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
+module
+
+public import Std
+public import Std.Internal.Parsec
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
 
 namespace Y2024.Day02
 open CiCL
@@ -45,6 +47,6 @@ def solve (inp : Input) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2024 2 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2024 2 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day02

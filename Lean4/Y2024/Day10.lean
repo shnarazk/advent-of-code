@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
-import «AoC».Vec
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
+public import «AoC».Vec
 
 namespace Y2024.Day10
 open Accumulation CiCL Dim2 Std
@@ -70,6 +72,6 @@ def solve (input : Input) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2024 10 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2024 10 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day10

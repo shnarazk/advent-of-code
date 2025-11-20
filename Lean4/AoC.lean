@@ -1,13 +1,17 @@
+module
+
 -- This module serves as the root of the `AoC` library.
 -- Import modules here that should be built as part of the library.
 -- import Aesop
-import Batteries
-import Cli
-import «AoC».Basic
-import «AoC».Color
-import «AoC».Combinator
-import «Y2023»
-import «Y2024»
+public import Batteries
+public import Cli
+public import «AoC».Basic
+public import «AoC».Color
+public import «AoC».Combinator
+public import «Y2023»
+public import «Y2024»
+
+@[expose] public section
 
 open AoC
 open Cli
