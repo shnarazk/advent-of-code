@@ -1,11 +1,17 @@
-import Batteries
-import Std.Internal.Parsec
+module
+
+public import Batteries
+public import Std.Internal.Parsec
+
+@[expose] public section
 
 namespace AoCParser
 open Lean
 open Std.Internal
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
+
+variable {α β γ : Type}
 
 /--
 end of line
@@ -21,12 +27,12 @@ def endBy (p : Parser α) (e : Parser β) : Parser (Array α) := do
 /--
 a sequence of space or TAB
 --/
-def whitespaces : Parser Unit := many1 (pchar ' ' <|> pchar '\t') *> return ()
+def whitespaces : Parser Unit := many1 (pchar ' ' <|> pchar '▸') *> return ()
 
 /--
 an optional sequence of space or TAB
 --/
-def whitespaces? : Parser Unit := many (pchar ' ' <|> pchar '\t') *> return ()
+def whitespaces? : Parser Unit := many (pchar ' ' <|> pchar '▸') *> return ()
 
 /--
 [A-Za-z]+

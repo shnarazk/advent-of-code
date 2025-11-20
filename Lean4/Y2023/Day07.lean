@@ -1,5 +1,7 @@
-import «AoC».Basic
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Parser
 
 namespace Y2023.Day07
 
@@ -138,6 +140,6 @@ def solve2 (d : Array Hand) : Nat :=
   let winnings := Array.foldl (fun acc r => (acc.fst + acc.snd * r.snd, acc.snd + 1)) (0, 1) o
   winnings.fst
 
-def solve := AocProblem.config 2023 7 parser.parse solve1 solve2
+public def solve := AocProblem.config 2023 7 parser.parse solve1 solve2
 
 end Y2023.Day07

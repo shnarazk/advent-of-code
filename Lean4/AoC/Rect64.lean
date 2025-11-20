@@ -1,5 +1,9 @@
+module
+
 -- import Init.Data.Array.Subarray
-import Std.Data.HashMap
+public import Std.Data.HashMap
+
+@[expose] public section
 
 namespace TwoDimensionalVector64
 
@@ -51,7 +55,6 @@ deriving Hashable, Repr
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.width == b.width && a.vector == b.vector
 
-private
 def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
     ([] : List (List α))
@@ -149,7 +152,7 @@ def swap [BEq α] [Inhabited α] (self : Rect α) (p q : Dim2) : Rect α :=
 def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Dim2 :=
   p.vector.findIdx? f |>.map (fun i ↦  (i.toUInt64 / p.width, i.toUInt64 % p.width))
 
-private partial
+partial
 def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=

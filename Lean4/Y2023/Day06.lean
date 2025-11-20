@@ -1,5 +1,7 @@
-import «AoC».Basic
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Parser
 
 namespace Y2023.Day06
 open Accumulation
@@ -72,6 +74,6 @@ def Part2.solve (data : String) : Nat :=
   let r := Race.new x[0]! x[1]!
   r.evaluate
 
-def solve := AocProblem.config 2023 6 some Part1.solve Part2.solve
+public def solve := AocProblem.config 2023 6 some Part1.solve Part2.solve
 
 end Y2023.Day06

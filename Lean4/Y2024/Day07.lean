@@ -1,5 +1,7 @@
-import «AoC».Basic
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Parser
 
 namespace Y2024.Day07
 open Accumulation Std
@@ -44,6 +46,6 @@ def shift (a b : Nat) (b0 : Nat := b) : Nat :=
 def solve₂ (input : Input) : Nat :=
   input.map (fun (val, v) ↦ exp #[(· + ·), (· * ·), shift] val v.toList) |> sum
 
-def solve := AocProblem.config 2024 07 parser.parse solve₁ solve₂
+public def solve := AocProblem.config 2024 07 parser.parse solve₁ solve₂
 
 end Y2024.Day07

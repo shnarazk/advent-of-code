@@ -1,4 +1,8 @@
-import Lean
+module
+
+public import Lean
+
+@[expose] public section
 
 def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
   dbgTrace s!"{label}: {a}" (fun _ ↦ a)
@@ -123,7 +127,7 @@ end AocProblem
 /--
 Return an array consisting of elements in `a`
 -/
-def unique (a : Array α) [BEq α] [Hashable α] : Array α :=
+def unique {α : Type} (a : Array α) [BEq α] [Hashable α] : Array α :=
   let hash := Array.foldl (·.insert ·) (Std.HashSet.emptyWithCapacity : Std.HashSet α) a
   hash.toArray
 
@@ -165,18 +169,18 @@ instance : Accumulation (Array (Option Int)) where
   sum     a := a.filterMap (·) |>.foldl Int.add 0 |>.toNat
   product a := a.filterMap (·) |>.foldl Int.mul 1 |>.toNat
 
-open Accumulation
+-- open Accumulation
 
 -- #eval Accumulation.sum [1, 3, 5]
 -- #eval sum [1, 3, 5]
 -- #eval product [1, 3, 5]
 
-def List.enumerate (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) => (i, x))
+def List.enumerate {α : Type} (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) => (i, x))
 -- List.zip (List.range a.length) a
 -- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
 
-def Array.enum (a : Array α) : Array (Nat × α) :=
+def Array.enum {α : Type} (a : Array α) : Array (Nat × α) :=
   a.zipIdx.map (fun (x, i) ↦ (i, x))
 
 -- example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
@@ -242,7 +246,7 @@ Do the same with `windows(2)` in Rust
 def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
   let l := a.toList
   List.zip l.dropLast l.tail
-example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+-- example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
 
 /-
 Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN.

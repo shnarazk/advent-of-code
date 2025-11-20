@@ -1,14 +1,18 @@
-import «AoC».Basic
-import «Y2024».Day01
-import «Y2024».Day02
-import «Y2024».Day03
-import «Y2024».Day04
-import «Y2024».Day05
-import «Y2024».Day06
-import «Y2024».Day07
-import «Y2024».Day08
-import «Y2024».Day09
-import «Y2024».Day10
+module
+
+public import «AoC».Basic
+public import «Y2024».Day01
+public import «Y2024».Day02
+public import «Y2024».Day03
+public import «Y2024».Day04
+public import «Y2024».Day05
+public import «Y2024».Day06
+public import «Y2024».Day07
+public import «Y2024».Day08
+public import «Y2024».Day09
+public import «Y2024».Day10
+
+@[expose] public section
 
 namespace Y2024
 

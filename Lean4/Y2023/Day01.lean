@@ -1,4 +1,6 @@
-import «AoC».Basic
+module
+
+public import «AoC».Basic
 import Batteries.Data.List.Basic
 
 namespace Y2023.Day01
@@ -37,6 +39,7 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
+public
 def solve := AocProblem.config 2023 1
   (·.splitOn "\n" |>.dropLast |>.toArray |>some) Part1.solve Part2.solve
 

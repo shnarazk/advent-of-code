@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
-import «AoC».Rect64
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
+public import «AoC».Rect64
 
 open Accumulation CiCL TwoDimensionalVector64
 
@@ -130,6 +132,6 @@ def solve (rs : Array (Rect Kind)) : Nat := rs.map maximize |> sum
 
 end Part2
 
-def solve := AocProblem.config 2023 16 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2023 16 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day16
