@@ -1,5 +1,9 @@
+module
+
 -- set_option autoImplicit true
-import Batteries
+public import Batteries
+
+@[expose] public section
 
 /-
 @inproceedings{10.1145/3520306.3534504,
@@ -18,6 +22,8 @@ import Batteries
 }
 -/
 namespace CiCL -- Combinators in Combinatory Logic
+
+variable {α β γ δ ζ η ε : Type}
 
 /--
 - Identity: λa. a
@@ -89,6 +95,8 @@ end CiCL
 
 namespace BQN
 
+variable {α β γ δ ζ η ε : Type}
+
 /--
 g ⟜ f = λa. g (f a) a
 -/
@@ -116,6 +124,8 @@ notation:60 " ⎊" lhs:60 "‿" mhs:60 "‿" rhs:60 => train lhs mhs rhs
 end BQN
 
 namespace CoP -- combinators on pair
+
+variable {α β γ δ ζ η ε : Type}
 
 @[inline]
 def both (f : α → β) (x : α × α) : β × β := (f x.fst, f x.snd)

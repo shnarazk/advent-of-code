@@ -1,3 +1,7 @@
+module 
+
+@[expose] public section
+
 namespace AoC.Color
 
 def red     : String := "\x1B[001m\x1B[031m"

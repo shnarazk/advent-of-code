@@ -3,6 +3,8 @@ import «AoC».Parser
 
 namespace Y2023.Day09
 
+variable {α β γ : Type}
+
 open Accumulation
 
 namespace parser

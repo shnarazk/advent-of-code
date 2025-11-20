@@ -3,6 +3,11 @@ testRunner = "testDriver"
 defaultTargets = ["aoc"]
 version = "0.6.1"
 
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+autoImplicit = false
+experimental.module = true
+
 [[require]]
 name = "batteries"
 scope = "leanprover-community"

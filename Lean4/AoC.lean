@@ -12,6 +12,8 @@ import «Y2024»
 open AoC
 open Cli
 
+universe u
+
 /--
   Measures the execution time of a monadic computation.
 

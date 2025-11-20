@@ -14,3 +14,8 @@ args = { program = "{0}", args = ["1"]}
 
 [language-server.rust-analyzer.config.files]
 watcher = "client"
+
+[[language]]
+name = "lean"
+auto-format = true
+formatter = { command = "lucr", args = [] }

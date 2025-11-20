@@ -1,8 +1,14 @@
+module
+
 -- import Mathlib.Tactic.Basic
 -- import Mathlib.Tactic.Coe
-import Std.Data.HashMap
+public import Std.Data.HashMap
+
+@[expose] public section
 
 namespace Dim2
+
+variable {α β γ : Type}
 
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
@@ -166,7 +172,6 @@ deriving Hashable, Repr
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.width == b.width && a.vector == b.vector
 
-private
 def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
     ([] : List (List α))
@@ -276,7 +281,7 @@ def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
         else none
     else none
 
-private partial
+partial
 def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
     : Option Nat :=

@@ -6,6 +6,8 @@ namespace Y2023.Day05
 
 open CiCL
 
+variable {α β γ : Type}
+
 structure ClosedSpan where
   _beg : Nat
   _end : Nat
