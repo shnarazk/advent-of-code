@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Rect64
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Rect64
+public import «AoC».Parser
 
 namespace Y2023.Day10
 
@@ -220,6 +222,6 @@ def solve (m: Rect Circuit) : Nat :=
 
 end part2
 
-def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part2.solve
+public def solve := AocProblem.config 2023 10 (parser.parse · |>.join) part1.solve part2.solve
 
 end Y2023.Day10

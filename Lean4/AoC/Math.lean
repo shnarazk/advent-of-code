@@ -1,3 +1,7 @@
+module
+
+@[expose] public section
+
 partial
 def gcd (x y : Int) : Int := if y = 0 then x else gcd y (x % y)
 

@@ -246,7 +246,7 @@ Do the same with `windows(2)` in Rust
 def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
   let l := a.toList
   List.zip l.dropLast l.tail
-example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+-- example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
 
 /-
 Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN.

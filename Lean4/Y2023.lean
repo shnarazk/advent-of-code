@@ -1,25 +1,29 @@
+module
+
 -- This module serves as the root of the `Y2023` library.
-import «AoC».Basic
-import «Y2023».Day01
-import «Y2023».Day02
-import «Y2023».Day03
-import «Y2023».Day04
-import «Y2023».Day05
-import «Y2023».Day06
-import «Y2023».Day07
-import «Y2023».Day08
-import «Y2023».Day09
-import «Y2023».Day10
-import «Y2023».Day11
-import «Y2023».Day12
-import «Y2023».Day13
-import «Y2023».Day14
-import «Y2023».Day15
-import «Y2023».Day16
-import «Y2023».Day17
-import «Y2023».Day18
-import «Y2023».Day19
-import «Y2023».Day20
+public import «AoC».Basic
+public import «Y2023».Day01
+public import «Y2023».Day02
+public import «Y2023».Day03
+public import «Y2023».Day04
+public import «Y2023».Day05
+public import «Y2023».Day06
+public import «Y2023».Day07
+public import «Y2023».Day08
+public import «Y2023».Day09
+public import «Y2023».Day10
+public import «Y2023».Day11
+public import «Y2023».Day12
+public import «Y2023».Day13
+public import «Y2023».Day14
+public import «Y2023».Day15
+public import «Y2023».Day16
+public import «Y2023».Day17
+public import «Y2023».Day18
+public import «Y2023».Day19
+public import «Y2023».Day20
+
+@[expose] public section
 
 namespace Y2023
 

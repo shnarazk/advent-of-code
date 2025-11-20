@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
-import «AoC».Rect64
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
+public import «AoC».Rect64
 
 def cuts (g : UInt64) : List Nat := List.range g.toNat |>.drop 1
 
@@ -131,6 +133,6 @@ end Part2
 
 -- #eval (some #[3, 5]).map (·.shrink 1)
 
-def solve := AocProblem.config 2023 13 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2023 13 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day13

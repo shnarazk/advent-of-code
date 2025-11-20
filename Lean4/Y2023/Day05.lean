@@ -1,6 +1,8 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
 
 namespace Y2023.Day05
 
@@ -120,7 +122,7 @@ def Part2.solve (seeds : Array Nat) (rule : Array (Array Range)) : Nat :=
   let spans' : List ClosedSpan := tp2 spans rule
   spans'.map (·._beg) |>.min? |>.getD 0
 
-def solve := AocProblem.config 2023 5
+public def solve := AocProblem.config 2023 5
   parser.parse (uncurry Part1.solve) (uncurry Part2.solve)
 
 end Y2023.Day05

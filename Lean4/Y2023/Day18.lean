@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
-import «AoC».Rect64
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
+public import «AoC».Rect64
 
 namespace Y2023.Day18
 
@@ -241,6 +243,6 @@ def solve (path' : Array Input) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2023 18 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2023 18 parser.parse Part1.solve Part2.solve
 
 end Y2023.Day18

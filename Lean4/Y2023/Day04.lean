@@ -1,4 +1,6 @@
-import «AoC».Basic
+module
+
+public import «AoC».Basic
 
 namespace Y2023.Day04
 
@@ -52,7 +54,7 @@ def solve (lines : Array String) : Nat :=
 
 end Part2
 
-def solve := AocProblem.config 2023 4
+public def solve := AocProblem.config 2023 4
   (·.splitOn "\n" |>.dropLast |>.toArray |> some) Part1.solve Part2.solve
 
 end Y2023.Day04
