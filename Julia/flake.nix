@@ -1,6 +1,6 @@
 {
   description = "A basic flake with a shell";
-  inputs.my-flakes.url = "github:shnarazk/flakes";
+  # inputs.my-flakes.url = "github:shnarazk/flakes";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   inputs.systems.url = "github:nix-systems/default";
   inputs.flake-utils = {
@@ -9,7 +9,7 @@
   };
 
   outputs =
-    { nixpkgs, flake-utils, my-flakes, ... }:
+    { nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -19,7 +19,8 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.bashInteractive
-            my-flakes.packages.${system}.julia-bin
+            pkgs.julia-bin
+            # my-flakes.packages.${system}.julia-bin
           ];
         };
       }
