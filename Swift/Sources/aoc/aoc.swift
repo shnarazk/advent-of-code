@@ -35,7 +35,7 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
     }
 
     @MainActor public func run() throws {
-        print(save)
+        // print(save)
         print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
         let data: String = try String(
             contentsOf: URL(fileURLWithPath: dataFile)

@@ -133,7 +133,8 @@ private func part2(robots: [Robot], boundary: Pos, _ modelConfig: ModelConfigura
     do {
         let input = try parser.parse(data)
         let sum1 = part1(robots: input, boundary: boundary)
-        let sum2 = part2(robots: input, boundary: boundary, save)
+        let config: ModelConfiguration? = if save { getAoCModelConfiguration() } else { nil }
+        let sum2 = part2(robots: input, boundary: boundary, config)
         print("Part 1: \(sum1)")
         print("Part 2: \(sum2)")
     } catch {
