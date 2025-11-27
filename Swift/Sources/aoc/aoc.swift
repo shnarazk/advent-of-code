@@ -38,7 +38,8 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
         // print(save)
         print("\u{001B}[34mAoC: \(year)-\(day), file: \(dataFile)\u{001B}[0m")
         let data: String = try String(
-            contentsOf: URL(fileURLWithPath: dataFile)
+            contentsOf: URL(fileURLWithPath: dataFile),
+            encoding: .utf8
         )
         if test.isEmpty && save {
             saveDescription(year: year, day: day, variant: nil, text: "", force: false)

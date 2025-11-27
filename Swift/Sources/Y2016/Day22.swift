@@ -11,7 +11,7 @@ public func day22(_ data: String) {
     //     // Fallback on earlier versions
     // }
     do {
-      let input: String = try String(contentsOfFile: inputFile)
+        let input: String = try String(contentsOfFile: inputFile, encoding: .utf8)
       line = []
       for _ in input.split(separator: "\n") {
         line.append((0, 0, 0, 0))
