@@ -7,9 +7,9 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         geometric::neighbors,
     },
-    rayon::prelude::*,
+    // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    serde::Serialize,
+    // serde::Serialize,
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap},
@@ -17,7 +17,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: Vec<()>,
 }
