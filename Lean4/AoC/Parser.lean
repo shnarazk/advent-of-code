@@ -87,7 +87,7 @@ def parse := pstring "Game:" *> manyChars (pchar ' ') *> digit
 
 -- #eval Lean.Parsec.run parse "Game: 0, "
 
-def parsed (_source : String) : Nat := 0
+-- def parsed (_source : String) : Nat := 0
 
 end test
 

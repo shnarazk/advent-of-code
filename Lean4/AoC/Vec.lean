@@ -232,7 +232,7 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   (self.width * i.1 + i.2) < self.vector.size
 
 @[inline]
-def get? [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
+def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   self.vector[self.width * i.1 + i.2]?
 
@@ -254,7 +254,7 @@ def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Re
   Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
 
 @[inline]
-def swap [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
+def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   let j : Nat × Nat := RectIndex.toIndex₂ q
   { self with
@@ -360,14 +360,14 @@ def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
   (n / frame.width, n % frame.width)
 
 @[inline]
-def enum {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array ((Nat × Nat) × α) :=
+def enum {α : Type} [BEq α] (self : Rect α) : Array ((Nat × Nat) × α) :=
   Array.range self.vector.size
     |>.filterMap (fun i ↦
         let p := self.ofIndex₁ i
         if let some val := self.get? p then some (p, val) else none)
 --
 @[inline]
-def range {α : Type} [BEq α] [Inhabited α] (self : Rect α) : Array (Nat × Nat) :=
+def range {α : Type} [BEq α] (self : Rect α) : Array (Nat × Nat) :=
   Array.range self.vector.size |>.map (fun i ↦ self.ofIndex₁ i)
 
 -- def v := #[true, false, true, false]
