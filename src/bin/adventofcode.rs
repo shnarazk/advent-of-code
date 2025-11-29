@@ -30,7 +30,11 @@ use {
         progress,
     },
     clap::Parser,
-    std::{fs::File, io::prelude::*, time::Instant},
+    std::{
+        fs::{self, File},
+        io::prelude::*,
+        time::Instant,
+    },
 };
 
 pub fn main() {
@@ -141,7 +145,11 @@ fn bench(config: ConfigAoC) {
             }
         })
         .collect::<Vec<_>>();
-    let output = format!("{}/{}/execution_time.json", JSON_DUMP_DIR, config.year);
+    let dump_dir = format!("{}/{}", JSON_DUMP_DIR, config.year);
+    if !matches!(fs::exists(&dump_dir), Ok(true)) {
+        fs::create_dir_all(&dump_dir).expect(&format!("failed to create {dump_dir}"));
+    }
+    let output = format!("{}/execution_time.json", dump_dir);
     if let Ok(json) = serde_json::to_string(&results) {
         let mut file = File::create(&output).unwrap_or_else(|_| panic!("fail to open {output}"));
         writeln!(file, "{json}").expect("fail to save");
