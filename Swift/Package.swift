@@ -40,6 +40,7 @@ let package = Package(
                 .target(name: "Y2022"),
                 .target(name: "Y2023"),
                 .target(name: "Y2024"),
+                .target(name: "Y2025"),
             ],
             //            swiftSettings: [
             //                .unsafeFlags(["-Xfrontend", "-enable-debug-dylib"])
@@ -54,6 +55,7 @@ let package = Package(
                 .target(name: "Y2022"),
                 .target(name: "Y2023"),
                 .target(name: "Y2024"),
+                .target(name: "Y2025"),
             ],
         ),
         .executableTarget(
@@ -68,6 +70,15 @@ let package = Package(
             ]
         ),
         .target(name: "Utils", dependencies: []),
+        .target(
+            name: "Y2025",
+            dependencies: [
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Collections", package: "swift-collections"),
+                .product(name: "Grape", package: "Grape"),
+                .target(name: "Utils"),
+            ]
+        ),
         .target(
             name: "Y2024",
             dependencies: [

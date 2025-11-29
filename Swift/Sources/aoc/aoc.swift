@@ -7,11 +7,12 @@ import Y2016
 import Y2022
 import Y2023
 import Y2024
+import Y2025
 
 @main
 struct Aoc: @preconcurrency ParsableCommand, Decodable {
     @Option(help: "year (4 digits)")
-    public var year: Int = 2024
+    public var year: Int = 2025
 
     @Argument(help: "day [1-25]")
     public var day: Int = 0
@@ -46,6 +47,11 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
         }
         let beg = Date()
         switch year {
+        case 2025:
+            switch day {
+            case 1: Y2025.day01(data)
+            default: fatalError()
+            }
         case 2024:
             switch day {
             case 1: Y2024.day01(data)
