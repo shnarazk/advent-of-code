@@ -8,6 +8,10 @@
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
 
+## 2025
+
+* [calendar](https://adventofcode.com/2025)
+
 ## 2024 completed
 
 * [calendar](https://adventofcode.com/2024)
