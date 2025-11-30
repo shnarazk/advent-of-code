@@ -10,6 +10,7 @@ public import «AoC».Color
 public import «AoC».Combinator
 public import «Y2023»
 public import «Y2024»
+public import «Y2025»
 
 @[expose] public section
 
@@ -36,6 +37,7 @@ def events
   := Batteries.AssocList.nil
     |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
     |>.cons 2024 (Y2024.solvedDays, Y2024.solve)
+    |>.cons 2025 (Y2025.solvedDays, Y2025.solve)
 -- #check events.find? 2023
 
 def formatFloat (f : Float) (precision : Nat) : String :=
@@ -127,11 +129,11 @@ def aoc : Cmd := `[Cli|
 
   EXTENSIONS:
     author "Author: shnarazk";
-    defaultValues! #[("year", "2024")]
+    defaultValues! #[("year", "2025")]
 ]
 
 -- def main (args : List String) : IO Unit := do aoc_driver args
 
 def main (args : List String) : IO UInt32 := aoc.validate args
 
--- #eval main <| "--year 2024 5".splitOn " "
+-- #eval main <| "--year 2025 1".splitOn " "

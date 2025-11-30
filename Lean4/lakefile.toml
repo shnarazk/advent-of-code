@@ -34,6 +34,9 @@ name = "Y2023"
 [[lean_lib]]
 name = "Y2024"
 
+[[lean_lib]]
+name = "Y2025"
+
 [[lean_exe]]
 name = "aoc"
 root = "AoC"
