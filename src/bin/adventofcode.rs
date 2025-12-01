@@ -39,11 +39,11 @@ use {
 
 pub fn main() {
     let config = ConfigAoC::parse();
-    if (config.day.is_none() || 25 < config.day.unwrap()) && !config.bench {
-        panic!("no day");
-    }
+    let last_day: usize = if config.year <= 2024 { 25 } else { 12 };
     if config.bench {
         bench(config);
+    } else if config.day.map_or(true, |day| last_day < day) {
+        panic!("{}No valid day{}", color::RED, color::RESET);
     } else {
         run_solver(config);
     }
@@ -79,7 +79,12 @@ fn run_solver(mut config: ConfigAoC) {
         2024 => aoc_arms!(2024, 25),
         #[cfg(feature = "y2025")]
         2025 => aoc_arms!(2025, 12),
-        _ => println!("invalid year: {}", config.year),
+        _ => println!(
+            "{}invalid year: {}{}",
+            color::RED,
+            config.year,
+            color::RESET
+        ),
     };
     let end = Instant::now();
     println!(
