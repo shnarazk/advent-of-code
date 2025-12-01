@@ -76,7 +76,6 @@ pub fn aoc_at(attrs: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 // #[aco_arms(2021, 25)]
-// #[aco_arms(2021)]
 #[proc_macro]
 pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     fn to_usize(token: &syn::ExprLit) -> usize {
@@ -91,8 +90,7 @@ pub fn aoc_arms(attrs: TokenStream) -> TokenStream {
     let vars = parse_macro_input!(attrs as Args);
     let year: usize = to_usize(&vars.items[0]);
     let day_from: usize = 1;
-    let total_days = if year <= 2024 { 25 } else { 12 };
-    let day_to: usize = vars.items.get(1).map_or(total_days, to_usize);
+    let day_to: usize = vars.items.get(1).map_or(day_from, to_usize);
     let match_body: String = format!(
         "match config.day {{ {} _=> panic!(\"{}an invalid day{}\"), }}\n",
         (day_from..=day_to)
