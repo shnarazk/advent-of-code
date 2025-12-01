@@ -10,7 +10,8 @@ namespace Y2025.Day01
 open Accumulation
 
 structure Input where
-  line : Array (Nat × Nat)deriving BEq, Repr
+  line : Array Int
+deriving BEq, Repr
 instance : ToString Input where toString s := s!"{s.line.size}"
 
 namespace parser
@@ -20,9 +21,9 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def line_parser := do
-  let left ← number <* ws
-  let right ← number <* eol
-  return (left, right)
+  let pre ← pstring "L" <|> pstring "R"
+  let num ← number_p <* eol
+  return if pre == "L" then - num else num
 
 def parse : String → Option Input := AoCParser.parse parser
   where
@@ -35,11 +36,12 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat :=
-  let l : Array Nat := input.line.map (·.1) |>.heapSort (·<·)
-  let r : Array Nat := input.line.map (·.2) |>.heapSort (·<·)
-  l.zip r
-    |>.map (fun (l, r) ↦ if l < r then r - l else l - r)
-    |> sum
+  input.line.foldl
+    (fun ⟨zeros, pos⟩ step ↦
+      let new := (pos + step) % 100
+      ⟨zeros + if new = 0 then 1 else 0, new⟩)
+    (0, 50)
+  |>.fst
 
 end Part1
 
@@ -48,11 +50,12 @@ namespace Part2
 open Std
 
 def solve (input : Input) : Nat :=
-  let hash := input.line.map (·.2)
-    |>.foldl (fun h i ↦ h.insert i (1 + h.getD i 0)) Std.HashMap.emptyWithCapacity
-  input.line.map (·.1)
-    |>.map (fun i ↦ i * hash.getD i 0)
-    |> sum
+  input.line.foldl
+    (fun ⟨zeros, pos⟩ step ↦
+      let p := pos + step
+      ⟨zeros + p.natAbs / 100 + if pos > 0 ∧ p ≤ 0 then 1 else 0, (p % 100 + 100) % 100⟩)
+    (0, 50)
+  |>.fst
 
 end Part2
 
