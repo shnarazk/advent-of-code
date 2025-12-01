@@ -1,41 +1,25 @@
 //! <https://adventofcode.com/2025/day/1>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors,
-    },
-    // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
-};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<isize>,
 }
 
 mod parser {
     use {
-        crate::parser::parse_usize,
+        crate::parser::parse_isize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
+            ascii::newline,
             combinator::{alt, separated, seq},
         },
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<isize> {
-        seq!(alt(("L", "R")), parse_usize)
+        seq!(alt(("L", "R")), parse_isize)
             .parse_next(s)
-            .map(|(s, n)| (n as isize) * if s == "L" { -1 } else { 1 })
+            .map(|(s, n)| n * if s == "L" { -1 } else { 1 })
     }
 
     pub fn parse(s: &mut &str) -> ModalResult<Vec<isize>> {
