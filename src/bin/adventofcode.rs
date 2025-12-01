@@ -147,7 +147,7 @@ fn bench(config: ConfigAoC) {
         .collect::<Vec<_>>();
     let dump_dir = format!("{}/{}", JSON_DUMP_DIR, config.year);
     if !matches!(fs::exists(&dump_dir), Ok(true)) {
-        fs::create_dir_all(&dump_dir).expect(&format!("failed to create {dump_dir}"));
+        fs::create_dir_all(&dump_dir).unwrap_or_else(|_| panic!("failed to create {dump_dir}"));
     }
     let output = format!("{}/execution_time.json", dump_dir);
     if let Ok(json) = serde_json::to_string(&results) {
