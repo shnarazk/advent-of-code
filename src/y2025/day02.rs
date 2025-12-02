@@ -41,6 +41,12 @@ impl AdventOfCode for Puzzle {
        ということで下位セグメント（群）が作る制約を全て満たすものを列挙すればよい。
     */
     fn part1(&mut self) -> Self::Output1 {
+        assert_eq!(window(123456, 1, 0), 1);
+        assert_eq!(window(123456, 1, 1), 2);
+        assert_eq!(window(123456, 1, 2), 3);
+        assert_eq!(window(12345678, 2, 3), 78);
+        assert_eq!(window(1234567890, 2, 3), 78);
+        assert_eq!(window(1234567890, 2, 4), 90);
         self.line
             .iter()
             .map(|(s, e)| {
@@ -70,6 +76,20 @@ impl AdventOfCode for Puzzle {
             })
             .sum::<usize>()
     }
+}
+
+// assert_eq!(window(123456, 1, 0), 1);
+// assert_eq!(window(123456, 1, 1), 2);
+// assert_eq!(window(123456, 1, 2), 3);
+// assert_eq!(window(12345678, 2, 3), 78);
+// assert_eq!(window(1234567890, 2, 3), 78);
+// assert_eq!(window(1234567890, 2, 4), 90);
+fn window(mut n: usize, w: usize, i: usize) -> usize {
+    let len = n.ilog10() + 1;
+    // dbg!(len);
+    n /= 10_usize.pow(len - (w * (i + 1)) as u32);
+    // dbg!(n);
+    n % 10_usize.pow(w as u32)
 }
 
 fn check_occurences(mut n: usize) -> Option<u8> {
