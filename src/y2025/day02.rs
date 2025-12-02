@@ -1,23 +1,7 @@
 //! <https://adventofcode.com/2025/day/2>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors,
-    },
-    // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
-};
+use crate::framework::{AdventOfCode, ParseError, aoc};
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<(usize, usize)>,
 }
@@ -27,7 +11,6 @@ mod parser {
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
             combinator::{separated, seq},
         },
     };
@@ -52,28 +35,17 @@ impl AdventOfCode for Puzzle {
         for (s, e) in self.line.iter() {
             for n in *s..=*e {
                 if satisfies(n) {
-                    // dbg!(n);
                     found += n;
                 };
             }
-            // satisfies(*s);
         }
-        // dbg!(satisfies(11));
-        // dbg!(satisfies(12));
-        // dbg!(satisfies(311));
-        // dbg!(satisfies(310));
-        // dbg!(satisfies(123231));
-        // dbg!(satisfies(1230231));
-        // dbg!(satisfies(15133));
         found
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut found = 0;
         for (s, e) in self.line.iter() {
-            println!("{s}-{}", s.abs_diff(*e));
             for n in *s..=*e {
                 if satisfies2(n) {
-                    dbg!(n);
                     found += n;
                 };
             }
@@ -92,23 +64,6 @@ fn satisfies(n: usize) -> bool {
         .iter()
         .enumerate()
         .all(|(i, n)| *n == v[offset + i])
-    // dbg!(&v);
-    /*
-    let distance = v
-        .iter()
-        .enumerate()
-        .map(|(i, d)| {
-            v[i + 1..]
-                .iter()
-                .position(|x| *x == *d)
-                .map_or(0, |s| s + 1)
-        })
-        .collect::<Vec<_>>();
-    // dbg!(&distance);
-    distance.iter().enumerate().any(|(i, d)| {
-        v[i] > 0 && *d > 0 && i + d < v.len() && distance[i + 1..i + *d].iter().all(|x| *x == *d)
-    })
-    */
 }
 
 fn satisfies2(n: usize) -> bool {
