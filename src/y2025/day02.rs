@@ -1,5 +1,8 @@
 //! <https://adventofcode.com/2025/day/2>
-use crate::framework::{AdventOfCode, ParseError, aoc};
+use {
+    crate::framework::{AdventOfCode, ParseError, aoc},
+    rayon::prelude::*,
+};
 
 #[derive(Clone, Debug, Default)]
 pub struct Puzzle {
@@ -33,26 +36,28 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let mut found = 0;
         for (s, e) in self.line.iter() {
-            for n in *s..=*e {
-                if let Some(_) = check_occurences(n)
-                    && satisfies(n)
-                {
-                    found += n;
-                };
-            }
+            found += (*s..*e)
+                .into_par_iter()
+                .map(|n| {
+                    check_occurences(n)
+                        .and_then(|_| satisfies(n).then(|| n))
+                        .unwrap_or(0)
+                })
+                .sum::<usize>();
         }
         found
     }
     fn part2(&mut self) -> Self::Output2 {
         let mut found = 0;
         for (s, e) in self.line.iter() {
-            for n in *s..=*e {
-                if let Some(k) = check_occurences(n)
-                    && satisfies2(n, k)
-                {
-                    found += n;
-                };
-            }
+            found += (*s..*e)
+                .into_par_iter()
+                .map(|n| {
+                    check_occurences(n)
+                        .and_then(|k| satisfies2(n, k).then(|| n))
+                        .unwrap_or(0)
+                })
+                .sum::<usize>();
         }
         found
     }
