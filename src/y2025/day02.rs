@@ -34,7 +34,9 @@ impl AdventOfCode for Puzzle {
         let mut found = 0;
         for (s, e) in self.line.iter() {
             for n in *s..=*e {
-                if satisfies(n) {
+                if let Some(_) = check_occurences(n)
+                    && satisfies(n)
+                {
                     found += n;
                 };
             }
@@ -45,13 +47,25 @@ impl AdventOfCode for Puzzle {
         let mut found = 0;
         for (s, e) in self.line.iter() {
             for n in *s..=*e {
-                if satisfies2(n) {
+                if let Some(k) = check_occurences(n)
+                    && satisfies2(n, k)
+                {
                     found += n;
                 };
             }
         }
         found
     }
+}
+
+fn check_occurences(mut n: usize) -> Option<usize> {
+    let mut occs = [0; 10];
+    while n > 0 {
+        occs[n % 10] += 1;
+        n /= 10;
+    }
+    let k = *occs.iter().filter(|k| **k > 0).min().unwrap();
+    (k > 1 && occs.iter().all(|o| *o % k == 0)).then_some(k)
 }
 
 fn satisfies(n: usize) -> bool {
@@ -66,10 +80,10 @@ fn satisfies(n: usize) -> bool {
         .all(|(i, n)| *n == v[offset + i])
 }
 
-fn satisfies2(n: usize) -> bool {
+fn satisfies2(n: usize, k: usize) -> bool {
     let v = vectorize(n);
-    'next: for m in 2..=v.len().max(2) {
-        if v.len() % m == 0 {
+    'next: for m in 2..=k {
+        if k % m == 0 {
             let l = v.len() / m;
             for (i, d) in v.iter().take(l).enumerate() {
                 if !(1..m).all(|r| v[i + r * l] == *d) {
