@@ -34,32 +34,34 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut found = 0;
-        for (s, e) in self.line.iter() {
-            found += (*s..*e)
-                .into_par_iter()
-                .map(|n| {
-                    check_occurences(n)
-                        .and_then(|_| satisfies(n).then(|| n))
-                        .unwrap_or(0)
-                })
-                .sum::<usize>();
-        }
-        found
+        self.line
+            .iter()
+            .map(|(s, e)| {
+                (*s..*e)
+                    .into_par_iter()
+                    .map(|n| {
+                        check_occurences(n)
+                            .and_then(|_| satisfies(n).then(|| n))
+                            .unwrap_or(0)
+                    })
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut found = 0;
-        for (s, e) in self.line.iter() {
-            found += (*s..*e)
-                .into_par_iter()
-                .map(|n| {
-                    check_occurences(n)
-                        .and_then(|k| satisfies2(n, k).then(|| n))
-                        .unwrap_or(0)
-                })
-                .sum::<usize>();
-        }
-        found
+        self.line
+            .iter()
+            .map(|(s, e)| {
+                (*s..*e)
+                    .into_par_iter()
+                    .map(|n| {
+                        check_occurences(n)
+                            .and_then(|k| satisfies2(n, k).then(|| n))
+                            .unwrap_or(0)
+                    })
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
     }
 }
 
