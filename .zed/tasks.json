@@ -14,7 +14,7 @@
     "shell": "system"
   },
   {
-    "label": "AoC test on 0",
+    "label": "AoC run with test data 0",
     "command": "cargo run --",
     "args": ["${ZED_FILENAME:3:2}", "0"],
     "use_new_terminal": false,

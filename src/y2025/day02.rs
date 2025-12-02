@@ -58,8 +58,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn check_occurences(mut n: usize) -> Option<usize> {
-    let mut occs = [0; 10];
+fn check_occurences(mut n: usize) -> Option<u8> {
+    let mut occs = [0_u8; 10];
     while n > 0 {
         occs[n % 10] += 1;
         n /= 10;
@@ -70,27 +70,18 @@ fn check_occurences(mut n: usize) -> Option<usize> {
 
 fn satisfies(n: usize) -> bool {
     let v = vectorize(n);
-    if v.len() % 2 == 1 {
-        return false;
-    }
     let offset = v.len() / 2;
-    v[..offset]
-        .iter()
-        .enumerate()
-        .all(|(i, n)| *n == v[offset + i])
+    v[..offset] == v[offset..]
 }
 
-fn satisfies2(n: usize, k: usize) -> bool {
+fn satisfies2(n: usize, k: u8) -> bool {
     let v = vectorize(n);
-    'next: for m in 2..=k {
+    for m in [2, 3, 5, 7, 11, 13, 17] {
         if k % m == 0 {
-            let l = v.len() / m;
-            for (i, d) in v.iter().take(l).enumerate() {
-                if !(1..m).all(|r| v[i + r * l] == *d) {
-                    continue 'next;
-                }
+            let l = v.len() / m as usize;
+            if (1..m as usize).all(|r| v[..l] == v[r * l..(r + 1) * l]) {
+                return true;
             }
-            return true;
         }
     }
     false

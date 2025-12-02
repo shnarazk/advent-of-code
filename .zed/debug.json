@@ -9,6 +9,6 @@
     "request": "launch",
     "program": "~/.cargo/target/debug/adventofcode",
     "cwd": "$ZED_WORKTREE_ROOT",
-    "args": ["2"]
+    "args": ["1", "0"]
   }
 ]
