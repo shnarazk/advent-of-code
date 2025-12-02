@@ -87,10 +87,10 @@ fn satisfies2(n: usize, k: u8) -> bool {
     false
 }
 
-fn vectorize(mut n: usize) -> Vec<usize> {
-    let mut v: Vec<usize> = Vec::new();
+fn vectorize(mut n: usize) -> Vec<u8> {
+    let mut v: Vec<u8> = Vec::new();
     while n > 0 {
-        v.push(n % 10);
+        v.push((n % 10) as u8);
         n /= 10;
     }
     v.reverse();
