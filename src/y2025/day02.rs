@@ -48,13 +48,13 @@ impl AdventOfCode for Puzzle {
         assert_eq!(window(12345678, 2, 3), 78);
         assert_eq!(window(1234567890, 2, 3), 78);
         assert_eq!(window(1234567890, 2, 4), 90);
-        dbg!(window(123456789, 5, 0));
+        // dbg!(window(123456789, 5, 0));
         self.line
             .iter()
             .map(|(rs, re)| {
                 let mut s = *rs;
                 let mut e = *re;
-                dbg!(s, e);
+                // dbg!(s, e);
                 let s_len = s.ilog10() + 1;
                 let e_len = e.ilog10() + 1;
                 if s_len % 2 == 1 {
@@ -67,30 +67,32 @@ impl AdventOfCode for Puzzle {
                     return 0;
                 }
                 assert_eq!(s.ilog10(), e.ilog10());
-                let len = (s.ilog10() + 1) as usize;
-                dbg!(window(s, len / 2, 0), window(e, len / 2, 0));
+                let len2 = (s.ilog10() + 1) / 2;
+                // dbg!(window(s, len / 2, 0), window(e, len / 2, 0));
                 let mut total = 0;
-                for d in window(s, len / 2, 0) + 1..window(e, len / 2, 0) {
-                    total += dbg!(d * 10_usize.pow(len as u32 / 2) + d);
+                let ss = window(s, len2, 0);
+                let ee = window(e, len2, 0);
+                for d in ss + 1..ee {
+                    total += d * 10_usize.pow(len2) + d;
+                }
+                if ss == ee {
+                    if ss >= window(s, len2, 1) && ss <= window(e, len2, 1) {
+                        total += ss * 10_usize.pow(len2) + ss;
+                    }
+                } else {
+                    if ss >= window(s, len2, 1) {
+                        total += ss * 10_usize.pow(len2) + ss;
+                    }
+                    if ee <= window(e, len2, 1) {
+                        total += ee * 10_usize.pow(len2) + ee;
+                    }
                 }
                 total
             })
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        self.line
-            .iter()
-            .map(|(s, e)| {
-                (*s..*e)
-                    .into_par_iter()
-                    .map(|n| {
-                        check_occurences(n)
-                            .and_then(|k| satisfies2(n, k).then(|| n))
-                            .unwrap_or(0)
-                    })
-                    .sum::<usize>()
-            })
-            .sum::<usize>()
+        0
     }
 }
 
@@ -100,49 +102,10 @@ impl AdventOfCode for Puzzle {
 // assert_eq!(window(12345678, 2, 3), 78);
 // assert_eq!(window(1234567890, 2, 3), 78);
 // assert_eq!(window(1234567890, 2, 4), 90);
-fn window(mut n: usize, w: usize, i: usize) -> usize {
+fn window(mut n: usize, w: u32, i: u32) -> usize {
     let len = n.ilog10() + 1;
     // dbg!(len);
-    n /= 10_usize.pow(len - (w * (i + 1)) as u32);
+    n /= 10_usize.pow(len - w * (i + 1));
     // dbg!(n);
-    n % 10_usize.pow(w as u32)
-}
-
-fn check_occurences(mut n: usize) -> Option<u8> {
-    let mut occs = [0_u8; 10];
-    while n > 0 {
-        occs[n % 10] += 1;
-        n /= 10;
-    }
-    let k = *occs.iter().filter(|k| **k > 0).min().unwrap();
-    (k > 1 && occs.iter().all(|o| *o % k == 0)).then_some(k)
-}
-
-fn satisfies(n: usize) -> bool {
-    let v = vectorize(n);
-    let offset = v.len() / 2;
-    v[..offset] == v[offset..]
-}
-
-fn satisfies2(n: usize, k: u8) -> bool {
-    let v = vectorize(n);
-    for m in [2, 3, 5, 7, 11, 13, 17] {
-        if k % m == 0 {
-            let l = v.len() / m as usize;
-            if (1..m as usize).all(|r| v[..l] == v[r * l..(r + 1) * l]) {
-                return true;
-            }
-        }
-    }
-    false
-}
-
-fn vectorize(mut n: usize) -> Vec<u8> {
-    let mut v: Vec<u8> = Vec::new();
-    while n > 0 {
-        v.push((n % 10) as u8);
-        n /= 10;
-    }
-    v.reverse();
-    v
+    n % 10_usize.pow(w)
 }
