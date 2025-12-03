@@ -63,6 +63,22 @@ impl AdventOfCode for Puzzle {
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        self.line
+            .iter()
+            .map(|line| {
+                let mut a = line[line.len() - 12..].to_vec();
+                for n in line.iter().rev().skip(12) {
+                    let mut x = *n;
+                    for d in 0..12_usize {
+                        if x >= a[d] {
+                            std::mem::swap(&mut x, &mut a[d]);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                a.iter().fold(0, |acc, &x| acc * 10 + x as usize)
+            })
+            .sum::<usize>()
     }
 }
