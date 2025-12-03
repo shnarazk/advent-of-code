@@ -39,6 +39,7 @@ impl AdventOfCode for Puzzle {
        25から始まるパターンすなわち2525は下位2桁が14よりも大きいので対象。
        36から始まるパターンすなわち3636は下位2桁が13よりも大きいので対象外。
        ということで下位セグメント（群）が作る制約を全て満たすものを列挙すればよい。
+       桁が下限と上限で違う時は最初に分割すればいいんじゃね。
     */
     fn part1(&mut self) -> Self::Output1 {
         assert_eq!(window(123456, 1, 0), 1);
@@ -47,6 +48,7 @@ impl AdventOfCode for Puzzle {
         assert_eq!(window(12345678, 2, 3), 78);
         assert_eq!(window(1234567890, 2, 3), 78);
         assert_eq!(window(1234567890, 2, 4), 90);
+        dbg!(window(123456789, 5, 0));
         self.line
             .iter()
             .map(|(s, e)| {
