@@ -51,15 +51,29 @@ impl AdventOfCode for Puzzle {
         dbg!(window(123456789, 5, 0));
         self.line
             .iter()
-            .map(|(s, e)| {
-                (*s..*e)
-                    .into_par_iter()
-                    .map(|n| {
-                        check_occurences(n)
-                            .and_then(|_| satisfies(n).then(|| n))
-                            .unwrap_or(0)
-                    })
-                    .sum::<usize>()
+            .map(|(rs, re)| {
+                let mut s = *rs;
+                let mut e = *re;
+                dbg!(s, e);
+                let s_len = s.ilog10() + 1;
+                let e_len = e.ilog10() + 1;
+                if s_len % 2 == 1 {
+                    s = 10_usize.pow(s_len as u32);
+                }
+                if e_len % 2 == 1 {
+                    e = 10_usize.pow(e_len as u32 - 1) - 1;
+                }
+                if s > e {
+                    return 0;
+                }
+                assert_eq!(s.ilog10(), e.ilog10());
+                let len = (s.ilog10() + 1) as usize;
+                dbg!(window(s, len / 2, 0), window(e, len / 2, 0));
+                let mut total = 0;
+                for d in window(s, len / 2, 0) + 1..window(e, len / 2, 0) {
+                    total += dbg!(d * 10_usize.pow(len as u32 / 2) + d);
+                }
+                total
             })
             .sum::<usize>()
     }
