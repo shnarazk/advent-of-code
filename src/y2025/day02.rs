@@ -2,6 +2,7 @@
 use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     rayon::prelude::*,
+    std::collections::HashSet,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -42,57 +43,16 @@ impl AdventOfCode for Puzzle {
        桁が下限と上限で違う時は最初に分割すればいいんじゃね。
     */
     fn part1(&mut self) -> Self::Output1 {
-        assert_eq!(window(123456, 1, 0), 1);
-        assert_eq!(window(123456, 1, 1), 2);
-        assert_eq!(window(123456, 1, 2), 3);
-        assert_eq!(window(12345678, 2, 3), 78);
-        assert_eq!(window(1234567890, 2, 3), 78);
-        assert_eq!(window(1234567890, 2, 4), 90);
-        // dbg!(window(123456789, 5, 0));
         self.line
             .iter()
-            .map(|(rs, re)| {
-                let mut s = *rs;
-                let mut e = *re;
-                // dbg!(s, e);
-                let s_len = s.ilog10() + 1;
-                let e_len = e.ilog10() + 1;
-                if s_len % 2 == 1 {
-                    s = 10_usize.pow(s_len as u32);
-                }
-                if e_len % 2 == 1 {
-                    e = 10_usize.pow(e_len as u32 - 1) - 1;
-                }
-                if s > e {
-                    return 0;
-                }
-                assert_eq!(s.ilog10(), e.ilog10());
-                let len2 = (s.ilog10() + 1) / 2;
-                // dbg!(window(s, len / 2, 0), window(e, len / 2, 0));
-                let mut total = 0;
-                let ss = window(s, len2, 0);
-                let ee = window(e, len2, 0);
-                for d in ss + 1..ee {
-                    total += d * 10_usize.pow(len2) + d;
-                }
-                if ss == ee {
-                    if ss >= window(s, len2, 1) && ss <= window(e, len2, 1) {
-                        total += ss * 10_usize.pow(len2) + ss;
-                    }
-                } else {
-                    if ss >= window(s, len2, 1) {
-                        total += ss * 10_usize.pow(len2) + ss;
-                    }
-                    if ee <= window(e, len2, 1) {
-                        total += ee * 10_usize.pow(len2) + ee;
-                    }
-                }
-                total
-            })
+            .map(|(rs, re)| calc(*rs, *re, 2))
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
-        0
+        self.line
+            .par_iter()
+            .map(|(rs, re)| calc2(*rs, *re))
+            .sum::<usize>()
     }
 }
 
@@ -104,8 +64,91 @@ impl AdventOfCode for Puzzle {
 // assert_eq!(window(1234567890, 2, 4), 90);
 fn window(mut n: usize, w: u32, i: u32) -> usize {
     let len = n.ilog10() + 1;
-    // dbg!(len);
     n /= 10_usize.pow(len - w * (i + 1));
-    // dbg!(n);
     n % 10_usize.pow(w)
+}
+
+fn repeat_window(n: usize, r: u32) -> usize {
+    let s = n.ilog10() + 1;
+    let found = (1..r).fold(n, |acc, _| acc * 10_usize.pow(s) + n);
+    found
+}
+
+fn calc(mut s: usize, mut e: usize, r: u32) -> usize {
+    let mut s_len = s.ilog10() + 1;
+    let mut e_len = e.ilog10() + 1;
+    if s_len % r != 0 {
+        s_len = (s_len / r + 1) * r;
+        s = 10_usize.pow(s_len as u32 - 1);
+    }
+    if e_len % r != 0 {
+        e_len = (e_len / r) * r;
+        e = 10_usize.pow(e_len as u32) - 1;
+    }
+    if s > e {
+        return 0;
+    }
+    debug_assert_eq!(s.ilog10(), e.ilog10());
+    let len = (s.ilog10() + 1) / r;
+    let mut total = 0;
+    let ss = window(s, len, 0);
+    let ee = window(e, len, 0);
+    for d in ss + 1..ee {
+        total += repeat_window(d, r);
+    }
+    if ss == ee {
+        if (1..r).all(|i| ss >= window(s, len, i) && ss <= window(e, len, i)) {
+            total += repeat_window(ss, r);
+        }
+    } else {
+        if (1..r).all(|i| ss >= window(s, len, i)) {
+            total += repeat_window(ss, r);
+        }
+        if (1..r).all(|i| ee <= window(e, len, i)) {
+            total += repeat_window(ee, r);
+        }
+    }
+    total
+}
+
+fn calc_1(s: usize, e: usize, total: &mut HashSet<usize>) {
+    let s_len = s.ilog10() + 1;
+    let ss = window(s, 1, 0);
+    let ee = e / 10_usize.pow(s_len - 1);
+    for d in ss..=ee {
+        let x = repeat_window(window(d, 1, 0), s_len + d.ilog10());
+        if x >= 10 && s <= x && x <= e {
+            total.insert(x);
+        }
+    }
+}
+
+fn calc_n(mut s: usize, mut e: usize, l: u32, total: &mut HashSet<usize>) {
+    let e_len = e.ilog10() + 1;
+    if e_len / l < 2 {
+        return;
+    }
+    if e_len % l != 0 {
+        e = 10_usize.pow(((e_len / l) * l) as u32) - 1;
+    }
+    let mut s_len = s.ilog10() + 1;
+    if s_len % l != 0 {
+        s_len = (s_len / l + 1) * l;
+        s = 10_usize.pow(s_len as u32 - 1);
+    }
+    for d in window(s, l, 0)..=window(e, l, 0) {
+        let x = repeat_window(d, s_len / l);
+        if s <= x && x <= e {
+            total.insert(x);
+        }
+    }
+}
+
+fn calc2(s: usize, e: usize) -> usize {
+    let mut total: HashSet<usize> = HashSet::new();
+    calc_1(s, e, &mut total);
+    (2..=8)
+        .into_iter()
+        .for_each(|l| calc_n(s, e, l, &mut total));
+    total.iter().sum::<usize>()
 }
