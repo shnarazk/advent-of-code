@@ -5,15 +5,16 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{neighbors, neighbors8},
+        geometric::{Dim2, neighbors, neighbors8},
     },
     // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     // serde::Serialize,
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
+        collections::{BinaryHeap, HashSet},
         hash::BuildHasherDefault,
+        mem::swap,
     },
 };
 
@@ -67,6 +68,36 @@ impl AdventOfCode for Puzzle {
         found
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let height = self.line.len();
+        let width = self.line[0].len();
+        let mut state: HashSet<Dim2<usize>> = HashSet::new();
+        for (i, l) in self.line.iter().enumerate() {
+            for (j, b) in l.iter().enumerate() {
+                if *b {
+                    state.insert((i, j));
+                }
+            }
+        }
+        let mut work: HashSet<Dim2<usize>> = HashSet::new();
+        let amount = state.len();
+        let mut found: bool = true;
+        while found {
+            found = false;
+            work.clear();
+            for pos in state.iter() {
+                if neighbors8(pos.0, pos.1, height, width)
+                    .iter()
+                    .filter(|p| state.contains(p))
+                    .count()
+                    < 4
+                {
+                    found = true;
+                } else {
+                    work.insert((pos.0, pos.1));
+                }
+            }
+            swap(&mut work, &mut state);
+        }
+        amount - state.len()
     }
 }
