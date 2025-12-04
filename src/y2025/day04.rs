@@ -1,21 +1,13 @@
 //! <https://adventofcode.com/2025/day/4>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, neighbors, neighbors8},
+        geometric::{Dim2, neighbors8},
     },
     // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    rustc_data_structures::fx::{FxHashSet, FxHasher},
     // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashSet},
-        hash::BuildHasherDefault,
-        mem::swap,
-    },
+    std::{collections::HashSet, hash::BuildHasherDefault, mem::swap},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -24,14 +16,11 @@ pub struct Puzzle {
 }
 
 mod parser {
-    use {
-        crate::parser::parse_usize,
-        winnow::{
-            ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, repeat, repeat_till, separated, seq},
-            token::one_of,
-        },
+    use winnow::{
+        ModalResult, Parser,
+        ascii::newline,
+        combinator::{repeat, separated},
+        token::one_of,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Vec<bool>> {
@@ -70,7 +59,8 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
-        let mut state: HashSet<Dim2<usize>> = HashSet::new();
+        let mut state: FxHashSet<Dim2<usize>> =
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
         for (i, l) in self.line.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
                 if *b {
@@ -78,11 +68,12 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        let mut work: HashSet<Dim2<usize>> = HashSet::new();
         let amount = state.len();
-        let mut found: bool = true;
-        while found {
-            found = false;
+        let mut work: FxHashSet<Dim2<usize>> =
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        let mut proceed: bool = true;
+        while proceed {
+            proceed = false;
             work.clear();
             for pos in state.iter() {
                 if neighbors8(pos.0, pos.1, height, width)
@@ -91,7 +82,7 @@ impl AdventOfCode for Puzzle {
                     .count()
                     < 4
                 {
-                    found = true;
+                    proceed = true;
                 } else {
                     work.insert((pos.0, pos.1));
                 }
