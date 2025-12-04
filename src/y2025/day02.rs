@@ -70,20 +70,19 @@ fn window(mut n: usize, w: u32, i: u32) -> usize {
 
 fn repeat_window(n: usize, r: u32) -> usize {
     let s = n.ilog10() + 1;
-    let found = (1..r).fold(n, |acc, _| acc * 10_usize.pow(s) + n);
-    found
+    (1..r).fold(n, |acc, _| acc * 10_usize.pow(s) + n)
 }
 
 fn calc(mut s: usize, mut e: usize, r: u32) -> usize {
     let mut s_len = s.ilog10() + 1;
     let mut e_len = e.ilog10() + 1;
-    if s_len % r != 0 {
+    if !s_len.is_multiple_of(r) {
         s_len = (s_len / r + 1) * r;
-        s = 10_usize.pow(s_len as u32 - 1);
+        s = 10_usize.pow(s_len - 1);
     }
-    if e_len % r != 0 {
+    if !e_len.is_multiple_of(r) {
         e_len = (e_len / r) * r;
-        e = 10_usize.pow(e_len as u32) - 1;
+        e = 10_usize.pow(e_len) - 1;
     }
     if s > e {
         return 0;
@@ -128,13 +127,13 @@ fn calc_n(mut s: usize, mut e: usize, l: u32, total: &mut HashSet<usize>) {
     if e_len / l < 2 {
         return;
     }
-    if e_len % l != 0 {
-        e = 10_usize.pow(((e_len / l) * l) as u32) - 1;
+    if !e_len.is_multiple_of(l) {
+        e = 10_usize.pow((e_len / l) * l) - 1;
     }
     let mut s_len = s.ilog10() + 1;
-    if s_len % l != 0 {
+    if !s_len.is_multiple_of(l) {
         s_len = (s_len / l + 1) * l;
-        s = 10_usize.pow(s_len as u32 - 1);
+        s = 10_usize.pow(s_len - 1);
     }
     for d in window(s, l, 0)..=window(e, l, 0) {
         let x = repeat_window(d, s_len / l);
@@ -147,8 +146,6 @@ fn calc_n(mut s: usize, mut e: usize, l: u32, total: &mut HashSet<usize>) {
 fn calc2(s: usize, e: usize) -> usize {
     let mut total: HashSet<usize> = HashSet::new();
     calc_1(s, e, &mut total);
-    (2..=8)
-        .into_iter()
-        .for_each(|l| calc_n(s, e, l, &mut total));
+    (2..=8).for_each(|l| calc_n(s, e, l, &mut total));
     total.iter().sum::<usize>()
 }

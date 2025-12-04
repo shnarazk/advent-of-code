@@ -42,7 +42,7 @@ pub fn main() {
     let last_day: usize = if config.year <= 2024 { 25 } else { 12 };
     if config.bench {
         bench(config);
-    } else if config.day.map_or(true, |day| last_day < day) {
+    } else if config.day.is_none_or(|day| last_day < day) {
         panic!("{}No valid day{}", color::RED, color::RESET);
     } else {
         run_solver(config);

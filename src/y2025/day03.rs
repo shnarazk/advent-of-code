@@ -56,9 +56,9 @@ impl AdventOfCode for Puzzle {
                 let mut a = line[line.len() - 12..].to_vec();
                 for n in line.iter().rev().skip(12) {
                     let mut x = *n;
-                    for d in 0..12_usize {
-                        if x >= a[d] {
-                            std::mem::swap(&mut x, &mut a[d]);
+                    for r in a.iter_mut() {
+                        if x >= *r {
+                            std::mem::swap(&mut x, r);
                         } else {
                             break;
                         }
