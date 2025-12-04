@@ -1,12 +1,12 @@
 //! <https://adventofcode.com/2025/day/4>
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, neighbors8},
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::{neighbors8, Dim2},
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
-        collections::{HashMap, HashSet, hash_map::Entry},
+        collections::{hash_map::Entry, HashMap, HashSet},
         hash::BuildHasherDefault,
         mem::swap,
     },
@@ -19,10 +19,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
-        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
+        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Vec<bool>> {
@@ -63,7 +63,7 @@ impl AdventOfCode for Puzzle {
         let width = self.line[0].len();
         let mut propagate: FxHashMap<Dim2<usize>, Vec<Dim2<usize>>> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut count: FxHashMap<Dim2<usize>, usize> =
+        let mut count: FxHashMap<Dim2<usize>, u8> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (i, l) in self.line.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
