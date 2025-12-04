@@ -12,6 +12,8 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 
 * [calendar](https://adventofcode.com/2025)
 
+- day04: a graph is the best for propagating changes instead of 2D matrix
+
 ## 2024 completed
 
 * [calendar](https://adventofcode.com/2024)
