@@ -4,10 +4,12 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, neighbors8},
     },
-    // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashSet, FxHasher},
-    // serde::Serialize,
-    std::{collections::HashSet, hash::BuildHasherDefault, mem::swap},
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
+    std::{
+        collections::{HashMap, HashSet, hash_map::Entry},
+        hash::BuildHasherDefault,
+        mem::swap,
+    },
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -59,36 +61,54 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
-        let mut state: FxHashSet<Dim2<usize>> =
-            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        let mut propagate: FxHashMap<Dim2<usize>, Vec<Dim2<usize>>> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        let mut count: FxHashMap<Dim2<usize>, usize> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (i, l) in self.line.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
                 if *b {
-                    state.insert((i, j));
+                    neighbors8(i, j, height, width)
+                        .iter()
+                        .filter(|p| self.line[p.0][p.1])
+                        .for_each(|p| {
+                            propagate.entry((i, j)).or_default().push(*p);
+                            *count.entry((i, j)).or_insert(0) += 1;
+                        });
+                    if let Entry::Vacant(e) = count.entry((i, j)) {
+                        e.insert(0);
+                        propagate.insert((i, j), Vec::new());
+                    }
                 }
             }
         }
-        let amount = state.len();
-        let mut work: FxHashSet<Dim2<usize>> =
+        let amount = count.len();
+        let mut removables: FxHashSet<Dim2<usize>> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        let mut proceed: bool = true;
-        while proceed {
-            proceed = false;
-            work.clear();
-            for pos in state.iter() {
-                if neighbors8(pos.0, pos.1, height, width)
-                    .iter()
-                    .filter(|p| state.contains(p))
-                    .count()
-                    < 4
-                {
-                    proceed = true;
-                } else {
-                    work.insert((pos.0, pos.1));
+        for (p, c) in count.iter() {
+            if *c < 4 {
+                removables.insert(*p);
+            }
+        }
+        let mut next: FxHashSet<Dim2<usize>> =
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        while !removables.is_empty() {
+            next.clear();
+            for p in removables.iter() {
+                if count.contains_key(p) {
+                    count.remove(p);
+                    for q in propagate.get(p).unwrap().iter() {
+                        if let Some(n) = count.get_mut(q) {
+                            *n -= 1;
+                            if *n < 4 {
+                                next.insert(*q);
+                            }
+                        }
+                    }
                 }
             }
-            swap(&mut work, &mut state);
+            swap(&mut next, &mut removables);
         }
-        amount - state.len()
+        amount - count.len()
     }
 }
