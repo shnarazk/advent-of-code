@@ -2,6 +2,7 @@
 use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     rayon::prelude::*,
+    std::collections::HashSet,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -39,74 +40,115 @@ impl AdventOfCode for Puzzle {
        25から始まるパターンすなわち2525は下位2桁が14よりも大きいので対象。
        36から始まるパターンすなわち3636は下位2桁が13よりも大きいので対象外。
        ということで下位セグメント（群）が作る制約を全て満たすものを列挙すればよい。
+       桁が下限と上限で違う時は最初に分割すればいいんじゃね。
     */
     fn part1(&mut self) -> Self::Output1 {
         self.line
             .iter()
-            .map(|(s, e)| {
-                (*s..*e)
-                    .into_par_iter()
-                    .map(|n| {
-                        check_occurences(n)
-                            .and_then(|_| satisfies(n).then(|| n))
-                            .unwrap_or(0)
-                    })
-                    .sum::<usize>()
-            })
+            .map(|(rs, re)| calc(*rs, *re, 2))
             .sum::<usize>()
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .iter()
-            .map(|(s, e)| {
-                (*s..*e)
-                    .into_par_iter()
-                    .map(|n| {
-                        check_occurences(n)
-                            .and_then(|k| satisfies2(n, k).then(|| n))
-                            .unwrap_or(0)
-                    })
-                    .sum::<usize>()
-            })
+            .par_iter()
+            .map(|(rs, re)| calc2(*rs, *re))
             .sum::<usize>()
     }
 }
 
-fn check_occurences(mut n: usize) -> Option<u8> {
-    let mut occs = [0_u8; 10];
-    while n > 0 {
-        occs[n % 10] += 1;
-        n /= 10;
+// assert_eq!(window(123456, 1, 0), 1);
+// assert_eq!(window(123456, 1, 1), 2);
+// assert_eq!(window(123456, 1, 2), 3);
+// assert_eq!(window(12345678, 2, 3), 78);
+// assert_eq!(window(1234567890, 2, 3), 78);
+// assert_eq!(window(1234567890, 2, 4), 90);
+fn window(mut n: usize, w: u32, i: u32) -> usize {
+    let len = n.ilog10() + 1;
+    n /= 10_usize.pow(len - w * (i + 1));
+    n % 10_usize.pow(w)
+}
+
+fn repeat_window(n: usize, r: u32) -> usize {
+    let s = n.ilog10() + 1;
+    let found = (1..r).fold(n, |acc, _| acc * 10_usize.pow(s) + n);
+    found
+}
+
+fn calc(mut s: usize, mut e: usize, r: u32) -> usize {
+    let mut s_len = s.ilog10() + 1;
+    let mut e_len = e.ilog10() + 1;
+    if s_len % r != 0 {
+        s_len = (s_len / r + 1) * r;
+        s = 10_usize.pow(s_len as u32 - 1);
     }
-    let k = *occs.iter().filter(|k| **k > 0).min().unwrap();
-    (k > 1 && occs.iter().all(|o| *o % k == 0)).then_some(k)
-}
-
-fn satisfies(n: usize) -> bool {
-    let v = vectorize(n);
-    let offset = v.len() / 2;
-    v[..offset] == v[offset..]
-}
-
-fn satisfies2(n: usize, k: u8) -> bool {
-    let v = vectorize(n);
-    for m in [2, 3, 5, 7, 11, 13, 17] {
-        if k % m == 0 {
-            let l = v.len() / m as usize;
-            if (1..m as usize).all(|r| v[..l] == v[r * l..(r + 1) * l]) {
-                return true;
-            }
+    if e_len % r != 0 {
+        e_len = (e_len / r) * r;
+        e = 10_usize.pow(e_len as u32) - 1;
+    }
+    if s > e {
+        return 0;
+    }
+    debug_assert_eq!(s.ilog10(), e.ilog10());
+    let len = (s.ilog10() + 1) / r;
+    let mut total = 0;
+    let ss = window(s, len, 0);
+    let ee = window(e, len, 0);
+    for d in ss + 1..ee {
+        total += repeat_window(d, r);
+    }
+    if ss == ee {
+        if (1..r).all(|i| ss >= window(s, len, i) && ss <= window(e, len, i)) {
+            total += repeat_window(ss, r);
+        }
+    } else {
+        if (1..r).all(|i| ss >= window(s, len, i)) {
+            total += repeat_window(ss, r);
+        }
+        if (1..r).all(|i| ee <= window(e, len, i)) {
+            total += repeat_window(ee, r);
         }
     }
-    false
+    total
 }
 
-fn vectorize(mut n: usize) -> Vec<u8> {
-    let mut v: Vec<u8> = Vec::new();
-    while n > 0 {
-        v.push((n % 10) as u8);
-        n /= 10;
+fn calc_1(s: usize, e: usize, total: &mut HashSet<usize>) {
+    let s_len = s.ilog10() + 1;
+    let ss = window(s, 1, 0);
+    let ee = e / 10_usize.pow(s_len - 1);
+    for d in ss..=ee {
+        let x = repeat_window(window(d, 1, 0), s_len + d.ilog10());
+        if x >= 10 && s <= x && x <= e {
+            total.insert(x);
+        }
     }
-    v.reverse();
-    v
+}
+
+fn calc_n(mut s: usize, mut e: usize, l: u32, total: &mut HashSet<usize>) {
+    let e_len = e.ilog10() + 1;
+    if e_len / l < 2 {
+        return;
+    }
+    if e_len % l != 0 {
+        e = 10_usize.pow(((e_len / l) * l) as u32) - 1;
+    }
+    let mut s_len = s.ilog10() + 1;
+    if s_len % l != 0 {
+        s_len = (s_len / l + 1) * l;
+        s = 10_usize.pow(s_len as u32 - 1);
+    }
+    for d in window(s, l, 0)..=window(e, l, 0) {
+        let x = repeat_window(d, s_len / l);
+        if s <= x && x <= e {
+            total.insert(x);
+        }
+    }
+}
+
+fn calc2(s: usize, e: usize) -> usize {
+    let mut total: HashSet<usize> = HashSet::new();
+    calc_1(s, e, &mut total);
+    (2..=8)
+        .into_iter()
+        .for_each(|l| calc_n(s, e, l, &mut total));
+    total.iter().sum::<usize>()
 }
