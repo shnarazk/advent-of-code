@@ -7,7 +7,7 @@ use {
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    // 1. inclsive: closed range
+    // 1. inclusive: closed range
     // 2. overlapped
     ranges: Vec<(usize, usize)>,
     // if it is in a range, it's called 'fresh'
@@ -62,10 +62,8 @@ impl AdventOfCode for Puzzle {
         let mut tick: FxHashMap<usize, (usize, usize)> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (b, e) in self.ranges.iter() {
-            let entry = tick.entry(*b).or_insert((0, 0));
-            entry.0 += 1;
-            let entry = tick.entry(*e).or_insert((0, 0));
-            entry.1 += 1;
+            tick.entry(*b).or_insert((0, 0)).0 += 1;
+            tick.entry(*e).or_insert((0, 0)).1 += 1;
         }
         let mut v = tick.into_iter().collect::<Vec<_>>();
         v.sort();
