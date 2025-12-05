@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{aoc, AdventOfCode, ParseError},
-        geometric::{neighbors8, Dim2},
+        geometric::Dim2,
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
@@ -45,14 +45,27 @@ impl AdventOfCode for Puzzle {
         let width = self.line[0].len();
         for (i, l) in self.line.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
-                if *b
-                    && neighbors8(i, j, height, width)
-                        .iter()
-                        .filter(|(i, j)| self.line[*i][*j])
-                        .count()
-                        < 4
-                {
-                    found += 1;
+                if *b {
+                    let mut count = 0;
+                    for r in 0..8 {
+                        let q = match r {
+                            0 if 0 < i && 0 < j => (i - 1, j - 1),
+                            1 if 0 < i => (i - 1, j),
+                            2 if 0 < i && j < width - 1 => (i - 1, j + 1),
+                            3 if 0 < j => (i, j - 1),
+                            4 if j < width - 1 => (i, j + 1),
+                            5 if i < height - 1 && 0 < j => (i + 1, j - 1),
+                            6 if i < height - 1 => (i + 1, j),
+                            7 if i < height - 1 && j < width - 1 => (i + 1, j + 1),
+                            _ => continue,
+                        };
+                        if self.line[q.0][q.1] {
+                            count += 1;
+                        }
+                    }
+                    if count < 4 {
+                        found += 1;
+                    }
                 }
             }
         }
@@ -75,15 +88,25 @@ impl AdventOfCode for Puzzle {
                 if *b {
                     let n = roll_id.len();
                     let p_id = *roll_id.entry((i, j)).or_insert(n);
-                    neighbors8(i, j, height, width)
-                        .iter()
-                        .filter(|q| self.line[q.0][q.1])
-                        .for_each(|q| {
+                    for r in 0..8 {
+                        let q = match r {
+                            0 if 0 < i && 0 < j => (i - 1, j - 1),
+                            1 if 0 < i => (i - 1, j),
+                            2 if 0 < i && j < width - 1 => (i - 1, j + 1),
+                            3 if 0 < j => (i, j - 1),
+                            4 if j < width - 1 => (i, j + 1),
+                            5 if i < height - 1 && 0 < j => (i + 1, j - 1),
+                            6 if i < height - 1 => (i + 1, j),
+                            7 if i < height - 1 && j < width - 1 => (i + 1, j + 1),
+                            _ => continue,
+                        };
+                        if self.line[q.0][q.1] {
                             let n = roll_id.len();
-                            let q_id = *roll_id.entry(*q).or_insert(n);
+                            let q_id = *roll_id.entry(q).or_insert(n);
                             propagate[p_id].push(q_id);
                             count[p_id] += 1;
-                        });
+                        }
+                    }
                 }
             }
         }
