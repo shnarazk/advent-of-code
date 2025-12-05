@@ -1,20 +1,8 @@
 //! <https://adventofcode.com/2025/day/5>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        // geometric::{Dim2, neighbors8},
-    },
-    // rayon::prelude::*,
+    crate::framework::{AdventOfCode, ParseError, aoc},
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
+    std::{collections::HashMap, hash::BuildHasherDefault},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -22,7 +10,7 @@ pub struct Puzzle {
     // 1. inclsive: closed range
     // 2. overlapped
     ranges: Vec<(usize, usize)>,
-    // if it is in a range, it is called 'fresh'
+    // if it is in a range, it's called 'fresh'
     availables: Vec<usize>,
 }
 
@@ -31,8 +19,8 @@ mod parser {
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, separated, seq},
+            ascii::newline,
+            combinator::{separated, seq},
         },
     };
 
@@ -92,7 +80,6 @@ impl AdventOfCode for Puzzle {
                 nest += b;
             }
             if 0 < e {
-                assert!(e <= nest);
                 nest -= e;
                 if nest == 0 {
                     count += n + 1 - start;
@@ -102,5 +89,3 @@ impl AdventOfCode for Puzzle {
         count
     }
 }
-
-// 338693411431448
