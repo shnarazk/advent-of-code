@@ -666,7 +666,7 @@ impl GeometricMath for Dim3<usize> {
 /// ```
 /// use adventofcode::geometric;
 /// assert_eq!(geometric::neighbors(0, 1), [None, Some(0), None]);
-/// assert_eq!(geometric::neighbors(0, 2), [None, Some(0), Some(1)]);        
+/// assert_eq!(geometric::neighbors(0, 2), [None, Some(0), Some(1)]);
 /// assert_eq!(geometric::neighbors(1, 1), [Some(0), None, None]);
 /// assert_eq!(geometric::neighbors(1, 3), [Some(0), Some(1), Some(2)]);
 pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
@@ -835,5 +835,43 @@ impl GeometricAddition for Dim2<isize> {
         let y = self.0 + d.0;
         let x = self.1 + d.1;
         (0 <= y && y < h as isize && 0 <= x && x < w as isize).then(|| Box::new((y, x)))
+    }
+}
+
+pub struct Neighbor8Iterator<'a, T> {
+    base: &'a Dim2<T>,
+    boundary: &'a Dim2<T>,
+    index: u8,
+}
+
+pub trait NeighborIteratorTrait<T> {
+    fn make_iterator8<'a>(&'a self, boundary: &'a Dim2<T>) -> Neighbor8Iterator<'a, T>;
+}
+
+impl NeighborIteratorTrait<usize> for Dim2<usize> {
+    fn make_iterator8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Neighbor8Iterator<'a, usize> {
+        Neighbor8Iterator {
+            base: self,
+            boundary,
+            index: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for Neighbor8Iterator<'a, usize> {
+    type Item = Dim2<usize>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 8 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 - 1, self.base.1 - 1));
+                }
+                2 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                _ => (),
+            }
+        }
+        None
     }
 }
