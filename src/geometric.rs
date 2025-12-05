@@ -844,12 +844,14 @@ pub struct Neighbor8Iterator<'a, T> {
     index: u8,
 }
 
-pub trait NeighborIteratorTrait<T> {
-    fn make_iterator8<'a>(&'a self, boundary: &'a Dim2<T>) -> Neighbor8Iterator<'a, T>;
+pub trait NeighborIterator<T> {
+    fn iter8<'a>(&'a self, boundary: &'a Dim2<T>) -> Neighbor8Iterator<'a, T>;
 }
 
-impl NeighborIteratorTrait<usize> for Dim2<usize> {
-    fn make_iterator8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Neighbor8Iterator<'a, usize> {
+impl NeighborIterator<usize> for Dim2<usize> {
+    /// Iterate on its 8 neighbors.
+    /// Any position which is equal or larger than `boundary` is eliminated.
+    fn iter8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Neighbor8Iterator<'a, usize> {
         Neighbor8Iterator {
             base: self,
             boundary,
@@ -861,6 +863,7 @@ impl NeighborIteratorTrait<usize> for Dim2<usize> {
 impl<'a> Iterator for Neighbor8Iterator<'a, usize> {
     type Item = Dim2<usize>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         while self.index < 8 {
             self.index += 1;
@@ -869,6 +872,22 @@ impl<'a> Iterator for Neighbor8Iterator<'a, usize> {
                     return Some((self.base.0 - 1, self.base.1 - 1));
                 }
                 2 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                3 if 0 < self.base.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 - 1, self.base.1 + 1));
+                }
+                4 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1)),
+                5 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1));
+                }
+                6 if self.base.0 + 1 < self.boundary.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 + 1, self.base.1 - 1));
+                }
+                7 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1));
+                }
+                8 if self.base.0 + 1 < self.boundary.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 + 1, self.base.1 + 1));
+                }
                 _ => (),
             }
         }
