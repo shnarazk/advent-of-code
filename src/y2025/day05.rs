@@ -19,7 +19,11 @@ use {
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
-    line: Vec<()>,
+    // 1. inclsive: closed range
+    // 2. overlapped
+    ranges: Vec<(usize, usize)>,
+    // if it is in a range, it is called 'fresh'
+    availables: Vec<usize>,
 }
 
 mod parser {
@@ -32,26 +36,42 @@ mod parser {
         },
     };
 
-    fn parse_line(s: &mut &str) -> ModalResult<()> {
-        ().parse_next(s)
+    fn parse_two_usizes(s: &mut &str) -> ModalResult<(usize, usize)> {
+        seq!(parse_usize, "-", parse_usize)
+            .parse_next(s)
+            .map(|(a, _, b)| (a, b))
     }
 
-    pub fn parse(s: &mut &str) -> ModalResult<Vec<()>> {
-        separated(1.., parse_line, newline).parse_next(s)
+    fn parse_block1(s: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
+        separated(1.., parse_two_usizes, newline).parse_next(s)
+    }
+    fn parse_block2(s: &mut &str) -> ModalResult<Vec<usize>> {
+        separated(1.., parse_usize, newline).parse_next(s)
+    }
+
+    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(usize, usize)>, Vec<usize>)> {
+        seq!(parse_block1, seq!(newline, newline), parse_block2)
+            .parse_next(dbg!(s))
+            .map(|(a, _, b)| (a, b))
     }
 }
 
 #[aoc(2025, 5)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
-        self.line = parser::parse(&mut input)?;
+        let (b1, b2) = parser::parse(&mut input)?;
+        self.ranges = b1;
+        self.availables = b2;
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        1
+        self.availables
+            .iter()
+            .filter(|id| self.ranges.iter().any(|(b, e)| *b <= **id && **id <= *e))
+            .count()
     }
     fn part2(&mut self) -> Self::Output2 {
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         2
     }
 }
