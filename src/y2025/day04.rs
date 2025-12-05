@@ -1,12 +1,12 @@
 //! <https://adventofcode.com/2025/day/4>
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, neighbors8},
+        framework::{aoc, AdventOfCode, ParseError},
+        geometric::{neighbors8, Dim2},
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
-        collections::{HashMap, HashSet, hash_map::Entry},
+        collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
         mem::swap,
     },
@@ -19,10 +19,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
-        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
+        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Vec<bool>> {
@@ -61,45 +61,51 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
-        let mut propagate: FxHashMap<Dim2<usize>, Vec<Dim2<usize>>> =
+        let num_rolls = self
+            .line
+            .iter()
+            .map(|l| l.iter().filter(|b| **b).count())
+            .sum();
+        let mut roll_id: FxHashMap<Dim2<usize>, usize> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut count: FxHashMap<Dim2<usize>, u8> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        let mut propagate = vec![Vec::<usize>::new(); num_rolls];
+        let mut count = vec![1_u8; num_rolls]; // 0 for dead
         for (i, l) in self.line.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
                 if *b {
+                    let n = roll_id.len();
+                    let p_id = *roll_id.entry((i, j)).or_insert(n);
                     neighbors8(i, j, height, width)
                         .iter()
-                        .filter(|p| self.line[p.0][p.1])
-                        .for_each(|p| {
-                            propagate.entry((i, j)).or_default().push(*p);
-                            *count.entry((i, j)).or_insert(0) += 1;
+                        .filter(|q| self.line[q.0][q.1])
+                        .for_each(|q| {
+                            let n = roll_id.len();
+                            let q_id = *roll_id.entry(*q).or_insert(n);
+                            propagate[p_id].push(q_id);
+                            count[p_id] += 1;
                         });
-                    if let Entry::Vacant(e) = count.entry((i, j)) {
-                        e.insert(0);
-                        propagate.insert((i, j), Vec::new());
-                    }
                 }
             }
         }
-        let mut removables: FxHashSet<Dim2<usize>> =
+        let mut removables: FxHashSet<usize> =
             HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        for (p, c) in count.iter() {
-            if *c < 4 {
-                removables.insert(*p);
+        for (id, c) in count.iter().enumerate() {
+            if *c < 4 + 1 {
+                removables.insert(id);
             }
         }
-        let mut next: FxHashSet<Dim2<usize>> =
-            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        let mut next: FxHashSet<usize> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        let mut num_deads = 0;
         while !removables.is_empty() {
             next.clear();
             for p in removables.iter() {
-                if count.contains_key(p) {
-                    count.remove(p);
-                    for q in propagate.get(p).unwrap().iter() {
-                        if let Some(n) = count.get_mut(q) {
-                            *n -= 1;
-                            if *n < 4 {
+                if count[*p] > 0 {
+                    count[*p] = 0;
+                    num_deads += 1;
+                    for q in propagate[*p].iter() {
+                        if count[*q] > 0 {
+                            count[*q] -= 1;
+                            if count[*q] < 4 + 1 {
                                 next.insert(*q);
                             }
                         }
@@ -108,6 +114,6 @@ impl AdventOfCode for Puzzle {
             }
             swap(&mut next, &mut removables);
         }
-        propagate.len() - count.len()
+        num_deads
     }
 }
