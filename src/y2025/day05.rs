@@ -51,7 +51,7 @@ mod parser {
 
     pub fn parse(s: &mut &str) -> ModalResult<(Vec<(usize, usize)>, Vec<usize>)> {
         seq!(parse_block1, seq!(newline, newline), parse_block2)
-            .parse_next(dbg!(s))
+            .parse_next(s)
             .map(|(a, _, b)| (a, b))
     }
 }
@@ -71,7 +71,36 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        2
+        let mut tick: FxHashMap<usize, (usize, usize)> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        for (b, e) in self.ranges.iter() {
+            let entry = tick.entry(*b).or_insert((0, 0));
+            entry.0 += 1;
+            let entry = tick.entry(*e).or_insert((0, 0));
+            entry.1 += 1;
+        }
+        let mut v = tick.into_iter().collect::<Vec<_>>();
+        v.sort();
+        let mut count = 0;
+        let mut nest = 0;
+        let mut start = 0;
+        for (n, (b, e)) in v.into_iter() {
+            if 0 < b {
+                if nest == 0 {
+                    start = n;
+                }
+                nest += b;
+            }
+            if 0 < e {
+                assert!(e <= nest);
+                nest -= e;
+                if nest == 0 {
+                    count += n + 1 - start;
+                }
+            }
+        }
+        count
     }
 }
+
+// 338693411431448
