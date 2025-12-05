@@ -1,8 +1,8 @@
 //! <https://adventofcode.com/2025/day/4>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
-        geometric::Dim2,
+        framework::{AdventOfCode, ParseError, aoc},
+        geometric::{Dim2, NeighborIterator},
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
@@ -19,10 +19,10 @@ pub struct Puzzle {
 
 mod parser {
     use winnow::{
+        ModalResult, Parser,
         ascii::newline,
         combinator::{repeat, separated},
         token::one_of,
-        ModalResult, Parser,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Vec<bool>> {
@@ -47,18 +47,7 @@ impl AdventOfCode for Puzzle {
             for (j, b) in l.iter().enumerate() {
                 if *b {
                     let mut count = 0;
-                    for r in 0..8 {
-                        let q = match r {
-                            0 if 0 < i && 0 < j => (i - 1, j - 1),
-                            1 if 0 < i => (i - 1, j),
-                            2 if 0 < i && j < width - 1 => (i - 1, j + 1),
-                            3 if 0 < j => (i, j - 1),
-                            4 if j < width - 1 => (i, j + 1),
-                            5 if i < height - 1 && 0 < j => (i + 1, j - 1),
-                            6 if i < height - 1 => (i + 1, j),
-                            7 if i < height - 1 && j < width - 1 => (i + 1, j + 1),
-                            _ => continue,
-                        };
+                    for q in (i, j).iter8(&(height, width)) {
                         if self.line[q.0][q.1] {
                             count += 1;
                         }
@@ -88,18 +77,7 @@ impl AdventOfCode for Puzzle {
                 if *b {
                     let n = roll_id.len();
                     let p_id = *roll_id.entry((i, j)).or_insert(n);
-                    for r in 0..8 {
-                        let q = match r {
-                            0 if 0 < i && 0 < j => (i - 1, j - 1),
-                            1 if 0 < i => (i - 1, j),
-                            2 if 0 < i && j < width - 1 => (i - 1, j + 1),
-                            3 if 0 < j => (i, j - 1),
-                            4 if j < width - 1 => (i, j + 1),
-                            5 if i < height - 1 && 0 < j => (i + 1, j - 1),
-                            6 if i < height - 1 => (i + 1, j),
-                            7 if i < height - 1 && j < width - 1 => (i + 1, j + 1),
-                            _ => continue,
-                        };
+                    for q in (i, j).iter8(&(height, width)) {
                         if self.line[q.0][q.1] {
                             let n = roll_id.len();
                             let q_id = *roll_id.entry(q).or_insert(n);
