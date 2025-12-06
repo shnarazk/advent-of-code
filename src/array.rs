@@ -2,11 +2,15 @@ pub fn rotate_clockwise<I: Clone>(m: Vec<Vec<I>>) -> Vec<Vec<I>> {
     let h = m.len();
     let w = m[0].len();
     (0..w)
-        .map(|i| {
-            (0..h)
-                .map(|jj| m[h - jj - 1][i].clone())
-                .collect::<Vec<_>>()
-        })
+        .map(|i| (0..h).map(|j| m[h - j - 1][i].clone()).collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+}
+
+pub fn rotate_anticlockwise<I: Clone>(m: Vec<Vec<I>>) -> Vec<Vec<I>> {
+    let h = m.len();
+    let w = m[0].len();
+    (0..w)
+        .map(|i| (0..h).map(|j| m[j][w - i - 1].clone()).collect::<Vec<_>>())
         .collect::<Vec<_>>()
 }
 
@@ -29,6 +33,13 @@ mod test {
         let expected_output = vec![vec![7, 4, 1], vec![8, 5, 2], vec![9, 6, 3]];
 
         assert_eq!(rotate_clockwise(input), expected_output);
+    }
+    #[test]
+    fn test_rotate_anticlockwise() {
+        let input = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+        let expected_output = vec![vec![3, 6, 9], vec![2, 5, 8], vec![1, 4, 7]];
+
+        assert_eq!(rotate_anticlockwise(input), expected_output);
     }
     #[test]
     fn test_transpose() {
