@@ -3,7 +3,7 @@ use {
     crate::{
         // color,
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, neighbors8},
+        geometric::{Dim2, NeighborIterator},
     },
     std::collections::{HashMap, HashSet},
 };
@@ -195,7 +195,7 @@ fn colorize(
     }
     while let Some(p) = to_visit.pop() {
         m[p.0][p.1] = 0;
-        for l in neighbors8(p.0, p.1, h2, w2) {
+        for l in (p.0, p.1).iter8(&(h2, w2)) {
             if m[l.0][l.1] == 1 && !to_visit.contains(&l) {
                 to_visit.push(l);
             }
