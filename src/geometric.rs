@@ -29,9 +29,6 @@ pub trait GeometricMath {
     fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized;
 }
 
 pub trait GeometricRotation {
@@ -219,17 +216,6 @@ impl GeometricMath for Dim2<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
-        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
-        DIR8.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
-            .collect::<Vec<Self>>()
-    }
 }
 
 impl GeometricMath for Dim2<usize> {
@@ -296,17 +282,6 @@ impl GeometricMath for Dim2<usize> {
             .filter(|v| v.0 < b0 && v.1 < b1)
             .collect::<Vec<Self>>()
     }
-    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(usize::MAX, |v| v.0);
-        let b1 = boundary.map_or(usize::MAX, |v| v.1);
-        DIR8.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0 < b0 && v.1 < b1)
-            .collect::<Vec<Self>>()
-    }
 }
 
 pub type Dim3<L> = (L, L, L);
@@ -335,7 +310,7 @@ const DIR6: [Vec3; 6] = [
     (0, 0, 1),
 ];
 
-const DIR26: [Vec3; 26] = [
+const _DIR26: [Vec3; 26] = [
     // (0, 0, 0),
     (0, 0, -1),
     (0, 0, 1),
@@ -434,19 +409,6 @@ impl GeometricMath for Dim3<isize> {
             .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
             .collect::<Vec<Self>>()
     }
-    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
-        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
-        let b2 = boundary.map_or(isize::MAX, |v| v.2.abs());
-        DIR26
-            .iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
-            .collect::<Vec<Self>>()
-    }
 }
 
 impl GeometricMath for Dim3<usize> {
@@ -521,19 +483,6 @@ impl GeometricMath for Dim3<usize> {
         let b1 = boundary.map_or(usize::MAX, |v| v.1);
         let b2 = boundary.map_or(usize::MAX, |v| v.2);
         DIR6.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
-            .collect::<Vec<Self>>()
-    }
-    fn neighbors2(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(usize::MAX, |v| v.0);
-        let b1 = boundary.map_or(usize::MAX, |v| v.1);
-        let b2 = boundary.map_or(usize::MAX, |v| v.2);
-        DIR26
-            .iter()
             .filter_map(|d| self.shift(d))
             .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
             .collect::<Vec<Self>>()
