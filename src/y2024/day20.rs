@@ -85,10 +85,10 @@ impl AdventOfCode for Puzzle {
         let mut dist: usize = 0;
         self.dist[pos] = dist;
         'next: while pos != self.goal {
-            for q in pos.neighbors4((0, 0), self.size).iter() {
+            for q in pos.iter4(&self.size) {
                 if self.mapping[q] && dist < self.dist[q] {
                     dist += 1;
-                    pos = *q;
+                    pos = q;
                     self.dist[q] = dist;
                     continue 'next;
                 }

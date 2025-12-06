@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors4,
+        geometric::NeighborIterator,
     },
     std::{
         cmp::Reverse,
@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
             to_check.push_back(*start);
             while let Some(p) = to_check.pop_front() {
                 let c = cost.get(&p).unwrap() + 1;
-                for (j, i) in neighbors4(p.0, p.1, self.height, self.width) {
+                for (j, i) in p.iter4(&(self.height, self.width)) {
                     if !self.line[j][i] {
                         continue;
                     }

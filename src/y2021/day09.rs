@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/9>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric,
+    geometric::NeighborIterator,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -19,7 +19,7 @@ impl Puzzle {
                 continue;
             }
             checked.push(pos);
-            for (jj, ii) in geometric::neighbors4(j, i, h + 1, w + 1) {
+            for (jj, ii) in (j, i).iter4(&(h + 1, w + 1)) {
                 if here < self.line[jj][ii]
                     && !to_check.contains(&(jj, ii))
                     && !checked.contains(&(jj, ii))
@@ -54,7 +54,7 @@ impl AdventOfCode for Puzzle {
         for j in 0..height {
             'next: for i in 0..width {
                 let here = self.line[j][i];
-                for (jj, ii) in geometric::neighbors4(j, i, height, width) {
+                for (jj, ii) in (j, i).iter4(&(height, width)) {
                     if self.line[jj][ii] <= here {
                         continue 'next;
                     }
@@ -71,9 +71,9 @@ impl AdventOfCode for Puzzle {
         for j in 0..height {
             for i in 0..width {
                 let here = self.line[j][i];
-                if geometric::neighbors4(j, i, height, width)
-                    .iter()
-                    .all(|(y, x)| here < self.line[*y][*x])
+                if (j, i)
+                    .iter4(&(height, width))
+                    .all(|(y, x)| here < self.line[y][x])
                 {
                     // dbg!(self.basin_size(height - 1, width - 1, j, i));
                     sizes.push(self.basin_size(height - 1, width - 1, j, i));

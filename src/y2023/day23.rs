@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, GeometricMath},
+        geometric::{Dim2, NeighborIterator},
         progress,
     },
     serde::Serialize,
@@ -104,30 +104,30 @@ impl AdventOfCode for Puzzle {
                 longest = longest.max(p.1.len());
                 continue;
             }
-            for q0 in p.0.neighbors4((0, 0), (height, width)).iter_mut() {
+            for mut q0 in p.0.iter4(&(height, width)) {
                 let mut q = p.clone();
                 match self.line[q0.0][q0.1] {
                     b'^' => {
-                        q.1.insert(*q0);
+                        q.1.insert(q0);
                         q0.0 -= 1;
                     }
                     b'<' => {
-                        q.1.insert(*q0);
+                        q.1.insert(q0);
                         q0.1 -= 1;
                     }
                     b'>' => {
-                        q.1.insert(*q0);
+                        q.1.insert(q0);
                         q0.1 += 1;
                     }
                     b'v' => {
-                        q.1.insert(*q0);
+                        q.1.insert(q0);
                         q0.0 += 1;
                     }
                     _ => (),
                 }
-                if self.line[q0.0][q0.1] != b'#' && !p.1.contains(q0) {
-                    q.0 = *q0;
-                    q.1.insert(*q0);
+                if self.line[q0.0][q0.1] != b'#' && !p.1.contains(&q0) {
+                    q.0 = q0;
+                    q.1.insert(q0);
                     to_visit.push(q);
                 }
             }
@@ -191,7 +191,7 @@ impl Puzzle {
                 if p != pos && self.branch_index[p.0][p.1].is_some() {
                     continue;
                 }
-                for q in p.neighbors4((0, 0), size) {
+                for q in p.iter4(&size) {
                     if self.line[q.0][q.1] != b'#' && !visited.contains_key(&q) {
                         to_visit.push(Reverse((cost + 1, q)));
                     }
@@ -212,12 +212,15 @@ impl Puzzle {
                 l.iter()
                     .enumerate()
                     .map(|(x, p)| {
-                        (y, x)
-                            .neighbors4((0, 0), size)
-                            .into_iter()
-                            .filter(|_| *p != b'#')
-                            .filter(|(y, x)| self.line[*y][*x] != b'#')
-                            .count()
+                        if *p == b'#' {
+                            0
+                        } else {
+                            (y, x)
+                                .iter4(&size)
+                                // .filter(|_| *p != b'#')
+                                .filter(|(y, x)| self.line[*y][*x] != b'#')
+                                .count()
+                        }
                     })
                     .collect::<Vec<_>>()
             })

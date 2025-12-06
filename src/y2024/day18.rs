@@ -69,9 +69,9 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             visited[p] = true;
-            for q in p.neighbors4((0, 0), self.size).iter() {
+            for q in p.iter4(&self.size) {
                 if self.mapping[q] {
-                    to_visit.push(Reverse((cost + 1, *q)));
+                    to_visit.push(Reverse((cost + 1, q)));
                 }
             }
         }

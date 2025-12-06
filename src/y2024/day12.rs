@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{GeometricMath, Vec2},
+        geometric::{NeighborIterator, Vec2},
         rect::Rect,
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
@@ -56,8 +56,8 @@ impl Puzzle {
                         v_segs.insert((p.0, p.1 + 1));
                     }
 
-                    for q in p.neighbors4((0, 0), self.mapping.size()).iter() {
-                        to_visid.push(*q);
+                    for q in p.iter4(self.mapping.size()) {
+                        to_visid.push(q);
                     }
                 } else {
                     r[p] = Some(false);
@@ -101,8 +101,8 @@ impl Puzzle {
                         v_segs.insert(((p.0, p.1 + 1), true));
                     }
 
-                    for q in p.neighbors4((0, 0), self.mapping.size()).iter() {
-                        to_visid.push(*q);
+                    for q in p.iter4(self.mapping.size()) {
+                        to_visid.push(q);
                     }
                 } else {
                     r[p] = Some(false);

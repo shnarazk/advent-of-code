@@ -754,13 +754,13 @@ impl GeometricAddition for Dim2<isize> {
     }
 }
 
-pub struct Neighbor8Iterator<'a, T> {
+pub struct Dim2Iter1<'a, T, const N: u8> {
     base: &'a Dim2<T>,
     boundary: &'a Dim2<T>,
     index: u8,
 }
 
-pub struct Neighbor8Iterator2<'a, T> {
+pub struct Dim2Iter2<'a, T, const N: u8> {
     base: &'a Dim2<T>,
     boundary0: &'a Dim2<T>,
     boundary1: &'a Dim2<T>,
@@ -768,19 +768,28 @@ pub struct Neighbor8Iterator2<'a, T> {
 }
 
 pub trait NeighborIterator<T> {
+    /// Iterate on its 4 neighbors.Their positions are in [(0, 0), `boundary1`).
+    fn iter4<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 4>;
     /// Iterate on its 8 neighbors.Their positions are in [(0, 0), `boundary1`).
-    fn iter8<'a>(&'a self, boundary: &'a Dim2<T>) -> Neighbor8Iterator<'a, T>;
+    fn iter8<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 8>;
     /// Iterate on its 8 neighbors. Their positions are in [`boundary0`, `boundary1`).
     fn iter8_from<'a>(
         &'a self,
         boundary0: &'a Dim2<T>,
         boundary1: &'a Dim2<T>,
-    ) -> Neighbor8Iterator2<'a, T>;
+    ) -> Dim2Iter2<'a, T, 8>;
 }
 
 impl NeighborIterator<usize> for Dim2<usize> {
-    fn iter8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Neighbor8Iterator<'a, usize> {
-        Neighbor8Iterator {
+    fn iter4<'a>(&'a self, boundary: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 4> {
+        Dim2Iter1 {
+            base: self,
+            boundary,
+            index: 0,
+        }
+    }
+    fn iter8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 8> {
+        Dim2Iter1 {
             base: self,
             boundary,
             index: 0,
@@ -790,8 +799,8 @@ impl NeighborIterator<usize> for Dim2<usize> {
         &'a self,
         boundary0: &'a Dim2<usize>,
         boundary1: &'a Dim2<usize>,
-    ) -> Neighbor8Iterator2<'a, usize> {
-        Neighbor8Iterator2 {
+    ) -> Dim2Iter2<'a, usize, 8> {
+        Dim2Iter2 {
             base: self,
             boundary0,
             boundary1,
@@ -800,7 +809,30 @@ impl NeighborIterator<usize> for Dim2<usize> {
     }
 }
 
-impl<'a> Iterator for Neighbor8Iterator<'a, usize> {
+impl<'a> Iterator for Dim2Iter1<'a, usize, 4> {
+    type Item = Dim2<usize>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 4 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                2 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1)),
+                3 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1));
+                }
+                4 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1));
+                }
+                _ => (),
+            }
+        }
+        None
+    }
+}
+
+impl<'a> Iterator for Dim2Iter1<'a, usize, 8> {
     type Item = Dim2<usize>;
 
     #[inline]
@@ -835,7 +867,7 @@ impl<'a> Iterator for Neighbor8Iterator<'a, usize> {
     }
 }
 
-impl<'a> Iterator for Neighbor8Iterator2<'a, usize> {
+impl<'a> Iterator for Dim2Iter2<'a, usize, 8> {
     type Item = Dim2<usize>;
 
     #[inline]
@@ -871,8 +903,15 @@ impl<'a> Iterator for Neighbor8Iterator2<'a, usize> {
 }
 
 impl NeighborIterator<isize> for Dim2<isize> {
-    fn iter8<'a>(&'a self, boundary: &'a Dim2<isize>) -> Neighbor8Iterator<'a, isize> {
-        Neighbor8Iterator {
+    fn iter4<'a>(&'a self, boundary: &'a Dim2<isize>) -> Dim2Iter1<'a, isize, 4> {
+        Dim2Iter1 {
+            base: self,
+            boundary,
+            index: 0,
+        }
+    }
+    fn iter8<'a>(&'a self, boundary: &'a Dim2<isize>) -> Dim2Iter1<'a, isize, 8> {
+        Dim2Iter1 {
             base: self,
             boundary,
             index: 0,
@@ -882,8 +921,8 @@ impl NeighborIterator<isize> for Dim2<isize> {
         &'a self,
         boundary0: &'a Dim2<isize>,
         boundary1: &'a Dim2<isize>,
-    ) -> Neighbor8Iterator2<'a, isize> {
-        Neighbor8Iterator2 {
+    ) -> Dim2Iter2<'a, isize, 8> {
+        Dim2Iter2 {
             base: self,
             boundary0,
             boundary1,
@@ -892,7 +931,30 @@ impl NeighborIterator<isize> for Dim2<isize> {
     }
 }
 
-impl<'a> Iterator for Neighbor8Iterator<'a, isize> {
+impl<'a> Iterator for Dim2Iter1<'a, isize, 4> {
+    type Item = Dim2<isize>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 4 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                2 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1)),
+                3 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1));
+                }
+                4 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1));
+                }
+                _ => (),
+            }
+        }
+        None
+    }
+}
+
+impl<'a> Iterator for Dim2Iter1<'a, isize, 8> {
     type Item = Dim2<isize>;
 
     #[inline]
@@ -927,7 +989,7 @@ impl<'a> Iterator for Neighbor8Iterator<'a, isize> {
     }
 }
 
-impl<'a> Iterator for Neighbor8Iterator2<'a, isize> {
+impl<'a> Iterator for Dim2Iter2<'a, isize, 8> {
     type Item = Dim2<isize>;
 
     #[inline]

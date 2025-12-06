@@ -100,11 +100,7 @@ impl AdventOfCode for Puzzle {
                 .collect::<HashSet<_, BuildHasherDefault<FxHasher>>>();
             let num_connected = res
                 .par_iter()
-                .filter(|p| {
-                    p.neighbors4((0, 0), self.size)
-                        .iter()
-                        .any(|q| res.contains(q))
-                })
+                .filter(|p| p.iter4(&self.size).any(|q| res.contains(&q)))
                 .count();
             let r = num_connected as f64 / num_points as f64;
             if 4.0 < r / signal_rate_ema {
@@ -137,11 +133,7 @@ impl AdventOfCode for Puzzle {
                 .collect::<HashSet<_, BuildHasherDefault<FxHasher>>>();
             let num_connected = res
                 .par_iter()
-                .filter(|p| {
-                    p.neighbors4((0, 0), self.size)
-                        .iter()
-                        .any(|q| res.contains(q))
-                })
+                .filter(|p| p.iter4(&self.size).any(|q| res.contains(&q)))
                 .count();
             let r = num_connected as f64 / num_points as f64;
             if 4.0 < r / signal_rate_ema && goal.is_none() {

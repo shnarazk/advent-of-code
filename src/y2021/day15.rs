@@ -1,7 +1,8 @@
 //! <https://adventofcode.com/2021/day/15>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric, parser,
+    geometric::NeighborIterator,
+    parser,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -26,7 +27,7 @@ impl Puzzle {
         while let Some(n) = cands.iter().min_by_key(|(j, i)| dist[*j][*i]) {
             let node = (n.0, n.1);
             cands.retain(|p| *p != node);
-            for neighbor in geometric::neighbors4(node.0, node.1, height, width) {
+            for neighbor in node.iter4(&(height, width)) {
                 let new_dist = dist[node.0][node.1] + self.line[neighbor.0][neighbor.1];
                 if new_dist < dist[neighbor.0][neighbor.1] {
                     dist[neighbor.0][neighbor.1] = new_dist;

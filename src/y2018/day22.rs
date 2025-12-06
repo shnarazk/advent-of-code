@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric,
+        geometric::NeighborIterator,
     },
     std::{
         cmp::Reverse,
@@ -98,22 +98,15 @@ impl AdventOfCode for Puzzle {
             cost_map.insert((pos, tool), cost);
             let region_type = self.region_type_map.get(&pos).unwrap();
             for tl in region_type.suitable_tools().iter() {
-                for next in geometric::neighbors4(
-                    pos.0,
-                    pos.1,
-                    self.target.0 + margin,
-                    self.target.1 + margin,
-                )
-                .iter()
-                {
-                    let next_region = self.region_type_map.get(next).unwrap();
-                    if cost_map.contains_key(&(*next, *tl)) {
+                for next in pos.iter4(&(self.target.0 + margin, self.target.1 + margin)) {
+                    let next_region = self.region_type_map.get(&next).unwrap();
+                    if cost_map.contains_key(&(next, *tl)) {
                         continue;
                     }
                     if next_region.suitable_tools().contains(tl) {
                         to_visit.push(Reverse((
                             cost + if *tl == tool { 1 } else { 8 },
-                            (*next, *tl),
+                            (next, *tl),
                         )));
                     }
                 }

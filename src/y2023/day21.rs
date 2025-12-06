@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, GeometricMath},
+        geometric::{Dim2, NeighborIterator},
         progress,
     },
     std::collections::HashSet,
@@ -51,9 +51,9 @@ impl AdventOfCode for Puzzle {
             while let Some(p) = to_visit.pop() {
                 if !self.line[p.0][p.1] {
                     map[p.0][p.1] = n;
-                    for q in p.neighbors4((0, 0), (height, width)).iter() {
-                        if !next.contains(q) {
-                            next.push(*q);
+                    for q in p.iter4(&(height, width)) {
+                        if !next.contains(&q) {
+                            next.push(q);
                         }
                     }
                 }
@@ -147,12 +147,9 @@ impl Puzzle {
         for n in 1..=upto {
             progress!(n);
             for p in to_visit.iter() {
-                for q in p
-                    .neighbors4((0, 0), (2 * self.cycle_len, 2 * self.cycle_len))
-                    .iter()
-                {
-                    if (!map[q.0 % height][q.1 % width]) && !next.contains(q) {
-                        next.insert(*q);
+                for q in p.iter4(&(2 * self.cycle_len, 2 * self.cycle_len)) {
+                    if (!map[q.0 % height][q.1 % width]) && !next.contains(&q) {
+                        next.insert(q);
                     }
                 }
             }
@@ -174,9 +171,9 @@ impl Puzzle {
             if m[p.0][p.1] == 0 {
                 m[p.0][p.1] = 2;
             }
-            for q in p.neighbors4((0, 0), (height, width)).iter() {
-                if (m[q.0][q.1] == 0) && !to_visit.contains(q) {
-                    to_visit.push(*q);
+            for q in p.iter4(&(height, width)) {
+                if (m[q.0][q.1] == 0) && !to_visit.contains(&q) {
+                    to_visit.push(q);
                 }
             }
         }

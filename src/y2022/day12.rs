@@ -3,7 +3,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric,
+        geometric::NeighborIterator,
     },
     std::{
         cmp::Reverse,
@@ -68,10 +68,7 @@ impl AdventOfCode for Puzzle {
             if state.location == self.goal {
                 return state.cost;
             }
-            for next in
-                geometric::neighbors4(state.location.0, state.location.1, self.height, self.width)
-                    .into_iter()
-            {
+            for next in state.location.iter4(&(self.height, self.width)) {
                 if self.line[state.location.0][state.location.1] + 1 < self.line[next.0][next.1]
                     || visited.contains(&next)
                 {
@@ -111,10 +108,7 @@ impl AdventOfCode for Puzzle {
             if self.line[state.location.0][state.location.1] == 0 {
                 return state.cost;
             }
-            for next in
-                geometric::neighbors4(state.location.0, state.location.1, self.height, self.width)
-                    .into_iter()
-            {
+            for next in state.location.iter4(&(self.height, self.width)) {
                 if self.line[next.0][next.1] + 1 < self.line[state.location.0][state.location.1]
                     || visited.contains(&next)
                 {

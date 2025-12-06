@@ -1,7 +1,9 @@
 //! <https://adventofcode.com/2019/day/20>
-use crate::geometric::neighbors4;
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
+    crate::{
+        framework::{AdventOfCode, ParseError, aoc},
+        geometric::NeighborIterator,
+    },
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -135,17 +137,17 @@ impl AdventOfCode for Puzzle {
                 return cost;
             }
             visited.insert(loc);
-            for next in neighbors4(loc.0, loc.1, height, width).iter() {
-                if visited.contains(next) {
+            for next in loc.iter4(&(height, width)) {
+                if visited.contains(&next) {
                     continue;
                 }
                 // dbg!(cost);
-                match self.map.get(next) {
+                match self.map.get(&next) {
                     Some(&b'.') => {
-                        to_visit.push(Reverse((cost + 1, *next)));
+                        to_visit.push(Reverse((cost + 1, next)));
                     }
                     Some(&b'*') => {
-                        let warp = self.portal.get(next).unwrap();
+                        let warp = self.portal.get(&next).unwrap();
                         to_visit.push(Reverse((cost + 1, *warp)));
                     }
                     _ => (),
@@ -287,19 +289,19 @@ impl Puzzle {
         to_visit.push(Reverse((0, start)));
         while let Some(Reverse((cost, loc))) = to_visit.pop() {
             visited.insert(loc);
-            for next in neighbors4(loc.0, loc.1, height, width).iter() {
-                if visited.contains(next) {
+            for next in loc.iter4(&(height, width)) {
+                if visited.contains(&next) {
                     continue;
                 }
-                visited.insert(*next);
-                match self.map.get(next) {
+                visited.insert(next);
+                match self.map.get(&next) {
                     Some(&b'.') => {
-                        to_visit.push(Reverse((cost + 1, *next)));
+                        to_visit.push(Reverse((cost + 1, next)));
                     }
                     Some(&b'*') => {
-                        let sgn = if inner(next) { 1 } else { -1 };
-                        debug_assert!(self.map.get(next) == Some(&b'*'));
-                        table.insert(*next, (cost + 1, sgn));
+                        let sgn = if inner(&next) { 1 } else { -1 };
+                        debug_assert!(self.map.get(&next) == Some(&b'*'));
+                        table.insert(next, (cost + 1, sgn));
                     }
                     _ => (),
                 }

@@ -37,10 +37,10 @@ impl Puzzle {
         if lvl == 9 {
             set.insert(from);
         } else {
-            from.neighbors4((0, 0), self.size).iter().for_each(|p| {
+            from.iter4(&self.size).for_each(|p| {
                 let l = *self.plane.get(p).unwrap();
                 if lvl + 1 == l {
-                    let v = self.aux1(*p, l, memo);
+                    let v = self.aux1(p, l, memo);
                     for &q in v.iter() {
                         set.insert(q);
                     }
@@ -62,10 +62,10 @@ impl Puzzle {
             1
         } else {
             let mut count = 0;
-            from.neighbors4((0, 0), self.size).iter().for_each(|p| {
+            from.iter4(&self.size).for_each(|p| {
                 let l = *self.plane.get(p).unwrap();
                 if lvl + 1 == l {
-                    let x = self.aux2(*p, l, memo);
+                    let x = self.aux2(p, l, memo);
                     count += x;
                 }
             });

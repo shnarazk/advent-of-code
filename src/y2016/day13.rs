@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric,
+        geometric::NeighborIterator,
     },
     std::{
         cmp::Reverse,
@@ -35,7 +35,7 @@ impl AdventOfCode for Puzzle {
                 return dist;
             }
             visited.insert(pos);
-            for p in geometric::neighbors4(pos.0, pos.1, usize::MAX, usize::MAX) {
+            for p in pos.iter4(&(usize::MAX, usize::MAX)) {
                 if !visited.contains(&p) && get(&mut map, p.0, p.1, self.line) {
                     to_visit.push(Reverse((dist + 1, p)));
                 }
@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
             if dist == limit {
                 continue;
             }
-            for p in geometric::neighbors4(pos.0, pos.1, usize::MAX, usize::MAX) {
+            for p in pos.iter4(&(usize::MAX, usize::MAX)) {
                 if !visited.contains(&p) && get(&mut map, p.0, p.1, self.line) {
                     to_visit.push(Reverse((dist + 1, p)));
                 }

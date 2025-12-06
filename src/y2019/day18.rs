@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors4,
+        geometric::NeighborIterator,
         progress,
     },
     std::{
@@ -217,18 +217,18 @@ impl Puzzle {
         cost.insert(start, 0);
         while let Some(loc) = to_visit.pop_front() {
             let c = *cost.get(&loc).unwrap();
-            for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
-                if self.map.get(l).map_or_else(
+            for l in loc.iter4(&(self.height, self.width)) {
+                if self.map.get(&l).map_or_else(
                     || false,
                     |k| {
                         [ENTRANCE, OPEN].contains(k)
                             || (b'a' <= *k && *k <= b'z')
                             || (b'A' <= *k && *k <= b'Z' && inventry.contains(&(*k + b'a' - b'A')))
                     },
-                ) && !cost.contains_key(l)
+                ) && !cost.contains_key(&l)
                 {
-                    cost.insert(*l, c + 1);
-                    let k = self.map.get(l).unwrap();
+                    cost.insert(l, c + 1);
+                    let k = self.map.get(&l).unwrap();
                     if ![OPEN, ENTRANCE].contains(k) {
                         result.insert(*k, c + 1);
                     }
@@ -236,7 +236,7 @@ impl Puzzle {
                     if b'a' <= *k && *k <= b'z' && !inventry.contains(k) {
                         continue;
                     }
-                    to_visit.push_back(*l);
+                    to_visit.push_back(l);
                 }
             }
         }
@@ -251,8 +251,8 @@ impl Puzzle {
         cost.insert(start, 0);
         while let Some(loc) = to_visit.pop_front() {
             let c = *cost.get(&loc).unwrap();
-            for l in neighbors4(loc.0, loc.1, self.height, self.width).iter() {
-                if self.map.get(l).map_or_else(
+            for l in loc.iter4(&(self.height, self.width)) {
+                if self.map.get(&l).map_or_else(
                     || false,
                     |k| {
                         [b'0', b'1', b'2', b'3', OPEN].contains(k)
@@ -261,10 +261,10 @@ impl Puzzle {
                                 && *k <= b'Z'
                                 && inventry.iter().any(|v| v.contains(&(*k + b'a' - b'A'))))
                     },
-                ) && !cost.contains_key(l)
+                ) && !cost.contains_key(&l)
                 {
-                    cost.insert(*l, c + 1);
-                    let k = self.map.get(l).unwrap();
+                    cost.insert(l, c + 1);
+                    let k = self.map.get(&l).unwrap();
                     if ![OPEN, b'0', b'1', b'2', b'3'].contains(k) {
                         result.insert(*k, c + 1);
                     }
@@ -272,7 +272,7 @@ impl Puzzle {
                     if b'a' <= *k && *k <= b'z' && inventry.iter().all(|v| !v.contains(k)) {
                         continue;
                     }
-                    to_visit.push_back(*l);
+                    to_visit.push_back(l);
                 }
             }
         }
