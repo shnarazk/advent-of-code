@@ -39,13 +39,6 @@ pub trait GeometricMath {
     ) -> Vec<Self>
     where
         Self: Sized;
-    fn neighbors8<V1: AsVecReference<Self>, V2: AsVecReference<Self>>(
-        &self,
-        boundary0: V1,
-        boundary1: V2,
-    ) -> Vec<Self>
-    where
-        Self: Sized;
 }
 
 pub trait GeometricRotation {
@@ -265,26 +258,6 @@ impl GeometricMath for Dim2<isize> {
             })
             .collect::<Vec<_>>()
     }
-    fn neighbors8<V1: AsVecReference<Dim2<isize>>, V2: AsVecReference<Dim2<isize>>>(
-        &self,
-        boundary0: V1,
-        boundary1: V2,
-    ) -> Vec<Self> {
-        let b0 = boundary0.as_vec_ref();
-        let b1 = boundary1.as_vec_ref();
-        [self.0 - 1, self.0, self.0 + 1]
-            .iter()
-            .filter(|s| b0.0 <= **s && **s < b1.0)
-            .flat_map(|y| {
-                [self.1 - 1, self.1, self.1 + 1]
-                    .iter()
-                    .filter(|t| b0.1 <= **t && **t < b1.1)
-                    .filter(|x| *y != self.0 || **x != self.1)
-                    .map(|x| (*y, *x))
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>()
-    }
 }
 
 impl GeometricMath for Dim2<usize> {
@@ -377,26 +350,6 @@ impl GeometricMath for Dim2<usize> {
                     .filter(|x| y == self.0 || *x == self.1)
                     .filter(|x| y != self.0 || *x != self.1)
                     .map(|x| (y, x))
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>()
-    }
-    fn neighbors8<V1: AsVecReference<Dim2<usize>>, V2: AsVecReference<Dim2<usize>>>(
-        &self,
-        boundary0: V1,
-        boundary1: V2,
-    ) -> Vec<Self> {
-        let b0 = boundary0.as_vec_ref();
-        let b1 = boundary1.as_vec_ref();
-        [self.0 - 1, self.0, self.0 + 1]
-            .iter()
-            .filter(|s| b0.0 <= **s && **s < b1.0)
-            .flat_map(|y| {
-                [self.1 - 1, self.1, self.1 + 1]
-                    .iter()
-                    .filter(|t| b0.1 <= **t && **t < b1.1)
-                    .filter(|x| *y != self.0 || **x != self.1)
-                    .map(|x| (*y, *x))
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>()
@@ -548,13 +501,6 @@ impl GeometricMath for Dim3<isize> {
     ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8<V1: AsVecReference<Dim3<isize>>, V2: AsVecReference<Dim3<isize>>>(
-        &self,
-        _boundary0: V1,
-        _boundary1: V2,
-    ) -> Vec<Self> {
-        unimplemented!()
-    }
 }
 
 impl GeometricMath for Dim3<usize> {
@@ -653,13 +599,6 @@ impl GeometricMath for Dim3<usize> {
     ) -> Vec<Self> {
         unimplemented!()
     }
-    fn neighbors8<V1: AsVecReference<Dim3<usize>>, V2: AsVecReference<Dim3<usize>>>(
-        &self,
-        _boundary0: V1,
-        _boundary1: V2,
-    ) -> Vec<Self> {
-        unimplemented!()
-    }
 }
 
 /// returns `[self - 1, self, self + 1]`
@@ -699,29 +638,6 @@ pub fn neighbors4(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize
                 .collect::<Vec<_>>()
         })
         .filter(|(jj, ii)| (*jj == j || *ii == i) && !(*jj == j && *ii == i))
-        .collect::<Vec<_>>()
-}
-
-/// returns all 8 neighbors
-/// ```
-/// use adventofcode::geometric;
-/// assert_eq!(geometric::neighbors8(0, 0, 2, 2), vec![(0, 1), (1, 0), (1, 1)]);
-/// assert_eq!(geometric::neighbors8(1, 1, 3, 3).len(), 8);
-/// assert_eq!(geometric::neighbors8(1, 1, 2, 3), vec![(0, 0), (0, 1), (0, 2), (1, 0), (1, 2)]);
-/// assert_eq!(geometric::neighbors8(1, 0, 3, 3), vec![(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)]);
-/// ```
-pub fn neighbors8(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
-    neighbors(j, height)
-        .iter()
-        .filter(|s| s.is_some())
-        .flat_map(|jj| {
-            neighbors(i, width)
-                .iter()
-                .filter(|t| t.is_some())
-                .map(|ii| (jj.unwrap(), ii.unwrap()))
-                .collect::<Vec<_>>()
-        })
-        .filter(|(jj, ii)| !(*jj == j && *ii == i))
         .collect::<Vec<_>>()
 }
 
