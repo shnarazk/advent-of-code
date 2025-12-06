@@ -1,7 +1,8 @@
 //! <https://adventofcode.com/2021/day/11>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric, parser,
+    geometric::NeighborIterator,
+    parser,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -37,7 +38,7 @@ impl Puzzle {
             }
         }
         for (j, i) in flash.iter() {
-            for (jj, ii) in geometric::neighbors8(*j, *i, self.height, self.width) {
+            for (jj, ii) in (*j, *i).iter8(&(self.height, self.width)) {
                 if self.line[jj][ii] == 9 {
                     secondary.push((jj, ii))
                 }
@@ -75,7 +76,7 @@ impl Puzzle {
             }
         }
         for (j, i) in flash.iter() {
-            for (jj, ii) in geometric::neighbors8(*j, *i, self.height, self.width) {
+            for (jj, ii) in (*j, *i).iter8(&(self.height, self.width)) {
                 if self.line[jj][ii] == 9 {
                     secondary.push((jj, ii))
                 }

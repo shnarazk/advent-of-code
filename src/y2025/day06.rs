@@ -5,7 +5,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        // geometric::{Dim2, neighbors8},
+        // geometric::{Dim2, NeighborIterator},
     },
     // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},

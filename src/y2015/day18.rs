@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2015/day/18>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric,
+    geometric::NeighborIterator,
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -23,9 +23,9 @@ impl AdventOfCode for Puzzle {
         for _ in 0..count {
             let mut next = grid.clone();
             for (j, v) in grid.iter().enumerate() {
-                for (i, _) in v.iter().enumerate() {
-                    let n = geometric::neighbors8(j, i, height, width)
-                        .iter()
+                for i in 0..v.len() {
+                    let n = (j, i)
+                        .iter8(&(height, width))
                         .filter(|(jj, ii)| grid[*jj][*ii] == '#')
                         .count();
                     match (grid[j][i], n) {
@@ -70,9 +70,9 @@ impl AdventOfCode for Puzzle {
         for _ in 0..count {
             let mut next = grid.clone();
             for (j, v) in grid.iter().enumerate() {
-                for (i, _) in v.iter().enumerate() {
-                    let n = geometric::neighbors8(j, i, height, width)
-                        .iter()
+                for i in 0..v.len() {
+                    let n = (j, i)
+                        .iter8(&(height, width))
                         .filter(|(jj, ii)| grid[*jj][*ii] == '#')
                         .count();
                     match (grid[j][i], n) {

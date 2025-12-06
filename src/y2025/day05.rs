@@ -5,17 +5,20 @@ use {
     std::{collections::HashMap, hash::BuildHasherDefault},
 };
 
+pub(crate) type Ranges = Vec<(usize, usize)>;
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     // 1. inclusive: closed range
     // 2. overlapped
-    ranges: Vec<(usize, usize)>,
+    ranges: Ranges,
     // if it is in a range, it's called 'fresh'
     availables: Vec<usize>,
 }
 
 mod parser {
     use {
+        super::Ranges,
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
@@ -30,14 +33,14 @@ mod parser {
             .map(|(a, _, b)| (a, b))
     }
 
-    fn parse_block1(s: &mut &str) -> ModalResult<Vec<(usize, usize)>> {
+    fn parse_block1(s: &mut &str) -> ModalResult<Ranges> {
         separated(1.., parse_two_usizes, newline).parse_next(s)
     }
     fn parse_block2(s: &mut &str) -> ModalResult<Vec<usize>> {
         separated(1.., parse_usize, newline).parse_next(s)
     }
 
-    pub fn parse(s: &mut &str) -> ModalResult<(Vec<(usize, usize)>, Vec<usize>)> {
+    pub fn parse(s: &mut &str) -> ModalResult<(Ranges, Vec<usize>)> {
         seq!(parse_block1, seq!(newline, newline), parse_block2)
             .parse_next(s)
             .map(|(a, _, b)| (a, b))
