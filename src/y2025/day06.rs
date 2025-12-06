@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2025/day/6>
 use {
     crate::{
-        array::rotate_anticlockwise,
+        array::rotate_ccw,
         framework::{AdventOfCode, ParseError, aoc},
     },
     // rayon::prelude::*,
@@ -128,7 +128,7 @@ fn rotate(m: &[Vec<(usize, u8)>], n: usize) -> Vec<usize> {
         }
     }
     let u = t.into_iter().map(|p| p.0).collect::<Vec<_>>();
-    rotate_anticlockwise(u)
+    rotate_ccw(u)
         .iter()
         .map(|l| from_vec(l))
         .collect::<Vec<_>>()
