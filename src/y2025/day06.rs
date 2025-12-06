@@ -67,8 +67,8 @@ impl AdventOfCode for Puzzle {
             .iter()
             .enumerate()
             .map(|(i, op)| match op {
-                Op::Add => self.problem.iter().map(|v| v[i]).fold(0, |acc, x| acc + x),
-                Op::Mul => self.problem.iter().map(|v| v[i]).fold(1, |acc, x| acc * x),
+                Op::Add => self.problem.iter().map(|v| v[i]).sum::<usize>(),
+                Op::Mul => self.problem.iter().map(|v| v[i]).product::<usize>(),
             })
             .sum()
     }
@@ -106,8 +106,8 @@ impl AdventOfCode for Puzzle {
             .iter()
             .enumerate()
             .map(|(i, op)| match op {
-                Op::Add => rotate(&m, i).iter().fold(0, |acc, x| acc + x),
-                Op::Mul => rotate(&m, i).iter().fold(1, |acc, x| acc * x),
+                Op::Add => rotate(&m, i).iter().sum::<usize>(),
+                Op::Mul => rotate(&m, i).iter().product::<usize>(),
             })
             .sum()
     }
@@ -145,6 +145,6 @@ fn to_vec(mut n: usize) -> Vec<usize> {
 }
 
 fn from_vec(v: &[usize]) -> usize {
-    v.into_iter()
+    v.iter()
         .fold(0, |acc, n| if *n < 10 { acc * 10 + n } else { acc })
 }
