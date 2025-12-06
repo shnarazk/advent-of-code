@@ -1,21 +1,10 @@
 //! <https://adventofcode.com/2025/day/6>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
-        array::{self, rotate_clockwise},
-        // geometric::{Dim2, NeighborIterator},
+        array::rotate_anticlockwise,
         framework::{AdventOfCode, ParseError, aoc},
     },
     // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -37,8 +26,8 @@ mod parser {
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space0, space1},
-            combinator::{alt, preceded, separated, seq},
+            ascii::{newline, space0, space1},
+            combinator::{preceded, separated, seq},
             token::one_of,
         },
     };
@@ -108,13 +97,11 @@ impl AdventOfCode for Puzzle {
                         while s[i][begins[j] + c] == ' ' {
                             c += 1;
                         }
-
                         (*n, c as u8)
                     })
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
-        dbg!(&m);
         self.ops
             .iter()
             .enumerate()
@@ -131,7 +118,6 @@ fn rotate(m: &[Vec<(usize, u8)>], n: usize) -> Vec<usize> {
         .iter()
         .map(|v| (to_vec(v[n].0), v[n].1))
         .collect::<Vec<_>>();
-    dbg!(&t);
     let d = t.iter().map(|l| l.0.len()).max().unwrap();
     for (l, prefix) in t.iter_mut() {
         for _ in 0..*prefix {
@@ -141,12 +127,11 @@ fn rotate(m: &[Vec<(usize, u8)>], n: usize) -> Vec<usize> {
             l.push(10);
         }
     }
-    let mut u = t.into_iter().map(|p| p.0).collect::<Vec<_>>();
-    u = rotate_clockwise(u);
-    u = rotate_clockwise(u);
-    u = rotate_clockwise(u);
-    dbg!(u.iter().map(|l| from_vec(l)).collect::<Vec<_>>());
-    u.iter().map(|l| from_vec(l)).collect::<Vec<_>>()
+    let u = t.into_iter().map(|p| p.0).collect::<Vec<_>>();
+    rotate_anticlockwise(u)
+        .iter()
+        .map(|l| from_vec(l))
+        .collect::<Vec<_>>()
 }
 
 fn to_vec(mut n: usize) -> Vec<usize> {
