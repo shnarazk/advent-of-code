@@ -4,8 +4,9 @@
 #![allow(unused_variables)]
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
+        array::{self, rotate_clockwise},
         // geometric::{Dim2, NeighborIterator},
+        framework::{AdventOfCode, ParseError, aoc},
     },
     // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
@@ -25,6 +26,7 @@ pub(crate) enum Op {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Puzzle {
+    input: String,
     problem: Vec<Vec<usize>>,
     ops: Vec<Op>,
 }
@@ -65,10 +67,10 @@ mod parser {
 #[aoc(2025, 6)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
-        let (p, o) = parser::parse(&mut input)?;
+        self.input = input.to_string();
+        let (p, o) = parser::parse(&mut input).expect("nop");
         self.problem = p;
         self.ops = o;
-        assert_eq!(self.problem[0].len(), self.ops.len());
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -82,7 +84,82 @@ impl AdventOfCode for Puzzle {
             .sum()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        2
+        let s = self
+            .input
+            .trim()
+            .split('\n')
+            .map(|s| s.chars().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        let begins = s[s.len() - 1]
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| **c != ' ')
+            .map(|(i, _)| i)
+            .collect::<Vec<_>>();
+        let m = self
+            .problem
+            .iter()
+            .enumerate()
+            .map(|(i, l)| {
+                l.iter()
+                    .enumerate()
+                    .map(|(j, n)| {
+                        let mut c = 0;
+                        while s[i][begins[j] + c] == ' ' {
+                            c += 1;
+                        }
+
+                        (*n, c as u8)
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        dbg!(&m);
+        self.ops
+            .iter()
+            .enumerate()
+            .map(|(i, op)| match op {
+                Op::Add => rotate(&m, i).iter().fold(0, |acc, x| acc + x),
+                Op::Mul => rotate(&m, i).iter().fold(1, |acc, x| acc * x),
+            })
+            .sum()
     }
+}
+
+fn rotate(m: &[Vec<(usize, u8)>], n: usize) -> Vec<usize> {
+    let mut t = m
+        .iter()
+        .map(|v| (to_vec(v[n].0), v[n].1))
+        .collect::<Vec<_>>();
+    dbg!(&t);
+    let d = t.iter().map(|l| l.0.len()).max().unwrap();
+    for (l, prefix) in t.iter_mut() {
+        for _ in 0..*prefix {
+            l.insert(0, 10);
+        }
+        while l.len() < d {
+            l.push(10);
+        }
+    }
+    let mut u = t.into_iter().map(|p| p.0).collect::<Vec<_>>();
+    u = rotate_clockwise(u);
+    u = rotate_clockwise(u);
+    u = rotate_clockwise(u);
+    dbg!(u.iter().map(|l| from_vec(l)).collect::<Vec<_>>());
+    u.iter().map(|l| from_vec(l)).collect::<Vec<_>>()
+}
+
+fn to_vec(mut n: usize) -> Vec<usize> {
+    let mut v: Vec<usize> = Vec::new();
+    while n > 0 {
+        v.push(n % 10);
+        n /= 10;
+    }
+    v.reverse();
+    v
+}
+
+fn from_vec(v: &[usize]) -> usize {
+    v.into_iter()
+        .fold(0, |acc, n| if *n < 10 { acc * 10 + n } else { acc })
 }
