@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/20>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric,
+    geometric::NeighborIterator,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -61,9 +61,9 @@ impl AdventOfCode for Puzzle {
 
             for (j, v) in next.iter_mut().enumerate() {
                 for (i, n) in v.iter_mut().enumerate() {
-                    let key: usize = geometric::neighbors9(j, i, height, width)
-                        .iter()
-                        .map(|(jj, ii)| (image[*jj][*ii] == '#') as usize)
+                    let key: usize = (j, i)
+                        .iter9(&(height, width))
+                        .map(|(jj, ii)| (image[jj][ii] == '#') as usize)
                         .fold(0, |t, x| 2 * t + x);
                     *n = self.enhancer[key];
                 }
@@ -121,9 +121,9 @@ impl AdventOfCode for Puzzle {
 
             for (j, v) in next.iter_mut().enumerate() {
                 for (i, n) in v.iter_mut().enumerate() {
-                    let key: usize = geometric::neighbors9(j, i, height, width)
-                        .iter()
-                        .map(|(jj, ii)| (image[*jj][*ii] == '#') as usize)
+                    let key: usize = (j, i)
+                        .iter9(&(height, width))
+                        .map(|(jj, ii)| (image[jj][ii] == '#') as usize)
                         .fold(0, |t, x| 2 * t + x);
                     *n = self.enhancer[key];
                 }

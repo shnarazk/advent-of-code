@@ -504,27 +504,6 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     ]
 }
 
-/// returns all 9 neighbors
-/// ```
-/// use adventofcode::geometric;
-/// assert_eq!(geometric::neighbors9(1, 1, 3, 3).len(), 9);
-/// assert_eq!(geometric::neighbors9(1, 1, 3, 3), vec![(0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0), (2,1), (2,2)]);
-/// assert_eq!(geometric::neighbors9(0, 0, 3, 3), vec![(0,0), (0,1), (1,0), (1,1)]);
-/// ```
-pub fn neighbors9(j: usize, i: usize, height: usize, width: usize) -> Vec<(usize, usize)> {
-    neighbors(j, height)
-        .iter()
-        .filter(|s| s.is_some())
-        .flat_map(|jj| {
-            neighbors(i, width)
-                .iter()
-                .filter(|t| t.is_some())
-                .map(|ii| (jj.unwrap(), ii.unwrap()))
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
-}
-
 /// returns all 6 neighbors in 3D space
 /// ```
 /// use adventofcode::geometric;
@@ -631,9 +610,9 @@ pub struct Dim2Iter2<'a, T, const N: u8> {
 }
 
 pub trait NeighborIterator<T> {
-    /// Iterate on its 4 neighbors.Their positions are in [(0, 0), `boundary1`).
+    /// Iterate on its 4 neighbors. Their positions are in [(0, 0), `boundary1`).
     fn iter4<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 4>;
-    /// Iterate on its 8 neighbors.Their positions are in [(0, 0), `boundary1`).
+    /// Iterate on its 8 neighbors. Their positions are in [(0, 0), `boundary1`).
     fn iter8<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 8>;
     /// Iterate on its 8 neighbors. Their positions are in [`boundary0`, `boundary1`).
     fn iter8_from<'a>(
@@ -641,6 +620,8 @@ pub trait NeighborIterator<T> {
         boundary0: &'a Dim2<T>,
         boundary1: &'a Dim2<T>,
     ) -> Dim2Iter2<'a, T, 8>;
+    /// Iterate on its 8 neighbors and itself. Their positions are in [(0, 0), `boundary1`).
+    fn iter9<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 9>;
 }
 
 impl NeighborIterator<usize> for Dim2<usize> {
@@ -667,6 +648,13 @@ impl NeighborIterator<usize> for Dim2<usize> {
             base: self,
             boundary0,
             boundary1,
+            index: 0,
+        }
+    }
+    fn iter9<'a>(&'a self, boundary: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 9> {
+        Dim2Iter1 {
+            base: self,
+            boundary,
             index: 0,
         }
     }
@@ -721,6 +709,42 @@ impl<'a> Iterator for Dim2Iter1<'a, usize, 8> {
                     return Some((self.base.0 + 1, self.base.1));
                 }
                 8 if self.base.0 + 1 < self.boundary.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 + 1, self.base.1 + 1));
+                }
+                _ => (),
+            }
+        }
+        None
+    }
+}
+
+impl<'a> Iterator for Dim2Iter1<'a, usize, 9> {
+    type Item = Dim2<usize>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 9 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 - 1, self.base.1 - 1));
+                }
+                2 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                3 if 0 < self.base.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 - 1, self.base.1 + 1));
+                }
+                4 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1)),
+                5 => return Some((self.base.0, self.base.1)),
+                6 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1));
+                }
+                7 if self.base.0 + 1 < self.boundary.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 + 1, self.base.1 - 1));
+                }
+                8 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1));
+                }
+                9 if self.base.0 + 1 < self.boundary.0 && self.base.1 + 1 < self.boundary.1 => {
                     return Some((self.base.0 + 1, self.base.1 + 1));
                 }
                 _ => (),
@@ -792,6 +816,13 @@ impl NeighborIterator<isize> for Dim2<isize> {
             index: 0,
         }
     }
+    fn iter9<'a>(&'a self, boundary: &'a Dim2<isize>) -> Dim2Iter1<'a, isize, 9> {
+        Dim2Iter1 {
+            base: self,
+            boundary,
+            index: 0,
+        }
+    }
 }
 
 impl<'a> Iterator for Dim2Iter1<'a, isize, 4> {
@@ -843,6 +874,42 @@ impl<'a> Iterator for Dim2Iter1<'a, isize, 8> {
                     return Some((self.base.0 + 1, self.base.1));
                 }
                 8 if self.base.0 + 1 < self.boundary.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 + 1, self.base.1 + 1));
+                }
+                _ => (),
+            }
+        }
+        None
+    }
+}
+
+impl<'a> Iterator for Dim2Iter1<'a, isize, 9> {
+    type Item = Dim2<isize>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 9 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 - 1, self.base.1 - 1));
+                }
+                2 if 0 < self.base.0 => return Some((self.base.0 - 1, self.base.1)),
+                3 if 0 < self.base.0 && self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0 - 1, self.base.1 + 1));
+                }
+                4 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1)),
+                5 => return Some((self.base.0, self.base.1)),
+                6 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1));
+                }
+                7 if self.base.0 + 1 < self.boundary.0 && 0 < self.base.1 => {
+                    return Some((self.base.0 + 1, self.base.1 - 1));
+                }
+                8 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1));
+                }
+                9 if self.base.0 + 1 < self.boundary.0 && self.base.1 + 1 < self.boundary.1 => {
                     return Some((self.base.0 + 1, self.base.1 + 1));
                 }
                 _ => (),
