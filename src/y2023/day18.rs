@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, GeometricMath},
+        geometric::{Dim2, NeighborIterator},
     },
     itertools::Itertools,
     serde::Serialize,
@@ -81,8 +81,8 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             map.insert(p, 0);
-            for q in p.neighbors8(corner0, corner1).iter() {
-                to_visit.push(*q);
+            for q in p.iter8_from(&corner0, &corner1) {
+                to_visit.push(q);
             }
         }
         ((corner1.0 - corner0.0) * (corner1.1 - corner0.1)) as usize
@@ -183,8 +183,8 @@ impl AdventOfCode for Puzzle {
                 continue;
             }
             map.insert(p, 0);
-            for q in p.neighbors8(corner0, corner1).iter() {
-                to_visit.push(*q);
+            for q in p.iter8_from(&corner0, &corner1) {
+                to_visit.push(q);
             }
         }
         for y in corner0.0..corner1.0 {
