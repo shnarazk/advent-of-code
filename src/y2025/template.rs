@@ -7,13 +7,14 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         // geometric::{Dim2, NeighborIter},
     },
-    rayon::prelude::*,
+    // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    serde::Serialize,
+    // serde::Serialize,
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap},
         hash::BuildHasherDefault,
+        mem::swap,
     },
 };
 
@@ -28,7 +29,8 @@ mod parser {
         winnow::{
             ModalResult, Parser,
             ascii::{alpha1, newline, space1},
-            combinator::{alt, separated, seq},
+            combinator::{alt, repeat, separated, seq},
+            token::one_of,
         },
     };
 
@@ -48,10 +50,10 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         1
     }
     fn part2(&mut self) -> Self::Output2 {
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         2
     }
 }
