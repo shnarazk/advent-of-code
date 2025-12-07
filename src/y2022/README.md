@@ -1,33 +1,36 @@
 ## y2022
 
-|   day |    time |
+- rustc-1.91
+- Apple Silicon M3
+
+|   day | time(ms)|
 |------:|--------:|
-| day1  |     0.5 |
-| day2  |     0.4 |
-| day3  |     0.4 |
-| day4  |     1.4 |
-| day5  |     0.8 |
+| day1  |     0.6 |
+| day2  |     0.3 |
+| day3  |     0.3 |
+| day4  |     0.3 |
+| day5  |     0.4 |
 | day6  |     0.5 |
-| day7  |     1.1 |
-| day8  |     9.1 |
-| day9  |     1.6 |
+| day7  |     0.4 |
+| day8  |     9.3 |
+| day9  |     1.1 |
 | day10 |     0.2 |
-| day11 |     9.5 |
-| day12 |     3.4 |
-| day13 |     1.0 |
-| day14 |     5.3 |
-| day15 |     0.4 |
-| day16 |   621.4 |
-| day17 |  9122.6 |
-| day18 |     3.9 |
-| day19 |  1269.0 |
-| day20 |   582.5 |
-| day21 |     9.2 |
-| day22 |     4.6 |
-| day23 |   571.4 |
-| day24 |   674.4 |
-| day25 |     0.8 |
-| y2022 | 12895.3 |
+| day11 |    12.5 |
+| day12 |     1.9 |
+| day13 |     1.4 |
+| day14 |     4.7 |
+| day15 |     0.2 |
+| day16 |   601.7 |
+| day17 |  6452.7 |
+| day18 |     2.5 |
+| day19 |   997.1 |
+| day20 |   314.5 |
+| day21 |     5.0 |
+| day22 |     2.5 |
+| day23 |   416.8 |
+| day24 |   642.2 |
+| day25 |     0.3 |
+| y2022 |  9469.4 |
 
 ### day14 https://adventofcode.com/2022/day/14
 buckets floading problem similar with [y2018 day17](https://adventofcode.com/2018/day/17)
