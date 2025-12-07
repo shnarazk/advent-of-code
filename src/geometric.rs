@@ -26,9 +26,6 @@ pub trait GeometricMath {
     where
         Self: Sized;
     fn scale(&self, s: Self::BaseType) -> Self;
-    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized;
 }
 
 pub trait GeometricRotation {
@@ -205,17 +202,6 @@ impl GeometricMath for Dim2<isize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k)
     }
-    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
-        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
-        DIR4.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1)
-            .collect::<Vec<Self>>()
-    }
 }
 
 impl GeometricMath for Dim2<usize> {
@@ -271,17 +257,6 @@ impl GeometricMath for Dim2<usize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k)
     }
-    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(usize::MAX, |v| v.0);
-        let b1 = boundary.map_or(usize::MAX, |v| v.1);
-        DIR4.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0 < b0 && v.1 < b1)
-            .collect::<Vec<Self>>()
-    }
 }
 
 pub type Dim3<L> = (L, L, L);
@@ -300,15 +275,6 @@ impl<L> AsVecReference<Dim3<L>> for &Dim3<L> {
         self
     }
 }
-
-const DIR6: [Vec3; 6] = [
-    (-1, 0, 0),
-    (1, 0, 0),
-    (0, -1, 0),
-    (0, 1, 0),
-    (0, 0, -1),
-    (0, 0, 1),
-];
 
 const _DIR26: [Vec3; 26] = [
     // (0, 0, 0),
@@ -397,18 +363,6 @@ impl GeometricMath for Dim3<isize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k, self.2 * k)
     }
-    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(isize::MAX, |v| v.0.abs());
-        let b1 = boundary.map_or(isize::MAX, |v| v.1.abs());
-        let b2 = boundary.map_or(isize::MAX, |v| v.2.abs());
-        DIR6.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0.abs() < b0 && v.1.abs() < b1 && v.2.abs() < b2)
-            .collect::<Vec<Self>>()
-    }
 }
 
 impl GeometricMath for Dim3<usize> {
@@ -475,18 +429,6 @@ impl GeometricMath for Dim3<usize> {
     fn scale(&self, k: Self::BaseType) -> Self {
         (self.0 * k, self.1 * k, self.2 * k)
     }
-    fn neighbors(&self, boundary: Option<Self>) -> Vec<Self>
-    where
-        Self: Sized,
-    {
-        let b0 = boundary.map_or(usize::MAX, |v| v.0);
-        let b1 = boundary.map_or(usize::MAX, |v| v.1);
-        let b2 = boundary.map_or(usize::MAX, |v| v.2);
-        DIR6.iter()
-            .filter_map(|d| self.shift(d))
-            .filter(|v| v.0 < b0 && v.1 < b1 && v.2 < b2)
-            .collect::<Vec<Self>>()
-    }
 }
 
 /// returns `[self - 1, self, self + 1]`
@@ -505,33 +447,33 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
 }
 
 /// returns all 26 neighbors in 3D space
-pub fn cubic_neighbors26(
-    x: usize,
-    y: usize,
-    z: usize,
-    bx: usize,
-    by: usize,
-    bz: usize,
-) -> Vec<(usize, usize, usize)> {
-    neighbors(x, bx)
-        .iter()
-        .filter(|s| s.is_some())
-        .flat_map(|xx| {
-            neighbors(y, by)
-                .iter()
-                .filter(|t| t.is_some())
-                .flat_map(|yy| {
-                    neighbors(z, bz)
-                        .iter()
-                        .filter(|t| t.is_some())
-                        .map(|zz| (xx.unwrap(), yy.unwrap(), zz.unwrap()))
-                        .filter(|(xx, yy, zz)| !(*xx == x && *yy == y && *zz == z))
-                        .collect::<Vec<_>>()
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
-}
+// pub fn cubic_neighbors26(
+//     x: usize,
+//     y: usize,
+//     z: usize,
+//     bx: usize,
+//     by: usize,
+//     bz: usize,
+// ) -> Vec<(usize, usize, usize)> {
+//     neighbors(x, bx)
+//         .iter()
+//         .filter(|s| s.is_some())
+//         .flat_map(|xx| {
+//             neighbors(y, by)
+//                 .iter()
+//                 .filter(|t| t.is_some())
+//                 .flat_map(|yy| {
+//                     neighbors(z, bz)
+//                         .iter()
+//                         .filter(|t| t.is_some())
+//                         .map(|zz| (xx.unwrap(), yy.unwrap(), zz.unwrap()))
+//                         .filter(|(xx, yy, zz)| !(*xx == x && *yy == y && *zz == z))
+//                         .collect::<Vec<_>>()
+//                 })
+//                 .collect::<Vec<_>>()
+//         })
+//         .collect::<Vec<_>>()
+// }
 
 pub trait GeometricAddition {
     fn move_to(&self, q: Dim2<isize>, h: usize, w: usize) -> Option<Box<Self>>;

@@ -3,10 +3,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors,
-    },
+    crate::framework::{AdventOfCode, ParseError, aoc},
     std::collections::HashMap,
 };
 
@@ -20,7 +17,7 @@ mod parser {
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
+            ascii::newline,
             combinator::{alt, separated, seq},
         },
     };

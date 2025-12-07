@@ -5,7 +5,6 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors,
         parser,
     },
     std::collections::HashMap,

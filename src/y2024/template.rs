@@ -3,10 +3,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        geometric::neighbors,
-    },
+    crate::framework::{AdventOfCode, ParseError, aoc},
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     serde::Serialize,
