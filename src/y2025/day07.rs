@@ -1,18 +1,12 @@
 //! <https://adventofcode.com/2025/day/7>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, NeighborIterator},
+        geometric::Dim2,
     },
-    // rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
+        collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
 };
@@ -24,14 +18,11 @@ pub struct Puzzle {
 }
 
 mod parser {
-    use {
-        crate::parser::parse_usize,
-        winnow::{
-            ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, repeat, separated, seq},
-            token::one_of,
-        },
+    use winnow::{
+        ModalResult, Parser,
+        ascii::newline,
+        combinator::{repeat, separated},
+        token::one_of,
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Vec<char>> {
@@ -60,9 +51,10 @@ impl AdventOfCode for Puzzle {
         let height = self.line.len();
         let width = self.line[0].len();
         // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut pos: HashSet<usize> = HashSet::new();
+        // let mut pos: HashSet<usize> = HashSet::new();
+        let mut pos: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
         pos.insert(self.start.1);
-        let mut next: HashSet<usize> = HashSet::new();
+        let mut next: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
         let mut num_splits = 0;
         for y in self.start.0..height {
             next.clear();
@@ -86,16 +78,15 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         let height = self.line.len();
         let width = self.line[0].len();
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        let mut pos: HashMap<usize, usize> = HashMap::new();
+        let mut pos: FxHashMap<usize, usize> =
+            HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
         pos.insert(self.start.1, 1);
-        let mut next: HashMap<usize, usize> = HashMap::new();
-        let mut num_splits = 0;
+        let mut next: FxHashMap<usize, usize> =
+            HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
         for y in self.start.0..height {
             next.clear();
             for (x, n) in pos.iter() {
                 if self.line[y][*x] == '^' {
-                    num_splits += 1;
                     if 0 < *x {
                         *next.entry(x - 1).or_insert(0) += n;
                     }
