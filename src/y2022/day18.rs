@@ -2,7 +2,8 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric, parser,
+        geometric::NeighborIterator,
+        parser,
     },
     std::collections::HashSet,
 };
@@ -39,8 +40,7 @@ impl AdventOfCode for Puzzle {
         self.map
             .iter()
             .map(|pos| {
-                geometric::cubic_neighbors6(pos.0, pos.1, pos.2, L, L, L)
-                    .iter()
+                pos.iter6(&(L, L, L))
                     .filter(|p| !self.map.contains(p))
                     .count()
             })
