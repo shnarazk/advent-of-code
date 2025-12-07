@@ -11,7 +11,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     line: Vec<Vec<char>>,
     start: Dim2<usize>,
@@ -50,8 +50,6 @@ impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
         let height = self.line.len();
         let width = self.line[0].len();
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        // let mut pos: HashSet<usize> = HashSet::new();
         let mut pos: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
         pos.insert(self.start.1);
         let mut next: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
