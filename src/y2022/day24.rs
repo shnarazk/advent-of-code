@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, GeometricMath},
+        geometric::{Dim2, NeighborIterator},
     },
     std::{
         cmp::Reverse,
@@ -121,7 +121,7 @@ impl AdventOfCode for Puzzle {
 }
 impl Puzzle {
     fn search(&self, start_time: usize, start: &Dim, goal: &Dim) -> usize {
-        let boundary = Some((self.height + 2, self.width + 2));
+        let boundary = (self.height + 2, self.width + 2);
         #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub struct State {
             expected: usize,
@@ -142,17 +142,17 @@ impl Puzzle {
                 return state.time;
             }
             let time = state.time + 1;
-            for next_position in state.position.neighbors(boundary).iter() {
-                if self.map.get(next_position) == Some(&'#') {
+            for next_position in state.position.iter4(&boundary) {
+                if self.map.get(&next_position) == Some(&'#') {
                     continue;
                 }
-                if self.is_open(time, next_position) {
+                if self.is_open(time, &next_position) {
                     let next = State {
                         expected: time
                             + goal.0.abs_diff(next_position.0)
                             + goal.1.abs_diff(next_position.1),
                         time,
-                        position: *next_position,
+                        position: next_position,
                     };
                     if !visited.contains(&next) {
                         to_visit.push(Reverse(next.clone()));
