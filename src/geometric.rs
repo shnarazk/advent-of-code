@@ -504,48 +504,6 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     ]
 }
 
-/// returns all 6 neighbors in 3D space
-/// ```
-/// use adventofcode::geometric;
-/// let mut a = geometric::cubic_neighbors6(1, 1, 1, 3, 3, 3);
-/// a.sort();
-/// let mut b = vec![(1,1,0), (1,1,2), (1,0,1), (1,2,1), (0,1,1), (2,1,1)];
-/// b.sort();
-/// assert_eq!(a, b);
-/// ```
-#[allow(clippy::nonminimal_bool)]
-pub fn cubic_neighbors6(
-    x: usize,
-    y: usize,
-    z: usize,
-    bx: usize,
-    by: usize,
-    bz: usize,
-) -> Vec<(usize, usize, usize)> {
-    neighbors(x, bx)
-        .iter()
-        .filter(|s| s.is_some())
-        .flat_map(|xx| {
-            neighbors(y, by)
-                .iter()
-                .filter(|t| t.is_some())
-                .flat_map(|yy| {
-                    neighbors(z, bz)
-                        .iter()
-                        .filter(|t| t.is_some())
-                        .map(|zz| (xx.unwrap(), yy.unwrap(), zz.unwrap()))
-                        .filter(|(xx, yy, zz)| {
-                            (*xx != x && *yy == y && *zz == z)
-                                || (*xx == x && *yy != y && *zz == z)
-                                || (*xx == x && *yy == y && *zz != z)
-                        })
-                        .collect::<Vec<_>>()
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
-}
-
 /// returns all 26 neighbors in 3D space
 pub fn cubic_neighbors26(
     x: usize,
