@@ -84,6 +84,30 @@ impl AdventOfCode for Puzzle {
         num_splits
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let height = self.line.len();
+        let width = self.line[0].len();
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        let mut pos: HashMap<usize, usize> = HashMap::new();
+        pos.insert(self.start.1, 1);
+        let mut next: HashMap<usize, usize> = HashMap::new();
+        let mut num_splits = 0;
+        for y in self.start.0..height {
+            next.clear();
+            for (x, n) in pos.iter() {
+                if self.line[y][*x] == '^' {
+                    num_splits += 1;
+                    if 0 < *x {
+                        *next.entry(x - 1).or_insert(0) += n;
+                    }
+                    if x + 1 < width {
+                        *next.entry(x + 1).or_insert(0) += n;
+                    }
+                } else {
+                    *next.entry(*x).or_insert(0) += n;
+                }
+            }
+            std::mem::swap(&mut pos, &mut next);
+        }
+        pos.into_values().sum::<usize>()
     }
 }
