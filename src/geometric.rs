@@ -609,9 +609,18 @@ pub struct Dim2Iter2<'a, T, const N: u8> {
     index: u8,
 }
 
+pub struct Dim3Iter1<'a, T, const N: u8> {
+    base: &'a Dim3<T>,
+    boundary: &'a Dim3<T>,
+    index: u8,
+}
+
 pub trait NeighborIterator<T> {
     /// Iterate on its 4 neighbors. Their positions are in [(0, 0), `boundary1`).
     fn iter4<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 4>;
+    /// Iterate on its 4 neighbors on 3Dim space.
+    /// Their positions are in [(0, 0, 0), `boundary1`).
+    fn iter6<'a>(&'a self, boundary: &'a Dim3<T>) -> Dim3Iter1<'a, T, 6>;
     /// Iterate on its 8 neighbors. Their positions are in [(0, 0), `boundary1`).
     fn iter8<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 8>;
     /// Iterate on its 8 neighbors. Their positions are in [`boundary0`, `boundary1`).
@@ -631,6 +640,9 @@ impl NeighborIterator<usize> for Dim2<usize> {
             boundary,
             index: 0,
         }
+    }
+    fn iter6<'a>(&'a self, _: &'a Dim3<usize>) -> Dim3Iter1<'a, usize, 6> {
+        unimplemented!()
     }
     fn iter8<'a>(&'a self, boundary: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 8> {
         Dim2Iter1 {
@@ -797,6 +809,9 @@ impl NeighborIterator<isize> for Dim2<isize> {
             index: 0,
         }
     }
+    fn iter6<'a>(&'a self, _: &'a Dim3<isize>) -> Dim3Iter1<'a, isize, 6> {
+        unimplemented!()
+    }
     fn iter8<'a>(&'a self, boundary: &'a Dim2<isize>) -> Dim2Iter1<'a, isize, 8> {
         Dim2Iter1 {
             base: self,
@@ -946,6 +961,57 @@ impl<'a> Iterator for Dim2Iter2<'a, isize, 8> {
                 }
                 8 if self.base.0 + 1 < self.boundary1.0 && self.base.1 + 1 < self.boundary1.1 => {
                     return Some((self.base.0 + 1, self.base.1 + 1));
+                }
+                _ => (),
+            }
+        }
+        None
+    }
+}
+
+impl NeighborIterator<usize> for Dim3<usize> {
+    fn iter4<'a>(&'a self, _: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 4> {
+        unimplemented!()
+    }
+    fn iter6<'a>(&'a self, boundary: &'a Dim3<usize>) -> Dim3Iter1<'a, usize, 6> {
+        Dim3Iter1 {
+            base: self,
+            boundary,
+            index: 0,
+        }
+    }
+    fn iter8<'a>(&'a self, _: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 8> {
+        unimplemented!()
+    }
+    fn iter8_from<'a>(&'a self, _: &'a Dim2<usize>, _: &'a Dim2<usize>) -> Dim2Iter2<'a, usize, 8> {
+        unimplemented!()
+    }
+    fn iter9<'a>(&'a self, _: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 9> {
+        unimplemented!()
+    }
+}
+
+impl<'a> Iterator for Dim3Iter1<'a, usize, 6> {
+    type Item = Dim3<usize>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < 6 {
+            self.index += 1;
+            match self.index {
+                1 if 0 < self.base.0 => {
+                    return Some((self.base.0 - 1, self.base.1 - 1, self.base.2));
+                }
+                2 if 0 < self.base.1 => return Some((self.base.0, self.base.1 - 1, self.base.2)),
+                3 if 0 < self.base.2 => return Some((self.base.0, self.base.1, self.base.2 - 1)),
+                4 if self.base.2 + 1 < self.boundary.2 => {
+                    return Some((self.base.0, self.base.1, self.base.2 + 1));
+                }
+                5 if self.base.1 + 1 < self.boundary.1 => {
+                    return Some((self.base.0, self.base.1 + 1, self.base.2));
+                }
+                6 if self.base.0 + 1 < self.boundary.0 => {
+                    return Some((self.base.0 + 1, self.base.1, self.base.2));
                 }
                 _ => (),
             }
