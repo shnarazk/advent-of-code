@@ -515,7 +515,7 @@ pub struct Dim3Iter1<'a, T, const N: u8> {
     index: u8,
 }
 
-pub trait NeighborIterator<T> {
+pub trait NeighborIter<T> {
     /// Iterate on its 4 neighbors. Their positions are in [(0, 0), `boundary1`).
     fn iter4<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 4>;
     /// Iterate on its 4 neighbors on 3Dim space.
@@ -533,7 +533,7 @@ pub trait NeighborIterator<T> {
     fn iter9<'a>(&'a self, boundary: &'a Dim2<T>) -> Dim2Iter1<'a, T, 9>;
 }
 
-impl NeighborIterator<usize> for Dim2<usize> {
+impl NeighborIter<usize> for Dim2<usize> {
     fn iter4<'a>(&'a self, boundary: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 4> {
         Dim2Iter1 {
             base: self,
@@ -701,7 +701,7 @@ impl<'a> Iterator for Dim2Iter2<'a, usize, 8> {
     }
 }
 
-impl NeighborIterator<isize> for Dim2<isize> {
+impl NeighborIter<isize> for Dim2<isize> {
     fn iter4<'a>(&'a self, boundary: &'a Dim2<isize>) -> Dim2Iter1<'a, isize, 4> {
         Dim2Iter1 {
             base: self,
@@ -869,7 +869,7 @@ impl<'a> Iterator for Dim2Iter2<'a, isize, 8> {
     }
 }
 
-impl NeighborIterator<usize> for Dim3<usize> {
+impl NeighborIter<usize> for Dim3<usize> {
     fn iter4<'a>(&'a self, _: &'a Dim2<usize>) -> Dim2Iter1<'a, usize, 4> {
         unimplemented!()
     }

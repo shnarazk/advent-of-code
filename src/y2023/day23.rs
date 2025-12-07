@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, NeighborIterator},
+        geometric::{Dim2, NeighborIter},
         progress,
     },
     serde::Serialize,

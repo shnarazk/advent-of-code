@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2021/day/11>
 use crate::{
     framework::{AdventOfCode, ParseError, aoc},
-    geometric::NeighborIterator,
+    geometric::NeighborIter,
     parser,
 };
 

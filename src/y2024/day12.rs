@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{NeighborIterator, Vec2},
+        geometric::{NeighborIter, Vec2},
         rect::Rect,
     },
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},

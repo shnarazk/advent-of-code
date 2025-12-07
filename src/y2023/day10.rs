@@ -3,7 +3,7 @@ use {
     crate::{
         // color,
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, NeighborIterator},
+        geometric::{Dim2, NeighborIter},
     },
     std::collections::{HashMap, HashSet},
 };

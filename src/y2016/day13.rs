@@ -2,7 +2,7 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::NeighborIterator,
+        geometric::NeighborIter,
     },
     std::{
         cmp::Reverse,
