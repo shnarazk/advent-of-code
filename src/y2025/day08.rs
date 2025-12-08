@@ -1,20 +1,11 @@
 //! <https://adventofcode.com/2025/day/8>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim3, NeighborIter},
+        geometric::Dim3,
     },
-    // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap},
-        hash::BuildHasherDefault,
-    },
+    std::{collections::HashMap, hash::BuildHasherDefault},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -25,11 +16,7 @@ pub struct Puzzle {
 mod parser {
     use {
         crate::{geometric::Dim3, parser::parse_usize},
-        winnow::{
-            ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, separated, seq},
-        },
+        winnow::{ModalResult, Parser, ascii::newline, combinator::separated},
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Dim3<usize>> {
@@ -50,7 +37,8 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut distances: HashMap<(usize, usize), usize> = HashMap::new();
+        let mut distances: FxHashMap<(usize, usize), usize> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (i, x) in self.line.iter().enumerate() {
             for (j, y) in self.line.iter().enumerate() {
                 if i < j {
@@ -67,7 +55,6 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|(pair, dist)| (*dist, *pair))
             .collect::<Vec<_>>();
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         d.sort();
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
@@ -91,8 +78,6 @@ impl AdventOfCode for Puzzle {
                     membership[*i] = membership[*j];
                 }
                 (true, true) => {
-                    dbg!(self.line[*i]);
-                    dbg!(self.line[*j]);
                     new_group += 1;
                     membership[*i] = new_group;
                     membership[*j] = new_group;
@@ -108,11 +93,11 @@ impl AdventOfCode for Puzzle {
             .map(|(id, l)| if *id == 0 { 1 } else { l.len() })
             .collect::<Vec<_>>();
         gv.sort();
-        dbg!(&gv[gv.len() - 3..]);
         gv[gv.len() - 3..].iter().product()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut distances: HashMap<(usize, usize), usize> = HashMap::new();
+        let mut distances: FxHashMap<(usize, usize), usize> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (i, x) in self.line.iter().enumerate() {
             for (j, y) in self.line.iter().enumerate() {
                 if i < j {
@@ -129,7 +114,6 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|(pair, dist)| (*dist, *pair))
             .collect::<Vec<_>>();
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         d.sort();
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
@@ -157,33 +141,17 @@ impl AdventOfCode for Puzzle {
                     membership[*i] = membership[*j];
                 }
                 (true, true) => {
-                    dbg!(self.line[*i]);
-                    dbg!(self.line[*j]);
                     new_group += 1;
                     num_groups += 1;
                     membership[*i] = new_group;
                     membership[*j] = new_group;
                 }
             }
-            dbg!(num_groups);
             if num_groups == 1 && membership.iter().filter(|g| **g != 0).count() == self.line.len()
             {
-                dbg!(&self.line[*i]);
-                dbg!(&self.line[*j]);
                 return self.line[*i].0 * self.line[*j].0;
             }
         }
-        let mut groups: HashMap<usize, Vec<usize>> = HashMap::new();
-        for (i, g) in membership.iter().enumerate() {
-            groups.entry(*g).or_default().push(i);
-        }
-        let mut gv = groups
-            .iter()
-            .map(|(id, l)| if *id == 0 { 1 } else { l.len() })
-            .collect::<Vec<_>>();
-        gv.sort();
-        // dbg!(&gv);
-        // gv[0].len()
         0
     }
 }
