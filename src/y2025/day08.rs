@@ -69,7 +69,6 @@ impl AdventOfCode for Puzzle {
             .collect::<Vec<_>>();
         // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         d.sort();
-        dbg!(&d[0]);
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
         for (_, (i, j)) in d.iter().take(1000) {
@@ -113,6 +112,78 @@ impl AdventOfCode for Puzzle {
         gv[gv.len() - 3..].iter().product()
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut distances: HashMap<(usize, usize), usize> = HashMap::new();
+        for (i, x) in self.line.iter().enumerate() {
+            for (j, y) in self.line.iter().enumerate() {
+                if i < j {
+                    distances.insert(
+                        (i, j),
+                        x.0.abs_diff(y.0).pow(2)
+                            + x.1.abs_diff(y.1).pow(2)
+                            + x.2.abs_diff(y.2).pow(2),
+                    );
+                }
+            }
+        }
+        let mut d = distances
+            .iter()
+            .map(|(pair, dist)| (*dist, *pair))
+            .collect::<Vec<_>>();
+        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        d.sort();
+        let mut membership: Vec<usize> = vec![0; self.line.len()];
+        let mut new_group: usize = 0;
+        let mut num_groups = 0;
+        for (_, (i, j)) in d.iter() {
+            let g1 = membership[*i];
+            let g2 = membership[*j];
+            match (g1 == 0, g2 == 0) {
+                (false, false) => {
+                    if g1 != g2 {
+                        let merging_id = membership[*i];
+                        let removing_id = membership[*j];
+                        for i in membership.iter_mut() {
+                            if *i == removing_id {
+                                *i = merging_id;
+                            }
+                        }
+                        num_groups -= 1;
+                    }
+                }
+                (false, true) => {
+                    membership[*j] = membership[*i];
+                }
+                (true, false) => {
+                    membership[*i] = membership[*j];
+                }
+                (true, true) => {
+                    dbg!(self.line[*i]);
+                    dbg!(self.line[*j]);
+                    new_group += 1;
+                    num_groups += 1;
+                    membership[*i] = new_group;
+                    membership[*j] = new_group;
+                }
+            }
+            dbg!(num_groups);
+            if num_groups == 1 && membership.iter().filter(|g| **g != 0).count() == self.line.len()
+            {
+                dbg!(&self.line[*i]);
+                dbg!(&self.line[*j]);
+                return self.line[*i].0 * self.line[*j].0;
+            }
+        }
+        let mut groups: HashMap<usize, Vec<usize>> = HashMap::new();
+        for (i, g) in membership.iter().enumerate() {
+            groups.entry(*g).or_default().push(i);
+        }
+        let mut gv = groups
+            .iter()
+            .map(|(id, l)| if *id == 0 { 1 } else { l.len() })
+            .collect::<Vec<_>>();
+        gv.sort();
+        // dbg!(&gv);
+        // gv[0].len()
+        0
     }
 }
