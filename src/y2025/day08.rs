@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2025/day/8>
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
+        framework::{aoc, AdventOfCode, ParseError},
         geometric::Dim3,
     },
     rustc_data_structures::fx::{FxHashMap, FxHasher},
@@ -16,7 +16,7 @@ pub struct Puzzle {
 mod parser {
     use {
         crate::{geometric::Dim3, parser::parse_usize},
-        winnow::{ModalResult, Parser, ascii::newline, combinator::separated},
+        winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Dim3<usize>> {
@@ -37,6 +37,11 @@ impl AdventOfCode for Puzzle {
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
+        let limit = self
+            .get_config()
+            .alt
+            .as_ref()
+            .map_or(1000_usize, |_| 10_usize);
         let mut distances: FxHashMap<(usize, usize), usize> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
         for (i, x) in self.line.iter().enumerate() {
@@ -58,7 +63,7 @@ impl AdventOfCode for Puzzle {
         d.sort();
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
-        for (_, (i, j)) in d.iter().take(1000) {
+        for (_, (i, j)) in d.iter().take(limit) {
             let g1 = membership[*i];
             let g2 = membership[*j];
             match (g1 == 0, g2 == 0) {
