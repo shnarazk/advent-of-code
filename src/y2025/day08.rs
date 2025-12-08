@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2025/day/8>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim3,
     },
     rustc_data_structures::fx::{FxHashMap, FxHasher},
@@ -16,7 +16,7 @@ pub struct Puzzle {
 mod parser {
     use {
         crate::{geometric::Dim3, parser::parse_usize},
-        winnow::{ascii::newline, combinator::separated, ModalResult, Parser},
+        winnow::{ModalResult, Parser, ascii::newline, combinator::separated},
     };
 
     fn parse_line(s: &mut &str) -> ModalResult<Dim3<usize>> {
@@ -44,6 +44,7 @@ impl AdventOfCode for Puzzle {
             .map_or(1000_usize, |_| 10_usize);
         let mut distances: FxHashMap<(usize, usize), usize> =
             HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        // TODO: use rayon!
         for (i, x) in self.line.iter().enumerate() {
             for (j, y) in self.line.iter().enumerate() {
                 if i < j {
@@ -61,19 +62,24 @@ impl AdventOfCode for Puzzle {
             .map(|(pair, dist)| (*dist, *pair))
             .collect::<Vec<_>>();
         d.sort();
+        let mut group_heap: Vec<usize> = vec![0];
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
         for (_, (i, j)) in d.iter().take(limit) {
-            let g1 = membership[*i];
-            let g2 = membership[*j];
+            let mut g1 = membership[*i];
+            while group_heap[g1] != 0 {
+                g1 = group_heap[g1];
+            }
+            let mut g2 = membership[*j];
+            while group_heap[g2] != 0 {
+                g2 = group_heap[g2];
+            }
             match (g1 == 0, g2 == 0) {
                 (false, false) => {
-                    let merging_id = membership[*i];
-                    let removing_id = membership[*j];
-                    for i in membership.iter_mut() {
-                        if *i == removing_id {
-                            *i = merging_id;
-                        }
+                    if g1 != g2 {
+                        let a = g1.min(g2);
+                        let b = g1.max(g2);
+                        group_heap[b] = a;
                     }
                 }
                 (false, true) => {
@@ -84,14 +90,20 @@ impl AdventOfCode for Puzzle {
                 }
                 (true, true) => {
                     new_group += 1;
+                    group_heap.push(0);
+                    assert_eq!(new_group, group_heap.len() - 1);
                     membership[*i] = new_group;
                     membership[*j] = new_group;
                 }
             }
         }
         let mut groups: HashMap<usize, Vec<usize>> = HashMap::new();
-        for (i, g) in membership.iter().enumerate() {
-            groups.entry(*g).or_default().push(i);
+        for (i, rg) in membership.iter().enumerate() {
+            let mut g = *rg;
+            while group_heap[g] != 0 {
+                g = group_heap[g];
+            }
+            groups.entry(g).or_default().push(i);
         }
         let mut gv = groups
             .iter()
