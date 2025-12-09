@@ -4,8 +4,8 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim3,
     },
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    std::{collections::HashMap, hash::BuildHasherDefault},
+    rayon::prelude::*,
+    std::collections::HashMap,
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -24,7 +24,6 @@ mod parser {
             .map(|v: Vec<usize>| (v[0], v[1], v[2]))
             .parse_next(s)
     }
-
     pub fn parse(s: &mut &str) -> ModalResult<Vec<Dim3<usize>>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
@@ -42,24 +41,28 @@ impl AdventOfCode for Puzzle {
             .alt
             .as_ref()
             .map_or(1000_usize, |_| 10_usize);
-        let mut distances: FxHashMap<(usize, usize), usize> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        // TODO: use rayon!
-        for (i, x) in self.line.iter().enumerate() {
-            for (j, y) in self.line.iter().enumerate() {
-                if i < j {
-                    distances.insert(
-                        (i, j),
-                        x.0.abs_diff(y.0).pow(2)
-                            + x.1.abs_diff(y.1).pow(2)
-                            + x.2.abs_diff(y.2).pow(2),
-                    );
-                }
-            }
-        }
-        let mut d = distances
-            .iter()
-            .map(|(pair, dist)| (*dist, *pair))
+        let size = self.line.len();
+        let mut d = (0..size)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i + 1..size)
+                    .into_par_iter()
+                    .map(|j| {
+                        let x = self.line[i];
+                        let y = self.line[j];
+                        (
+                            [
+                                x.0.abs_diff(y.0).pow(2),
+                                x.1.abs_diff(y.1).pow(2),
+                                x.2.abs_diff(y.2).pow(2),
+                            ]
+                            .iter()
+                            .sum::<usize>(),
+                            (i, j),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+            })
             .collect::<Vec<_>>();
         d.sort();
         let mut group_heap: Vec<usize> = vec![0];
@@ -113,23 +116,28 @@ impl AdventOfCode for Puzzle {
         gv[gv.len() - 3..].iter().product()
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut distances: FxHashMap<(usize, usize), usize> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        for (i, x) in self.line.iter().enumerate() {
-            for (j, y) in self.line.iter().enumerate() {
-                if i < j {
-                    distances.insert(
-                        (i, j),
-                        x.0.abs_diff(y.0).pow(2)
-                            + x.1.abs_diff(y.1).pow(2)
-                            + x.2.abs_diff(y.2).pow(2),
-                    );
-                }
-            }
-        }
-        let mut d = distances
-            .iter()
-            .map(|(pair, dist)| (*dist, *pair))
+        let size = self.line.len();
+        let mut d = (0..size)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i + 1..size)
+                    .into_par_iter()
+                    .map(|j| {
+                        let x = self.line[i];
+                        let y = self.line[j];
+                        (
+                            [
+                                x.0.abs_diff(y.0).pow(2),
+                                x.1.abs_diff(y.1).pow(2),
+                                x.2.abs_diff(y.2).pow(2),
+                            ]
+                            .iter()
+                            .sum::<usize>(),
+                            (i, j),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+            })
             .collect::<Vec<_>>();
         d.sort();
         let mut membership: Vec<usize> = vec![0; self.line.len()];
@@ -169,6 +177,6 @@ impl AdventOfCode for Puzzle {
                 return self.line[*i].0 * self.line[*j].0;
             }
         }
-        0
+        unreachable!()
     }
 }
