@@ -74,6 +74,7 @@ impl AdventOfCode for Puzzle {
             .enumerate()
             .map(|(e, d)| (*d, e))
             .collect::<HashMap<_, _>>();
+
         let mut xs = self
             .line
             .iter()
@@ -96,7 +97,6 @@ impl AdventOfCode for Puzzle {
             slice_y.entry(p.0).or_default().push(p.1);
             slice_x.entry(p.1).or_default().push(p.0);
         }
-
         slice_y.iter_mut().for_each(|(_, pair)| {
             // assert_eq!(pair.len(), 2);
             pair.sort();
@@ -105,6 +105,7 @@ impl AdventOfCode for Puzzle {
             // assert_eq!(pair.len(), 2);
             pair.sort();
         });
+
         let grid_size = ys.len() + 2;
         let mut grid = vec![vec![3; grid_size]; grid_size];
         for (y, xs) in slice_y.iter() {
@@ -115,12 +116,13 @@ impl AdventOfCode for Puzzle {
             }
         }
         for (x, ys) in slice_x.iter() {
-            grid[encode_y[&ys[0]]][encode_x[x]] = 1;
-            grid[encode_y[&ys[1]]][encode_x[x]] = 1;
+            // grid[encode_y[&ys[0]]][encode_x[x]] = 1;
+            // grid[encode_y[&ys[1]]][encode_x[x]] = 1;
             for y in encode_y[&ys[0]] + 1..encode_y[&ys[1]] {
                 grid[y][encode_x[x]] = 2;
             }
         }
+
         let mut to_visit: Vec<Dim2<usize>> = vec![(0, 0)];
         while let Some(p) = to_visit.pop() {
             if grid[p.0][p.1] == 3 {
@@ -141,22 +143,34 @@ impl AdventOfCode for Puzzle {
         }
 
         let mut area = 0;
-        for gy in 1..grid_size {
-            for gx in 1..grid_size {
-                if grid[gy][gx] == 0 {
+        for by in 1..grid_size {
+            for bx in 1..grid_size {
+                if grid[by][bx] != 1 {
                     continue;
                 }
+                let mut min_x = 0;
+                for y in by..grid_size {
+                    for x in (min_x..=bx).rev() {
+                        if grid[y][x] == 0 {
+                            min_x = x;
+                            break;
+                        }
+                        if grid[y][x] == 1 {
+                            let a = (ys[by].abs_diff(ys[y]) + 1) * (xs[bx].abs_diff(xs[x]) + 1);
+
+                            area = area.max(a);
+                        }
+                    }
+                }
                 let mut max_x = grid_size;
-                for y in gy..grid_size {
-                    for x in gx..max_x {
+                for y in by..grid_size {
+                    for x in bx..max_x {
                         if grid[y][x] == 0 {
                             max_x = x;
                             break;
                         }
-                        if (grid[gy][gx] == 1 && grid[y][x] == 1)
-                            || (grid[gy][x] == 1 && grid[y][gx] == 1)
-                        {
-                            let a = (ys[gy].abs_diff(ys[y]) + 1) * (xs[gx].abs_diff(xs[x]) + 1);
+                        if grid[y][x] == 1 {
+                            let a = (ys[by].abs_diff(ys[y]) + 1) * (xs[bx].abs_diff(xs[x]) + 1);
                             area = area.max(a);
                         }
                     }
