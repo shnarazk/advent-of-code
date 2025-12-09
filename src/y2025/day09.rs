@@ -1,7 +1,4 @@
 //! <https://adventofcode.com/2025/day/9>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
@@ -9,9 +6,7 @@ use {
     },
     // rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
-    // serde::Serialize,
     std::{
-        cmp::{Ordering, Reverse},
         collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
@@ -27,8 +22,8 @@ mod parser {
         crate::{geometric::Dim2, parser::parse_usize},
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, separated, seq},
+            ascii::newline,
+            combinator::{separated, seq},
         },
     };
 
@@ -103,11 +98,11 @@ impl AdventOfCode for Puzzle {
         }
 
         slice_y.iter_mut().for_each(|(_, pair)| {
-            assert_eq!(pair.len(), 2);
+            // assert_eq!(pair.len(), 2);
             pair.sort();
         });
         slice_x.iter_mut().for_each(|(_, pair)| {
-            assert_eq!(pair.len(), 2);
+            // assert_eq!(pair.len(), 2);
             pair.sort();
         });
         let grid_size = ys.len() + 2;
@@ -168,74 +163,6 @@ impl AdventOfCode for Puzzle {
                 }
             }
         }
-        return area;
-        // ここまでOK
-        self.line.sort();
-        for (i, p) in self.line.iter().enumerate() {
-            'next: for q in self.line.iter().skip(i) {
-                let flag = *p == (3, 2) && *q == (5, 9);
-                if flag {
-                    dbg!(q);
-                }
-                // 交差する線分があってはいけない
-                for (y, xs) in slice_y.iter() {
-                    if p.0 < *y && *y < q.0 && (xs[0] < q.1 && p.1 < xs[1]) {
-                        continue 'next;
-                    }
-                }
-                for (x, ys) in slice_x.iter() {
-                    if p.1 < *x && *x < q.1 && (ys[0] < q.0 && p.0 < ys[1]) {
-                        continue 'next;
-                    }
-                }
-                for r in self.line.iter() {
-                    if p.0 < r.0 && p.1 < r.1 && r.0 < q.0 && r.1 < q.1 {
-                        if flag {
-                            dbg!();
-                        }
-                        continue 'next;
-                    }
-                }
-                // TODO: もう一つの条件は逆対角線を作る2点がどこかの線分上に存在すること
-                let target1 = (p.0, q.1);
-                let target2 = (q.0, p.1);
-                let slice1 = slice_y.get(&p.0).unwrap();
-                if !(slice1[0] <= target1.1 && target1.1 <= slice1[1]) {
-                    let inside = slice_x
-                        .iter()
-                        .filter(|(a, b)| b[0] < target1.0 && target1.0 < b[1])
-                        .count()
-                        % 2;
-                    if flag {
-                        dbg!(target1);
-                    }
-                    if inside == 0 {
-                        continue;
-                    }
-                }
-                let slice2 = slice_y.get(&q.0).unwrap();
-                if !(slice2[0] <= target2.1 && target2.1 <= slice2[1]) {
-                    let inside = slice_x
-                        .iter()
-                        .filter(|(a, b)| b[0] < target2.0 && target2.0 < b[1])
-                        .count()
-                        % 2;
-                    if flag {
-                        dbg!();
-                    }
-                    if inside == 0 {
-                        continue;
-                    }
-                }
-                let a = (p.0.abs_diff(q.0) + 1) * (p.1.abs_diff(q.1) + 1);
-                // if a > area {
-                //     println!("{p:?}, {q:?} => {a}");
-                // }
-                area = area.max(a);
-            }
-        }
         area
     }
 }
-// too high: 3053207276
-// too high: 2695024914
