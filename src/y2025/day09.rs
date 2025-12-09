@@ -110,21 +110,66 @@ impl AdventOfCode for Puzzle {
             assert_eq!(pair.len(), 2);
             pair.sort();
         });
-        let mut grid = vec![vec![0; xs.len() + 1]; ys.len() + 1];
+        let grid_size = ys.len() + 2;
+        let mut grid = vec![vec![3; grid_size]; grid_size];
         for (y, xs) in slice_y.iter() {
-            for x in encode_x[&xs[0]]..encode_x[&xs[1]] {
-                grid[*encode_y.get(y).expect("y")][x] = 1;
+            grid[encode_y[y]][encode_x[&xs[0]]] = 1;
+            grid[encode_y[y]][encode_x[&xs[1]]] = 1;
+            for x in encode_x[&xs[0]] + 1..encode_x[&xs[1]] {
+                grid[encode_y[y]][x] = 2;
             }
         }
         for (x, ys) in slice_x.iter() {
-            for y in encode_y[&ys[0]]..encode_y[&ys[1]] {
-                grid[y][*encode_x.get(x).expect("x")] = 1;
+            grid[encode_y[&ys[0]]][encode_x[x]] = 1;
+            grid[encode_y[&ys[1]]][encode_x[x]] = 1;
+            for y in encode_y[&ys[0]] + 1..encode_y[&ys[1]] {
+                grid[y][encode_x[x]] = 2;
             }
         }
-        grid[0][0] = 2;
-        // ここまでOK
+        let mut to_visit: Vec<Dim2<usize>> = vec![(0, 0)];
+        while let Some(p) = to_visit.pop() {
+            if grid[p.0][p.1] == 3 {
+                grid[p.0][p.1] = 0;
+                for q in p.iter8(&(grid_size, grid_size)) {
+                    if grid[q.0][q.1] == 3 {
+                        to_visit.push(q);
+                    }
+                }
+            }
+        }
+        for l in grid.iter_mut() {
+            for k in l.iter_mut() {
+                if *k == 3 {
+                    *k = 2;
+                }
+            }
+        }
+
         let mut area = 0;
+        for gy in 1..grid_size {
+            for gx in 1..grid_size {
+                if grid[gy][gx] == 0 {
+                    continue;
+                }
+                let mut max_x = grid_size;
+                for y in gy..grid_size {
+                    for x in gx..max_x {
+                        if grid[y][x] == 0 {
+                            max_x = x;
+                            break;
+                        }
+                        if (grid[gy][gx] == 1 && grid[y][x] == 1)
+                            || (grid[gy][x] == 1 && grid[y][gx] == 1)
+                        {
+                            let a = (ys[gy].abs_diff(ys[y]) + 1) * (xs[gx].abs_diff(xs[x]) + 1);
+                            area = area.max(a);
+                        }
+                    }
+                }
+            }
+        }
         return area;
+        // ここまでOK
         self.line.sort();
         for (i, p) in self.line.iter().enumerate() {
             'next: for q in self.line.iter().skip(i) {
@@ -193,3 +238,4 @@ impl AdventOfCode for Puzzle {
     }
 }
 // too high: 3053207276
+// too high: 2695024914
