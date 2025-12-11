@@ -65,7 +65,21 @@ impl AdventOfCode for Puzzle {
         check_path(&table, "you", "out", &mut memo)
     }
     fn part2(&mut self) -> Self::Output2 {
-        2
+        let mut table: FxHashSet<(&str, &str)> =
+            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+        let mut memo: FxHashMap<(&str, &str), (usize, usize, usize)> =
+            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        for (s, outs) in self.line.iter() {
+            for out in outs {
+                table.insert((s, out));
+                if ["dac", "fft"].contains(&s.as_str()) {
+                    memo.insert((s, out), (1, 0, 0));
+                } else {
+                    memo.insert((s, out), (1, 0, 0));
+                }
+            }
+        }
+        check_path2(&table, "svr", "out", &mut memo).2
     }
 }
 
@@ -83,6 +97,29 @@ fn check_path<'a>(
         .filter(|(f, t)| **f == *from)
         .map(|(_, t)| check_path(table, *t, to, memo))
         .sum::<usize>();
+    memo.insert((from, to), n);
+    n
+}
+
+fn check_path2<'a>(
+    table: &FxHashSet<(&'a str, &'a str)>,
+    from: &'a str,
+    to: &'a str,
+    memo: &mut FxHashMap<(&'a str, &'a str), (usize, usize, usize)>,
+) -> (usize, usize, usize) {
+    if let Some(n) = memo.get(&(from, to)) {
+        return *n;
+    }
+    let mut n = table
+        .iter()
+        .filter(|(f, t)| **f == *from)
+        .map(|(_, t)| check_path2(table, *t, to, memo))
+        .fold((0, 0, 0), |acc, l| (acc.0 + l.0, acc.1 + l.1, acc.2 + l.2));
+    dbg!(from);
+    if ["dac", "fft"].contains(&from) {
+        n = (0, n.0, n.1);
+        dbg!(n);
+    }
     memo.insert((from, to), n);
     n
 }
