@@ -41,14 +41,14 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [calendar](https://adventofcode.com/2022)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2022/README.md)
 
-- day21: convert to a problem-size small world by heterogeneous scaling!
-
 ![スクリーンショット 2022-12-25 14 44 40](https://user-images.githubusercontent.com/997855/209458247-0b73a6db-bacb-45bb-85c2-c853be5c4939.png)
 
 ## 2021 completed
 
 * [calendar](https://adventofcode.com/2021)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2021/README.md)
+
+- day22: convert to a problem-size small world by heterogeneous scaling!
 
 ![](https://user-images.githubusercontent.com/997855/147392328-7c1c22a5-5490-4c80-83c8-ad0c0b1474cc.png)
 
