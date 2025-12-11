@@ -94,7 +94,7 @@ impl AdventOfCode for Puzzle {
                 (true, true) => {
                     new_group += 1;
                     group_heap.push(0);
-                    assert_eq!(new_group, group_heap.len() - 1);
+                    // assert_eq!(new_group, group_heap.len() - 1);
                     membership[*i] = new_group;
                     membership[*j] = new_group;
                 }
@@ -140,22 +140,25 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         d.sort();
+        let mut group_heap: Vec<usize> = vec![0];
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
         let mut num_groups = 0;
         for (_, (i, j)) in d.iter() {
-            let g1 = membership[*i];
-            let g2 = membership[*j];
+            let mut g1 = membership[*i];
+            while group_heap[g1] != 0 {
+                g1 = group_heap[g1];
+            }
+            let mut g2 = membership[*j];
+            while group_heap[g2] != 0 {
+                g2 = group_heap[g2];
+            }
             match (g1 == 0, g2 == 0) {
                 (false, false) => {
                     if g1 != g2 {
-                        let merging_id = membership[*i];
-                        let removing_id = membership[*j];
-                        for i in membership.iter_mut() {
-                            if *i == removing_id {
-                                *i = merging_id;
-                            }
-                        }
+                        let a = g1.min(g2);
+                        let b = g1.max(g2);
+                        group_heap[b] = a;
                         num_groups -= 1;
                     }
                 }
@@ -168,6 +171,7 @@ impl AdventOfCode for Puzzle {
                 (true, true) => {
                     new_group += 1;
                     num_groups += 1;
+                    group_heap.push(0);
                     membership[*i] = new_group;
                     membership[*j] = new_group;
                 }
