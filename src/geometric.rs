@@ -446,7 +446,7 @@ pub fn neighbors(here: usize, upto: usize) -> [Option<usize>; 3] {
     ]
 }
 
-/// returns all 26 neighbors in 3D space
+// returns all 26 neighbors in 3D space
 // pub fn cubic_neighbors26(
 //     x: usize,
 //     y: usize,

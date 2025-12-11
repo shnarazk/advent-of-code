@@ -111,15 +111,23 @@ impl AdventOfCode for Puzzle {
         for (y, xs) in slice_y.iter() {
             grid[encode_y[y]][encode_x[&xs[0]]] = 1;
             grid[encode_y[y]][encode_x[&xs[1]]] = 1;
-            for x in encode_x[&xs[0]] + 1..encode_x[&xs[1]] {
-                grid[encode_y[y]][x] = 2;
+            for x in grid[encode_y[y]]
+                .iter_mut()
+                .take(encode_x[&xs[1]])
+                .skip(encode_x[&xs[0]] + 1)
+            {
+                *x = 2;
             }
         }
         for (x, ys) in slice_x.iter() {
             // grid[encode_y[&ys[0]]][encode_x[x]] = 1;
             // grid[encode_y[&ys[1]]][encode_x[x]] = 1;
-            for y in encode_y[&ys[0]] + 1..encode_y[&ys[1]] {
-                grid[y][encode_x[x]] = 2;
+            for l in grid
+                .iter_mut()
+                .take(encode_y[&ys[1]])
+                .skip(encode_y[&ys[0]] + 1)
+            {
+                l[encode_x[x]] = 2;
             }
         }
 
