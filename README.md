@@ -14,6 +14,7 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2025/README.md)
 
 - day04: a graph is the best for propagating changes instead of 2D matrix
+- day10: ILP that I've never used
 
 ## 2024 completed
 
