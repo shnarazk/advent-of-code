@@ -103,13 +103,15 @@ impl AdventOfCode for Puzzle {
         dbg!(self.line.len());
         self.line
             .par_iter()
+            .take(1)
             .map(|(_, buttons, goal)| {
                 let mut sorted = buttons.clone();
                 sorted.sort_unstable_by_key(|l| l.len());
                 sorted.reverse();
                 let counts = vec![None; buttons.len()];
                 let levels = vec![0; goal.len()];
-                dbg!(traverse(&sorted, goal, counts, levels).expect(""))
+                let mut memo: HashSet<Vec<usize>> = HashSet::new();
+                dbg!(traverse(&sorted, goal, counts, &levels, &mut memo).expect(""))
                 /*
                 let size = goal.len();
                 let mut to_visit: HashSet<Vec<usize>> = HashSet::new();
@@ -154,29 +156,42 @@ fn traverse(
     buttons: &[Vec<usize>],
     goal: &Vec<usize>,
     counts: Vec<Option<usize>>,
-    levels: Vec<usize>,
+    levels: &Vec<usize>,
+    memo: &mut HashSet<Vec<usize>>,
 ) -> Option<usize> {
-    if levels == *goal {
+    if *levels == *goal {
         return Some(counts.iter().flat_map(|n| n).sum::<usize>());
     } else if let Some(cursor) = counts.iter().position(|n| n.is_none()) {
         let mut max_assign = buttons[cursor]
             .iter()
             .map(|li| goal[*li] - levels[*li])
             .min();
+        let tmp = max_assign;
         while let Some(count) = max_assign {
-            // if cursor == 0 {
-            //     dbg!(count);
-            // }
+            if cursor == 0 {
+                dbg!(count, memo.len());
+            }
             let mut new_counts = counts.clone();
             new_counts[cursor] = max_assign;
             let mut new_levels = levels.clone();
             for li in buttons[cursor].iter() {
                 new_levels[*li] += count;
             }
-            if let Some(ans) = traverse(buttons, goal, new_counts, new_levels) {
+            if memo.contains(&new_levels) {
+                return None;
+                dbg!("");
+            }
+            if let Some(ans) = traverse(buttons, goal, new_counts, &new_levels, memo) {
                 return Some(ans);
             }
             max_assign = count.checked_sub(1);
+        }
+        if let Some(n) = tmp {
+            let mut l = levels.clone();
+            for li in buttons[cursor].iter() {
+                l[*li] += n;
+            }
+            memo.insert(l);
         }
     }
     None
