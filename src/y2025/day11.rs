@@ -1,18 +1,9 @@
 //! <https://adventofcode.com/2025/day/11>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        // geometric::{Dim2, NeighborIter},
-    },
-    // rayon::prelude::*,
+    crate::framework::{AdventOfCode, ParseError, aoc},
     rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
-    // serde::Serialize,
     std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
+        collections::{HashMap, HashSet},
         hash::BuildHasherDefault,
     },
 };
@@ -23,13 +14,10 @@ pub struct Puzzle {
 }
 
 mod parser {
-    use {
-        crate::parser::parse_usize,
-        winnow::{
-            ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, repeat, separated, seq},
-        },
+    use winnow::{
+        ModalResult, Parser,
+        ascii::{alpha1, newline},
+        combinator::{separated, seq},
     };
 
     fn parse_name(s: &mut &str) -> ModalResult<String> {
@@ -72,11 +60,7 @@ impl AdventOfCode for Puzzle {
         for (s, outs) in self.line.iter() {
             for out in outs {
                 table.insert((s, out));
-                if ["dac", "fft"].contains(&s.as_str()) {
-                    memo.insert((s, out), (1, 0, 0));
-                } else {
-                    memo.insert((s, out), (1, 0, 0));
-                }
+                memo.insert((s, out), (1, 0, 0));
             }
         }
         check_path2(&table, "svr", "out", &mut memo).2
@@ -94,8 +78,8 @@ fn check_path<'a>(
     }
     let n = table
         .iter()
-        .filter(|(f, t)| **f == *from)
-        .map(|(_, t)| check_path(table, *t, to, memo))
+        .filter(|(f, _)| **f == *from)
+        .map(|(_, t)| check_path(table, t, to, memo))
         .sum::<usize>();
     memo.insert((from, to), n);
     n
@@ -112,13 +96,11 @@ fn check_path2<'a>(
     }
     let mut n = table
         .iter()
-        .filter(|(f, t)| **f == *from)
-        .map(|(_, t)| check_path2(table, *t, to, memo))
+        .filter(|(f, _)| **f == *from)
+        .map(|(_, t)| check_path2(table, t, to, memo))
         .fold((0, 0, 0), |acc, l| (acc.0 + l.0, acc.1 + l.1, acc.2 + l.2));
-    dbg!(from);
     if ["dac", "fft"].contains(&from) {
         n = (0, n.0, n.1);
-        dbg!(n);
     }
     memo.insert((from, to), n);
     n
