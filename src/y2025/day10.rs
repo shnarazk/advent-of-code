@@ -67,13 +67,6 @@ mod parser {
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        self.line.iter().take(10).for_each(|(_, buttons, goal)| {
-            let ws = buttons.iter().map(|l| l.len()).collect::<Vec<_>>();
-            let total = goal.iter().sum::<usize>();
-            let g = ws.iter().skip(1).fold(ws[0], |acc, n| gcd(acc, *n));
-            dbg!(g, total);
-        });
-        demo();
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -113,8 +106,8 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .par_iter()
-            .take(10)
             .map(|(_, buttons, goal)| {
+                return dbg!(demo(buttons, goal));
                 let mut sorted = buttons.clone();
                 sorted.sort_unstable_by_key(|l| l.len());
                 sorted.reverse();
@@ -235,40 +228,31 @@ fn f(v: &[usize], count: Vec<usize>, n: usize) -> Option<Vec<usize>> {
     None
 }
 
-// (3,4,5,7) (2,4,5,6,7) (1,4,7) (1,3,4,7) (1,2,3,4,5,7) (7) (1,2,3,6) (0,1,3,6,7)
-// {4,59,39,250,242,220,26,250}
-fn demo() {
+fn demo(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
-    let mut buttons: Vec<Variable> = Vec::new();
-    for i in 0..8 {
+    let mut variables: Vec<Variable> = Vec::new();
+    for i in 0..buttons.len() {
         let b = problem.add_integer_var(1.0, (0, i32::MAX));
-        buttons.push(b);
+        variables.push(b);
     }
-    // (3,4,5,7) (2,4,5,6,7) (1,4,7) (1,3,4,7) (1,2,3,4,5,7) (7) (1,2,3,6) (0,1,3,6,7)
-    let config: Vec<Vec<usize>> = vec![
-        vec![3, 4, 5, 7],
-        vec![2, 4, 5, 6, 7],
-        vec![1, 4, 7],
-        vec![1, 3, 4, 7],
-        vec![1, 2, 3, 4, 5, 7],
-        vec![7],
-        vec![1, 2, 3, 6],
-        vec![0, 1, 3, 6, 7],
-    ];
-    let goals: Vec<usize> = vec![4, 59, 39, 250, 242, 220, 26, 250];
     for (gi, g) in goals.iter().enumerate() {
         let mut group: Vec<(Variable, f64)> = Vec::new();
-        for (bi, b) in config.iter().enumerate() {
+        for (bi, b) in buttons.iter().enumerate() {
             if b.contains(&gi) {
-                group.push((buttons[bi], 1.0));
+                group.push((variables[bi], 1.0));
             }
         }
         problem.add_constraint(&group, ComparisonOp::Eq, *g as f64);
     }
 
     let solution = problem.solve().unwrap();
-    for (vi, v) in buttons.iter().enumerate() {
+    for (vi, v) in variables.iter().enumerate() {
         println!("b{vi} = {:?}", solution[*v]);
     }
-    println!("done");
+    variables
+        .iter()
+        .map(|b| solution[*b])
+        .map(|f| f.round() as usize)
+        .sum::<usize>()
 }
+// too low: 21346
