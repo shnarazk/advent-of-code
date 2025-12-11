@@ -14,6 +14,7 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2025/README.md)
 
 - day04: a graph is the best for propagating changes instead of 2D matrix
+- day09: problem contains only 1K points per axis like [Y2021Day22](https://adventofcode.com/2021/day/22)
 - day10: ILP that I've never used
 
 ## 2024 completed
@@ -39,6 +40,8 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 
 * [calendar](https://adventofcode.com/2022)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2022/README.md)
+
+- day21: convert to a problem-size small world by heterogeneous scaling!
 
 ![スクリーンショット 2022-12-25 14 44 40](https://user-images.githubusercontent.com/997855/209458247-0b73a6db-bacb-45bb-85c2-c853be5c4939.png)
 
