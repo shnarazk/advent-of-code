@@ -112,6 +112,17 @@ impl AdventOfCode for Puzzle {
                 {
                     return false;
                 }
+                // Or maybe, another one...
+                if self
+                    .shapes
+                    .iter()
+                    .enumerate()
+                    .map(|(si, s)| s.2.len() * s.2[0].len() * required[si])
+                    .sum::<usize>()
+                    <= (*height / 3 * 3) * (*width / 3 * 3)
+                {
+                    return true;
+                }
                 let grid = vec![vec![false; *width]; *height];
                 let placed = vec![0_usize; required.len()];
                 let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
