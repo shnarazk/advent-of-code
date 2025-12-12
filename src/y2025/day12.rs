@@ -17,7 +17,7 @@ use {
     },
 };
 
-type Shape = (usize, Vec<Vec<bool>>, Vec<Vec<Vec<bool>>>);
+type Shape = (usize, usize, Vec<Vec<bool>>, Vec<Vec<Vec<bool>>>);
 type Region = (usize, usize, Vec<usize>);
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -43,7 +43,9 @@ mod parser {
         separated(1.., repeat(1.., one_of(['.', '#']).map(|c: char| c == '#')).map(|v: Vec<bool>| v), newline),
             _: newline
         )
-            .map(|(i, s)| (i, s, vec![]))
+            .map(|(i, s):  (usize,Vec<Vec<bool>>)| {
+let n = s.iter().map(|l| l.iter().filter(|b| **b).count()).sum();
+                (i, n, s, vec![])})
         .parse_next(s)
     }
     fn parse_shapes(s: &mut &str) -> ModalResult<Vec<Shape>> {
@@ -59,13 +61,6 @@ mod parser {
     pub fn parse(s: &mut &str) -> ModalResult<(Vec<Shape>, Vec<Region>)> {
         seq!(parse_shapes, _: newline, parse_regions).parse_next(s)
     }
-}
-
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-struct Present {
-    id: usize,
-    shape: Vec<Vec<bool>>,
-    rotate: Direction,
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -105,9 +100,9 @@ impl AdventOfCode for Puzzle {
         let (s, r) = parser::parse(&mut input)?;
         self.shapes = s
             .into_iter()
-            .map(|(id, shape, _)| {
+            .map(|(id, count, shape, _)| {
                 let variants = possible_directions(&shape);
-                (id, shape, variants)
+                (id, count, shape, variants)
             })
             .collect::<Vec<_>>();
         self.regions = r;
@@ -117,7 +112,17 @@ impl AdventOfCode for Puzzle {
         self.regions
             .iter()
             .filter(|(width, height, required)| {
-                dbg!(required.iter().product::<usize>());
+                // check a simple prop.
+                if self
+                    .shapes
+                    .iter()
+                    .enumerate()
+                    .map(|(si, s)| s.1 * required[si])
+                    .sum::<usize>()
+                    > *height * *width
+                {
+                    return false;
+                }
                 let grid = vec![vec![false; *width]; *height];
                 let placed = vec![0_usize; required.len()];
                 let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
@@ -136,7 +141,7 @@ impl AdventOfCode for Puzzle {
                         if required[si] == state.placed[si] {
                             continue;
                         }
-                        'next_variant: for variant in shape.2.iter() {
+                        'next_variant: for variant in shape.3.iter() {
                             // place the best place that makes the filled region compact
                             for d in 0..height + width {
                                 let mut found = false;
@@ -183,11 +188,6 @@ fn possible_directions(shape: &[Vec<bool>]) -> Vec<Vec<Vec<bool>>> {
     let r1_is_r0 = r1 == r0;
     let r2 = rotate_clockwise(r1.clone());
     let r2_is_r0 = r2 == r0;
-    let sym_v = shape
-        .iter()
-        .enumerate()
-        .take((height + 1) / 2)
-        .all(|(i, l)| *l == shape[height - i - 1]);
     match (r1_is_r0, r2_is_r0) {
         (false, false) => vec![r0.clone(), r1.clone(), rotate_clockwise(r1), rotate_ccw(r0)],
         (false, true) => vec![r0, r1],
@@ -208,6 +208,20 @@ fn not_overlapped(
     if pos.0 + shape_height > grid_height || pos.1 + shape_width > grid_width {
         return None;
     }
-
-    None
+    for y in 0..shape_height {
+        for x in 0..shape_width {
+            if shape[y][x] && grid[pos.0 + y][pos.1 + x] {
+                return None;
+            }
+        }
+    }
+    let mut g = grid.to_vec().clone();
+    for y in 0..shape_height {
+        for x in 0..shape_width {
+            if shape[y][x] {
+                g[pos.0 + y][pos.1 + x] = true;
+            }
+        }
+    }
+    Some(g)
 }
