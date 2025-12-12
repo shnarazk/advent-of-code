@@ -5,7 +5,7 @@ use {
         geometric::Dim3,
     },
     rayon::prelude::*,
-    std::collections::HashMap,
+    std::collections::{BinaryHeap, HashMap},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -42,6 +42,7 @@ impl AdventOfCode for Puzzle {
             .as_ref()
             .map_or(1000_usize, |_| 10_usize);
         let size = self.line.len();
+        /*
         let mut d = (0..size)
             .into_par_iter()
             .flat_map(|i| {
@@ -65,6 +66,30 @@ impl AdventOfCode for Puzzle {
             })
             .collect::<Vec<_>>();
         d.sort();
+        */
+        let mut heap: BinaryHeap<(usize, (usize, usize))> = BinaryHeap::new();
+        for (i, x) in self.line.iter().enumerate() {
+            for (j, y) in self.line.iter().enumerate().skip(i + 1) {
+                let r = (
+                    [
+                        x.0.abs_diff(y.0).pow(2),
+                        x.1.abs_diff(y.1).pow(2),
+                        x.2.abs_diff(y.2).pow(2),
+                    ]
+                    .iter()
+                    .sum::<usize>(),
+                    (i, j),
+                );
+                if heap.len() < limit {
+                    heap.push(r);
+                } else if r.0 < heap.peek().map_or(usize::MAX, |r| r.0) {
+                    heap.pop();
+                    heap.push(r);
+                }
+            }
+        }
+        let d = heap.into_sorted_vec();
+        assert_eq!(d.len(), limit);
         let mut group_heap: Vec<usize> = vec![0];
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
