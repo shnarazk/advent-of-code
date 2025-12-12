@@ -37,7 +37,6 @@ mod parser {
     fn parse_line(s: &mut &str) -> ModalResult<()> {
         ().parse_next(s)
     }
-
     pub fn parse(s: &mut &str) -> ModalResult<Vec<()>> {
         separated(1.., parse_line, newline).parse_next(s)
     }
