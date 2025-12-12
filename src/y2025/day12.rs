@@ -1,26 +1,18 @@
 //! <https://adventofcode.com/2025/day/12>
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 use {
     crate::{
         array::{rotate_ccw, rotate_clockwise},
         framework::{AdventOfCode, ParseError, aoc},
-        geometric::{Dim2, Direction, NeighborIter},
+        geometric::Dim2,
     },
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
-    serde::ser::SerializeTuple,
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
-        hash::BuildHasherDefault,
-    },
+    rayon::prelude::*,
+    std::collections::BinaryHeap,
 };
 
 type Shape = (usize, usize, Vec<Vec<bool>>, Vec<Vec<Vec<bool>>>);
 type Region = (usize, usize, Vec<usize>);
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
     shapes: Vec<Shape>,
     regions: Vec<Region>,
@@ -32,8 +24,8 @@ mod parser {
         crate::parser::parse_usize,
         winnow::{
             ModalResult, Parser,
-            ascii::{alpha1, newline, space1},
-            combinator::{alt, repeat, separated, seq},
+            ascii::{newline, space1},
+            combinator::{repeat, separated, seq},
             token::one_of,
         },
     };
@@ -63,7 +55,7 @@ let n = s.iter().map(|l| l.iter().filter(|b| **b).count()).sum();
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 struct State {
     num_placed: usize,
     remain_rooms: usize,
@@ -89,9 +81,6 @@ impl State {
         self.num_placed = self.placed.iter().sum();
         self
     }
-    fn progress(&self) -> usize {
-        self.placed.iter().sum::<usize>()
-    }
 }
 
 #[aoc(2025, 12)]
@@ -110,7 +99,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.regions
-            .iter()
+            .par_iter()
             .filter(|(width, height, required)| {
                 // check a simple prop.
                 if self
@@ -175,14 +164,11 @@ impl AdventOfCode for Puzzle {
             .count()
     }
     fn part2(&mut self) -> Self::Output2 {
-        // let mut _: FxHashMap<_, _> = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        2
+        2025
     }
 }
 
 fn possible_directions(shape: &[Vec<bool>]) -> Vec<Vec<Vec<bool>>> {
-    let height = shape.len();
-    let width = shape[0].len();
     let r0 = shape.to_vec();
     let r1 = rotate_clockwise(r0.clone());
     let r1_is_r0 = r1 == r0;
