@@ -11,8 +11,8 @@
       "args": ["build"],
     },
     "request": "launch",
-    "program": "/Users/nash/.cargo/target/debug/adventofcode",
-    // "cwd": "$ZED_WORKTREE_ROOT",
+    "program": "~/.cargo/target/debug/adventofcode",
+    "cwd": "$ZED_WORKTREE_ROOT",
     "args": ["10", "0"],
   },
 ]
