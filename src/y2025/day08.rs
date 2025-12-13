@@ -4,8 +4,7 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim3,
     },
-    rayon::prelude::*,
-    std::collections::HashMap,
+    std::collections::{BinaryHeap, HashMap},
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -41,30 +40,29 @@ impl AdventOfCode for Puzzle {
             .alt
             .as_ref()
             .map_or(1000_usize, |_| 10_usize);
-        let size = self.line.len();
-        let mut d = (0..size)
-            .into_par_iter()
-            .flat_map(|i| {
-                (i + 1..size)
-                    .into_par_iter()
-                    .map(|j| {
-                        let x = self.line[i];
-                        let y = self.line[j];
-                        (
-                            [
-                                x.0.abs_diff(y.0).pow(2),
-                                x.1.abs_diff(y.1).pow(2),
-                                x.2.abs_diff(y.2).pow(2),
-                            ]
-                            .iter()
-                            .sum::<usize>(),
-                            (i, j),
-                        )
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        d.sort();
+        let mut heap: BinaryHeap<(usize, (usize, usize))> = BinaryHeap::new();
+        for (i, x) in self.line.iter().enumerate() {
+            for (j, y) in self.line.iter().enumerate().skip(i + 1) {
+                let r = (
+                    [
+                        x.0.abs_diff(y.0).pow(2),
+                        x.1.abs_diff(y.1).pow(2),
+                        x.2.abs_diff(y.2).pow(2),
+                    ]
+                    .iter()
+                    .sum::<usize>(),
+                    (i, j),
+                );
+                if heap.len() < limit {
+                    heap.push(r);
+                } else if r.0 < heap.peek().map_or(usize::MAX, |r| r.0) {
+                    heap.pop();
+                    heap.push(r);
+                }
+            }
+        }
+        let d = heap.into_sorted_vec();
+        assert_eq!(d.len(), limit);
         let mut group_heap: Vec<usize> = vec![0];
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
@@ -117,29 +115,40 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         let size = self.line.len();
-        let mut d = (0..size)
-            .into_par_iter()
-            .flat_map(|i| {
-                (i + 1..size)
-                    .into_par_iter()
-                    .map(|j| {
-                        let x = self.line[i];
-                        let y = self.line[j];
-                        (
-                            [
-                                x.0.abs_diff(y.0).pow(2),
-                                x.1.abs_diff(y.1).pow(2),
-                                x.2.abs_diff(y.2).pow(2),
-                            ]
-                            .iter()
-                            .sum::<usize>(),
-                            (i, j),
-                        )
-                    })
-                    .collect::<Vec<_>>()
-            })
+        let mut occs: Vec<usize> = vec![usize::MAX; size];
+        let mut dists: Vec<Vec<(usize, (usize, usize))>> = Vec::new();
+        for i in 0..size {
+            let mut min = usize::MAX;
+            let mut min_index = 0;
+            let mut ret: Vec<(usize, (usize, usize))> = Vec::new();
+            for j in i + 1..size {
+                let x = self.line[i];
+                let y = self.line[j];
+                let d = [
+                    x.0.abs_diff(y.0).pow(2),
+                    x.1.abs_diff(y.1).pow(2),
+                    x.2.abs_diff(y.2).pow(2),
+                ]
+                .iter()
+                .sum::<usize>();
+                if d < min {
+                    min = d;
+                    min_index = j;
+                }
+                ret.push((d, (i, j)));
+            }
+            occs[i] = occs[i].min(min);
+            occs[min_index] = occs[min_index].min(min);
+            dists.push(ret);
+        }
+        debug_assert!(occs.iter().all(|d| *d < usize::MAX));
+        let thr = occs.into_iter().max().unwrap();
+        let mut d = dists
+            .into_iter()
+            .flat_map(|l| l.into_iter().filter(|r| r.0 <= thr).collect::<Vec<_>>())
             .collect::<Vec<_>>();
         d.sort();
+        dbg!(d.len());
         let mut group_heap: Vec<usize> = vec![0];
         let mut membership: Vec<usize> = vec![0; self.line.len()];
         let mut new_group: usize = 0;
