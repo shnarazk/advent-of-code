@@ -64,12 +64,12 @@ struct State {
 }
 
 impl State {
-    fn fill_by_grid_and_placed(mut self) -> Self {
-        let height = self.grid.len();
-        let width = self.grid[0].len();
+    fn new(placed: Vec<usize>, grid: Vec<Vec<bool>>) -> Self {
+        let height = grid.len();
+        let width = grid[0].len();
         let mut h = 0;
         let mut w = 0;
-        for (i, l) in self.grid.iter().enumerate() {
+        for (i, l) in grid.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
                 if *b {
                     h = h.max(i);
@@ -77,9 +77,12 @@ impl State {
                 }
             }
         }
-        self.remain_rooms = height * width - h * w;
-        self.num_placed = self.placed.iter().sum();
-        self
+        State {
+            num_placed: placed.iter().sum(),
+            remain_rooms: height * width - h * w,
+            placed,
+            grid,
+        }
     }
 }
 
@@ -126,12 +129,7 @@ impl AdventOfCode for Puzzle {
                 let grid = vec![vec![false; *width]; *height];
                 let placed = vec![0_usize; required.len()];
                 let mut to_visit: BinaryHeap<State> = BinaryHeap::new();
-                let init_state = (State {
-                    grid: grid,
-                    placed,
-                    ..Default::default()
-                })
-                .fill_by_grid_and_placed();
+                let init_state = State::new(placed, grid);
                 to_visit.push(init_state);
                 while let Some(state) = to_visit.pop() {
                     if state.placed == *required {
@@ -152,12 +150,7 @@ impl AdventOfCode for Puzzle {
                                     {
                                         let mut placed = state.placed.clone();
                                         placed[si] += 1;
-                                        let new_state = (State {
-                                            grid,
-                                            placed,
-                                            ..Default::default()
-                                        })
-                                        .fill_by_grid_and_placed();
+                                        let new_state = State::new(placed, grid);
                                         to_visit.push(new_state);
                                         found = true;
                                     }
