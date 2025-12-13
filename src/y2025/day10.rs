@@ -60,7 +60,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
-            .iter()
+            .par_iter()
             .map(|(goal, buttons, _)| {
                 let mut checked: HashSet<Vec<bool>> = HashSet::new();
                 let mut to_visit: HashSet<Vec<bool>> = HashSet::new();
