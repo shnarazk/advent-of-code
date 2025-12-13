@@ -1,0 +1,9 @@
+# Skip non-source trees and generated content
+ignore = [
+  ".direnv",
+  ".git",
+  "deps",
+  "docs/build",
+  "build",
+  "tmp",
+]
