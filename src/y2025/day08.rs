@@ -4,7 +4,6 @@ use {
         framework::{AdventOfCode, ParseError, aoc},
         geometric::Dim3,
     },
-    rayon::prelude::*,
     std::collections::{BinaryHeap, HashMap},
 };
 
@@ -146,8 +145,7 @@ impl AdventOfCode for Puzzle {
         let thr = occs.into_iter().max().unwrap();
         let mut d = dists
             .into_iter()
-            .map(|l| l.into_iter().filter(|r| r.0 <= thr).collect::<Vec<_>>())
-            .flatten()
+            .flat_map(|l| l.into_iter().filter(|r| r.0 <= thr).collect::<Vec<_>>())
             .collect::<Vec<_>>();
         d.sort();
         dbg!(d.len());
