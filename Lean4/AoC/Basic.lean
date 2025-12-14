@@ -51,7 +51,7 @@ structure AocProblem where
   input_name : String
   answers: Option (String × String) := none
   time: Float := 0
-deriving BEq, Repr
+deriving BEq --, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
 --#check AocProblem.mk 2024 8 (by simp)
@@ -114,6 +114,23 @@ def build {α β γ : Type} [ToString β] [ToString γ]
     input_name := (← self.fileName alt)
     answers := none }
 
+/--
+  Configure and build an `AocProblem` for the given Advent of Code `(year, day)`.
+
+  Parameters:
+  - `parser` should return `some data` on success, or `none` on parse failure.
+    If parsing fails, the returned `AocProblem` will have `answers := none`.
+  - `solve₁` and `solve₂` compute part 1 and part 2 results from the parsed input.
+  - `alt` selects an alternate input filename suffix (see `dataFileName`), e.g.
+    `some "sample"` to load `.../input-dayDD-sample.txt`, or `none` for the default.
+
+  Returns:
+  An `IO AocProblem` with fields `input_name` set to the resolved filename and
+  `answers` populated on successful parsing.
+
+  Example:
+  `AocProblem.config 2024 1 parse solve1 solve2 (some "sample")`
+-/
 def config {α β γ : Type} [ToString β] [ToString γ]
     (year day : Nat)
     (parser : String → Option α)

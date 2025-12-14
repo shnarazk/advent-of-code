@@ -32,6 +32,9 @@ def elapsedTime {α : Type} {m : Type → Type u} [Monad m] [MonadLiftT BaseIO m
   let fin ← IO.monoNanosNow
   return (val, fin - beg)
 
+/--
+  Assoc List of year → day → part → solver function
+-/
 def events
     : Batteries.AssocList Nat (Nat × (Nat → Option String → IO AocProblem))
   := Batteries.AssocList.nil
@@ -40,6 +43,17 @@ def events
     |>.cons 2025 (Y2025.solvedDays, Y2025.solve)
 -- #check events.find? 2023
 
+/--
+  Format a `Float` with a fixed number of digits after the decimal point.
+
+  The number is rounded to `precision` decimal places, and then converted to a `String`.
+  The implementation additionally truncates the produced string to the expected width.
+
+  Notes:
+  * `precision = 0` produces an integer-like string (after rounding).
+  * Extremely large/small floats may still render using scientific notation depending on
+    `Float.toString`, in which case the truncation may not behave as desired.
+-/
 def formatFloat (f : Float) (precision : Nat) : String :=
   let factor := Float.pow 10.0 precision.toFloat
   let rounded := (f * factor).round / factor
@@ -53,6 +67,20 @@ def formatFloat (f : Float) (precision : Nat) : String :=
 -- #eval formatFloat (-123.456789) 2  -- Outputs "123.46"
 -- #eval formatFloat (-123.456789) 4  -- Outputs "-123.4568"
 
+/--
+  Truncate a path-like `String` to its last `depth` components.
+
+  The string `s` is split on the separator character `sep` (default: `/`),
+  then only the last `depth` components are kept and re-joined using `sep`.
+
+  Examples:
+  * `"/a/b/c/d".up_to_depth 2` returns `"c/d"`
+  * `"a/b".up_to_depth 10` returns `"a/b"` (depth larger than the number of components)
+
+  Notes:
+  * Consecutive separators and leading/trailing separators produce empty components,
+    following the behavior of `String.splitToList`.
+-/
 def String.up_to_depth (depth : Nat) (s : String) (sep : Char := '/') : String :=
   s.splitToList (· == sep)
   |>.reverse
@@ -62,6 +90,7 @@ def String.up_to_depth (depth : Nat) (s : String) (sep : Char := '/') : String :
 
 -- #eval "/a_a_a/bab/ccc/dadd/eeee/ff.g".up_to_depth 3
 
+/-- Print the result to stout. -/
 def AocProblem.show (self : AocProblem) : IO Unit :=
   match self.answers, self.time with
     | some ans, time => do
@@ -69,12 +98,14 @@ def AocProblem.show (self : AocProblem) : IO Unit :=
       IO.println s!"{Color.green}  => {ans.1}, {ans.2}{Color.reset}"
     | _, _ => do return
 
-def run (year: Nat) (day : Nat) (extra : Option String) : IO (Option AocProblem) := do
+/-- Solve the puzzle for year and day in IO monad and return the result as `Option AoCProblem`.
+-/
+def run (year: Nat) (day : Nat) (alt : Option String) : IO (Option AocProblem) := do
   match events.find? year with
     | some (days, solver) =>
        if day ≤ days
         then
-          let (res, time) ← elapsedTime <| solver day extra
+          let (res, time) ← elapsedTime <| solver day alt
           do pure (some { res with time := time.toFloat  / 1000000.0 })
         else do
           IO.println s!"{Color.red}Y{year} day{day} has not been solved!{Color.reset}"
@@ -83,6 +114,9 @@ def run (year: Nat) (day : Nat) (extra : Option String) : IO (Option AocProblem)
        IO.println s!"{Color.red}Year {year} is not a valid year!{Color.reset}"
        pure none
 
+/--
+  Solve the puzzle of year and day like `run`. But This returns `IO Unit`.
+-/
 def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit := do
   let solved := events.find? year |>.map (·.fst) |>.getD 1
   let results ← match days.size with
@@ -91,6 +125,9 @@ def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit :
   let _ ← results.filterMap (·) |>.mapM (·.show)
   return ()
 
+/--
+  Run all puzzles of `year` and dump the result to a JSON file.
+-/
 def benchmark_driver (year : Nat) : IO Unit := do
   let solved := events.find? year |>.map (·.fst) |>.getD 1
   let results ← List.range solved |>.mapM (fun d ↦ run year (d + 1) none)
@@ -104,6 +141,7 @@ def benchmark_driver (year : Nat) : IO Unit := do
   IO.println s!"dumped to '{filename}'"
   return ()
 
+/-- The entry point called by command line argument parser -/
 def aocCmd (p : Parsed) : IO UInt32 := do
   let year : Nat := p.flag! "year" |>.as! Nat
   let benchmark : Bool := p.hasFlag "benchmark"
@@ -115,6 +153,7 @@ def aocCmd (p : Parsed) : IO UInt32 := do
   if benchmark then benchmark_driver year else aoc_driver year days alt
   return 0
 
+/-- command line argument definition -/
 def aoc : Cmd := `[Cli|
   aoc VIA aocCmd ; ["0.6.1"]
   "Run Advent-of-Code codes in Lean4"
@@ -134,6 +173,7 @@ def aoc : Cmd := `[Cli|
 
 -- def main (args : List String) : IO Unit := do aoc_driver args
 
+/-- the entry point -/
 def main (args : List String) : IO UInt32 := aoc.validate args
 
 -- #eval main <| "--year 2025 1".splitOn " "

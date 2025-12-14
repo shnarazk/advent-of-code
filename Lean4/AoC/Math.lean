@@ -2,26 +2,33 @@ module
 
 @[expose] public section
 
+/--
+  Return the greatest common divider of `x` and `y`.
+-/
 partial
 def gcd (x y : Int) : Int := if y = 0 then x else gcd y (x % y)
 
 -- #eval gcd 10 5
 
+/--
+  Return the least common multiple of `x` and `y`.
+-/
 partial
 def lcm (x y : Int) : Int := (x * y) % gcd x y
 
-partial
-def solve (i a m : Int) : Int :=
- if (i * a) % m = 1 then i else solve (i + 1) a m
-
 /--
-Chinese Remainder Theorem
+  Chinese Remainder Theorem:
+  This return `n' such that
+  - n % a.1 = a.2
+  - n % b.1 = b.2
 ```
-crt ⟨5, 4⟩ ⟨2, 0⟩ |>.snd = 14
+chinese_remainder_theorem ⟨5, 4⟩ ⟨2, 0⟩ |>.snd = 14
 ```
 -/
 partial
 def chinese_remainder_theorem (aq_ar bq_br : Int × Int) : Int × Int :=
+  let rec solve (i : Int) (a : Int) (m : Int) : Int :=
+    if (i * a) % m = 1 then i else solve (i + 1) a m
   let (aq, ar) := aq_ar
   let (bq, br) := bq_br
   if ar = 0 ∧ br = 0 then ⟨lcm aq bq, 0⟩

@@ -50,7 +50,7 @@ And It returns the `default` by `·.get (0, 0)`
 structure Rect (α : Type) [BEq α] where
   width : UInt64
   vector : Array α
-deriving Hashable, Repr
+deriving Hashable --, Repr
 
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.width == b.width && a.vector == b.vector
