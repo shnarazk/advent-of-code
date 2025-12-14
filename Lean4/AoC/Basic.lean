@@ -161,7 +161,9 @@ def unique {α : Type} (a : Array α) [BEq α] [Hashable α] : Array α :=
 
 /-- a class for monoidal operations on containers of numbers -/
 class Accumulation (α : Type) where
+  /-- summention -/
   sum    : α → Nat
+  /-- product -/
   product: α → Nat
 
 instance : Accumulation (List Nat) where
@@ -208,6 +210,7 @@ def List.enumerate {α : Type} (a : List α) : List (Nat × α) := a.zipIdx.map 
 -- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
 
+/-- alias of Array.enumerate. -/
 def Array.enum {α : Type} (a : Array α) : Array (Nat × α) :=
   a.zipIdx.map (fun (x, i) ↦ (i, x))
 
@@ -218,9 +221,11 @@ def Array.enumerate {α : Type} (a : Array α) : Array (Nat × α) := Array.enum
 
 -- #eval #[2, 4, 5].enum
 
+/-- enumerate on a `String` as `Array Char` -/
 def String.enum (a : String) : List (Nat × Char) :=
   List.zip (List.range a.length) a.toList
 
+/-- deprecated version of `String.enum` -/
 @[deprecated "Use `String.enum` instead of 'String.enumerate`" (since := "2024-11-01")]
 def String.enumerate := String.enum
 
