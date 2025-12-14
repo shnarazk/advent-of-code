@@ -4,6 +4,7 @@
 
 * [adventofcode.com](https://adventofcode.com/)
 * [r/adventofcode](https://www.reddit.com/r/adventofcode/)
+* [unofficial survey](https://jeroenheijmans.github.io/advent-of-code-surveys/)
 * [my old data visualizer](https://github.com/shnarazk/AoCVisualizer)
 
 I solve all the problems in Rust and sometimes use some other interesting languages.
