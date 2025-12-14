@@ -4,13 +4,11 @@ public import Lean
 
 @[expose] public section
 
+/-- print a data like `dbg!` in Rust -/
 def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
   dbgTrace s!"{label}: {a}" (fun _ ↦ a)
 
-/--
-Build and return a data filename
--/
-
+/-- return a path to the datafile of `year` and `day` -/
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
   let aoc_dir ← IO.getEnv "AOC_DIR"
   let d := ("0" ++ s!"{day}").takeRight 2
@@ -18,38 +16,44 @@ def dataFileName (year day : Nat) (ext : Option String): IO String := do
   | some ext => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}-{ext}.txt"
   | none     => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}.txt"
 
-
+/-- return the content of `datafilename` -/
 def readData (datafilename : String) : IO String := do
    IO.FS.readFile datafilename
 
 -- #eval dataFileName 2023 2 none
 
-/--
-return file contents as String
--/
+/-- return file contents as String -/
 def dataOf (year day : Nat) (ext : Option String): IO String :=
   dataFileName year day ext >>= readData
 
+/-- return the lines of `datafilename` as an Arrat -/
 def readLines (datafilename : String) : IO (Array String) := do
      IO.FS.lines datafilename
 
-/--
-return file contents as Array String
--/
+/-- return file contents as Array String -/
 def linesOf (year day : Nat) (ext : Option String): IO (Array String) :=
   dataFileName year day ext >>= readLines
 
 -- end FileIO
 
+/-- Answers as pair of solutions -/
 def Answers := String × String
 
+/-- data representing a puzzle and its solutions -/
 structure AocProblem where
+  /-- year -/
   year : Nat
+  /-- day -/
   day : Nat
+  /-- a constraint on year -/
   validYear : 2000 < year
+  /-- a constrain on day -/
   validDay : 1 ≤ day ∧ day ≤ 25
+  /-- data file name -/
   input_name : String
+  /-- a pair of answers or none before solving them -/
   answers: Option (String × String) := none
+  /-- the total elapsed time to solve the both parts -/
   time: Float := 0
 deriving BEq --, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
@@ -57,6 +61,8 @@ instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 --#check AocProblem.mk 2024 8 (by simp)
 
 namespace AocProblem
+
+/-- constructor for `AoCProblem` -/
 def new (year day : Nat) : AocProblem :=
   have valid_year : 2000 < max year 2001 := by
     have : 2001 ≤ max year 2001 := by exact Nat.le_max_right year 2001
@@ -79,12 +85,15 @@ def new (year day : Nat) : AocProblem :=
     none
     0
 
+/-- return the input data file name -/
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext
 
+/-- return the content of the input data file name -/
 def getData (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext >>= readData
 
+/-- return the lines of the input data file name as an Array -/
 def getLines (self : AocProblem) (ext : Option String) : IO (Array String) :=
   dataFileName self.year self.day ext >>= readLines
 
@@ -98,8 +107,10 @@ instance : Lean.ToJson AocProblem where
 
 -- #eval Lean.ToJson.toJson (AocProblem.new 2024 10)
 
+/-- return a JSON string representing `AoCProblem` -/
 def toJson (self : AocProblem) : Lean.Json := Lean.ToJson.toJson self
 
+/-- construct `AoCProblem` with the input and the solvers' oututs -/
 def build {α β γ : Type} [ToString β] [ToString γ]
     (self : AocProblem)
     (parser : String → Option α)
@@ -141,15 +152,14 @@ def config {α β γ : Type} [ToString β] [ToString γ]
 
 end AocProblem
 
-/--
-Return an array consisting of elements in `a`
--/
+/-- Return an array consisting of elements in `a` -/
 def unique {α : Type} (a : Array α) [BEq α] [Hashable α] : Array α :=
   let hash := Array.foldl (·.insert ·) (Std.HashSet.emptyWithCapacity : Std.HashSet α) a
   hash.toArray
 
 -- #eval unique #[1, 0, 2, 1, 3, 2]
 
+/-- a class for monoidal operations on containers of numbers -/
 class Accumulation (α : Type) where
   sum    : α → Nat
   product: α → Nat
@@ -192,6 +202,7 @@ instance : Accumulation (Array (Option Int)) where
 -- #eval sum [1, 3, 5]
 -- #eval product [1, 3, 5]
 
+/-- Rusty enumerate -/
 def List.enumerate {α : Type} (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) => (i, x))
 -- List.zip (List.range a.length) a
 -- #eval [2, 4, 5].enum
@@ -202,6 +213,7 @@ def Array.enum {α : Type} (a : Array α) : Array (Nat × α) :=
 
 -- example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
 
+/-- Rusty enumerate -/
 def Array.enumerate {α : Type} (a : Array α) : Array (Nat × α) := Array.enum a
 
 -- #eval #[2, 4, 5].enum
@@ -239,35 +251,31 @@ def unwrapOr {α : Type} : (Option α) → (default : α) → α
 
 end Option
 
+/-- Rusty operation -/
 def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
   match self with
   | true  => some (f ())
   | false => none
 -- #eval true.map (K 3)
 
+/-- Rusty operation -/
 def Bool.then {α : Type} (self : Bool) (f : Unit → Option α) : Option α :=
   match self with
   | true  => f ()
   | false => none
 
-/--
-Do the same with `windows(2)` in Rust
--/
+/-- Do the same with `windows(2)` in Rust -/
 def List.windows2 {α : Type} (l : List α) : List (α × α) :=
   List.zip l.dropLast l.tail
 example : (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
 
-/--
-Do the same with `windows(2)` in Rust
--/
+/-- Do the same with `windows(2)` in Rust -/
 def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
   let l := a.toList
   List.zip l.dropLast l.tail
 -- example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
 
-/-
-Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN.
--/
+/-- Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN. -/
 prefix:max "⁻" => Neg.neg
 example : 4 + ⁻2 = 2 := by rfl
 example : (· + ·) 1 ⁻8 = -7 := by rfl

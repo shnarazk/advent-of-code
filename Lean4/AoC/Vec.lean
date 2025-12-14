@@ -194,21 +194,15 @@ instance [ToString α] [BEq α] : ToString (Rect α) where
 
 namespace Rect
 
-/-
-- return the height
--/
+/-- return the height of `Rect` -/
 @[inline]
 def height [BEq α] (self : Rect α) : Nat := self.vector.size / self.width
 
-/--
-- return a new instance fitting to the given Dim2
--/
+/-- return a new instance fitting to the given Dim2 -/
 def ofDim2 [BEq α] (h w : Nat) (default : α) : Rect α :=
   Rect.mk w (Array.replicate (h * w) default)
 
-/--
-- return a new instance of Rect by converting from an 2D array
--/
+/-- return a new instance of Rect by converting from an 2D array -/
 def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
   have h := a.size
   match h with
@@ -219,9 +213,7 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
     let v : Array α := a.foldl Array.append #[]
     Rect.mk w v
 
-/--
-- return the `(i,j)`-th element of Mat1 instance
--/
+/-- return the `(i,j)`-th element of Mat1 instance -/
 @[inline]
 def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
@@ -236,18 +228,14 @@ def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   self.vector[self.width * i.1 + i.2]?
 
-/--
-- set the `(i,j)`-th element to `val` and return the modified Mat1 instance
--/
+/-- set the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
 def set [BEq α] [RectIndex β] (self : Rect α) (p : β) (val : α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   let ix := self.width * i.1 + i.2
   Rect.mk self.width (self.vector.set! ix val)
 
-/--
-- modify the `(i,j)`-th element to `val` and return the modified Mat1 instance
--/
+/-- modify the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
 def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
@@ -270,9 +258,7 @@ def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
 -- #eval r.get (Dim2.mk 1 1) 88
 -- #eval r.swap (Dim2.mk 0 0) (Dim2.mk 1 1)
 
-/--
-- search an element that satisfies the predicate and return indices or none
--/
+/-- search an element that satisfies the predicate and return indices or none -/
 def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
   if let some i := p.vector.findIdx? f
     then
@@ -292,9 +278,7 @@ def findIdxOnSubarray [BEq α]
     | 0 => none
     | _ => findIdxOnSubarray sa (limit.sub sub1) sub1 pred
 
-/--
-- search an element in a specific row
--/
+/-- search an element in a specific row -/
 def findIdxInRow? [BEq α] (p : Rect α) (i : Nat) (pred : α → Bool) : Option (Nat × Nat) :=
   let f := i * p.width
   let t := (i + 1) * p.width
@@ -344,8 +328,7 @@ def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : 
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (frame.width * i.fst + i.snd)
 
-/-- convert from `Vec2` to valid `Dim2` or `None`
--/
+/-- convert from `Vec2` to valid `Dim2` or `None` -/
 @[inline]
 def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
   if let some i := RectIndexMaybe.toIndex₂? p then
@@ -365,7 +348,8 @@ def enum {α : Type} [BEq α] (self : Rect α) : Array ((Nat × Nat) × α) :=
     |>.filterMap (fun i ↦
         let p := self.ofIndex₁ i
         if let some val := self.get? p then some (p, val) else none)
---
+
+/-- return the array of valid (height, width) pair of `Rect` -/
 @[inline]
 def range {α : Type} [BEq α] (self : Rect α) : Array (Nat × Nat) :=
   Array.range self.vector.size |>.map (fun i ↦ self.ofIndex₁ i)
@@ -373,6 +357,7 @@ def range {α : Type} [BEq α] (self : Rect α) : Array (Nat × Nat) :=
 -- def v := #[true, false, true, false]
 -- def x := Rect.mk 2 v
 -- def y := Rect.of2DMatrix #[#[(1 : Int), 2, 3], #[4, 5, 6]]
+-- #eval y.range
 -- #check x
 -- #eval x
 -- #check y
