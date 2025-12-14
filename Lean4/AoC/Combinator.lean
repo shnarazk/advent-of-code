@@ -21,6 +21,7 @@ public import Batteries
     series = {ARRAY 2022}
 }
 -/
+
 namespace CiCL -- Combinators in Combinatory Logic
 
 variable {α β γ δ ζ η ε : Type}
@@ -31,7 +32,7 @@ def I (a : α) := a
 
 /-- Constant: λa b. a -/
 @[inline]
-def K (a : α) (_b : β) := a
+def K (a : α) (b : β) := (a, b).1
 
 /-- Dyandic application -/
 @[inline]

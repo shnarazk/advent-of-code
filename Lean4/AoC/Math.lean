@@ -16,6 +16,11 @@ def gcd (x y : Int) : Int := if y = 0 then x else gcd y (x % y)
 partial
 def lcm (x y : Int) : Int := (x * y) % gcd x y
 
+/-- aux function for chinese_remainder_theorem -/
+partial
+def crt_solve (i : Int) (a : Int) (m : Int) : Int :=
+    if (i * a) % m = 1 then i else crt_solve (i + 1) a m
+
 /--
   Chinese Remainder Theorem:
   This return `n' such that
@@ -27,13 +32,11 @@ chinese_remainder_theorem ⟨5, 4⟩ ⟨2, 0⟩ |>.snd = 14
 -/
 partial
 def chinese_remainder_theorem (aq_ar bq_br : Int × Int) : Int × Int :=
-  let rec solve (i : Int) (a : Int) (m : Int) : Int :=
-    if (i * a) % m = 1 then i else solve (i + 1) a m
   let (aq, ar) := aq_ar
   let (bq, br) := bq_br
   if ar = 0 ∧ br = 0 then ⟨lcm aq bq, 0⟩
   else
-    let n := solve 0 aq bq
+    let n := crt_solve 0 aq bq
     let nar := (n * ar) % bq
     let nbr := (n * br) % bq
     let m := if nar < nbr then nbr - nar else bq + nbr - nar

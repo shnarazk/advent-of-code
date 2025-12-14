@@ -10,6 +10,7 @@ namespace Dim2
 
 variable {α β γ : Type}
 
+/-- symbols for 4 direction -/
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
 instance : ToString Dir where
@@ -20,6 +21,8 @@ instance : ToString Dir where
     | .W => "W"
 
 namespace Dir
+
+/-- return the direction after 90-degree clock-wise rotation -/
 def turn : Dir → Dir
   | Dir.N => Dir.E
   | Dir.E => Dir.S
@@ -34,6 +37,7 @@ lemma turn_four_times_eq_self : ∀ d : Dir, d.turn.turn.turn.turn = d := by
   cases d <;> simp
 -/
 
+/-- return the corresponding `Dir2` -/
 def asVec₂ : Dir → (Int × Int)
   | Dir.N => (-1,  0)
   | Dir.E => ( 0,  1)
@@ -43,6 +47,7 @@ def asVec₂ : Dir → (Int × Int)
 
 end Dir
 
+/-- 2D vector -/
 abbrev Vec₂ := Int × Int
 
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
@@ -81,13 +86,17 @@ instance instDecidableLeVec₂ (a b : Vec₂) : Decidable (a ≤ b) := by
 
 -- #eval ((0, 0) : Vec₂) ≤ ((8, 2) : Vec₂)
 
+/-- return `(0, 0) ≤ pos ∧ ≤ size` -/
 def geZeroAndLe (size pos : Vec₂) : Bool := (0, 0) ≤ pos && pos ≤ size
 
+/-- glyph ≤₀ for geZeroAndLe -/
 syntax:50 term:51 " ≤₀ " term:50 : term
 macro_rules | `($a ≤₀ $b) => `(geZeroAndLe $b $a)
 
+/-- return `(0, 0) ≤ pos ∧ < size` -/
 def geZeroAndLt (size pos : Vec₂) : Bool := (0, 0) ≤ pos && pos < size
 
+/-- glyph <₀ for geZeroAndLt -/
 syntax:50 (name := syntaxInfixGeZeroAndLt) term:51 " <₀ " term:50 : term
 macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 
@@ -97,9 +106,7 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 
 -- def Vec₂.toUInt64 (v : Vec₂) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
 
-/--
-  Subtype of `Vec₂` as valid index for `Rect`.
--/
+/-- Subtype of `Vec₂` as valid index for `Rect`. -/
 def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
 deriving BEq, Hashable, Repr
 
@@ -119,7 +126,9 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
 -- def w : Vec₂ := (-1, -1)
 -- #eval (↑ w)
 
+/-- class for indices for `Rect` -/
 class RectIndex (α : Type) where
+  /-- return a pair of indices for `Rect` -/
   toIndex₂ : α → Nat × Nat
 
 instance : RectIndex Idx₂ where
@@ -130,7 +139,9 @@ instance : RectIndex (Nat × Nat) where
 
 -- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
 
+/-- class for optional indices for `Rect` -/
 class RectIndexMaybe (α : Type) where
+  /-- return an optional pair of indices for `Rect` -/
   toIndex₂? : α → Option (Nat × Nat)
 
 instance : RectIndexMaybe Vec₂ where
@@ -144,9 +155,15 @@ instance : RectIndexMaybe (Nat × Nat) where
 
 -- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
 
+/-- return the list of `(0 : UInt64)` to `n` -/
 partial
 def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
 
+/-- return all valid indices smaller than `p`
+
+  Example:
+  toList' (3, 2) = [(0,0), (0,1), (1,0), (1,1), (2,0), (2,1)]
+-/
 def toList' (p : Idx₂) : List Idx₂ :=
   let i : Vec₂ := ↑ p
   let rl := range_list i.1
@@ -165,13 +182,16 @@ Note: this implementation accept zero space for now.
 And It returns the `default` by `·.get (0, 0)`
 -/
 structure Rect (α : Type) [BEq α] where
+  /-- width -/
   width : Nat
+  /-- internal data storage -/
   vector : Array α
 deriving Hashable --, Repr
 
 instance [BEq α] : BEq (Rect α) where
   beq a b := a.width == b.width && a.vector == b.vector
 
+/-- Split a list into consecutive chunks of length `n` (the last chunk may be shorter). -/
 def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
   if l.length = 0 then
     ([] : List (List α))
@@ -183,6 +203,7 @@ def fold_n (n : Nat) (l : List α) (h : 0 < n) : List (List α) :=
 
 -- #eval fold_n 3 #[0, 2, 3, 10, 12, 19, 20, 22, 23].toList (by simp)
 
+/-- return `self` as `List (List α)` -/
 def Rect.to2Dmatrix {α : Type} [BEq α] (self : Rect α) : List (List α) :=
   let w : Nat := self.width
   if h : 0 < w then fold_n w self.vector.toList h else []
@@ -213,16 +234,18 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
     let v : Array α := a.foldl Array.append #[]
     Rect.mk w v
 
-/-- return the `(i,j)`-th element of Mat1 instance -/
+/-- return the `(i,j)`-th element of `Rect` -/
 @[inline]
 def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   self.vector.getD (self.width * i.1 + i.2) default
 
+/-- return true if `p` is a valid index of `self` -/
 def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (self.width * i.1 + i.2) < self.vector.size
 
+/-- return `self[p]` as `Option` -/
 @[inline]
 def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
@@ -241,6 +264,7 @@ def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Re
   let i : Nat × Nat := RectIndex.toIndex₂ p
   Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
 
+/-- swap `self[p]` and `self[q]` -/
 @[inline]
 def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
@@ -267,6 +291,7 @@ def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
         else none
     else none
 
+/-- helper: search `sa` backwards from `limit` (stepping by `sub1`) for the first element satisfying `pred`. -/
 partial
 def findIdxOnSubarray [BEq α]
     (sa : Subarray α) (limit : Fin sa.size) (sub1 : Fin sa.size) (pred : α → Bool)
@@ -292,12 +317,15 @@ def findIdxInRow? [BEq α] (p : Rect α) (i : Nat) (pred : α → Bool) : Option
 
 -- #eval if let some y := Mat1.of2DMatrix #[#[1,2,3], #[4,5,6]] then y.findIdxInRow? 1 (· == 4) else none
 
+/-- map on `Rect` -/
 def map {β : Type} [BEq α] [BEq β] (self : Rect α) (f : α → β) : Rect β :=
   { self with vector := self.vector.map f }
 
+/-- foldl on `Rect` -/
 def foldl {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : β) : β :=
   self.vector.foldl f init
 
+/-- foldl on each row and return the results as an `Array` -/
 def foldlRows {β : Type} [BEq α]
     (self : Rect α) (f : β → α → β) (init : β) : Array β :=
   Array.range self.width
@@ -306,23 +334,29 @@ def foldlRows {β : Type} [BEq α]
         |> Array.ofSubarray
         |>.foldl f init)
 
+/-- map on each row -/
 def mapRows {β : Type} [BEq α]
     (self : Rect α) (f : Array α → β) :  Array β :=
   Array.range (self.vector.size / self.width)
     |> .map (fun i => self.vector.toSubarray i (i + self.width) |> Array.ofSubarray |> f)
 
+/-- return `i`-th row of `self` as a `Subarray` -/
 def row [BEq α] (self : Rect α) (i : Nat) : Subarray α :=
   let j : Nat := i % (self.vector.size % self.width)
   let f : Nat := j * self.width
   let t := f + self.width
   self.vector.toSubarray f t
 
+/-- return `j`-th column of `self` as a Array -/
 def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
   Array.range self.width |>.map (fun i ↦ self.get (i, j) default)
 
+/-- return the height and the width of `self` -/
 def area [BEq α] (self : Rect α) : Nat := self.vector.size
 
 -- @[inline] def index (size : Pos) (p : Pos) : Nat := p.fst * size.snd + p.snd
+
+/-- return the index for `n`-th element of `self` -/
 @[inline]
 def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : Nat :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
@@ -338,10 +372,13 @@ def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p :
     else none
 
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
+
+/-- return the index for the 1D vector converted from `self` -/
 @[inline]
 def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
   (n / frame.width, n % frame.width)
 
+/-- enumerate on `Rect` -/
 @[inline]
 def enum {α : Type} [BEq α] (self : Rect α) : Array ((Nat × Nat) × α) :=
   Array.range self.vector.size
