@@ -3,8 +3,8 @@
 // Example:
 [
   {
-    "label": "Example task",
-    "command": "lake build; lale lint",
+    "label": "Run lint",
+    "command": "lake build && lake lint",
     //"args": [],
     // Env overrides for the command, will be appended to the terminal's environment from the settings.
     // "env": { "foo": "bar" },
