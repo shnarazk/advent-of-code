@@ -54,14 +54,17 @@ def parse : String → Option (Input × HashSet Idx₂) := AoCParser.parse parse
       let p := v.enumerate.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
           |> (·[0]!)
-      let size := (v.size, v[0]!.size)
-      return (Input.mk (p.1, p.2) Dir.N size, obstructions)
+      return (Input.mk (p.1, p.2) Dir.N (v.size, v[0]!.size), obstructions)
 
 end parser
 
 /-- 辿った場所をHashMapとして返す -/
 partial
-def traceMove (self : Input) (obstructions : HashSet Idx₂) (pre : Option (Idx₂ × Dir)) (hash : HashMap Idx₂ (Idx₂ × Dir))
+def traceMove
+    (self : Input)
+    (obstructions : HashSet Idx₂)
+    (pre : Option (Idx₂ × Dir))
+    (hash : HashMap Idx₂ (Idx₂ × Dir))
     : HashMap Idx₂ (Idx₂ × Dir) :=
   let hash' := if let some p := pre
       then if !hash.contains self.guardPos then hash.insert self.guardPos p else hash
@@ -92,34 +95,44 @@ deriving BEq
 
 /-- 同じ場所を辿れば`true`。`trail`に記録 -/
 partial
-def loop (self : Input) (obstructions : HashSet Idx₂) (new_obstruction : Idx₂) (trail : HashSet (Idx₂ × Dir)) (nextPos : Option Idx₂) : Bool :=
-  match nextPos with
+def loop
+    (self : Input)
+    (obstructions : HashSet Idx₂)
+    (new_obstruction : Idx₂)
+    (trail : HashSet (Idx₂ × Dir))
+    : Bool :=
+  -- TODO: nextPosに行けることは確認済み
+  match self.nextPos with
     | none   => false
     | some p =>
       let self₀ := self.moveTo p
-      if trail.contains self₀.status -- && !self₀.obstruction.contains p
+      if trail.contains self₀.status
         then true
         else
           let trail' := trail.insert self₀.status
-          if let q@(some p') := self₀.nextPos
+          if let some p' := self₀.nextPos
             then
               if obstructions.contains p' || p' == new_obstruction
                 then
                   let self₁ := self₀.turn
-                  if let q'@(some p'') := self₁.nextPos
+                  if let some p'' := self₁.nextPos
                     then
                       if obstructions.contains p'' || p'' == new_obstruction
                         then
                           let self₂ := self₁.turn
-                          loop self₂ obstructions new_obstruction trail' self₂.nextPos
-                        else loop self₁ obstructions new_obstruction  trail' q'
+                          loop self₂ obstructions new_obstruction trail'
+                        else loop self₁ obstructions new_obstruction trail'
                     else false
-                else loop self₀ obstructions new_obstruction trail' q
+                else loop self₀ obstructions new_obstruction trail'
             else false
 
 def isLoop (self : Input) (obstructions : HashSet Idx₂) (new_obstruction : Idx₂) (pre: Idx₂ × Dir) : Bool :=
-  let self' := { self with guardPos := pre.1, guardDir := pre.2 }
-  loop self' obstructions new_obstruction HashSet.emptyWithCapacity pre.1
+  let x := pre.1 - pre.2.asVec₂
+  if h : (0, 0) ≤ x
+  then
+    let self' := { self with guardPos := ⟨x, h⟩, guardDir := pre.2 }
+    loop self' obstructions new_obstruction HashSet.emptyWithCapacity
+  else panic! "out of range"
 
 def solve (data : Input × HashSet Idx₂) : Nat :=
   traceMove data.1 data.2 none HashMap.emptyWithCapacity |>.filter (isLoop data.1 data.2 ·) |>.size
