@@ -11,7 +11,7 @@ def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
 /-- return a path to the datafile of `year` and `day` -/
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
   let aoc_dir ← IO.getEnv "AOC_DIR"
-  let d := ("0" ++ s!"{day}").takeRight 2
+  let d := ("0" ++ s!"{day}").takeEnd 2
   return match ext with
   | some ext => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}-{ext}.txt"
   | none     => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}.txt"

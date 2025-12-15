@@ -12,23 +12,23 @@ def toHashMap (source : String) : Std.HashMap String Nat :=
       List.foldl
         (fun hash assoc =>
           let (l, n) := association assoc
-          match hash.get? l with
-          | some n' => hash.insert l $ max n n'
-          | none    => hash.insert l n)
+          match hash.get? l.toString with
+          | some n' => hash.insert l.toString $ max n n'
+          | none    => hash.insert l.toString n)
         hash
         items
     )
     (Std.HashMap.emptyWithCapacity.insert "«id»" id)
     items_in_bags
   where
-    id := ((List.getD (source.splitToList (. == ':')) 0 "-1").drop 5).trim.toNat!
+    id := ((List.getD (source.splitToList (. == ':')) 0 "-1").drop 5).trimAscii.toNat!
     body := List.getD (source.splitToList (. == ':')) 1 ""
     turns := body.splitToList (. == ';')
     items_in_bags := turns.map (fun b => b.splitToList (. == ','))
     association := fun s =>
-      let pair := String.splitToList s.trim (· == ' ')
-      let value := (pair.getD 0 "no num").trim.toNat!
-      let label := (pair.getD 1 "no name").trim
+      let pair := String.splitToList s.trimAscii.toString (· == ' ')
+      let value := (pair.getD 0 "no num").trimAscii.toNat!
+      let label := (pair.getD 1 "no name").trimAscii
       (label, value)
 
 namespace Part1

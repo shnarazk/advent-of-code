@@ -14,7 +14,7 @@ def parsed (source : String) : List Nat × List Nat :=
     targets := parts.getD 0 "no num"
     cands   := parts.getD 1 "no name"
     toNats  := fun (s : String) =>
-      let pair := String.splitToList s.trim (. == ' ')
+      let pair := String.splitToList s.trimAscii.toString (. == ' ')
       let numbers := pair.filter (fun s => s != "")
       numbers.map String.toNat!
 

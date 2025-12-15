@@ -61,6 +61,7 @@ def formatFloat (f : Float) (precision : Nat) : String :=
     |>.toUInt16 |>.toNat
   rounded.toString ++ s!"/{digits}"
     |>.take (digits + precision + if f < 0 then 2 else 1)
+    |>.toString
 
 -- #eval formatFloat 123.456789 2  -- Outputs "123.46"
 -- #eval formatFloat 123.456789 4  -- Outputs "-123.4568"
