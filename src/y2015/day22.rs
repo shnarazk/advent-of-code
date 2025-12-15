@@ -45,6 +45,7 @@ pub struct Puzzle {
 
 impl Puzzle {
     // turn consists of your spell then boss's attack
+    #[allow(unused_assignments)]
     fn turn(&self, kind: usize, dec: usize) -> Result<Puzzle, GameState> {
         if 2000 < self.used_mana {
             return Err(GameState::Impossible);
