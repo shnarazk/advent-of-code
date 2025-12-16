@@ -10,7 +10,7 @@ namespace Y2024.Day06
 open Accumulation CiCL Dim2 Std
 
 structure State where
-  pos : Idx₂
+  pos : Vec₂
   dir : Dir
   -- size: Vec₂
 deriving BEq, Hashable
@@ -21,13 +21,13 @@ namespace State
 
 def turn (self : State) : State := { self with dir := self.dir.turn }
 
-def moveTo (self : State) (pos : Idx₂) : State := { self with pos := pos }
+def moveTo (self : State) (pos : Vec₂) : State := { self with pos := pos }
 
-def includes (size: Vec₂) (pos : Vec₂) : Option Idx₂ :=
-  if h : (0, 0) ≤ pos ∧ pos.1 < size.1 ∧ pos.2 < size.2 then some ⟨pos, h.left⟩ else none
+def includes (size: Vec₂) (pos : Vec₂) : Option Vec₂ :=
+  if (0, 0) ≤ pos ∧ pos.1 < size.1 ∧ pos.2 < size.2 then some pos else none
 
 /-- 移動先が領域内でなければ `none` -/
-def nextPos (self : State) (size : Vec₂) : Option Idx₂ := includes size <| self.pos + self.dir.asVec₂
+def nextPos (self : State) (size : Vec₂) : Option Vec₂ := includes size <| self.pos + self.dir.asVec₂
 
 end State
 
@@ -40,15 +40,15 @@ open Std.Internal.Parsec.String
 def parseLine := do many1 (pchar '.' <|> pchar '#' <|> pchar '^')
 -- #eval AoCParser.parse parseLine "^..#"
 
-def parse : String → Option (State × Vec₂ × HashSet Idx₂) := AoCParser.parse parser
+def parse : String → Option (State × Vec₂ × HashSet Vec₂) := AoCParser.parse parser
   where
-    parser : Parser (State × Vec₂ × HashSet Idx₂) := do
+    parser : Parser (State × Vec₂ × HashSet Vec₂) := do
       let v ← many1 (parseLine <* eol)
       let obstructions := v.enum.foldl
         (fun h (i, l) ↦ l.enum.foldl
-          (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Idx₂) else h)
+          (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Vec₂) else h)
           h)
-        (HashSet.emptyWithCapacity : HashSet Idx₂)
+        (HashSet.emptyWithCapacity : HashSet Vec₂)
       let p := v.enumerate.flatMap
           (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
           |> (·[0]!)
@@ -61,10 +61,10 @@ partial
 def traceMove
     (self : State)
     (size : Vec₂)
-    (obstructions : HashSet Idx₂)
+    (obstructions : HashSet Vec₂)
     (pre : Option State)
-    (hash : HashMap Idx₂ State)
-    : HashMap Idx₂ State :=
+    (hash : HashMap Vec₂ State)
+    : HashMap Vec₂ State :=
   let hash' := if let some p := pre
       then if !hash.contains self.pos then hash.insert self.pos p else hash
       else hash.insert self.pos self
@@ -80,14 +80,14 @@ def traceMove
 
 namespace Part1
 
-def solve (data: State × Vec₂ × HashSet Idx₂) : Nat := traceMove data.1 data.2.1 data.2.2 none HashMap.emptyWithCapacity |>.size
+def solve (data: State × Vec₂ × HashSet Vec₂) : Nat := traceMove data.1 data.2.1 data.2.2 none HashMap.emptyWithCapacity |>.size
 
 end Part1
 
 namespace Part2
 
 structure Guard where
-  guardPos : Idx₂
+  guardPos : Vec₂
   guardDir : Dir
   size: Vec₂
 deriving BEq
@@ -97,8 +97,8 @@ partial
 def loop
     (self : State)
     (size : Vec₂)
-    (obstructions : HashSet Idx₂)
-    (new_obstruction : Idx₂)
+    (obstructions : HashSet Vec₂)
+    (new_obstruction : Vec₂)
     (trail : HashSet State)
     : Bool :=
   -- TODO: nextPosに行けることは確認済み
@@ -129,18 +129,14 @@ def loop
 def isLoop
     (self : State)
     (size : Vec₂)
-    (obstructions : HashSet Idx₂)
-    (new_obstruction : Idx₂)
+    (obstructions : HashSet Vec₂)
+    (new_obstruction : Vec₂)
     (pre: State)
     : Bool :=
-  let x := pre.1 - pre.2.asVec₂
-  if h : (0, 0) ≤ x
-  then
-    let self' := { self with pos := ⟨x, h⟩, dir := pre.2 }
-    loop self' size obstructions new_obstruction HashSet.emptyWithCapacity
-  else panic! "out of range"
+  let self' := { self with pos := pre.1 - pre.2.asVec₂, dir := pre.2 }
+  loop self' size obstructions new_obstruction HashSet.emptyWithCapacity
 
-def solve (data : State × Vec₂ × HashSet Idx₂) : Nat :=
+def solve (data : State × Vec₂ × HashSet Vec₂) : Nat :=
   traceMove data.1 data.2.1 data.2.2 none HashMap.emptyWithCapacity |>.filter (isLoop data.1 data.2.1 data.2.2 ·) |>.size
 
 end Part2
