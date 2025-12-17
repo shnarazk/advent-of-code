@@ -28,7 +28,7 @@ def includes (size: Vec₂) (pos : Vec₂) : Option Vec₂ :=
 /-- 移動先が領域内でなければ `none` -/
 def nextPos (self : State) (size : Vec₂) : Option Vec₂ := includes size <| self.pos + self.dir.asVec₂
 
-def nextPos! (self : State) (size : Vec₂) : Vec₂ := self.pos + self.dir.asVec₂
+def nextPos! (self : State) : Vec₂ := self.pos + self.dir.asVec₂
 
 end State
 
@@ -89,7 +89,7 @@ namespace Part2
 
 /-- 同じ場所を辿れば`true`。`trail`に記録 -/
 partial
-def loop
+def findLoop
     (self : State)
     (size : Vec₂)
     (obstructions : HashSet Vec₂)
@@ -97,40 +97,52 @@ def loop
     (trail : HashSet State)
     : Bool :=
   -- nextPosに行けることは確認済み
-  let p := self.nextPos! size
-  let self₀ := self.moveTo p
+  let self₀ := self.moveTo self.nextPos!
   if trail.contains self₀
     then true
     else
       let trail' := trail.insert self₀
-      if let some p' := self₀.nextPos size
+      if let some p := self₀.nextPos size
         then
-          if obstructions.contains p' || p' == new_obstruction
+          if obstructions.contains p || p == new_obstruction
             then
               let self₁ := self₀.turn
-              if let some p'' := self₁.nextPos size
+              if let some p' := self₁.nextPos size
                 then
-                  if obstructions.contains p'' || p'' == new_obstruction
+                  if obstructions.contains p' || p' == new_obstruction
                     then
                       let self₂ := self₁.turn
-                      loop self₂ size obstructions new_obstruction trail'
-                    else loop self₁ size obstructions new_obstruction trail'
+                      findLoop self₂ size obstructions new_obstruction trail'
+                    else findLoop self₁ size obstructions new_obstruction trail'
                 else false
-            else loop self₀ size obstructions new_obstruction trail'
+            else findLoop self₀ size obstructions new_obstruction trail'
         else false
 
-def isLoop
-    (self : State)
-    (size : Vec₂)
-    (obstructions : HashSet Vec₂)
-    (new_obstruction : Vec₂)
-    (pre: State)
-    : Bool :=
+partial
+def findLoopM (init : State) (size : Vec₂) (obs : HashSet Vec₂) (newOb : Vec₂) : Bool := Id.run do
+  let obstructions := obs.insert newOb
+  let mut pos := init.moveTo (init.nextPos!)
+  let mut trail := HashSet.emptyWithCapacity
+  repeat
+    if trail.contains pos then return true
+    trail := trail.insert pos
+    let some p := pos.nextPos size | return false
+    if obstructions.contains p then
+      pos := pos.turn
+      let some p' := pos.nextPos size | return false
+      if obstructions.contains p' then pos := pos.turn
+    pos := pos.moveTo (pos.nextPos!)
+  return false
+
+def isLoop (self : State) (size : Vec₂) (obs : HashSet Vec₂) (newOb : Vec₂) (pre: State) : Bool :=
   let self' := { self with pos := pre.1 - pre.2.asVec₂, dir := pre.2 }
-  loop self' size obstructions new_obstruction HashSet.emptyWithCapacity
+  -- findLoopM self' size obs newOb
+  findLoop self' size obs newOb HashSet.emptyWithCapacity
 
 def solve (data : State × Vec₂ × HashSet Vec₂) : Nat :=
-  traceMove data.1 data.2.1 data.2.2 none HashMap.emptyWithCapacity |>.filter (isLoop data.1 data.2.1 data.2.2 ·) |>.size
+  traceMove data.1 data.2.1 data.2.2 none HashMap.emptyWithCapacity
+    |>.filter (isLoop data.1 data.2.1 data.2.2 ·)
+    |>.size
 
 end Part2
 
