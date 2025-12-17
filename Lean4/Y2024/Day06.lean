@@ -12,7 +12,6 @@ open Accumulation CiCL Dim2 Std
 structure State where
   pos : Vec₂
   dir : Dir
-  -- size: Vec₂
 deriving BEq, Hashable
 
 instance : ToString State where toString self := s!"{self.pos}"
@@ -28,6 +27,8 @@ def includes (size: Vec₂) (pos : Vec₂) : Option Vec₂ :=
 
 /-- 移動先が領域内でなければ `none` -/
 def nextPos (self : State) (size : Vec₂) : Option Vec₂ := includes size <| self.pos + self.dir.asVec₂
+
+def nextPos! (self : State) (size : Vec₂) : Vec₂ := self.pos + self.dir.asVec₂
 
 end State
 
@@ -86,12 +87,6 @@ end Part1
 
 namespace Part2
 
-structure Guard where
-  guardPos : Vec₂
-  guardDir : Dir
-  size: Vec₂
-deriving BEq
-
 /-- 同じ場所を辿れば`true`。`trail`に記録 -/
 partial
 def loop
@@ -101,30 +96,28 @@ def loop
     (new_obstruction : Vec₂)
     (trail : HashSet State)
     : Bool :=
-  -- TODO: nextPosに行けることは確認済み
-  match self.nextPos size with
-    | none   => false
-    | some p =>
-      let self₀ := self.moveTo p
-      if trail.contains self₀
-        then true
-        else
-          let trail' := trail.insert self₀
-          if let some p' := self₀.nextPos size
+  -- nextPosに行けることは確認済み
+  let p := self.nextPos! size
+  let self₀ := self.moveTo p
+  if trail.contains self₀
+    then true
+    else
+      let trail' := trail.insert self₀
+      if let some p' := self₀.nextPos size
+        then
+          if obstructions.contains p' || p' == new_obstruction
             then
-              if obstructions.contains p' || p' == new_obstruction
+              let self₁ := self₀.turn
+              if let some p'' := self₁.nextPos size
                 then
-                  let self₁ := self₀.turn
-                  if let some p'' := self₁.nextPos size
+                  if obstructions.contains p'' || p'' == new_obstruction
                     then
-                      if obstructions.contains p'' || p'' == new_obstruction
-                        then
-                          let self₂ := self₁.turn
-                          loop self₂ size obstructions new_obstruction trail'
-                        else loop self₁ size obstructions new_obstruction trail'
-                    else false
-                else loop self₀ size obstructions new_obstruction trail'
-            else false
+                      let self₂ := self₁.turn
+                      loop self₂ size obstructions new_obstruction trail'
+                    else loop self₁ size obstructions new_obstruction trail'
+                else false
+            else loop self₀ size obstructions new_obstruction trail'
+        else false
 
 def isLoop
     (self : State)
