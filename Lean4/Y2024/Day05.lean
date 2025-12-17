@@ -37,10 +37,7 @@ def pupdates := do sepBy1 pupdate eol
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := do
-      let rs ← prules
-      let us ← pupdates
-      return Input.mk rs us
+    parser : Parser Input := do Input.mk <$> prules <*> pupdates
 
 end parser
 

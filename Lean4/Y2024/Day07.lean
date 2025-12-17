@@ -20,15 +20,15 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def parse_line : Parser (Nat × Array Nat) := do
-  let head ← number <* pstring ": "
-  let v ← sepBy1 number (pstring " ")
-  return (head, v)
+  Prod.mk <$> (number <* pstring ": ") <*> (sepBy1 number (pstring " "))
 
 def parse : String → Option Input := AoCParser.parse (sepBy1 parse_line eol)
 
 end parser
 
-def exp (ops : Array (Nat → Nat → Nat)) (threshold : Nat)
+def exp
+    (ops : Array (Nat → Nat → Nat))
+    (threshold : Nat)
     (l : List Nat)
     (subs : HashSet Nat := HashSet.emptyWithCapacity.insert 0)
     : Nat :=
@@ -44,7 +44,7 @@ def shift (a b : Nat) (b0 : Nat := b) : Nat :=
 -- #eval shift 3000000 1000000
 
 def solve₂ (input : Input) : Nat :=
-  input.map (fun (val, v) ↦ exp #[(· + ·), (· * ·), shift] val v.toList) |> sum
+  input.map (fun ((val : Nat), v) ↦ exp #[(· + ·), (· * ·), shift] val v.toList) |> sum
 
 public def solve := AocProblem.config 2024 07 parser.parse solve₁ solve₂
 
