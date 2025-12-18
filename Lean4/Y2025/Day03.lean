@@ -3,15 +3,30 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
--- public import «AoC».Rect64
 
 namespace Y2025.Day03
-open Accumulation CiCL
+
+open Accumulation
 
 structure Input where
+  line : Array (Array Nat)
 deriving BEq, Hashable, Repr
 
-instance : ToString Input where toString _ := s!""
+instance : ToString Input where toString s := s!"{s.line}"
+
+def toJolt (len : Nat) (v : Array Nat) : Nat := Id.run do
+  let mut stack := v[(v.size - len)...v.size].toArray
+  for r in len ... v.size do
+    let i := v.size - r - 1
+    let mut n := v[i]!
+    for j in 0 ... len do
+      if stack[j]! <= n
+      then
+        let tmp := stack[j]!
+        stack := stack.set! j n
+        n := tmp
+      else break
+  return stack.foldl (fun acc n ↦ acc * 10 + n) 0
 
 namespace parser
 
@@ -19,27 +34,18 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def parse_line := many1 ((·.toNat - '0'.toNat) <$> digit)
+
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := return Input.mk
+    parser : Parser Input := Input.mk <$> sepBy1 parse_line eol
 
 end parser
 
-namespace Part1
+def solve₁ (input : Input) : Nat := input.line.map (toJolt 2) |> sum
 
-def solve (_ : Input) : Nat := 0
+def solve₂ (input : Input) : Nat := input.line.map (toJolt 12) |> sum
 
-end Part1
-
-namespace Part2
-
-def solve (_ : Input) : Nat := 0
-
-end Part2
-
-public def solve := AocProblem.config 2025 03
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+public def solve := AocProblem.config 2025 03 parser.parse solve₁ solve₂
 
 end Y2025.Day03
