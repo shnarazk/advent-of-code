@@ -14,15 +14,16 @@ def iLog10 (a : UInt64) : Int := if a < 10 then 0 else 1 + iLog10 (a / 10)
 /-- pick up `nth` `size` digits as `UInt64`. `nth` is zero-based and is counted from the top. -/
 def pick (a : UInt64) (size nth : Nat) : UInt64 :=
   let len : Nat := (a.iLog10 + 1).toNat
+  -- assert! len ≥ size * (nth + 1)
   (a / (10 ^ (len - size * (nth + 1))).toUInt64) % (10 ^ size)
 -- #eval pick 112233 2 2
+-- #eval pick 112233 3 2
 
 /-- return the number from `a` repeating `n` times -/
 def repeat_number (a : UInt64) (n : Nat) : UInt64 :=
-  let len : Nat:= (a.iLog10 + 1).toNat
+  let len : Nat := (a.iLog10 + 1).toNat
   (1...n).iter.fold (fun acc _ ↦ acc * (10 ^ len).toUInt64 + a) a
-
--- #eval repeat_number 123 3
+-- #eval repeat_number 123 4
 
 end UInt64
 
@@ -55,10 +56,34 @@ end parser
 namespace Part1
 
 /-- return the number of the satifying numbers in `[s, e]`. `r` is radix. -/
-def calcOnRange (s e : UInt64) (r : Nat := 2) : Nat := Id.run do
-  let mut s_len := s.iLog10 + 1
-  let mut e_len := e.iLog10 + 1
-  (min s.iLog10  e.iLog10).toNat
+def calcOnRange (s' e' : UInt64) (r : Nat := 2) : Nat := Id.run do
+  let mut s := s'
+  let mut e := e'
+  let mut s_len : Int := s.iLog10 + 1
+  let mut e_len : Int := e.iLog10 + 1
+  if s_len % r > 0 then
+    s_len := (s_len / r + 1) * r
+    s := (10 ^ (s_len.toNat - 1)).toUInt64
+  if e_len % r > 0 then
+    e_len := (e_len / r) * r
+    e := (10 ^ e_len.toNat - 1).toUInt64
+  if s > e then return 0
+  let len := (s.iLog10 + 1) / r
+  let mut total := 0
+  let ss := s.pick len.toNat 0
+  let ee := e.pick len.toNat 0
+  for d in (ss + 1) ... ee do
+    total := total + d.repeat_number r
+  if ss == ee
+  then
+    if (1 ... r).iter.all (fun i ↦ ss ≥ s.pick len.toNat i && ss ≤ e.pick len.toNat i) then
+     total := total + ss.repeat_number r
+  else
+    if (1 ... r).iter.all (fun i ↦ ss ≥ s.pick len.toNat i) then
+     total := total + ss.repeat_number r
+    if (1 ... r).iter.all (fun i ↦ ee ≤ e.pick len.toNat i) then
+     total := total + ee.repeat_number r
+  total.toNat
 
 def solve (input : Input) : Nat := input.line.map (uncurry calcOnRange) |> sum
 
