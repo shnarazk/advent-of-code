@@ -4,7 +4,10 @@ use {
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashSet, FxHasher},
     serde::Serialize,
-    std::{collections::HashSet, hash::BuildHasherDefault},
+    std::{
+        collections::{BinaryHeap, HashSet},
+        hash::BuildHasherDefault,
+    },
 };
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -81,30 +84,26 @@ fn expands2(vec: &[usize], threshold: usize) -> usize {
             shift(a * 10, b, b0 / 10)
         }
     }
-    fn exp(mut vec: Vec<usize>, subs: FxHashSet<usize>, threshold: usize) -> usize {
-        if let Some(&a) = vec.first() {
-            vec.remove(0);
-            exp(
-                vec,
-                subs.iter()
-                    .flat_map(|x| {
-                        [*x + a, *x * a, shift(*x, a, a)]
-                            .iter()
-                            .filter(|v| **v <= threshold)
-                            .cloned()
-                            .collect::<Vec<_>>()
-                    })
-                    .collect::<FxHashSet<usize>>(),
-                threshold,
-            )
-        } else if subs.contains(&threshold) {
-            threshold
-        } else {
-            0
+    fn search(vec: &[usize], threshold: usize) -> usize {
+        let end_index: usize = vec.len();
+        let mut to_visit: BinaryHeap<(usize, usize)> = BinaryHeap::new();
+        to_visit.push((vec[0], 1));
+        while let Some(state) = to_visit.pop() {
+            if state.1 == end_index {
+                if state.0 == threshold {
+                    return threshold;
+                } else {
+                    continue;
+                }
+            }
+            let a = vec[state.1];
+            for next in [state.0 + a, state.0 * a, shift(state.0, a, a)] {
+                if next <= threshold {
+                    to_visit.push((next, state.1 + 1));
+                }
+            }
         }
+        0
     }
-    let mut args: Vec<usize> = vec.to_vec();
-    let mut temp: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
-    temp.insert(args.remove(0));
-    exp(args, temp, threshold)
+    search(vec, threshold)
 }
