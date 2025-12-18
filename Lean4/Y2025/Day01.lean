@@ -7,6 +7,7 @@ public import «AoC».Combinator
 public import «AoC».Parser
 
 namespace Y2025.Day01
+
 open Accumulation
 
 structure Input where
@@ -27,9 +28,7 @@ def line_parser := do
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := do
-      let v ← many line_parser
-      return Input.mk v
+    parser : Parser Input := do Input.mk <$> many line_parser
 
 end parser
 
