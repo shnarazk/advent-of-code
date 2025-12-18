@@ -3,15 +3,26 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
--- import «AoC».Rect64
 
 namespace UInt64
 
-/-- return the number of digits: `0.iLog10 = 1` -/
+/-- return the number of digits minus one: `0.iLog10 = 0` -/
 partial
-def iLog10 (a : UInt64) : Int := if a < 10 then 1 else 1 + iLog10 (a / 10)
-
+def iLog10 (a : UInt64) : Int := if a < 10 then 0 else 1 + iLog10 (a / 10)
 -- #eval (12809 : UInt64).iLog10
+
+/-- pick up `nth` `size` digits as `UInt64`. `nth` is zero-based and is counted from the top. -/
+def pick (a : UInt64) (size nth : Nat) : UInt64 :=
+  let len : Nat := (a.iLog10 + 1).toNat
+  (a / (10 ^ (len - size * (nth + 1))).toUInt64) % (10 ^ size)
+-- #eval pick 112233 2 2
+
+/-- return the number from `a` repeating `n` times -/
+def repeat_number (a : UInt64) (n : Nat) : UInt64 :=
+  let len : Nat:= (a.iLog10 + 1).toNat
+  (1...n).iter.fold (fun acc _ ↦ acc * (10 ^ len).toUInt64 + a) a
+
+-- #eval repeat_number 123 3
 
 end UInt64
 
@@ -43,10 +54,13 @@ end parser
 
 namespace Part1
 
-def calcOnRange (a b : UInt64) : Nat := (min a.iLog10  b.iLog10).toNat
+/-- return the number of the satifying numbers in `[s, e]`. `r` is radix. -/
+def calcOnRange (s e : UInt64) (r : Nat := 2) : Nat := Id.run do
+  let mut s_len := s.iLog10 + 1
+  let mut e_len := e.iLog10 + 1
+  (min s.iLog10  e.iLog10).toNat
 
-def solve (input : Input) : Nat :=
-  input.line.map (uncurry calcOnRange) |> sum
+def solve (input : Input) : Nat := input.line.map (uncurry calcOnRange) |> sum
 
 end Part1
 
