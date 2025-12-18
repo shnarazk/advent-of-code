@@ -69,13 +69,11 @@ def new (year day : Nat) : AocProblem :=
     exact this
   have valid_day : 1 ≤ min (max day 1) 25 ∧ min (max day 1) 25 ≤ 25 := by
     constructor
-    {
-      have : 1 ≤ max day 1 := by exact Nat.le_max_right day 1
+    · have : 1 ≤ max day 1 := by exact Nat.le_max_right day 1
       have H : 1 ≤ 25 := by exact Nat.lt_of_sub_eq_succ rfl
       have : 1 ≤ min (max day 1) 25 := by exact Nat.le_min_of_le_of_le this H
       exact this
-    }
-    { exact Nat.min_le_right (max day 1) 25 }
+    · exact Nat.min_le_right (max day 1) 25
   AocProblem.mk
     (max year 2001)
     (min (max day 1) 25)
@@ -119,10 +117,10 @@ def build {α β γ : Type} [ToString β] [ToString γ]
     : IO AocProblem := do
   if let some d := parser (← self.getData alt)
   then return { self with
-    input_name := (← self.fileName alt)
+    input_name := ← self.fileName alt
     answers := some (s!"{solve₁ d}", s!"{solve₂ d}") }
   else return { self with
-    input_name := (← self.fileName alt)
+    input_name := ← self.fileName alt
     answers := none }
 
 /--
