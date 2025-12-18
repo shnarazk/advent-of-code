@@ -34,30 +34,30 @@ def whitespaces? : Parser Unit := many (pchar ' ' <|> pchar '▸') *> return ()
 def alphabets := many1Chars asciiLetter
 
 /-- repeat `ch` and discard the result -/
-def separator (ch : Char)  : Parser Unit := many1 (pchar ch) *> return ()
+def separator (ch : Char) : Parser Unit := many1 (pchar ch) *> return ()
 
 /-- repeat `ch` zero or more times and discard the result -/
-def separator₀ (ch : Char)  : Parser Unit := optional (many (pchar ch)) *> return ()
+def separator₀ (ch : Char) : Parser Unit := optional (many (pchar ch)) *> return ()
 
 /-- a `Nat` -/
-def number := do
+def number : Parser Nat := do
   let s ← many1 digit
   return (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)
 
 -- #eval Parsec.run number "21, 8,"
 
 /-- a signed number -/
-def number_p := do
+def number_p : Parser Int := do
   let s ← many1 digit
   return Int.ofNat (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)
 
 /-- a nugative integer -/
-def number_m := do
+def number_m : Parser Int := do
   let n ← pchar '-' *> number_p
   return -n
 
 /-- a negative or non-negative integer -/
-def number_signed := number_m <|> number_p
+def number_signed : Parser Int := number_m <|> number_p
 
 -- #eval Parser.run number_signed "-21, 8,"
 
