@@ -1,7 +1,9 @@
-import «AoC».Basic
-import «AoC».Combinator
-import «AoC».Parser
--- import «AoC».Rect64
+module
+
+public import «AoC».Basic
+public import «AoC».Combinator
+public import «AoC».Parser
+-- public import «AoC».Rect64
 
 namespace Y2025.Day00
 open Accumulation CiCL
@@ -35,7 +37,7 @@ def solve (_ : Input) : Nat := 0
 
 end Part2
 
-def solve := AocProblem.config 2025 00
+public def solve := AocProblem.config 2025 00
   ((dbg "parsed as ") ∘ parser.parse)
   Part1.solve
   Part2.solve
