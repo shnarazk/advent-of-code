@@ -32,7 +32,7 @@ namespace parser
 open Lean Parser AoCParser
 open Std.Internal.Parsec.String
 
-def pseeds := pstring "seeds: " *> sepBy1 number whitespaces <* eol <* eol
+def pseeds := pstring "seeds: " *> separated number whitespaces <* eol <* eol
 
 def plabel := do
   let _ ← alphabets <* pstring "-to-"
@@ -47,7 +47,7 @@ def range := do
   let r ← number <* separator₀ ' '
   return ({ dest := d, source := s, span := r } : Range)
 
-def pmap := sepBy1 range eol
+def pmap := separated range eol
 
 -- #eval Parsec.run pmap "88 18 7"
 -- #eval Parsec.run pmap "88 18 7\n18 25 70"
@@ -58,7 +58,7 @@ def parse := AoCParser.parse parser
   where
     parser : Parser ((Array Nat) × (Array (Array Range))) := do
       let ss ← pseeds
-      let ms ← sepBy1 (plabel *> pmap) (pstring "\n\n")
+      let ms ← separated (plabel *> pmap) (pstring "\n\n")
       return (ss, ms)
 
 end parser

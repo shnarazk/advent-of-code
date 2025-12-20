@@ -17,10 +17,10 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def line_parser := do sepBy1 number (pchar ' ')
+def line_parser := do separated number (pchar ' ')
 -- #eval AoCParser.parse line_parser "3 5 8"
 
-def parse : String → Option Input := AoCParser.parse (sepBy1 line_parser eol)
+def parse : String → Option Input := AoCParser.parse (separated line_parser eol)
 -- #eval parse "3 8\n1 2 3\n6 9"
 
 end parser

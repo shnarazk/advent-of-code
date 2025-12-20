@@ -21,9 +21,9 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def parse_line : Parser (Nat × Array Nat) := do
-  Prod.mk <$> (number <* pstring ": ") <*> (sepBy1 number (pstring " "))
+  Prod.mk <$> (number <* pstring ": ") <*> (separated number (pstring " "))
 
-def parse : String → Option Input := AoCParser.parse (sepBy1 parse_line eol)
+def parse : String → Option Input := AoCParser.parse (separated parse_line eol)
 
 end parser
 

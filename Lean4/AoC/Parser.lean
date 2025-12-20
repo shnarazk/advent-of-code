@@ -17,21 +17,11 @@ variable {α β γ : Type}
 def eol : Parser Unit := pchar '\n' *> return ()
 
 /-- repeat `p` separated by `s` -/
-@[deprecated "Use `separated` instead of `sepBy1`" (since := "2025-12-20")]
-def sepBy1 (p : Parser α) (s : Parser β) : Parser (Array α) := do
-  manyCore (attempt (s *> p)) #[←p]
-
-/-- repeat `p` separated by `s` -/
 def separated (p : Parser α) (s : Parser β) : Parser (Array α) := do
   manyCore (attempt (s *> p)) #[←p]
 
 /-- repeat `p`. This is `repeat` in Winnow. But it's reserved keyword in Lean4. -/
 def repeated (p : Parser α) : Parser (Array α ) := do manyCore (attempt p) #[←p]
-
-/-- repeat `p` ended by `e` -/
-@[deprecated "Use `repeatTill` instead of `endBy`" (since := "2025-12-20")]
-def endBy (p : Parser α) (e : Parser β) : Parser (Array α) := do
-  manyCore (attempt p) #[←p] <* e
 
 /-- repeat `p` ended by `e`. Return both. -/
 def repeatTill (p : Parser α) (e : Parser β) : Parser (Array α × β) := do
@@ -86,7 +76,7 @@ def label := many1Chars asciiLetter <* pchar ':'
 -- #eval Parsec.run label "Game: 0, "
 
 /-- sequence of "label: number" separated by "," -/
-def fields := sepBy1 (separator₀ ' ' *> label *> separator ' ' *> number) (pchar ',')
+def fields := separated (separator₀ ' ' *> label *> separator ' ' *> number) (pchar ',')
 
 -- #eval Parsec.run fields "a: 0, bb: 8"
 

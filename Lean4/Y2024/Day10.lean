@@ -19,7 +19,7 @@ def parse_line : Parser (Array Nat) := many1 single_digit
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := Rect.of2DMatrix <$> sepBy1 parse_line eol
+    parser : Parser Input := Rect.of2DMatrix <$> separated parse_line eol
 
 end parser
 

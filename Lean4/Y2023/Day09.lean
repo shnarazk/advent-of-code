@@ -16,7 +16,7 @@ open Std.Internal.Parsec.String
 
 def parse := AoCParser.parse parser
   where
-    parser := sepBy1 (sepBy1 number_signed (pchar ' ')) eol
+    parser := separated (separated number_signed (pchar ' ')) eol
 
 end parser
 

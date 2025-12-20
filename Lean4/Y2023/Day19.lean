@@ -31,9 +31,7 @@ def Target.new : String → Target
   | "R" => Target.Reject
   | s   => Target.Chain s
 
-/--
-A composition of var op num => action
--/
+/-- A composition of var op num => action -/
 structure Decl where
   label   : String
   op     : Operator
@@ -44,9 +42,7 @@ deriving BEq
 instance : ToString Decl where
   toString r := s!"{r.label}{r.op}{r.num}:{r.action}"
 
-/--
-composition of label : rules* default
--/
+/-- composition of label : rules* default -/
 structure Rule where
   label : String
   rules : Array Decl
@@ -83,7 +79,7 @@ def prule := do
 
 def pdecl := do
   let label ← alphabets <* pchar '{'
-  let rules ← sepBy1 prule (pchar ',') <* pchar ','
+  let rules ← separated prule (pchar ',') <* pchar ','
   let drule ← alphabets <* pchar '}'
   return Rule.mk label rules (Target.new drule)
 -- #eval AoCParser.parse pdecl "rfg{s<537:gd,x>2440:R,A}"
@@ -94,7 +90,7 @@ def prating := do
   return (name, value)
 
 def pratings := do
-  let rs ← pchar '{' *> sepBy1 prating (pchar ',') <* pchar '}'
+  let rs ← pchar '{' *> separated prating (pchar ',') <* pchar '}'
   let h := rs.foldl (fun h p ↦ HashMap.insert h (Prod.fst p) (Prod.snd p)) (HashMap.emptyWithCapacity : HashMap String Nat)
   return h
 -- #eval AoCParser.parse (sepBy1 pratings eol) "{x=768,m=2655}\n{x=167,m=44}"
@@ -102,8 +98,8 @@ def pratings := do
 def parse : String → Option (Rules × Array Setting) := AoCParser.parse parser
  where
     parser := do
-      let d ← sepBy1 pdecl eol <* eol
-      let p ← eol *> sepBy1 pratings eol
+      let d ← separated pdecl eol <* eol
+      let p ← eol *> separated pratings eol
       return (makeInstruction d, p)
 -- #eval parse "rfg{s<537:gd,x>2440:R,A}\nqs{s>3448:A,lnx}\n\n{x=787}" |>.mapOr (·.fst) #[]
 -- #eval parse "rfg{s<537:gd,lnx}\n\n{x=787,m=2655}" |>.mapOr (·.snd.map (·.toList)) #[]

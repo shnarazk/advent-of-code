@@ -16,9 +16,7 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def segments := sepBy1
-  (many1 (satisfy (!",\n".contains ·)))
-  (satisfy (",\n".contains ·))
+def segments := separated (many1 (satisfy (!",\n".contains ·))) (satisfy (",\n".contains ·))
 
 def parse : String → Option Input := AoCParser.parse segments
 -- #eval parse "abc,de=,cko"

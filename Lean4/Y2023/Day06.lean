@@ -38,7 +38,7 @@ namespace parser
 open Lean Parser AoCParser
 open Std.Internal.Parsec.String
 
-def numbers := sepBy1 number whitespaces
+def numbers := separated number whitespaces
 def ptime := pstring "Time:" *> whitespaces *> numbers
 def pdist := pstring "Distance:" *> whitespaces *> numbers
 

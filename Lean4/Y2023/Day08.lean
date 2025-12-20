@@ -24,7 +24,7 @@ def pbranch := do
 
 def parser := do
   let path ← ppath <* eol <* eol
-  let branches  ← sepBy1 pbranch eol
+  let branches  ← separated pbranch eol
   let hash := branches.foldl
     (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
     HashMap.emptyWithCapacity

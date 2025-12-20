@@ -81,7 +81,7 @@ def cell := do
 
 def maze_line := many1 cell <* eol
 def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
-def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (sepBy1 maze eol)
+def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (separated maze eol)
 
 end parser
 

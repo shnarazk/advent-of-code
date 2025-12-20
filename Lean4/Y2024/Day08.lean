@@ -32,7 +32,7 @@ def parseSymbol := do asciiLetter <|> digit <|> pchar '.'
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
-      let v ← sepBy1 (many1 parseSymbol) eol
+      let v ← separated (many1 parseSymbol) eol
       let a := v.enum.toList.map
         (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ (c, (i, j))))
         |>.flatten

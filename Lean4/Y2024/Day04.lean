@@ -107,7 +107,7 @@ def parse_line : Parser (Array Char) := do
   return as.toList.toArray
 -- #eval AoCParser.parse parse_line "eocb\n"
 
-def parse_lines := sepBy1 parse_line eol
+def parse_lines := separated parse_line eol
 -- #eval AoCParser.parse parse_lines "eocb\nABC\n"
 
 def parse : String → Option Input := AoCParser.parse parser

@@ -173,7 +173,7 @@ def pmodule := pbroadcaster <|> pflipflop <|> pconjunction
 -- #eval AoCParser.parse pmodule "%a"
 -- #eval AoCParser.parse pmodule "&inv"
 
-def pdests := sepBy1 alphabets (pstring ", ")
+def pdests := separated alphabets (pstring ", ")
 -- #eval AoCParser.parse pdests  "a"
 -- #eval AoCParser.parse .dests "a, b, c"
 
@@ -186,7 +186,7 @@ def pline := do
 
 def parse : String → Option (Array Rule) := AoCParser.parse parser
   where
-    parser := sepBy1 pline eol
+    parser := separated pline eol
 -- #eval parse "%a -> inv, con\n&inv -> b"
 
 end parser

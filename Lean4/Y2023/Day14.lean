@@ -135,7 +135,7 @@ def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
 
 def parse : String → Option (Array (Rect Kind)) := AoCParser.parse parser
   where
-    parser := sepBy1 maze eol
+    parser := separated maze eol
 
 end parser
 

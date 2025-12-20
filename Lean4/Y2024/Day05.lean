@@ -27,12 +27,12 @@ def prule := do
   return (a,b)
 -- #eval AoCParser.parse prule "34|12"
 
-def prules := do endBy (prule <* eol) eol
+def prules := do repeated (prule <* eol) <* eol
 -- #eval AoCParser.parse prules "1|2\n3|5\n\n"
 
-def pupdate := do sepBy1 number (pchar ',')
+def pupdate := do separated number (pchar ',')
 
-def pupdates := do sepBy1 pupdate eol
+def pupdates := do separated pupdate eol
 -- #eval AoCParser.parse pupdates "1 2 4\n5 6 9\n4 2"
 
 def parse : String → Option Input := AoCParser.parse parser

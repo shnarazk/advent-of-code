@@ -31,7 +31,7 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def pcell := (pchar '.' *> return false) <|> (pchar '#' *> return true)
-def parse := AoCParser.parse $ sepBy1 (many1 pcell) eol
+def parse := AoCParser.parse $ separated (many1 pcell) eol
 
 end parser
 

@@ -96,7 +96,7 @@ def line := do
 
 def parse : String → Option (Array Input) := AoCParser.parse parser
   where
-    parser : Parser (Array Input) := sepBy1 line eol
+    parser : Parser (Array Input) := separated line eol
 
 end parser
 

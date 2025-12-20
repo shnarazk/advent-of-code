@@ -38,7 +38,7 @@ def parse_line := many1 ((·.toNat - '0'.toNat) <$> digit)
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := Input.mk <$> sepBy1 parse_line eol
+    parser : Parser Input := Input.mk <$> separated parse_line eol
 
 end parser
 

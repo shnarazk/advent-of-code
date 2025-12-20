@@ -20,7 +20,7 @@ open Std.Internal.Parsec.String
 def card := digit <|> pchar 'A' <|> pchar 'K' <|> pchar 'Q' <|> pchar 'J' <|> pchar 'T'
 def cards := many1 card <* whitespaces
 def line : Parser Hand := (return Hand.hand) <*> cards <*> number
-def parse := AoCParser.parse $ sepBy1 line eol
+def parse := AoCParser.parse $ separated line eol
 
 end parser
 

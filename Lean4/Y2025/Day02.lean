@@ -78,7 +78,7 @@ def parse_range := do
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := Input.mk <$> sepBy1 parse_range (pchar ',')
+    parser : Parser Input := Input.mk <$> separated parse_range (pchar ',')
 
 end parser
 

@@ -25,10 +25,10 @@ open Std.Internal.Parsec.String
 
 def line_parser := do
   let pattern ← many1 (pchar '.' <|> pchar '#' <|> pchar '?') <* whitespaces
-  let rule    ← sepBy1 number (pchar ',')
+  let rule    ← separated number (pchar ',')
   return Data.mk pattern rule
 
-def parse := AoCParser.parse $ sepBy1 line_parser eol
+def parse := AoCParser.parse $ separated line_parser eol
 
 end parser
 

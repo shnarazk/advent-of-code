@@ -52,7 +52,7 @@ def parse_inst' (n : Nat) : Parser Inst := do
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser (Array Inst) := endBy (parse_inst' 100) (notFollowedBy (parse_inst' 100))
+    parser : Parser (Array Inst) := repeated (parse_inst' 100) <* (notFollowedBy (parse_inst' 100))
 -- #eval AoCParser.parse (many (pstring "ab")) "ababab "
 -- #eval AoCParser.parse (many parse_inst') "xxdo()xdo()y"
 -- #eval parse "xxmul(1,2)   don't()mul(20,1)x"
