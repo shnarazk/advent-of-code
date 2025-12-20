@@ -4,7 +4,7 @@ public import «AoC».Basic
 public import «Y2025».Day01
 public import «Y2025».Day02
 public import «Y2025».Day03
--- public import «Y2025».Day04
+public import «Y2025».Day04
 -- public import «Y2025».Day05
 -- public import «Y2025».Day06
 -- public import «Y2025».Day07
@@ -22,7 +22,7 @@ def solvers : List (Option String → IO AocProblem) := [
   Y2025.Day01.solve,
   Y2025.Day02.solve,
   Y2025.Day03.solve,
-  -- Y2025.Day04.solve,
+  Y2025.Day04.solve,
   -- Y2025.Day05.solve,
   -- Y2025.Day06.solve,
   -- Y2025.Day07.solve,
