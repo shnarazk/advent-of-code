@@ -3,16 +3,29 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
-public import «AoC».Rect64
+public import «AoC».Vec
 
 namespace Y2025.Day04
-open Accumulation CiCL TwoDimensionalVector64 Rect
+open Std Accumulation CiCL Dim2 Rect
 
 structure Input where
   grid: Rect Bool
 deriving BEq
 
 instance : ToString Input where toString s := s!"{s.grid}"
+
+def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
+  ([
+    Dir.N.asVec₂,
+    Dir.E.asVec₂,
+    Dir.S.asVec₂,
+    Dir.W.asVec₂,
+    Dir.N.asVec₂+ Dir.E.asVec₂,
+    Dir.E.asVec₂+ Dir.S.asVec₂,
+    Dir.S.asVec₂+ Dir.W.asVec₂,
+    Dir.W.asVec₂+ Dir.N.asVec₂,
+  ].iter.filter (fun d ↦ grid.contains (pos + d))).count < 4
+
 
 namespace parser
 
@@ -30,12 +43,10 @@ end parser
 
 namespace Part1
 
-open Std
-
 def solve (input : Input) : Nat := Id.run do
   let l := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst)
   let h := HashSet.ofArray l
-  h.size
+  h.iter.filter (removable h ·) |>.count
 
 end Part1
 
