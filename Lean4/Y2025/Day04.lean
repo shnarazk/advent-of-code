@@ -14,6 +14,19 @@ deriving BEq
 
 instance : ToString Input where toString s := s!"{s.grid}"
 
+def depends (grid : HashSet Vec₂) (pos : Vec₂) : List Vec₂ :=
+  [ Dir.N.asVec₂,
+    Dir.E.asVec₂,
+    Dir.S.asVec₂,
+    Dir.W.asVec₂,
+    Dir.N.asVec₂+ Dir.E.asVec₂,
+    Dir.E.asVec₂+ Dir.S.asVec₂,
+    Dir.S.asVec₂+ Dir.W.asVec₂,
+    Dir.W.asVec₂+ Dir.N.asVec₂,
+  ].iter.map (pos + ·)
+  |>.filter (grid.contains ·)
+  |>.toList
+
 def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
   ([
     Dir.N.asVec₂,
@@ -56,8 +69,23 @@ open Std
 
 def solve (input : Input) : Nat := Id.run do
   let l := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst)
-  let h := HashSet.ofArray l
-  h.size
+  let mut h := HashSet.ofArray l
+  let mut flow := h.iter.map (fun p ↦ (p, depends h p)) |>.toList |> (HashMap.ofList ·)
+  let mut toVisit := flow.iter |>.filter (fun pd ↦ pd.snd.length < 4) |>.map (·.fst) |>.toList
+  let mut removed := 0
+  while !toVisit.isEmpty do
+    let mut nextTargets := []
+    for toRemove in toVisit do
+      if let some nexts := flow.get? toRemove then
+        flow := flow.erase toRemove
+        removed := removed + 1
+        for next in nexts do
+          let some depends := flow.get? next | panic! ""
+          let depends' := depends.erase toRemove
+          flow := flow.insert next depends'
+          if depends'.length < 4 then nextTargets := nextTargets.insert next
+    toVisit := nextTargets
+  removed
 
 end Part2
 
