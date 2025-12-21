@@ -3,9 +3,9 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
-public import «AoC».Rect64
+public import «AoC».Vec
 
-open Accumulation CiCL TwoDimensionalVector64
+open Accumulation CiCL Dim2
 
 namespace Y2023.Day16
 
@@ -29,7 +29,7 @@ instance : ToString (Rect Kind) where
 
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
-def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
+def propagate (r : Rect Kind) (pos : Idx₂) (dir : Dir) : List (Idx₂ × Dir) :=
   let k := r.get pos Kind.E
   let w := r.width - 1
   let h := r.height - 1
@@ -37,30 +37,31 @@ def propagate (r : Rect Kind) (pos : Dim2) (dir : Dir) : List (Dim2 × Dir) :=
   let go_e := (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), Dir.E))
   let go_s := (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), Dir.S))
   let go_w := (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), Dir.W))
+  let toIdx := fun (p, d) ↦ (if h : (0,0) ≤ p then let q : Idx₂ := ⟨p, h⟩; q else ⟨(0, 0), by decide⟩, d)
   match dir, k with
-    | Dir.N, Kind.V => [go_n]       |>.filterMap I
-    | Dir.N, Kind.H => [go_e, go_w] |>.filterMap I
-    | Dir.N, Kind.S => [go_e]       |>.filterMap I
-    | Dir.N, Kind.B => [go_w]       |>.filterMap I
-    | Dir.N, Kind.E => [go_n]       |>.filterMap I
+    | Dir.N, Kind.V => [go_n]       |>.filterMap I |>.map toIdx
+    | Dir.N, Kind.H => [go_e, go_w] |>.filterMap I |>.map toIdx
+    | Dir.N, Kind.S => [go_e]       |>.filterMap I |>.map toIdx
+    | Dir.N, Kind.B => [go_w]       |>.filterMap I |>.map toIdx
+    | Dir.N, Kind.E => [go_n]       |>.filterMap I |>.map toIdx
 
-    | Dir.E, Kind.V => [go_n, go_s] |>.filterMap I
-    | Dir.E, Kind.H => [go_e]       |>.filterMap I
-    | Dir.E, Kind.S => [go_n]       |>.filterMap I
-    | Dir.E, Kind.B => [go_s]       |>.filterMap I
-    | Dir.E, Kind.E => [go_e]       |>.filterMap I
+    | Dir.E, Kind.V => [go_n, go_s] |>.filterMap I |>.map toIdx
+    | Dir.E, Kind.H => [go_e]       |>.filterMap I |>.map toIdx
+    | Dir.E, Kind.S => [go_n]       |>.filterMap I |>.map toIdx
+    | Dir.E, Kind.B => [go_s]       |>.filterMap I |>.map toIdx
+    | Dir.E, Kind.E => [go_e]       |>.filterMap I |>.map toIdx
 
-    | Dir.S, Kind.V => [go_s]       |>.filterMap I
-    | Dir.S, Kind.H => [go_e, go_w] |>.filterMap I
-    | Dir.S, Kind.S => [go_w]       |>.filterMap I
-    | Dir.S, Kind.B => [go_e]       |>.filterMap I
-    | Dir.S, Kind.E => [go_s]       |>.filterMap I
+    | Dir.S, Kind.V => [go_s]       |>.filterMap I |>.map toIdx
+    | Dir.S, Kind.H => [go_e, go_w] |>.filterMap I |>.map toIdx
+    | Dir.S, Kind.S => [go_w]       |>.filterMap I |>.map toIdx
+    | Dir.S, Kind.B => [go_e]       |>.filterMap I |>.map toIdx
+    | Dir.S, Kind.E => [go_s]       |>.filterMap I |>.map toIdx
 
-    | Dir.W, Kind.V => [go_n, go_s] |>.filterMap I
-    | Dir.W, Kind.H => [go_w]       |>.filterMap I
-    | Dir.W, Kind.S => [go_s]       |>.filterMap I
-    | Dir.W, Kind.B => [go_n]       |>.filterMap I
-    | Dir.W, Kind.E => [go_w]       |>.filterMap I
+    | Dir.W, Kind.V => [go_n, go_s] |>.filterMap I |>.map toIdx
+    | Dir.W, Kind.H => [go_w]       |>.filterMap I |>.map toIdx
+    | Dir.W, Kind.S => [go_s]       |>.filterMap I |>.map toIdx
+    | Dir.W, Kind.B => [go_n]       |>.filterMap I |>.map toIdx
+    | Dir.W, Kind.E => [go_w]       |>.filterMap I |>.map toIdx
 
     | _, Kind.P => []
 
@@ -85,11 +86,11 @@ def parse : String → Option (Array (Rect Kind)) := AoCParser.parse (separated 
 
 end parser
 
-def injectTrace (self : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) : Rect Kind :=
+def injectTrace (self : Rect Kind) (visited : Std.HashSet (Idx₂ × Dir)) : Rect Kind :=
   visited.toList.foldl (fun r (p, _) ↦ r.set p Kind.P) self
 
 partial
-def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : List (Dim2 × Dir))
+def traverse (r : Rect Kind) (visited : Std.HashSet (Idx₂ × Dir)) (to_visit : List (Idx₂ × Dir))
     : Rect Kind :=
   if to_visit.isEmpty then
     injectTrace r visited
@@ -104,7 +105,7 @@ def traverse (r : Rect Kind) (visited : Std.HashSet (Dim2 × Dir)) (to_visit : L
         (visited, [])
       |> uncurry (traverse r)
 
-def evaluate (r : Rect Kind) (start : (Dim2 × Dir)): Nat :=
+def evaluate (r : Rect Kind) (start : (Idx₂ × Dir)): Nat :=
   traverse r Std.HashSet.emptyWithCapacity [start]
     |>.vector
     |>.filter (· == Kind.P)
@@ -122,11 +123,15 @@ namespace Part2
 def maximize (r : Rect Kind) : Nat :=
   let w := r.width
   let h := r.height
-  let n := range_list w |>.map (fun (x : UInt64) ↦ (((0 : UInt64), x), Dir.S))
-  let s := range_list w |>.map (fun (x : UInt64) ↦ ((h - 1, x), Dir.N))
-  let e := range_list h |>.map (fun (y : UInt64) ↦ ((y, (0 : UInt64)), Dir.S))
-  let w := range_list h |>.map (fun (y : UInt64) ↦ ((y, w - 1), Dir.S))
-  (n ++ s ++ e ++ w).map (evaluate r ·) |>.max? |>.unwrapOr 0
+  let n := range_list w |>.map (fun x ↦ (((0 : Int), x), Dir.S))
+  let s := range_list w |>.map (fun x ↦ (((h : Int) - 1, x), Dir.N))
+  let e := range_list h |>.map (fun y ↦ ((y, (0 : Int)), Dir.S))
+  let w := range_list h |>.map (fun y ↦ ((y, (w : Int) - 1), Dir.S))
+  (n ++ s ++ e ++ w)
+    |>.flatMap (fun (p,d) ↦ if h : (0, 0) ≤ p then let q : Idx₂ := ⟨p, h⟩ ; [(q, d)] else [])
+    |>.map (evaluate r ·)
+    |>.max?
+    |>.unwrapOr 0
 
 def solve (rs : Array (Rect Kind)) : Nat := rs.map maximize |> sum
 
