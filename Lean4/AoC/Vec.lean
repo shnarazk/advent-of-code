@@ -126,6 +126,11 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
 -- def w : Vec₂ := (-1, -1)
 -- #eval (↑ w)
 
+-- namespace Idx₂
+
+def Idx₂.fst (i : Idx₂) : Int := i.1.fst
+def Idx₂.snd (i : Idx₂) : Int := i.1.snd
+
 /-- class for indices for `Rect` -/
 class RectIndex (α : Type) where
   /-- return a pair of indices for `Rect` -/
