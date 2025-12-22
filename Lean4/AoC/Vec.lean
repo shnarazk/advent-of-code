@@ -47,7 +47,7 @@ def asVec₂ : Dir → (Int × Int)
 
 end Dir
 
-/-- 2D vector -/
+/-- 2D vector: `Int × Int` -/
 abbrev Vec₂ := Int × Int
 
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
