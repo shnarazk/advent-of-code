@@ -3,26 +3,27 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
-public import «AoC».Rect64
+public import «AoC».Vec
 
-def cuts (g : UInt64) : List Nat := List.range g.toNat |>.drop 1
+def cuts (g : Nat) : List Nat := List.range g |>.drop 1
 
-namespace TwoDimensionalVector64.Dim2
-
-end TwoDimensionalVector64.Dim2
-
-namespace TwoDimensionalVector64.Rect
+namespace Dim2.Rect
 
 variable (r : Rect Bool)
 
-def mirroredₕ (p : Dim2) (h' : Nat) : Option Dim2 :=
-  let h : UInt64 := h'.toUInt64
-  if p.1 < h then
-    let y' : UInt64 := h + h - p.1 - 1
-    if y' < r.height then some (y', p.2) else none
+/-- vertically mirror point. So horizon is the base. -/
+def mirroredₕ (p : Idx₂) (h' : Nat) : Option Idx₂ :=
+  let h : Int := Int.ofNat h'
+  if p.1.1 < h then
+    let y' : Int := h + h - p.1.1 - 1
+    if z : y' < r.height && (0, 0) ≤ (y', p.1.2)
+      then some ⟨(y', p.1.2), by simp at z; obtain ⟨_, z2⟩ := z; exact z2⟩
+      else none
   else
-    let y' := p.1 - h
-    if h < y' + 1 then none else some (h - y' - 1, p.2)
+    let y' : Int := p.1.1 - h
+    if z : h ≥ y' + 1 && (0, 0) ≤ (h - y' - 1, p.1.2)
+    then some ⟨(h - y' - 1, p.1.2), by simp at z ; obtain ⟨_, z2⟩ := z ; exact z2⟩
+    else none
 
 -- def r99 := Rect.ofDim2 (Dim2.mk 5 6) (by simp [NonNegDim]) false
 -- def p := Dim2.mk 1 5
@@ -30,28 +31,30 @@ def mirroredₕ (p : Dim2) (h' : Nat) : Option Dim2 :=
 -- #eval if let some q := r99.mirroredₕ p 2 then r99.mirroredₕ q 2 else none
 -- #eval mirroredₕ r99 (Dim2.mk 4 5) 2
 
-/--
-Return optinal Dim2 that locates on the mirrored position.
--/
-def mirroredᵥ (p : Dim2) (v' : Nat) : Option Dim2 :=
-  let v : UInt64 := v'.toUInt64
-  if p.2 < v then
-    let x' : UInt64 := (v + v) - p.2 - 1
-    if x' < r.width then some (p.1, x') else none
+/-- Return optinal Dim2 that locates on the horrizontally mirrored position. -/
+def mirroredᵥ (p : Idx₂) (v' : Nat) : Option Idx₂ :=
+  let v : Int := Int.ofNat v'
+  if p.1.2 < v then
+    let x' : Int := (v + v) - p.1.2 - 1
+    if z : x' < r.width && (0, 0) ≤ (p.1.1, x')
+      then some ⟨(p.1.1, x'), by simp at z ; obtain ⟨_, z2⟩ := z ; exact z2⟩
+      else none
   else
-    let x' : UInt64 := p.2 - v
-    if v < x' + 1 then none else some (p.1, v - x' - 1)
+    let x' : Int := p.1.2 - v
+    if z : v ≥ x' + 1 && (0, 0) ≤ (p.1.1, v - x' - 1)
+    then some ⟨(p.1.1, v - x' - 1), by simp at z ; obtain ⟨_, z2⟩ := z ; exact z2⟩
+    else none
 
 -- #eval r99.mirroredᵥ (Dim2.mk 4 5) 4
 
 -- #eval r99.cutᵥ 1
 
-end TwoDimensionalVector64.Rect
+end Dim2.Rect
 
 namespace Y2023.Day13
 
 open Accumulation CoP CiCL
-open TwoDimensionalVector64
+open Dim2
 
 namespace parser
 
@@ -77,7 +80,7 @@ variable (r : Rect Bool)
 
 def cutₕ (r : Rect Bool) (n : Nat) : Option Nat :=
   -- 対応するものがなければ `true`
-  if r.indices.all (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false = r.get · false) true) then
+  if r.range.all (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false = r.get · false) true) then
     some (n * 100)
   else
     none
@@ -86,7 +89,7 @@ def cutₕ (r : Rect Bool) (n : Nat) : Option Nat :=
 -- #eval r99.get (Dim2.mk 1 1) true = r99.get (Dim2.mk 1 2) true
 
 def cutᵥ (r : Rect Bool) (n : Nat) : Option Nat :=
-  if r.indices.all (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false = r.get · false) true) then
+  if r.range.all (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false = r.get · false) true) then
     some n
   else
     none
@@ -106,18 +109,20 @@ namespace Part2
 variable (r : Rect Bool)
 
 def smudgedₕ (n : Nat) : Option Nat :=
-  if r.indices.map (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false != r.get · false) false)
+  if r.range.map (fun (p : Nat × Nat) ↦ ⟨p, by constructor <;> simp⟩)
+      |>.map (fun p ↦ r.mirroredₕ p n |>.mapOr (r.get p false != r.get · false) false)
       |>.filter (·)
-      |> (·.length = 2)
+      |> (·.size = 2)
   then
     some (n * 100)
   else
     none
 
 def smudgedᵥ (r : Rect Bool) (n : Nat) : Option Nat :=
-  if r.indices.map (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false != r.get · false) false)
+  if r.range.map (fun (p : Nat × Nat) ↦ ⟨p, by constructor <;> simp⟩)
+    |>.map (fun p ↦ r.mirroredᵥ p n |>.mapOr (r.get p false != r.get · false) false)
     |>.filter (·)
-    |> (·.length = 2)
+    |> (·.size = 2)
   then
     some n
   else
