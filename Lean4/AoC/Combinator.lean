@@ -56,7 +56,7 @@ def D (f : α → γ → δ) (a : α) (g : β → γ) (b : β) := f a (g b)
 
 /-- Dyadic Composition: λf g a b. f (g a b) -/
 @[inline]
-def B₁ (f : γ → δ) (g : α → β → γ) (a : α) (b :β) := f (g a b)
+def B₁ (f : γ → δ) (g : α → β → γ) (a : α) (b : β) := f (g a b)
 
 /-- Psi -/
 def Ψ (f : β → β → γ) (g : α → β) (a b : α) := f (g a) (g b)

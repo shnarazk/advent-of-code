@@ -1,16 +1,14 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
 public import «AoC».Parser
 
 namespace Y2025.Day05
-open Accumulation CiCL
 
 structure Input where
   ranges : Array (Nat × Nat)
   ids : Array Nat
-deriving BEq, Hashable, Repr
+deriving BEq, Repr
 
 instance : ToString Input where toString s := s!"{s.ranges}, {s.ids}"
 
@@ -58,13 +56,11 @@ instance : DecidableLT (Nat × Bool) := by
         | isFalse hnlt2 => isFalse (fun h ↦
             match h with
             | Or.inl hlt => absurd hlt hnlt
-            | Or.inr ⟨heq', hlt2⟩ =>
-              have : heq' = heq := by rfl
-              absurd hlt2 hnlt2)
+            | Or.inr ⟨_, hlt2⟩ => absurd hlt2 hnlt2)
       | isFalse hneq => isFalse (fun h ↦
           match h with
           | Or.inl hlt => absurd hlt hnlt
-          | Or.inr ⟨heq', hlt2⟩ => absurd heq' hneq)
+          | Or.inr ⟨heq', _⟩ => absurd heq' hneq)
   exact h4
 
 -- #eval (2, true) < (3, false)
