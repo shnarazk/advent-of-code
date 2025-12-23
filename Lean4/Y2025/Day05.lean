@@ -37,7 +37,57 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+open Std
+
+instance : LT (Nat × Bool) where
+  lt a b := a.fst < b.fst ∨ (a.fst = b.fst ∧ a.snd < b.snd)
+
+instance : DecidableLT (Nat × Bool) := by
+  intro p q
+  have h1 : Decidable (p.fst < q.fst) := inferInstance
+  have h2 : Decidable (p.fst = q.fst) := inferInstance
+  have h3 : Decidable (p.snd < q.snd) := inferInstance
+  have h4 : Decidable (p < q) :=
+    match h1 with
+    | isTrue hlt => isTrue (Or.inl hlt)
+    | isFalse hnlt =>
+      match h2 with
+      | isTrue heq =>
+        match h3 with
+        | isTrue hlt2 => isTrue (Or.inr ⟨heq, hlt2⟩)
+        | isFalse hnlt2 => isFalse (fun h ↦
+            match h with
+            | Or.inl hlt => absurd hlt hnlt
+            | Or.inr ⟨heq', hlt2⟩ =>
+              have : heq' = heq := by rfl
+              absurd hlt2 hnlt2)
+      | isFalse hneq => isFalse (fun h ↦
+          match h with
+          | Or.inl hlt => absurd hlt hnlt
+          | Or.inr ⟨heq', hlt2⟩ => absurd heq' hneq)
+  exact h4
+
+-- #eval (2, true) < (3, false)
+
+def solve (input : Input) : Nat := Id.run do
+  let nodes : HashMap (Nat × Bool) Nat := input.ranges.foldl
+    (fun acc range ↦ acc
+      |>.alter (range.fst, false) (fun o ↦ o.mapOr (· + 1) 1 |> some)
+      |>.alter (range.snd, true) (fun o ↦ o.mapOr (· + 1) 1 |> some))
+    (HashMap.emptyWithCapacity 10)
+  let node_list : Array ((Nat × Bool) × Nat) := nodes.toArray.heapSort (·.fst < ·.fst)
+  let mut level := 0
+  let mut start := 0
+  let mut total := 0
+  for ((n, b), c) in node_list do
+    if b
+    then
+      level := level - c
+      if level == 0 then total := total + (n + 1 - start)
+    else
+      if level == 0 then start := n
+      level := level + c
+  total
 
 end Part2
 
