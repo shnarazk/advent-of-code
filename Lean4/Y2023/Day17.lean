@@ -4,12 +4,12 @@ public import Batteries.Data.BinaryHeap
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
-public import «AoC».Rect64
+public import «AoC».Vec
 
 namespace Y2023.Day17
 
 open Accumulation CiCL
-open TwoDimensionalVector64
+open Dim2
 
 structure Input where
 deriving BEq, Repr
@@ -34,7 +34,7 @@ def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
 end parser
 
 structure State where
-  pos   : Dim2
+  pos   : Idx₂
   dir   : Dir
   cost  : Nat
   steps : Nat
@@ -52,18 +52,26 @@ def limit := 3
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
-  let go_n (t : Nat) := (t ≤ limit && 0 < state.pos.fst).map
-      (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
-          State.mk p Dir.N (state.cost + r.get p 1) t)
-  let go_s (t : Nat) := (t ≤ limit && state.pos.fst < h).map
-      (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
-          State.mk p Dir.S (state.cost + r.get p 1) t)
-  let go_w (t : Nat) := (t ≤ limit && 0 < state.pos.snd).map
-      (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
-          State.mk p Dir.W (state.cost + r.get p 1) t)
-  let go_e (t : Nat) := (t ≤ limit && state.pos.snd < w).map
-      (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
-          State.mk p Dir.E (state.cost + r.get p 1) t)
+  let go_n (t : Nat) := if p : t ≤ limit && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
+    then
+      let p : Idx₂ := ⟨(state.pos.fst - 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      some <| State.mk p Dir.N (state.cost + r.get p 1) t
+    else none
+  let go_s (t : Nat) := if p : t ≤ limit && state.pos.fst < h && (0,0) ≤ (state.pos.fst + 1, state.pos.snd)
+    then
+      let p : Idx₂ := ⟨(state.pos.fst + 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      some <| State.mk p Dir.S (state.cost + r.get p 1) t
+    else none
+  let go_w (t : Nat) := if p : t ≤ limit && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
+    then
+      let p : Idx₂ := ⟨(state.pos.fst, state.pos.snd - 1), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      some <| State.mk p Dir.W (state.cost + r.get p 1) t
+    else none
+  let go_e (t : Nat) := if p : t ≤ limit && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
+    then
+      let p : Idx₂ := ⟨(state.pos.fst, state.pos.snd + 1), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      some <| State.mk p Dir.E (state.cost + r.get p 1) t
+    else none
   match state.dir with
   | .N => [go_n (state.steps + 1), go_e 1, go_w 1].filterMap I
   | .E => [go_e (state.steps + 1), go_s 1, go_n 1].filterMap I
@@ -74,8 +82,8 @@ variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
 partial
-def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
-    (visited : Std.HashMap (Dim2 × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
+def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
+    (visited : Std.HashMap (Idx₂ × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
   if let (some state, to_visit') := to_visit.extractMax then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
       state.cost
@@ -99,8 +107,8 @@ def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
   find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
     (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
-      (fun (b a : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd)
-        < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
+      (fun (b a : State) ↦ a.cost + path_len - (a.pos.fst + a.pos.snd)
+        < b.cost + path_len - (b.pos.fst + b.pos.snd)))
 
 end Part1
 
@@ -113,21 +121,29 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
   let go_n (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.fst).map
-      (fun _ ↦ let p := (state.pos.fst - 1, state.pos.snd)
-          State.mk p Dir.N (state.cost + r.get p 1) t)
+    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
+    then
+      let q : Idx₂ := ⟨(state.pos.fst - 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      some <| State.mk q Dir.N (state.cost + r.get q 1) t
+    else none
   let go_s (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h).map
-      (fun _ ↦ let p := (state.pos.fst + 1, state.pos.snd)
-          State.mk p Dir.S (state.cost + r.get p 1) t)
+    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h && (0, 0) ≤ (state.pos.fst + 1, state.pos.snd)
+    then
+      let q : Idx₂ := ⟨(state.pos.fst + 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      some <| State.mk q Dir.S (state.cost + r.get q 1) t
+    else none
   let go_w (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd).map
-      (fun _ ↦ let p := (state.pos.fst, state.pos.snd - 1)
-          State.mk p Dir.W (state.cost + r.get p 1) t)
+    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
+    then
+      let q : Idx₂ := ⟨(state.pos.fst, state.pos.snd - 1), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      some <| State.mk q Dir.W (state.cost + r.get q 1) t
+    else none
   let go_e (turn : Bool) (t : Nat) :=
-    ((!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w).map
-      (fun _ ↦ let p := (state.pos.fst, state.pos.snd + 1)
-          State.mk p Dir.E (state.cost + r.get p 1) t)
+    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
+    then
+      let q : Idx₂ := ⟨(state.pos.fst, state.pos.snd + 1), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      some <| State.mk q Dir.E (state.cost + r.get q 1) t
+    else none
   match state.dir with
   | .N => [go_n false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
   | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
@@ -138,8 +154,8 @@ variable (visited : Std.HashSet State)
 variable (to_visit : List State)
 
 partial
-def find {f : State → State → Bool} (r : Rect Nat) (goal : Dim2) (thr : Nat)
-    (visited : Std.HashMap (Dim2 × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
+def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
+    (visited : Std.HashMap (Idx₂ × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
     (to_visit :BinaryHeap f) : Nat :=
   if let (some state, to_visit') := to_visit.extractMax then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd && limitₛ ≤ state.steps then
@@ -164,8 +180,8 @@ def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
   find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
     (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
-      (fun (b a : State) ↦ a.cost.toUInt64 + path_len - (a.pos.fst + a.pos.snd)
-        < b.cost.toUInt64 + path_len - (b.pos.fst + b.pos.snd)))
+      (fun (b a : State) ↦ a.cost + path_len - (a.pos.fst + a.pos.snd)
+        < b.cost + path_len - (b.pos.fst + b.pos.snd)))
 
 end Part2
 
