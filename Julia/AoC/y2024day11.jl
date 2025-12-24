@@ -26,7 +26,7 @@ function divide(stone::Stone)::Union{Tuple{Stone,Stone},Nothing}
         b = 0
         base = 1
         m = n
-        for _ in 1:n
+        for _ = 1:n
             b += (a % 10) * base
             a = div(a, 10)
             base *= 10
@@ -41,7 +41,7 @@ end
 # @assert divide(Stone(8201, 1)) == (Stone(82, 2), Stone(1, 2))
 # @assert divide(Stone(832, 0)) == nothing
 
-function count(stone::Stone, depth::Int, memo::Dict{Stone, Int})::Int
+function count(stone::Stone, depth::Int, memo::Dict{Stone,Int})::Int
     ret = 0
     if stone.level == depth
         return 1
@@ -52,7 +52,7 @@ function count(stone::Stone, depth::Int, memo::Dict{Stone, Int})::Int
     elseif (p = divide(stone)) !== nothing
         ret = count(p[1], depth, memo) + count(p[2], depth, memo)
     else
-        ret =  count(Stone(stone.mark * 2024, stone.level + 1), depth, memo)
+        ret = count(Stone(stone.mark * 2024, stone.level + 1), depth, memo)
     end
     memo[stone] = ret
     ret
@@ -70,11 +70,13 @@ end
 
 function run()::ANS
     open(datafile(2024, 11), "r") do file
-        data = read(file, String) |> strip |> s -> Int.(parse_one(s, 🔎ints)) |>
-            s -> map(n -> Stone(n, 0), s)
+        data =
+            read(file, String) |>
+            strip |>
+            s -> Int.(parse_one(s, 🔎ints)) |> s -> map(n -> Stone(n, 0), s)
         sum1 = part1(data)
         sum2 = part2(data)
-        (part1=sum1, part2=sum2)
+        (part1 = sum1, part2 = sum2)
     end
 end
 

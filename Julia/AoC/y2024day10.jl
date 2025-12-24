@@ -53,10 +53,11 @@ end
 function run()::ANS
     open(datafile(2024, 10), "r") do file
         lines = String.(eachline(file)) |> s -> filter(!isempty, s)
-        m::Matrix{Int} = hcat(map(collect, lines)...) |>
-                         permutedims |>
-                         Matrix |>
-                         m -> map(e -> e - '0', m)
+        m::Matrix{Int} =
+            hcat(map(collect, lines)...) |>
+            permutedims |>
+            Matrix |>
+            m -> map(e -> e - '0', m)
         starts = filter(p -> m[p] == 0, collect(CartesianIndices(m)))
         sum1 = part1(m, starts)
         sum2 = part2(m, starts)

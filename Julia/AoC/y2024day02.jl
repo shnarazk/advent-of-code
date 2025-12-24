@@ -10,9 +10,11 @@ end
 
 function run()::ANS
     open(datafile(2024, 2), "r") do file
-        lines = String.(eachline(file)) |>
-                s -> filter(!isempty, s) |>    # ダセー!!!
-                     s -> map(t -> Int.(parse_one(t, 🔎ints)), s)
+        lines =
+            String.(eachline(file)) |>
+            s ->
+                filter(!isempty, s) |>    # ダセー!!!
+                s -> map(t -> Int.(parse_one(t, 🔎ints)), s)
         part1 = map(check1, lines) |> sum
         part2 = map(check2, lines) |> sum
         (part1, part2)

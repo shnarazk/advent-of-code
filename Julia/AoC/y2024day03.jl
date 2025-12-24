@@ -2,7 +2,7 @@ using AoC, AoC.Parser, ParserCombinator
 
 🔎target = Alt(
     Drop(E"mul(") + 🔎int + Drop(E",") + 🔎int + Drop(E")") |> x -> x[1] * x[2],
-    p".*" |> x -> 0
+    p".*" |> x -> 0,
 )
 
 🔎do = Alt(E"do()" |> x -> true, p".*" |> x -> false)
@@ -16,7 +16,7 @@ end
 function check2(l::String)::Int
     active = true
     sum = 0
-    for i in 1:length(l)
+    for i = 1:length(l)
         s::String = l[i:end]
         if s[1] != 'd' && s[1] != 'm'
             continue
@@ -37,7 +37,7 @@ end
 function run()::ANS
     open(datafile(2024, 3), "r") do file
         mem = read(file, String)
-        (part1=check1(mem), part2=check2(mem))
+        (part1 = check1(mem), part2 = check2(mem))
     end
 end
 

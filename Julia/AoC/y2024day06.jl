@@ -4,7 +4,7 @@ const Cursor = NamedTuple{(:pos, :dir),Tuple{Dim2,Dim2}}
 
 function part1(m::Matrix{Char})::Int
     boundary = Dim2(size(m)...)
-    cursor::Cursor = (pos=findfirst(==('^'), m), dir=Dir.U)
+    cursor::Cursor = (pos = findfirst(==('^'), m), dir = Dir.U)
     passed = Set([cursor.pos])
     while within(cursor.pos + cursor.dir, boundary) !== nothing
         pos = cursor.pos + cursor.dir
@@ -14,7 +14,7 @@ function part1(m::Matrix{Char})::Int
             pos = cursor.pos + dir
             @assert m[pos] != '#'
         end
-        cursor = (pos=pos, dir=dir)
+        cursor = (pos = pos, dir = dir)
         push!(passed, pos)
     end
     length(passed)
@@ -36,7 +36,7 @@ function is_loop(m::Matrix{Char}, cursor::Cursor, passed::Set)::Bool
                 pos = cursor.pos + dir
             end
         end
-        cursor = (pos=pos, dir=dir)
+        cursor = (pos = pos, dir = dir)
         if cursor in passed
             return true
         else
@@ -49,7 +49,7 @@ end
 function part2(m::Matrix{Char})::Int
     boundary = Dim2(size(m)...)
     loops = Set()
-    cursor::Cursor = (pos=findfirst(==('^'), m), dir=Dir.U)
+    cursor::Cursor = (pos = findfirst(==('^'), m), dir = Dir.U)
     passed::Set{Cursor} = Set([cursor])
     while within(cursor.pos + cursor.dir, boundary) !== nothing
         pos = cursor.pos + cursor.dir
@@ -58,12 +58,12 @@ function part2(m::Matrix{Char})::Int
             dir = turn_right(dir)
             pos = cursor.pos + dir
             @assert m[pos] != '#'
-            cursor = (pos=cursor.pos, dir=dir)
+            cursor = (pos = cursor.pos, dir = dir)
         end
         if all(c -> c.pos != pos, passed) && is_loop(m, cursor, passed)
             push!(loops, pos)
         end
-        cursor = (pos=pos, dir=dir)
+        cursor = (pos = pos, dir = dir)
         push!(passed, cursor)
     end
     length(loops)
