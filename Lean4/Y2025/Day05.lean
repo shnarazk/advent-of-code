@@ -68,14 +68,11 @@ instance : DecidableLT (Nat × Bool) := by
 def solve (input : Input) : Nat := Id.run do
   let nodes : HashMap (Nat × Bool) Nat := input.ranges.foldl
     (fun acc range ↦ acc
-      |>.alter (range.fst, false) (fun o ↦ o.mapOr (· + 1) 1 |> some)
-      |>.alter (range.snd, true) (fun o ↦ o.mapOr (· + 1) 1 |> some))
-    (HashMap.emptyWithCapacity 10)
-  let node_list : Array ((Nat × Bool) × Nat) := nodes.toArray.heapSort (·.fst < ·.fst)
-  let mut level := 0
-  let mut start := 0
-  let mut total := 0
-  for ((n, b), c) in node_list do
+      |>.alter (range.fst, false) (·.mapOr (· + 1) 1 |> some)
+      |>.alter (range.snd, true) (·.mapOr (· + 1) 1 |> some))
+    (HashMap.emptyWithCapacity (2 * input.ranges.size))
+  let mut (level, start, total) := (0, 0, 0)
+  for ((n, b), c) in nodes.toArray.heapSort (·.fst < ·.fst) do
     if b
     then
       level := level - c

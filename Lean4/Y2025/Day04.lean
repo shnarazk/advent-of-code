@@ -49,16 +49,14 @@ def parse_line := repeated ((· == '@') <$> (pchar '.' <|> pchar '@'))
 
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := builder <$> separated parse_line eol
-    builder := fun v ↦ Input.mk (Rect.of2DMatrix v)
+    parser : Parser Input := (Input.mk ∘ Rect.of2DMatrix) <$> separated parse_line eol
 
 end parser
 
 namespace Part1
 
 def solve (input : Input) : Nat := Id.run do
-  let l := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst)
-  let h := HashSet.ofArray l
+  let h := input.grid.enum.filter (·.snd) |>.map (·.fst) |> HashSet.ofArray
   h.iter.filter (removable h ·) |>.count
 
 end Part1
@@ -68,10 +66,9 @@ namespace Part2
 open Std
 
 def solve (input : Input) : Nat := Id.run do
-  let l := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst)
-  let mut h := HashSet.ofArray l
-  let mut flow := h.iter.map (fun p ↦ (p, depends h p)) |>.toList |> (HashMap.ofList ·)
-  let mut toVisit := flow.iter |>.filter (fun pd ↦ pd.snd.length < 4) |>.map (·.fst) |>.toList
+  let mut h := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst) |> HashSet.ofArray
+  let mut flow := h.iter.map (fun p ↦ (p, depends h p)) |>.toList |> HashMap.ofList
+  let mut toVisit := flow.iter |>.filter (·.snd.length < 4) |>.map (·.fst) |>.toList
   let mut removed := 0
   while !toVisit.isEmpty do
     let mut nextTargets := []
