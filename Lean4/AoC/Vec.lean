@@ -1,7 +1,5 @@
 module
 
--- import Mathlib.Tactic.Basic
--- import Mathlib.Tactic.Coe
 public import Std.Data.HashMap
 
 @[expose] public section
@@ -10,7 +8,7 @@ namespace Dim2
 
 variable {α β γ : Type}
 
-/-- symbols for 4 direction -/
+/-- symbols for 4 directions -/
 inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
 
 instance : ToString Dir where
@@ -60,6 +58,7 @@ instance : HSub Vec₂ Vec₂ Vec₂ where
 instance : HSub Vec₂ Int Vec₂ where
   hSub (v : Vec₂) (a : Int) : Vec₂ := (v.1 - a, v.2 - a)
 
+/-- One of definitions of LT on Vec₂ -/
 instance : LT Vec₂ where
   lt (a b : Vec₂) := a.1 < b.1 ∧ a.2 < b.2
 
@@ -131,6 +130,7 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
       constructor <;> { simp }
   ⟩
 -- def v : Vec₂ := (1, 1)
+-- def v : Idx₂ := (1, 1)
 -- def d : Idx₂ := ⟨(1, 1), by exact ⟨rfl, rfl⟩⟩
 -- #check ((↑ d) : Vec₂)
 -- #check ((↑ d) : Idx₂)
