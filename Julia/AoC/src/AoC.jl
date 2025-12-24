@@ -7,6 +7,33 @@ include("Math.jl")
 
 const ANS = NamedTuple{(:part1, :part2),Tuple{Int,Int}}
 
+"""
+    datafile(year, day)::String
+
+    Return the path to the Advent of Code input file for `year` and `day`.
+
+    The base directory is taken from the environment variable `AOC_DIR`. The file
+    name is constructed as:
+
+    `\$AOC_DIR/data/<year>/input-day<DD>[ -<suffix> ].txt`
+
+    where `<DD>` is `day` left-padded to two digits. If an extra command-line
+    argument is provided (i.e. `length(ARGS) > 0`), it is appended as a suffix
+    (e.g. `-test`) before the `.txt` extension, which is useful for selecting
+    alternate inputs.
+
+    # Examples
+    ```julia
+    ENV["AOC_DIR"] = "/home/me/aoc"
+    datafile(2023, 1)   # "/home/me/aoc/data/2023/input-day01.txt"
+
+    # with `ARGS = ["test"]`
+    datafile(2023, 1)   # "/home/me/aoc/data/2023/input-day01-test.txt"
+    ```
+
+    # Errors
+    Throws a `KeyError` if `ENV["AOC_DIR"]` is not set.
+"""
 function datafile(year, day)::String
     basedir = ENV["AOC_DIR"]
     days = lpad(string(day), 2, '0')
