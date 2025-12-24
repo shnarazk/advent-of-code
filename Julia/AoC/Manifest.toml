@@ -1,8 +1,14 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.5"
+julia_version = "1.12.3"
 manifest_format = "2.0"
-project_hash = "b684bed510eddcea1cfb1ee1710a11009f64f811"
+project_hash = "84d1abaeddbb2ce85d1f1c59a47d5a7a6a8ea104"
+
+[[deps.AoC]]
+deps = ["ParserCombinator"]
+path = "."
+uuid = "d3ea9ae9-af4a-410f-a534-06eea3ee9a32"
+version = "0.1.0"
 
 [[deps.AutoHashEquals]]
 git-tree-sha1 = "4ec6b48702dacc5994a835c1189831755e4e76ef"
