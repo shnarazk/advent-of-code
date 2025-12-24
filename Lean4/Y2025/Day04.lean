@@ -6,6 +6,7 @@ public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2025.Day04
+
 open Std Accumulation CiCL Dim2 Rect
 
 structure Input where
@@ -14,31 +15,20 @@ deriving BEq
 
 instance : ToString Input where toString s := s!"{s.grid}"
 
+def dir8 := [ Dir.N.asVec₂,
+  Dir.E.asVec₂,
+  Dir.S.asVec₂,
+  Dir.W.asVec₂,
+  Dir.N + Dir.E,
+  Dir.E + Dir.S,
+  Dir.S + Dir.W,
+  Dir.W + Dir.N ]
+
 def depends (grid : HashSet Vec₂) (pos : Vec₂) : List Vec₂ :=
-  [ Dir.N.asVec₂,
-    Dir.E.asVec₂,
-    Dir.S.asVec₂,
-    Dir.W.asVec₂,
-    Dir.N.asVec₂+ Dir.E.asVec₂,
-    Dir.E.asVec₂+ Dir.S.asVec₂,
-    Dir.S.asVec₂+ Dir.W.asVec₂,
-    Dir.W.asVec₂+ Dir.N.asVec₂,
-  ].iter.map (pos + ·)
-  |>.filter (grid.contains ·)
-  |>.toList
+  dir8.iter.map (pos + ·) |>.filter (grid.contains ·) |>.toList
 
 def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
-  ([
-    Dir.N.asVec₂,
-    Dir.E.asVec₂,
-    Dir.S.asVec₂,
-    Dir.W.asVec₂,
-    Dir.N.asVec₂+ Dir.E.asVec₂,
-    Dir.E.asVec₂+ Dir.S.asVec₂,
-    Dir.S.asVec₂+ Dir.W.asVec₂,
-    Dir.W.asVec₂+ Dir.N.asVec₂,
-  ].iter.filter (fun d ↦ grid.contains (pos + d))).count < 4
-
+  (dir8.iter.filter (fun d ↦ grid.contains (pos + d))).count < 4
 
 namespace parser
 
@@ -66,7 +56,7 @@ namespace Part2
 open Std
 
 def solve (input : Input) : Nat := Id.run do
-  let mut h := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst) |> HashSet.ofArray
+  let h := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst) |> HashSet.ofArray
   let mut flow := h.iter.map (fun p ↦ (p, depends h p)) |>.toList |> HashMap.ofList
   let mut toVisit := flow.iter |>.filter (·.snd.length < 4) |>.map (·.fst) |>.toList
   let mut removed := 0
