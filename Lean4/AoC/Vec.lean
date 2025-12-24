@@ -37,14 +37,6 @@ lemma turn_four_times_eq_self : ∀ d : Dir, d.turn.turn.turn.turn = d := by
   cases d <;> simp
 -/
 
-/-- return the corresponding `Dir2` -/
-def asVec₂ : Dir → (Int × Int)
-  | Dir.N => (-1,  0)
-  | Dir.E => ( 0,  1)
-  | Dir.S => ( 1,  0)
-  | Dir.W => ( 0, -1)
--- #eval (8, 5) + Dir.N.asVec2
-
 end Dir
 
 /-- 2D vector: `Int × Int` -/
@@ -105,6 +97,25 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 -- #eval (3, 2) <₀ (5, 5)
 
 -- def Vec₂.toUInt64 (v : Vec₂) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
+
+namespace Dir
+
+/-- return the corresponding `Dir2` -/
+def asVec₂ : Dir → Vec₂
+  | Dir.N => (-1,  0)
+  | Dir.E => ( 0,  1)
+  | Dir.S => ( 1,  0)
+  | Dir.W => ( 0, -1)
+-- #eval (8, 5) + Dir.N.asVec₂
+
+instance incetanceDirAdd : HAdd Dir Dir Vec₂ where
+  hAdd a b := asVec₂ a + asVec₂ b
+
+instance incetanceDirSub : HSub Dir Dir Vec₂ where
+  hSub a b := asVec₂ a - asVec₂ b
+
+end Dir
+
 
 /-- Subtype of `Vec₂` as valid index for `Rect`. -/
 def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
