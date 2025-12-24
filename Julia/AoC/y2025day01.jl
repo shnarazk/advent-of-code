@@ -6,8 +6,7 @@ using AoC, AoC.Parser, ParserCombinator
 
 function run()::ANS
     data = []
-    part1 = 0
-    part2 = 0
+    (part1, part2) = (0, 0)
     open(datafile(2025, 1), "r") do file
         for line in eachline(file)
             parsed = parse_one(line, 🔎line)

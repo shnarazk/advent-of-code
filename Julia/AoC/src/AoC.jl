@@ -34,7 +34,7 @@ const ANS = NamedTuple{(:part1, :part2),Tuple{Int,Int}}
     # Errors
     Throws a `KeyError` if `ENV["AOC_DIR"]` is not set.
 """
-function datafile(year, day)::String
+function datafile(year::Int, day::Int)::String
     basedir = ENV["AOC_DIR"]
     days = lpad(string(day), 2, '0')
     seg = basedir * "/data/$(year)/input-day$(days)"

@@ -3,6 +3,9 @@ module Geometry
 export Dim2, Dim2_zero, Dim2_unit
 export within
 
+"""
+    Index type for 2 Dimentional space
+"""
 const Dim2 = CartesianIndex{2}
 
 const Dim2_zero::Dim2 = CartesianIndex(0, 0)
