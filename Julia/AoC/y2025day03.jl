@@ -8,8 +8,7 @@ function jolt(v::Vector{Int}, len::Int)::Int
         n = rn
         for (i, val) in enumerate(tmp)
             if val <= n
-                tmp[i] = n
-                n = val
+                tmp[i], n = n, val
             else
                 break
             end
