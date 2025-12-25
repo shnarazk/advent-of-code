@@ -58,7 +58,30 @@ end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+open Option
+
+def solve (input : Input) : Nat := Id.run do
+  let slices := input.data |>.split '\n' |>.filter (!·.isEmpty)
+  let lines := slices |>.map (fun s ↦ s.chars.toArray)
+  let num_lines := slices.count
+  let lastLine := slices |>.toList |>.getLast! |>.toString
+  let columnStarts := lastLine
+    |>.enum
+    |>.filterMap (fun (i, c) ↦ (c != ' ').map (fun _ ↦ i))
+    |>.concat (lastLine.length + 1)
+  let mut total := 0
+  for range in columnStarts.windows2.iter do
+    let mul? := (· == '*') <| String.Pos.Raw.get! lastLine ⟨range.fst⟩
+    let mut c := mul?.toNat
+    for i in range.fst ... (range.snd - 1) do
+      let mut ith_num := 0
+      for line in lines.take (num_lines - 1) do
+        let ch := line[i]!
+        if ch.isDigit then
+          ith_num := ith_num * 10 + (ch.val - '0'.val).toNat
+      if mul? then c := c * ith_num else c := c + ith_num
+    total := total + c
+  total
 
 end Part2
 
