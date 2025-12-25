@@ -21,6 +21,7 @@
             pkgs.bashInteractive
             pkgs.julia-bin
             # my-flakes.packages.${system}.julia-bin
+            pkgs.watchexec
           ];
         };
       }
