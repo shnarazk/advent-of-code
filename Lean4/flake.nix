@@ -22,8 +22,7 @@
             # pkgs.bashInteractive
             pkgs.elan
             home.packages.${system}.nvim4lean
-            # pkgs.nodejs_22
-            # pkgs.tokei
+            pkgs.watchexec
           ];
         };
       }
