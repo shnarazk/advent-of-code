@@ -10,19 +10,21 @@ namespace Y2025.Day04
 open Std Accumulation CiCL Dim2 Rect
 
 structure Input where
-  grid: Rect Bool
+  grid : Rect Bool
 deriving BEq
 
-instance : ToString Input where toString s := s!"{s.grid}"
+instance : ToString Input where
+  toString s := s!"{s.grid}"
 
-def dir8 := [ Dir.N.asVec₂,
-  Dir.E.asVec₂,
-  Dir.S.asVec₂,
-  Dir.W.asVec₂,
-  Dir.N + Dir.E,
-  Dir.E + Dir.S,
-  Dir.S + Dir.W,
-  Dir.W + Dir.N ]
+def dir8 :=
+  [ Dir.N.asVec₂
+  , Dir.E.asVec₂
+  , Dir.S.asVec₂
+  , Dir.W.asVec₂
+  , Dir.N + Dir.E
+  , Dir.E + Dir.S
+  , Dir.S + Dir.W
+  , Dir.W + Dir.N ]
 
 def depends (grid : HashSet Vec₂) (pos : Vec₂) : List Vec₂ :=
   dir8.iter.map (pos + ·) |>.filter (grid.contains ·) |>.toList
@@ -70,7 +72,8 @@ def solve (input : Input) : Nat := Id.run do
           let some depends := flow.get? next | panic! ""
           let depends' := depends.erase toRemove
           flow := flow.insert next depends'
-          if depends'.length < 4 then nextTargets := nextTargets.insert next
+          if depends'.length < 4 then
+            nextTargets := nextTargets.insert next
     toVisit := nextTargets
   removed
 
