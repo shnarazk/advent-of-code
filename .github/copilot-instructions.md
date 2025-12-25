@@ -6,7 +6,7 @@ These apply to Lean4 files. Keep them simple and consistent.
 - Prefer Lean 4 standard formatting; keep code readable and minimal.
 - Avoid trailing whitespace; use LF line endings.
 - Use two spaces for indentation; never tabs.
-- Keep lines ≤ 100 columns when possible.
+- Keep lines ≤ 140 columns when possible.
 - Don't orphan parentheses; keep them with their arguments.
 
 ## Imports & Open
