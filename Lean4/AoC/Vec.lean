@@ -80,7 +80,7 @@ instance instDecidableLeVec₂ (a b : Vec₂) : Decidable (a ≤ b) := by
 /-- return `(0, 0) ≤ pos ∧ ≤ size` -/
 def geZeroAndLe (size pos : Vec₂) : Bool := (0, 0) ≤ pos && pos ≤ size
 
-/-- glyph ≤₀ for geZeroAndLe -/
+/-- glyph ≤₀ for geZeroAndLe: `(0, 0) ≤ pos ∧ ≤ size` -/
 syntax:50 term:51 " ≤₀ " term:50 : term
 macro_rules | `($a ≤₀ $b) => `(geZeroAndLe $b $a)
 
