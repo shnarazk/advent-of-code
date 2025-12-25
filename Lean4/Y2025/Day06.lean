@@ -47,7 +47,12 @@ end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (input : Input) : Nat :=
+  input.ops.enum
+    |>.map (fun (i, op) => match op with
+      | .add => input.problems.map (·[i]!) |>.sum
+      | .mul => input.problems.map (·[i]!) |>.foldl (· * ·) 1)
+    |> sum
 
 end Part1
 
