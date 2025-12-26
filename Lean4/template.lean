@@ -6,6 +6,7 @@ public import «AoC».Parser
 -- public import «AoC».Vec
 
 namespace Y2025.Day00
+
 open Accumulation CiCL
 
 structure Input where
