@@ -64,7 +64,18 @@ end Part1
 namespace Part2
 
 def solve (input : Input) : Nat := Id.run do
-  0
+  let mut pos : HashMap Nat Nat := HashMap.emptyWithCapacity 100
+  pos := pos.insert input.start 1
+  for line in input.splitters do
+    let mut next : HashMap Nat Nat := HashMap.emptyWithCapacity 10
+    for (p, n) in pos do
+      if line.contains p then
+        next := next.alter (p - 1) (fun o ↦ o.mapOr (· + n) n |> some)
+        next := next.alter (p + 1) (fun o ↦ o.mapOr (· + n) n |> some)
+      else
+        next := next.alter p (fun o ↦ o.mapOr (· + n) n |> some)
+    pos := next
+  pos.values.sum
 
 end Part2
 
