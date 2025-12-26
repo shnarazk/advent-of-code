@@ -31,7 +31,26 @@ function run()::ANS
             end
         end
     end
-    part1 = length(filter(l -> length(l[2]) < 4, collect(flow)))
+    to_visit = Set(map(l -> l[1], collect(filter(l -> length(l[2]) < 4, flow))))
+    part1 = length(to_visit)
+    while length(to_visit) > 0
+        next = Set()
+        for pos in to_visit
+            if pos in keys(flow)
+                for neighbor in flow[pos]
+                    if neighbor in keys(flow)
+                        flow[neighbor] = filter(x -> x != pos, flow[neighbor])
+                        if length(flow[neighbor]) < 4
+                            push!(next, neighbor)
+                        end
+                    end
+                end
+                delete!(flow, pos)
+                part2 += 1
+            end
+        end
+        to_visit = next
+    end
     (part1, part2)
 end
 
