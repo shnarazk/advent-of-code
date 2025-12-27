@@ -33,7 +33,7 @@ def parse : String → Option Input := AoCParser.parse parser
     let mut splitters : List (List Nat) := []
     for l in grid do
       let mut sps := []
-      for (j, ch) in l.enumerate do
+      for (j, ch) in l.iter.enumerate do
         if ch == 'S' then start := j
         if ch == '^' then sps := sps.insert j
       if !sps.isEmpty then splitters := splitters.concat sps

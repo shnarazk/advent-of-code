@@ -37,8 +37,9 @@ namespace Part1
 
 def solve (input : Input) : Nat := Id.run do
   let mut dists : Array (Nat × (Nat × Nat)) := #[]
-  for (i, b1) in input.boxes.enum do
-    for (j, b2) in input.boxes.enum.drop (i + 1) do
+  for (i, b1) in input.boxes.iter.enumerate do
+    for (j, b2) in input.boxes.iter.enumerate do
+      if j ≤ i then continue
       let d := b1 - b2
       dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
   dists := dists.heapSort (·.fst < ·.fst)
@@ -78,8 +79,9 @@ namespace Part2
 
 def solve (input : Input) : Nat := Id.run do
   let mut dists : Array (Nat × (Nat × Nat)) := #[]
-  for (i, b1) in input.boxes.enum do
-    for (j, b2) in input.boxes.enum.drop (i + 1) do
+  for (i, b1) in input.boxes.iter.enumerate do
+    for (j, b2) in input.boxes.iter.enumerate do
+      if j ≤ i then continue
       let d := b1 - b2
       dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
   dists := dists.heapSort (·.fst < ·.fst)

@@ -33,8 +33,9 @@ def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
       let v ← separated (many1 parseSymbol) eol
-      let a := v.enum.toList.map
-        (fun (i, row) ↦ row.enum.toList.map (fun (j, c) ↦ (c, (i, j))))
+      let a := v.iter.enumerate
+        |>.map (fun (i, row) ↦ row.iter.enumerate.toList.map (fun (j, c) ↦ (c, (i, j))))
+        |>.toList
         |>.flatten
         |>.filter (fun (c, _) ↦ c ≠ '.')
       return Input.mk a (v.size, v[0]!.size)
@@ -54,8 +55,9 @@ def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
     else []
 
 def solve (input : Input) : Nat :=
-  input.anntena.enumerate.map
+  input.anntena.iter.enumerate.map
     (fun (i, a1) ↦ input.anntena.drop (i + 1) |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
+    |>.toList
     |>.flatten
     |> HashSet.ofList
     |>.size
@@ -75,8 +77,10 @@ def inbound_antinodes (size : Vec₂) (a b : Char × Vec₂) : List Vec₂ :=
     else []
 
 def solve (input : Input) : Nat :=
-    input.anntena.enumerate.map
-    (fun (i, a1) ↦ input.anntena.drop (i + 1) |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
+  input.anntena.iter.enumerate
+    |>.map
+      (fun (i, a1) ↦ input.anntena.drop (i + 1) |>.flatMap (fun a2 ↦ inbound_antinodes input.size a1 a2))
+    |>.toList
     |>.flatten
     |> HashSet.ofList
     |>.size

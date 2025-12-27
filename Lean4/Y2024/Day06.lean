@@ -45,13 +45,14 @@ def parse : String → Option (State × Vec₂ × HashSet Vec₂) := AoCParser.p
   where
     parser : Parser (State × Vec₂ × HashSet Vec₂) := do
       let v ← many1 (parseLine <* eol)
-      let obstructions := v.enum.foldl
-        (fun h (i, l) ↦ l.enum.foldl
+      let obstructions := v.iter.enumerate.fold
+        (fun h (i, l) ↦ l.iter.enumerate.fold
           (fun h (j, c) ↦ if c == '#' then h.insert (↑(i, j) : Vec₂) else h)
           h)
         (HashSet.emptyWithCapacity : HashSet Vec₂)
-      let p := v.enumerate.flatMap
-          (fun (i, l) ↦ l.enum.flatMap (fun (j, c) ↦ if c == '^' then #[(i, j)] else #[]))
+      let p := v.iter.enumerate
+          |>.flatMap (fun (i, l) ↦ l.iter.enumerate.flatMap (fun (j, c) ↦ (if c == '^' then #[(i, j)] else #[]).iter) |>.toList.iter)
+          |>.toArray
           |> (·[0]!)
       return (State.mk (p.1, p.2) Dir.N, (v.size, v[0]!.size), obstructions)
 

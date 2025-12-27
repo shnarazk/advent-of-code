@@ -1,8 +1,24 @@
 module
 
 public import Lean
+public import Std.Data.Iterators.Combinators.Zip
 
 @[expose] public section
+
+section
+universe w
+
+open Std Std.Iterators Std.Iterators.Iter in
+/-- Convert an iterator to enumerated iterator -/
+@[inline]
+def Std.Iterators.Iter.enumerate {α β : Type} [Iterator α Id β] [IteratorLoop α Id Id] [Finite α Id]
+    (it : Iter (α := α) β) : Iter (α := Zip (Rxo.Iterator Nat) Id α β) (Nat × β) :=
+  (0...it.count).iter.zip it
+
+-- #eval [1, 4, 66].iter.enumerate.toArray
+-- #eval #[1, 4, 66].iter.enumerate.toArray
+
+end
 
 /-- print a data like `dbg!` in Rust -/
 def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
@@ -205,29 +221,24 @@ instance : Accumulation (Array (Option Int)) where
 -- #eval product [1, 3, 5]
 
 /-- Rusty enumerate -/
+@[deprecated "Use `Iterators.enumerate` instead of 'List.enumerate`" (since := "2025-12-27")]
 def List.enumerate {α : Type} (a : List α) : List (Nat × α) := a.zipIdx.map (fun (x, i) => (i, x))
--- List.zip (List.range a.length) a
--- #eval [2, 4, 5].enum
 -- #eval [2, 4, 5].enumerate
 
 /-- alias of Array.enumerate. -/
-def Array.enum {α : Type} (a : Array α) : Array (Nat × α) :=
+@[deprecated "Use `Iterators.enumerate` instead of 'Array.enumerate`" (since := "2025-12-27")]
+def Array.enumerate {α : Type} (a : Array α) : Array (Nat × α) :=
   a.zipIdx.map (fun (x, i) ↦ (i, x))
 
--- example : #[2, 4, 5].enum = #[(0, 2), (1, 4), (2, 5)] := rfl
+-- example : #[2, 4, 5].enumerate = #[(0, 2), (1, 4), (2, 5)] := rfl
 
-/-- Rusty enumerate -/
-def Array.enumerate {α : Type} (a : Array α) : Array (Nat × α) := Array.enum a
-
--- #eval #[2, 4, 5].enum
 
 /-- enumerate on a `String` as `Array Char` -/
-def String.enum (a : String) : List (Nat × Char) :=
-  List.zip (List.range a.length) a.toList
+@[deprecated "Use `Iterators.enumerate` instead of 'String.enumerate`" (since := "2025-12-25")]
+def String.enumerate (s : String) : List (Nat × Char) :=
+  s.toList.zipIdx.map (fun (x, i) ↦ (i, x))
 
-/-- deprecated version of `String.enum` -/
-@[deprecated "Use `String.enum` instead of 'String.enumerate`" (since := "2024-11-01")]
-def String.enumerate := String.enum
+-- #eval "abc".enumerate
 
 namespace Option
 
