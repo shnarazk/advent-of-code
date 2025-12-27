@@ -77,10 +77,10 @@ def decode_hex (str : Array Char) : Direction × Nat :=
       | some '3' => Direction.U
       | _ => dbg "Parse error" Direction.U,
     hex.map
-        (fun c ↦ ("0123456789abcdef".enum.find? (Prod.snd · == c)).mapOr (·.fst) 0)
+        (fun c ↦ ("0123456789abcdef".toList.iter.enumerate.find? (Prod.snd · == c)).mapOr (·.fst) 0)
       |>.foldl (fun (acc v : Nat) ↦ acc * 16 + v) 0)
 
-example : decode_hex "70c710".toList.toArray = (Direction.R, 461937) := by rfl
+-- #eval (decode_hex "70c710".toList.toArray, (Direction.R, 461937))
 
 def line := do
   let dist ← (
@@ -166,10 +166,10 @@ def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
   -- doubled map
   let dm := path.windows2.foldl
     (fun r ((y₁, x₁), (y₂, x₂)) ↦
-      let y₁' : Nat := ys.enum.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
-      let x₁' : Nat := xs.enum.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
-      let y₂' : Nat := ys.enum.find? (fun iy ↦ iy.snd == y₂) |>.mapOr (·.fst) 0
-      let x₂' : Nat := xs.enum.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
+      let y₁' : Nat := ys.iter.enumerate.find? (fun iy ↦ iy.snd == y₁) |>.mapOr (·.fst) 0
+      let x₁' : Nat := xs.iter.enumerate.find? (fun ix ↦ ix.snd == x₁) |>.mapOr (·.fst) 0
+      let y₂' : Nat := ys.iter.enumerate.find? (fun iy ↦ iy.snd == y₂) |>.mapOr (·.fst) 0
+      let x₂' : Nat := xs.iter.enumerate.find? (fun ix ↦ ix.snd == x₂) |>.mapOr (·.fst) 0
       if y₁' == y₂' then
         fromTo' (2 * x₁') (2 * x₂')
           |>.foldl (fun r x ↦ r.set (2 * y₁', x) 1) r
@@ -204,10 +204,11 @@ def scanLine (total last_line_sum : Nat) (last_y : Int) :
       let lastHeight : Nat := (y - last_y).toNat
       let windows2 := List.zip l.dropLast l.tail
       let _line_sum : Int := windows2.map (fun (prev, curr) ↦ curr.snd.snd - prev.snd.snd + 1)
+        |>.iter
         |>.enumerate
         |>.filter (fun p ↦ p.fst % 2 == 0)
         |>.map (·.snd)
-        |> sum
+        |>.fold (· + ·) 0
       scanLine (total + last_line_sum * lastHeight) line_total y r'
 
 def solve (path' : Array Input) : Nat :=

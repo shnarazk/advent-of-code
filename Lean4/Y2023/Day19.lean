@@ -145,7 +145,7 @@ def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Target → N
     if let some rule := rules.get? label then
       rule.rules.foldl
           (fun (total, (cond : Array (Nat × Nat))) rule ↦
-            if let some (index, _) := #["x", "m", "a", "s"].enum.find? (·.snd == rule.label) then
+            if let some (index, _) := #["x", "m", "a", "s"].iter.enumerate.find? (·.snd == rule.label) then
               match rule.op with
                 | Operator.Lt =>
                     if rule.num ≤ cond[index]!.fst then
