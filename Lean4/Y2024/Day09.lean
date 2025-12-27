@@ -57,14 +57,16 @@ def swap (disc : Array (Option Nat)) (left right : Nat) : Array (Option Nat) :=
       if r <= l then disc else swap (disc.swapIfInBounds l r) (l + 1) (r - 1)
 
 def solve (input : Input) : Nat :=
-  let disc := input.line
-    |>.enum
-    |>.flatMap
-      (fun (i, l) ↦ Array.replicate l (if i % 2 == 0 then some ((i + 1) / 2) else none))
+  let disc := input.line.iter
+    |>.enumerate
+    |>.flatMap (fun (i, l) ↦
+      Array.replicate l (if i % 2 == 0 then some ((i + 1) / 2) else none) |>.iter)
+    |>.toArray
   swap disc 0 (disc.size - 1)
-   |>.enum
-   |>.map (fun (i, v) ↦ i * v.unwrapOr 0)
-   |> sum
+    |>.iter
+    |>.enumerate
+    |>.map (fun (i, v) ↦ i * v.unwrapOr 0)
+    |>.fold (· + ·) 0
 
 end Part1
 
@@ -91,23 +93,23 @@ def swap (files : List (Nat × Nat)) (free_start free_len : Array Nat) : List (N
 
 
 def solve (input : Input) : Nat :=
-  let file_len := input.line.enum.filter (fun (i, _) ↦ i % 2 == 0) |>.map (·.2)
-  let free_len := input.line.enum.filter (fun (i, _) ↦ i % 2 == 1 ) |>.map (·.2)
-  let file_start := input.line.enum.foldl
-      (fun (list, i) (id, len) ↦ (if id % 2 == 0 then list ++ [i] else list, i + len))
+  let file_len := input.line.iter.enumerate.filter (fun (i, _) ↦ i % 2 == 0) |>.map (·.2)
+  let free_len := input.line.iter.enumerate.filter (fun (i, _) ↦ i % 2 == 1 ) |>.map (·.2) |>.toArray
+  let file_start := input.line.iter.enumerate
+    |>.fold (fun (list, i) (id, len) ↦ (if id % 2 == 0 then list ++ [i] else list, i + len))
       ([], 0)
     |>.1
-  let free_start := input.line.enum.foldl
-      (fun (list, i) (id, len) ↦ (if id % 2 == 1 then list ++ [i] else list, i + len))
-      ([], 0)
+  let free_start := input.line.iter.enumerate
+    |>.fold (fun (list, i) (id, len) ↦ (if id % 2 == 1 then list ++ [i] else list, i + len)) ([], 0)
     |>.1
     |>.toArray
   let target_files := file_start.zip file_len.toList |>.reverse
   swap target_files free_start free_len
-   |>.reverse
-   |>.enumerate
-   |>.map (fun (id, (start, len)) ↦ List.range len |>.map (fun i ↦ (start + i) * id) |> sum)
-   |> sum
+    |>.reverse
+    |>.iter
+    |>.enumerate
+    |>.map (fun (id, (start, len)) ↦ List.range len |>.map (fun i ↦ (start + i) * id) |> sum)
+    |>.fold (· + ·) 0
 
 end Part2
 
