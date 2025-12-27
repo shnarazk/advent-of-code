@@ -3,7 +3,7 @@ module
 public import Std.Data.Iterators.Combinators.Zip
 public import «AoC».Basic
 public import «AoC».Combinator
--- public import «AoC».Parser
+public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2025.Day09
