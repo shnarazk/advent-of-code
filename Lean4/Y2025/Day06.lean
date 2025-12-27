@@ -48,11 +48,11 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat :=
-  input.ops.enum
+  input.ops.iter.enumerate
     |>.map (fun (i, op) => match op with
       | .add => input.problems.map (·[i]!) |>.sum
       | .mul => input.problems.map (·[i]!) |>.foldl (· * ·) 1)
-    |> sum
+    |>.fold (· + ·) 0
 
 end Part1
 
@@ -65,9 +65,10 @@ def solve (input : Input) : Nat := Id.run do
   let lines := slices |>.map (fun s ↦ s.chars.toArray)
   let num_lines := slices.count
   let lastLine := slices |>.toList |>.getLast! |>.toString
-  let columnStarts := lastLine
-    |>.enum
+  let columnStarts := lastLine.toList.iter 
+    |>.enumerate
     |>.filterMap (fun (i, c) ↦ (c != ' ').map (fun _ ↦ i))
+    |>.toList
     |>.concat (lastLine.length + 1)
   let mut total := 0
   for range in columnStarts.windows2.iter do
