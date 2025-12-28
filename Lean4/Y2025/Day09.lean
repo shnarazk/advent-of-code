@@ -59,52 +59,38 @@ namespace Part2
   - 2 : filled
   - 3 : unvisited -/
 def solve (input : Input) : Nat := Id.run do
-  let ys := input.line.iter |>.map (·.val.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort |> dbg "ys"
-  let encodeY := ys.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> dbg "encodeY" |> HashMap.ofList
+  let ys := input.line.iter |>.map (·.val.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+  let encodeY := ys.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeY.size == 0 then return 0
-  let xs := input.line.iter |>.map (·.val.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort |> dbg "xs"
-  let encodeX := xs.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> dbg "encodeX" |> HashMap.ofList
+  let xs := input.line.iter |>.map (·.val.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+  let encodeX := xs.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeX.size == 0 then return 0
   let mut sliceY : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
   let mut sliceX : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
   for p in input.line.iter do
     sliceY := sliceY.alter p.fst.toNat (fun o ↦ o.mapOr (·.push p.snd.toNat) #[p.snd.toNat])
     sliceX := sliceX.alter p.snd.toNat (fun o ↦ o.mapOr (·.push p.fst.toNat) #[p.fst.toNat])
-  sliceY := sliceY.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> dbg "sliceY" |> HashMap.ofList
+  sliceY := sliceY.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
   if sliceY.size == 0 then return 0
-  sliceX := sliceX.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> dbg "sliceX" |> HashMap.ofList
+  sliceX := sliceX.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
   if sliceX.size == 0 then return 0
   let mut gridSize := ys.size + 1
   let mut grid : Rect Nat := Rect.ofDim2 gridSize gridSize 3
-  assert! grid.height == gridSize
-  assert! grid.width == gridSize
   for (y, xs) in sliceY.iter do
-    -- if (encodeY.get? y).isNone then return (dbg "PANIC" 82)
-    -- if (encodeX.get? xs[0]!).isNone then return (dbg "PANIC" 83)
-    -- if (encodeX.get? xs[1]!).isNone then return (dbg "PANIC" 84)
-    -- if (grid.get? (encodeY.get! y, encodeX.get! xs[0]!)).isNone then return (dbg "PANIC" 85)
-    -- if (grid.get? (encodeY.get! y, encodeX.get! xs[1]!)).isNone then return (dbg "PANIC" 86)
-    grid := grid.set (encodeY.get! y, encodeX.get! xs[0]!) 1 
-    grid := grid.set (encodeY.get! y, encodeX.get! xs[1]!) 1 
+    grid := grid.set (encodeY.get! y, encodeX.get! xs[0]!) 1
+    grid := grid.set (encodeY.get! y, encodeX.get! xs[1]!) 1
     for x in (encodeX.get! xs[0]! + 1) ... (encodeX.get! xs[1]!) do
-      -- if (grid.get? (encodeY.get! y, x)).isNone then return (dbg "PANIC" 90)
-      grid := grid.set (encodeY.get! y, x) 2 
+      grid := grid.set (encodeY.get! y, x) 2
   for (x, ys) in sliceX.iter do
-    -- if (encodeX.get? x).isNone then return (dbg "PANIC" 94)
-    -- if (encodeY.get? ys[0]!).isNone then return (dbg "PANIC" 95)
-    -- if (encodeY.get? ys[1]!).isNone then return (dbg s!"PANIC at encodeX:{encodeX.toList} x:{x}, ys:{ys}" 96)
     for y in (encodeY.get! ys[0]! + 1) ... (encodeY.get! ys[1]!) do
-      -- if (grid.get? (y, encodeX.get! x)).isNone then return (dbg "PANIC" 98)
-      grid := grid.set (y, encodeX.get! x) 2 
-  -- ここまでOK
-  -- if gridSize > 3 then return 8
+      grid := grid.set (y, encodeX.get! x) 2
   -- categorize the unvisited cells
   let mut toVisit : Array Idx₂ := #[(default : Idx₂)]
   while !toVisit.isEmpty do
     let mut next : HashSet Idx₂ := HashSet.emptyWithCapacity 100
     for pos in toVisit.iter do
       let some state := grid.get? pos | continue
-      if state != 3 then continue 
+      if state != 3 then continue
       grid := grid.set pos 0
       for diff in Dir.eightNeighbors.iter do
         let some q := toIdx₂ (pos + diff) | continue
@@ -112,30 +98,27 @@ def solve (input : Input) : Nat := Id.run do
         if state == 3 then next := next.insert q
     toVisit := next.toArray
   -- re-mark all unvisited as uncoverd
-  grid := dbg "grid" <| grid.map (fun k ↦ if k == 3 then 2 else k)
+  grid := grid.map (fun k ↦ if k == 3 then 2 else k)
   -- search the maximum
   let mut area := 0
   for y' in 1...gridSize do
     for x' in 1...gridSize do
-      if grid.get (y', x') 4 != 1 then continue 
+      if grid.get (y', x') 4 != 1 then continue
       let mut min_x := 1
-      for y in (y' ... gridSize) do
+      for y in y' ... gridSize do
         for x_rev in min_x ...= x' do
           let x := x' + min_x - x_rev
           if grid.get (y, x) 1 == 0 then min_x := x + 1 ; break
           if grid.get (y, x) 0 == 1 then
-            if area < (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!) then
-              area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
+            area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       let mut max_x := gridSize
-      for y in (y' ... gridSize) do
+      for y in y' ... gridSize do
         for x in x' ... max_x do
           if grid.get (y, x) 1 == 0 then max_x := x ; break
           if grid.get (y, x) 0 == 1 then
-            if area < (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!) then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       continue
-  dbg s!"{grid.get (1,1) 999}" area
-
+  area
 
 end Part2
 
