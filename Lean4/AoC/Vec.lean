@@ -115,7 +115,6 @@ instance incetanceDirSub : HSub Dir Dir Vec₂ where
 
 end Dir
 
-
 /-- Subtype of `Vec₂` as valid index for `Rect`. -/
 def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
 deriving BEq, Hashable, Repr
@@ -136,6 +135,7 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
 -- #check ((↑ d) : Idx₂)
 -- def w : Vec₂ := (-1, -1)
 -- #eval (↑ w)
+instance inhabitedIdx₂ : Inhabited Idx₂ where default := (↑ ((0 : Nat), (0 : Nat)) : Idx₂)
 
 -- namespace Idx₂
 
@@ -186,6 +186,9 @@ def toList' (p : Idx₂) : List Idx₂ :=
   List.map (fun y ↦ (range_list i.2).map (y, ·) ) rl
     |>.flatten
     |>.flatMap (fun v ↦ if h : (0, 0) ≤ v then [⟨v, h⟩] else [])
+
+/-- return `some Idx₂` if possible -/
+def toIdx₂ (p : Vec₂) : Option Idx₂ := if h : (0,0) ≤ p then some ⟨p, h⟩ else none
 
 open Std.HashMap
 
