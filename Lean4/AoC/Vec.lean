@@ -113,6 +113,18 @@ instance incetanceDirAdd : HAdd Dir Dir Vec₂ where
 instance incetanceDirSub : HSub Dir Dir Vec₂ where
   hSub a b := asVec₂ a - asVec₂ b
 
+/-- 8 neighbors -/
+def eightNeighbors : Array Vec₂ := #[
+  Dir.N.asVec₂,
+  Dir.E.asVec₂,
+  Dir.S.asVec₂,
+  Dir.W.asVec₂,
+  Dir.N + Dir.E,
+  Dir.E + Dir.S,
+  Dir.S + Dir.W,
+  Dir.W + Dir.N,
+]
+
 end Dir
 
 /-- Subtype of `Vec₂` as valid index for `Rect`. -/
