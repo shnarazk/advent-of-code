@@ -1,0 +1,3 @@
+[submodule "Pharo"]
+	path = Pharo
+	url = git@github.com:shnarazk/AoC-in-Pharo.git
