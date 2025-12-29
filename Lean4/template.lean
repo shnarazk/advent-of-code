@@ -28,13 +28,13 @@ end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Input) : Nat := Id.run do 0
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := 0
+def solve (_ : Input) : Nat := Id.run do 0
 
 end Part2
 
