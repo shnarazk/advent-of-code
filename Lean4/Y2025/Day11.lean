@@ -3,16 +3,17 @@ module
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Parser
--- public import «AoC».Vec
 
 namespace Y2025.Day11
 
-open Accumulation CiCL
+open Std
 
 structure Input where
-deriving BEq, Hashable, Repr
+  names : Array String
+  flow : HashMap String (Array String)
+deriving BEq, Repr
 
-instance : ToString Input where toString _ := s!""
+instance : ToString Input where toString s := s!"{s.names.size}, {s.flow.toList}"
 
 namespace parser
 
@@ -20,9 +21,19 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+def parse_name := alphabets
+def parse_line := do
+  let node ← parse_name <* pstring ": "
+  let outputs ← separated parse_name whitespaces
+  pure (node, outputs)
+
+-- #eval AoCParser.parse parse_line "abv: qqq rew "
+
 def parse : String → Option Input := AoCParser.parse parser
   where
-    parser : Parser Input := return Input.mk
+    parser : Parser Input := do
+    let ar ← separated parse_line eol
+    pure <| Input.mk (ar.iter.map (·.fst) |>.toArray) ar.iter.toHashMap
 
 end parser
 
@@ -38,9 +49,6 @@ def solve (_ : Input) : Nat := Id.run do 0
 
 end Part2
 
-public def solve := AocProblem.config 2025 11
-  ((dbg "parsed as ") ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+public def solve := AocProblem.config 2025 11 parser.parse Part1.solve Part2.solve
 
 end Y2025.Day11
