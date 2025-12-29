@@ -18,6 +18,24 @@ def Std.Iterators.Iter.enumerate {α β : Type} [Iterator α Id β] [IteratorLoo
 -- #eval [1, 4, 66].iter.enumerate.toArray
 -- #eval #[1, 4, 66].iter.enumerate.toArray
 
+open Std Std.Iterators Std.Iterators.Iter in
+/-- sum on iterator -/
+@[inline]
+def Std.Iterators.Iter.sum {α : Type} [Iterator α Id Nat] [IteratorLoop α Id Id]
+    (it : Iter (α := α) Nat) : Nat :=
+  it.fold (· + ·) 0
+
+-- #eval [1, 4, 66].iter.sum
+
+open Std Std.Iterators Std.Iterators.Iter in
+/-- product on iterator -/
+@[inline]
+def Std.Iterators.Iter.product {α : Type} [Iterator α Id Nat] [IteratorLoop α Id Id]
+    (it : Iter (α := α) Nat) : Nat :=
+  it.fold (· * ·) 1
+
+-- #eval [2, 3, 6].iter.product
+
 end
 
 /-- print a data like `dbg!` in Rust -/
