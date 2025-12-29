@@ -33,8 +33,23 @@ open Std Std.Iterators Std.Iterators.Iter in
 def Std.Iterators.Iter.product {α : Type} [Iterator α Id Nat] [IteratorLoop α Id Id]
     (it : Iter (α := α) Nat) : Nat :=
   it.fold (· * ·) 1
-
 -- #eval [2, 3, 6].iter.product
+
+open Std Std.Iterators Std.Iterators.Iter in
+/-- return a HashMap over an iterator -/
+@[inline]
+def Std.Iterators.Iter.toHashMap {α β γ : Type} [BEq β] [Hashable β] [Iterator α Id (β × γ)] [IteratorLoop α Id Id]
+    (it : Iter (α := α) (β × γ)) : HashMap β γ :=
+  it.fold (fun acc pair ↦ acc.insert pair.fst pair.snd) (HashMap.emptyWithCapacity it.count)
+-- #eval [(2, "aaa"), (3, "three"), (6, "six")].iter.toHashMap
+
+open Std Std.Iterators Std.Iterators.Iter in
+/-- return a HashSet over an iterator -/
+@[inline]
+def Std.Iterators.Iter.toHashSet {α β : Type} [BEq β] [Hashable β] [Iterator α Id β] [IteratorLoop α Id Id]
+    (it : Iter (α := α) β) : HashSet β :=
+  it.fold (·.insert ·) (HashSet.emptyWithCapacity it.count)
+-- #eval [2, 3, 6].iter.toHashSet
 
 end
 
