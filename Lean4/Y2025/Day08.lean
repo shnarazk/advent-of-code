@@ -1,5 +1,6 @@
 module
 
+public import Batteries.Data.BinaryHeap
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Iterator
@@ -78,21 +79,29 @@ end Part1
 
 namespace Part2
 
+-- #eval (fun (a b : Nat × (Nat × Nat)) ↦ a.fst < b.fst) (1, 10, 20) (5, 100, 100)
+
 def solve (input : Input) : Nat := Id.run do
-  let mut dists : Array (Nat × (Nat × Nat)) := #[]
+  -- let mut dists : Array (Nat × (Nat × Nat)) := #[]
+  let mut heap : Batteries.BinaryHeap (Nat × (Nat × Nat)) (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst) :=
+    Batteries.BinaryHeap.empty (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst)
   for (i, b1) in input.boxes.iter.enumerate do
     for (j, b2) in input.boxes.iter.enumerate do
       if j ≤ i then continue
       let d := b1 - b2
-      dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
-  dists := dists.heapSort (·.fst < ·.fst)
+      -- dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
+      heap := heap.insert (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
+  -- dists := dists.heapSort (·.fst < ·.fst)
   let mut groups : Array Nat := #[]
   let mut toGroup : HashMap Nat Nat := HashMap.emptyWithCapacity 100
   let mut next_gid := 0
   let num_boxes := input.boxes.size
   let mut num_groups := 0
-  for (_, (i, j)) in dists do
-    assert! (i != j)
+  while true do
+  -- for (_, (i, j)) in dists do
+    let ret := heap.extractMax
+    let some (_, (i, j)) := ret.fst | return 0
+    heap := ret.snd
     match toGroup.get? i, toGroup.get? j with
     | none, none =>
       toGroup := toGroup.insert i next_gid
