@@ -1,11 +1,10 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2025.Day06
-open Accumulation CiCL
 
 inductive Op where
   | add
@@ -52,7 +51,7 @@ def solve (input : Input) : Nat :=
     |>.map (fun (i, op) => match op with
       | .add => input.problems.map (·[i]!) |>.sum
       | .mul => input.problems.map (·[i]!) |>.foldl (· * ·) 1)
-    |>.fold (· + ·) 0
+    |>.sum
 
 end Part1
 

@@ -2,11 +2,12 @@ module
 
 public import «AoC».Basic
 public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2023.Day19
 
-open Accumulation CiCL Std
+open CiCL Std
 abbrev HashMap := Std.HashMap
 
 inductive Operator where | Lt | Gt deriving BEq
@@ -131,7 +132,7 @@ def execute (rules : Rules) (setting : Setting) : Target → Option Nat
 
 def solve (input : Rules × Array Setting) : Nat :=
   let (rules, settings) := input
-  settings.map (execute rules · (Target.Chain "in")) |>.filterMap I |> sum
+  settings.map (execute rules · (Target.Chain "in")) |>.filterMap I |>.sum
 
 end Part1
 
@@ -139,7 +140,7 @@ namespace Part2
 
 partial
 def collectPositives (rules : Rules) (range : Array (Nat × Nat)) : Target → Nat
-  | Target.Accept => range.map (fun (b, e) ↦ e - b + 1) |> product
+  | Target.Accept => range.iter.map (fun (b, e) ↦ e - b + 1) |>.product
   | Target.Reject => 0
   | Target.Chain label =>
     if let some rule := rules.get? label then

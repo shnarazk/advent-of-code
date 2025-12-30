@@ -1,14 +1,14 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2025.Day09
 
 open Std
-open Accumulation Dim2
+open Dim2
 
 /-- return the distance between a and b -/
 def dist (a b : Int) : Nat := (if a ≤ b then b - a else a - b).toNat

@@ -2,12 +2,13 @@ module
 
 public import «AoC».Basic
 public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2023.Day18
 
-open Accumulation CiCL
+open CiCL
 open Dim2
 
 inductive Direction where | U | D | R | L deriving BEq
@@ -106,10 +107,10 @@ namespace Part1
 
 def solve (l : Array Input) : Nat :=
   -- shift axis to escape negative index
-  let heightₚ := l.filter (·.dir == .D) |>.map (·.length) |> sum
-  let heightₘ := l.filter (·.dir == .U) |>.map (·.length) |> sum
-  let widthₚ  := l.filter (·.dir == .R) |>.map (·.length) |> sum
-  let widthₘ  := l.filter (·.dir == .L) |>.map (·.length) |> sum
+  let heightₚ := l.filter (·.dir == .D) |>.map (·.length) |>.sum
+  let heightₘ := l.filter (·.dir == .U) |>.map (·.length) |>.sum
+  let widthₚ  := l.filter (·.dir == .R) |>.map (·.length) |>.sum
+  let widthₘ  := l.filter (·.dir == .L) |>.map (·.length) |>.sum
   let height := heightₚ + heightₘ |>(· + 1)
   let offset_h := height / 4
   let width := widthₚ + widthₘ |>(· + 1)

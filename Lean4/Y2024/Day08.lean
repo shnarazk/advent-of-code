@@ -1,14 +1,14 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 public import «AoC».Vec
 public import Init.Data.SInt.Basic
 
 namespace Y2024.Day08
 
-open Std Accumulation CiCL Dim2
+open Std Accumulation Dim2
 
 -- syntax:50 term:51 " <₀ " term:50 : term
 -- macro_rules | `($a <₀ $b) => `(Vec\_2.geZeroAndLt $b $a)

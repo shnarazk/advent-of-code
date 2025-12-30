@@ -2,12 +2,13 @@ module
 
 public import «AoC».Basic
 public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 public import «AoC».Vec3
 
 namespace Y2025.Day08
 
-open Accumulation Dim3 Std
+open Dim3 Std
 
 structure Input where
   boxes : Array Vec₃
