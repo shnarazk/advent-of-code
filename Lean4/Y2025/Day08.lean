@@ -82,16 +82,17 @@ namespace Part2
 -- #eval (fun (a b : Nat × (Nat × Nat)) ↦ a.fst < b.fst) (1, 10, 20) (5, 100, 100)
 
 def solve (input : Input) : Nat := Id.run do
-  -- let mut dists : Array (Nat × (Nat × Nat)) := #[]
-  let mut heap : Batteries.BinaryHeap (Nat × (Nat × Nat)) (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst) :=
-    Batteries.BinaryHeap.empty (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst)
+  let mut dists : Array (Nat × (Nat × Nat)) := #[]
+  -- let mut heap : Batteries.BinaryHeap (Nat × (Nat × Nat)) (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst) :=
+  --  Batteries.BinaryHeap.empty (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst)
   for (i, b1) in input.boxes.iter.enumerate do
     for (j, b2) in input.boxes.iter.enumerate do
       if j ≤ i then continue
       let d := b1 - b2
-      -- dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
-      heap := heap.insert (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
+      dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
+      -- heap := heap.insert (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
   -- dists := dists.heapSort (·.fst < ·.fst)
+  let mut heap: Batteries.BinaryHeap (Nat × (Nat × Nat)) (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst) := Batteries.BinaryHeap.mk <| (Batteries.BinaryHeap.mkHeap (fun (a b : Nat × (Nat × Nat)) ↦ a.fst ≥ b.fst) dists.toVector).toArray
   let mut groups : Array Nat := #[]
   let mut toGroup : HashMap Nat Nat := HashMap.emptyWithCapacity 100
   let mut next_gid := 0
