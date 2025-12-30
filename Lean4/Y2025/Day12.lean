@@ -1,7 +1,7 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2025.Day12
@@ -21,8 +21,7 @@ open Std.Internal.Parsec.String
 
 def parse_block := do
   let _id ← number <* pstring ":\n"
-  let shape ← separated (repeated ((· == '#') <$> (pchar '.' <|> pchar '#'))) eol <* eol
-  pure shape
+  separated (repeated ((· == '#') <$> (pchar '.' <|> pchar '#'))) eol <* eol
 
 -- #eval AoCParser.parse (separated parse_block eol) "4:\n.#\n\n2:\n#..\n"
 
@@ -42,13 +41,16 @@ end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := Id.run do 0
+def solve (input : Input) : Nat := Id.run do
+  input.spec.iter
+    |>.filter (fun ((width, height), requirement) ↦ width * height ≥ requirement.iter.sum * 9)
+    |>.count
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := Id.run do 0
+def solve (_ : Input) : String := "Y2025 was completed!"
 
 end Part2
 
