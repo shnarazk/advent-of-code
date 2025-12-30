@@ -8,7 +8,7 @@ public import «AoC».Vec
 
 namespace Y2023.Day17
 
-open Accumulation CiCL
+open CiCL
 open Dim2
 
 structure Input where
