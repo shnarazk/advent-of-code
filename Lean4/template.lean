@@ -20,6 +20,8 @@ open AoCParser
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+-- #eval AoCParser.parse number "123"
+
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := return Input.mk
