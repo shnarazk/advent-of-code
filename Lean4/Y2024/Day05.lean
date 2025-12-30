@@ -1,12 +1,10 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2024.Day05
-
-open Accumulation CiCL
 
 structure Input where
   rules : Array (Nat × Nat)
@@ -44,7 +42,7 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat :=
-  input.updates.toList.filter
+  input.updates.filter
       (fun v ↦
         let occurs := v.iter.enumerate.map (fun (a, b) ↦ (b, a)) |>.toList |> Std.HashMap.ofList
         input.rules.all (fun (a, b) ↦
@@ -52,7 +50,7 @@ def solve (input : Input) : Nat :=
           let j := occurs.get? b
           i == none || j == none || (i.unwrapOr 0) < (j.unwrapOr 0)))
     |>.map (fun l ↦ l[l.size / 2]!)
-    |> sum
+    |>.sum
 
 end Part1
 
@@ -71,7 +69,7 @@ def topologySort (rules: Array (Nat × Nat)) (l : List Nat) : List Nat :=
     | _ => panic! s!"impossible {cands}"
 
 def solve (input : Input) : Nat :=
-  input.updates.toList.filter
+  input.updates.filter
       (fun v ↦
         let occurs := v.iter.enumerate.map (fun (a, b) ↦ (b, a)) |>.toList |> Std.HashMap.ofList
         !input.rules.all (fun (a, b) ↦
@@ -80,7 +78,7 @@ def solve (input : Input) : Nat :=
           i == none || j == none || (i.unwrapOr 0) < (j.unwrapOr 0)))
     |>.map (topologySort input.rules ·.toList)
     |>.map (fun l ↦ l[l.length / 2]!)
-    |> sum
+    |>.sum
 
 end Part2
 

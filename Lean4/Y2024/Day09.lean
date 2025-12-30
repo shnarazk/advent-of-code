@@ -1,12 +1,12 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2024.Day09
 
-open Accumulation CiCL
+open Accumulation 
 
 structure Input where
   line : Array Nat
@@ -66,7 +66,7 @@ def solve (input : Input) : Nat :=
     |>.iter
     |>.enumerate
     |>.map (fun (i, v) ↦ i * v.unwrapOr 0)
-    |>.fold (· + ·) 0
+    |>.sum
 
 end Part1
 
@@ -109,7 +109,7 @@ def solve (input : Input) : Nat :=
     |>.iter
     |>.enumerate
     |>.map (fun (id, (start, len)) ↦ List.range len |>.map (fun i ↦ (start + i) * id) |> sum)
-    |>.fold (· + ·) 0
+    |>.sum
 
 end Part2
 

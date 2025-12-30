@@ -1,13 +1,13 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 -- public import «AoC».Vec
 
 namespace Y2025.Day00
 
-open Accumulation CiCL
+open Std
 
 structure Input where
 deriving BEq, Hashable, Repr

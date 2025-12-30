@@ -1,12 +1,11 @@
 module
 
 public import «AoC».Basic
-public import «AoC».Combinator
+public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2024.Day04
 
-open Accumulation CiCL
 abbrev HashMap := Std.HashMap
 
 def asNat : Bool -> Nat
@@ -126,7 +125,7 @@ def solve (input : Input) : Nat :=
   input.plane.toList.map
       (fun (p, _) ↦ input.xmas_n p + input.xmas_s p + input.xmas_e p + input.xmas_w p
         + input.xmas_ne p + input.xmas_es p + input.xmas_sw p + input.xmas_wn p)
-    |> sum
+    |>.sum
 
 end Part1
 
