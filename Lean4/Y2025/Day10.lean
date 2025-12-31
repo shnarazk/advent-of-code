@@ -79,6 +79,19 @@ end Part1
 
 namespace Part2
 
+instance : HAdd (Array Int) (Array Int) (Array Int) where
+  hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]!) |>.toArray
+  
+instance : HMul (Array Int) Int (Array Int) where
+  hMul v n := v.iter.map (· * n) |>.toArray
+
+instance : HMul (Array (Array Int)) (Array Int) (Array Int) where
+  hMul buttons count := 
+    count.iter.enumerate
+    |>.fold
+      (fun acc (i, n) ↦ acc + buttons[i]! * n)
+      (Array.replicate buttons[0]!.size 0)
+ 
 def solve (_ : Input) : Nat := 0
 
 end Part2
