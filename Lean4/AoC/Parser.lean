@@ -53,7 +53,7 @@ def number : Parser Nat := do
   let s ← many1 digit
   return (Array.foldl (fun n (c : Char) => n * 10 + c.toNat - '0'.toNat) (0 : Nat) s)
 
--- #eval Parsec.run number "21, 8,"
+#guard Parser.run number "21, 8," == Except.ok 21
 
 /-- a signed number -/
 def number_p : Parser Int := do
@@ -68,23 +68,24 @@ def number_m : Parser Int := do
 /-- a negative or non-negative integer -/
 def number_signed : Parser Int := number_m <|> number_p
 
--- #eval Parser.run number_signed "-21, 8,"
+#guard (Parser.run number_signed "-21, 8,") == Except.ok (-21)
 
 /-- single digit number -/
 def single_digit := (·.toNat - '0'.toNat) <$> digit
--- #eval Parser.run single_digit "456"
+
+#guard Parser.run single_digit "456" == Except.ok 4
 
 namespace test
 
 /-- alphabets followed by ':' -/
 def label := many1Chars asciiLetter <* pchar ':'
 
--- #eval Parsec.run label "Game: 0, "
+#guard Parser.run label "Game: 0, " == Except.ok "Game"
 
 /-- sequence of "label: number" separated by "," -/
 def fields := separated (separator₀ ' ' *> label *> separator ' ' *> number) (pchar ',')
 
--- #eval Parsec.run fields "a: 0, bb: 8"
+#guard Parser.run fields "a: 0, bb: 8" == Except.ok #[0, 8]
 
 -- def parse := pstring "Game:" *> manyChars (pchar ' ') *> digit
 -- #eval Lean.Parsec.run parse "Game: 0, "
