@@ -14,7 +14,7 @@ def gcd (x y : Int) : Int := if y = 0 then x else gcd y (x % y)
   Return the least common multiple of `x` and `y`.
 -/
 partial
-def lcm (x y : Int) : Int := (x * y) % gcd x y
+def lcm (x y : Int) : Int := (x * y) / gcd x y
 
 /-- aux function for chinese_remainder_theorem -/
 partial
