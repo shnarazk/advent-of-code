@@ -66,7 +66,7 @@ instance instDecidableLtVec₂ (a b : Vec₂) : Decidable (a < b) := by
   dsimp [instLTVec₂]
   exact instDecidableAnd
 
--- #eval ((0, 0) : Vec₂) < ((8, 2) : Vec₂)
+#guard ((0, 0) : Vec₂) < ((8, 2) : Vec₂)
 
 instance : LE Vec₂ where
   le (a b : Vec₂) := a.1 ≤ b.1 ∧ a.2 ≤ b.2
@@ -75,7 +75,7 @@ instance instDecidableLeVec₂ (a b : Vec₂) : Decidable (a ≤ b) := by
   dsimp [instLEVec₂]
   exact instDecidableAnd
 
--- #eval ((0, 0) : Vec₂) ≤ ((8, 2) : Vec₂)
+#guard ((0, 0) : Vec₂) ≤ ((8, 2) : Vec₂)
 
 /-- return `(0, 0) ≤ pos ∧ ≤ size` -/
 def geZeroAndLe (size pos : Vec₂) : Bool := (0, 0) ≤ pos && pos ≤ size

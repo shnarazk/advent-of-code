@@ -233,12 +233,12 @@ namespace Option
 
 `map_or` is already used for a prep
 -/
-def mapOr {α β : Type} : (Option α) → (f : α → β) → (default : β) → β
+def mapOr {α β : Type} : (Option α) → (α → β) → β → β
   | some a, f, _ => f a
   | none, _, default => default
 
--- #eval some "abc" |>.mapOr (·.length) 99
--- #eval none |>.mapOr (·.length) 99
+#guard (some "abc" |>.mapOr (·.length) 99) == 3
+#guard ((none : Option String).mapOr (·.length) 99) == 99
 
 /--
 - (some "abc").unwrapOr "." => "abc"
@@ -246,9 +246,12 @@ def mapOr {α β : Type} : (Option α) → (f : α → β) → (default : β) �
 
 imported from Rust
 -/
-def unwrapOr {α : Type} : (Option α) → (default : α) → α
+def unwrapOr {α : Type} : (Option α) → α → α
   | some a, _ => a
-  | none , df => df
+  | none,  df => df
+
+#guard ((some "abc").unwrapOr ".") == "abc"
+#guard none.unwrapOr "." == "."
 
 end Option
 
@@ -257,7 +260,8 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
   match self with
   | true  => some (f ())
   | false => none
--- #eval true.map (K 3)
+
+#guard true.map (fun _ ↦ 3) == some 3
 
 /-- Rusty operation -/
 def Bool.then {α : Type} (self : Bool) (f : Unit → Option α) : Option α :=
@@ -268,15 +272,18 @@ def Bool.then {α : Type} (self : Bool) (f : Unit → Option α) : Option α :=
 /-- Do the same with `windows(2)` in Rust -/
 def List.windows2 {α : Type} (l : List α) : List (α × α) :=
   List.zip l.dropLast l.tail
-example : (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
+#guard (List.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)]
 
 /-- Do the same with `windows(2)` in Rust -/
 def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
   let l := a.toList
   List.zip l.dropLast l.tail
--- example : (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)] := by rfl
+
+#guard (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)]
 
 /-- Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN. -/
 prefix:max "⁻" => Neg.neg
-example : 4 + ⁻2 = 2 := by rfl
-example : (· + ·) 1 ⁻8 = -7 := by rfl
+
+#guard 4 + ⁻2 = 2
+#guard (· + ·) 1 ⁻8 = -7

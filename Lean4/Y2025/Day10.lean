@@ -84,20 +84,24 @@ abbrev Vec := Array Int
 
 instance : HAdd Vec Vec Vec where
   hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! + b[i]!) |>.toArray
--- #eval #[(1 : Int), 1, 3] + #[(3 : Int), 2, 5]
+
+#guard #[(1 : Int), 1, 3] + #[(3 : Int), 2, 5] == #[4, 3, 8]
 
 instance : HSub Vec Vec Vec where
   hSub a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! - b[i]!) |>.toArray
--- #eval #[(1 : Int), 1, 3] - #[(3 : Int), 2, 5]
+
+#guard #[(1 : Int), 1, 3] - #[(3 : Int), 2, 5] == #[-2, -1, -2]
   
 instance : HMul Vec Int Vec where
   hMul v n := v.iter.map (· * n) |>.toArray
--- #eval sweepOut (#[1, 1], 3) (#[3, 2], 5)
+  
+#guard #[(1 : Int), 2, 3] * (3 : Int) == #[3, 6, 9]
 
 /-- dot product of vectors -/
 def dot (a b : Vec) : Int :=
   a.iter |>.zip b.iter |>.map (fun (a, b) ↦ a * b) |>.fold (· + ·) 0
-#eval dot #[(1 : Int), 1, 3] #[(3 : Int), 2, 5]
+
+#guard dot #[(1 : Int), 1, 3] #[(3 : Int), 2, 5] == 20
 
 /-- erase the first column from the equation -/
 def sweepOut (a b : Vec × Int) : Vec × Int :=
@@ -109,7 +113,8 @@ def sweepOut (a b : Vec × Int) : Vec × Int :=
   let av' := av.drop 1
   let bv' := bv.drop 1
   (bv' * eb - av' * ea, bs * eb - as * eb)
--- #eval sweepOut (#[1, 1], 3) (#[3, 2], 5)
+
+-- #guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
 
 partial
 def resolve (m : List (Vec × Int)) : Vec :=
@@ -133,7 +138,8 @@ def resolve (m : List (Vec × Int)) : Vec :=
       let k := dot effs (v0.fst.drop 1)
       let ans := v0.snd / k
       #[ans] ++ effs
-#eval resolve [(#[1], 3)]
+      
+#guard resolve [(#[1], 3)] == #[3]
 
 instance : HMul (Array Vec) Vec Vec where
   hMul buttons count := 

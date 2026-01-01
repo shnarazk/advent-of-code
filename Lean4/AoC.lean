@@ -63,10 +63,10 @@ def formatFloat (f : Float) (precision : Nat) : String :=
     |>.take (digits + precision + if f < 0 then 2 else 1)
     |>.toString
 
--- #eval formatFloat 123.456789 2  -- Outputs "123.46"
--- #eval formatFloat 123.456789 4  -- Outputs "-123.4568"
--- #eval formatFloat (-123.456789) 2  -- Outputs "123.46"
--- #eval formatFloat (-123.456789) 4  -- Outputs "-123.4568"
+#guard formatFloat 123.456789 2 == "123.46"
+#guard formatFloat (-123.456789) 4 == "-123.4568"
+#guard formatFloat (-123.456789) 2 == "-123.46"
+#guard formatFloat (-123.456789) 4 == "-123.4568"
 
 /--
   Truncate a path-like `String` to its last `depth` components.
