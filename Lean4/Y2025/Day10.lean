@@ -2,6 +2,7 @@ module
 
 public import «AoC».Basic
 public import «AoC».Iterator
+public import «AoC».Math
 public import «AoC».Parser
 
 namespace Y2025.Day10
@@ -79,13 +80,62 @@ end Part1
 
 namespace Part2
 
-instance : HAdd (Array Int) (Array Int) (Array Int) where
-  hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]!) |>.toArray
-  
-instance : HMul (Array Int) Int (Array Int) where
-  hMul v n := v.iter.map (· * n) |>.toArray
+abbrev Vec := Array Int
 
-instance : HMul (Array (Array Int)) (Array Int) (Array Int) where
+instance : HAdd Vec Vec Vec where
+  hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! + b[i]!) |>.toArray
+-- #eval #[(1 : Int), 1, 3] + #[(3 : Int), 2, 5]
+
+instance : HSub Vec Vec Vec where
+  hSub a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! - b[i]!) |>.toArray
+-- #eval #[(1 : Int), 1, 3] - #[(3 : Int), 2, 5]
+  
+instance : HMul Vec Int Vec where
+  hMul v n := v.iter.map (· * n) |>.toArray
+-- #eval sweepOut (#[1, 1], 3) (#[3, 2], 5)
+
+/-- dot product of vectors -/
+def dot (a b : Vec) : Int :=
+  a.iter |>.zip b.iter |>.map (fun (a, b) ↦ a * b) |>.fold (· + ·) 0
+#eval dot #[(1 : Int), 1, 3] #[(3 : Int), 2, 5]
+
+/-- erase the first column from the equation -/
+def sweepOut (a b : Vec × Int) : Vec × Int :=
+  let (av, as) := a
+  let (bv, bs) := b
+  let c := lcm av[0]! bv[0]!
+  let ea := c / av[0]!
+  let eb := c / bv[0]!
+  let av' := av.drop 1
+  let bv' := bv.drop 1
+  (bv' * eb - av' * ea, bs * eb - as * eb)
+-- #eval sweepOut (#[1, 1], 3) (#[3, 2], 5)
+
+partial
+def resolve (m : List (Vec × Int)) : Vec :=
+  let v0 := m[0]!
+  if m.length == 1 then
+    #[v0.snd / v0.fst[0]!]
+  else
+    let (l1, l2) := m.iter.fold
+      (fun (contains, notContains) (vec, total) ↦ if vec[0]! == 0
+          then (contains.concat vec, notContains)
+          else (contains, notContains.concat vec))
+      ([], [])
+    if l1.isEmpty
+    then
+      let m' := m |>.iter |>.map (fun (v, n) ↦ (v.drop 1, n)) |>.toList
+      let effs := resolve m'
+      #[0] ++ effs
+    else
+      let m' := m.drop 1 |>.iter |>.map (sweepOut v0 ·) |>.toList
+      let effs := resolve m'
+      let k := dot effs (v0.fst.drop 1)
+      let ans := v0.snd / k
+      #[ans] ++ effs
+#eval resolve [(#[1], 3)]
+
+instance : HMul (Array Vec) Vec Vec where
   hMul buttons count := 
     count.iter.enumerate
     |>.fold
