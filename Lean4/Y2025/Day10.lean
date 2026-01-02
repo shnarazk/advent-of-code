@@ -179,7 +179,14 @@ instance : HMul (Array Vec) Vec Vec where
       (Array.replicate buttons[0]!.size 0)
 
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
-  0
+  let _num_leds := requirement.size
+  let num_buttons := buttons.size
+  let b := requirement.iter.enumerate.map (fun (i, g) ↦ (
+    (0 ... num_buttons).iter.map (fun j ↦ if buttons[j]!.contains i then 1 else 0) |>.toArray,
+    g)) |>.toList
+  resolve b
+    |>.iter
+    |>.fold (fun acc i ↦ acc + i.toNat) 0
 
 def solve (input : Input) : Nat :=
   input.line.iter
