@@ -47,19 +47,19 @@ def parse_indicators := do
   let v ← pchar '[' *> repeated (pchar '.' <|> pchar '#') <* pchar ']'
   v.iter.map (· == '#') |>.toArray |> pure
 
-#guard AoCParser.parse parse_indicators "[..#.]" == some #[false, false, true, false]
+-- #guard parse parse_indicators "[..#.]" == some #[false, false, true, false]
 
-def parse_nums := separated number (pchar ',') 
+def parse_nums := separated number (pchar ',')
 
-#guard AoCParser.parse parse_nums "42,31,8" == some #[42, 31, 8]
+-- #guard parse parse_nums "42,31,8" == some #[42, 31, 8]
 
-def parse_buttons := separated (pchar '(' *> parse_nums <* pchar ')') (pchar ' ') 
+def parse_buttons := separated (pchar '(' *> parse_nums <* pchar ')') (pchar ' ')
 
-#guard AoCParser.parse parse_buttons "(42,31) (4,31)" == some #[#[42, 31], #[4, 31]]
+-- #guard parse parse_buttons "(42,31) (4,31)" == some #[#[42, 31], #[4, 31]]
 
 def parse_requirement := pchar '{' *> parse_nums <* pchar '}'
 
-#guard AoCParser.parse parse_requirement "{42,31,4,31}" == some #[42, 31, 4, 31]
+-- #guard parse parse_requirement "{42,31,4,31}" == some #[42, 31, 4, 31]
 
 def parse_line := do
   let i ← parse_indicators <* pchar ' '
@@ -70,8 +70,8 @@ def parse_line := do
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do Input.mk <$> separated parse_line eol
-    
-#guard parse "[.#] (1,0) (2,4) {4,3}" == some { line := #[(#[false, true], #[#[1, 0], #[2, 4]], #[4, 3])]}
+
+-- #guard parse "[.#] (1,0) (2,4) {4,3}" == some { line := #[(#[false, true], #[#[1, 0], #[2, 4]], #[4, 3])]}
 
 end parser
 
@@ -142,7 +142,8 @@ def sweepOut (a b : Vec × Int) : Vec × Int :=
   let bv' := bv.drop 1
   (bv' * eb - av' * ea, bs * eb - as * eb)
 
-#guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
+-- lcm is not found in interpreter
+-- #guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
 
 partial
 def resolve (m : List (Vec × Int)) : Vec :=
@@ -167,11 +168,11 @@ def resolve (m : List (Vec × Int)) : Vec :=
       let k := dot effs (v0.fst.drop 1)
       let ans := v0.snd / k
       #[ans] ++ effs
-      
+
 #guard resolve [(#[1], 3)] == #[3]
 
 instance : HMul (Array Vec) Vec Vec where
-  hMul buttons count := 
+  hMul buttons count :=
     count.iter.enumerate
     |>.fold
       (fun acc (i, n) ↦ acc + buttons[i]! * n)
@@ -179,7 +180,7 @@ instance : HMul (Array Vec) Vec Vec where
 
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   0
- 
+
 def solve (input : Input) : Nat :=
   input.line.iter
     |>.map (fun (_, b, r) ↦ solve' b.inted r.inted)

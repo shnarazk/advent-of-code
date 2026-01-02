@@ -13,7 +13,7 @@ open Std.Internal.Parsec.String
 
 variable {α β γ : Type}
 
-instance {ε : Type} [BEq ε] [BEq α] : BEq (Except ε α) where 
+instance {ε : Type} [BEq ε] [BEq α] : BEq (Except ε α) where
   beq a b := match a, b with
   | .error x, .error y => x == y
   | .ok x, .ok y => x == y

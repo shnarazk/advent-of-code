@@ -42,6 +42,7 @@ name = "aoc"
 root = "AoC"
 moreLinkArgs = ["-O3", "-UNDEBUG"]
 buildType = "release"
+# supportInterpreter = true
 
 [[lean_exe]]
 name = "testDriver"
