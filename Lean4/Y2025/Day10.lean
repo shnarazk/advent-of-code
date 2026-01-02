@@ -148,7 +148,9 @@ def sweepOut (a b : Vec × Int) : Vec × Int :=
 partial
 def resolve (m : List (Vec × Int)) : Vec :=
   let v0 := m[0]!
-  if m.length == 1 then
+  if m.length == 0 then
+    #[]
+  else if m.length == 1 then
     #[v0.snd / v0.fst[0]!]
   else
     let (l1, l2) := m.iter.fold
@@ -181,9 +183,9 @@ instance : HMul (Array Vec) Vec Vec where
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   let _num_leds := requirement.size
   let num_buttons := buttons.size
-  let b := requirement.iter.enumerate.map (fun (i, g) ↦ (
-    (0 ... num_buttons).iter.map (fun j ↦ if buttons[j]!.contains i then 1 else 0) |>.toArray,
-    g)) |>.toList
+  let b := requirement.iter.enumerate
+    |>.map (fun (i, g) ↦ (Array.range num_buttons |>.map (buttons[·]!.contains i |>.toInt), g))
+    |>.toList
   resolve b
     |>.iter
     |>.fold (fun acc i ↦ acc + i.toNat) 0
