@@ -5,6 +5,30 @@ public import «AoC».Iterator
 public import «AoC».Math
 public import «AoC».Parser
 
+abbrev Vec := Array Int
+
+class ToVec (α : Type) (β : outParam Type) where
+  toVec : α → β
+
+instance : ToVec Nat Int where
+  toVec (n : Nat) : Int := n.toInt64.toInt
+
+instance {α β : Type} [ToVec α β] : ToVec (Array α) (Array β) where
+  toVec v := v.iter.map ToVec.toVec |>.toArray
+
+#guard ToVec.toVec #[1, 2] == #[(1 : Int), 2]
+#guard ToVec.toVec #[#[1, 2]] == #[#[(1 : Int), 2]]
+#guard ToVec.toVec #[#[#[1], #[2]]] == #[#[#[(1 : Int)], #[2]]]
+
+/-- rank-polymorphic toInt -/
+def Nat.inted (n : Nat) : Int := ToVec.toVec n
+def Array.inted {α β : Type} [ToVec α β] (v : Array α) : Array β := ToVec.toVec v
+
+#guard (3 : Nat).inted == (3 : Int)
+#guard #[1, 2].inted == #[(1 : Int), 2]
+#guard #[#[1, 2]].inted == #[#[(1 : Int), 2]]
+#guard #[#[#[1], #[2]]].inted == #[#[#[(1 : Int)], #[2]]]
+
 namespace Y2025.Day10
 
 structure Input where
@@ -22,16 +46,20 @@ open Std.Internal.Parsec.String
 def parse_indicators := do
   let v ← pchar '[' *> repeated (pchar '.' <|> pchar '#') <* pchar ']'
   v.iter.map (· == '#') |>.toArray |> pure
--- #eval AoCParser.parse parse_indicators "[..##.]"
+
+#guard AoCParser.parse parse_indicators "[..#.]" == some #[false, false, true, false]
 
 def parse_nums := separated number (pchar ',') 
--- #eval AoCParser.parse parse_nums "42,31,8"
+
+#guard AoCParser.parse parse_nums "42,31,8" == some #[42, 31, 8]
 
 def parse_buttons := separated (pchar '(' *> parse_nums <* pchar ')') (pchar ' ') 
--- #eval AoCParser.parse parse_buttons "(42,31) (4,31)"
+
+#guard AoCParser.parse parse_buttons "(42,31) (4,31)" == some #[#[42, 31], #[4, 31]]
 
 def parse_requirement := pchar '{' *> parse_nums <* pchar '}'
--- #eval AoCParser.parse parse_requirement "{42,31,4,31}"
+
+#guard AoCParser.parse parse_requirement "{42,31,4,31}" == some #[42, 31, 4, 31]
 
 def parse_line := do
   let i ← parse_indicators <* pchar ' '
@@ -42,7 +70,8 @@ def parse_line := do
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do Input.mk <$> separated parse_line eol
--- #eval parse "[.#] (1,3) (2,3,4) {42,31,4,31}"
+    
+#guard parse "[.#] (1,0) (2,4) {4,3}" == some { line := #[(#[false, true], #[#[1, 0], #[2, 4]], #[4, 3])]}
 
 end parser
 
@@ -57,7 +86,8 @@ def toIdicator (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : 
       (fun acc (n, b) ↦
         if b then buttons[n]! |>.iter |>.fold (fun acc i ↦ acc.modify i (!·)) acc else acc)
       (Array.replicate len false)
- -- #eval toIdicator #[#[1], #[0,2]] #[false, true] 3
+
+ #guard toIdicator #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]
 
 def solve' (setting : Array Bool × Array (Array Nat) × Array Nat) : Nat := Id.run do
   let (indicator, buttons,_ ) := setting
@@ -80,8 +110,6 @@ end Part1
 
 namespace Part2
 
-abbrev Vec := Array Int
-
 instance : HAdd Vec Vec Vec where
   hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! + b[i]!) |>.toArray
 
@@ -91,10 +119,10 @@ instance : HSub Vec Vec Vec where
   hSub a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! - b[i]!) |>.toArray
 
 #guard #[(1 : Int), 1, 3] - #[(3 : Int), 2, 5] == #[-2, -1, -2]
-  
+
 instance : HMul Vec Int Vec where
   hMul v n := v.iter.map (· * n) |>.toArray
-  
+
 #guard #[(1 : Int), 2, 3] * (3 : Int) == #[3, 6, 9]
 
 /-- dot product of vectors -/
@@ -114,7 +142,7 @@ def sweepOut (a b : Vec × Int) : Vec × Int :=
   let bv' := bv.drop 1
   (bv' * eb - av' * ea, bs * eb - as * eb)
 
--- #guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
+#guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
 
 partial
 def resolve (m : List (Vec × Int)) : Vec :=
@@ -123,9 +151,9 @@ def resolve (m : List (Vec × Int)) : Vec :=
     #[v0.snd / v0.fst[0]!]
   else
     let (l1, l2) := m.iter.fold
-      (fun (contains, notContains) (vec, total) ↦ if vec[0]! == 0
-          then (contains.concat vec, notContains)
-          else (contains, notContains.concat vec))
+      (fun (contains, notContains) line ↦ if line.fst[0]! == 0
+          then (contains.concat line, notContains)
+          else (contains, notContains.concat line))
       ([], [])
     if l1.isEmpty
     then
@@ -133,7 +161,8 @@ def resolve (m : List (Vec × Int)) : Vec :=
       let effs := resolve m'
       #[0] ++ effs
     else
-      let m' := m.drop 1 |>.iter |>.map (sweepOut v0 ·) |>.toList
+      let v0 := l1[0]!
+      let m' := (l1.drop 1 ++ l2).drop 1 |>.iter |>.map (sweepOut v0 ·) |>.toList
       let effs := resolve m'
       let k := dot effs (v0.fst.drop 1)
       let ans := v0.snd / k
@@ -147,8 +176,14 @@ instance : HMul (Array Vec) Vec Vec where
     |>.fold
       (fun acc (i, n) ↦ acc + buttons[i]! * n)
       (Array.replicate buttons[0]!.size 0)
+
+def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
+  0
  
-def solve (_ : Input) : Nat := 0
+def solve (input : Input) : Nat :=
+  input.line.iter
+    |>.map (fun (_, b, r) ↦ solve' b.inted r.inted)
+    |>.sum
 
 end Part2
 
