@@ -25,6 +25,12 @@ git = "git@github.com:leanprover/lean4-cli.git"
 rev = "main"
 # version = "git#e4d23db1b205e04589230eedbfe1439693dd3b9c"
 
+[[require]]
+name = "lean4-itertools"
+scope = "shnarazk"
+git = "git@github.com:shnarazk/lean4-itertools.git"
+rev = "main"
+
 [[lean_lib]]
 name = "AoC"
 

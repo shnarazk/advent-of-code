@@ -1,8 +1,8 @@
 module
 
+public import Itertools
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Iterator
 public import «AoC».Parser
 public import «AoC».Vec3
 

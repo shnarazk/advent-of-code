@@ -1,7 +1,7 @@
 module
 
+public import Itertools
 public import «AoC».Basic
-public import «AoC».Iterator
 public import «AoC».Parser
 
 namespace Y2025.Day12

@@ -1,7 +1,9 @@
 module
 
+public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Iterator
+-- public import «AoC».Iterator
 public import «AoC».Math
 public import «AoC».Parser
 
