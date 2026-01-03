@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2025/day/10>
 #![allow(dead_code)]
-#![allow(unused_imports)]
+// #![allow(unused_imports)]
 // #![allow(unused_variables)]
 use {
     crate::{
@@ -8,7 +8,7 @@ use {
         math::{gcd, lcm},
     },
     rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
     std::{
         cmp::{Ordering, Reverse},
         collections::{BinaryHeap, HashMap, HashSet},
@@ -132,26 +132,25 @@ impl AdventOfCode for Puzzle {
             .take(10)
             .map(|(_, buttons, goal)| {
                 let num_buttons = buttons.len();
-                let mut sorted_buttons = buttons.clone();
-                sorted_buttons.sort_unstable_by_key(|l| l.len());
-                sorted_buttons.reverse();
+                let mut distribution = buttons.clone();
+                distribution.sort_unstable_by_key(|l| l.len());
+                distribution.reverse();
+                let mut visited: FxHashSet<State> =
+                    HashSet::<_, BuildHasherDefault<FxHasher>>::default();
                 let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
                 to_visit.push(Reverse(State {
                     remain: goal.iter().sum::<usize>(),
                     counts: vec![0; num_buttons],
                 }));
                 while let Some(Reverse(state)) = to_visit.pop() {
-                    for (_, _button) in state.counts.iter().enumerate() {
+                    if state.counts == *goal {
+                        return dbg!(0);
+                    }
+                    for (bi, distribution) in buttons.iter().enumerate() {
                         let mut s = state.clone();
-                        // for bi in button.iter() {
-                        //     s[*bi] += 1;
-                        //     if s[*bi] > goal[*bi] {
-                        //         continue 'next_button;
-                        //     }
-                        // }
-                        if s.counts == *goal {
-                            return dbg!(0);
-                        }
+                        // TODO: check whether counts exceeds the goal
+                        s.counts[bi] += 1;
+                        s.remain -= distribution.len();
                         // for n in next.iter() {
                         //     if (0..size).all(|i| s1[i] <= n[i]) {
                         //         continue 'next_button;
@@ -161,6 +160,7 @@ impl AdventOfCode for Puzzle {
                             to_visit.push(Reverse(s));
                         }
                     }
+                    visited.insert(state);
                 }
                 unreachable!()
             })
