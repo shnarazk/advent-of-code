@@ -5,13 +5,13 @@
 use {
     crate::{
         framework::{AdventOfCode, ParseError, aoc},
-        math::{gcd, lcm},
+        // math::{gcd, lcm},
     },
-    rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
+    // rayon::prelude::*,
+    rustc_data_structures::fx::{FxHashSet, FxHasher},
     std::{
         cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashMap, HashSet},
+        collections::{BinaryHeap, HashSet},
         hash::BuildHasherDefault,
     },
 };
@@ -64,7 +64,7 @@ mod parser {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct State {
-    remain: usize,
+    remain: u32,
     counts: Vec<usize>,
 }
 
@@ -80,16 +80,36 @@ impl Ord for State {
     }
 }
 
+impl State {
+    fn sum(&self, buttons: &[Vec<usize>], n: usize) -> Vec<u32> {
+        let mut result = vec![0; n];
+        for (bi, n) in self.counts.iter().enumerate() {
+            for i in buttons[bi].iter() {
+                result[*i] += *n as u32;
+            }
+        }
+        result
+    }
+}
+
+fn exceeds(values: &[u32], dist: &[usize], goal: &[u32]) -> bool {
+    assert_eq!(values.len(), goal.len());
+    values
+        .iter()
+        .enumerate()
+        .any(|(i, n)| dist.contains(&(i as usize)) as u32 + n > goal[i])
+}
+
 #[aoc(2025, 10)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
-        self.line.iter().take(10).for_each(|(_, buttons, goal)| {
-            let ws = buttons.iter().map(|l| l.len()).collect::<Vec<_>>();
-            let total = goal.iter().sum::<usize>();
-            let g = ws.iter().skip(1).fold(ws[0], |acc, n| gcd(acc, *n));
-            dbg!(g, total);
-        });
+        // self.line.iter().take(10).for_each(|(_, buttons, goal)| {
+        //     let ws = buttons.iter().map(|l| l.len()).collect::<Vec<_>>();
+        //     let total = goal.iter().sum::<usize>();
+        //     let g = ws.iter().skip(1).fold(ws[0], |acc, n| gcd(acc, *n));
+        //     dbg!(g, total);
+        // });
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -128,102 +148,72 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .par_iter()
+            .iter()
             .take(10)
             .map(|(_, buttons, goal)| {
+                let goal = goal.iter().map(|n| *n as u32).collect::<Vec<_>>();
+                // let scale: usize = 10000;
+                let mut counter = 0;
                 let num_buttons = buttons.len();
-                let mut distribution = buttons.clone();
-                distribution.sort_unstable_by_key(|l| l.len());
-                distribution.reverse();
-                let mut visited: FxHashSet<State> =
+                let goal_len = goal.len();
+                // let button_weight: Vec<usize> =
+                //     buttons.iter().map(|l| l.len()).collect::<Vec<usize>>();
+                // let mut distribution = buttons.clone();
+                // distribution.sort_unstable_by_key(|l| l.len());
+                // distribution.reverse();
+                let mut visited: FxHashSet<Vec<u32>> =
                     HashSet::<_, BuildHasherDefault<FxHasher>>::default();
                 let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
                 to_visit.push(Reverse(State {
-                    remain: goal.iter().sum::<usize>(),
+                    remain: goal.iter().map(|d| *d).sum::<u32>(),
                     counts: vec![0; num_buttons],
                 }));
                 while let Some(Reverse(state)) = to_visit.pop() {
-                    if state.counts == *goal {
-                        return dbg!(0);
+                    let values = state.sum(buttons, goal_len);
+                    if values == *goal {
+                        return dbg!(state.counts.into_iter().sum::<usize>());
                     }
+                    if state.remain == 0 || visited.contains(&values) {
+                        continue;
+                    }
+                    let sum = state.counts.iter().sum::<usize>();
+                    if counter < sum {
+                        counter = sum;
+                        dbg!(&state);
+                    }
+                    // assert_eq!(values.len(), goal.len());
                     for (bi, distribution) in buttons.iter().enumerate() {
+                        if exceeds(&values, &distribution, &goal) {
+                            continue;
+                        }
                         let mut s = state.clone();
-                        // TODO: check whether counts exceeds the goal
                         s.counts[bi] += 1;
-                        s.remain -= distribution.len();
-                        // for n in next.iter() {
-                        //     if (0..size).all(|i| s1[i] <= n[i]) {
-                        //         continue 'next_button;
-                        //     }
+                        // if s.remain < distribution.len() {
+                        //     panic!(
+                        //         "{:?} < {:?} :: {:?}, {}: {:?}",
+                        //         s, goal, buttons, bi, distribution
+                        //     );
                         // }
-                        if to_visit.iter().find(|Reverse(r)| *r == s).is_none() {
+                        let v = s.sum(buttons, goal_len);
+                        s.remain = goal
+                            .iter()
+                            .zip(v.iter())
+                            .map(|(a, b)| *a - *b)
+                            .sum::<u32>()
+                            // / s.counts
+                            //     .iter()
+                            //     .enumerate()
+                            //     .map(|(i, c)| *c * button_weight[i])
+                            //     .sum::<usize>();
+                            ;
+                        if !visited.contains(&v) {
                             to_visit.push(Reverse(s));
                         }
                     }
-                    visited.insert(state);
+                    visited.insert(values);
                 }
                 unreachable!()
             })
             .sum::<usize>()
     }
-}
-
-fn traverse(
-    buttons: &[Vec<usize>],
-    goal: &Vec<usize>,
-    counts: Vec<Option<usize>>,
-    levels: &Vec<usize>,
-    memo: &mut HashSet<Vec<usize>>,
-) -> Option<usize> {
-    if *levels == *goal {
-        return Some(counts.iter().flatten().sum::<usize>());
-    } else if let Some(cursor) = counts.iter().position(|n| n.is_none()) {
-        let mut max_assign = buttons[cursor]
-            .iter()
-            .map(|li| goal[*li] - levels[*li])
-            .min();
-        // let tmp = max_assign;
-        while let Some(count) = max_assign {
-            let mut new_counts = counts.clone();
-            new_counts[cursor] = max_assign;
-            let mut new_levels = levels.clone();
-            for li in buttons[cursor].iter() {
-                new_levels[*li] += count;
-            }
-            // if memo.contains(&new_levels) {
-            //     return None;
-            // }
-            if let Some(ans) = traverse(buttons, goal, new_counts, &new_levels, memo) {
-                return Some(ans);
-            }
-            max_assign = count.checked_sub(1);
-        }
-        // if let Some(n) = tmp {
-        //     let mut l = levels.clone();
-        //     for li in buttons[cursor].iter() {
-        //         l[*li] += n;
-        //     }
-        //     memo.insert(l);
-        // }
-    }
-    None
-}
-
-fn f(v: &[usize], count: Vec<usize>, n: usize) -> Option<Vec<usize>> {
-    if n == 0 {
-        println!("{count:?}");
-        return None;
-    }
-    if v.is_empty() {
-        return None;
-    }
-    for i in (0..=n / v[0]).rev() {
-        let mut c = count.clone();
-        c.push(i);
-        if let Some(mut a) = f(&v[1..], c, n - v[0] * i) {
-            a.push(i);
-            return Some(a);
-        }
-    }
-    None
 }
