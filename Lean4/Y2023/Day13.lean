@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 def cuts (g : Nat) : List Nat := List.range g |>.drop 1
@@ -58,7 +58,7 @@ open Dim2
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

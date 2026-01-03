@@ -2,9 +2,9 @@ module
 
 public import Std
 public import Std.Internal.Parsec
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace Y2024.Day02
 open CiCL
@@ -13,7 +13,7 @@ abbrev Input := Array (Array Nat)
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

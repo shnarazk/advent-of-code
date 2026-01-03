@@ -1,8 +1,8 @@
 module
 
+public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Iterator
-public import «AoC».Parser
 
 namespace Y2024.Day04
 
@@ -97,7 +97,7 @@ def Input.mas_2 (self : Input) (p : Int × Int) : Bool :=
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

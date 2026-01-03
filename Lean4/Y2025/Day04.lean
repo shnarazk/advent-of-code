@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2025.Day04
@@ -34,7 +34,7 @@ def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec.String
 
 def parse_line := repeated ((· == '@') <$> (pchar '.' <|> pchar '@'))

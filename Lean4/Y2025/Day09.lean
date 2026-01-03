@@ -1,8 +1,8 @@
 module
 
+public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Iterator
-public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2025.Day09
@@ -24,7 +24,7 @@ instance : ToString Input where toString s := s!"{s.line.size}"
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

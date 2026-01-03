@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace UInt64
 
@@ -69,7 +69,7 @@ def calcOnRange (s' e' : UInt64) (r : Nat := 2) : Nat := Id.run do
 
  namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

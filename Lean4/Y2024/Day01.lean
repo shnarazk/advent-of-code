@@ -2,9 +2,9 @@ module
 
 public import Std
 public import Std.Internal.Parsec
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace Y2024.Day01
 open Accumulation
@@ -15,7 +15,7 @@ instance : ToString Input where toString s := s!"{s.line.size}"
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

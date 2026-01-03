@@ -5,6 +5,20 @@ public import Std.Data.Iterators.Combinators.Zip
 
 @[expose] public section
 
+namespace AoCParser
+
+open Lean
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
+
+/-- Run `parser` on `source` and return the result as `Option` -/
+public def parse {α : Type} (parser : Parser α) (source : String) : Option α :=
+  match Parser.run parser source with
+  | Except.ok r    => some r
+  | Except.error _ => none
+
+end AoCParser
+
 /-- print a data like `dbg!` in Rust -/
 def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
   dbgTrace s!"{label}: {a}" (fun _ ↦ a)

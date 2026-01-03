@@ -1,7 +1,7 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 
 namespace Y2025.Day05
 
@@ -14,7 +14,7 @@ instance : ToString Input where toString s := s!"{s.ranges}, {s.ids}"
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec.String
 
 def parse_range := do Prod.mk <$> (number <* (pchar '-')) <*> number
@@ -72,7 +72,7 @@ def solve (input : Input) : Nat := Id.run do
       |>.alter (range.snd, true) (·.mapOr (· + 1) 1 |> some))
     (HashMap.emptyWithCapacity (2 * input.ranges.size))
   let mut (level, start, total) := (0, 0, 0)
-  for ((n, b), c) in nodes.toArray.heapSort (·.fst < ·.fst) do
+  for ((n, b), c) in nodes.toArray.qsort (·.fst < ·.fst) do
     if b
     then
       level := level - c

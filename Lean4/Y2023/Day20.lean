@@ -1,9 +1,9 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Math
-public import «AoC».Parser
 
 namespace Y2023.Day20
 
@@ -154,7 +154,7 @@ def Circuit.run_pulse (circuit : Circuit) (dest_port : Label) (limit : Nat := 10
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String

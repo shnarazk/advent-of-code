@@ -1,9 +1,9 @@
 module
 
 public import Batteries.Data.BinaryHeap
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2023.Day17
@@ -18,7 +18,7 @@ instance : ToString Input where toString _ := s!""
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

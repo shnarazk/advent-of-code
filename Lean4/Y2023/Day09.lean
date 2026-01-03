@@ -1,7 +1,7 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 
 namespace Y2023.Day09
 
@@ -11,7 +11,7 @@ open Accumulation
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec.String
 
 def parse := AoCParser.parse parser

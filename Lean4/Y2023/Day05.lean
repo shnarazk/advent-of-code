@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace Y2023.Day05
 
@@ -29,7 +29,7 @@ instance : ToString Range where
 
 namespace parser
 
-open Lean Parser AoCParser
+open WinnowParsers
 open Std.Internal.Parsec.String
 
 def pseeds := pstring "seeds: " *> separated number whitespaces <* eol <* eol
