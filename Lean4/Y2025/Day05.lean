@@ -72,7 +72,7 @@ def solve (input : Input) : Nat := Id.run do
       |>.alter (range.snd, true) (·.mapOr (· + 1) 1 |> some))
     (HashMap.emptyWithCapacity (2 * input.ranges.size))
   let mut (level, start, total) := (0, 0, 0)
-  for ((n, b), c) in nodes.toArray.heapSort (·.fst < ·.fst) do
+  for ((n, b), c) in nodes.toArray.qsort (·.fst < ·.fst) do
     if b
     then
       level := level - c
