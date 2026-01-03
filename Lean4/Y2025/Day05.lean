@@ -1,7 +1,7 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 
 namespace Y2025.Day05
 
@@ -14,7 +14,7 @@ instance : ToString Input where toString s := s!"{s.ranges}, {s.ids}"
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec.String
 
 def parse_range := do Prod.mk <$> (number <* (pchar '-')) <*> number

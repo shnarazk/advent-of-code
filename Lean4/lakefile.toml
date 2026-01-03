@@ -31,6 +31,12 @@ scope = "shnarazk"
 git = "git@github.com:shnarazk/lean4-itertools.git"
 rev = "main"
 
+[[require]]
+name = "lean4-winnow"
+scope = "shnarazk"
+git = "git@github.com:shnarazk/lean4-winnow.git"
+rev = "main"
+
 [[lean_lib]]
 name = "AoC"
 

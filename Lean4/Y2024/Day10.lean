@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2024.Day10
@@ -11,7 +11,8 @@ open Accumulation CiCL Dim2 Std
 abbrev Input := Rect Nat
 
 namespace parser
-open AoCParser
+
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

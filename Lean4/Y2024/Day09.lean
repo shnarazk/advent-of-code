@@ -1,8 +1,8 @@
 module
 
 public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 
 namespace Y2024.Day09
 
@@ -22,7 +22,7 @@ instance : ToString (Array (Option Nat)) where
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

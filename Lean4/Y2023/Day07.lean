@@ -1,7 +1,7 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 
 namespace Y2023.Day07
 
@@ -13,7 +13,7 @@ deriving BEq, Inhabited, Repr
 
 namespace parser
 
-open Lean AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

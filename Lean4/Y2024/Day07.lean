@@ -1,7 +1,7 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
-public import «AoC».Parser
 public import «AoC».Combinator
 
 namespace Y2024.Day07
@@ -16,7 +16,7 @@ def expand (ops : Array (Nat → Nat → Nat)) (vals : HashSet Nat) (b threshold
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

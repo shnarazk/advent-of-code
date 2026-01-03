@@ -1,9 +1,9 @@
 module
 
 public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 namespace Y2023.Day18
@@ -65,7 +65,7 @@ def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

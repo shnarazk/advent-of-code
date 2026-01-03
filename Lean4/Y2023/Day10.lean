@@ -1,9 +1,9 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Vec
-public import «AoC».Parser
 
 namespace Y2023.Day10
 
@@ -84,7 +84,7 @@ def dest (mat : Rect Circuit) (vec : Vec₂ × Vec₂) : Vec₂ × Vec₂ :=
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

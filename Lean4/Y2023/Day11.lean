@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace Y2023.Day11
 
@@ -26,7 +26,7 @@ end Data
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

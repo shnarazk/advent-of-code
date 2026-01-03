@@ -1,8 +1,8 @@
 module
 
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec
 
 open Accumulation CiCL Dim2
@@ -67,7 +67,7 @@ def propagate (r : Rect Kind) (pos : Idx₂) (dir : Dir) : List (Idx₂ × Dir) 
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

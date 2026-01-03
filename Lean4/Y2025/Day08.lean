@@ -1,9 +1,9 @@
 module
 
 public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 public import «AoC».Vec3
 
 namespace Y2025.Day08
@@ -19,7 +19,7 @@ instance : ToString Input where toString s := s!"{s.boxes}"
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 

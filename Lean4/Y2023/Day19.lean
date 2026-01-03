@@ -1,9 +1,9 @@
 module
 
 public import Itertools
+public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
-public import «AoC».Parser
 
 namespace Y2023.Day19
 
@@ -62,7 +62,7 @@ abbrev Setting := HashMap String Nat
 
 namespace parser
 
-open AoCParser
+open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 open Std.HashMap
