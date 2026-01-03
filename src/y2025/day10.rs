@@ -1,13 +1,12 @@
 //! <https://adventofcode.com/2025/day/10>
-// #![allow(dead_code)]
-// #![allow(unused_imports)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
 // #![allow(unused_variables)]
 use {
     crate::{
-        framework::{self, AdventOfCode, ParseError, aoc},
+        framework::{AdventOfCode, ParseError, aoc},
         math::{gcd, lcm},
     },
-    // microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     rustc_data_structures::fx::{FxHashMap, FxHasher},
     std::{
@@ -63,6 +62,24 @@ mod parser {
     }
 }
 
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+struct State {
+    remain: usize,
+    counts: Vec<usize>,
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.remain.partial_cmp(&other.remain)
+    }
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.remain.cmp(&other.remain)
+    }
+}
+
 #[aoc(2025, 10)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
@@ -73,7 +90,6 @@ impl AdventOfCode for Puzzle {
             let g = ws.iter().skip(1).fold(ws[0], |acc, n| gcd(acc, *n));
             dbg!(g, total);
         });
-        // demo();
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
@@ -115,53 +131,36 @@ impl AdventOfCode for Puzzle {
             .par_iter()
             .take(10)
             .map(|(_, buttons, goal)| {
-                let mut sorted = buttons.clone();
-                sorted.sort_unstable_by_key(|l| l.len());
-                sorted.reverse();
-
-                let b = sorted[0].len();
-                let s = sorted[sorted.len() - 1].len();
-                let memo: HashSet<Vec<usize>> = HashSet::new();
-                // let range = dbg!(b - s);
-
-                let counts: Vec<Option<usize>> = vec![None; buttons.len()];
-                let levels = vec![0_usize; goal.len()];
-
-                // dbg!(traverse(&sorted, goal, counts, &levels, &mut memo).expect(""))
-                let size = goal.len();
-                let mut to_visit: HashSet<Vec<usize>> = HashSet::new();
-                let mut next: HashSet<Vec<usize>> = HashSet::new();
-                to_visit.insert(vec![0; goal.len()]);
-                for i in 1_usize.. {
-                    if i % 10 == 0 {
-                        dbg!(to_visit.len());
-                    }
-                    next.clear();
-                    for s in to_visit.iter() {
-                        'next_button: for button in buttons.iter() {
-                            let mut s1 = s.clone();
-                            for bi in button.iter() {
-                                s1[*bi] += 1;
-                                if s1[*bi] > goal[*bi] {
-                                    continue 'next_button;
-                                }
-                            }
-                            if s1 == *goal {
-                                return dbg!(i);
-                            }
-                            // for n in next.iter() {
-                            //     if (0..size).all(|i| s1[i] <= n[i]) {
-                            //         continue 'next_button;
-                            //     }
-                            // }
-                            if to_visit.contains(&s1) {
-                                dbg!();
-                            }
-                            next.insert(s1);
+                let num_buttons = buttons.len();
+                let mut sorted_buttons = buttons.clone();
+                sorted_buttons.sort_unstable_by_key(|l| l.len());
+                sorted_buttons.reverse();
+                let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+                to_visit.push(Reverse(State {
+                    remain: goal.iter().sum::<usize>(),
+                    counts: vec![0; num_buttons],
+                }));
+                while let Some(Reverse(state)) = to_visit.pop() {
+                    for (_, _button) in state.counts.iter().enumerate() {
+                        let mut s = state.clone();
+                        // for bi in button.iter() {
+                        //     s[*bi] += 1;
+                        //     if s[*bi] > goal[*bi] {
+                        //         continue 'next_button;
+                        //     }
+                        // }
+                        if s.counts == *goal {
+                            return dbg!(0);
+                        }
+                        // for n in next.iter() {
+                        //     if (0..size).all(|i| s1[i] <= n[i]) {
+                        //         continue 'next_button;
+                        //     }
+                        // }
+                        if to_visit.iter().find(|Reverse(r)| *r == s).is_none() {
+                            to_visit.push(Reverse(s));
                         }
                     }
-                    std::mem::swap(&mut next, &mut to_visit);
-                    assert!(!to_visit.is_empty());
                 }
                 unreachable!()
             })
@@ -183,11 +182,8 @@ fn traverse(
             .iter()
             .map(|li| goal[*li] - levels[*li])
             .min();
-        let tmp = max_assign;
+        // let tmp = max_assign;
         while let Some(count) = max_assign {
-            // if cursor == 0 {
-            //     dbg!(count, memo.len());
-            // }
             let mut new_counts = counts.clone();
             new_counts[cursor] = max_assign;
             let mut new_levels = levels.clone();
