@@ -1,9 +1,19 @@
 //! <https://adventofcode.com/2025/day/10>
+#![allow(dead_code)]
+// #![allow(unused_imports)]
+// #![allow(unused_variables)]
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
-    microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
+    crate::{
+        framework::{AdventOfCode, ParseError, aoc},
+        math::{gcd, lcm},
+    },
     rayon::prelude::*,
-    std::collections::HashSet,
+    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
+    std::{
+        cmp::{Ordering, Reverse},
+        collections::{BinaryHeap, HashMap, HashSet},
+        hash::BuildHasherDefault,
+    },
 };
 
 type Spec = (Vec<bool>, Vec<Vec<usize>>, Vec<usize>);
@@ -52,15 +62,39 @@ mod parser {
     }
 }
 
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+struct State {
+    remain: usize,
+    counts: Vec<usize>,
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.remain.partial_cmp(&other.remain)
+    }
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.remain.cmp(&other.remain)
+    }
+}
+
 #[aoc(2025, 10)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
+        self.line.iter().take(10).for_each(|(_, buttons, goal)| {
+            let ws = buttons.iter().map(|l| l.len()).collect::<Vec<_>>();
+            let total = goal.iter().sum::<usize>();
+            let g = ws.iter().skip(1).fold(ws[0], |acc, n| gcd(acc, *n));
+            dbg!(g, total);
+        });
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
         self.line
-            .par_iter()
+            .iter()
             .map(|(goal, buttons, _)| {
                 let mut checked: HashSet<Vec<bool>> = HashSet::new();
                 let mut to_visit: HashSet<Vec<bool>> = HashSet::new();
@@ -95,32 +129,101 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .par_iter()
-            .map(|(_, buttons, goal)| solve(buttons, goal))
+            .take(10)
+            .map(|(_, buttons, goal)| {
+                let num_buttons = buttons.len();
+                let mut distribution = buttons.clone();
+                distribution.sort_unstable_by_key(|l| l.len());
+                distribution.reverse();
+                let mut visited: FxHashSet<State> =
+                    HashSet::<_, BuildHasherDefault<FxHasher>>::default();
+                let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
+                to_visit.push(Reverse(State {
+                    remain: goal.iter().sum::<usize>(),
+                    counts: vec![0; num_buttons],
+                }));
+                while let Some(Reverse(state)) = to_visit.pop() {
+                    if state.counts == *goal {
+                        return dbg!(0);
+                    }
+                    for (bi, distribution) in buttons.iter().enumerate() {
+                        let mut s = state.clone();
+                        // TODO: check whether counts exceeds the goal
+                        s.counts[bi] += 1;
+                        s.remain -= distribution.len();
+                        // for n in next.iter() {
+                        //     if (0..size).all(|i| s1[i] <= n[i]) {
+                        //         continue 'next_button;
+                        //     }
+                        // }
+                        if to_visit.iter().find(|Reverse(r)| *r == s).is_none() {
+                            to_visit.push(Reverse(s));
+                        }
+                    }
+                    visited.insert(state);
+                }
+                unreachable!()
+            })
             .sum::<usize>()
     }
 }
 
-fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
-    let mut problem = Problem::new(OptimizationDirection::Minimize);
-    let mut variables: Vec<Variable> = Vec::new();
-    for _ in 0..buttons.len() {
-        let b = problem.add_integer_var(1.0, (0, i32::MAX));
-        variables.push(b);
-    }
-    for (gi, g) in goals.iter().enumerate() {
-        let mut group: Vec<(Variable, f64)> = Vec::new();
-        for (bi, b) in buttons.iter().enumerate() {
-            if b.contains(&gi) {
-                group.push((variables[bi], 1.0));
+fn traverse(
+    buttons: &[Vec<usize>],
+    goal: &Vec<usize>,
+    counts: Vec<Option<usize>>,
+    levels: &Vec<usize>,
+    memo: &mut HashSet<Vec<usize>>,
+) -> Option<usize> {
+    if *levels == *goal {
+        return Some(counts.iter().flatten().sum::<usize>());
+    } else if let Some(cursor) = counts.iter().position(|n| n.is_none()) {
+        let mut max_assign = buttons[cursor]
+            .iter()
+            .map(|li| goal[*li] - levels[*li])
+            .min();
+        // let tmp = max_assign;
+        while let Some(count) = max_assign {
+            let mut new_counts = counts.clone();
+            new_counts[cursor] = max_assign;
+            let mut new_levels = levels.clone();
+            for li in buttons[cursor].iter() {
+                new_levels[*li] += count;
             }
+            // if memo.contains(&new_levels) {
+            //     return None;
+            // }
+            if let Some(ans) = traverse(buttons, goal, new_counts, &new_levels, memo) {
+                return Some(ans);
+            }
+            max_assign = count.checked_sub(1);
         }
-        problem.add_constraint(&group, ComparisonOp::Eq, *g as f64);
+        // if let Some(n) = tmp {
+        //     let mut l = levels.clone();
+        //     for li in buttons[cursor].iter() {
+        //         l[*li] += n;
+        //     }
+        //     memo.insert(l);
+        // }
     }
+    None
+}
 
-    let solution = problem.solve().unwrap();
-    variables
-        .iter()
-        .map(|b| solution[*b])
-        .map(|f| f.round() as usize)
-        .sum::<usize>()
+fn f(v: &[usize], count: Vec<usize>, n: usize) -> Option<Vec<usize>> {
+    if n == 0 {
+        println!("{count:?}");
+        return None;
+    }
+    if v.is_empty() {
+        return None;
+    }
+    for i in (0..=n / v[0]).rev() {
+        let mut c = count.clone();
+        c.push(i);
+        if let Some(mut a) = f(&v[1..], c, n - v[0] * i) {
+            a.push(i);
+            return Some(a);
+        }
+    }
+    None
 }
