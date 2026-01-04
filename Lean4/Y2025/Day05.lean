@@ -63,7 +63,7 @@ instance : DecidableLT (Nat × Bool) := by
           | Or.inr ⟨heq', _⟩ => absurd heq' hneq)
   exact h4
 
--- #eval (2, true) < (3, false)
+#guard (2, true) < (3, false)
 
 def solve (input : Input) : Nat := Id.run do
   let nodes : HashMap (Nat × Bool) Nat := input.ranges.foldl

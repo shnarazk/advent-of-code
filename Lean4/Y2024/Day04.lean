@@ -81,7 +81,8 @@ def Input.xmas_wn (self : Input) (p : Int × Int) : Nat :=
       && self.plane.get? (p.1 - 3, p.2 - 3) == some 'S'
     |> asNat
 
--- #eval ['z', 'c'].mergeSort
+#guard ['z', 'c'].mergeSort == ['c', 'z']
+
 def Input.mas_1 (self : Input) (p : Int × Int) : Bool :=
   let o := self.plane.getD p 'P'
   let a := self.plane.getD (p.1 - 1, p.2 - 1) 'P'

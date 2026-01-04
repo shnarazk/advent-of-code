@@ -9,21 +9,24 @@ namespace UInt64
 /-- return the number of digits minus one: `0.iLog10 = 0` -/
 partial
 def iLog10 (a : UInt64) : Int := if a < 10 then 0 else 1 + iLog10 (a / 10)
--- #eval (12809 : UInt64).iLog10
+
+#guard (12809 : UInt64).iLog10 == 4
 
 /-- pick up `nth` `size` digits as `UInt64`. `nth` is zero-based and is counted from the top. -/
 def pick (a : UInt64) (size nth : Nat) : UInt64 :=
   let len : Nat := (a.iLog10 + 1).toNat
   -- assert! len ≥ size * (nth + 1)
   (a / (10 ^ (len - size * (nth + 1))).toUInt64) % (10 ^ size)
--- #eval pick 112233 2 2
--- #eval pick 112233 3 2
+
+#guard pick 112233 2 2 = 33
+#guard pick 112233 3 2 = 233
 
 /-- return the number from `a` repeating `n` times -/
 def repeatBy (a : UInt64) (n : Nat) : UInt64 :=
   let len : Nat := (a.iLog10 + 1).toNat
   (1...n).iter.fold (fun acc _ ↦ acc * (10 ^ len).toUInt64 + a) a
--- #eval repeat_number 123 4
+
+#guard repeatBy 123 4 == 123123123123
 
 end UInt64
 

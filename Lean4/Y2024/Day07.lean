@@ -42,7 +42,8 @@ def solve₁ (input : Input) : Nat :=
 
 def shift (a b : Nat) (b0 : Nat := b) : Nat :=
   if b0 < 10 then a * 10 + b else shift (a * 10) b (b0 / 10)
--- #eval shift 3000000 1000000
+
+#guard shift 3000000 1000000 == 30000001000000
 
 namespace Part2
 
