@@ -64,7 +64,7 @@ mod parser {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct State {
-    remain: u32,
+    remain: usize,
     counts: Vec<usize>,
 }
 
@@ -81,29 +81,46 @@ impl Ord for State {
 }
 
 impl State {
-    fn sum(&self, buttons: &[Vec<usize>], n: usize) -> Vec<u32> {
+    fn sum(&self, buttons: &[Vec<usize>], n: usize) -> Vec<usize> {
         let mut result = vec![0; n];
         for (bi, n) in self.counts.iter().enumerate() {
             for i in buttons[bi].iter() {
-                result[*i] += *n as u32;
+                result[*i] += *n as usize;
             }
         }
         result
     }
 }
 
-fn exceeds(values: &[u32], dist: &[usize], goal: &[u32]) -> bool {
+fn exceeds(values: &[usize], dist: &[usize], goal: &[usize]) -> bool {
     assert_eq!(values.len(), goal.len());
     values
         .iter()
         .enumerate()
-        .any(|(i, n)| dist.contains(&(i as usize)) as u32 + n > goal[i])
+        .any(|(i, n)| dist.contains(&(i as usize)) as usize + n > goal[i])
 }
 
 #[aoc(2025, 10)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
         self.line = parser::parse(&mut input)?;
+        dbg!(self.line.iter().map(|s| s.2.len()).max());
+        dbg!(
+            self.line
+                .iter()
+                .map(|s| {
+                    let mut p = s.2.clone();
+                    p.sort();
+                    p.reverse();
+                    [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+                        .iter()
+                        .zip(p.iter())
+                        .map(|(_a, b)| b * 1)
+                        // .product::<usize>()
+                        .max()
+                })
+                .max()
+        );
         // self.line.iter().take(10).for_each(|(_, buttons, goal)| {
         //     let ws = buttons.iter().map(|l| l.len()).collect::<Vec<_>>();
         //     let total = goal.iter().sum::<usize>();
@@ -151,7 +168,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .take(10)
             .map(|(_, buttons, goal)| {
-                let goal = goal.iter().map(|n| *n as u32).collect::<Vec<_>>();
+                let goal = goal.iter().map(|n| *n as usize).collect::<Vec<_>>();
                 // let scale: usize = 10000;
                 let mut counter = 0;
                 let num_buttons = buttons.len();
@@ -161,11 +178,11 @@ impl AdventOfCode for Puzzle {
                 // let mut distribution = buttons.clone();
                 // distribution.sort_unstable_by_key(|l| l.len());
                 // distribution.reverse();
-                let mut visited: FxHashSet<Vec<u32>> =
+                let mut visited: FxHashSet<Vec<usize>> =
                     HashSet::<_, BuildHasherDefault<FxHasher>>::default();
                 let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
                 to_visit.push(Reverse(State {
-                    remain: goal.iter().map(|d| *d).sum::<u32>(),
+                    remain: goal.iter().map(|d| *d).sum::<usize>(),
                     counts: vec![0; num_buttons],
                 }));
                 while let Some(Reverse(state)) = to_visit.pop() {
@@ -198,13 +215,21 @@ impl AdventOfCode for Puzzle {
                         s.remain = goal
                             .iter()
                             .zip(v.iter())
-                            .map(|(a, b)| *a - *b)
-                            .sum::<u32>()
+                            .map(|(a, b)| (*a - *b).pow(1) + 1)
+                            .product::<usize>()
+                        // * goal
+                        //     .iter()
+                        //     .zip(v.iter())
+                        //     .filter(|(a, b)| *a != *b)
+                        //     .count()
                             // / s.counts
                             //     .iter()
                             //     .enumerate()
                             //     .map(|(i, c)| *c * button_weight[i])
                             //     .sum::<usize>();
+                            // * s.counts
+                            //     .iter()
+                            //     .sum::<usize>().isqrt();
                             ;
                         if !visited.contains(&v) {
                             to_visit.push(Reverse(s));
