@@ -30,12 +30,9 @@ instance : ToString Dir where
       | .S => "S"
       | .W => "W"
 
--- #eval Dir.N.rotate.rotate.rotate.rotate
+-- #guard Dir.N.turn.turn.turn.turn == Dir.N
 
 namespace Dim2.Rect
-
--- notation:50 lhs " _ " rhs => Dim2.mk lhs rhs
--- #eval 30 _ 40
 
 def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
   let height : Nat := self.vector.size / self.width
@@ -91,7 +88,8 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         self
 
 def spin : Rect Kind → Rect Kind := [.N, .W, .S, .E].foldl (·.pullUp ·)
--- #eval [Dir.N, .W, .S, .E].foldl (fun acc x ↦ s!"{acc} => {x}") ""
+
+#guard [Dir.N, .W, .S, .E].foldl (fun acc x ↦ s!"{acc} => {x}") "" == " => N => W => S => E"
 
 def evaluate (self : Rect Kind) : Nat :=
   let height : Nat := self.vector.size / self.width

@@ -28,7 +28,7 @@ def makeNeighbors (size s : Idx₂) : List Idx₂ :=
 
 def makeVecs (size start : Idx₂) : List (Idx₂ × Idx₂) := (makeNeighbors size start).map ((start, ·))
 
--- #eval makeVecs (10, 10) (2, 2)
+-- #guard makeVecs (3, 3) (2, 2) == [(((2, 2) : Idx₂), ((1, 2) : Idx₂)), ((2, 2), (2, 1))]
 
 inductive Circuit where
   | v : Circuit
@@ -62,7 +62,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
   | 'S' => .s
   |  _  => .x
 
--- #eval (Circuit.ofChar 'f') |> toString
+#guard ((Circuit.ofChar 'F')|> toString) == "J"
 
 def startPosition (self : Rect Circuit) : Idx₂ := self.findPosition? (· == Circuit.s) |>.unwrapOr (0, 0)
 
@@ -150,10 +150,7 @@ def expand (self : Array PropagateState) (size : Idx₂) (n : Nat) : Array Propa
   else
     self
 
-/-
-- Switch to 1D scan from 28 scan
--- #eval List.iota 4 |>.mapIdx fun i x ↦ (i, x)
--/
+/-- Switch to 1D scan from 28 scan -/
 partial
 def loop (m : Array PropagateState) (size : Idx₂) : Array PropagateState :=
   let r := m.foldl
@@ -180,7 +177,7 @@ def interpolate (p : Vec₂) (q : Vec₂) : Vec₂ :=
   let (p', q') := both (fun d ↦ (d.fst * 2, d.snd * 2)) (p, q)
   ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
 
--- #eval Pos.interpolate ((3, 4) : Pos) ((3, 5) : Pos)
+#guard interpolate ((3, 4) : Vec₂) ((3, 5) : Vec₂) == (6, 9)
 
 /--
 This generates a list of dupicated nodes.
