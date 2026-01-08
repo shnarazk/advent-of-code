@@ -47,18 +47,6 @@ def dividable (n : Nat) : Option (Nat × Nat) :=
 #guard dividable 14 == some (1, 4)
 #guard dividable 148 == none
 
-partial
-def count_stones (max_depth depth n : Nat) : Nat :=
-  if max_depth == depth then
-    1
-  else
-    if n == 0 then
-      count_stones max_depth (depth + 1) 1
-    else
-      match dividable n with
-      | some (a, b) => (count_stones max_depth (depth + 1) a) + (count_stones max_depth (depth + 1) b)
-      | _ => count_stones max_depth (depth + 1) (2024 * n)
-
 namespace parser
 
 open WinnowParsers
@@ -73,13 +61,54 @@ end parser
 
 namespace Part1
 
+partial
+def count_stones (max_depth depth n : Nat) : Nat :=
+  if max_depth == depth then
+    1
+  else
+    if n == 0 then
+      count_stones max_depth (depth + 1) 1
+    else
+      match dividable n with
+      | some (a, b) => (count_stones max_depth (depth + 1) a) + (count_stones max_depth (depth + 1) b)
+      | _ => count_stones max_depth (depth + 1) (2024 * n)
+
 def solve (input : Input) : Nat := input.line.iter.map (fun n ↦ count_stones 25 0 n) |>.sum
 
 end Part1
 
 namespace Part2
 
-def solve (input : Input) : Nat := input.line.iter.map (fun _ ↦ 1) |>.sum
+abbrev Memo := HashMap (Nat × Nat) Nat
+
+partial
+def count_stones (memo : Memo) (max_depth depth n : Nat) : Memo × Nat := Id.run do
+  if let some c := memo.get? (depth, n) then
+    return (memo, c)
+  if max_depth == depth then
+    return (memo, 1)
+  else
+    if n == 0 then
+      let (memo', c) := count_stones memo max_depth (depth + 1) 1
+      return (memo'.insert (depth, n) c, c)
+    else
+      match dividable n with
+      | some (a, b) =>
+        let (memo', c1) := count_stones memo max_depth (depth + 1) a
+        let (memo'', c2) := count_stones memo' max_depth (depth + 1) b
+        return (memo''.insert (depth, n) (c1 + c2), c1 + c2)
+      | _ =>
+        let (memo', c) := count_stones memo max_depth (depth + 1) (2024 * n)
+        return (memo'.insert (depth, n) c, c)
+
+def solve (input : Input) : Nat := Id.run do
+  let mut memo : Memo := HashMap.emptyWithCapacity 100
+  let mut count := 0
+  for n in input.line do
+    let (memo', c) := count_stones memo 75 0 n
+    count := count + c
+    memo := memo'
+  count
 
 end Part2
 
