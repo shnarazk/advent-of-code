@@ -1,16 +1,16 @@
 //! <https://adventofcode.com/2025/day/11>
 use {
     crate::framework::{AdventOfCode, ParseError, aoc},
-    rustc_data_structures::fx::{FxHashMap, FxHashSet, FxHasher},
-    std::{
-        collections::{HashMap, HashSet},
-        hash::BuildHasherDefault,
-    },
+    rustc_data_structures::fx::{FxHashMap, FxHasher},
+    std::{collections::HashMap, hash::BuildHasherDefault},
 };
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct Puzzle {
-    line: Vec<(String, Vec<String>)>,
+    // line: Vec<(String, Vec<String>)>,
+    name: FxHashMap<String, usize>,
+    flow: FxHashMap<usize, Vec<usize>>,
+    dist: FxHashMap<(usize, usize), usize>,
 }
 
 mod parser {
@@ -36,72 +36,96 @@ mod parser {
 #[aoc(2025, 11)]
 impl AdventOfCode for Puzzle {
     fn prepare(&mut self, mut input: &str) -> Result<(), ParseError> {
-        self.line = parser::parse(&mut input)?;
+        let line = parser::parse(&mut input)?;
+        dbg!(line.len());
+        self.name = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        self.flow = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        self.dist = HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
+        for (s, outs) in line.iter() {
+            if !self.name.contains_key(s) {
+                self.name.insert(s.to_string(), self.name.len());
+            }
+            for out in outs {
+                if !self.name.contains_key(out) {
+                    self.name.insert(out.to_string(), self.name.len());
+                }
+                self.flow
+                    .entry(*self.name.get(s).unwrap())
+                    .or_default()
+                    .push(*self.name.get(out).unwrap());
+                self.dist.insert(
+                    (*self.name.get(s).unwrap(), *self.name.get(out).unwrap()),
+                    1,
+                );
+            }
+        }
+        dbg!(&self.flow.len());
         Ok(())
     }
     fn part1(&mut self) -> Self::Output1 {
-        let mut table: FxHashSet<(&str, &str)> =
-            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        let mut memo: FxHashMap<(&str, &str), usize> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        for (s, outs) in self.line.iter() {
-            for out in outs {
-                table.insert((s, out));
-                memo.insert((s, out), 1);
-            }
-        }
-        check_path(&table, "you", "out", &mut memo)
+        count_pathes(
+            &self.flow,
+            *self.name.get("you").unwrap(),
+            *self.name.get("out").unwrap(),
+            &mut self.dist,
+        )
     }
     fn part2(&mut self) -> Self::Output2 {
-        let mut table: FxHashSet<(&str, &str)> =
-            HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-        let mut memo: FxHashMap<(&str, &str), (usize, usize, usize)> =
-            HashMap::<_, _, BuildHasherDefault<FxHasher>>::default();
-        for (s, outs) in self.line.iter() {
-            for out in outs {
-                table.insert((s, out));
-                memo.insert((s, out), (1, 0, 0));
-            }
+        let dac_fft = count_pathes(
+            &self.flow,
+            *self.name.get("dac").unwrap(),
+            *self.name.get("fft").unwrap(),
+            &mut self.dist,
+        );
+        if dac_fft > 0 {
+            count_pathes(
+                &self.flow,
+                *self.name.get("svr").unwrap(),
+                *self.name.get("dac").unwrap(),
+                &mut self.dist,
+            ) * dac_fft
+                * count_pathes(
+                    &self.flow,
+                    *self.name.get("dac").unwrap(),
+                    *self.name.get("out").unwrap(),
+                    &mut self.dist,
+                )
+        } else {
+            count_pathes(
+                &self.flow,
+                *self.name.get("svr").unwrap(),
+                *self.name.get("fft").unwrap(),
+                &mut self.dist,
+            ) * count_pathes(
+                &self.flow,
+                *self.name.get("fft").unwrap(),
+                *self.name.get("dac").unwrap(),
+                &mut self.dist,
+            ) * count_pathes(
+                &self.flow,
+                *self.name.get("dac").unwrap(),
+                *self.name.get("out").unwrap(),
+                &mut self.dist,
+            )
         }
-        check_path2(&table, "svr", "out", &mut memo).2
     }
 }
 
-fn check_path<'a>(
-    table: &FxHashSet<(&'a str, &'a str)>,
-    from: &'a str,
-    to: &'a str,
-    memo: &mut FxHashMap<(&'a str, &'a str), usize>,
+fn count_pathes(
+    flow: &FxHashMap<usize, Vec<usize>>,
+    from: usize,
+    to: usize,
+    dist: &mut FxHashMap<(usize, usize), usize>,
 ) -> usize {
-    if let Some(n) = memo.get(&(from, to)) {
+    if let Some(n) = dist.get(&(from, to)) {
         return *n;
     }
-    let n = table
+    let n = flow
+        .get(&from)
+        .unwrap_or(&vec![])
         .iter()
-        .filter(|(f, _)| **f == *from)
-        .map(|(_, t)| check_path(table, t, to, memo))
+        .map(|&t| count_pathes(flow, t, to, dist))
         .sum::<usize>();
-    memo.insert((from, to), n);
-    n
-}
-
-fn check_path2<'a>(
-    table: &FxHashSet<(&'a str, &'a str)>,
-    from: &'a str,
-    to: &'a str,
-    memo: &mut FxHashMap<(&'a str, &'a str), (usize, usize, usize)>,
-) -> (usize, usize, usize) {
-    if let Some(n) = memo.get(&(from, to)) {
-        return *n;
-    }
-    let mut n = table
-        .iter()
-        .filter(|(f, _)| **f == *from)
-        .map(|(_, t)| check_path2(table, t, to, memo))
-        .fold((0, 0, 0), |acc, l| (acc.0 + l.0, acc.1 + l.1, acc.2 + l.2));
-    if ["dac", "fft"].contains(&from) {
-        n = (0, n.0, n.1);
-    }
-    memo.insert((from, to), n);
+    dist.insert((from, to), n);
     n
 }
