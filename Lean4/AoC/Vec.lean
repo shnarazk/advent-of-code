@@ -290,41 +290,62 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
 @[inline]
 def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  self.vector.getD (self.width * i.1 + i.2) default
+  if i.snd < self.width then
+    self.vector.getD (self.width * i.1 + i.2) default
+  else
+    default
 
 /-- return true if `p` is a valid index of `self` -/
 def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  (self.width * i.1 + i.2) < self.vector.size
+  i.2 < self.width && (self.width * i.1 + i.2) < self.vector.size
+  
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 1) == true
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (2, 1) == true
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 2) == false
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 3) == false
+#guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]]).validIndex? (3, 0) == true
 
 /-- return `self[p]` as `Option` -/
 @[inline]
 def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  self.vector[self.width * i.1 + i.2]?
+  if i.snd < self.width then
+    self.vector[self.width * i.1 + i.2]?
+  else
+    none
 
 /-- set the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
 def set [BEq α] [RectIndex β] (self : Rect α) (p : β) (val : α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  let ix := self.width * i.1 + i.2
-  Rect.mk self.width (self.vector.set! ix val)
+  if i.snd < self.width then
+    let ix := self.width * i.1 + i.2
+    Rect.mk self.width (self.vector.set! ix val)
+  else
+    Rect.mk 0 #[]
 
 /-- modify the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
 def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
-  Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
+  if i.snd < self.width then
+    Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
+  else
+    Rect.mk 0 #[]
 
 /-- swap `self[p]` and `self[q]` -/
 @[inline]
 def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   let j : Nat × Nat := RectIndex.toIndex₂ q
-  { self with
-    vector := Array.swapIfInBounds self.vector
-      (self.width * i.fst + i.snd)
-      (self.width * j.fst + j.snd) }
+  if i.snd < self.width && j.snd < self.width then
+    { self with
+      vector := Array.swapIfInBounds self.vector
+        (self.width * i.fst + i.snd)
+        (self.width * j.fst + j.snd) }
+  else
+    self
 
 -- def r := Rect.of2DMatrix #[#[0,1], #[2,4]]
 -- #eval r
