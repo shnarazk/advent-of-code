@@ -113,6 +113,11 @@ instance incetanceDirAdd : HAdd Dir Dir Vec₂ where
 instance incetanceDirSub : HSub Dir Dir Vec₂ where
   hSub a b := asVec₂ a - asVec₂ b
 
+instance : HAdd Vec₂ Dir Vec₂ where
+  hAdd (v : Vec₂) (d : Dir) : Vec₂ :=
+    let vd := d.asVec₂
+    (v.1 + vd.1, v.2 + vd.2)
+
 /-- 8 neighbors -/
 def eightNeighbors : Array Vec₂ := #[
   Dir.N.asVec₂,
@@ -153,6 +158,14 @@ instance inhabitedIdx₂ : Inhabited Idx₂ where default := (↑ ((0 : Nat), (0
 
 def Idx₂.fst (i : Idx₂) : Int := i.1.fst
 def Idx₂.snd (i : Idx₂) : Int := i.1.snd
+
+instance : HAdd Idx₂ Dir (Option Idx₂) where
+  hAdd (v : Idx₂) (d : Dir) : (Option Idx₂) :=
+    let v' : Vec₂ := v.val + d 
+    if h : (0, 0) ≤ v' then
+      some ⟨v', h⟩
+    else
+      none
 
 /-- class for indices for `Rect` -/
 class RectIndex (α : Type) where
