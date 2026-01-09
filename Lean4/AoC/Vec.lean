@@ -118,6 +118,14 @@ instance : HAdd Vec₂ Dir Vec₂ where
     let vd := d.asVec₂
     (v.1 + vd.1, v.2 + vd.2)
 
+instance : HAdd (Nat × Nat) Dir (Option (Nat × Nat)) where
+  hAdd (v : Nat × Nat) (d : Dir) : (Option (Nat × Nat)) :=
+    let dv := d.asVec₂
+    let (y, x) := (v.1.toInt64.toInt + dv.1, v.2.toInt64.toInt + dv.2) 
+    if let some y := y.toNat? then
+      if let some x := x.toNat? then some (y, x) else none
+    else none
+
 /-- 8 neighbors -/
 def eightNeighbors : Array Vec₂ := #[
   Dir.N.asVec₂,
