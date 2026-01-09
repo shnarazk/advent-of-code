@@ -271,6 +271,9 @@ namespace Rect
 @[inline]
 def height [BEq α] (self : Rect α) : Nat := self.vector.size / self.width
 
+@[inline]
+def geometory [BEq α] (self : Rect α) : Nat × Nat := (self.height, self.width)
+
 /-- return a new instance fitting to the given Dim2 -/
 def ofDim2 [BEq α] (h w : Nat) (default : α) : Rect α :=
   Rect.mk w (Array.replicate (h * w) default)
