@@ -33,31 +33,49 @@ end parser
 namespace Part1
 
 def evaluate_at (accum' : Rect Bool) (grid : Rect Char) (i j : Nat) : Rect Bool × Nat := Id.run do
-  if accum'.get (i, j) false then return (accum', 0)
-  let some c := grid.get? (i, j) | return (accum', 0)
+  if accum'.get (i, j) true then return (accum', 0)
+  let some ch := grid.get? (i, j) | return (accum', 0)
   let mut accum := accum'
   let mut count := 0
-  let mut r : Rect (Option Bool) := accum.map (K none)
+  let debug := i == 19 && j == 138
+  let mut debug_dummy := 0
+  let mut checked : Rect Bool := accum.map (K false)
+  if checked.geometory != grid.geometory then
+    return (accum, dbg "!!!" 0)
   let mut to_visit := [(i, j)]
   let mut seg_h : HashSet Vec₂ := HashSet.emptyWithCapacity 100
   let mut seg_v : HashSet Vec₂ := HashSet.emptyWithCapacity 100
   while !to_visit.isEmpty do
     let p :: to_visit' := to_visit | continue
     to_visit := to_visit'
-    to_visit := to_visit.drop 1
-    if some none != r.get? p then continue
-    if grid.get? p == some c then
+    if checked.get p true then continue
+    checked := checked.set p true
+    if grid.get? p == some ch then
       count := count + 1
       accum := accum.set p true
-      r := r.set p (some true)
-      if grid.get? (p.fst - 1, p.snd) != some c then seg_h := seg_h.insert p
-      if grid.get? (p.fst + 1, p.snd) != some c then seg_h := seg_h.insert (p.fst + 1, p.snd)
-      if grid.get? (p.fst, p.snd - 1) != some c then seg_v := seg_v.insert p
-      if grid.get? (p.fst, p.snd + 1) != some c then seg_v := seg_v.insert (p.fst, p.snd + 1)
-      -- TODO: neighbors
-    else
-      r := r.set p (some false)
-  (accum, i * j)
+      debug_dummy := 0
+      if p.fst == 0 || grid.get? (p.fst - 1, p.snd) != some ch then
+        debug_dummy := debug_dummy + 1
+        seg_h := seg_h.insert p
+      if               grid.get? (p.fst + 1, p.snd) != some ch then
+        debug_dummy := debug_dummy + 1
+        seg_h := seg_h.insert (p.fst + 1, p.snd)
+      if p.snd == 0 || grid.get? (p.fst, p.snd - 1) != some ch then
+        debug_dummy := debug_dummy + 1
+        seg_v := seg_v.insert p
+      if               grid.get? (p.fst, p.snd + 1) != some ch then
+        debug_dummy := debug_dummy + 1
+        seg_v := seg_v.insert (p.fst, p.snd + 1)
+      if debug then
+        debug_dummy := debug_dummy + dbg s!"{p}" debug_dummy
+      for dir in [Dir.N, Dir.E, Dir.S, Dir.W] do
+        let some q := p + dir | continue
+        if grid.validIndex? q then
+          to_visit := to_visit.concat q
+        else
+          assert! (q.fst ≥ grid.height) || (q.snd ≥ grid.width)
+  (accum, count * (seg_v.size + seg_h.size))
+  -- (accum, count * dbg s!"{ch}@({i}, {j}) => area: {count}, sides" (seg_v.size + seg_h.size))
 
 def solve (input : Input) : Nat := Id.run do
   let mut accum := input.grid.map (K false)
