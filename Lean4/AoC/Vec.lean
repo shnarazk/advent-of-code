@@ -265,13 +265,6 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
     let v : Array α := a.foldl Array.append #[]
     Rect.mk w v
 
-/-- return the `(i,j)`-th element of `Rect` as `Option` -/
-@[inline]
-def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  let ix := (self.width * i.1 + i.2)
-  if h : ix < self.vector.size then some (self.vector.getInternal ix h) else none
-  
 /-- return the `(i,j)`-th element of `Rect` -/
 @[inline]
 def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
