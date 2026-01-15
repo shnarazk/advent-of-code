@@ -11,6 +11,9 @@
         packages = [
           pkgs.bashInteractive
           pkgs.ocamlPackages_latest.dune_3
+          pkgs.ocamlPackages_latest.eio
+          pkgs.ocamlPackages_latest.eio_main
+          pkgs.ocamlPackages_latest.eio_posix
           pkgs.ocamlPackages_latest.ocaml
           pkgs.ocamlPackages_latest.ocamlformat
           pkgs.ocamlPackages_latest.utop
