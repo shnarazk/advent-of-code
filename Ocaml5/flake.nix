@@ -10,6 +10,7 @@
       devShells.default = pkgs.mkShell {
         packages = [
           pkgs.bashInteractive
+          pkgs.ocamlPackages_latest.angstrom
           pkgs.ocamlPackages_latest.dune_3
           pkgs.ocamlPackages_latest.eio
           pkgs.ocamlPackages_latest.eio_main
