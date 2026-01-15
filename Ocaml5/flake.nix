@@ -10,8 +10,12 @@
       devShells.default = pkgs.mkShell {
         packages = [
           pkgs.bashInteractive
-          pkgs.ocaml
-            pkgs.opam
+          pkgs.ocamlPackages_latest.dune_3
+          pkgs.ocamlPackages_latest.ocaml
+          pkgs.ocamlPackages_latest.ocamlformat
+          pkgs.ocamlPackages_latest.utop
+          pkgs.ocamlPackages_latest.ocaml-lsp
+          pkgs.opam
         ];
       };
     });
