@@ -1,3 +1,5 @@
 (library
  (name y2025)
- (libraries angstrom aoc eio_main eio eio_posix))
+ (libraries angstrom aoc eio_main eio eio_posix)
+ (preprocess
+  (pps ppx_deriving.show)))

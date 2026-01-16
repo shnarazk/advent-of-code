@@ -17,6 +17,7 @@
           pkgs.ocamlPackages_latest.eio_posix
           pkgs.ocamlPackages_latest.ocaml
           pkgs.ocamlPackages_latest.ocamlformat
+          pkgs.ocamlPackages_latest.ppx_deriving
           pkgs.ocamlPackages_latest.utop
           pkgs.ocamlPackages_latest.ocaml-lsp
           pkgs.opam
