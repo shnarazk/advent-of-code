@@ -1,0 +1,4 @@
+[[language]]
+name = "ocaml"
+auto-format = true
+formatter = { command = "ocamlformat", args = ["-q", "--name=input.ml", "-"] }
