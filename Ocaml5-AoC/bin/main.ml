@@ -1,5 +1,6 @@
 open Angstrom
 open Eio
+open Format
 
 let token = take_while (function 'A' .. 'z' -> true | _ -> false)
 
@@ -15,13 +16,15 @@ module Dist = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
+(* We use -1 for neighbor nodes. So We have to covert this value to real distance if needed *)
 let rec count_paths dist src dst =
   match Dist.find_opt dist (src, dst) with
-  | Some d -> d
+  | Some d -> abs d
   | None ->
       let count = ref 0 in
       Dist.iter
-        (fun sd _ -> if fst sd = src then count := !count + count_paths dist (snd sd) dst else ())
+        (fun sd n ->
+          if fst sd = src && n = -1 then count := !count + count_paths dist (snd sd) dst else ())
         dist;
       Dist.add dist (src, dst) !count;
       !count
@@ -50,6 +53,13 @@ let () =
   in
   let flow : int Dist.t = Dist.create 16 in
   Array.iter
-    (fun setting -> Array.iter (fun dest -> Dist.add flow (fst setting, dest) 1) (snd setting))
+    (fun setting -> Array.iter (fun dest -> Dist.add flow (fst setting, dest) (-1)) (snd setting))
     parsed;
-  Flow.copy_string (Format.sprintf "%d" (count_paths flow "you" "out") ^ "\n") stdout
+  Flow.copy_string (sprintf "Part1: %d\n" (count_paths flow "you" "out")) stdout;
+  let dac_fft = count_paths flow "dac" "fft" in
+  let fft_dac = count_paths flow "fft" "dac" in
+  let part2 =
+    if dac_fft > 0 then dac_fft * count_paths flow "svr" "dac" * count_paths flow "fft" "out"
+    else fft_dac * count_paths flow "svr" "fft" * count_paths flow "dac" "out"
+  in
+  Flow.copy_string (Format.sprintf "Part2 : %d\n" part2) stdout
