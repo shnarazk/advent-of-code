@@ -1,5 +1,6 @@
 //! <https://adventofcode.com/2023/day/1>
 use crate::framework::{AdventOfCode, ParseError, aoc};
+use std::simd::{Simd, cmp::SimdPartialOrd};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
@@ -80,5 +81,67 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.sum2
+    }
+}
+
+pub fn first_last_digit_simd(buf: &[u8]) -> Option<(u8, u8)> {
+    const LANES: usize = 16; // NEON-friendly width
+    type V = Simd<u8, LANES>;
+
+    let mut i = 0usize;
+    let mut first: Option<u8> = None;
+    let mut last: Option<u8> = None;
+
+    let v0 = V::splat(b'0');
+    let v9 = V::splat(b'9');
+
+    while i + LANES <= buf.len() {
+        let v = V::from_slice(&buf[i..i + LANES]);
+
+        let is_digit = v.simd_ge(v0) & v.simd_le(v9);
+
+        // For LANES=16 this is a u16 mask. Bit k corresponds to lane k.
+        let mask: u16 = is_digit.to_bitmask().try_into().unwrap();
+
+        if mask != 0 {
+            if first.is_none() {
+                let lane = mask.trailing_zeros() as usize; // 0..15
+                first = Some(buf[i + lane] - b'0');
+            }
+
+            let lane = 15 - (mask.leading_zeros() as usize); // last set bit index 0..15
+            last = Some(buf[i + lane] - b'0');
+        }
+
+        i += LANES;
+    }
+
+    // Scalar tail
+    while i < buf.len() {
+        let c = buf[i];
+        if (b'0'..=b'9').contains(&c) {
+            let d = c - b'0';
+            if first.is_none() {
+                first = Some(d);
+            }
+            last = Some(d);
+        }
+        i += 1;
+    }
+
+    first.zip(last)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_first_last_digit_simd() {
+        assert_eq!(first_last_digit_simd(b""), None);
+        assert_eq!(first_last_digit_simd(b"abc"), None);
+        assert_eq!(first_last_digit_simd(b"a1bc"), Some((1, 1)));
+        assert_eq!(first_last_digit_simd(b"a1b2c3"), Some((1, 3)));
+        assert_eq!(first_last_digit_simd(b"9xxx0"), Some((9, 0)));
     }
 }

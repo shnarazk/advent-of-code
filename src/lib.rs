@@ -1,3 +1,4 @@
+#![feature(portable_simd)]
 pub mod array;
 pub mod color;
 pub mod framework;
