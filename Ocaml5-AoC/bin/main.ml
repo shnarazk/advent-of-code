@@ -16,7 +16,7 @@ module Dist = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
-(* We use -1 for neighbor nodes. So We have to covert this value to real distance if needed *)
+(* We use -1 for neighbor nodes. So We have to covert this value to real value if needed *)
 let rec count_paths dist src dst =
   match Dist.find_opt dist (src, dst) with
   | Some d -> abs d
@@ -40,8 +40,7 @@ let () =
     | None -> failwith "AOC_DIR is not defined"
   in
   let data_file = Path.(fs / aoc_dir / "data/2025/input-day11.txt") in
-  Flow.copy_string "\nHello, World!\n" stdout;
-  Flow.copy_string ("AOC_DIR: " ^ aoc_dir ^ "\n") stdout;
+  (* Flow.copy_string ("AOC_DIR: " ^ aoc_dir ^ "\n") stdout; *)
   Flow.copy_string (Path.native data_file |> Option.get) stdout;
   Flow.copy_string "\n" stdout;
   let data : string = Path.load data_file in
@@ -62,4 +61,4 @@ let () =
     if dac_fft > 0 then dac_fft * count_paths flow "svr" "dac" * count_paths flow "fft" "out"
     else fft_dac * count_paths flow "svr" "fft" * count_paths flow "dac" "out"
   in
-  Flow.copy_string (Format.sprintf "Part2 : %d\n" part2) stdout
+  Flow.copy_string (Format.sprintf "Part2: %d\n" part2) stdout
