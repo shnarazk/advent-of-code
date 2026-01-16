@@ -8,7 +8,25 @@ let parse_line =
 
 let parser = Aoc.Parsers.separated parse_line (char '\n')
 
-(* for Advent of Code 2025 *)
+module Dist = Hashtbl.Make (struct
+  type t = string * string
+
+  let equal a b = String.equal (fst a) (fst b) && String.equal (snd a) (snd b)
+  let hash = Hashtbl.hash
+end)
+
+let rec count_paths dist src dst =
+  match Dist.find_opt dist (src, dst) with
+  | Some d -> d
+  | None ->
+      let count = ref 0 in
+      Dist.iter
+        (fun sd _ -> if fst sd = src then count := !count + count_paths dist (snd sd) dst else ())
+        dist;
+      Dist.add dist (src, dst) !count;
+      !count
+
+(* for Advent of Code 2025 day11 *)
 let () =
   Eio_main.run @@ fun env ->
   let stdout = Stdenv.stdout env
@@ -30,4 +48,8 @@ let () =
     | Ok v -> v
     | Error msg -> failwith msg
   in
-  Flow.copy_string (Format.sprintf "%d" (snd parsed.(1) |> Array.length) ^ "\n") stdout
+  let flow : int Dist.t = Dist.create 16 in
+  Array.iter
+    (fun setting -> Array.iter (fun dest -> Dist.add flow (fst setting, dest) 1) (snd setting))
+    parsed;
+  Flow.copy_string (Format.sprintf "%d" (count_paths flow "you" "out") ^ "\n") stdout
