@@ -30,18 +30,7 @@ let rec count_paths dist src dst =
       !count
 
 (* for Advent of Code 2025 day11 *)
-let solve env =
-  let stdout = Stdenv.stdout env
-  and fs = Stdenv.fs env
-  and aoc_dir =
-    match Sys.getenv_opt "AOC_DIR" with
-    | Some dir -> dir
-    | None -> failwith "AOC_DIR is not defined"
-  in
-  let data_file = Path.(fs / aoc_dir / "data/2025/input-day11.txt") in
-  (* Flow.copy_string ("AOC_DIR: " ^ aoc_dir ^ "\n") stdout; *)
-  Flow.copy_string (Path.native data_file |> Option.get) stdout;
-  Flow.copy_string "\n" stdout;
+let solve data_file stdout =
   let data : string = Path.load data_file in
   (* Flow.copy_string data stdout; *)
   let parsed =
