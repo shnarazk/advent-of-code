@@ -7,20 +7,19 @@
 (source
  (github shnarazk/advent-of-code))
 
-(authors "Author Name <author@example.com>")
+(authors "Narazaki, Shuji <shujinarazaki@protonmail.com>")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "Narazaki, Shuji <shujinarazaki@protonmail.com>")
 
 (license LICENSE)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/shnarazk/advent-of-code/Ocaml5-AoC)
 
 (package
  (name aoc)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "Advent-of-Code in Ocaml")
+ (description "Advent-of-Code in Ocaml")
  (depends ocaml)
- (tags
-  ("add topics" "to describe" your project)))
+ (tags ("advent-of-code")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
