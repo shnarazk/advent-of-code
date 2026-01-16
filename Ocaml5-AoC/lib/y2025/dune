@@ -1,0 +1,3 @@
+(library
+ (name y2025)
+ (libraries angstrom aoc eio_main eio eio_posix))

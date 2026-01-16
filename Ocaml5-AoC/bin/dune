@@ -1,4 +1,4 @@
 (executable
  (public_name aoc)
  (name main)
- (libraries eio_main eio eio_posix angstrom aoc))
+ (libraries eio_main eio eio_posix angstrom aoc y2025))
