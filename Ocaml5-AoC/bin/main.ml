@@ -13,11 +13,18 @@ let aoc_dir =
 let () =
   Eio_main.run @@ fun env ->
   let stdout = Stdenv.stdout env and fs = Stdenv.fs env in
-  let data_file = Path.(fs / aoc_dir / sprintf "data/%d/input-day%2d.txt" !year !day) in
+  let data_file = Path.(fs / aoc_dir / sprintf "data/%d/input-day%02d.txt" !year !day) in
   if Path.is_file data_file then
     Flow.copy_string ((Path.native data_file |> Option.get) ^ "\n") stdout
   else failwith @@ sprintf "%s does not exist." (Path.native data_file |> Option.get);
-  match !year with
-  | 2025 -> (
-      match !day with 11 -> Y2025.Day11.solve data_file stdout | _ -> failwith "invalid day")
-  | _ -> failwith "invalid year"
+  let solver =
+    match !year with
+    | 2025 -> (
+        match !day with
+        | 03 -> Y2025.Day03.solve data_file
+        | 07 -> Y2025.Day07.solve data_file
+        | 11 -> Y2025.Day11.solve data_file
+        | _ -> failwith "invalid day")
+    | _ -> failwith "invalid year"
+  in
+  solver stdout
