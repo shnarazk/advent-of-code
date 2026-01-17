@@ -3,8 +3,15 @@ open Format
 
 let year = ref 2025
 let day = ref 1
-let help_msg = "aoc [-y YEAR] day"
-let spec_lst = [ ("-y", Arg.Set_int year, sprintf "year (default: %d)" !year) ]
+let alternative_input = ref ""
+let help_msg = "aoc [-y YEAR] [-a LABEL] day"
+
+let spec_lst =
+  [
+    ("-a", Arg.Set_string alternative_input, "alternative input label");
+    ("-y", Arg.Set_int year, sprintf "year (default: %d)" !year);
+  ]
+
 let () = Arg.parse spec_lst (fun d -> day := int_of_string d) help_msg
 
 let aoc_dir =
@@ -13,7 +20,11 @@ let aoc_dir =
 let () =
   Eio_main.run @@ fun env ->
   let stdout = Stdenv.stdout env and fs = Stdenv.fs env in
-  let data_file = Path.(fs / aoc_dir / sprintf "data/%d/input-day%02d.txt" !year !day) in
+  let data_file =
+    if !alternative_input = "" then
+      Path.(fs / aoc_dir / sprintf "data/%d/input-day%02d.txt" !year !day)
+    else Path.(fs / aoc_dir / sprintf "data/%d/input-day%02d-%s.txt" !year !day !alternative_input)
+  in
   if Path.is_file data_file then
     Flow.copy_string ((Path.native data_file |> Option.get) ^ "\n") stdout
   else failwith @@ sprintf "%s does not exist." (Path.native data_file |> Option.get);
