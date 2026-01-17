@@ -7,7 +7,7 @@ let token = take_while (function 'A' .. 'z' -> true | _ -> false)
 let parse_line =
   lift2 (fun h t -> (h, t)) (token <* string ": ") (Aoc.Parsers.separated token (char ' '))
 
-let parser = Aoc.Parsers.separated parse_line (char '\n')
+let parser = Aoc.Parsers.separated parse_line end_of_line <* end_of_line <* end_of_input
 
 module Dist = Hashtbl.Make (struct
   type t = string * string
@@ -29,12 +29,11 @@ let rec count_paths dist src dst =
       Dist.add dist (src, dst) !count;
       !count
 
-(* for Advent of Code 2025 day11 *)
 let solve data_file stdout =
   let data : string = Path.load data_file in
   (* Flow.copy_string data stdout; *)
   let parsed =
-    match Angstrom.(parse_string ~consume:Prefix parser data) with
+    match Angstrom.(parse_string ~consume:All parser data) with
     | Ok v -> v
     | Error msg -> failwith msg
   in
@@ -49,4 +48,4 @@ let solve data_file stdout =
     if dac_fft > 0 then dac_fft * count_paths flow "svr" "dac" * count_paths flow "fft" "out"
     else fft_dac * count_paths flow "svr" "fft" * count_paths flow "dac" "out"
   in
-  Flow.copy_string (Format.sprintf "Part2: %d\n" part2) stdout
+  Flow.copy_string (sprintf "Part2: %d\n" part2) stdout
