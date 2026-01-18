@@ -33,8 +33,22 @@ let removable (grid : unit Cell.t) (pos : position) : bool =
   Array.to_seq dirs |> Seq.map (fun d -> add pos d) |> Seq.filter (Cell.mem grid) |> Seq.length
   |> fun n -> n < 4
 
+let survive (grid : unit Cell.t) (pos : position) : bool = not @@ removable grid pos
+
 let solve1 (grid : unit Cell.t) : int =
   Cell.to_seq_keys grid |> Seq.filter (removable grid) |> Seq.length
+
+let solve2 (grid : unit Cell.t) : int =
+  let rec loop grid =
+    let next =
+      Cell.to_seq_keys grid
+      |> Seq.filter (survive grid)
+      |> Seq.map (fun p -> (p, ()))
+      |> Cell.of_seq
+    in
+    if Cell.(length grid = length next) then next else loop next
+  in
+  Cell.(length grid - length (loop grid))
 
 let solve data_file stdout =
   let data =
@@ -46,6 +60,6 @@ let solve data_file stdout =
   let grid = Cell.create 100 in
   Array.(iteri (fun i xs -> iter (fun j -> Cell.add grid (i, j) ()) xs) data);
   (* print_endline @@ [%show: (int * int) list] @@ Cell.to_list !grid; *)
-  let part1 = solve1 grid and part2 = 0 in
+  let part1 = solve1 grid and part2 = solve2 grid in
   Flow.copy_string (sprintf "Part1: %d\n" part1) stdout;
   Flow.copy_string (sprintf "Part2: %d\n" part2) stdout
