@@ -43,7 +43,7 @@ let count (start : int Occurrence.t) (branches : int array array) : int * int =
 
 let solve data_file stdout =
   let data =
-    match Angstrom.(parse_string ~consume:All parser @@ Path.load data_file) with
+    match parse_string ~consume:All parser @@ Path.load data_file with
     | Ok v -> Array.to_seq v |> Seq.filter (fun l -> Array.length l > 0) |> Array.of_seq
     | Error msg -> failwith msg
   in

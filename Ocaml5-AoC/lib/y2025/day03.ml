@@ -25,7 +25,7 @@ let evaluate (len : int) (a : int array) : int =
 
 let solve data_file stdout =
   let data =
-    match Angstrom.(parse_string ~consume:All parser @@ Path.load data_file) with
+    match parse_string ~consume:All parser @@ Path.load data_file with
     | Ok v -> v
     | Error msg -> failwith msg
   in

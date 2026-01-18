@@ -33,9 +33,7 @@ let solve data_file stdout =
   let data : string = Path.load data_file in
   (* Flow.copy_string data stdout; *)
   let parsed =
-    match Angstrom.(parse_string ~consume:All parser data) with
-    | Ok v -> v
-    | Error msg -> failwith msg
+    match parse_string ~consume:All parser data with Ok v -> v | Error msg -> failwith msg
   in
   let flow : int Dist.t = Dist.create 16 in
   Array.iter
