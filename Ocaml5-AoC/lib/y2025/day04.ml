@@ -16,29 +16,25 @@ let add (ay, ax) (by, bx) = (ay + by, ax + bx)
 let lt (ay, ax) (by, bx) = ay < by && ax < bx
 
 (** set of 2D position *)
-module Cell = Set.Make (struct
+module Cell = Hashtbl.Make (struct
   type t = position
 
-  let compare (ay, ax) (by, bx) = match compare ay by with 0 -> compare ax bx | other -> other
+  let equal (ay, ax) (by, bx) = ay = by && ax = bx
+  let hash = Hashtbl.hash
 end)
 
 (** 8 neighbors *)
 let dirs = [| (-1, 0); (0, 1); (1, 0); (0, -1); (-1, 1); (1, 1); (1, -1); (-1, -1) |]
 
-let depends (grid : Cell.t) (pos : position) : position list =
-  Array.to_seq dirs
-  |> Seq.map (fun d -> add pos d)
-  |> Seq.filter (fun p -> Cell.exists (fun c -> compare c p = 0) grid)
-  |> List.of_seq
+let depends (grid : unit Cell.t) (pos : position) : position list =
+  Array.to_seq dirs |> Seq.map (fun d -> add pos d) |> Seq.filter (Cell.mem grid) |> List.of_seq
 
-let removable (grid : Cell.t) (pos : position) : bool =
-  Array.to_seq dirs
-  |> Seq.map (fun d -> add pos d)
-  |> Seq.filter (fun p -> Cell.exists (fun c -> compare c p = 0) grid)
-  |> Seq.length
+let removable (grid : unit Cell.t) (pos : position) : bool =
+  Array.to_seq dirs |> Seq.map (fun d -> add pos d) |> Seq.filter (Cell.mem grid) |> Seq.length
   |> fun n -> n < 4
 
-let solve1 (grid : Cell.t) : int = Cell.to_seq grid |> Seq.filter (removable grid) |> Seq.length
+let solve1 (grid : unit Cell.t) : int =
+  Cell.to_seq_keys grid |> Seq.filter (removable grid) |> Seq.length
 
 let solve data_file stdout =
   let data =
@@ -47,9 +43,9 @@ let solve data_file stdout =
     | Error msg -> failwith msg
   in
   (* print_endline @@ [%show: int array array] data; *)
-  let grid = ref Cell.empty in
-  Array.(iteri (fun i xs -> iter (fun j -> grid := Cell.add (i, j) !grid) xs) data);
+  let grid = Cell.create 100 in
+  Array.(iteri (fun i xs -> iter (fun j -> Cell.add grid (i, j) ()) xs) data);
   (* print_endline @@ [%show: (int * int) list] @@ Cell.to_list !grid; *)
-  let part1 = solve1 !grid and part2 = 0 in
+  let part1 = solve1 grid and part2 = 0 in
   Flow.copy_string (sprintf "Part1: %d\n" part1) stdout;
   Flow.copy_string (sprintf "Part2: %d\n" part2) stdout
