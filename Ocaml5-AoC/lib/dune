@@ -1,5 +1,5 @@
 (library
  (name aoc)
- (libraries angstrom eio_main eio eio_posix)
+ (libraries angstrom eio_main eio eio_posix uutf)
  (preprocess
   (pps ppx_deriving.show)))
