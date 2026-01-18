@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.3"
+julia_version = "1.12.4"
 manifest_format = "2.0"
 project_hash = "d82c8b8ddb9a89f40a10a3d60bca289a596a6ba8"
 
@@ -11,7 +11,7 @@ uuid = "d3ea9ae9-af4a-410f-a534-06eea3ee9a32"
 version = "0.1.0"
 
 [[deps.AoC_Julia]]
-deps = ["AoC", "HiGHS", "IJulia", "JuMP", "ParserCombinator"]
+deps = ["AoC", "HiGHS", "IJulia", "JuMP", "LanguageServer", "ParserCombinator"]
 path = "."
 uuid = "83a32440-6450-4b14-aeff-d72eb91a7b9d"
 version = "0.1.0"
@@ -223,9 +223,9 @@ version = "1.4.2"
 
 [[deps.JuMP]]
 deps = ["LinearAlgebra", "MacroTools", "MathOptInterface", "MutableArithmetics", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays"]
-git-tree-sha1 = "b76f23c45d75e27e3e9cbd2ee68d8e39491052d0"
+git-tree-sha1 = "8e4088727b5a130c12b1fedbc316306b6bbf2b9d"
 uuid = "4076af6c-e467-56ae-b986-b466b2749572"
-version = "1.29.3"
+version = "1.29.4"
 
     [deps.JuMP.extensions]
     JuMPDimensionalDataExt = "DimensionalData"
@@ -338,7 +338,7 @@ version = "1.11.0"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2025.5.20"
+version = "2025.11.4"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
