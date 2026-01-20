@@ -11,7 +11,7 @@ let parser =
   lift4 (fun a _ b _ -> (a, b)) parse_block1 (count 2 end_of_line) parse_block2 end_of_line
 
 module Level = Hashtbl.Make (struct
-  type t = int
+  type t = int * bool
 
   let equal = ( = )
   let hash = Hashtbl.hash
@@ -26,13 +26,28 @@ let solve2 (ranges : (int * int) array) : int =
   let level = Level.create 64 in
   Array.to_seq ranges
   |> Seq.iter (fun (b, e) ->
-      Level.add level b @@ Option.fold ~none:1 ~some:(fun l -> l + 1) @@ Level.find_opt level b;
-      Level.add level e @@ Option.fold ~none:(-1) ~some:(fun l -> l - 1) @@ Level.find_opt level e);
+      Level.replace level (b, false)
+      @@ Option.fold ~none:1 ~some:(fun l -> l + 1)
+      @@ Level.find_opt level (b, false);
+      Level.replace level (e, true)
+      @@ Option.fold ~none:(-1) ~some:(fun l -> l - 1)
+      @@ Level.find_opt level (e, true));
   let level =
-    List.fast_sort (fun (a, _) (b, _) -> compare a b) @@ List.of_seq @@ Level.to_seq level
+    List.fast_sort (fun (a, b1) (b, b2) -> match compare a b with 0 -> compare b1 b2 | c -> c)
+    @@ List.of_seq @@ Level.to_seq level
   in
-  print_endline @@ [%show: (int * int) list] level;
-  List.fold_left (fun (n, c) _ -> (n + 1, c + 1)) (0, 0) level |> snd
+  (* print_endline @@ [%show: (int * int) list] level; *)
+  List.fold_left
+    (fun (sum, level, start) ((pos, _), diff) ->
+      let l = level + diff in
+      assert (l >= 0);
+      let sum = if level > 0 && l = 0 then sum + (pos - start + 1) else sum
+      and start = if level = 0 && l > 0 then pos else start in
+      (sum, l, start))
+    (0, 0, 0) level
+  |> fun (a, l, _) ->
+  assert (l = 0);
+  a
 
 let solve data_file stdout =
   let ranges, data =
@@ -40,8 +55,8 @@ let solve data_file stdout =
     | Ok v -> v
     | Error msg -> failwith msg
   in
-  print_endline @@ [%show: (int * int) array] ranges;
-  print_endline @@ [%show: int array] data;
+  (* print_endline @@ [%show: (int * int) array] ranges; *)
+  (* print_endline @@ [%show: int array] data; *)
   let part1 = Array.to_seq data |> Seq.map (solve1 ranges) |> Seq.fold_left ( + ) 0
   and part2 = solve2 ranges in
   Flow.copy_string (sprintf "Part1: %d\n" part1) stdout;
