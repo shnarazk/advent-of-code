@@ -38,6 +38,7 @@ let () =
         | 04 -> Y2025.Day04.solve data_file
         | 05 -> Y2025.Day05.solve data_file
         | 07 -> Y2025.Day07.solve data_file
+        | 08 -> Y2025.Day08.solve data_file
         | 11 -> Y2025.Day11.solve data_file
         | _ -> failwith "invalid day")
     | _ -> failwith "invalid year"
