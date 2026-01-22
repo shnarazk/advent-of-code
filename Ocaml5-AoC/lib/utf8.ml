@@ -11,9 +11,7 @@ let uchars_of_string (s : string) : Uchar.t array =
   in
   loop []
 
-(** convert a UChar to a string:
-print_endline (string_of_uchar (Uchar.of_int 0x1F600))
-*)
+(** convert a UChar to a string: print_endline (string_of_uchar (Uchar.of_int 0x1F600)) *)
 let string_of_uchar (u : Uchar.t) : string =
   let buf = Buffer.create 4 in
   let encoder = Uutf.encoder `UTF_8 (`Buffer buf) in
