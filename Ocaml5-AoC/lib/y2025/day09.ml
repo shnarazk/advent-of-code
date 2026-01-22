@@ -32,6 +32,8 @@ let solve1 (points : (int * int) array) : int =
 let solve2 (points : (int * int) array) : int =
   assert (Array.to_seq points |> Seq.for_all (fun (x, y) -> x > 0 && y > 0));
   let pick_x = IntSet.create 64 and pick_y = IntSet.create 64 in
+  IntSet.add pick_x 0 ();
+  IntSet.add pick_y 0 ();
   Array.to_seq points
   |> Seq.iter (fun (x, y) ->
       IntSet.replace pick_x x ();
@@ -40,10 +42,15 @@ let solve2 (points : (int * int) array) : int =
   and pullback_y = IntSet.to_seq_keys pick_y |> Array.of_seq in
   Array.fast_sort compare pullback_x;
   Array.fast_sort compare pullback_y;
+  assert (pullback_x.(0) = 0);
+  assert (pullback_y.(0) = 0);
   print_endline @@ [%show: int array] pullback_x;
   let pushout_x = Array.to_seqi pullback_x |> Seq.map (fun (c, w) -> (w, c)) |> IntSet.of_seq
   and pushout_y = Array.to_seqi pullback_y |> Seq.map (fun (c, w) -> (w, c)) |> IntSet.of_seq in
+  assert (IntSet.find pushout_x 0 = 0);
+  assert (IntSet.find pushout_y 0 = 0);
   print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_x;
+
   IntSet.length pushout_x + IntSet.length pushout_y
 
 let solve data_file stdout =
