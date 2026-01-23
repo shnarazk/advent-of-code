@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2025/day/9>
 use {
     crate::{
-        framework::{AdventOfCode, ParseError, aoc},
+        framework::{aoc, AdventOfCode, ParseError},
         geometric::{Dim2, NeighborIter},
     },
     // rayon::prelude::*,
@@ -21,9 +21,9 @@ mod parser {
     use {
         crate::{geometric::Dim2, parser::parse_usize},
         winnow::{
-            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
+            ModalResult, Parser,
         },
     };
 
@@ -160,12 +160,11 @@ impl AdventOfCode for Puzzle {
                 for y in by..grid_size {
                     for x in (min_x..=bx).rev() {
                         if grid[y][x] == 0 {
-                            min_x = x;
+                            min_x = x + 1;
                             break;
                         }
                         if grid[y][x] == 1 {
                             let a = (ys[by].abs_diff(ys[y]) + 1) * (xs[bx].abs_diff(xs[x]) + 1);
-
                             area = area.max(a);
                         }
                     }
