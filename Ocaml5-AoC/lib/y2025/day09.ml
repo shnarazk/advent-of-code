@@ -31,7 +31,9 @@ let solve1 (points : (int * int) array) : int =
 
 let solve2 (points : (int * int) array) : int =
   assert (Array.to_seq points |> Seq.for_all (fun (x, y) -> x > 0 && y > 0));
-  let pick_x = IntSet.create 64 and pick_y = IntSet.create 64 in
+  let num_points = Array.length points
+  and pick_x = IntSet.create 64
+  and pick_y = IntSet.create 64 in
   IntSet.add pick_x 0 ();
   IntSet.add pick_y 0 ();
   Array.to_seq points
@@ -50,8 +52,43 @@ let solve2 (points : (int * int) array) : int =
   assert (IntSet.find pushout_x 0 = 0);
   assert (IntSet.find pushout_y 0 = 0);
   print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_x;
+  print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_y;
+  (* categorize by propagation *)
+  (* 0: outside *)
+  (* 1: corner *)
+  (* 2: inside *)
+  (* 3: unreached *)
+  let bound = (Array.length pullback_x + 1, Array.length pullback_y + 1) in
+  let grid = C.uncurry Dim2.makeArray bound 3 and to_visit = ref [ (0, 0) ] in
+  for i = 0 to Array.length points - 1 do
+    let j = (i + 1) mod num_points in
+    let p = points.(i) and q = points.(j) in
+    grid.(IntSet.find pushout_x (fst p)).(IntSet.find pushout_y (snd p)) <- 1;
 
-  IntSet.length pushout_x + IntSet.length pushout_y
+    if fst p = fst q then
+      let b = min (IntSet.find pushout_y (snd p)) (IntSet.find pushout_y (snd q))
+      and e = max (IntSet.find pushout_y (snd p)) (IntSet.find pushout_y (snd q)) in
+      for y = b + 1 to e - 1 do
+        grid.(IntSet.find pushout_x (fst p)).(y) <- 2
+      done
+    else
+      let b = min (IntSet.find pushout_x (fst p)) (IntSet.find pushout_x (fst q))
+      and e = max (IntSet.find pushout_x (fst p)) (IntSet.find pushout_x (fst q)) in
+      for x = b + 1 to e - 1 do
+        grid.(x).(IntSet.find pushout_y (snd p)) <- 2
+      done
+  done;
+  while not (List.is_empty !to_visit) do
+    let pos = List.hd !to_visit in
+    to_visit := List.tl !to_visit;
+    if grid.(fst pos).(snd pos) = 3 then begin
+      grid.(fst pos).(snd pos) <- 0;
+      Array.to_seq (Dim2.neightbor4 pos bound) |> Seq.iter (fun p -> to_visit := p :: !to_visit)
+    end
+  done;
+  (* Now grid.(x).(y) != 0 means is's inside. *)
+  print_endline @@ [%show: int array array] grid;
+  Array.length grid + List.length !to_visit
 
 let solve data_file stdout =
   let data =

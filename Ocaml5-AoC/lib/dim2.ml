@@ -16,11 +16,11 @@ let dir4 : dim2 array = [| (-1, 0); (0, 1); (1, 0); (0, -1) |]
 (** 8 neighbors *)
 let dir8 : dim2 array = [| (-1, 0); (-1, 1); (0, 1); (1, 1); (1, 0); (1, -1); (0, -1); (-1, -1) |]
 
-(** note: limit is included *)
+(** note: limit is not included *)
 let neightbor4 (pos : dim2) (upto : dim2) : dim2 array =
   Array.to_seq dir4
   |> Seq.map (fun d -> add pos d)
-  |> Seq.filter (fun p -> le (0, 0) p && le p upto)
+  |> Seq.filter (fun p -> le (0, 0) p && lt p upto)
   |> Array.of_seq
 
 module Dim2Set = Hashtbl.Make (struct
