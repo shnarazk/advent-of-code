@@ -23,6 +23,13 @@ let neightbor4 (pos : dim2) (upto : dim2) : dim2 array =
   |> Seq.filter (fun p -> le (0, 0) p && lt p upto)
   |> Array.of_seq
 
+(** note: limit is not included *)
+let neightbor8 (pos : dim2) (upto : dim2) : dim2 array =
+  Array.to_seq dir8
+  |> Seq.map (fun d -> add pos d)
+  |> Seq.filter (fun p -> le (0, 0) p && lt p upto)
+  |> Array.of_seq
+
 module Dim2Set = Hashtbl.Make (struct
   type t = dim2
 

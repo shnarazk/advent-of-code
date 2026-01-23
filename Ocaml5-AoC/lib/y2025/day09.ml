@@ -46,13 +46,13 @@ let solve2 (points : (int * int) array) : int =
   Array.fast_sort compare pullback_y;
   assert (pullback_x.(0) = 0);
   assert (pullback_y.(0) = 0);
-  print_endline @@ [%show: int array] pullback_x;
+  (* print_endline @@ [%show: int array] pullback_x; *)
   let pushout_x = Array.to_seqi pullback_x |> Seq.map (fun (c, w) -> (w, c)) |> IntSet.of_seq
   and pushout_y = Array.to_seqi pullback_y |> Seq.map (fun (c, w) -> (w, c)) |> IntSet.of_seq in
   assert (IntSet.find pushout_x 0 = 0);
   assert (IntSet.find pushout_y 0 = 0);
-  print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_x;
-  print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_y;
+  (* print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_x; *)
+  (* print_endline @@ [%show: (int * int) array] @@ Array.of_seq @@ IntSet.to_seq pushout_y; *)
   (* categorize by propagation *)
   (* 0: outside *)
   (* 1: corner *)
@@ -83,12 +83,50 @@ let solve2 (points : (int * int) array) : int =
     to_visit := List.tl !to_visit;
     if grid.(fst pos).(snd pos) = 3 then begin
       grid.(fst pos).(snd pos) <- 0;
-      Array.to_seq (Dim2.neightbor4 pos bound) |> Seq.iter (fun p -> to_visit := p :: !to_visit)
+      Array.to_seq (Dim2.neightbor8 pos bound) |> Seq.iter (fun p -> to_visit := p :: !to_visit)
     end
   done;
   (* Now grid.(x).(y) != 0 means is's inside. *)
-  print_endline @@ [%show: int array array] grid;
-  Array.length grid + List.length !to_visit
+  (* print_endline @@ [%show: int array array] grid; *)
+  let pullback_to_area (a : Dim2.dim2) (b : Dim2.dim2) : int =
+    let xs = (fun (a, b) -> abs (a - b)) @@ C.both (fun p -> pullback_x.(fst p)) a b
+    and ys = (fun (a, b) -> abs (a - b)) @@ C.both (fun p -> pullback_y.(snd p)) a b in
+    (xs + 1) * (ys + 1)
+  in
+  let area = ref 0 in
+  for bx = 1 to fst bound - 2 do
+    for by = 1 to snd bound - 2 do
+      if grid.(bx).(by) = 1 then begin
+        let min_x = ref 1 in
+        for y = by to snd bound - 2 do
+          let to_check = ref true in
+          for x = bx downto !min_x do
+            if !to_check then
+              match grid.(x).(y) with
+              | 0 ->
+                  min_x := x + 1;
+                  to_check := false
+              | 1 -> area := max !area @@ pullback_to_area (bx, by) (x, y)
+              | _ -> ()
+          done
+        done;
+        let max_x = ref @@ (fst bound - 2) in
+        for y = by to snd bound - 2 do
+          let to_check = ref true in
+          for x = bx to !max_x - 1 do
+            if !to_check then
+              match grid.(x).(y) with
+              | 0 ->
+                  max_x := x;
+                  to_check := false
+              | 1 -> area := max !area @@ pullback_to_area (bx, by) (x, y)
+              | _ -> ()
+          done
+        done
+      end
+    done
+  done;
+  !area
 
 let solve data_file stdout =
   let data =
@@ -96,7 +134,7 @@ let solve data_file stdout =
     | Ok v -> v
     | Error msg -> failwith msg
   in
-  print_endline @@ [%show: (int * int) array] data;
+  (* print_endline @@ [%show: (int * int) array] data; *)
   let part1 = solve1 data and part2 = solve2 data in
   Flow.copy_string (sprintf "Part1: %d\n" part1) stdout;
   Flow.copy_string (sprintf "Part2: %d\n" part2) stdout
