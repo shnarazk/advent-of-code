@@ -28,8 +28,8 @@ winnow = "^0.7"
 microlp = { version = "0.2.11", optional = true }
 
 [features]
-default = ["y2025"]
-# default = ["y2025", "y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
+# default = ["y2025"]
+default = ["y2025", "y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
 y2025 = ["rayon", "microlp"]
 y2024 = ["rayon"]
 y2023 = []
