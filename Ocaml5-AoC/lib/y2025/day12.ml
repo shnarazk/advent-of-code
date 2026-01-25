@@ -22,22 +22,18 @@ let parse_config =
 let parse_configs = Parsers.separated parse_config end_of_line
 let parser = lift2 (fun a b -> (a, b)) parse_blocks (parse_configs <* end_of_line)
 
-(* module Dist = Hashtbl.Make (struct
-  type t = 
-
-  let equal a b = 
-  let hash = Hashtbl.hash
-end)
-*)
-
 let solve data_file stdout =
-  let blocks, configs =
+  let _blocks, configs =
     match Angstrom.(parse_string ~consume:All parser @@ Path.load data_file) with
     | Ok v -> v
     | Error msg -> failwith msg
   in
-  print_endline @@ [%show: (int * char list array) list] blocks;
-  print_endline @@ [%show: ((int * int) * int array) array] configs;
-  let part1 = 0 and part2 = 0 in
+  (* print_endline @@ [%show: (int * char list array) list] blocks; *)
+  (* print_endline @@ [%show: ((int * int) * int array) array] configs; *)
+  let part1 =
+    Array.to_seq configs
+    |> Seq.filter (fun ((w, h), l) -> w / 3 * (h / 3) >= Array.fold_left ( + ) 0 l)
+    |> Seq.length
+  in
   Flow.copy_string (sprintf "Part1: %d\n" part1) stdout;
-  Flow.copy_string (sprintf "Part2: %d\n" part2) stdout
+  Flow.copy_string "Call it a year!\n" stdout
