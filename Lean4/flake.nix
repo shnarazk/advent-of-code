@@ -21,7 +21,6 @@
           packages = [
             # pkgs.bashInteractive
             pkgs.elan
-            home.packages.${system}.nvim4lean
             pkgs.watchexec
           ];
         };
