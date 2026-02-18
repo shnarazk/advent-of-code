@@ -44,7 +44,7 @@ namespace Part1
 def solve (input : Input) : Nat := Id.run do
   input.spec.iter
     |>.filter (fun ((width, height), requirement) ↦ width * height ≥ requirement.iter.sum * 9)
-    |>.count
+    |>.length
 
 end Part1
 

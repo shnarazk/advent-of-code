@@ -30,7 +30,7 @@ def depends (grid : HashSet Vec₂) (pos : Vec₂) : List Vec₂ :=
   dir8.iter.map (pos + ·) |>.filter (grid.contains ·) |>.toList
 
 def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
-  (dir8.iter.filter (fun d ↦ grid.contains (pos + d))).count < 4
+  (dir8.iter.filter (fun d ↦ grid.contains (pos + d))).length < 4
 
 namespace parser
 
@@ -49,7 +49,7 @@ namespace Part1
 
 def solve (input : Input) : Nat := Id.run do
   let h := input.grid.enum.filter (·.snd) |>.map (·.fst) |> HashSet.ofArray
-  h.iter.filter (removable h ·) |>.count
+  h.iter.filter (removable h ·) |>.length
 
 end Part1
 

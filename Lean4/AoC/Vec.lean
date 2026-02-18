@@ -63,7 +63,9 @@ instance : LT Vec₂ where
   lt (a b : Vec₂) := a.1 < b.1 ∧ a.2 < b.2
 
 instance instDecidableLtVec₂ (a b : Vec₂) : Decidable (a < b) := by
-  dsimp [instLTVec₂]
+  simp [LT.lt]
+  have s1 : Decidable (a.fst < b.fst) := by exact a.fst.decLt b.fst
+  have s1 : Decidable (a.snd < b.snd) := by exact a.snd.decLt b.snd
   exact instDecidableAnd
 
 #guard ((0, 0) : Vec₂) < ((8, 2) : Vec₂)
@@ -72,7 +74,9 @@ instance : LE Vec₂ where
   le (a b : Vec₂) := a.1 ≤ b.1 ∧ a.2 ≤ b.2
 
 instance instDecidableLeVec₂ (a b : Vec₂) : Decidable (a ≤ b) := by
-  dsimp [instLEVec₂]
+  simp [LE.le]
+  have s1 : Decidable (a.fst ≤ b.fst) := by exact a.fst.decLe b.fst
+  have s1 : Decidable (a.snd ≤ b.snd) := by exact a.snd.decLe b.snd
   exact instDecidableAnd
 
 #guard ((0, 0) : Vec₂) ≤ ((8, 2) : Vec₂)
@@ -121,7 +125,7 @@ instance : HAdd Vec₂ Dir Vec₂ where
 instance : HAdd (Nat × Nat) Dir (Option (Nat × Nat)) where
   hAdd (v : Nat × Nat) (d : Dir) : (Option (Nat × Nat)) :=
     let dv := d.asVec₂
-    let (y, x) := (v.1.toInt64.toInt + dv.1, v.2.toInt64.toInt + dv.2) 
+    let (y, x) := (v.1.toInt64.toInt + dv.1, v.2.toInt64.toInt + dv.2)
     if let some y := y.toNat? then
       if let some x := x.toNat? then some (y, x) else none
     else none
@@ -169,7 +173,7 @@ def Idx₂.snd (i : Idx₂) : Int := i.1.snd
 
 instance : HAdd Idx₂ Dir (Option Idx₂) where
   hAdd (v : Idx₂) (d : Dir) : (Option Idx₂) :=
-    let v' : Vec₂ := v.val + d 
+    let v' : Vec₂ := v.val + d
     if h : (0, 0) ≤ v' then
       some ⟨v', h⟩
     else
@@ -302,7 +306,7 @@ def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
 def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
   i.2 < self.width && (self.width * i.1 + i.2) < self.vector.size
-  
+
 #guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 1) == true
 #guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (2, 1) == true
 #guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 2) == false

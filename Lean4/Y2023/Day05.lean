@@ -76,7 +76,7 @@ def transpose (seeds : Array Nat) (rs : Array Range) :=
   seeds.map (transpose₀ · rs.toList)
 
 def Part1.solve (seeds : Array Nat) (maps : Array (Array Range)) : Nat :=
-  maps.foldl transpose seeds |>.minD 0
+  maps.foldl transpose seeds |>.rangeMinD 0
 
 def pairs (l : List α) : List (α × α) :=
   match l with

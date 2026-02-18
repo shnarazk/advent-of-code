@@ -96,7 +96,7 @@ def solve' (setting : Array Bool × Array (Array Nat) × Array Nat) : Nat := Id.
   while !toVisit.isEmpty do
     let mut next : HashSet (Array Bool) := HashSet.emptyWithCapacity 1
     for state in toVisit.iter do
-      if toIdicator buttons state len == indicator then return (state.iter.filter (·) |>.count)
+      if toIdicator buttons state len == indicator then return (state.iter.filter (·) |>.length)
       for (i, b) in state.iter.enumerate do
         if b then continue
         let s := state.set! i true

@@ -62,9 +62,9 @@ open Option
 def solve (input : Input) : Nat := Id.run do
   let slices := input.data |>.split '\n' |>.filter (!·.isEmpty)
   let lines := slices |>.map (fun s ↦ s.chars.toArray)
-  let num_lines := slices.count
+  let num_lines := slices.length
   let lastLine := slices |>.toList |>.getLast! |>.toString
-  let columnStarts := lastLine.toList.iter 
+  let columnStarts := lastLine.toList.iter
     |>.enumerate
     |>.filterMap (fun (i, c) ↦ (c != ' ').map (fun _ ↦ i))
     |>.toList
