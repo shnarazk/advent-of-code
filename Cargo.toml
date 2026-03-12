@@ -5,7 +5,7 @@ authors = ["Narazaki, Shuji <shujinarazaki@protonmail.com>"]
 edition = "2024"
 autobins = false
 default-run = "adventofcode"
-rust-version = "1.92"
+rust-version = "1.94"
 
 [[bin]]
 name = "adventofcode"
