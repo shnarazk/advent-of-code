@@ -137,30 +137,42 @@ mod parser {
                 .map(|(a, b, c)| Inst::Mulr(a, b, c)),
             seq!(_: "muli ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Muli(a, b, c)),
-            seq!(_: "banr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Banr(a, b, c)),
-            seq!(_: "bani ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Bani(a, b, c)),
-            seq!(_: "bori ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Bori(a, b, c)),
-            seq!(_: "borr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Borr(a, b, c)),
+            seq!(_: "b",
+            alt((
+                seq!(_: "anr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                    .map(|(a, b, c)| Inst::Banr(a, b, c)),
+                seq!(_: "ani ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                    .map(|(a, b, c)| Inst::Bani(a, b, c)),
+                seq!(_: "ori ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                    .map(|(a, b, c)| Inst::Bori(a, b, c)),
+                seq!(_: "orr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                    .map(|(a, b, c)| Inst::Borr(a, b, c)),
+            )))
+            .map(|(a,)| a),
             seq!(_: "setr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Setr(a, b, c)),
             seq!(_: "seti ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Seti(a, b, c)),
-            seq!(_: "gtir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Gtir(a, b, c)),
-            seq!(_: "gtri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Gtri(a, b, c)),
-            seq!(_: "gtrr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
-                .map(|(a, b, c)| Inst::Gtrr(a, b, c)),
-            seq!(_: "eqir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+            seq!(_: "g",
+                            alt((
+                        seq!(_: "tir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                            .map(|(a, b, c)| Inst::Gtir(a, b, c)),
+                        seq!(_: "tri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                            .map(|(a, b, c)| Inst::Gtri(a, b, c)),
+                        seq!(_: "trr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+                            .map(|(a, b, c)| Inst::Gtrr(a, b, c)),
+            )))
+            .map(|(a,)| a),
+            seq!(_: "e",
+                alt((
+            seq!(_: "qir ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Eqir(a, b, c)),
-            seq!(_: "eqri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+            seq!(_: "qri ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Eqri(a, b, c)),
-            seq!(_: "eqrr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
+            seq!(_: "qrr ", parse_usize, _: space1, parse_usize, _: space1, parse_usize)
                 .map(|(a, b, c)| Inst::Eqrr(a, b, c)),
+            )))
+            .map(|(a,)| a),
         ))
         .parse_next(s)
     }
