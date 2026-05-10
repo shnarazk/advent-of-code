@@ -58,9 +58,8 @@ impl AdventOfCode for Puzzle {
         let mut points = vec![0; self.players];
         let mut circle_next = vec![0; self.points];
         let mut current = 0;
-        let mut next_ball = 1;
         let mut following_ptr = 0;
-        for e in (1..=self.players).cycle() {
+        for (next_ball, e) in (1..).zip((1..=self.players).cycle()) {
             if next_ball % 23 == 0 {
                 points[e - 1] += next_ball;
                 let mut buffer = [0; 8];
@@ -89,7 +88,6 @@ impl AdventOfCode for Puzzle {
             }
             // print!("[{e}] ({current}): ");
             // print_link(&circle_next);
-            next_ball += 1;
         }
         0
     }

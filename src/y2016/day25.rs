@@ -45,10 +45,8 @@ impl Puzzle {
                 Code::Dec(Val::Reg(reg)) => {
                     self.register[*reg as usize] -= 1;
                 }
-                Code::Jnz(cond, offset) => {
-                    if 0 != self.get(cond) {
-                        return Some((pc as isize + self.get(offset)) as usize);
-                    }
+                Code::Jnz(cond, offset) if 0 != self.get(cond) => {
+                    return Some((pc as isize + self.get(offset)) as usize);
                 }
                 Code::Tgl(offset) => {
                     let off = self.get(offset);

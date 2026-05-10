@@ -64,10 +64,10 @@ impl Puzzle {
         for (_, to) in self.path.iter().filter(|(from, _)| *from == *here) {
             match to {
                 Node::End => continue,
-                Node::Small(_) if favorite == Some(to) => {
-                    if path.iter().filter(|n| *n == &to).count() == 2 {
-                        continue;
-                    }
+                Node::Small(_)
+                    if favorite == Some(to) && path.iter().filter(|n| *n == &to).count() == 2 =>
+                {
+                    continue;
                 }
                 Node::Small(_) if path.contains(&to) => continue,
                 _ => (),
