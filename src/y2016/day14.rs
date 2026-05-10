@@ -10,6 +10,10 @@ pub struct Puzzle {
     line: Vec<()>,
 }
 
+fn to_hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
 #[aoc(2016, 14)]
 impl AdventOfCode for Puzzle {
     fn part1(&mut self) -> Self::Output1 {
@@ -22,8 +26,7 @@ impl AdventOfCode for Puzzle {
         // let mut count = 0;
         for i in 0..1000 {
             hasher.update(format!("{salt}{i}"));
-            let result = hasher.finalize_reset();
-            let phrase = format!("{result:x}");
+            let phrase = to_hex(&hasher.finalize_reset());
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -39,8 +42,7 @@ impl AdventOfCode for Puzzle {
         'next_phrase: while passed < limit {
             // generate
             hasher.update(format!("{}{}", salt, check + 1000));
-            let result = hasher.finalize_reset();
-            let phrase = format!("{result:x}");
+            let phrase = to_hex(&hasher.finalize_reset());
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -67,7 +69,7 @@ impl AdventOfCode for Puzzle {
         }
         check - 1
     }
-    #[allow(unused)]
+
     fn part2(&mut self) -> Self::Output2 {
         let limit = 64;
         let mut passed = 0;
@@ -79,13 +81,11 @@ impl AdventOfCode for Puzzle {
         for i in 0..1000 {
             hasher.update(format!("{salt}{i}"));
             let mut result = hasher.finalize_reset();
-            {
-                for _ in 0..2016 {
-                    hasher.update(format!("{result:x}"));
-                    result = hasher.finalize_reset();
-                }
+            for _ in 0..2016 {
+                hasher.update(to_hex(&result));
+                result = hasher.finalize_reset();
             }
-            let phrase = format!("{result:x}");
+            let phrase = to_hex(&result);
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
@@ -101,13 +101,11 @@ impl AdventOfCode for Puzzle {
             // generate
             hasher.update(format!("{}{}", salt, check + 1000));
             let mut result = hasher.finalize_reset();
-            {
-                for _ in 0..2016 {
-                    hasher.update(format!("{result:x}"));
-                    result = hasher.finalize_reset();
-                }
+            for _ in 0..2016 {
+                hasher.update(to_hex(&result));
+                result = hasher.finalize_reset();
             }
-            let phrase = format!("{result:x}");
+            let phrase = to_hex(&result);
             let occ5 = phrase
                 .chars()
                 .collect::<Vec<char>>()
