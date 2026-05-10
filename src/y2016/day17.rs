@@ -7,6 +7,10 @@ use {
 
 type Dim2 = (usize, usize);
 
+fn to_hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Puzzle {
     line: String,
@@ -100,7 +104,7 @@ impl<'a> Hasher<'a> {
         let key = format!("{}{path}", self.seed);
         self.hasher.update(&key);
         let result = self.hasher.finalize_reset();
-        let phrase = format!("{result:x}").chars().take(4).collect::<Vec<char>>();
+        let phrase = to_hex(&result).chars().take(4).collect::<Vec<char>>();
         let is_open = |c: &char, d: char| ['b', 'c', 'd', 'e', 'f'].contains(c).then_some(d);
         [
             is_open(&phrase[0], 'U'),
