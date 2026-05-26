@@ -4,6 +4,7 @@ public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Vec
+public meta import «AoC».Vec
 
 namespace Y2023.Day10
 
