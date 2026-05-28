@@ -9,19 +9,19 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apple/swift-argument-parser",
-            .upToNextMinor(from: "1.0.0")
+            from: "1.0.0"
         ),
         .package(
             url: "https://github.com/apple/swift-collections.git",
-            .upToNextMinor(from: "1.2.0")
+            from: "1.2.0"
         ),
         .package(
             url: "https://github.com/pointfreeco/swift-parsing",
-            .upToNextMinor(from: "0.14.0")
+            from: "0.14.0"
         ),
         .package(
             url: "https://github.com/swiftgraphs/Grape",
-            .upToNextMinor(from: "1.1.0")
+            from: "1.1.0"
         ),
     ],
     targets: [
