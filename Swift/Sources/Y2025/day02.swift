@@ -72,9 +72,46 @@ private func part1(range: (Int, Int)) -> Int {
     sumOfSatisfiers(range: range, repeating: 2)
 }
 
+private func helper1(range: (Int, Int), set: inout Set<Int>) {
+    let sLen = digits(range.0)
+    let ss = pick(source: range.0, length: 1, nth: 1)
+    let ee = range.1 / pow10(sLen - 1)
+    if ss <= ee {
+        for d in ss...ee {
+            let x = repeated(
+                source: pick(source: d, length: 1, nth: 1), count: sLen + digits(d) - 1)
+            if x >= 10 && range.0 <= x && x <= range.1 {
+                set.insert(x)
+            }
+        }
+    }
+}
+
+private func helper2(range: (Int, Int), length: Int, set: inout Set<Int>) {
+    var e = range.1
+    let eLen = digits(e)
+    if eLen / length < 2 { return }
+    if eLen % length > 0 { e = pow10((eLen / length) * length) - 1 }
+    var s = range.0
+    var sLen = digits(s)
+    if sLen % length > 0 {
+        sLen = (sLen / length + 1) * length
+        s = pow10(sLen - 1)
+    }
+    for d in pick(source: s, length: length, nth: 1)...pick(source: e, length: length, nth: 1) {
+        let x = repeated(source: d, count: sLen / length)
+        if s <= x && x <= e { set.insert(x) }
+    }
+}
+
 /// Solves part 2.
 private func part2(range: (Int, Int)) -> Int {
-    range.1
+    var total: Set<Int> = Set()
+    helper1(range: range, set: &total)
+    for l in 2...8 {
+        helper2(range: range, length: l, set: &total)
+    }
+    return total.reduce(0, +)
 }
 
 public func day02(_ data: String) {
