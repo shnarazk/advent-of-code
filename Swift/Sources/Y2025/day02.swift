@@ -1,21 +1,29 @@
 import Parsing
 
+/// Returns 10^n.
 private func pow10(_ n: Int) -> Int {
     return n == 0 ? 1 : 10 * pow10(n - 1)
 }
 
+/// Returns the number of decimal digits in `n`.
 private func digits(_ n: Int) -> Int {
     return n < 10 ? 1 : 1 + digits(n / 10)
 }
 
+/// Extracts the `nth` group of `length` digits from `source`, counted from the left (1-indexed).
+/// e.g. `pick(source: 112233, length: 2, nth: 1)` → `11`
 private func pick(source: Int, length: Int, nth: Int) -> Int {
     (source / pow10(digits(source) - length * nth)) % pow10(length)
 }
 
+/// Returns the number formed by concatenating `source` with itself `n` times.
+/// e.g. `repeated(source: 123, count: 4)` → `123_123_123_123`
 private func repeated(source: Int, count n: Int) -> Int {
     (1...n).reduce(0, { acc, _ in acc * pow10(digits(source)) + source })
 }
 
+/// Returns the sum of all integers in `range` whose digits form `repeating` identical groups.
+/// e.g. with `repeating: 2`, valid numbers are 1122, 3344, 111333, …
 private func sumOfSatisfiers(range: (Int, Int), repeating: Int) -> Int {
     var s = range.0
     var e = range.1
@@ -59,10 +67,12 @@ private func sumOfSatisfiers(range: (Int, Int), repeating: Int) -> Int {
     return total
 }
 
+/// Solves part 1: sum of integers in `range` with digits in 2 repeating groups.
 private func part1(range: (Int, Int)) -> Int {
     sumOfSatisfiers(range: range, repeating: 2)
 }
 
+/// Solves part 2.
 private func part2(range: (Int, Int)) -> Int {
     range.1
 }
