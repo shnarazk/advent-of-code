@@ -72,6 +72,9 @@ private func part1(range: (Int, Int)) -> Int {
     sumOfSatisfiers(range: range, repeating: 2)
 }
 
+/// Collects all repdigit numbers within `range` into `set`.
+/// A repdigit is a positive integer whose digits are all the same (e.g. 11, 222, 9999).
+/// Numbers less than 10 (single-digit) are excluded.
 private func helper1(range: (Int, Int), set: inout Set<Int>) {
     let sLen = digits(range.0)
     let ss = pick(source: range.0, length: 1, nth: 1)
@@ -87,6 +90,10 @@ private func helper1(range: (Int, Int), set: inout Set<Int>) {
     }
 }
 
+/// Collects numbers within `range` whose digits form a `length`-digit block repeated at least twice,
+/// inserting each qualifying number into `set`.
+/// For example, with `length: 2` the numbers 1212, 3434, and 112112 would qualify,
+/// since each is a repeat twice pattern (`12`, `34`, `112`) repeated consecutively.
 private func helper2(range: (Int, Int), length: Int, set: inout Set<Int>) {
     var e = range.1
     let eLen = digits(e)
