@@ -53,6 +53,14 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
             case 2: Y2025.day02(data)
             case 3: Y2025.day03(data)
             case 4: Y2025.day04(data)
+            case 5: Y2025.day05(data)
+            case 6: Y2025.day06(data)
+            case 7: Y2025.day07(data)
+            case 8: Y2025.day08(data)
+            case 9: Y2025.day09(data)
+            case 10: Y2025.day10(data)
+            case 11: Y2025.day11(data)
+            case 12: Y2025.day12(data)
             default: fatalError()
             }
         case 2024:
