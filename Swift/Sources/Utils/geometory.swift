@@ -48,11 +48,11 @@ public struct Pos: Comparable, Hashable, Sendable {
     }
     public func turnLeft() -> Pos {
         switch self {
-            case .west: .south
-            case .south: .east
-            case .east: .north
-            case .north: .west
-            default: .zero
+        case .west: .south
+        case .south: .east
+        case .east: .north
+        case .north: .west
+        default: .zero
         }
     }
     /// Return the last valid Pos(y - 1, x - 1)  corresponding to range (0, 0) to (y, x)
@@ -131,6 +131,14 @@ public struct Pos: Comparable, Hashable, Sendable {
     /// `bound` is the closed end.
     public func neighbors4(bound: Pos) -> [Pos] {
         [self + .north, self + .east, self + .south, self + .west].compactMap { $0.within(bound) }
+    }
+    /// Returns up to 8 orthogonal and diagonal neighbors of `self` within `(0,0)` and `bound` (closed).
+    public func neighbors8(bound: Pos) -> [Pos] {
+        [
+            self + .north, self + .north + .east, self + .east, self + .south + .east,
+            self + .south, self + .south + .west, self + .west, self + .north + .west,
+        ]
+        .compactMap { $0.within(bound) }
     }
     // return Pos(y: 2, x:2) from [[1,2,3], [4,5,6], [7,8,9]]
     public static func boundary<T>(of m: [[T]]) -> Pos {
