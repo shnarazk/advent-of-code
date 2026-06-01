@@ -50,12 +50,12 @@ struct Aoc: @preconcurrency ParsableCommand, Decodable {
             switch year {
             case 2025:
                 switch day {
-                case 1: Y2025.day01(data)
-                case 2: Y2025.day02(data)
-                case 3: Y2025.day03(data)
-                case 4: Y2025.day04(data)
-                case 5: Y2025.day05(data)
-                case 6: Y2025.day06(data)
+                case 1: try Y2025.day01(data)
+                case 2: try Y2025.day02(data)
+                case 3: try Y2025.day03(data)
+                case 4: try Y2025.day04(data)
+                case 5: try Y2025.day05(data)
+                case 6: try Y2025.day06(data)
                 case 7: try Y2025.day07(data)
                 case 8: try Y2025.day08(data)
                 case 9: try Y2025.day09(data)

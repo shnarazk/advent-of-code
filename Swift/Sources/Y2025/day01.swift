@@ -23,7 +23,7 @@ private func part2(_ lines: [Int]) -> Int {
     return zeros
 }
 
-public func day01(_ data: String) {
+public func day01(_ data: String) throws {
     let line_parser: some Parser<Substring, Int> = Parse(input: Substring.self) {
         OneOf {
             Parse {
@@ -45,13 +45,9 @@ public func day01(_ data: String) {
     } terminator: {
         "\n"
     }
-    do {
-        let lines: [Int] = try parser.parse(data)
-        let sum1 = part1(lines)
-        let sum2 = part2(lines)
-        print("Part1: \(sum1)")
-        print("Part2: \(sum2)")
-    } catch {
-        print(error)
-    }
+    let lines: [Int] = try parser.parse(data)
+    let sum1 = part1(lines)
+    let sum2 = part2(lines)
+    print("Part1: \(sum1)")
+    print("Part2: \(sum2)")
 }

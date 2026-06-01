@@ -35,7 +35,7 @@ private func part2(_ ranges: [(Int, Int)], _ _: [Int]) -> Int {
     return count
 }
 
-public func day05(_ data: String) {
+public func day05(_ data: String) throws {
     let range_parser: some Parser<Substring, (Int, Int)> = Parse {
         Int.parser()
         "-"
@@ -57,14 +57,9 @@ public func day05(_ data: String) {
         "\n\n"
         parser_part2
     }
-    do {
-        let (ranges, avalables) = try parser.parse(data)
-        let sum1 = part1(ranges, avalables)
-        let sum2 = part2(ranges, avalables)
-        print("Part 1: \(sum1)")
-        print("Part 2: \(sum2)")
-    } catch {
-        print(error)
-        fatalError()
-    }
+    let (ranges, avalables) = try parser.parse(data)
+    let sum1 = part1(ranges, avalables)
+    let sum2 = part2(ranges, avalables)
+    print("Part 1: \(sum1)")
+    print("Part 2: \(sum2)")
 }

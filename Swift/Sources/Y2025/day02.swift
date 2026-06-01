@@ -121,7 +121,7 @@ private func part2(range: (Int, Int)) -> Int {
     return total.reduce(0, +)
 }
 
-public func day02(_ data: String) {
+public func day02(_ data: String) throws {
     assert(pick(source: 112233, length: 2, nth: 3) == 33)
     assert(pick(source: 112233, length: 3, nth: 2) == 233)
     assert(repeated(source: 123, count: 4) == 123_123_123_123)
@@ -137,14 +137,9 @@ public func day02(_ data: String) {
     } terminator: {
         "\n"
     }
-    do {
-        let input = try parser.parse(data)
-        let sum1 = input.map { part1(range: $0) }.reduce(0, +)
-        let sum2 = input.map { part2(range: $0) }.reduce(0, +)
-        print("Part 1: \(sum1)")
-        print("Part 2: \(sum2)")
-    } catch {
-        print(error)
-        fatalError()
-    }
+    let input = try parser.parse(data)
+    let sum1 = input.map { part1(range: $0) }.reduce(0, +)
+    let sum2 = input.map { part2(range: $0) }.reduce(0, +)
+    print("Part 1: \(sum1)")
+    print("Part 2: \(sum2)")
 }

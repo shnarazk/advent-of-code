@@ -79,7 +79,7 @@ private func part2(_ grid: [[Bool]]) -> Int {
     return numDeads
 }
 
-public func day04(_ data: String) {
+public func day04(_ data: String) throws {
     let line_parser: some Parser<Substring, [Bool]> = Many {
         First<Substring>()
             .filter { $0 == "@" || $0 == "." }
@@ -90,14 +90,9 @@ public func day04(_ data: String) {
     let parser: some Parser<Substring, [[Bool]]> = Many {
         line_parser
     }
-    do {
-        let grid = try parser.parse(data)
-        let sum1 = part1(grid)
-        let sum2 = part2(grid)
-        print("Part 1: \(sum1)")
-        print("Part 2: \(sum2)")
-    } catch {
-        print(error)
-        fatalError()
-    }
+    let grid = try parser.parse(data)
+    let sum1 = part1(grid)
+    let sum2 = part2(grid)
+    print("Part 1: \(sum1)")
+    print("Part 2: \(sum2)")
 }

@@ -32,7 +32,7 @@ private func part2(_ input: [[Int]]) -> Int {
     .reduce(0, +)
 }
 
-public func day03(_ data: String) {
+public func day03(_ data: String) throws {
     let line_parser: some Parser<Substring, [Int]> = Many {
         First<Substring>()
             .filter { $0.isNumber }
@@ -43,14 +43,9 @@ public func day03(_ data: String) {
     let parser: some Parser<Substring, [[Int]]> = Many {
         line_parser
     }
-    do {
-        let input = try parser.parse(data)
-        let sum1 = part1(input)
-        let sum2 = part2(input)
-        print("Part 1: \(sum1)")
-        print("Part 2: \(sum2)")
-    } catch {
-        print(error)
-        fatalError()
-    }
+    let input = try parser.parse(data)
+    let sum1 = part1(input)
+    let sum2 = part2(input)
+    print("Part 1: \(sum1)")
+    print("Part 2: \(sum2)")
 }
