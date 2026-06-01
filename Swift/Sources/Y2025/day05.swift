@@ -2,13 +2,37 @@ import Parsing
 
 private func part1(_ ranges: [(Int, Int)], _ availables: [Int]) -> Int {
     availables.filter { id in
-        ranges.contains(where: { (b, e) in b <= id && id <= e })
+        ranges.contains(where: { (b, e) in (b...e) ~= id })
     }
     .count
 }
 
-private func part2(_ _ranges: [(Int, Int)], _ _availables: [Int]) -> Int {
-    0
+private func part2(_ ranges: [(Int, Int)], _ _: [Int]) -> Int {
+    var tick: [Int: (Int, Int)] = [:]
+    for (b, e) in ranges {
+        tick[b, default: (0, 0)].0 += 1
+        tick[e, default: (0, 0)].1 += 1
+    }
+    var v: [(Int, (Int, Int))] = Array(tick)
+    v.sort { $0.0 < $1.0 }
+    var count = 0
+    var nest = 0
+    var start = 0
+    for (id, (b, e)) in v {
+        if 0 < b {
+            if nest == 0 {
+                start = id
+            }
+            nest += b
+        }
+        if 0 < e {
+            nest -= e
+            if nest == 0 {
+                count += id + 1 - start
+            }
+        }
+    }
+    return count
 }
 
 public func day05(_ data: String) {
