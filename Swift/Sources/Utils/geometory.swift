@@ -16,6 +16,10 @@ public struct Pos: Comparable, Hashable, Sendable {
         self.y = y
         self.x = x
     }
+    public init() {
+        self.y = 0
+        self.x = 0
+    }
     var debugDescription: String {
         "(y:\(y), x:\(x))"
     }
@@ -174,5 +178,100 @@ public func within(_ me: (Int, Int), in size: (Int, Int)) -> (Int, Int)? {
         me
     } else {
         nil
+    }
+}
+
+@DebugDescription
+public struct Pos3: Comparable, Hashable, Sendable {
+    public func negate() -> Pos3 {
+        Pos3(z: -z, y: -y, x: -x)
+    }
+    public func abs() -> Pos3 {
+        Pos3(z: Swift.abs(z), y: Swift.abs(y), x: Swift.abs(x))
+    }
+
+    public let z: Int
+    public let y: Int
+    public let x: Int
+    public static let zero: Pos3 = Pos3(z: 0, y: 0, x: 0)
+    public init(z: Int, y: Int, x: Int) {
+        self.z = z
+        self.y = y
+        self.x = x
+    }
+    public init() {
+        self.z = 0
+        self.y = 0
+        self.x = 0
+    }
+    var debugDescription: String {
+        "(z:\(z), y:\(y), x:\(x))"
+    }
+    public static func < (lhs: Pos3, rhs: Pos3) -> Bool {
+        lhs.z < rhs.z && lhs.y < rhs.y && lhs.x < rhs.x
+    }
+    public static func <= (lhs: Pos3, rhs: Pos3) -> Bool {
+        lhs.z <= rhs.z && lhs.y <= rhs.y && lhs.x <= rhs.x
+    }
+    public static func + (lhs: Pos3, rhs: Pos3) -> Pos3 {
+        Pos3(z: lhs.z + rhs.z, y: lhs.y + rhs.y, x: lhs.x + rhs.x)
+    }
+    public static func + (lhs: Pos3, rhs: Int) -> Pos3 {
+        Pos3(z: lhs.z + rhs, y: lhs.y + rhs, x: lhs.x + rhs)
+    }
+    public static func - (lhs: Pos3, rhs: Pos3) -> Pos3 {
+        Pos3(z: lhs.z - rhs.z, y: lhs.y - rhs.y, x: lhs.x - rhs.x)
+    }
+    public static func - (lhs: Pos3, rhs: Int) -> Pos3 {
+        Pos3(z: lhs.z - rhs, y: lhs.y - rhs, x: lhs.x - rhs)
+    }
+    public static func * (lhs: Pos3, rhs: Pos3) -> Pos3 {
+        Pos3(z: lhs.z * rhs.z, y: lhs.y * rhs.y, x: lhs.x * rhs.x)
+    }
+    public static func * (lhs: Pos3, rhs: Int) -> Pos3 {
+        Pos3(z: lhs.z * rhs, y: lhs.y * rhs, x: lhs.x * rhs)
+    }
+    public static func / (lhs: Pos3, rhs: Pos3) -> Pos3 {
+        Pos3(z: lhs.z / rhs.z, y: lhs.y / rhs.y, x: lhs.x / rhs.x)
+    }
+    public static func / (lhs: Pos3, rhs: Int) -> Pos3 {
+        Pos3(z: lhs.z / rhs, y: lhs.y / rhs, x: lhs.x / rhs)
+    }
+    public static func % (lhs: Pos3, rhs: Pos3) -> Pos3 {
+        Pos3(z: lhs.z % rhs.z, y: lhs.y % rhs.y, x: lhs.x % rhs.x)
+    }
+    public static func % (lhs: Pos3, rhs: Int) -> Pos3 {
+        Pos3(z: lhs.z % rhs, y: lhs.y % rhs, x: lhs.x % rhs)
+    }
+}
+
+extension Array
+where
+    Element: Collection, Element.Index == Int, Element.Element: Collection,
+    Element.Element.Index == Int
+{
+    /// allow `my3D[pos]`
+    public subscript(_ pos: Pos3) -> Element.Element.Element {
+        get {
+            return self[pos.z][pos.y][pos.x]
+        }
+    }
+}
+// Use Pos as index for [[T]]
+// only on Arrays whose Element is a MutableCollection (e.g. another Array)
+// whose indices are Ints
+extension Array
+where
+    Element: MutableCollection, Element.Index == Int, Element.Element: MutableCollection,
+    Element.Element.Index == Int
+{
+    /// allow `my3D[pos] = value`
+    public subscript(_ pos: Pos3) -> Element.Element.Element {
+        get {
+            return self[pos.z][pos.y][pos.x]
+        }
+        set {
+            self[pos.z][pos.y][pos.x] = newValue
+        }
     }
 }
