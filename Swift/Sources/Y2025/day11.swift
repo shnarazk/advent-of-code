@@ -9,13 +9,9 @@ private struct Path: Hashable {
     }
 }
 
-private func countPath(_ dict: [String: [String]], from: String, to: String) -> Int {
-    var table: [Path: Int] = [:]
-    for p in dict {
-        for dist in p.1 {
-            table[Path(p.0, dist)] = 1
-        }
-    }
+private func countPath(
+    _ dict: [String: [String]], _ table: inout [Path: Int], from: String, to: String
+) -> Int {
     func get(from: String, to: String) -> Int {
         if let value = table[Path(from, to)] {
             return value
@@ -27,18 +23,18 @@ private func countPath(_ dict: [String: [String]], from: String, to: String) -> 
     return get(from: from, to: to)
 }
 
-private func part1(_ dict: [String: [String]]) -> Int {
-    return countPath(dict, from: "you", to: "out")
+private func part1(_ dict: [String: [String]], _ table: inout [Path: Int]) -> Int {
+    return countPath(dict, &table, from: "you", to: "out")
 }
 
-private func part2(_ dict: [String: [String]]) -> Int {
+private func part2(_ dict: [String: [String]], _ table: inout [Path: Int]) -> Int {
     return
-        (countPath(dict, from: "svr", to: "fft")
-        * countPath(dict, from: "fft", to: "dac")
-        * countPath(dict, from: "dac", to: "out"))
-        + (countPath(dict, from: "svr", to: "dac")
-            * countPath(dict, from: "dac", to: "fft")
-            * countPath(dict, from: "fft", to: "out"))
+        (countPath(dict, &table, from: "svr", to: "fft")
+        * countPath(dict, &table, from: "fft", to: "dac")
+        * countPath(dict, &table, from: "dac", to: "out"))
+        + (countPath(dict, &table, from: "svr", to: "dac")
+            * countPath(dict, &table, from: "dac", to: "fft")
+            * countPath(dict, &table, from: "fft", to: "out"))
 }
 
 public func day11(_ data: String) throws {
@@ -56,8 +52,14 @@ public func day11(_ data: String) throws {
     }
     let parser: some Parser<Substring, [(String, [String])]> = Many { line }
     let dict: [String: [String]] = Dictionary(try parser.parse(data), uniquingKeysWith: +)
-    let sum1 = part1(dict)
-    let sum2 = part2(dict)
+    var table: [Path: Int] = [:]
+    for p in dict {
+        for dist in p.1 {
+            table[Path(p.0, dist)] = 1
+        }
+    }
+    let sum1 = part1(dict, &table)
+    let sum2 = part2(dict, &table)
     print("Part 1: \(sum1)")
     print("Part 2: \(sum2)")
 }
