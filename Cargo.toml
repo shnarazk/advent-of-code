@@ -14,7 +14,7 @@ path = "src/bin/adventofcode.rs"
 [dependencies]
 aoc_macro = { version = "^0.3", path = "aoc_macro" }
 clap = { version = "^4.5", features = ["derive"] }
-itertools = { version = "^0.14" }
+itertools = { version = "^0.15" }
 md-5 = { version = "^0.11", optional = true }
 # petgraph = { version = "0.8", optional = true }
 # plotters = { version = "0.3.7", features = ["histogram"] }
