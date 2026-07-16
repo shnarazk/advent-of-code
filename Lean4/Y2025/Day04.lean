@@ -61,7 +61,7 @@ def solve (input : Input) : Nat := Id.run do
   let h := input.grid.enum.filter (fun ib ↦ ib.2) |>.map (·.fst) |> HashSet.ofArray
   let mut flow := h.iter.map (fun p ↦ (p, depends h p)) |>.toList |> HashMap.ofList
   let mut toVisit := flow.iter |>.filter (·.snd.length < 4) |>.map (·.fst) |>.toList
-  let mut removed := 0
+  let mut removed : Nat := 0
   while !toVisit.isEmpty do
     let mut nextTargets := []
     for toRemove in toVisit do

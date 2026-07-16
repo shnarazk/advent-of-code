@@ -82,7 +82,7 @@ def count_sides (hash : HashMap Nat (Array (Nat × Bool))) : Nat :=
   hash.values.iter
     |>.map (fun v' ↦ Id.run do
       let v := v'.qsortOrd
-      let mut count := 1
+      let mut count : Nat := 1
       let mut ended := v[0]!.fst + 1
       let mut spin := v[0]!.snd
       for (st, sp) in v.drop 1 |>.iter do

@@ -44,7 +44,7 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat := Id.run do
-  let mut numSplits := 0
+  let mut numSplits : Nat := 0
   let mut pos : HashSet Nat := HashSet.emptyWithCapacity 100
   pos := pos.insert input.start
   for line in input.splitters do
