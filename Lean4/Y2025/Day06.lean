@@ -64,7 +64,7 @@ def solve (input : Input) : Nat := Id.run do
   let lines := slices |>.map (fun s ↦ s.chars.toArray)
   let num_lines := slices.length
   let lastLine := slices |>.toList |>.getLast! |>.toString
-  let columnStarts := lastLine.toList.iter
+  let columnStarts := lastLine.chars
     |>.enumerate
     |>.filterMap (fun (i, c) ↦ (c != ' ').map (fun _ ↦ i))
     |>.toList
