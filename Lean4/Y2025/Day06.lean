@@ -61,8 +61,8 @@ open Option
 
 def solve (input : Input) : Nat := Id.run do
   let slices := input.data |>.split '\n' |>.filter (!·.isEmpty)
-  let lines := slices |>.map (fun s ↦ s.chars.toArray)
   let num_lines := slices.length
+  let lines := slices |>.map (fun s ↦ s.chars.toArray) |>.take (num_lines - 1) |>.toArray
   let lastLine := slices |>.toList |>.getLast! |>.toString
   let columnStarts := lastLine.chars
     |>.enumerate
@@ -75,8 +75,8 @@ def solve (input : Input) : Nat := Id.run do
     let mut c := mul?.toNat
     for i in range.fst ... (range.snd - 1) do
       let mut ith_num := 0
-      for line in lines.take (num_lines - 1) do
-        let ch := line[i]!
+      for line in lines do
+        let ch : Char := line[i]!
         if ch.isDigit then
           ith_num := ith_num * 10 + (ch.val - '0'.val).toNat
       if mul? then c := c * ith_num else c := c + ith_num
