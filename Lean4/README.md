@@ -23,7 +23,7 @@ $ lake exe aoc -y YEAR -b
 |  03 |              0.6  |    0.7 |    0.7  |
 |  04 |             21.7  |   21.9 |    5.0  |
 |  05 |              0.7  |    0.7 |    0.2  |
-|  06 |            251.5  | 1608.2 |    0.9  |
+|  06 |            251.5  |   *1.4 |    0.9  |
 |  07 |              1.7  |    1.8 |    0.4  |
 |  08 |            449.9  |  454.2 |    7.4  |
 |  09 |             29.1  |   23.2 |    3.4  |
@@ -33,6 +33,8 @@ $ lake exe aoc -y YEAR -b
 | 2025|                   |        |   32.9  |
 
 (day10 part2 has not been completed.)
+
+Note: `*` for algorithmic or language-specific breaking changes
 
 #### y2024
 
