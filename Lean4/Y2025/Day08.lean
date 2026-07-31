@@ -39,7 +39,7 @@ def parse : String → Option Input := AoCParser.parse parser
         if j ≤ i then continue
         let d := b1 - b2
         dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
-    dists := dists.heapSort (·.fst < ·.fst)
+    dists := dists.qsort (·.fst < ·.fst)
     pure <| Input.mk boxes dists
 
 end parser
@@ -54,7 +54,7 @@ def solve (input : Input) : Nat := Id.run do
   let mut groupSizes : HashMap Nat Nat := HashMap.emptyWithCapacity (num_boxes / 4)
   for i in 0 ... num_boxes do
     groupSizes := groupSizes.alter (group.root! i) (fun o ↦ o.mapOr (· + 1) 1 |> some)
-  let mut v : Array Nat := groupSizes.values.toArray.heapSort (· > ·) |>.take 3
+  let mut v : Array Nat := groupSizes.values.toArray.qsort (· > ·) |>.take 3
   v.foldl (· * ·) 1 |> pure
 
 end Part1

@@ -35,8 +35,8 @@ end parser
 namespace Part1
 
 def solve (input : Input) : Nat :=
-  let l : Array Nat := input.line.map (·.1) |>.heapSort (·<·)
-  let r : Array Nat := input.line.map (·.2) |>.heapSort (·<·)
+  let l : Array Nat := input.line.map (·.1) |>.qsort (·<·)
+  let r : Array Nat := input.line.map (·.2) |>.qsort (·<·)
   l.zip r
     |>.map (fun (l, r) ↦ if l < r then r - l else l - r)
     |> sum

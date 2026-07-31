@@ -89,7 +89,7 @@ structure Circuit where
   pulse_h : Nat
 
 def Circuit.toHashable (self : Circuit) (l : List Bool) : List Mdl × List Bool :=
-  (self.circuit.toList.mergeSort (fun a b ↦ a.fst < b.fst) |>.map (·.snd.fst), l)
+  (self.circuit.toList.mergeSort (·.fst < ·.fst) |>.map (·.snd.fst), l)
 
 def Circuit.get (self : Circuit) (lebel : Label) : Option Node := self.circuit.get? lebel
 

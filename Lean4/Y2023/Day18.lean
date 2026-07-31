@@ -162,8 +162,8 @@ def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
     |> ((0,0) :: ·)
     |>.toArray
     |>.reverse
-  let ys : Array Int := path.map (·.fst) |> unique |>.heapSort (· < ·)
-  let xs : Array Int := path.map (·.snd) |> unique |>.heapSort (· < ·)
+  let ys : Array Int := path.map (·.fst) |> unique |>.qsort (· < ·)
+  let xs : Array Int := path.map (·.snd) |> unique |>.qsort (· < ·)
   -- doubled map
   let dm := path.windows2.foldl
     (fun r ((y₁, x₁), (y₂, x₂)) ↦
