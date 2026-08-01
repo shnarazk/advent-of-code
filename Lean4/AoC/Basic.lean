@@ -20,8 +20,9 @@ public def parse {α : Type} (parser : Parser α) (source : String) : Option α 
 end AoCParser
 
 /-- print a data like `dbg!` in Rust -/
-def dbg {α : Type} [ToString α] (label : String) (a : α) : α :=
-  dbgTrace s!"{label}: {a}" (fun _ ↦ a)
+def dbg {α : Type} (str : String) (a : α) : α :=
+  dbgTrace s!"{str}" (fun _ ↦ a)
+  -- dbgTrace s!"{label}: {a}" (fun _ ↦ a)
 
 /-- return a path to the datafile of `year` and `day` -/
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
