@@ -35,15 +35,15 @@ def parse_dim3 := do
 def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do
-    let boxes ← separated parse_dim3 eol
-    let mut dists : Array (Nat × (Nat × Nat)) := #[]
-    for i in 0 ... boxes.size do
-      -- have pi : i < boxes.size := by sorry
-      for j in (i+1) ... boxes.size do
-        let d := boxes[i]! - boxes[j]!
-        dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
-    dists := dists.qsort (·.fst < ·.fst)
-    pure <| Input.mk boxes dists
+      let boxes ← separated parse_dim3 eol
+      let mut dists : Array (Nat × (Nat × Nat)) := #[]
+      for i in 0 ... boxes.size do
+        let bi := boxes[i]!
+        for j in (i+1) ... boxes.size do
+          let d := bi - boxes[j]!
+          dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
+      dists := dists.qsort (·.fst < ·.fst)
+      pure <| Input.mk boxes dists
 
 end parser
 
@@ -72,7 +72,7 @@ def solve (input : Input) : Nat := Id.run do
     group := group.union! i j
     let root := group.root! 0
     if (0...num_boxes).iter.all (group.root! · == root) then
-      return (input.boxes[i]?.mapOr (·.x.toNat) 0) * (input.boxes[j]?.mapOr (·.x.toNat) 0)
+      return input.boxes[i]!.x.toNat * input.boxes[j]!.x.toNat
   0
 
 end Part2
