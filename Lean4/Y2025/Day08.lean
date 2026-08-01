@@ -23,6 +23,9 @@ open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+instance : Inhabited Vec₃ where
+  default := Vec₃.mk 0 0 0
+
 def parse_dim3 := do
   let x ← number <* pchar ','
   let y ← number <* pchar ','
@@ -34,10 +37,10 @@ def parse : String → Option Input := AoCParser.parse parser
     parser : Parser Input := do
     let boxes ← separated parse_dim3 eol
     let mut dists : Array (Nat × (Nat × Nat)) := #[]
-    for (i, b1) in boxes.iter.enumerate do
-      for (j, b2) in boxes.iter.enumerate do
-        if j ≤ i then continue
-        let d := b1 - b2
+    for i in 0 ... boxes.size do
+      -- have pi : i < boxes.size := by sorry
+      for j in (i+1) ... boxes.size do
+        let d := boxes[i]! - boxes[j]!
         dists := dists.push (d.x.natAbs ^ 2 + d.y.natAbs ^ 2 + d.z.natAbs ^ 2, i, j)
     dists := dists.qsort (·.fst < ·.fst)
     pure <| Input.mk boxes dists
