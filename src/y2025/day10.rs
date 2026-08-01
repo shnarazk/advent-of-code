@@ -117,7 +117,9 @@ fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
         problem.add_constraint(&group, ComparisonOp::Eq, *g as f64);
     }
 
-    let solution = problem.solve().unwrap();
+    let Ok(solution) = problem.solve().unwrap().into_solution() else {
+        panic!();
+    };
     variables
         .iter()
         .map(|b| solution[*b])
