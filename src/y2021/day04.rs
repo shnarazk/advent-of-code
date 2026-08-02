@@ -26,11 +26,8 @@ fn row_at(vec: &[Vec<usize>], at: usize) -> Cow<'_, [usize]> {
 fn grade(vec: &[usize], order: &[usize], board: &[Vec<usize>]) -> Option<(usize, usize)> {
     let mut need = 0;
     for i in vec.iter() {
-        if let Some(o) = order.get(*i) {
-            need = need.max(*o);
-        } else {
-            return None;
-        }
+        let o = order.get(*i)?;
+        need = need.max(*o);
     }
     let point = board
         .iter()

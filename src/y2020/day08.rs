@@ -158,11 +158,8 @@ fn flip(codes: &[(Instruction, bool)], at: usize) -> Option<Vec<(Instruction, bo
     let mut newcodes: Vec<(Instruction, bool)> = Vec::new();
     for (n, inst) in codes.iter().enumerate() {
         if n == at {
-            if let Some(flipped) = inst.0.flip() {
-                newcodes.push((flipped, false));
-            } else {
-                return None;
-            }
+            let flipped = inst.0.flip()?;
+            newcodes.push((flipped, false));
         } else {
             newcodes.push((inst.0.clone(), false));
         }

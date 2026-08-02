@@ -96,7 +96,7 @@ impl AdventOfCode for Puzzle {
                     let message = output.iter().map(|c| *c as u8 as char).collect::<String>();
                     if let Ok(amount) = parser::parse_output(&mut message.as_str()) {
                         if verbose {
-                            println!("{}{}{}", color::RED, &amount, color::RESET);
+                            println!("{}{}{}", color::RED, amount, color::RESET);
                         }
                         return amount;
                     }

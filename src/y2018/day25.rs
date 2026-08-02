@@ -55,7 +55,7 @@ impl AdventOfCode for Puzzle {
                     + (p[3] - q[3]).unsigned_abs();
                 if dist <= 3 {
                     // renumber cj to ci
-                    for (_, v) in constellation.iter_mut() {
+                    for v in constellation.values_mut() {
                         if *v == cj {
                             *v = ci;
                         }

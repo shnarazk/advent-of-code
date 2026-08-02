@@ -84,7 +84,7 @@ impl AdventOfCode for Puzzle {
             .iter()
             .cloned()
             .collect::<HashMap<Label, Vec<Rule>>>();
-        for (_, rules) in self.rules.iter() {
+        for rules in self.rules.values() {
             for rule in rules.iter() {
                 if let Some((label, op, val)) = &rule.0 {
                     let var_index = match label.as_str() {

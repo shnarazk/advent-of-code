@@ -284,8 +284,8 @@ static INPUT_BITS: OnceLock<usize> = OnceLock::new();
 static PROPAGATION_TABLE: OnceLock<WireMap<(Gate, WireRef, WireRef)>> = OnceLock::new();
 
 fn build_swapped_pair((pick1, pick2): (WireRef, WireRef)) -> (GateSpec, GateSpec) {
-    debug_assert!(![b'x', b'y'].contains(&pick1.0));
-    debug_assert!(![b'x', b'y'].contains(&pick2.0));
+    debug_assert!(!b"xy".contains(&pick1.0));
+    debug_assert!(!b"xy".contains(&pick2.0));
 
     let p1 = pick1.min(pick2);
     let p2 = pick1.max(pick2);

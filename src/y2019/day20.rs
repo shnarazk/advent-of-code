@@ -250,7 +250,7 @@ impl Puzzle {
             top_left.0 <= l.0 && l.0 <= bottom_right.0 && top_left.1 <= l.1 && l.1 <= bottom_right.1
         };
         // let goal = self.gate.get("ZZ").unwrap()[0].0;
-        for (_, entries) in self.gate.iter() {
+        for entries in self.gate.values() {
             for portal_entry in entries.iter() {
                 for (dest, (cost, flag)) in self.build_cost_table(inner, portal_entry.1).iter() {
                     // if name == "AA" {

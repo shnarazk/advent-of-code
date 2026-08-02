@@ -15,7 +15,7 @@ impl Default for Puzzle {
         for i in 1..=9 {
             table[b'0' as usize + i] = i;
         }
-        for c in [b'e', b'f', b'n', b'o', b's', b't'] {
+        for c in *b"efnost" {
             table[c as usize] = 10;
         }
         let subst = vec![

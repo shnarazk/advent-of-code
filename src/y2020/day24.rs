@@ -143,7 +143,7 @@ impl Puzzle {
     }
     fn next_day(&self) -> Puzzle {
         let mut next: Puzzle = Puzzle::default();
-        for (k, _v) in self.cell.iter() {
+        for k in self.cell.keys() {
             /*
             if *v {
                 println!("{:?}", k);
