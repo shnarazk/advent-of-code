@@ -1,6 +1,6 @@
 # 2025 in Rust
 
-- rustc-1.92
+- rustc-1.92, 1.97.1
 - Apple Silicon M3
 
 |   day | time(ms)|
@@ -12,7 +12,7 @@
 | day5  |     0.2 |
 | day6  |     0.9 |
 | day7  |     0.4 |
-| day8  |     7.4 |
+| day8  |     3.2 |
 | day9  |     3.4 |
 | day10 |     7.2 |
 | day11 |     6.1 |
