@@ -1,6 +1,5 @@
 module
 
-public import Batteries.Data.BinaryHeap
 public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Combinator
@@ -43,9 +42,11 @@ structure State where
 instance : ToString State where
   toString s := s!"<({s.pos.fst}, {s.pos.snd}){s.dir} c:{s.cost} #{s.steps}>"
 
-abbrev BinaryHeap := Batteries.BinaryHeap State
+abbrev Heap := Batteries.BinomialHeap State
 
 namespace Part1
+
+open Batteries
 
 def limit := 3
 
@@ -83,8 +84,8 @@ variable (to_visit : List State)
 
 partial
 def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
-    (visited : Std.HashMap (Idx₂ × Dir) (Nat × Nat)) (to_visit :BinaryHeap f) : Nat :=
-  if let (some state, to_visit') := to_visit.extractMax then
+    (visited : Std.HashMap (Idx₂ × Dir) (Nat × Nat)) (to_visit : Heap f) : Nat :=
+  if let some (state, to_visit') := to_visit.deleteMin then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd then
       state.cost
     else
@@ -106,9 +107,11 @@ def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Na
 def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
   find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
-    (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
+    (BinomialHeap.ofArray
       (fun (b a : State) ↦ a.cost + path_len - (a.pos.fst + a.pos.snd)
-        < b.cost + path_len - (b.pos.fst + b.pos.snd)))
+        > b.cost + path_len - (b.pos.fst + b.pos.snd))
+      #[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0]
+    )
 
 end Part1
 
@@ -156,8 +159,8 @@ variable (to_visit : List State)
 partial
 def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
     (visited : Std.HashMap (Idx₂ × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
-    (to_visit :BinaryHeap f) : Nat :=
-  if let (some state, to_visit') := to_visit.extractMax then
+    (to_visit : Heap f) : Nat :=
+  if let some (state, to_visit') := to_visit.deleteMin then
     if state.pos.fst == goal.fst && state.pos.snd == goal.snd && limitₛ ≤ state.steps then
       if limitₛ ≤ state.steps then
         state.cost
@@ -179,9 +182,11 @@ def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Na
 def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
   find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
-    (#[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0].toBinaryHeap
+    (Batteries.BinomialHeap.ofArray
       (fun (b a : State) ↦ a.cost + path_len - (a.pos.fst + a.pos.snd)
-        < b.cost + path_len - (b.pos.fst + b.pos.snd)))
+        > b.cost + path_len - (b.pos.fst + b.pos.snd))
+      #[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0]
+    )
 
 end Part2
 
