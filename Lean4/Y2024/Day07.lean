@@ -51,11 +51,11 @@ open Batteries CiCL
 
 def search (goal : Nat) (numbers : Array Nat) : Nat := Id.run do
   let end_index := numbers.size
-  let mut to_visit : BinaryHeap (Nat × Nat) _ := BinaryHeap.empty (fun (a b : Nat × Nat) ↦ a.1 < b.1)
+  let mut to_visit :  BinomialHeap (Nat × Nat) _ := mkBinomialHeap (Nat × Nat) (fun (a b : Nat × Nat) ↦ a.1 < b.1)
   to_visit := to_visit.insert (numbers[0]!, 1)
   repeat
-    let some state := to_visit.max | break
-    to_visit := to_visit.popMax
+    let some (state, to_visit'):= to_visit.deleteMin | break
+    to_visit := to_visit'
     if state.2 == end_index
     then
       if state.1 == goal then return goal
