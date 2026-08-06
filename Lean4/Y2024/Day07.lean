@@ -40,18 +40,18 @@ def exp
 def solve₁ (input : Input) : Nat :=
   input.map (fun (val, v) ↦ exp #[(· + ·), (· * ·)] val v.toList) |> sum
 
+namespace Part2
+
+open Batteries CiCL
+
 def shift (a b : Nat) (b0 : Nat := b) : Nat :=
   if b0 < 10 then a * 10 + b else shift (a * 10) b (b0 / 10)
 
 #guard shift 3000000 1000000 == 30000001000000
 
-namespace Part2
-
-open Batteries CiCL
-
 def search (goal : Nat) (numbers : Array Nat) : Nat := Id.run do
   let end_index := numbers.size
-  let mut to_visit :  BinomialHeap (Nat × Nat) _ := mkBinomialHeap (Nat × Nat) (fun (a b : Nat × Nat) ↦ a.1 < b.1)
+  let mut to_visit :  BinomialHeap (Nat × Nat) _ := mkBinomialHeap (Nat × Nat) (·.1 > ·.1)
   to_visit := to_visit.insert (numbers[0]!, 1)
   repeat
     let some (state, to_visit'):= to_visit.deleteMin | break
