@@ -168,7 +168,10 @@ instance inhabitedIdx₂ : Inhabited Idx₂ where default := (↑ ((0 : Nat), (0
 
 -- namespace Idx₂
 
+/-- return the first element of `Idx₂` -/
 def Idx₂.fst (i : Idx₂) : Int := i.1.fst
+
+/-- return the second element of `Idx₂` -/
 def Idx₂.snd (i : Idx₂) : Int := i.1.snd
 
 instance : HAdd Idx₂ Dir (Option Idx₂) where
@@ -275,6 +278,7 @@ namespace Rect
 @[inline]
 def height [BEq α] (self : Rect α) : Nat := self.vector.size / self.width
 
+/-- return the pair of the height and the width of `Rect` -/
 @[inline]
 def geometory [BEq α] (self : Rect α) : Nat × Nat := (self.height, self.width)
 

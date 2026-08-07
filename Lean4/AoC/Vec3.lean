@@ -8,10 +8,13 @@ namespace Dim3
 
 variable {α β γ : Type}
 
-/-- 3D vector: `Int × Int` -/
+/-- 3D vector: `Int × Int × Int` -/
 structure Vec₃ where
+  /-- the first axis: z -/
   z : Int
+  /-- the second axis: y -/
   y : Int
+  /-- the last axis: x -/
   x : Int
 deriving BEq, Hashable, Repr
 
