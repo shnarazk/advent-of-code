@@ -1,5 +1,6 @@
 module
 
+public import Std.Data.Iterators
 public import Itertools
 public import WinnowParsers
 public import «AoC».Basic
@@ -85,7 +86,7 @@ def count_sides (hash : HashMap Nat (Array (Nat × Bool))) : Nat :=
       let mut count : Nat := 1
       let mut ended := v[0]!.fst + 1
       let mut spin := v[0]!.snd
-      for (st, sp) in v.drop 1 |>.iter do
+      for (st, sp) in v.iter.drop 1 do
         if ended != st || spin != sp then count := count + 1
         ended := st + 1
         spin := sp
