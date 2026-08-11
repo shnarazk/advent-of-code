@@ -12,13 +12,29 @@ open Dim2
 
 structure Input where
 deriving BEq, Repr
- instance : ToString Input where toString _ := s!"" namespace parser open WinnowParsers open Std.Internal.Parsec open Std.Internal.Parsec.String def line : Parser (Array Nat) := do let l ← many1 digit <* eol return l.map (fun (c : Char) ↦ (c.val - '0'.val).toNat) def matrix := many1 line
+
+instance : ToString Input where
+  toString _ := s!""
+
+namespace parser
+
+open WinnowParsers
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
+
+def line : Parser (Array Nat) := do
+  let l ← many1 digit <* eol
+  return l.map (fun (c : Char) ↦ (c.val - '0'.val).toNat)
+
+def matrix := many1 line
+
 def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
   where
     parse₁ := pure ∘ Rect.of2DMatrix =<< matrix
 
 end parser
 
+/-- { pos : Idx₂, dir : Dir, cost : Nat, steps : Nat } -/
 structure State where
   pos   : Idx₂
   dir   : Dir
