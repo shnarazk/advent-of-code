@@ -42,22 +42,30 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   let w := r.width - 1
   let go_n (t : Nat) := if p : t ≤ limit && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
     then
-      let p : Idx₂ := ⟨(state.pos.fst - 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      let p : Idx₂ := ⟨
+        (state.pos.fst - 1, state.pos.snd),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
       some <| State.mk p Dir.N (state.cost + r.get p 1) t
     else none
   let go_s (t : Nat) := if p : t ≤ limit && state.pos.fst < h && (0,0) ≤ (state.pos.fst + 1, state.pos.snd)
     then
-      let p : Idx₂ := ⟨(state.pos.fst + 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      let p : Idx₂ := ⟨
+        (state.pos.fst + 1, state.pos.snd),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
       some <| State.mk p Dir.S (state.cost + r.get p 1) t
     else none
   let go_w (t : Nat) := if p : t ≤ limit && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
     then
-      let p : Idx₂ := ⟨(state.pos.fst, state.pos.snd - 1), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      let p : Idx₂ := ⟨
+        (state.pos.fst, state.pos.snd - 1),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
       some <| State.mk p Dir.W (state.cost + r.get p 1) t
     else none
   let go_e (t : Nat) := if p : t ≤ limit && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
     then
-      let p : Idx₂ := ⟨(state.pos.fst, state.pos.snd + 1), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      let p : Idx₂ := ⟨
+        (state.pos.fst, state.pos.snd + 1),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
       some <| State.mk p Dir.E (state.cost + r.get p 1) t
     else none
   match state.dir with
@@ -113,25 +121,33 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   let go_n (turn : Bool) (t : Nat) :=
     if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
     then
-      let q : Idx₂ := ⟨(state.pos.fst - 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
+      let q : Idx₂ := ⟨
+        (state.pos.fst - 1, state.pos.snd),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
       some <| State.mk q Dir.N (state.cost + r.get q 1) t
     else none
   let go_s (turn : Bool) (t : Nat) :=
     if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h && (0, 0) ≤ (state.pos.fst + 1, state.pos.snd)
     then
-      let q : Idx₂ := ⟨(state.pos.fst + 1, state.pos.snd), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      let q : Idx₂ := ⟨
+        (state.pos.fst + 1, state.pos.snd),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
       some <| State.mk q Dir.S (state.cost + r.get q 1) t
     else none
   let go_w (turn : Bool) (t : Nat) :=
     if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
     then
-      let q : Idx₂ := ⟨(state.pos.fst, state.pos.snd - 1), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      let q : Idx₂ := ⟨
+        (state.pos.fst, state.pos.snd - 1),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
       some <| State.mk q Dir.W (state.cost + r.get q 1) t
     else none
   let go_e (turn : Bool) (t : Nat) :=
     if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
     then
-      let q : Idx₂ := ⟨(state.pos.fst, state.pos.snd + 1), by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
+      let q : Idx₂ := ⟨
+        (state.pos.fst, state.pos.snd + 1),
+        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
       some <| State.mk q Dir.E (state.cost + r.get q 1) t
     else none
   match state.dir with
