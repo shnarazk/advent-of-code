@@ -12,20 +12,7 @@ open Dim2
 
 structure Input where
 deriving BEq, Repr
-
-instance : ToString Input where toString _ := s!""
-
-namespace parser
-
-open WinnowParsers
-open Std.Internal.Parsec
-open Std.Internal.Parsec.String
-
-def line : Parser (Array Nat) := do
-  let l ← many1 digit <* eol
-  return l.map (fun (c : Char) ↦ (c.val - '0'.val).toNat)
-
-def matrix := many1 line
+ instance : ToString Input where toString _ := s!"" namespace parser open WinnowParsers open Std.Internal.Parsec open Std.Internal.Parsec.String def line : Parser (Array Nat) := do let l ← many1 digit <* eol return l.map (fun (c : Char) ↦ (c.val - '0'.val).toNat) def matrix := many1 line
 def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
   where
     parse₁ := pure ∘ Rect.of2DMatrix =<< matrix
@@ -80,7 +67,7 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   | .W => [go_w (state.steps + 1), go_s 1, go_n 1].filterMap I
 
 variable (visited : Std.HashSet State)
-variable (to_visit : List State)
+variable (to_visit : Batteries.BinomialHeap State (·.cost > ·.cost))
 
 partial
 def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
@@ -154,39 +141,40 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   | .W => [go_w false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
 
 variable (visited : Std.HashSet State)
-variable (to_visit : List State)
+variable (to_visit : Batteries.BinomialHeap State (·.cost < ·.cost))
+
+-- #eval (State.mk (1, 1) Dir.E 0 0 |>.pos) == (State.mk (1, 1) Dir.E 0 0 |>.pos)
 
 partial
-def find {f : State → State → Bool} (r : Rect Nat) (goal : Idx₂) (thr : Nat)
-    (visited : Std.HashMap (Idx₂ × Dir × Nat) Nat) -- (y, x) × dir × stepsₛ → cost
-    (to_visit : Heap f) : Nat :=
+def find {f : State → State → Bool} (r : Rect Nat) (goal : @&Idx₂)
+    (visited : @&Std.HashMap (Idx₂ × Dir × Nat) Nat)
+    (to_visit : @&Heap f) : Nat :=
   if let some (state, to_visit') := to_visit.deleteMin then
-    if state.pos.fst == goal.fst && state.pos.snd == goal.snd && limitₛ ≤ state.steps then
+    if state.pos == goal && limitₛ ≤ state.steps then
       if limitₛ ≤ state.steps then
         state.cost
       else
-        find r goal thr visited to_visit'
+        find r goal visited to_visit'
     else
       let costᵣ := visited.getD (state.pos, state.dir, state.steps) 100000
-      if thr <= state.cost || costᵣ <= state.cost then
-        find r goal thr visited to_visit'
+      if costᵣ <= state.cost then
+        find r goal visited to_visit'
       else
         let states := next_states r state
             |>.filter (fun s ↦ s.cost < visited.getD (s.pos, s.dir, s.steps) 100000)
-        find r goal thr
+        find r goal
           (visited.insert (state.pos, state.dir, state.steps) state.cost)
           (states.foldl (·.insert ·) to_visit')
   else
-    thr
+    0
 
 def solve (r : Rect Nat) : Nat :=
   let path_len := 10 * (r.height + r.width)
-  find r (r.height - 1, r.width - 1) 1000000 Std.HashMap.emptyWithCapacity
+  let eval := fun (s : State) ↦ s.cost + path_len - (s.pos.fst + s.pos.snd)
+  find r (r.height - 1, r.width - 1) Std.HashMap.emptyWithCapacity
     (Batteries.BinomialHeap.ofArray
-      (fun (b a : State) ↦ a.cost + path_len - (a.pos.fst + a.pos.snd)
-        > b.cost + path_len - (b.pos.fst + b.pos.snd))
-      #[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0]
-    )
+      (eval · < eval ·)
+      #[State.mk (0, 0) Dir.E 0 0, State.mk (0, 0) Dir.S 0 0])
 
 end Part2
 
