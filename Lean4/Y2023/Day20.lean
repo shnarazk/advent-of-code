@@ -1,7 +1,9 @@
 module
 
 public import WinnowParsers
+public meta import WinnowParsers
 public import «AoC».Basic
+public meta import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Math
 
@@ -65,6 +67,7 @@ def Mdl.link : Mdl → Mdl → Mdl
 structure Rule where
   module : Mdl
   dests  : Array String
+deriving BEq
 
 instance : ToString Rule where
   toString r := s!"{r.module} -> {r.dests}"
@@ -169,20 +172,24 @@ def pmodule := pbroadcaster <|> pflipflop <|> pconjunction
       let l ← pchar '&' *> alphabets
       return Mdl.Conjunction l HashMap.emptyWithCapacity
 
--- #eval AoCParser.parse pmodule "broadcaster"
--- #eval AoCParser.parse pmodule "%a"
--- #eval AoCParser.parse pmodule "&inv"
+#guard AoCParser.parse pmodule "broadcaster" == some Mdl.Broadcaster
+#guard
+  AoCParser.parse pmodule "&inv"
+    == some (Mdl.Conjunction "inv" HashMap.emptyWithCapacity)
 
 def pdests := separated alphabets (pstring ", ")
--- #eval AoCParser.parse pdests "a"
--- #eval AoCParser.parse .dests "a, b, c"
+
+#guard (AoCParser.parse pdests "a") == some #["a"]
+#guard (AoCParser.parse pdests "a, b, c") == some #["a", "b", "c"]
 
 def pline := do
   let m ← pmodule <* whitespaces <* pstring "->" <* whitespaces
   let o ← pdests
   return Rule.mk m o
--- #check pline
--- #eval AoCParser.parse pline "%a -> inv, con"
+
+#guard
+  AoCParser.parse pline "%a -> inv, con"
+    == some (Rule.mk (Mdl.FlipFlop "a" false) #["inv", "con"])
 
 def parse : String → Option (Array Rule) := AoCParser.parse parser
   where
