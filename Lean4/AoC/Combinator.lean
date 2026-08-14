@@ -46,13 +46,22 @@ def C (f : α → β → γ) (b : β) (a : α) : γ := f a b
 @[inline]
 def B (f : β → γ) (g : α → β) (a : α) := f (g a)
 
-/-- Monadic After: λa b c. (a c) (b c) -/
+/-- Monadic After: λf g a. f a (g a)
+- `D` is the dyadic version,
+- `T` is the mirror version,
+-/
 @[inline]
-def S (f : α → β → γ) (b : α → β) (a : α) := f a (b a)
+def S (f : α → β → γ) (g : α → β) (a : α) := f a (g a)
 
-/-- Dyadic After -/
+/-- Dyadic After: λf a g b. f a (g b) -/
 @[inline]
 def D (f : α → γ → δ) (a : α) (g : β → γ) (b : β) := f a (g b)
+
+/-- Monadic Before: λf g a. f (g a) a
+- _This is not included in the paper._
+- `S` is the mirror version. -/
+@[inline]
+def T (f : β → α → γ) (g : α → β) (a : α) := f (g a) a
 
 /-- Dyadic Composition: λf g a b. f (g a b) -/
 @[inline]

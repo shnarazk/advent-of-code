@@ -46,7 +46,7 @@ def solve (_ : Input) : Nat := Id.run do 0
 end Part2
 
 public def solve := AocProblem.config 2025 00
-  ((CiCL.before dbg (fun data ↦ s!"parsed as {data}")) ∘ parser.parse)
+  ((CiCL.T dbg (fun data ↦ s!"parsed as {data}")) ∘ parser.parse)
   Part1.solve
   Part2.solve
 
