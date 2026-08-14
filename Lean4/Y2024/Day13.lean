@@ -1,13 +1,12 @@
 module
 
 public import Itertools
-public meta import Itertools
+-- public meta import Itertools
 public import WinnowParsers
 public meta import WinnowParsers
 public import «AoC».Basic
 public meta import «AoC».Basic
 public import «AoC».Combinator
--- public import «AoC».Vec
 
 namespace Y2024.Day13
 
@@ -16,16 +15,33 @@ open Std
 /-- The input data.
   - buttonA : Nat × Nat
   - buttonB : Nat × Nat
-  - prize : Nat × Nat
+  - prize   : Nat × Nat
 -/
 structure Input where
   buttonA : Nat × Nat
   buttonB : Nat × Nat
-  prize : Nat × Nat
-
+  prize   : Nat × Nat
 deriving BEq, Hashable, Repr
 
-instance : ToString Input where toString s := s!"{s.buttonA}, {s.buttonB}, {s.prize}\n"
+instance : ToString Input where
+  toString s := s!"{s.buttonA}, {s.buttonB}, {s.prize}\n"
+
+def Input.solver (self : Input) (offset : Nat := 0) : Nat :=
+  let dist (a b : Nat) : Nat := if a >= b then a - b else b - a
+  let a := self.buttonA
+  let b := self.buttonB
+  let goal := CoP.both2 (· + ·) self.prize (offset, offset)
+  if a.2 * b.1 != a.1 * b.2 then
+      let tmp1 := dist (a.2 * b.1) (a.1 * b.2)
+      let tmp2 := dist (b.1 * goal.2) (b.2 * goal.1)
+      let tmp3 := dist (a.2 * goal.1) (a.1 * goal.2)
+      let i := tmp2 / tmp1
+      let im := tmp2 % tmp1
+      let j := tmp3 / tmp1
+      let jm := tmp3 % tmp1
+      if im == 0 && jm == 0 then 3 * i + j else 0
+    else
+      0
 
 /- The input data format:
 
@@ -70,28 +86,23 @@ def block : Parser Input := do
 
 def parse : String → Option (Array Input) := AoCParser.parse parser
   where
-    parser : Parser (Array Input) := do
-    separated block eol
-
-#guard AoCParser.parse number "123" == some 123
+    parser : Parser (Array Input) := separated block eol
 
 end parser
 
 namespace Part1
 
-def solve (_ : Array Input) : Nat := Id.run do 0
+def solve (input : Array Input) : Nat := input.iter |>.map (·.solver) |>.sum
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Array Input) : Nat := Id.run do 0
+def solve (input : Array Input) : Nat :=
+  input.iter |>.map (·.solver 10_000_000_000_000) |>.sum
 
 end Part2
 
-public def solve := AocProblem.config 2024 13
-  ((CiCL.T dbg (fun data ↦ s!"got {data.unwrapOr #[] |>.size} items")) ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+public def solve := AocProblem.config 2024 13 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day13
