@@ -14,7 +14,8 @@ namespace Y2024.Day14
 open Std
 open Dim2
 
-/-- The input data. -/
+/-- The input data.
+- We use axis ordering: y -> x. -/
 structure Input where
   pos : Vec₂
   vec : Vec₂
@@ -34,9 +35,9 @@ def parseInput : Parser Input := do
   let p2 ← pstring "," *> number_signed
   let v1 ← pstring " v=" *> number_signed
   let v2 ← pstring "," *> number_signed
-  pure <| Input.mk (p1, p2) (v1, v2)
+  pure <| Input.mk (p2, p1) (v2, v1)
 
-#guard AoCParser.parse parseInput "p=0,4 v=3,-1" == some (Input.mk (0, 4) (3, -1))
+#guard AoCParser.parse parseInput "p=0,4 v=3,-1" == some (Input.mk (4, 0) (-1, 3))
 
 def parse : String → Option (Array Input) := AoCParser.parse parser
   where
@@ -46,19 +47,50 @@ end parser
 
 namespace Part1
 
-def solve (_ : Array Input) : Nat := Id.run do 0
+def solve (input : Array Input) : Nat := Id.run do
+  let size := if input.size == 12 then (7, 11) else (103, 101)
+  let t : Int := 100
+  let (hy, hx) := CoP.both (· / 2) size
+  let ret : Array Int := input.iter
+    |>.map (fun i ↦
+      let (pi, pj) := i.pos
+      let (si, sj) := i.vec
+      let a := (((t * si + pi) % size.1) + size.1) % size.1
+      let b := (((t * sj + pj) % size.2) + size.2) % size.2
+      match compare a hy, compare b hx with
+        | .eq, _ | _, .eq => #[0, 0, 0, 0]
+        | .lt, .lt => #[1, 0, 0, 0]
+        | .lt, .gt => #[0, 1, 0, 0]
+        | .gt, .lt => #[0, 0, 1, 0]
+        | .gt, .gt => #[0, 0, 0, 1] )
+    |>.fold (Array.zip · · |>.map (CoP.join (· + ·))) #[0, 0, 0, 0]
+  return ret.iter.map (·.toNat) |>.product
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Array Input) : Nat := Id.run do 0
+def solve (input : Array Input) : Nat := Id.run do
+  let size := if input.size == 12 then (7, 11) else (103, 101)
+  let t : Int := 100
+  let (hy, hx) := CoP.both (· / 2) size
+  let ret : Array Int := input.iter
+    |>.map (fun i ↦
+      let (pi, pj) := i.pos
+      let (si, sj) := i.vec
+      let a := (((t * si + pi) % size.1) + size.1) % size.1
+      let b := (((t * sj + pj) % size.2) + size.2) % size.2
+      match compare a hy, compare b hx with
+        | .eq, _ | _, .eq => #[0, 0, 0, 0]
+        | .lt, .lt => #[1, 0, 0, 0]
+        | .lt, .gt => #[0, 1, 0, 0]
+        | .gt, .lt => #[0, 0, 1, 0]
+        | .gt, .gt => #[0, 0, 0, 1] )
+    |>.fold (Array.zip · · |>.map (CoP.join (· + ·))) #[0, 0, 0, 0]
+  return ret.iter.map (·.toNat) |>.product
 
 end Part2
 
-public def solve := AocProblem.config 2024 14
-  ((CiCL.T dbg (fun data ↦ s!"got {data.unwrapOr #[] |>.size} elements")) ∘ parser.parse)
-  Part1.solve
-  Part2.solve
+public def solve := AocProblem.config 2024 14 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day14
