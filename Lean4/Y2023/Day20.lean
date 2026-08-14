@@ -3,6 +3,7 @@ module
 public import WinnowParsers
 public meta import WinnowParsers
 public import «AoC».Basic
+public meta import «AoC».Basic
 public import «AoC».Combinator
 public import «AoC».Math
 
