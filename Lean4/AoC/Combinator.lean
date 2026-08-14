@@ -135,6 +135,6 @@ def both2 (f : α → β → γ) (x : α × α) (y : β × β) : γ × γ := (f 
 
 /-- apply dyadic function to a pair -/
 @[inline]
-def join (f : α → α → β) (x : α × α) : β := f x.fst x.snd
+def join (f : α → β → γ) (x : α × β) : γ := f x.fst x.snd
 
 end CoP

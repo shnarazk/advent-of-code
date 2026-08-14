@@ -57,7 +57,7 @@ def solve (_ : Array Input) : Nat := Id.run do 0
 end Part2
 
 public def solve := AocProblem.config 2024 14
-  ((CiCL.T dbg (fun data ↦ s!"parsed as {data.unwrapOr #[] |>.size}")) ∘ parser.parse)
+  ((CiCL.T dbg (fun data ↦ s!"got {data.unwrapOr #[] |>.size} elements")) ∘ parser.parse)
   Part1.solve
   Part2.solve
 
