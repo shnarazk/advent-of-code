@@ -12,25 +12,24 @@ structure Puzzle where
   branches : HashMap String (String × String)
 
 namespace parser
+
 open WinnowParsers
 open Std.Internal.Parsec.String
 
-def ppath := alphabets
 def pbranch := do
   let label ← alphabets <* whitespaces <* pchar '=' <* whitespaces
   let left  ← pchar '(' *> alphabets <* pchar ',' <* whitespaces
   let right ← alphabets <* pchar ')'
   return (label, (left, right))
 
-def parser := do
-  let path ← ppath <* eol <* eol
-  let branches ← separated pbranch eol
-  let hash := branches.foldl
-    (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
-    HashMap.emptyWithCapacity
-  return Puzzle.mk path.toList hash
-
 def parse := AoCParser.parse parser
+  where parser := do
+    let path ← alphabets <* eol <* eol
+    let branches ← separated pbranch eol
+    let hash := branches.foldl
+      (fun h (b : String × String × String) => HashMap.insert h b.fst b.snd)
+      HashMap.emptyWithCapacity
+    return Puzzle.mk path.toList hash
 
 end parser
 
@@ -56,15 +55,13 @@ def trace₂ (puzzle : Puzzle) (limit : Nat) (step : Nat) (pos : String) : Nat :
       let dir := puzzle.path[step % puzzle.path.length]!
       trace₂ puzzle lim (step + 1) <| if dir == 'L' then left else right
 
--- #eval Nat.lcm 1 9
+#guard Nat.lcm 1 9 == 9
 
-def analyze (p : Puzzle) : Nat :=
+def Part2.solve (p : Puzzle) : Nat :=
   let limit := Nat.lcm p.path.length p.branches.size
   p.branches.toList.filter (String.endsWith ·.fst "A")
     |>.map (trace₂ p limit 0 ·.fst)
     |>.foldl Nat.lcm 1
-
-def Part2.solve (p: Puzzle) : Nat:= analyze p
 
 public def solve := AocProblem.config 2023 8 parser.parse Part1.solve Part2.solve
 
