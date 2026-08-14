@@ -3,6 +3,7 @@ module
 public import Itertools
 public import WinnowParsers
 public import «AoC».Basic
+public import «AoC».Combinator
 
 namespace Y2024.Day11
 
@@ -70,7 +71,7 @@ def count_stones (max_depth depth n : Nat) : Nat :=
       count_stones max_depth (depth + 1) 1
     else
       match dividable n with
-      | some (a, b) => (count_stones max_depth (depth + 1) a) + (count_stones max_depth (depth + 1) b)
+      | some (a, b) => CiCL.Ψ (· + ·) (count_stones max_depth (depth + 1) ·) a b
       | _ => count_stones max_depth (depth + 1) (2024 * n)
 
 def solve (input : Input) : Nat := input.line.iter.map (fun n ↦ count_stones 25 0 n) |>.sum
@@ -94,9 +95,9 @@ def count_stones (memo : Memo) (max_depth depth n : Nat) : Memo × Nat := Id.run
     else
       match dividable n with
       | some (a, b) =>
-        let (memo', c1) := count_stones memo max_depth (depth + 1) a
-        let (memo'', c2) := count_stones memo' max_depth (depth + 1) b
-        return (memo''.insert (depth, n) (c1 + c2), c1 + c2)
+        let (memo₁, c1) := count_stones memo max_depth (depth + 1) a
+        let (memo₂, c2) := count_stones memo₁ max_depth (depth + 1) b
+        return (memo₂.insert (depth, n) (c1 + c2), c1 + c2)
       | _ =>
         let (memo', c) := count_stones memo max_depth (depth + 1) (2024 * n)
         return (memo'.insert (depth, n) c, c)
