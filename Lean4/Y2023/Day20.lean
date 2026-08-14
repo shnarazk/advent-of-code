@@ -174,7 +174,7 @@ def pmodule := pbroadcaster <|> pflipflop <|> pconjunction
 -- #eval AoCParser.parse pmodule "&inv"
 
 def pdests := separated alphabets (pstring ", ")
--- #eval AoCParser.parse pdests  "a"
+-- #eval AoCParser.parse pdests "a"
 -- #eval AoCParser.parse .dests "a, b, c"
 
 def pline := do

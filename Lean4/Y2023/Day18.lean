@@ -156,7 +156,7 @@ def transform (w₁ : Array Input) : Rect Nat × Array Int × Array Int :=
         | Direction.U => ((now.fst : Int) - (i.length : Int), now.snd)
         | Direction.R => (now.fst, (now.snd : Int) + (i.length : Int))
         | Direction.L => (now.fst, (now.snd : Int) - (i.length : Int))
-        (now  :: l, next))
+        (now :: l, next))
       ([], (0, 0))
     |>.fst
     |> ((0,0) :: ·)
