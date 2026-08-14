@@ -1,7 +1,6 @@
 module
 
 public import Itertools
-public meta import Itertools
 public import WinnowParsers
 public meta import WinnowParsers
 public import «AoC».Basic
@@ -72,22 +71,29 @@ namespace Part2
 
 def solve (input : Array Input) : Nat := Id.run do
   let size := if input.size == 12 then (7, 11) else (103, 101)
-  let t : Int := 100
-  let (hy, hx) := CoP.both (· / 2) size
-  let ret : Array Int := input.iter
-    |>.map (fun i ↦
-      let (pi, pj) := i.pos
-      let (si, sj) := i.vec
-      let a := (((t * si + pi) % size.1) + size.1) % size.1
-      let b := (((t * sj + pj) % size.2) + size.2) % size.2
-      match compare a hy, compare b hx with
-        | .eq, _ | _, .eq => #[0, 0, 0, 0]
-        | .lt, .lt => #[1, 0, 0, 0]
-        | .lt, .gt => #[0, 1, 0, 0]
-        | .gt, .lt => #[0, 0, 1, 0]
-        | .gt, .gt => #[0, 0, 0, 1] )
-    |>.fold (Array.zip · · |>.map (CoP.join (· + ·))) #[0, 0, 0, 0]
-  return ret.iter.map (·.toNat) |>.product
+  let decay_rate : Float := 0.9
+  let num_points : Nat := input.size
+  let mut signal_rate : Float := 1.0
+  for t in 1 ... 100_000 do
+    let t' : Int := Int.ofNat t
+    let res : HashSet Vec₂ := input
+      |>.iter
+      |>.map (fun p ↦
+        let (pi, pj) := p.pos
+        let (si, sj) := p.vec
+        ( (((t' * si + pi) % size.1) + size.1) % size.1,
+          (((t' * sj + pj) % size.2) + size.2) % size.2) )
+      |>.toHashSet'
+    let num_connected := res
+      |>.iter
+      |>.filter (fun a ↦ #[Dir.N, .E, .S, .W].iter.map (a + ·) |>.any (res.contains ·))
+      |>.length
+    let r := num_connected.toFloat / num_points.toFloat
+    if r / signal_rate > 4.0 then return t
+    signal_rate := signal_rate * decay_rate
+    signal_rate := signal_rate + (1.0 - decay_rate) * r
+  return 0
+
 
 end Part2
 
