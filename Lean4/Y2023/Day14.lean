@@ -6,7 +6,7 @@ public import «AoC».Combinator
 public import «AoC».Vec
 public meta import «AoC».Vec
 
-open Accumulation CiCL BQN
+open Accumulation
 open Dim2
 
 inductive Kind where
@@ -31,7 +31,7 @@ instance : ToString Dir where
       | .S => "S"
       | .W => "W"
 
--- #guard Dir.N.turn.turn.turn.turn == Dir.N
+#guard Dir.N.turn.turn.turn.turn == Dir.N
 
 namespace Dim2.Rect
 
@@ -115,11 +115,9 @@ open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
-def cell := pchar 'O' <|> pchar '#' <|> pchar '.'
+def cell := (pchar 'O' *> pure Kind.Round) <|> (pchar '#' *> pure Kind.Cube) <|> (pchar '.' *> pure Kind.Empty)
 
-def maze_line := do
-  let v ← many1 cell <* eol
-  return  v.map (match · with | 'O' => Kind.Round | '#' => Kind.Cube | _ => Kind.Empty)
+def maze_line := many1 cell <* eol
 
 def maze := many1 maze_line >>= pure ∘ Rect.of2DMatrix
 
@@ -136,8 +134,6 @@ def solve (as: Array (Rect Kind)) : Nat := as.map (·.pullUp Dir.N |>.evaluate) 
 end Part1
 
 namespace Part2
-
-open Std.HashMap
 
 private def loopTo' (self : Rect Kind) (n : Nat) (memory : Std.HashMap (Rect Kind) Int) (i : Nat)
     : Rect Kind :=
