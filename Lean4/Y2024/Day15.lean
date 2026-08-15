@@ -33,13 +33,23 @@ instance : ToString Kind where
 
 #guard s!"{Kind.robot}" == "@"
 
-/-- The input data. -/
-structure Input where
-  mapping : Array (Array Kind)
-  moves : Array Dir
-deriving BEq, Hashable, Repr
+/-- The status. -/
+structure State where
+  mapping : Rect Kind
+  moves   : Array Dir
+  pos     : Idx₂
+  posHalf : Bool
+deriving BEq, Hashable
 
-instance : ToString Input where
+namespace Input
+
+def new (ma : Array (Array Kind)) (mv : Array Dir) : State :=
+    State.mk (Rect.of2DMatrix ma) mv (default : Idx₂) false
+
+end Input
+
+
+instance : ToString State where
   toString s := s!"{s.mapping} {s.moves}"
 
 namespace parser
@@ -63,12 +73,17 @@ open WinnowParsers
 open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
+@[inline]
+public def parseAs {α : Type} (ch : Char) (a : α) : Parser α := pchar ch *> pure a
+
+infixr:80 " ?> " => parseAs
+
 def parseKind : Parser Kind := do
-  (pchar '.' *> pure Kind.empty) <|>
-  (pchar '#' *> pure Kind.wall) <|>
-  (pchar '@' *> pure Kind.robot) <|>
-  (pchar 'o' *> pure Kind.box) <|>
-  (pchar 'O' *> pure Kind.boxH)
+  ('.' ?> Kind.empty) <|>
+  ('#' ?> Kind.wall) <|>
+  ('@' ?> Kind.robot) <|>
+  ('o' ?> Kind.box) <|>
+  ('O' ?> Kind.boxH)
 
 #guard AoCParser.parse parseKind "#" == some Kind.wall
 
@@ -79,28 +94,28 @@ def parseGridLine : Parser (Array Kind) := many1 parseKind <* eol
 def parseGrid : Parser (Array (Array Kind)) := many1 parseGridLine <* eol
 
 def parseDir : Parser Dir := do
-  (pchar '^' *> pure Dir.N) <|>
-  (pchar '>' *> pure Dir.E) <|>
-  (pchar 'v' *> pure Dir.S) <|>
-  (pchar '<' *> pure Dir.W)
+  ('^' ?> Dir.N) <|>
+  ('>' ?> Dir.E) <|>
+  ('v' ?> Dir.S) <|>
+  ('<' ?> Dir.W)
 
 def parseMoves : Parser (Array Dir) := many1 parseDir <* eol
 
 #guard AoCParser.parse parseMoves "^>v\n" == some #[Dir.N, Dir.E, Dir.S]
 
-def parse : String → Option Input := AoCParser.parse (Input.mk <$> parseGrid <*> parseMoves)
+def parse : String → Option State := AoCParser.parse (Input.new <$> parseGrid <*> parseMoves)
 
 end parser
 
 namespace Part1
 
-def solve (_ : Input) : Nat := Id.run do 0
+def solve (_ : State) : Nat := Id.run do 0
 
 end Part1
 
 namespace Part2
 
-def solve (_ : Input) : Nat := Id.run do 0
+def solve (_ : State) : Nat := Id.run do 0
 
 end Part2
 
