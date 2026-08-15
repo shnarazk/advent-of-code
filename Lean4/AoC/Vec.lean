@@ -40,6 +40,7 @@ end Dir
 /-- 2D vector: `Int × Int` -/
 abbrev Vec₂ := Int × Int
 
+instance : Inhabited Vec₂ where default := (0, 0)
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
 -- #eval (0, 0) == (1, 0)
 instance : ToString Vec₂ where toString v := s!"({v.1},{v.2})"
