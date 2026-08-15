@@ -15,6 +15,7 @@ public import «Y2024».Day11
 public import «Y2024».Day12
 public import «Y2024».Day13
 public import «Y2024».Day14
+public import «Y2024».Day15
 
 @[expose] public section
 
@@ -35,6 +36,7 @@ def solvers : List (Option String → IO AocProblem) := [
   Y2024.Day12.solve,
   Y2024.Day13.solve,
   Y2024.Day14.solve,
+  Y2024.Day15.solve,
 ]
 
 protected def solvedDays : Nat := solvers.length
