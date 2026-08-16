@@ -49,14 +49,15 @@ structure State where
 deriving BEq, Hashable
 
 instance : ToString State where
-  toString s := s!"{s.mapping} {s.moves}"
+  toString s := s!"State: {s.mapping} {s.moves}"
 
 namespace State
 
 def new (ma : Array (Array Kind)) (mv : Array Dir) : State :=
   let mapping : Rect Kind := Rect.of2DMatrix ma
-  let pos := mapping.findPosition? (· == Kind.robot) |>.unwrapOr (dbg "error" (default : Idx₂))
-  State.mk (mapping.set pos Kind.empty) mv pos false
+  match mapping.findPosition? (· == Kind.robot) with
+  | some p => State.mk (mapping.set p Kind.empty) mv p false
+  | none => State.mk mapping mv default false
 
 def dump (state : State) : Rect Kind := state.mapping.set state.pos Kind.robot
 
@@ -150,7 +151,15 @@ end Part1
 
 namespace Part2
 
-def solve (_ : State) : Nat := Id.run do 0
+-- def _root_.Y2024.Day15.State.test (_: State) : Nat := 3
+-- #eval (State.new #[#[Kind.box, .wall],#[Kind.wall, .wall]] #[Dir.E]).test
+
+def _root_.Y2024.Day15.State.move (s: State) : State := s
+
+def solve (state : State) : Nat := Id.run do
+  let mut s := state
+  while ! s.moves.isEmpty do s := s.move
+  return 0 -- (evaluate s)
 
 end Part2
 

@@ -268,6 +268,8 @@ def Rect.to2Dmatrix {α : Type} [BEq α] (self : Rect α) : List (List α) :=
   let w : Nat := self.width
   if h : 0 < w then fold_n w self.vector.toList h else []
 
+#guard (Rect.mk 2 #[1, 2, 3, 4]).to2Dmatrix.toString == "[[1, 2], [3, 4]]"
+
 instance [ToString α] [BEq α] : ToString (Rect α) where
   toString self :=
     let ll := self.to2Dmatrix
