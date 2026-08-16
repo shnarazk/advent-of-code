@@ -320,12 +320,10 @@ def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
 
 /-- return `self[p]` as `Option` -/
 @[inline]
-def get? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Option α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.snd < self.width then
-    self.vector[self.width * i.1 + i.2]?
-  else
-    none
+def get? [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option α :=
+  match RectIndexMaybe.toIndex₂? p with
+  | some i => if i.snd < self.width then self.vector[self.width * i.1 + i.2]? else none
+  | none => none
 
 /-- set the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
@@ -447,7 +445,7 @@ def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : 
   let i : Nat × Nat := RectIndex.toIndex₂ p
   (frame.width * i.fst + i.snd)
 
-/-- convert from `Vec2` to valid `Dim2` or `None` -/
+/-- convert from `Vec2` to valid `Idx₂` or `None` -/
 @[inline]
 def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
   if let some i := RectIndexMaybe.toIndex₂? p then
