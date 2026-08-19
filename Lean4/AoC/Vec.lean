@@ -309,6 +309,12 @@ def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
   else
     default
 
+/-- return the `(i,j)`-th element of `Rect` by using `[]!` -/
+@[inline]
+def getElem! [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : α :=
+  let i : Nat × Nat := RectIndex.toIndex₂ p
+  self.vector[(self.width * i.1 + i.2)]!
+
 /-- return true if `p` is a valid index of `self` -/
 def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
   let i : Nat × Nat := RectIndex.toIndex₂ p
