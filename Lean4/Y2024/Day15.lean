@@ -16,15 +16,13 @@ open Std
 open Dim2
 
 /-- Category of items in the map:
-i void (default)
-- empty
+- empty (default)
 - wall
 - robot
 - box
 - boxH, used in part2
 -/
 inductive Kind where
-  | void
   | empty
   | wall
   | robot
@@ -33,11 +31,10 @@ inductive Kind where
   deriving BEq, Hashable, Repr
 
 instance : Inhabited Kind where
-  default := .void
+  default := .empty
 
 instance : ToString Kind where
   toString s := match s with
-    | .void => panic " "
     | .empty => " "
     | .wall => "#"
     | .robot => "@"
@@ -59,8 +56,13 @@ instance RectHash.isGetElem :
   getElem? self i := self.hashmap[i.fst * self.width + i.snd]?
   getElem self i p := self.hashmap.get (i.fst * self.width + i.snd) p
 
+@[inline]
 def RectHash.set (self : @&RectHash) (i : Vec₂) (k : Kind) : RectHash :=
   { self with hashmap := self.hashmap.insert (i.fst * self.width + i.snd) k }
+
+@[inline]
+def RectHash.erase (self : @&RectHash) (i : Vec₂) : RectHash :=
+  { self with hashmap := self.hashmap.erase (i.fst * self.width + i.snd) }
 
 #guard (RectHash.new 10)[(↑ (1,1) : Vec₂)]? == none
 
@@ -68,29 +70,30 @@ def RectHash.set (self : @&RectHash) (i : Vec₂) (k : Kind) : RectHash :=
 - mapping : `Rect Kind`
 - moves : `Array Dir`
 - pos : `Idx₂`
-- posHalf : `Bool`
 -/
-structure State where
-  mapping : Rect Kind
+structure Input where
+  mapping : RectHash
   moves   : Array Dir
-  pos     : Idx₂
-  posHalf : Bool
-deriving BEq, Hashable
+  pos     : Vec₂
+deriving BEq
 
-instance : ToString State where
-  toString s := s!"State: {s.mapping} {s.moves}"
+instance : ToString Input where
+  toString s := s!"Input: {s.mapping.hashmap.toList} {s.moves}"
 
-namespace State
+namespace Input
 
-def new (ma : Array (Array Kind)) (mv : Array Dir) : State :=
-  let mapping : Rect Kind := Rect.of2DMatrix ma
-  match mapping.findPosition? (· == Kind.robot) with
-  | some p => State.mk (mapping.set p Kind.empty) mv p false
-  | none => State.mk mapping mv default false
+def new (ma : Array (Array Kind)) (mv : Array Dir) : Input := Id.run do
+  let mut mapping : RectHash := RectHash.new ma[0]!.size
+  let mut pos : Vec₂ := default
+  for (i, l) in ma.iter.enumerate do
+    for (j, k) in l.iter.enumerate do
+      if k != .empty && k != .robot then mapping := mapping.set (i, j) k
+      if k == Kind.robot then pos := (i, j)
+  return Input.mk mapping mv pos
 
-def dump (state : State) : Rect Kind := state.mapping.set state.pos Kind.robot
+-- def dump (state : Input) : Rect Kind := state.mapping.set state.pos Kind.robot
 
-end State
+end Input
 
 namespace parser
 
@@ -143,46 +146,37 @@ def parseMoves : Parser (Array Dir) := Array.flatten <$> (many1 (many1 parseDir 
 
 #guard AoCParser.parse parseMoves "^>v<\n" == some #[Dir.N, .E, .S, .W]
 
-def parse : String → Option State := AoCParser.parse (State.new <$> parseGrid <*> parseMoves)
+def parse : String → Option Input := AoCParser.parse (Input.new <$> parseGrid <*> parseMoves)
 
 end parser
 
 namespace Part1
 
-def press (state : State) : State := Id.run do
-  let some dir := state.moves[0]? | return state
-  let moves := state.moves.drop 1
-  let some next := toIdx₂ ((↑ state.pos : Vec₂) + dir.asVec₂) | return dbg "ERROR" state
+def press (mapping : RectHash) (pos : Vec₂) (dir : Dir) : RectHash × Vec₂ := Id.run do
+  let next := pos + dir.asVec₂
   let mut p := next
-  while state.mapping.get? p == some Kind.box do
-    -- let some q := toIdx₂ ((↑ p : Vec₂) + dir.asVec₂) | return dbg "ERROR" state
-    let q := toIdx₂ ((↑ p : Vec₂) + dir.asVec₂)
-    if q.isNone then return dbg "error" state
-    p := q.unwrapOr next
-  match state.mapping.get? p with
-    | some .empty =>
-      return { state with
-        mapping := state.mapping.set p Kind.box |>.set next Kind.empty
-        moves := moves
-        pos := next }
-    | some .wall => return { state with moves := moves }
-    | _ => return { state with moves := moves }
+  while mapping[p]? == some Kind.box do p := p + dir.asVec₂
+  match mapping[p]? with
+    | none => return (mapping.set p Kind.box |>.erase next, next)
+    | _    => return (mapping, pos)
 
-def evaluate (state : State) : Nat :=
-  state.mapping.enum
-    |>.map (fun (p, k) ↦ if k == Kind.box then p.fst * 100 + p.snd else 0)
+def evaluate (mapping : RectHash) : Nat :=
+  mapping.hashmap.iter
+    |>.map (fun (i, k) ↦ if k == Kind.box then (i / mapping.width * 100 + i % mapping.width).toNat else 0)
     |>.sum
 
-def solve (state : State) : Nat := Id.run do
-  let mut s := state
-  while ! s.moves.isEmpty do s := press s
-  return (evaluate s)
+def solve (input : Input) : Nat := Id.run do
+  let mut mapping := input.mapping
+  let mut pos := input.pos
+  for d in input.moves do (mapping, pos) := press mapping pos d
+  return (evaluate mapping)
 
 end Part1
 
+/-
 namespace Part2
 
-partial def unsupportedE (state: State) (pos : Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupportedE (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
   let some e := pos + Dir.E | return dbg "ERROR162" false
   match state.mapping.get? pos, half with
   | some .empty , _     => true
@@ -193,7 +187,7 @@ partial def unsupportedE (state: State) (pos : Idx₂) (half : Bool) : Bool := I
   | some .boxH  , true  => unsupportedE state e half
   | _           , _     => dbg "ERROR170" false
 
-partial def unsupportedW (state: State) (pos : Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupportedW (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
   match state.mapping.get? pos, half with
   | some .empty , false
   | some .boxH  , false =>
@@ -208,7 +202,7 @@ partial def unsupportedW (state: State) (pos : Idx₂) (half : Bool) : Bool := I
   | some .boxH  , true  => dbg "ERROR184" false
   | _           , _     => dbg "ERROR185" false
 
-partial def unsupportedS (state: State) (pos : Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupportedS (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
   let some s := pos + Dir.S | return dbg "ERROR187" false
   match state.mapping.get? pos, half with
   | some .wall  , _     => false
@@ -225,7 +219,7 @@ partial def unsupportedS (state: State) (pos : Idx₂) (half : Bool) : Bool := I
     unsupportedS state s true && unsupportedS state se false
   | _           , _     => dbg "ERROR202" false
 
-partial def unsupportedN (state: State) (pos : Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupportedN (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
   match state.mapping.get? pos, half with
   | some .wall  , _     => false
   | some .box   , _     =>
@@ -245,7 +239,7 @@ partial def unsupportedN (state: State) (pos : Idx₂) (half : Bool) : Bool := I
     unsupportedN state n true && unsupportedN state ne false
   | _           , _     => dbg "ERROR222" false
 
-partial def unsupported (state : State) (dir : Dir) (pos: Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupported (state : Input) (dir : Dir) (pos: Idx₂) (half : Bool) : Bool := Id.run do
   match dir with
   | .N => unsupportedN state pos half
   | .E => unsupportedE state pos half
@@ -253,7 +247,7 @@ partial def unsupported (state : State) (dir : Dir) (pos: Idx₂) (half : Bool) 
   | .W => unsupportedW state pos half
 
 /- Shift the adjoining boxes to east -/
-partial def shiftE (state : State) (pos : Idx₂) (half : Bool) : State := Id.run do
+partial def shiftE (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
   let some e := pos + Dir.E | return dbg "ERROR233" state;
   match state.mapping.get? pos, half with
   | some .box , false =>
@@ -264,7 +258,7 @@ partial def shiftE (state : State) (pos : Idx₂) (half : Bool) : State := Id.ru
     { s' with mapping := s'.mapping.set pos .empty |>.set e .box }
   | _         , _     => state
 
-partial def shiftW (state : State) (pos : Idx₂) (half : Bool) : State := Id.run do
+partial def shiftW (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
   let some w := pos + Dir.W | return dbg "ERROR244" state;
   match state.mapping.get? pos, half with
   | some .empty, false
@@ -282,7 +276,7 @@ partial def shiftW (state : State) (pos : Idx₂) (half : Bool) : State := Id.ru
     { s' with mapping := s'.mapping.set pos .empty |>.set w .boxH }
   | _          , _     => state;
 
-partial def shiftS (state : State) (pos : Idx₂) (half : Bool) : State := Id.run do
+partial def shiftS (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
   let some s := pos + Dir.S | return dbg "ERROR262" state;
   match state.mapping.get? pos, half with
   | some .empty, false
@@ -306,7 +300,7 @@ partial def shiftS (state : State) (pos : Idx₂) (half : Bool) : State := Id.ru
     { s' with mapping := s'.mapping.set pos .empty |>.set s .box }
   | _        , _       => state;
 
-partial def shiftN (state : State) (pos : Idx₂) (half : Bool) : State := Id.run do
+partial def shiftN (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
   let some n := pos + Dir.N | return dbg "ERROR286" state;
   match state.mapping.get? pos, half with
   | some .empty, false | some .boxH, false =>
@@ -329,14 +323,14 @@ partial def shiftN (state : State) (pos : Idx₂) (half : Bool) : State := Id.ru
     { s' with mapping := s'.mapping.set pos .empty |>.set n .box }
   | _, _ => state
 
-partial def shift (state : State) (dir : Dir) (pos : Idx₂) (half : Bool) : State := Id.run do
+partial def shift (state : Input) (dir : Dir) (pos : Idx₂) (half : Bool) : Input := Id.run do
   match dir with
   | .N => shiftN state pos half
   | .E => shiftE state pos half
   | .S => shiftS state pos half
   | .W => shiftW state pos half
 
-partial def move (state : State) : State := Id.run do
+partial def move (state : Input) : Input := Id.run do
   let some dir := state.moves[0]? | return state;
   let moves := state.moves.drop 1
   let (next, half) := match dir, state.posHalf with
@@ -355,7 +349,7 @@ partial def move (state : State) : State := Id.run do
   else
     return { state with moves := moves }
 
-def evaluate (state : State) : Nat :=
+def evaluate (state : Input) : Nat :=
   state.mapping.enum
   |>.map (fun (pos, kind) => match kind with
      | .box  => pos.fst * 100 + pos.snd * 2
@@ -363,13 +357,13 @@ def evaluate (state : State) : Nat :=
      | _         => 0 )
   |>.sum
 
-def solve (state : State) : Nat := Id.run do
+def solve (state : Input) : Nat := Id.run do
   let mut s := state
   while ! s.moves.isEmpty do s := move s
   return evaluate s
 
-end Part2
+end Part2 -/
 
-public def solve := AocProblem.config 2024 15 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2024 15 parser.parse Part1.solve Part1.solve
 
 end Y2024.Day15
