@@ -16,6 +16,7 @@ open Std
 open Dim2
 
 /-- Category of items in the map:
+i void (default)
 - empty
 - wall
 - robot
@@ -23,6 +24,7 @@ open Dim2
 - boxH, used in part2
 -/
 inductive Kind where
+  | void
   | empty
   | wall
   | robot
@@ -30,8 +32,12 @@ inductive Kind where
   | boxH
   deriving BEq, Hashable, Repr
 
+instance : Inhabited Kind where
+  default := .void
+
 instance : ToString Kind where
   toString s := match s with
+    | .void => panic " "
     | .empty => " "
     | .wall => "#"
     | .robot => "@"
@@ -39,6 +45,24 @@ instance : ToString Kind where
     | .boxH => "["
 
 #guard s!"{Kind.robot}" == "@"
+
+structure RectHash where
+  hashmap :Std.HashMap Int Kind
+  width: Int
+deriving BEq, Repr
+
+def RectHash.new (w : Int) : RectHash :=
+  RectHash.mk Std.HashMap.emptyWithCapacity w
+
+instance RectHash.isGetElem :
+    GetElem? RectHash Vec₂ Kind (fun h i ↦ i.fst * h.width + i.snd ∈ h.hashmap) where
+  getElem? self i := self.hashmap[i.fst * self.width + i.snd]?
+  getElem self i p := self.hashmap.get (i.fst * self.width + i.snd) p
+
+def RectHash.set (self : @&RectHash) (i : Vec₂) (k : Kind) : RectHash :=
+  { self with hashmap := self.hashmap.insert (i.fst * self.width + i.snd) k }
+
+#guard (RectHash.new 10)[(↑ (1,1) : Vec₂)]? == none
 
 /-- The status.
 - mapping : `Rect Kind`
