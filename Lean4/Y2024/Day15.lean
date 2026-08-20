@@ -43,6 +43,13 @@ instance : ToString Kind where
 
 #guard s!"{Kind.robot}" == "@"
 
+/-- HashMap based 2D mapping to Kind
+- `new (width : Int) : RectHash`
+- `[i]? : Option Kind`
+- `[i]!`
+- `set (i : Vec₂) (k : Kind)`
+- `erase (i : Vec₂)`
+-/
 structure RectHash where
   hashmap :Std.HashMap Int Kind
   width: Int
@@ -66,10 +73,10 @@ def RectHash.erase (self : @&RectHash) (i : Vec₂) : RectHash :=
 
 #guard (RectHash.new 10)[(↑ (1,1) : Vec₂)]? == none
 
-/-- The status.
-- mapping : `Rect Kind`
-- moves : `Array Dir`
-- pos : `Idx₂`
+/-- The given configuration.
+- `mapping : RectHash`
+- `moves : Array Dir`
+- `pos : Vec₂`
 -/
 structure Input where
   mapping : RectHash
