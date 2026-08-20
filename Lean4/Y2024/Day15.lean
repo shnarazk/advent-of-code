@@ -173,197 +173,159 @@ def solve (input : Input) : Nat := Id.run do
 
 end Part1
 
-/-
 namespace Part2
 
-partial def unsupportedE (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
-  let some e := pos + Dir.E | return dbg "ERROR162" false
-  match state.mapping.get? pos, half with
-  | some .empty , _     => true
-  | some .wall  , _     => false
-  | some .box   , false => unsupportedE state e half
-  | some .box   , true  => dbg "ERROR167" false
-  | some .boxH  , false => true
-  | some .boxH  , true  => unsupportedE state e half
-  | _           , _     => dbg "ERROR170" false
+partial def unsupportedE? (mapping : RectHash) (pos : Vec₂) (half : Bool) : Bool := Id.run do
+  let e := pos + Dir.E
+  match mapping[pos]?, half with
+  | none       , _     => true
+  | some .wall , _     => false
+  | some .box  , false => unsupportedE? mapping e half
+  | some .box  , true  => dbg "ERROR167" false
+  | some .boxH , false => true
+  | some .boxH , true  => unsupportedE? mapping e half
+  | _          , _     => dbg "ERROR170" false
 
-partial def unsupportedW (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
-  match state.mapping.get? pos, half with
-  | some .empty , false
+partial def unsupportedW? (mapping : RectHash) (pos : Vec₂) (half : Bool) : Bool := Id.run do
+  match mapping[pos]?, half with
+  | none        , false
   | some .boxH  , false =>
       -- w might be out of range, so we must define w only if it's really needed.
-      let some w := pos + Dir.W | return dbg s!"ERROR177({pos})" false
-      state.mapping.get? w != some Kind.boxH || unsupportedW state w false
-  | some .empty , true  => true
+      let w := pos + Dir.W;  mapping[w]? != some Kind.boxH || unsupportedW? mapping w false
+  | none        , true  => true
   | some .wall  , _     => false
-  | some .box   , _     =>
-    let some w := pos + Dir.W | return dbg s!"ERROR182({pos})" false
-    unsupportedW state w true
+  | some .box   , _     => let w := pos + Dir.W; unsupportedW? mapping w true
   | some .boxH  , true  => dbg "ERROR184" false
   | _           , _     => dbg "ERROR185" false
 
-partial def unsupportedS (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
-  let some s := pos + Dir.S | return dbg "ERROR187" false
-  match state.mapping.get? pos, half with
+partial def unsupportedS? (mapping : RectHash) (pos : Vec₂) (half : Bool) : Bool := Id.run do
+  let s := pos + Dir.S
+  match mapping[pos]?, half with
   | some .wall  , _     => false
-  | some .box   , _     => unsupportedS state s false && unsupportedS state s true
-  | some .empty , true  => true
-  | some .empty , false
+  | some .box   , _     => unsupportedS? mapping s false && unsupportedS? mapping s true
+  | none        , true  => true
+  | none        , false
   | some .boxH  , false =>
-    let some w := pos + Dir.W | return dbg "ERROR195" false;
-    let some sw := w + Dir.S  | return dbg "ERROR196" false;
-    state.mapping.get? w != some .boxH
-    || (unsupportedS state sw true && unsupportedS state s false)
+    let (w, sw) := (pos + Dir.W, s + Dir.W)
+    mapping[w]? != some .boxH || (unsupportedS? mapping sw true && unsupportedS? mapping s false)
   | some .boxH  , true  =>
-    let some se := s + Dir.E  | return dbg "ERROR200" false;
-    unsupportedS state s true && unsupportedS state se false
+    let se := s + Dir.E;  unsupportedS? mapping s true && unsupportedS? mapping se false
   | _           , _     => dbg "ERROR202" false
 
-partial def unsupportedN (state: Input) (pos : Idx₂) (half : Bool) : Bool := Id.run do
-  match state.mapping.get? pos, half with
+partial def unsupportedN? (mapping : RectHash) (pos : Vec₂) (half : Bool) : Bool := Id.run do
+  match mapping[pos]?, half with
   | some .wall  , _     => false
   | some .box   , _     =>
-    let some n := pos + Dir.N | return dbg "ERROR208" false;
-    unsupportedN state n false && unsupportedN state n true
-  | some .empty , true  => true
-  | some .empty , false
+    let n := pos + Dir.N; unsupportedN? mapping n false && unsupportedN? mapping n true
+  | none        , true  => true
+  | none        , false
   | some .boxH  , false =>
-    let some n := pos + Dir.N | return dbg "ERROR213" false;
-    let some w := pos + Dir.W | return dbg "ERROR214" false;
-    let some nw := w + Dir.N | return dbg "ERROR215" false;
-    state.mapping.get? w != some .boxH ||
-      (unsupportedN state nw true && unsupportedN state n false)
+    let (n, w, nw) := (pos + Dir.N, pos + Dir.W, pos + Dir.N + Dir.W)
+    mapping[w]? != some .boxH || (unsupportedN? mapping nw true && unsupportedN? mapping n false)
   | some .boxH  , true  =>
-    let some n := pos + Dir.N | return dbg "ERROR219" false;
-    let some ne := n + Dir.E | return dbg "ERROR220" false;
-    unsupportedN state n true && unsupportedN state ne false
+    let (n, ne) := (pos + Dir.N, pos + Dir.N + Dir.E)
+    unsupportedN? mapping n true && unsupportedN? mapping ne false
   | _           , _     => dbg "ERROR222" false
 
-partial def unsupported (state : Input) (dir : Dir) (pos: Idx₂) (half : Bool) : Bool := Id.run do
+partial def unsupported? (mapping : RectHash) (dir : Dir) (pos: Vec₂) (half : Bool) : Bool := Id.run do
   match dir with
-  | .N => unsupportedN state pos half
-  | .E => unsupportedE state pos half
-  | .S => unsupportedS state pos half
-  | .W => unsupportedW state pos half
+  | .N => unsupportedN? mapping pos half
+  | .E => unsupportedE? mapping pos half
+  | .S => unsupportedS? mapping pos half
+  | .W => unsupportedW? mapping pos half
 
 /- Shift the adjoining boxes to east -/
-partial def shiftE (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
-  let some e := pos + Dir.E | return dbg "ERROR233" state;
-  match state.mapping.get? pos, half with
-  | some .box , false =>
-    let s' := shiftE state e false
-    { s' with mapping := s'.mapping.set pos .boxH }
-  | some .boxH, true  =>
-    let s' := shiftE state e true
-    { s' with mapping := s'.mapping.set pos .empty |>.set e .box }
-  | _         , _     => state
+partial def shiftE (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
+  let e := pos + Dir.E
+  match mapping[pos]?, half with
+  | some .box , false => shiftE mapping e false |>.set pos .boxH
+  | some .boxH, true  => shiftE mapping e true |>.erase pos |>.set e .box
+  | _         , _     => mapping
 
-partial def shiftW (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
-  let some w := pos + Dir.W | return dbg "ERROR244" state;
-  match state.mapping.get? pos, half with
-  | some .empty, false
+partial def shiftW (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
+  let w := pos + Dir.W
+  match mapping[pos]?, half with
+  | none       , false
   | some .boxH , false =>
-    if state.mapping.get? w == some .boxH then
-      let s' := shiftW state w false
-      { s' with mapping := s'.mapping.set w .box }
-    else
-      state
-  | some .box  , false =>
-    let s' := shiftW state w true
-    { s' with mapping := s'.mapping.set pos .empty |>.set w .boxH }
-  | some .box  , true  =>
-    let s' := shiftW state w true
-    { s' with mapping := s'.mapping.set pos .empty |>.set w .boxH }
-  | _          , _     => state;
+    if mapping[w]? == some .boxH then shiftW mapping w false |>.set w .box else mapping
+  | some .box  , false => shiftW mapping w true |>.erase pos |>.set w .boxH
+  | some .box  , true  => shiftW mapping w true |>.erase pos |>.set w .boxH
+  | _          , _     => mapping;
 
-partial def shiftS (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
-  let some s := pos + Dir.S | return dbg "ERROR262" state;
-  match state.mapping.get? pos, half with
-  | some .empty, false
+partial def shiftS (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
+  let s := pos + Dir.S
+  match mapping[pos]?, half with
+  | none       , false
   | some .boxH , false =>
-    let some w := pos + Dir.W | return dbg "ERROR266" state;
-    let some sw := s + Dir.W | return dbg "ERROR267" state;
-    if state.mapping.get? w == some .boxH then
-      let s' := state |> (shiftS · sw true) |> (shiftS · s false)
-      { s' with mapping := s'.mapping.set w .empty |>.set sw .boxH }
+    let (w, sw) := (pos + Dir.W, s + Dir.W)
+    if mapping[w]? == some .boxH then
+      mapping |> (shiftS · sw true) |> (shiftS · s false) |>.erase w |>.set sw .boxH
     else
-      state
+      mapping
   | some .box , false  =>
-    let s' := state |> (shiftS · s false) |> (shiftS · s true)
-    { s' with mapping := s'.mapping.set pos .empty |>.set s .box }
+    mapping |> (shiftS · s false) |> (shiftS · s true) |>.erase pos |>.set s .box
   | some .boxH, true   =>
-    let some se := s + Dir.E | return dbg "ERROR" state;
-    let s' := state |> (shiftS · s true) |> (shiftS · se false)
-    { s' with mapping := s'.mapping.set pos .empty |>.set s .boxH }
+    mapping |> (shiftS · s true) |> (shiftS · (s + Dir.E) false) |>.erase pos |>.set s .boxH
   | some .box, true    =>
-    let s' := state |> (shiftS · s false) |> (shiftS · s true)
-    { s' with mapping := s'.mapping.set pos .empty |>.set s .box }
-  | _        , _       => state;
+    mapping |> (shiftS · s false) |> (shiftS · s true) |>.erase pos |>.set s .box
+  | _        , _       => mapping;
 
-partial def shiftN (state : Input) (pos : Idx₂) (half : Bool) : Input := Id.run do
-  let some n := pos + Dir.N | return dbg "ERROR286" state;
-  match state.mapping.get? pos, half with
-  | some .empty, false | some .boxH, false =>
-    let some w := pos + Dir.W | return dbg "ERROR289" state;
-    if state.mapping.get? w == some .boxH then
-      let some nw := w + Dir.N | return dbg "ERROR291" state;
-      let s' := state |> (shiftN · nw true) |> (shiftN · n false)
-      { s' with mapping := s'.mapping.set w .empty |>.set nw .boxH }
+partial def shiftN (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
+  let n := pos + Dir.N
+  match mapping[pos]?, half with
+  | none      , false
+  | some .boxH, false =>
+    let w := pos + Dir.W
+    if mapping[w]? == some .boxH then
+      let nw := w + Dir.N
+      mapping |> (shiftN · nw true) |> (shiftN · n false) |>.erase w |>.set nw .boxH
     else
-      state
-  | some .box, false =>
-      let s' := state |> (shiftN · n false) |> (shiftN · n true)
-      { s' with mapping := s'.mapping.set pos .empty |>.set n .box }
-  | some .boxH, true =>
-    let some ne := n + Dir.E | return dbg "ERROR299" state;
-    let s' := state |> (shiftN · n true) |> (shiftN · ne false)
-    { s' with mapping := s'.mapping.set pos .empty |>.set n .boxH }
-  | some .box, true =>
-    let s' := state |> (shiftN · n false) |> (shiftN · n true)
-    { s' with mapping := s'.mapping.set pos .empty |>.set n .box }
-  | _, _ => state
+      mapping
+  | some .box, false  =>
+    mapping |> (shiftN · n false) |> (shiftN · n true) |>.erase pos |>.set n .box
+  | some .boxH, true  =>
+    mapping |> (shiftN · n true) |> (shiftN · (n + Dir.E) false) |>.erase pos |>.set n .boxH
+  | some .box, true   =>
+    mapping |> (shiftN · n false) |> (shiftN · n true) |>.erase pos |>.set n .box
+  | _        , _      => mapping
 
-partial def shift (state : Input) (dir : Dir) (pos : Idx₂) (half : Bool) : Input := Id.run do
+partial def shift (mapping : RectHash) (dir : Dir) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
   match dir with
-  | .N => shiftN state pos half
-  | .E => shiftE state pos half
-  | .S => shiftS state pos half
-  | .W => shiftW state pos half
+  | .N => shiftN mapping pos half
+  | .E => shiftE mapping pos half
+  | .S => shiftS mapping pos half
+  | .W => shiftW mapping pos half
 
-partial def move (state : Input) : Input := Id.run do
-  let some dir := state.moves[0]? | return state;
-  let moves := state.moves.drop 1
-  let (next, half) := match dir, state.posHalf with
-    | .N, b     => (state.pos + Dir.N, b)
-    | .S, b     => (state.pos + Dir.S, b)
-    | .E, false => (some state.pos, true)
-    | .E, true  => (state.pos + Dir.E, false)
-    | .W, false => (state.pos + Dir.W, true)
-    | .W, true  => (some state.pos, false)
-  if let some p := next then
-    if unsupported state dir p half then
-      let s := shift state dir p half
-      return { s with pos := p, moves := moves, posHalf := half }
-    else
-      return { state with moves := moves }
+def move (mapping : RectHash) (pos : Vec₂) (half : Bool) (dir : Dir) : RectHash × Vec₂ × Bool := Id.run do
+  let (pos', half') := match dir, half with
+    | .N, _     => (pos + Dir.N, half)
+    | .S, _     => (pos + Dir.S, half)
+    | .E, false => (pos, true)
+    | .E, true  => (pos + Dir.E, false)
+    | .W, false => (pos + Dir.W, true)
+    | .W, true  => (pos, false)
+  if unsupported? mapping dir pos' half' then
+    (shift mapping dir pos' half', pos', half')
   else
-    return { state with moves := moves }
+    (mapping, pos, half)
 
-def evaluate (state : Input) : Nat :=
-  state.mapping.enum
-  |>.map (fun (pos, kind) => match kind with
-     | .box  => pos.fst * 100 + pos.snd * 2
-     | .boxH => pos.fst * 100 + pos.snd * 2 + 1
-     | _         => 0 )
-  |>.sum
+def evaluate (mapping : RectHash) : Nat :=
+  mapping.hashmap.iter
+    |>.map (fun (i, k) ↦ match k with
+        | .box  => (i / mapping.width * 100 + i % mapping.width * 2).toNat
+        | .boxH => (i / mapping.width * 100 + i % mapping.width * 2 + 1).toNat
+        | _     => 0)
+    |>.sum
 
-def solve (state : Input) : Nat := Id.run do
-  let mut s := state
-  while ! s.moves.isEmpty do s := move s
-  return evaluate s
+def solve (input : Input) : Nat := Id.run do
+  let mut mapping := input.mapping
+  let mut pos := input.pos
+  let mut halfPos := false
+  for d in input.moves do (mapping, pos, halfPos) := move mapping pos halfPos d
+  return (evaluate mapping)
 
-end Part2 -/
+end Part2
 
-public def solve := AocProblem.config 2024 15 parser.parse Part1.solve Part1.solve
+public def solve := AocProblem.config 2024 15 parser.parse Part1.solve Part2.solve
 
 end Y2024.Day15
