@@ -7,8 +7,6 @@ public import Std.Data.Iterators
 
 namespace Grid
 
-open Vector
-
 universe u
 variable {α β γ : Type u}
 
@@ -31,14 +29,17 @@ instance Grid.isGetElem [Inhabited α] {h w : Nat} :
   getElem self i _ := self.vector[i.fst]![i.snd]!
 
 @[inline]
-def Grid.set [Inhabited α] {h w : Nat} (grid : @&Grid α h w) (i : Nat × Nat) (x : α) : Grid α h w :=
+def Grid.set [Inhabited α] {h w : Nat}
+    (grid : @&Grid α h w) (i : Nat × Nat) (x : α) : Grid α h w :=
   Grid.mk <| grid.vector.set! i.fst (grid.vector[i.fst]!.set! i.snd x)
 
 #guard (Grid.new 3 2 false)[(4,1)]? == none
 #guard (Grid.new 3 2 false)[(1,1)]! == false
+#guard Grid.new 3 2 false |>.set (1, 0) true |> (·[(1,0)]!)
 
 /-- Generate a new `Grid β` by mapping `f : Nat → Nat → α → β` to `Grid α`. -/
-def Grid.map [Inhabited α] [Inhabited β] {h w : Nat} (grid : Grid α h w) (f : Nat → Nat → α → β) : Grid β h w :=
+def Grid.map [Inhabited α] [Inhabited β] {h w : Nat}
+    (grid : Grid α h w) (f : Nat → Nat → α → β) : Grid β h w :=
   Grid.mk <| grid.vector.mapIdx (fun i v ↦ v.mapIdx (fun j x ↦ f i j x))
 
 #guard
