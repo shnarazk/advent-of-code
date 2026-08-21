@@ -25,7 +25,7 @@ def Grid.new [Inhabited α] (h w : Nat) (a : α := default) : Grid α h w :=
 
 instance Grid.isGetElem [Inhabited α] {h w : Nat} :
     GetElem? (Grid α h w) (Nat × Nat) α (fun _ i ↦ i.fst < h && i.snd < w) where
-  getElem? self p := match self.vector[p.fst]? with | some v => v[p.snd]? | _ => none
+  getElem? self i := self.vector[i.fst]? >>= (·[i.snd]?)
   getElem self i _ := self.vector[i.fst]![i.snd]!
 
 @[inline]
