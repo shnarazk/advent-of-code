@@ -100,6 +100,16 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 -- #eval geZeroAndLt (5, 5) (3, 2)
 -- #eval (3, 2) <₀ (5, 5)
 
+/-- Add `p` and `v`. If any scalar value of the result is less than zero, return `none`.
+Otherwise return `some (p + v)`. -/
+def saturated_add (p : Nat × Nat) (v : Vec₂) : Option (Nat × Nat) :=
+  let yi : Int64 := p.fst.toInt64 - v.fst.toInt64
+  let xi : Int64 := p.snd.toInt64 - v.snd.toInt64
+  if yi < 0 || xi < 0 then none else some (yi.toNatClampNeg, xi.toNatClampNeg)
+
+syntax:50 (name := syntaxInfixSaturatedAdd) term:51 " +? " term:50 : term
+macro_rules | `($a +? $b) => `(saturated_add $a $b)
+
 -- def Vec₂.toUInt64 (v : Vec₂) : (UInt64 × UInt64) := (v.1.toUInt64, v.2.toUInt64)
 
 namespace Dir
