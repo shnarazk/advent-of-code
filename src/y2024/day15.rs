@@ -109,7 +109,7 @@ impl Puzzle {
             for j in 0..self.mapping.size.1 {
                 if self.pos == (i, j) {
                     if self.pos_half {
-                        s.push(follow.map_or('.', |f| f));
+                        s.push(follow.unwrap_or('.'));
                         s.push(self.dir.as_char());
                         follow = None;
                     } else if self.mapping[(i, j)] == Kind::BoxH {
@@ -124,7 +124,7 @@ impl Puzzle {
                     }
                 } else {
                     let (a, b, f) = self.mapping[(i, j)].as_char2();
-                    s.push(follow.map_or(a, |p| p));
+                    s.push(follow.unwrap_or(a));
                     s.push(b);
                     follow = f;
                 }
