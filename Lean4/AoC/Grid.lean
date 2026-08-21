@@ -60,3 +60,14 @@ def Grid.enumerate [Inhabited α] {h w : Nat} (grid : Grid α h w) :=
     |>.map (fun (i, _) ↦ i.fst * 10 + i.snd) -- #[0, 1, 10, 11]
     |>.fold (· + ·) 0
     |> (· == 22)
+
+/-- O(n) oonvert from `Array (Array α)` to a `Grid`. -/
+def Grid.of2DArray {α : Type u} [Inhabited α]
+    (a : Array (Array α)) (w : Nat := a[0]!.size) : Grid α a.size w := Id.run do
+  let mut g := Grid.new a.size w (default : α)
+  for (l, i) in a.zipIdx.iter do
+    for (v, j) in l.zipIdx.iter do
+      g := g.set (i, j) v
+  return g
+
+-- #eval Grid.of2DArray #[#[true], #[false]] |>.vector |>.toArray
