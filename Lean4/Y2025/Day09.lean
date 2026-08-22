@@ -4,11 +4,13 @@ public import Itertools
 public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Vec
+public import «AoC».Grid
 
 namespace Y2025.Day09
 
 open Std
 open Dim2
+open Grid
 
 /-- return the distance between a and b -/
 def dist (a b : Int) : Nat := (if a ≤ b then b - a else a - b).toNat
@@ -75,7 +77,7 @@ def solve (input : Input) : Nat := Id.run do
   sliceX := sliceX.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
   if sliceX.size == 0 then return 0
   let mut gridSize := ys.size + 1
-  let mut grid : Rect Nat := Rect.ofDim2 gridSize gridSize 3
+  let mut grid : Grid Nat gridSize gridSize := Grid.new gridSize gridSize 3
   for (y, xs) in sliceY.iter do
     grid := grid.set (encodeY.get! y, encodeX.get! xs[0]!) 1
     grid := grid.set (encodeY.get! y, encodeX.get! xs[1]!) 1
@@ -85,39 +87,36 @@ def solve (input : Input) : Nat := Id.run do
     for y in (encodeY.get! ys[0]! + 1) ... (encodeY.get! ys[1]!) do
       grid := grid.set (y, encodeX.get! x) 2
   -- categorize the unvisited cells
-  let mut toVisit : Array Idx₂ := #[(default : Idx₂)]
+  let mut toVisit : Array (Nat × Nat) := #[(0, 0)]
   while !toVisit.isEmpty do
-    let mut next : HashSet Idx₂ := HashSet.emptyWithCapacity 100
+    let mut next : HashSet (Nat × Nat) := HashSet.emptyWithCapacity 100
     for pos in toVisit.iter do
-      let some state := grid.get? pos | continue
-      if state != 3 then continue
+      if grid[pos]! != 3 then continue
       grid := grid.set pos 0
       for diff in Dir.eightNeighbors.iter do
-        let some q := toIdx₂ (pos + diff) | continue
-        let some state := grid.get? q | continue
-        if state == 3 then next := next.insert q
+        let some q := pos +? diff | continue
+        if grid[q]? == some 3 then next := next.insert q
     toVisit := next.toArray
   -- re-mark all unvisited as uncoverd
-  grid := grid.map (fun k ↦ if k == 3 then 2 else k)
+  grid := grid.map (fun _ _ k ↦ if k == 3 then 2 else k)
   -- search the maximum
   let mut area := 0
   for y' in 1...gridSize do
     for x' in 1...gridSize do
-      if grid.get (y', x') 4 != 1 then continue
+      if grid[(y', x')]! != 1 then continue
       let mut min_x := 1
       for y in y' ... gridSize do
         for x_rev in min_x ...= x' do
           let x := x' + min_x - x_rev
-          if grid.get (y, x) 1 == 0 then min_x := x + 1 ; break
-          if grid.get (y, x) 0 == 1 then
+          if grid[(y, x)]! == 0 then min_x := x + 1 ; break
+          if grid[(y, x)]! == 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       let mut max_x := gridSize
       for y in y' ... gridSize do
         for x in x' ... max_x do
-          if grid.get (y, x) 1 == 0 then max_x := x ; break
-          if grid.get (y, x) 0 == 1 then
+          if grid[(y, x)]! == 0 then max_x := x ; break
+          if grid[(y, x)]! == 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
-      continue
   area
 
 end Part2
