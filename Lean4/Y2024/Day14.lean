@@ -69,31 +69,36 @@ end Part1
 
 namespace Part2
 
+-- `∀ a, b : Int, a % b.abs ≥ 0` holds in Lean4.
+#guard (5 : Int) % 3 == 2
+#guard (-5 : Int) % 3 == (-5 + 3 + 3) % 3
+
 def solve (input : Array Input) : Nat := Id.run do
   let size := if input.size == 12 then (7, 11) else (103, 101)
+  let center := (size.fst / 2, size.snd / 2)
   let decay_rate : Float := 0.9
-  let num_points : Nat := input.size
+  let dirs := #[Dir.N, .E, .S, .W].map (·.asVec₂)
   let mut signal_rate : Float := 1.0
   for t in 1 ... 100_000 do
     let t' : Int := Int.ofNat t
-    let res : HashSet Vec₂ := input
+    -- We don't need the complete picture. We do an area sample.
+    let samples : HashSet Vec₂ := input
       |>.iter
       |>.map (fun p ↦
         let (pi, pj) := p.pos
         let (si, sj) := p.vec
-        ( (((t' * si + pi) % size.1) + size.1) % size.1,
-          (((t' * sj + pj) % size.2) + size.2) % size.2) )
+        ( (t' * si + pi) % size.1, (t' * sj + pj) % size.2 ))
+      |>.filter (fun p ↦ p.fst > center.fst && p.snd > center.snd)
       |>.toHashSet'
-    let num_connected := res
+    let num_connected := samples
       |>.iter
-      |>.filter (fun a ↦ #[Dir.N, .E, .S, .W].iter.map (a + ·) |>.any (res.contains ·))
+      |>.filter (fun a ↦ dirs.iter.map (a + ·) |>.any (samples.contains ·))
       |>.length
-    let r := num_connected.toFloat / num_points.toFloat
+    let r := num_connected.toFloat / samples.size.toFloat
     if r / signal_rate > 4.0 then return t
     signal_rate := signal_rate * decay_rate
     signal_rate := signal_rate + (1.0 - decay_rate) * r
   return 0
-
 
 end Part2
 
