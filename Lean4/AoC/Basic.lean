@@ -252,6 +252,7 @@ namespace Option
 
 `map_or` is already used for a prep
 -/
+@[inline]
 def mapOr {α β : Type} : (Option α) → (α → β) → β → β
   | some a, f, _ => f a
   | none, _, default => default
@@ -265,6 +266,7 @@ def mapOr {α β : Type} : (Option α) → (α → β) → β → β
 
 imported from Rust
 -/
+@[inline]
 def unwrapOr {α : Type} : (Option α) → α → α
   | some a, _ => a
   | none,  df => df
@@ -275,6 +277,7 @@ def unwrapOr {α : Type} : (Option α) → α → α
 end Option
 
 /-- Rusty operation -/
+@[inline]
 def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
   match self with
   | true  => some (f ())
@@ -283,6 +286,7 @@ def Bool.map {α : Type} (self : Bool) (f : Unit → α) : Option α :=
 #guard true.map (fun _ ↦ 3) == some 3
 
 /-- Rusty operation -/
+@[inline]
 def Bool.then {α : Type} (self : Bool) (f : Unit → Option α) : Option α :=
   match self with
   | true  => f ()
