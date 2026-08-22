@@ -91,13 +91,11 @@ def solve (input : Input) : Nat := Id.run do
   while !toVisit.isEmpty do
     let mut next : HashSet (Nat × Nat) := HashSet.emptyWithCapacity 100
     for pos in toVisit.iter do
-      let state := grid[pos]!
-      if state != 3 then continue
+      if grid[pos]! != 3 then continue
       grid := grid.set pos 0
       for diff in Dir.eightNeighbors.iter do
         let some q := pos +? diff | continue
-        let some state := grid[q]? | continue
-        if state == 3 then next := next.insert q
+        if grid[q]? == some 3 then next := next.insert q
     toVisit := next.toArray
   -- re-mark all unvisited as uncoverd
   grid := grid.map (fun _ _ k ↦ if k == 3 then 2 else k)
@@ -110,16 +108,15 @@ def solve (input : Input) : Nat := Id.run do
       for y in y' ... gridSize do
         for x_rev in min_x ...= x' do
           let x := x' + min_x - x_rev
-          if grid[(y, x)]? == some 0 then min_x := x + 1 ; break
+          if grid[(y, x)]! == 0 then min_x := x + 1 ; break
           if grid[(y, x)]! == 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       let mut max_x := gridSize
       for y in y' ... gridSize do
         for x in x' ... max_x do
-          if grid[(y, x)]? == some 0 then max_x := x ; break
+          if grid[(y, x)]! == 0 then max_x := x ; break
           if grid[(y, x)]! == 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
-      continue
   area
 
 end Part2
