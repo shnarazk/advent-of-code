@@ -179,11 +179,30 @@ instance : HAdd Idx₂ Vec₂ (Option Idx₂) where
   hAdd (v : Idx₂) (d : Vec₂) : (Option Idx₂) := ↑ (v + d)
 
 #guard (↑ (((1, 2) : Idx₂) + ((-2, -3) : Vec₂)) : Option Idx₂) == none
+#guard (↑ (((1, 2) : Idx₂) + ((2, 3) : Vec₂)) : Option Idx₂) == some (3, 5)
 
 instance : HAdd Idx₂ Dir (Option Idx₂) where
   hAdd (v : Idx₂) (d : Dir) : (Option Idx₂) := (↑ v : Vec₂) + d
 
 #guard (default : Idx₂) + Dir.W == none
+
+instance : LT Idx₂ where
+  lt (p q : Idx₂) := p.fst < q.fst ∧ p.snd < q.snd
+
+instance instDecidableLtIdx₂ (a b : Idx₂) : Decidable (a < b) := by
+  rw [LT.lt]
+  have s1 : Decidable (a.fst < b.fst) := by exact a.fst.decLt b.fst
+  have s2 : Decidable (a.snd < b.snd) := by exact a.snd.decLt b.snd
+  exact instDecidableAnd
+
+instance : LE Idx₂ where
+  le (p q : Idx₂) := p.fst ≤ q.fst ∧ p.snd ≤ q.snd
+
+instance instDecidableLeIdx₂ (a b : Idx₂) : Decidable (a ≤ b) := by
+  rw [LE.le]
+  have s1 : Decidable (a.fst ≤ b.fst) := by exact a.fst.decLe b.fst
+  have s2 : Decidable (a.snd ≤ b.snd) := by exact a.snd.decLe b.snd
+  exact instDecidableAnd
 
 -- /-- class for indices for `Rect` -/
 -- class RectIndex (α : Type) where
