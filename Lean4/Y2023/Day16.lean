@@ -11,6 +11,9 @@ namespace Y2023.Day16
 
 inductive Kind where | V | H | S | B | E | P deriving BEq, Hashable, Repr
 
+instance : Inhabited Kind where
+  default := .P
+
 instance : ToString Kind where
   toString : Kind → String
     | .V => "|"
@@ -27,17 +30,16 @@ instance : ToString (Rect Kind) where
       |>String.join
       |>("\n" ++ ·)
 
-inductive Dir where | N | E | S | W deriving BEq, Hashable, Repr
-
 def propagate (r : Rect Kind) (pos : Idx₂) (dir : Dir) : List (Idx₂ × Dir) :=
-  let k := r.get pos Kind.E
+  let k := r[pos]?.unwrapOr Kind.E
   let w := r.width - 1
   let h := r.height - 1
-  let go_n := (0 < pos.fst : Bool).map (K ((pos.fst - 1, pos.snd), Dir.N))
-  let go_e := (pos.snd < w : Bool).map (K ((pos.fst, pos.snd + 1), Dir.E))
-  let go_s := (pos.fst < h : Bool).map (K ((pos.fst + 1, pos.snd), Dir.S))
-  let go_w := (0 < pos.snd : Bool).map (K ((pos.fst, pos.snd - 1), Dir.W))
-  let toIdx := fun (p, d) ↦ (if h : (0,0) ≤ p then let q : Idx₂ := ⟨p, h⟩; q else ⟨(0, 0), by decide⟩, d)
+  let pos' : Vec₂ := ↑pos
+  let go_n := (0 < pos.fst : Bool).map (K (pos' + Dir.N, Dir.N))
+  let go_e := (pos.snd < w : Bool).map (K (pos' + Dir.E, Dir.E))
+  let go_s := (pos.fst < h : Bool).map (K (pos' + Dir.S, Dir.S))
+  let go_w := (0 < pos.snd : Bool).map (K (pos' + Dir.W, Dir.W))
+  let toIdx := fun (p, d) ↦ (((↑ p : Option Idx₂).unwrapOr (0, 0), d))
   match dir, k with
     | Dir.N, Kind.V => [go_n]       |>.filterMap I |>.map toIdx
     | Dir.N, Kind.H => [go_e, go_w] |>.filterMap I |>.map toIdx
@@ -123,12 +125,13 @@ namespace Part2
 def maximize (r : Rect Kind) : Nat :=
   let w := r.width
   let h := r.height
-  let n := range_list w |>.map (fun x ↦ (((0 : Int), x), Dir.S))
-  let s := range_list w |>.map (fun x ↦ (((h : Int) - 1, x), Dir.N))
-  let e := range_list h |>.map (fun y ↦ ((y, (0 : Int)), Dir.S))
-  let w := range_list h |>.map (fun y ↦ ((y, (w : Int) - 1), Dir.S))
+  let toInt : Nat → Int := fun (x : Nat) ↦ ((↑ x) : Int)
+  let n := List.range w |>.map toInt |>.map (fun x ↦ (((0 : Int), x), Dir.S))
+  let s := List.range w |>.map toInt |>.map (fun x ↦ (((h : Int) - 1, x), Dir.N))
+  let e := List.range h |>.map toInt |>.map (fun y ↦ ((y, (0 : Int)), Dir.S))
+  let w := List.range h |>.map toInt |>.map (fun y ↦ ((y, (w : Int) - 1), Dir.S))
   (n ++ s ++ e ++ w)
-    |>.flatMap (fun (p,d) ↦ if h : (0, 0) ≤ p then let q : Idx₂ := ⟨p, h⟩ ; [(q, d)] else [])
+    |>.filterMap (fun (p, d) ↦ ((↑ p) : Option Idx₂).map (fun p' ↦ (p', d)))
     |>.map (evaluate r ·)
     |>.max?
     |>.unwrapOr 0
