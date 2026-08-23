@@ -44,10 +44,10 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
       (fun m x ↦
         (List.range height).foldl
           (fun (m, empty) y ↦
-            match m.get (y, x) Kind.Empty with
-            | Kind.Round => (m.swap (empty, x) (y, x), empty + 1)
-            | Kind.Cube  => (m, y + 1)
-            | Kind.Empty => (m, empty))
+            match m[(y, x)]? with
+            | some Kind.Round => (m.swap (empty, x) (y, x), empty + 1)
+            | some Kind.Cube  => (m, y + 1)
+            | _               => (m, empty))
           (m, 0)
         |>.fst)
       self
@@ -56,10 +56,10 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         (fun m x ↦
           (List.range height|>.reverse).foldl
             (fun (m, empty) y ↦
-              match m.get (y, x) Kind.Empty with
-              | Kind.Round => (m.swap (empty, x) (y, x), empty - 1)
-              | Kind.Cube  => (m, y - 1)
-              | Kind.Empty => (m, empty))
+              match m[(y, x)]? with
+              | some Kind.Round => (m.swap (empty, x) (y, x), empty - 1)
+              | some Kind.Cube  => (m, y - 1)
+              | _               => (m, empty))
             (m, self.width - 1)
           |>.fst)
         self
@@ -68,10 +68,10 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         (fun m y ↦
           (List.range width |>.reverse).foldl
             (fun (m, empty) x ↦
-              match m.get (y, x) Kind.Empty with
-              | Kind.Round => (m.swap (y, empty) (y, x), empty - 1)
-              | Kind.Cube  => (m, x - 1)
-              | Kind.Empty => (m, empty))
+              match m[(y, x)]? with
+              | some Kind.Round => (m.swap (y, empty) (y, x), empty - 1)
+              | some Kind.Cube  => (m, x - 1)
+              | _               => (m, empty))
             (m, self.width - 1)
           |>.fst)
         self
@@ -80,10 +80,10 @@ def pullUp (self : Rect Kind) (dir : Dir) : Rect Kind :=
         (fun m y ↦
           (List.range width).foldl
             (fun (m, empty) x ↦
-              match m.get (y, x) Kind.Empty with
-              | Kind.Round => (m.swap (y, empty) (y, x), empty + 1)
-              | Kind.Cube  => (m, x + 1)
-              | Kind.Empty => (m, empty))
+              match m[(y, x)]? with
+              | some Kind.Round => (m.swap (y, empty) (y, x), empty + 1)
+              | some Kind.Cube  => (m, x + 1)
+              | _               => (m, empty))
             (m, 0)
           |>.fst)
         self
@@ -98,10 +98,10 @@ def evaluate (self : Rect Kind) : Nat :=
     (fun c y ↦
       (List.range self.width).foldl
         (fun c x ↦
-          match self.get (y, x) Kind.Empty with
-          | Kind.Round => c + height - y
-          | Kind.Cube  => c
-          | Kind.Empty => c)
+          match self[(y, x)]? with
+          | some Kind.Round => c + height - y
+          | some Kind.Cube  => c
+          | _               => c)
         c)
     (0 : Nat)
 
