@@ -57,8 +57,8 @@ def solve (input : Input) : Nat := Id.run do
   let mut groupSizes : HashMap Nat Nat := HashMap.emptyWithCapacity (num_boxes / 4)
   for i in 0 ... num_boxes do
     groupSizes := groupSizes.alter (group.root! i) (fun o ↦ o.mapOr (· + 1) 1 |> some)
-  let mut v : Array Nat := groupSizes.values.toArray.qsort (· > ·) |>.take 3
-  v.foldl (· * ·) 1 |> pure
+  let v : Array Nat := groupSizes.values.toArray.qsort (· > ·) |>.take 3
+  return v.foldl (· * ·) 1
 
 end Part1
 
