@@ -34,13 +34,14 @@ def expand (rect : Rect Nat) (toVisit : List Idx₂)
   match toVisit with
   | [] => result.size
   | node :: remain =>
-    if rect.get node 0 == 9 then expand rect remain visited (result.insert node)
+    if rect[node]? == some 9 then expand rect remain visited (result.insert node)
       else
-        let currentLevel := rect.get node 0
+        let nextLevel := rect[node]! + 1
         let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
-            |>.filterMap (fun offset ↦ rect.toValidIdx₂ (((↑ node) : Vec₂) + offset))
-            |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
-            |>.filter (fun p ↦ !visited.get p false)
+            |>.filterMap (fun offset ↦ (↑ (node + offset) : Option Idx₂))
+            |>.filter rect.validIndex?
+            |>.filter (rect[·]? == some nextLevel)
+            |>.filter (!visited[·]!)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' result
 
@@ -59,12 +60,13 @@ def expand (rect : Rect Nat) (toVisit : List Idx₂)
   match toVisit with
   | [] => count
   | node :: remain =>
-    if rect.get node 0 == 9 then expand rect remain visited (count + 1)
+    if rect[node]? == some 9 then expand rect remain visited (count + 1)
       else
-        let currentLevel := rect.get node 0
+        let nextLevel := rect[node]! + 1
         let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
-            |>.filterMap (fun offset ↦ rect.toValidIdx₂ (((↑ node) : Vec₂) + offset))
-            |>.filter (fun p ↦ currentLevel + 1 == rect.get p 0)
+            |>.filterMap (fun offset ↦ (↑ (node + offset) : Option Idx₂))
+            |>.filter rect.validIndex?
+            |>.filter (rect[·]? == some nextLevel)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' count
 
