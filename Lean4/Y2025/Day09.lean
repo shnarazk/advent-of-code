@@ -44,7 +44,7 @@ def solve (input : Input) : Nat :=
     |>.enumerate
     |>.map (fun (i, p) ↦
       input.line.iterFromIdx (i + 1)
-        |>.map (fun (q : Idx₂) ↦ (dist₁ p.val.1 q.val.1) * (dist₁ p.val.2 q.val.2))
+        |>.map (fun (q : Idx₂) ↦ (dist₁ p.1 q.1) * (dist₁ p.2 q.2))
         |>.fold max 0)
     |>.fold max 0
 
@@ -59,17 +59,17 @@ namespace Part2
   - 2 : filled
   - 3 : unvisited -/
 def solve (input : Input) : Nat := Id.run do
-  let ys := input.line.iter |>.map (·.val.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+  let ys := input.line.iter |>.map (·.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
   let encodeY := ys.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeY.size == 0 then return 0
-  let xs := input.line.iter |>.map (·.val.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+  let xs := input.line.iter |>.map (·.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
   let encodeX := xs.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeX.size == 0 then return 0
   let mut sliceY : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
   let mut sliceX : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
   for p in input.line.iter do
-    sliceY := sliceY.alter p.fst.toNat (fun o ↦ o.mapOr (·.push p.snd.toNat) #[p.snd.toNat])
-    sliceX := sliceX.alter p.snd.toNat (fun o ↦ o.mapOr (·.push p.fst.toNat) #[p.fst.toNat])
+    sliceY := sliceY.alter p.fst (fun o ↦ o.mapOr (·.push p.snd) #[p.snd])
+    sliceX := sliceX.alter p.snd (fun o ↦ o.mapOr (·.push p.fst) #[p.fst])
   sliceY := sliceY.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
   if sliceY.size == 0 then return 0
   sliceX := sliceX.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
@@ -89,12 +89,12 @@ def solve (input : Input) : Nat := Id.run do
   while !toVisit.isEmpty do
     let mut next : HashSet Idx₂ := HashSet.emptyWithCapacity 100
     for pos in toVisit.iter do
-      let some state := grid.get? pos | continue
+      let some state := grid[pos]? | continue
       if state != 3 then continue
       grid := grid.set pos 0
       for diff in Dir.eightNeighbors.iter do
-        let some q := toIdx₂ (pos + diff) | continue
-        let some state := grid.get? q | continue
+        let some q := (↑ (pos + diff) : Option Idx₂) | continue
+        let some state := grid[q]? | continue
         if state == 3 then next := next.insert q
     toVisit := next.toArray
   -- re-mark all unvisited as uncoverd
@@ -103,19 +103,19 @@ def solve (input : Input) : Nat := Id.run do
   let mut area := 0
   for y' in 1...gridSize do
     for x' in 1...gridSize do
-      if grid.get (y', x') 4 != 1 then continue
+      if grid[(y', x')]? != some 1 then continue
       let mut min_x := 1
       for y in y' ... gridSize do
         for x_rev in min_x ...= x' do
           let x := x' + min_x - x_rev
-          if grid.get (y, x) 1 == 0 then min_x := x + 1 ; break
-          if grid.get (y, x) 0 == 1 then
+          if grid[(y, x)]? == some 0 then min_x := x + 1 ; break
+          if grid[(y, x)]? == some 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       let mut max_x := gridSize
       for y in y' ... gridSize do
         for x in x' ... max_x do
-          if grid.get (y, x) 1 == 0 then max_x := x ; break
-          if grid.get (y, x) 0 == 1 then
+          if grid[(y, x)]? == some 0 then max_x := x ; break
+          if grid[(y, x)]? == some 1 then
             area := max area <| (dist₁ ys[y']! ys[y]!) * (dist₁ xs[x']! xs[x]!)
       continue
   area
