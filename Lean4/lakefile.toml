@@ -7,7 +7,6 @@ defaultTargets = ["aoc"]
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 autoImplicit = false
-experimental.module = true
 linter.missingDocs = false
 linter.unusedVariables = true
 
