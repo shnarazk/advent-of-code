@@ -156,8 +156,13 @@ abbrev Idx₂ := Nat × Nat
 
 -- instance : ToString Idx₂ where toString v := toString v.val
 
+/-- Convert a `Vec₂` to `Option Idx₂` -/
+@[inline]
+def Vec₂.ofIdx₂ (v : Idx₂) : Vec₂ :=
+   (((↑ v.1) : Int), ((↑ v.2) : Int))
+
 instance : Coe Idx₂ Vec₂ where
-  coe v := (((↑ v.1) : Int), ((↑ v.2) : Int))
+  coe := Vec₂.ofIdx₂
 
 /-- Convert a `Vec₂` to `Option Idx₂` -/
 @[inline]
