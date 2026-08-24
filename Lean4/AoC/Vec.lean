@@ -162,8 +162,12 @@ instance : Coe (Nat × Nat) Idx₂ where
 instance : Coe Idx₂ Vec₂ where
   coe v := (((↑ v.1) : Int), ((↑ v.2) : Int))
 
+@[inline]
+def Vec₂.toIdx₂ (v : Vec₂) : Option Idx₂ :=
+  if (0, 0) ≤ v then some (v.fst.toNat, v.snd.toNat) else none
+
 instance : Coe Vec₂ (Option Idx₂) where
-  coe v := if (0, 0) ≤ v then some (v.fst.toNat, v.snd.toNat) else none
+  coe := Vec₂.toIdx₂
 
 -- def v : Vec₂ := (1, 1)
 -- def v : Idx₂ := (1, 1)
