@@ -10,12 +10,6 @@ namespace Y2023.Day17
 open CiCL
 open Dim2
 
-structure Input where
-deriving BEq, Repr
-
-instance : ToString Input where
-  toString _ := s!""
-
 namespace parser
 
 open WinnowParsers
@@ -34,7 +28,7 @@ def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
 
 end parser
 
-/-- { pos : Idx₂, dir : Dir, cost : Nat, steps : Nat } -/
+/-- `{ pos : Idx₂, dir : Dir, cost : Nat, steps : Nat }` -/
 structure State where
   pos   : Idx₂
   dir   : Dir
@@ -53,6 +47,7 @@ open Batteries
 
 def limit := 3
 
+@[inline]
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
@@ -123,6 +118,7 @@ namespace Part2
 def limitₗ := 10
 def limitₛ := 4
 
+@[inline]
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
@@ -155,9 +151,6 @@ def next_states (r : Rect Nat) (state : State) : List State :=
   | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
   | .S => [go_s false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
   | .W => [go_w false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
-
-variable (visited : Std.HashSet State)
-variable (to_visit : Batteries.BinomialHeap State (·.cost < ·.cost))
 
 -- #eval (State.mk (1, 1) Dir.E 0 0 |>.pos) == (State.mk (1, 1) Dir.E 0 0 |>.pos)
 

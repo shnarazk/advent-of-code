@@ -42,10 +42,7 @@ abbrev Vec₂ := Int × Int
 
 instance : Inhabited Vec₂ where default := (0, 0)
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
--- #eval (0, 0) == (1, 0)
 instance : ToString Vec₂ where toString v := s!"({v.1},{v.2})"
-instance : Hashable Int64 where hash a := a.toUInt64
--- instance : Hashable Vec₂ where hash a := hash (a.1)o
 
 instance : HAdd Vec₂ Vec₂ Vec₂ where
   hAdd (a b : Vec₂) : Vec₂ := (a.1 + b.1, a.2 + b.2)
@@ -105,6 +102,7 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 namespace Dir
 
 /-- return the corresponding `Dir2` -/
+@[inline]
 def asVec₂ : Dir → Vec₂
   | Dir.N => (-1,  0)
   | Dir.E => ( 0,  1)
@@ -131,7 +129,15 @@ instance : HAdd (Nat × Nat) Dir (Option (Nat × Nat)) where
       if let some x := x.toNat? then some (y, x) else none
     else none
 
-/-- 8 neighbors -/
+/-- 4 direction neighbors -/
+def fourNeighbors : Array Vec₂ := #[
+  Dir.N.asVec₂,
+  Dir.E.asVec₂,
+  Dir.S.asVec₂,
+  Dir.W.asVec₂,
+]
+
+/-- 8 direction neighbors -/
 def eightNeighbors : Array Vec₂ := #[
   Dir.N.asVec₂,
   Dir.E.asVec₂,
@@ -241,8 +247,6 @@ def toList' (p : Idx₂) : List Idx₂ :=
   List.map (fun y ↦ (List.range p.2).map (y, ·) ) (List.range p.1) |>.flatten
 
 #guard toList' (3, 2) = [(0,0), (0,1), (1,0), (1,1), (2,0), (2,1)]
-
-open Std.HashMap
 
 variable {α : Type}
 
