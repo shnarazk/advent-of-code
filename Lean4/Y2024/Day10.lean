@@ -39,7 +39,6 @@ def expand (rect : Rect Nat) (toVisit : List Idx₂)
         let nextLevel := rect[node]! + 1
         let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
             |>.filterMap (fun offset ↦ (↑ (node + offset) : Option Idx₂))
-            |>.filter rect.validIndex?
             |>.filter (rect[·]? == some nextLevel)
             |>.filter (!visited[·]!)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
@@ -65,7 +64,6 @@ def expand (rect : Rect Nat) (toVisit : List Idx₂)
         let nextLevel := rect[node]! + 1
         let toVisit' := [((-1, 0) : Vec₂), (1, 0), (0, -1), (0, 1)]
             |>.filterMap (fun offset ↦ (↑ (node + offset) : Option Idx₂))
-            |>.filter rect.validIndex?
             |>.filter (rect[·]? == some nextLevel)
         let visited' := toVisit'.foldl (fun acc p ↦ acc.set p true) visited
       expand rect (toVisit' ++ remain) visited' count
