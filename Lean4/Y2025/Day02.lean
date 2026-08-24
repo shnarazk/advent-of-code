@@ -7,12 +7,14 @@ public import «AoC».Combinator
 namespace UInt64
 
 /-- return the number of digits minus one: `0.iLog10 = 0` -/
+@[inline]
 partial
 def iLog10 (a : UInt64) : Int := if a < 10 then 0 else 1 + iLog10 (a / 10)
 
 #guard (12809 : UInt64).iLog10 == 4
 
 /-- pick up `nth` `size` digits as `UInt64`. `nth` is zero-based and is counted from the top. -/
+@[inline]
 def pick (a : UInt64) (size nth : Nat) : UInt64 :=
   let len : Nat := (a.iLog10 + 1).toNat
   -- assert! len ≥ size * (nth + 1)
@@ -22,6 +24,7 @@ def pick (a : UInt64) (size nth : Nat) : UInt64 :=
 #guard pick 112233 3 2 = 233
 
 /-- return the number from `a` repeating `n` times -/
+@[inline]
 def repeatBy (a : UInt64) (n : Nat) : UInt64 :=
   let len : Nat := (a.iLog10 + 1).toNat
   (1...n).iter.fold (fun acc _ ↦ acc * (10 ^ len).toUInt64 + a) a

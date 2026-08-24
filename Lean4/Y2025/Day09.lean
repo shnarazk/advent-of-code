@@ -11,9 +11,11 @@ open Std
 open Dim2
 
 /-- return the distance between a and b -/
+@[inline]
 def dist (a b : Int) : Nat := (if a ≤ b then b - a else a - b).toNat
 
 /-- return one plus the distance between a and b -/
+@[inline]
 def dist₁ (a b : Int) : Nat := (1 + if a ≤ b then b - a else a - b).toNat
 
 structure Input where
