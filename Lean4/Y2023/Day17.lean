@@ -10,12 +10,6 @@ namespace Y2023.Day17
 open CiCL
 open Dim2
 
-structure Input where
-deriving BEq, Repr
-
-instance : ToString Input where
-  toString _ := s!""
-
 namespace parser
 
 open WinnowParsers
@@ -34,7 +28,7 @@ def parse : String → Option (Rect Nat) := AoCParser.parse parse₁
 
 end parser
 
-/-- { pos : Idx₂, dir : Dir, cost : Nat, steps : Nat } -/
+/-- `{ pos : Idx₂, dir : Dir, cost : Nat, steps : Nat }` -/
 structure State where
   pos   : Idx₂
   dir   : Dir
@@ -53,36 +47,29 @@ open Batteries
 
 def limit := 3
 
+@[inline]
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
-  let go_n (t : Nat) := if p : t ≤ limit && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
+  let go_n (t : Nat) := if t ≤ limit && 1 ≤ state.pos.fst
     then
-      let p : Idx₂ := ⟨
-        (state.pos.fst - 1, state.pos.snd),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
-      some <| State.mk p Dir.N (state.cost + r.get p 1) t
+      let p : Idx₂ := (state.pos.fst - 1, state.pos.snd)
+      some <| State.mk p Dir.N (state.cost + r[p]?.unwrapOr 1) t
     else none
-  let go_s (t : Nat) := if p : t ≤ limit && state.pos.fst < h && (0,0) ≤ (state.pos.fst + 1, state.pos.snd)
+  let go_s (t : Nat) := if t ≤ limit && state.pos.fst < h
     then
-      let p : Idx₂ := ⟨
-        (state.pos.fst + 1, state.pos.snd),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
-      some <| State.mk p Dir.S (state.cost + r.get p 1) t
+      let p : Idx₂ := (state.pos.fst + 1, state.pos.snd)
+      some <| State.mk p Dir.S (state.cost + r[p]?.unwrapOr 1) t
     else none
-  let go_w (t : Nat) := if p : t ≤ limit && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
+  let go_w (t : Nat) := if t ≤ limit && 0 < state.pos.snd && 1 ≤ state.pos.snd
     then
-      let p : Idx₂ := ⟨
-        (state.pos.fst, state.pos.snd - 1),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
-      some <| State.mk p Dir.W (state.cost + r.get p 1) t
+      let p : Idx₂ := (state.pos.fst, state.pos.snd - 1)
+      some <| State.mk p Dir.W (state.cost + r[p]?.unwrapOr 1) t
     else none
-  let go_e (t : Nat) := if p : t ≤ limit && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
+  let go_e (t : Nat) := if t ≤ limit && state.pos.snd < w
     then
-      let p : Idx₂ := ⟨
-        (state.pos.fst, state.pos.snd + 1),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
-      some <| State.mk p Dir.E (state.cost + r.get p 1) t
+      let p : Idx₂ := (state.pos.fst, state.pos.snd + 1)
+      some <| State.mk p Dir.E (state.cost + r[p]?.unwrapOr 1) t
     else none
   match state.dir with
   | .N => [go_n (state.steps + 1), go_e 1, go_w 1].filterMap I
@@ -131,49 +118,39 @@ namespace Part2
 def limitₗ := 10
 def limitₛ := 4
 
+@[inline]
 def next_states (r : Rect Nat) (state : State) : List State :=
   let h := r.height - 1
   let w := r.width - 1
   let go_n (turn : Bool) (t : Nat) :=
-    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && (0, 0) ≤ (state.pos.fst - 1, state.pos.snd)
+    if (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 1 ≤ state.pos.fst
     then
-      let q : Idx₂ := ⟨
-        (state.pos.fst - 1, state.pos.snd),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact le_of_le_of_eq p2 rfl⟩
-      some <| State.mk q Dir.N (state.cost + r.get q 1) t
+      let q : Idx₂ := (state.pos.fst - 1, state.pos.snd)
+      some <| State.mk q Dir.N (state.cost + r[q]?.unwrapOr 1) t
     else none
   let go_s (turn : Bool) (t : Nat) :=
-    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h && (0, 0) ≤ (state.pos.fst + 1, state.pos.snd)
+    if (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.fst < h
     then
-      let q : Idx₂ := ⟨
-        (state.pos.fst + 1, state.pos.snd),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
-      some <| State.mk q Dir.S (state.cost + r.get q 1) t
+      let q : Idx₂ := (state.pos.fst + 1, state.pos.snd)
+      some <| State.mk q Dir.S (state.cost + r[q]?.unwrapOr 1) t
     else none
   let go_w (turn : Bool) (t : Nat) :=
-    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd && (0, 0) ≤ (state.pos.fst, state.pos.snd - 1)
+    if (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && 0 < state.pos.snd && 1 ≤ state.pos.snd
     then
-      let q : Idx₂ := ⟨
-        (state.pos.fst, state.pos.snd - 1),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
-      some <| State.mk q Dir.W (state.cost + r.get q 1) t
+      let q : Idx₂ := (state.pos.fst, state.pos.snd - 1)
+      some <| State.mk q Dir.W (state.cost + r[q]?.unwrapOr 1) t
     else none
   let go_e (turn : Bool) (t : Nat) :=
-    if p : (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w && (0, 0) ≤ (state.pos.fst, state.pos.snd + 1)
+    if (!turn || limitₛ ≤ state.steps) && t ≤ limitₗ && state.pos.snd < w
     then
-      let q : Idx₂ := ⟨
-        (state.pos.fst, state.pos.snd + 1),
-        by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
-      some <| State.mk q Dir.E (state.cost + r.get q 1) t
+      let q : Idx₂ := (state.pos.fst, state.pos.snd + 1)
+      some <| State.mk q Dir.E (state.cost + r[q]?.unwrapOr 1) t
     else none
   match state.dir with
   | .N => [go_n false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
   | .E => [go_e false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
   | .S => [go_s false (state.steps + 1), go_e true 1, go_w true 1].filterMap I
   | .W => [go_w false (state.steps + 1), go_s true 1, go_n true 1].filterMap I
-
-variable (visited : Std.HashSet State)
-variable (to_visit : Batteries.BinomialHeap State (·.cost < ·.cost))
 
 -- #eval (State.mk (1, 1) Dir.E 0 0 |>.pos) == (State.mk (1, 1) Dir.E 0 0 |>.pos)
 

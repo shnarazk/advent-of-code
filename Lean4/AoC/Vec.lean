@@ -42,10 +42,7 @@ abbrev Vec₂ := Int × Int
 
 instance : Inhabited Vec₂ where default := (0, 0)
 instance : BEq Vec₂ where beq a b := a.1 == b.1 && a.2 == b.2
--- #eval (0, 0) == (1, 0)
 instance : ToString Vec₂ where toString v := s!"({v.1},{v.2})"
-instance : Hashable Int64 where hash a := a.toUInt64
--- instance : Hashable Vec₂ where hash a := hash (a.1)o
 
 instance : HAdd Vec₂ Vec₂ Vec₂ where
   hAdd (a b : Vec₂) : Vec₂ := (a.1 + b.1, a.2 + b.2)
@@ -105,6 +102,7 @@ macro_rules | `($a <₀ $b) => `(geZeroAndLt $b $a)
 namespace Dir
 
 /-- return the corresponding `Dir2` -/
+@[inline]
 def asVec₂ : Dir → Vec₂
   | Dir.N => (-1,  0)
   | Dir.E => ( 0,  1)
@@ -131,7 +129,15 @@ instance : HAdd (Nat × Nat) Dir (Option (Nat × Nat)) where
       if let some x := x.toNat? then some (y, x) else none
     else none
 
-/-- 8 neighbors -/
+/-- 4 direction neighbors -/
+def fourNeighbors : Array Vec₂ := #[
+  Dir.N.asVec₂,
+  Dir.E.asVec₂,
+  Dir.S.asVec₂,
+  Dir.W.asVec₂,
+]
+
+/-- 8 direction neighbors -/
 def eightNeighbors : Array Vec₂ := #[
   Dir.N.asVec₂,
   Dir.E.asVec₂,
@@ -145,19 +151,27 @@ def eightNeighbors : Array Vec₂ := #[
 
 end Dir
 
-/-- Subtype of `Vec₂` as valid index for `Rect`. -/
-def Idx₂ := { v : Vec₂ // (0, 0) ≤ v }
-deriving BEq, Hashable, Repr
+/-- `Vec₂` of `Nat` version as valid index for `Rect`. -/
+abbrev Idx₂ := Nat × Nat
 
-instance : ToString Idx₂ where toString v := toString v.val
-instance : Coe Idx₂ Vec₂ where coe v := v.1
-instance : Coe Idx₂ (Nat × Nat) where coe v := (v.1.1.toNat, v.1.2.toNat)
-instance : Coe (Nat × Nat) Idx₂ where coe v :=
-  ⟨
-    (((↑ v.1) : Int), ((↑ v.2) : Int)),
-    by
-      constructor <;> { simp }
-  ⟩
+-- instance : ToString Idx₂ where toString v := toString v.val
+
+/-- Convert a `Vec₂` to `Option Idx₂` -/
+@[inline]
+def Vec₂.ofIdx₂ (v : Idx₂) : Vec₂ :=
+   (((↑ v.1) : Int), ((↑ v.2) : Int))
+
+instance : Coe Idx₂ Vec₂ where
+  coe := Vec₂.ofIdx₂
+
+/-- Convert a `Vec₂` to `Option Idx₂` -/
+@[inline]
+def Vec₂.toIdx₂ (v : Vec₂) : Option Idx₂ :=
+  if (0, 0) ≤ v then some (v.fst.toNat, v.snd.toNat) else none
+
+instance : Coe Vec₂ (Option Idx₂) where
+  coe := Vec₂.toIdx₂
+
 -- def v : Vec₂ := (1, 1)
 -- def v : Idx₂ := (1, 1)
 -- def d : Idx₂ := ⟨(1, 1), by exact ⟨rfl, rfl⟩⟩
@@ -165,56 +179,71 @@ instance : Coe (Nat × Nat) Idx₂ where coe v :=
 -- #check ((↑ d) : Idx₂)
 -- def w : Vec₂ := (-1, -1)
 -- #eval (↑ w)
-instance inhabitedIdx₂ : Inhabited Idx₂ where default := (↑ ((0 : Nat), (0 : Nat)) : Idx₂)
+instance inhabitedIdx₂ : Inhabited Idx₂ where default := ((0 : Nat), (0 : Nat))
 
 -- namespace Idx₂
 
-/-- return the first element of `Idx₂` -/
-def Idx₂.fst (i : Idx₂) : Int := i.1.fst
+instance : HAdd Idx₂ Vec₂ Vec₂ where
+  hAdd (v : Idx₂) (d : Vec₂) : Vec₂ := (↑ v : Vec₂) + d
 
-/-- return the second element of `Idx₂` -/
-def Idx₂.snd (i : Idx₂) : Int := i.1.snd
+#guard ((1, 2) : Idx₂) + ((-2, -3) : Vec₂) == ((-1, -1) : Vec₂)
+
+instance : HAdd Idx₂ Vec₂ (Option Idx₂) where
+  hAdd (v : Idx₂) (d : Vec₂) : (Option Idx₂) := ↑ (v + d)
+
+#guard (↑ (((1, 2) : Idx₂) + ((-2, -3) : Vec₂)) : Option Idx₂) == none
+#guard (↑ (((1, 2) : Idx₂) + ((2, 3) : Vec₂)) : Option Idx₂) == some (3, 5)
 
 instance : HAdd Idx₂ Dir (Option Idx₂) where
-  hAdd (v : Idx₂) (d : Dir) : (Option Idx₂) :=
-    let v' : Vec₂ := v.val + d
-    if h : (0, 0) ≤ v' then
-      some ⟨v', h⟩
-    else
-      none
+  hAdd (v : Idx₂) (d : Dir) : (Option Idx₂) := (↑ v : Vec₂) + d
 
-/-- class for indices for `Rect` -/
-class RectIndex (α : Type) where
-  /-- return a pair of indices for `Rect` -/
-  toIndex₂ : α → Nat × Nat
+#guard (default : Idx₂) + Dir.W == none
 
-instance : RectIndex Idx₂ where
-  toIndex₂ p := ↑ p
+instance : LT Idx₂ where
+  lt (p q : Idx₂) := p.fst < q.fst ∧ p.snd < q.snd
 
-instance : RectIndex (Nat × Nat) where
-  toIndex₂ p := p
+instance instDecidableLtIdx₂ (a b : Idx₂) : Decidable (a < b) := by
+  rw [LT.lt]
+  have s1 : Decidable (a.fst < b.fst) := by exact a.fst.decLt b.fst
+  have s2 : Decidable (a.snd < b.snd) := by exact a.snd.decLt b.snd
+  exact instDecidableAnd
 
+instance : LE Idx₂ where
+  le (p q : Idx₂) := p.fst ≤ q.fst ∧ p.snd ≤ q.snd
+
+instance instDecidableLeIdx₂ (a b : Idx₂) : Decidable (a ≤ b) := by
+  rw [LE.le]
+  have s1 : Decidable (a.fst ≤ b.fst) := by exact a.fst.decLe b.fst
+  have s2 : Decidable (a.snd ≤ b.snd) := by exact a.snd.decLe b.snd
+  exact instDecidableAnd
+
+-- /-- class for indices for `Rect` -/
+-- class RectIndex (α : Type) where
+--   /-- return a pair of indices for `Rect` -/
+--   toIndex₂ : α → Idx₂
+--
+-- instance : RectIndex Idx₂ where
+--   toIndex₂ p := p
+--
+-- /-- class for optional indices for `Rect` -/
+-- class RectIndexMaybe (α : Type) where
+--   /-- return an optional pair of indices for `Rect` -/
+--   toIndex₂? : α → Option (Nat × Nat)
+--
+-- instance : RectIndexMaybe Vec₂ where
+--   toIndex₂? p := if (0, 0) ≤ p then some (p.1.toNat, p.2.toNat) else none
+--
+-- instance : RectIndexMaybe Idx₂ where
+--   toIndex₂? p := some (↑ p)
+--
+-- instance : RectIndexMaybe (Nat × Nat) where
+--   toIndex₂? p := some p
+--
 -- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
 
-/-- class for optional indices for `Rect` -/
-class RectIndexMaybe (α : Type) where
-  /-- return an optional pair of indices for `Rect` -/
-  toIndex₂? : α → Option (Nat × Nat)
-
-instance : RectIndexMaybe Vec₂ where
-  toIndex₂? p := if (0, 0) ≤ p then some (p.1.toNat, p.2.toNat) else none
-
-instance : RectIndexMaybe Idx₂ where
-  toIndex₂? p := some (↑ p)
-
-instance : RectIndexMaybe (Nat × Nat) where
-  toIndex₂? p := some p
-
--- #check RectIndex.toIndex₂ ((↑ d) : Idx₂)
-
-/-- return the list of `(0 : UInt64)` to `n` -/
-partial
-def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
+-- /-- return the list of `(0 : UInt64)` to `n` -/
+-- partial
+-- def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
 
 /-- return all valid indices smaller than `p`
 
@@ -222,16 +251,9 @@ def range_list (n : Int) : List Int := List.range n.toNat |>.map Int.ofNat
   toList' (3, 2) = [(0,0), (0,1), (1,0), (1,1), (2,0), (2,1)]
 -/
 def toList' (p : Idx₂) : List Idx₂ :=
-  let i : Vec₂ := ↑ p
-  let rl := range_list i.1
-  List.map (fun y ↦ (range_list i.2).map (y, ·) ) rl
-    |>.flatten
-    |>.flatMap (fun v ↦ if h : (0, 0) ≤ v then [⟨v, h⟩] else [])
+  List.map (fun y ↦ (List.range p.2).map (y, ·) ) (List.range p.1) |>.flatten
 
-/-- return `some Idx₂` if possible -/
-def toIdx₂ (p : Vec₂) : Option Idx₂ := if h : (0,0) ≤ p then some ⟨p, h⟩ else none
-
-open Std.HashMap
+#guard toList' (3, 2) = [(0,0), (0,1), (1,0), (1,1), (2,0), (2,1)]
 
 variable {α : Type}
 
@@ -302,68 +324,76 @@ def of2DMatrix [BEq α] (a : Array (Array α)) : Rect α :=
 
 /-- return the `(i,j)`-th element of `Rect` -/
 @[inline]
-def get [BEq α] [RectIndex β] (self : Rect α) (p : β) (default : α) : α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.snd < self.width then
-    self.vector.getD (self.width * i.1 + i.2) default
-  else
-    default
+def rectGetElem? [BEq α] [Coe β (Option Idx₂)] (self : Rect α) (p : β) : Option α :=
+  match ((↑ p) : Option Idx₂) with
+  | some i => if i.snd < self.width then self.vector[self.width * i.1 + i.2]? else none
+  | none   => none
 
 /-- return the `(i,j)`-th element of `Rect` by using `[]!` -/
 @[inline]
-def getElem! [BEq α] [Inhabited α] [RectIndex β] (self : Rect α) (p : β) : α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  self.vector[(self.width * i.1 + i.2)]!
+def rectGetElem! [BEq α] [Inhabited α] [Coe β (Option Idx₂)] (self : Rect α) (p : β) : α :=
+  match ((↑ p) : Option Idx₂) with
+    | some i => self.vector[(self.width * i.1 + i.2)]!
+    | none   => self.vector[0]!
+
+instance Rect.hasGetElem? [BEq α] [Inhabited α] [Coe β (Option Idx₂)] :
+    GetElem? (Rect α) β α
+        (fun col idx ↦ match ((↑ idx) : Option Idx₂) with | some i => i.fst * col.width + i.snd < col.vector.size | none => false) where
+  getElem c i _ := rectGetElem! c i
+  getElem? := rectGetElem?
+
+#guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]])[((1,0) : Vec₂)]? == some 2
+#guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]])[((1,0) : Vec₂)]! == 2
+#guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]])[((1,0) : Idx₂)]! == 2
 
 /-- return true if `p` is a valid index of `self` -/
-def validIndex? [BEq α] [RectIndex β] (self : Rect α) (p : β) : Bool :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  i.2 < self.width && (self.width * i.1 + i.2) < self.vector.size
+def validIndex? [BEq α] [Coe β (Option Idx₂)] (self : Rect α) (p : β) : Bool :=
+  match ((↑ p) : Option Idx₂) with
+  | some i => i.2 < self.width && (self.width * i.1 + i.2) < self.vector.size
+  | _      => false
 
-#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 1) == true
-#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (2, 1) == true
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? ((1, 1) : Idx₂) == true
+#guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? ((2, 1) : Vec₂) == true
 #guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 2) == false
 #guard (Rect.of2DMatrix #[#[1,2], #[3,6], #[9, 0]]).validIndex? (1, 3) == false
 #guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]]).validIndex? (3, 0) == true
+#guard (Rect.of2DMatrix #[#[1], #[2], #[3], #[4]]).validIndex? ((-3, 0) : Vec₂) == false
 
-/-- return `self[p]` as `Option` -/
-@[inline]
-def get? [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option α :=
-  match RectIndexMaybe.toIndex₂? p with
-  | some i => if i.snd < self.width then self.vector[self.width * i.1 + i.2]? else none
-  | none => none
+-- /-- return `self[p]` as `Option` -/
+-- @[inline]
+-- def get? [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option α :=
+--   match RectIndexMaybe.toIndex₂? p with
+--   | some i => if i.snd < self.width then self.vector[self.width * i.1 + i.2]? else none
+--   | none => none
 
 /-- set the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
-def set [BEq α] [RectIndex β] (self : Rect α) (p : β) (val : α) : Rect α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.snd < self.width then
-    let ix := self.width * i.1 + i.2
-    Rect.mk self.width (self.vector.set! ix val)
-  else
-    Rect.mk 0 #[]
+def set [BEq α] [Coe β (Option Idx₂)] (self : Rect α) (p : β) (val : α) : Rect α :=
+  match ((↑ p) : Option Idx₂) with
+  | some i =>
+    let j := self.width * i.1 + i.2
+    if j < self.vector.size then Rect.mk self.width (self.vector.set! j val) else self
+  | none   => self
 
 /-- modify the `(i,j)`-th element to `val` and return the modified Mat1 instance -/
 @[inline]
-def modify [BEq α] [RectIndex β] (self : Rect α) (p: β) (f : α → α) : Rect α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  if i.snd < self.width then
-    Rect.mk self.width (self.vector.modify (self.width * i.1 + i.2) f)
-  else
-    Rect.mk 0 #[]
+def modify [BEq α] [Coe β (Option Idx₂)] (self : Rect α) (p: β) (f : α → α) : Rect α :=
+  match ((↑ p) : Option Idx₂) with
+  | some i =>
+    let j := self.width * i.1 + i.2
+    if j < self.vector.size then Rect.mk self.width (self.vector.modify j f) else self
+    | none => self
 
 /-- swap `self[p]` and `self[q]` -/
 @[inline]
-def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  let j : Nat × Nat := RectIndex.toIndex₂ q
-  if i.snd < self.width && j.snd < self.width then
-    { self with
-      vector := Array.swapIfInBounds self.vector
-        (self.width * i.fst + i.snd)
-        (self.width * j.fst + j.snd) }
-  else
-    self
+def swap [BEq α] [Coe β (Option Idx₂)] [Coe γ (Option Idx₂)]
+    (self : Rect α) (p : β) (q : γ) : Rect α :=
+  match ((↑ p) : Option Idx₂), ((↑ q) : Option Idx₂) with
+  | some p', some q' =>
+    let i : Nat := self.width * p'.fst + p'.snd
+    let j : Nat := self.width * q'.fst + q'.snd
+    { self with vector := Array.swapIfInBounds self.vector i j }
+  | _      , _       => self
 
 -- def r := Rect.of2DMatrix #[#[0,1], #[2,4]]
 -- #eval r
@@ -374,13 +404,8 @@ def swap [BEq α] [RectIndex β] (self : Rect α) (p q : β) : Rect α :=
 -- #eval r.swap (Dim2.mk 0 0) (Dim2.mk 1 1)
 
 /-- search an element that satisfies the predicate and return indices or none -/
-def findPosition? [BEq α] (p : Rect α) (f : α → Bool) : Option Idx₂ :=
-  if let some i := p.vector.findIdx? f
-    then
-      if h : 0 ≤ Int.ofNat (i / p.width) ∧ 0 ≤ Int.ofNat (i % p.width)
-        then some ⟨(Int.ofNat (i / p.width), Int.ofNat (i % p.width)), by exact ⟨h.1, h.2⟩⟩
-        else none
-    else none
+def findPosition? [BEq α] (r : Rect α) (f : α → Bool) : Option Idx₂ :=
+  r.vector.findIdx? f |>.map (fun i ↦ (i / r.width, i % r.width))
 
 /-- helper: search `sa` backwards from `limit` (stepping by `sub1`) for the first element satisfying `pred`. -/
 partial
@@ -420,10 +445,7 @@ def foldl {β : Type} [BEq α] (self : Rect α) (f : β → α → β) (init : �
 def foldlRows {β : Type} [BEq α]
     (self : Rect α) (f : β → α → β) (init : β) : Array β :=
   Array.range self.width
-    |> .map (fun i =>
-      self.vector.toSubarray i (i + self.width)
-        |> Array.ofSubarray
-        |>.foldl f init)
+    |>.map (fun i => self.vector.toSubarray i (i + self.width) |> Array.ofSubarray |>.foldl f init)
 
 /-- map on each row -/
 def mapRows {β : Type} [BEq α]
@@ -439,8 +461,8 @@ def row [BEq α] (self : Rect α) (i : Nat) : Subarray α :=
   self.vector.toSubarray f t
 
 /-- return `j`-th column of `self` as a Array -/
-def column [BEq α] (self : Rect α) (j : Nat) (default : α) : Array α :=
-  Array.range self.width |>.map (fun i ↦ self.get (i, j) default)
+def column [BEq α] [Inhabited α] (self : Rect α) (j : Nat) : Array α :=
+  Array.range (self.vector.size / self.width) |>.map (fun i ↦ self[(i, j)]!)
 
 /-- return the height and the width of `self` -/
 def area [BEq α] (self : Rect α) : Nat := self.vector.size
@@ -449,18 +471,12 @@ def area [BEq α] (self : Rect α) : Nat := self.vector.size
 
 /-- return the index for `n`-th element of `self` -/
 @[inline]
-def toIndex₁ {α : Type} [BEq α] [RectIndex β] (frame : Rect α) (p : β) : Nat :=
-  let i : Nat × Nat := RectIndex.toIndex₂ p
-  (frame.width * i.fst + i.snd)
-
-/-- convert from `Vec2` to valid `Idx₂` or `None` -/
-@[inline]
-def toValidIdx₂ {α : Type} [BEq α] [RectIndexMaybe β] (self : Rect α) (p : β) : Option Idx₂ :=
-  if let some i := RectIndexMaybe.toIndex₂? p then
-        if h: 0 ≤ Int.ofNat i.1 ∧ 0 ≤ Int.ofNat i.2 ∧ i.2 < self.width ∧ self.toIndex₁ i < self.vector.size
-          then some ⟨((↑ i) : Vec₂), by constructor <;> { simp }⟩
-          else none
-    else none
+def toIndex? {α : Type} [BEq α] [Coe β (Option Idx₂)] (frame : Rect α) (p : β) : Option Nat :=
+  match ((↑ p) : Option Idx₂) with
+  | some i' =>
+    let i := frame.width * i'.fst + i'.snd
+    if i < frame.vector.size then some i else none
+  | none    => none
 
 -- @[inline] def index' (size : Pos) (n: Nat) : Pos := (n / size.snd, n % size.snd)
 
@@ -471,11 +487,11 @@ def ofIndex₁ {α : Type} [BEq α] (frame : Rect α) (n : Nat) : Nat × Nat :=
 
 /-- enumerate on `Rect` -/
 @[inline]
-def enum {α : Type} [BEq α] (self : Rect α) : Array ((Nat × Nat) × α) :=
+def enum {α : Type} [Inhabited α] [BEq α] (self : Rect α) : Array ((Nat × Nat) × α) :=
   Array.range self.vector.size
     |>.filterMap (fun i ↦
         let p := self.ofIndex₁ i
-        if let some val := self.get? p then some (p, val) else none)
+        if let some val := self[p]? then some (p, val) else none)
 
 /-- return the array of valid (height, width) pair of `Rect` -/
 @[inline]

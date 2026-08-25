@@ -34,8 +34,8 @@ end parser
 namespace Part1
 
 def evaluate_at (accum' : Rect Bool) (grid : Rect Char) (i j : Nat) : Rect Bool × Nat := Id.run do
-  if accum'.get (i, j) true then return (accum', 0)
-  let some ch := grid.get? (i, j) | return (accum', 0)
+  if accum'[(i, j)]? == some true then return (accum', 0)
+  let some ch := grid[(i, j)]? | return (accum', 0)
   let mut accum := accum'
   let mut count := 0
   let mut checked : Rect Bool := accum.map (K false)
@@ -46,15 +46,15 @@ def evaluate_at (accum' : Rect Bool) (grid : Rect Char) (i j : Nat) : Rect Bool 
   while !to_visit.isEmpty do
     let p :: to_visit' := to_visit | continue
     to_visit := to_visit'
-    if checked.get p true then continue
+    if checked[p]! then continue
     checked := checked.set p true
-    if grid.get? p == some ch then
+    if grid[p]? == some ch then
       count := count + 1
       accum := accum.set p true
-      if p.fst == 0 || grid.get? (p.fst - 1, p.snd) != some ch then seg_h := seg_h.insert p
-      if               grid.get? (p.fst + 1, p.snd) != some ch then seg_h := seg_h.insert (p.fst + 1, p.snd)
-      if p.snd == 0 || grid.get? (p.fst, p.snd - 1) != some ch then seg_v := seg_v.insert p
-      if               grid.get? (p.fst, p.snd + 1) != some ch then seg_v := seg_v.insert (p.fst, p.snd + 1)
+      if p.fst == 0 || grid[(p.fst - 1, p.snd)]? != some ch then seg_h := seg_h.insert p
+      if               grid[(p.fst + 1, p.snd)]? != some ch then seg_h := seg_h.insert (p.fst + 1, p.snd)
+      if p.snd == 0 || grid[(p.fst, p.snd - 1)]? != some ch then seg_v := seg_v.insert p
+      if               grid[(p.fst, p.snd + 1)]? != some ch then seg_v := seg_v.insert (p.fst, p.snd + 1)
       for dir in [Dir.N, Dir.E, Dir.S, Dir.W] do
         let some q := p + dir | continue
         if grid.validIndex? q then to_visit := to_visit.concat q
@@ -94,8 +94,8 @@ def count_sides (hash : HashMap Nat (Array (Nat × Bool))) : Nat :=
     |>.sum
 
 def evaluate_at (accum' : Rect Bool) (grid : Rect Char) (i j : Nat) : Rect Bool × Nat := Id.run do
-  if accum'.get (i, j) true then return (accum', 0)
-  let some ch := grid.get? (i, j) | return (accum', 0)
+  if accum'[(i, j)]? == some true then return (accum', 0)
+  let some ch := grid[(i, j)]? | return (accum', 0)
   let mut accum := accum'
   let mut count := 0
   let mut checked : Rect Bool := accum.map (K false)
@@ -106,15 +106,15 @@ def evaluate_at (accum' : Rect Bool) (grid : Rect Char) (i j : Nat) : Rect Bool 
   while !to_visit.isEmpty do
     let p :: to_visit' := to_visit | continue
     to_visit := to_visit'
-    if checked.get p true then continue
+    if checked[p]? == some true then continue
     checked := checked.set p true
-    if grid.get? p == some ch then
+    if grid[p]? == some ch then
       count := count + 1
       accum := accum.set p true
-      if p.fst == 0 || grid.get? (p.fst - 1, p.snd) != some ch then seg_h := seg_h.insert (p, false)
-      if grid.get? (p.fst + 1, p.snd) != some ch then seg_h := seg_h.insert ((p.fst + 1, p.snd), true)
-      if p.snd == 0 || grid.get? (p.fst, p.snd - 1) != some ch then seg_v := seg_v.insert (p, false)
-      if grid.get? (p.fst, p.snd + 1) != some ch then seg_v := seg_v.insert ((p.fst, p.snd + 1), true)
+      if p.fst == 0 || grid[(p.fst - 1, p.snd)]? != some ch then seg_h := seg_h.insert (p, false)
+      if grid[(p.fst + 1, p.snd)]? != some ch then seg_h := seg_h.insert ((p.fst + 1, p.snd), true)
+      if p.snd == 0 || grid[(p.fst, p.snd - 1)]? != some ch then seg_v := seg_v.insert (p, false)
+      if grid[(p.fst, p.snd + 1)]? != some ch then seg_v := seg_v.insert ((p.fst, p.snd + 1), true)
       for dir in [Dir.N, Dir.E, Dir.S, Dir.W] do
         let some q := p + dir | continue
         if grid.validIndex? q then to_visit := to_visit.concat q

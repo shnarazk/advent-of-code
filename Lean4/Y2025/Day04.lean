@@ -26,9 +26,11 @@ def dir8 :=
   , Dir.S + Dir.W
   , Dir.W + Dir.N ]
 
+@[inline]
 def depends (grid : HashSet Vec₂) (pos : Vec₂) : List Vec₂ :=
   dir8.iter.map (pos + ·) |>.filter (grid.contains ·) |>.toList
 
+@[inline]
 def removable (grid : HashSet Vec₂) (pos : Vec₂) : Bool :=
   (dir8.iter.filter (fun d ↦ grid.contains (pos + d))).length < 4
 
@@ -47,7 +49,7 @@ end parser
 
 namespace Part1
 
-def solve (input : Input) : Nat := Id.run do
+def solve (input : Input) : Nat :=
   let h := input.grid.enum.filter (·.snd) |>.map (·.fst) |> HashSet.ofArray
   h.iter.filter (removable h ·) |>.length
 

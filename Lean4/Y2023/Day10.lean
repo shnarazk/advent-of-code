@@ -11,25 +11,17 @@ namespace Y2023.Day10
 open CiCL CoP Dim2
 
 def makeNeighbors (size s : Idx₂) : List Idx₂ :=
-  [(Ordering.lt, Ordering.eq), (.gt, .eq), (.eq, .lt), (.eq, .gt)]
-    |>.filterMap
-      (fun d => if
-        !( (s.fst    == 0         && d.fst == .lt)
-        || (size.fst ≤ s.fst + 1  && d.fst == .gt)
-        ||  size.fst < s.fst + 1
-        || (s.snd    == 0         && d.snd == .lt)
-        || (size.snd = s.snd + 1  && d.snd == .gt)
-        ||  size.snd < s.snd + 1)
-        then
-          let q := (
-          (match d.fst with | .lt => s.fst - 1 | .eq => s.fst | .gt => s.fst + 1),
-          (match d.snd with | .lt => s.snd - 1 | .eq => s.snd | .gt => s.snd + 1))
-        if p : (0, 0) ≤ q then some ⟨q, p⟩ else none
-        else none)
+  #[Dir.N, .E, .S, .W].iter
+    |>.map Dir.asVec₂
+    |>.filterMap (fun d ↦ (↑ (s + d) : Option Idx₂))
+    |>.filter (· < size)
+    |>.toList
+
+#guard makeNeighbors (3, 3) (2, 2) == [((1, 2) : Idx₂), (2, 1)]
 
 def makeVecs (size start : Idx₂) : List (Idx₂ × Idx₂) := (makeNeighbors size start).map ((start, ·))
 
--- #guard makeVecs (3, 3) (2, 2) == [(((2, 2) : Idx₂), ((1, 2) : Idx₂)), ((2, 2), (2, 1))]
+#guard makeVecs (3, 3) (2, 2) == [(((2, 2) : Idx₂), ((1, 2) : Idx₂)), ((2, 2), (2, 1))]
 
 inductive Circuit where
   | v : Circuit
@@ -69,19 +61,18 @@ def startPosition (self : Rect Circuit) : Idx₂ := self.findPosition? (· == Ci
 
 def dest (mat : Rect Circuit) (vec : Vec₂ × Vec₂) : Vec₂ × Vec₂ :=
   let (pre, now) := vec
-  let dy := now.fst - pre.fst
-  let dx := now.snd - pre.snd
-  if p : (0, 0) ≤ now
-  then
-    let now' : Idx₂ := ⟨now, p⟩
-    let next := match mat.get? now' with
+  match ((↑ now) : Option Idx₂) with
+  | some now' =>
+    let dy := now.fst - pre.fst
+    let dx := now.snd - pre.snd
+    let next := match mat[now']? with
       | some .v => (now.fst + dy, now.snd)
       | some .h => (now.fst     , now.snd + dx)
       | some .l => (now.fst + dx, now.snd + dy)
       | some .j => (now.fst - dx, now.snd - dy)
       |       _ => now
     (now, next)
-  else ((0, 0), (0, 0))
+  | none => ((0, 0), (0, 0))
 
 namespace parser
 
@@ -107,13 +98,10 @@ def loop_len (self : Rect Circuit) (limit : Nat) (start : Idx₂) (len : Nat) (v
     let v' := dest self (vec.fst, vec.snd)
     if v'.fst.fst == v'.snd.fst && v'.fst.snd == v'.snd.snd
       then if v'.snd.fst == start.fst && v'.snd.snd == start.snd then len + 1 else 0
-      else if p : (0, 0) ≤ v'.fst && (0, 0) ≤ v'.snd
-      then
-        let v'₁ : Idx₂ := ⟨v'.fst, by simp at p; obtain ⟨p1, _⟩ := p; exact p1⟩
-        let v'₂ : Idx₂ := ⟨v'.snd, by simp at p; obtain ⟨_, p2⟩ := p; exact p2⟩
-        loop_len self lim' start (len + 1) (v'₁, v'₂)
       else
-        panic "impossible"
+        match ((↑ v'.fst) : Option Idx₂), ((↑ v'.snd) : Option Idx₂) with
+        | some v'₁, some v'₂ => loop_len self lim' start (len + 1) (v'₁, v'₂)
+        | _       , _        => panic "impossible"
 
 def solve (m : Rect Circuit) : Nat :=
   makeVecs (m.vector.size / m.width, m.width) (startPosition m)
@@ -125,28 +113,28 @@ end part1
 namespace part2
 
 inductive PropagateState where
-  | Wall       : PropagateState
-  | Propagated : PropagateState
-  | ToExpand   : PropagateState
-  | Unknown    : PropagateState
+  | Wall
+  | Propagated
+  | ToExpand
+  | Unknown
 deriving BEq, Repr
 
 instance : Inhabited PropagateState where default := .Unknown
 
 def map_of (size : Idx₂) (locs : List Idx₂) : Array PropagateState :=
   locs.foldl
-    (fun map pos ↦ map.set! (size.snd * pos.fst + pos.snd).toNat PropagateState.Wall)
-    (Array.replicate (size.fst.toNat * size.snd.toNat) PropagateState.Unknown)
+    (fun map pos ↦ map.set! (size.snd * pos.fst + pos.snd) PropagateState.Wall)
+    (Array.replicate (size.fst * size.snd) PropagateState.Unknown)
 
 def expand (self : Array PropagateState) (size : Idx₂) (n : Nat) : Array PropagateState :=
-  if p : (0, 0) ≤ (n / size.snd, n % size.snd)
+  if (0, 0) ≤ (n / size.snd, n % size.snd)
   then
-    let s : Idx₂ := ⟨(n / size.snd, n % size.snd), p⟩
+    let s : Idx₂ := (n / size.snd, n % size.snd)
     makeNeighbors size s
       |>.foldl
-        (fun m q ↦ match m[(size.snd * q.fst + q.snd).toNat]! with
-          | .Unknown => m.set! (size.snd * q.fst + q.snd).toNat .ToExpand
-          | _ => m)
+        (fun m q ↦ match m[(size.snd * q.fst + q.snd)]! with
+          | .Unknown => m.set! (size.snd * q.fst + q.snd) .ToExpand
+          | _        => m)
         (self.set! n .Propagated)
   else
     self
@@ -168,25 +156,25 @@ def mkLoop (self : Rect Circuit) (limit : Nat) (start : Idx₂) (path : List Idx
   | 0        => []
   | lim' + 1 =>
     let v'v := dest self vec
-    let v1 : Idx₂ := if p : (0, 0) ≤ v'v.fst then ⟨v'v.fst, p⟩ else ⟨(0, 0), by decide⟩
-    let v2 : Idx₂ := if p : (0, 0) ≤ v'v.snd then ⟨v'v.snd, p⟩ else ⟨(0, 0), by decide⟩
+    let v1 : Idx₂ := ((↑ v'v.fst) : Option Idx₂).unwrapOr (0, 0)
+    let v2 : Idx₂ := ((↑ v'v.snd) : Option Idx₂).unwrapOr (0, 0)
     if v1.fst == v2.fst && v1.snd == v2.snd
       then if v2.fst == start.fst && v2.snd == start.snd then path ++ [v1] else []
       else mkLoop self lim' start (path ++ [v1]) (v1, v2)
 
-def interpolate (p : Vec₂) (q : Vec₂) : Vec₂ :=
+def interpolate (p : Idx₂) (q : Idx₂) : Idx₂ :=
   let (p', q') := both (fun d ↦ (d.fst * 2, d.snd * 2)) (p, q)
   ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
 
-#guard interpolate ((3, 4) : Vec₂) ((3, 5) : Vec₂) == (6, 9)
+#guard interpolate ((3, 4) : Idx₂) ((3, 5) : Idx₂) == (6, 9)
 
 /--
 This generates a list of dupicated nodes.
 -/
-def scaleUp : List Vec₂ → List Vec₂
+def scaleUp : List Idx₂ → List Idx₂
   | []          => []
   | p :: []     => [(p.fst * 2, p.snd * 2)]
-  | p :: q :: l => ([(p.fst * 2, p.snd * 2), interpolate p q] : List Vec₂) ++ scaleUp (q :: l)
+  | p :: q :: l => ([(p.fst * 2, p.snd * 2), interpolate p q] : List Idx₂) ++ scaleUp (q :: l)
 
 /-!
   1. pick the looping route
@@ -198,22 +186,20 @@ def scaleUp : List Vec₂ → List Vec₂
 def solve (m: Rect Circuit) : Nat :=
   let st := startPosition m
   let shape : Idx₂ := ↑(m.vector.size / m.width, m.width)
-  let loop := makeVecs shape st
-    |>.map (fun v ↦ mkLoop m m.area st [st] ((↑v.fst : Vec₂), (↑v.snd : Vec₂)))
-    |>.map (·.map (fun v ↦ v.1))
+  let loop : List Idx₂ := makeVecs shape st
+    |>.map (fun (v : Idx₂ × Idx₂) ↦ mkLoop m m.area st [st] ((↑v.fst : Vec₂), (↑v.snd : Vec₂)))
+    -- |>.map (·.map (fun v ↦ v.1))
     |>.foldl (fun best cand ↦ if best.length < cand.length then cand else best) []
     |> scaleUp
-    |>.flatMap (fun (v : Vec₂) ↦ [if p : (0, 0) ≤ v then ⟨v, p⟩ else ⟨(0, 0), by decide⟩])
-  let size : Idx₂ := ⟨(shape.fst * 2, shape.snd * 2), by
-    constructor
-    · simp ; exact Int.zero_le_ofNat ((m.vector.size / m.width, m.width).fst * 2)
-    · simp ; exact Int.zero_le_ofNat ((m.vector.size / m.width, m.width).snd * 2)
-  ⟩
+    -- |>.map (fun (v : Idx₂) ↦ ((↑ v) : Vec₂))
+    -- |>.map (fun (v : Vec₂) ↦ ((↑ v) : Option Idx₂).unwrapOr (0, 0))
+    -- |>.flatMap (fun (v : Vec₂) ↦ [if p : (0, 0) ≤ v then ⟨v, p⟩ else ⟨(0, 0), by decide⟩])
+  let size : Idx₂ := (shape.fst * 2, shape.snd * 2)
   let a_map := propagate (map_of size loop) size
-  List.range shape.fst.toNat
+  List.range shape.fst
     |>.foldl (fun sum y ↦
-      List.range shape.snd.toNat
-        |>.filter (fun x ↦ PropagateState.Unknown == a_map[size.snd.toNat * y * 2 + x * 2]!)
+      List.range shape.snd
+        |>.filter (fun x ↦ PropagateState.Unknown == a_map[size.snd * y * 2 + x * 2]!)
         |>.length
         |> (· + sum))
       0

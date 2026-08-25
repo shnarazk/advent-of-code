@@ -4,6 +4,7 @@ public import Itertools
 public import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Math
+public meta import «AoC».Math
 
 abbrev Vec := Array Int
 
@@ -87,7 +88,7 @@ def toIdicator (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : 
         if b then buttons[n]! |>.iter |>.fold (fun acc i ↦ acc.modify i (!·)) acc else acc)
       (Array.replicate len false)
 
- #guard toIdicator #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]
+#guard toIdicator #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]
 
 def solve' (setting : Array Bool × Array (Array Nat) × Array Nat) : Nat := Id.run do
   let (indicator, buttons,_ ) := setting
@@ -126,12 +127,14 @@ instance : HMul Vec Int Vec where
 #guard #[(1 : Int), 2, 3] * (3 : Int) == #[3, 6, 9]
 
 /-- dot product of vectors -/
+@[inline]
 def dot (a b : Vec) : Int :=
   a.iter |>.zip b.iter |>.map (fun (a, b) ↦ a * b) |>.fold (· + ·) 0
 
 #guard dot #[(1 : Int), 1, 3] #[(3 : Int), 2, 5] == 20
 
 /-- erase the first column from the equation -/
+@[inline]
 def sweepOut (a b : Vec × Int) : Vec × Int :=
   let (av, as) := a
   let (bv, bs) := b
@@ -142,8 +145,7 @@ def sweepOut (a b : Vec × Int) : Vec × Int :=
   let bv' := bv.drop 1
   (bv' * eb - av' * ea, bs * eb - as * eb)
 
--- lcm is not found in interpreter
--- #guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
+#guard sweepOut (#[1, 1], 3) (#[3, 2], 5) == (#[-1], 2)
 
 partial
 def resolve (m : List (Vec × Int)) : Vec :=
@@ -158,8 +160,7 @@ def resolve (m : List (Vec × Int)) : Vec :=
           then (contains.concat line, notContains)
           else (contains, notContains.concat line))
       ([], [])
-    if l1.isEmpty
-    then
+    if l1.isEmpty then
       let m' := m |>.iter |>.map (fun (v, n) ↦ (v.drop 1, n)) |>.toList
       let effs := resolve m'
       #[0] ++ effs

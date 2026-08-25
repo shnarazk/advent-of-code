@@ -34,7 +34,7 @@ def find_inner_point (r : Rect Nat) : Nat × Nat :=
   let cands := List.range height
       |>.filterMap (fun y ↦
         let b := List.range width
-            |>.filter (fun x ↦ r.get (y, x) 0 == 1)
+            |>.filter (fun x ↦ r[(y, x)]? == some 1)
         if h : b.length = 2 then
           have H1 : 1 < b.length := by simp [h]
           have H0 : 0 < b.length := by simp [h]
@@ -50,15 +50,15 @@ def fill (r : Rect Nat) (to_visit : List (Nat × Nat)) : Rect Nat :=
   | pos :: to_visit' =>
     let h := (r.height - 1)
     let w := (r.width - 1)
-    match r.get (pos.fst, pos.snd) 1 with
-    | 0 =>
+    match r[(pos.fst, pos.snd)]? with
+    | some 0 =>
       let r' := r.set (pos.fst, pos.snd) 1
       let to_u := (0 < pos.fst : Bool).map (K (pos.fst - 1, pos.snd))
       let to_d := (pos.fst < h : Bool).map (K (pos.fst + 1, pos.snd))
       let to_l := (0 < pos.snd : Bool).map (K (pos.fst, pos.snd - 1))
       let to_r := (pos.snd < w : Bool).map (K (pos.fst, pos.snd + 1))
       let nexts := [to_u, to_d, to_l, to_r].filterMap I
-        |>.filter (fun p ↦ r'.get (p.fst, p.snd) 1 = 0)
+        |>.filter (fun p ↦ r'[(p.fst, p.snd)]? = some 0)
       fill r' (nexts ++ to_visit')
     | _ =>
       fill r to_visit'
@@ -224,11 +224,11 @@ def solve (path' : Array Input) : Nat :=
         List.range width
             |>.foldl
               (fun acc x ↦
-                if filled.get? ((2 * y), (2 * x)) == some 1 then
+                if filled[((2 * y), (2 * x))]? == some 1 then
                   let area := match
-                      filled.get? ((2 * y + 1), (2 * x)) == some 1,
-                      filled.get? ((2 * y), (2 * x + 1)) == some 1,
-                      filled.get? ((2 * y + 1), (2 * x + 1)) == some 1 with
+                      filled[((2 * y + 1), (2 * x))]? == some 1,
+                      filled[((2 * y), (2 * x + 1))]? == some 1,
+                      filled[((2 * y + 1), (2 * x + 1))]? == some 1 with
                     | true,  true,  true  => (ys[y + 1]! - ys[y]!) * (xs[x + 1]! - xs[x]!)
                     | true,  true,  false => (ys[y + 1]! - ys[y]!) + (xs[x + 1]! - xs[x]!) - 1
                     | true,  false, false => ys[y + 1]! - ys[y]!
