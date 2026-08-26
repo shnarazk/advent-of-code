@@ -12,17 +12,11 @@ open Dim2
 
 /-- return the distance between a and b -/
 @[inline]
-def dist (a b : Int) : Nat := (if a ≤ b then b - a else a - b).toNat
+def dist (a b : Int) : Nat := (a - b).natAbs
 
 /-- return one plus the distance between a and b -/
 @[inline]
-def dist₁ (a b : Int) : Nat := (1 + if a ≤ b then b - a else a - b).toNat
-
-structure Input where
-  line : Array Idx₂
-deriving BEq, Hashable, Repr
-
-instance : ToString Input where toString s := s!"{s.line.size}"
+def dist₁ (a b : Int) : Nat := (a - b).natAbs + 1
 
 namespace parser
 
@@ -31,28 +25,19 @@ open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def parse_line := (fun (a b : Nat) ↦ (↑(b, a) : Idx₂)) <$> number <* pchar ',' <*> number
-def parse_input := separated parse_line eol
 
-def parse : String → Option Input := AoCParser.parse parser
-  where
-    parser : Parser Input := Input.mk <$> parse_input
+def parse : String → Option (Array Idx₂) := AoCParser.parse (separated parse_line eol)
 
 end parser
 
-namespace Part1
-
-def solve (input : Input) : Nat :=
-  input.line.iter
+def solve₁ (line : Array Idx₂) : Nat :=
+  line.iter
     |>.enumerate
     |>.map (fun (i, p) ↦
-      input.line.iterFromIdx (i + 1)
+      line.iterFromIdx (i + 1)
         |>.map (fun (q : Idx₂) ↦ (dist₁ p.1 q.1) * (dist₁ p.2 q.2))
         |>.fold max 0)
     |>.fold max 0
-
-end Part1
-
-namespace Part2
 
 /--
   Use the following code for grid catrgorization
@@ -60,16 +45,16 @@ namespace Part2
   - 1 : corner
   - 2 : filled
   - 3 : unvisited -/
-def solve (input : Input) : Nat := Id.run do
-  let ys := input.line.iter |>.map (·.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+def solve₂ (line : Array Idx₂) : Nat := Id.run do
+  let ys := line.iter |>.map (·.fst) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
   let encodeY := ys.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeY.size == 0 then return 0
-  let xs := input.line.iter |>.map (·.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
+  let xs := line.iter |>.map (·.snd) |>.toList |> HashSet.ofList |>.toArray |>.push 0 |>.qsort
   let encodeX := xs.iter.enumerate.map (fun (i, d) ↦ (d, i)) |>.toList |> HashMap.ofList
   if encodeX.size == 0 then return 0
   let mut sliceY : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
   let mut sliceX : HashMap Nat (Array Nat) := HashMap.emptyWithCapacity 100
-  for p in input.line.iter do
+  for p in line.iter do
     sliceY := sliceY.alter p.fst (fun o ↦ o.mapOr (·.push p.snd) #[p.snd])
     sliceX := sliceX.alter p.snd (fun o ↦ o.mapOr (·.push p.fst) #[p.fst])
   sliceY := sliceY.iter |>.map (fun (k, v) ↦ (k, v.qsort)) |>.toList |> HashMap.ofList
@@ -122,8 +107,6 @@ def solve (input : Input) : Nat := Id.run do
       continue
   area
 
-end Part2
-
-public def solve := AocProblem.config 2025 09 parser.parse Part1.solve Part2.solve
+public def solve := AocProblem.config 2025 09 parser.parse solve₁ solve₂
 
 end Y2025.Day09

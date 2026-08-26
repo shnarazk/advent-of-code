@@ -59,6 +59,7 @@ def Circuit.ofChar (c : Char) : Circuit :=
 
 def startPosition (self : Rect Circuit) : Idx₂ := self.findPosition? (· == Circuit.s) |>.unwrapOr (0, 0)
 
+@[inline]
 def dest (mat : Rect Circuit) (vec : Vec₂ × Vec₂) : Vec₂ × Vec₂ :=
   let (pre, now) := vec
   match ((↑ now) : Option Idx₂) with
@@ -121,11 +122,13 @@ deriving BEq, Repr
 
 instance : Inhabited PropagateState where default := .Unknown
 
+@[inline]
 def map_of (size : Idx₂) (locs : List Idx₂) : Array PropagateState :=
   locs.foldl
     (fun map pos ↦ map.set! (size.snd * pos.fst + pos.snd) PropagateState.Wall)
     (Array.replicate (size.fst * size.snd) PropagateState.Unknown)
 
+@[inline]
 def expand (self : Array PropagateState) (size : Idx₂) (n : Nat) : Array PropagateState :=
   if (0, 0) ≤ (n / size.snd, n % size.snd)
   then
@@ -139,14 +142,17 @@ def expand (self : Array PropagateState) (size : Idx₂) (n : Nat) : Array Propa
   else
     self
 
-/-- Switch to 1D scan from 28 scan -/
+/-- Switched to 1D scan from 2D scan -/
 partial
 def loop (m : Array PropagateState) (size : Idx₂) : Array PropagateState :=
   let r := m.foldl
-    (fun (i, m, u) p ↦ ( i + 1, if p == PropagateState.ToExpand then (expand m size i, true) else (m, u)))
+    (fun (i, m, u) p ↦ (
+        i + 1,
+        if p == PropagateState.ToExpand then (expand m size i, true) else (m, u)))
     (0, m, false)
   if r.snd.snd then loop r.snd.fst size else r.snd.fst
 
+@[inline]
 def propagate (self : Array PropagateState) (size : Idx₂) : Array PropagateState := loop s size
   where
     s := self.set! 0 .ToExpand
@@ -162,6 +168,7 @@ def mkLoop (self : Rect Circuit) (limit : Nat) (start : Idx₂) (path : List Idx
       then if v2.fst == start.fst && v2.snd == start.snd then path ++ [v1] else []
       else mkLoop self lim' start (path ++ [v1]) (v1, v2)
 
+@[inline]
 def interpolate (p : Idx₂) (q : Idx₂) : Idx₂ :=
   let (p', q') := both (fun d ↦ (d.fst * 2, d.snd * 2)) (p, q)
   ((p'.fst + q'.fst) / 2, (p'.snd + q'.snd) / 2)
