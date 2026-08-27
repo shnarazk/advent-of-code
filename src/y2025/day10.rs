@@ -157,6 +157,8 @@ impl Ord for State {
 }
 
 impl State {
+    /// - `buttons` is a mapping from `id` to `[affecting_light_id]`
+    /// - `n` is the number of lights
     fn sum(&self, buttons: &[Vec<usize>], n: usize) -> Vec<usize> {
         let mut result = vec![0; n];
         for (bi, n) in self.counts.iter().enumerate() {
@@ -168,16 +170,16 @@ impl State {
     }
 }
 
+/// returns `true` if `values + dist` exceeds `goal` by any amount
 fn exceeds(values: &[usize], dist: &[usize], goal: &[usize]) -> bool {
-    assert_eq!(values.len(), goal.len());
+    debug_assert_eq!(values.len(), goal.len());
     values
         .iter()
         .enumerate()
         .any(|(i, n)| dist.contains(&(i as usize)) as usize + n > goal[i])
 }
 
-fn solve2(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
-    let goal = goals.iter().map(|n| *n as usize).collect::<Vec<_>>();
+fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     // let scale: usize = 10000;
     let mut counter = 0;
     let num_buttons = buttons.len();
