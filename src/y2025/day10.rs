@@ -99,7 +99,8 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .par_iter()
+            .iter()
+            .take(2)
             .map(|(_, buttons, goal)| {
                 if true {
                     solve2(buttons, goal)
@@ -173,24 +174,100 @@ impl State {
 }
 
 /// returns `true` if `values + dist` exceeds `goal` by any amount
-fn exceeds(values: &[usize], dist: &[usize], goal: &[usize]) -> bool {
-    debug_assert_eq!(values.len(), goal.len());
-    values
+fn exceeds(flips: &[usize], dist: &[usize], goal: &[usize]) -> bool {
+    debug_assert_eq!(flips.len(), goal.len());
+    flips
         .iter()
         .enumerate()
         .any(|(i, n)| dist.contains(&(i as usize)) as usize + n > goal[i])
 }
 
+fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
+    let mut ord = Ordering::Equal;
+    for (f, g) in flips.iter().zip(goal.iter()) {
+        match f.cmp(g) {
+            Ordering::Greater => return Ordering::Greater,
+            o => {
+                ord = ord.min(o);
+            }
+        }
+    }
+    ord
+}
+
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
+    println!("goal: {:?}", &goal);
+    println!("buttons: {:?}", &buttons);
+    let num_buttons = buttons.len();
+    let num_lights = goal.len();
+    let limit = goal.iter().copied().max().unwrap();
+    let mut target_order: usize = 0;
+    let mut order_to_index = vec![(0, 0); num_buttons];
+    for (i, button) in buttons.iter().enumerate() {
+        order_to_index[i] = (button.len(), i);
+    }
+    order_to_index.sort();
+    order_to_index.reverse();
+    println!("order_to_index: {:?}", &order_to_index);
+    let mut upper_limit = vec![limit + 1; num_buttons];
+    let mut toggles = vec![0; num_buttons];
+    let mut best = usize::MAX;
+    let mut flips = vec![0; num_lights];
+    'shift_target: loop {
+        let index = order_to_index[target_order].1;
+        for limit in (0..upper_limit[index]).rev() {
+            toggles[index] = limit;
+            flips.fill(0);
+            for (i, n) in toggles.iter().enumerate() {
+                for j in buttons[i].iter() {
+                    flips[*j] += n;
+                }
+            }
+            // println!("{:?} => {:?}", &tmp, &flips);
+            match compare(&flips, goal) {
+                Ordering::Equal => {
+                    println!("{:?}", &toggles);
+                    return dbg!(toggles.iter().copied().sum::<usize>());
+                }
+                Ordering::Greater => {
+                    continue;
+                }
+                Ordering::Less => {
+                    let dist = flips
+                        .iter()
+                        .zip(goal.iter())
+                        .map(|(a, b)| *b - *a)
+                        .sum::<usize>();
+                    if dist < best {
+                        best = dbg!(dist);
+                    }
+                    if target_order + 1 == num_buttons {
+                        break;
+                    }
+                    target_order += 1;
+                    // println!("shift to next");
+                    upper_limit[index] = limit;
+                    continue 'shift_target;
+                }
+            }
+        }
+        if target_order == 0 {
+            // panic!("");
+            return 0;
+        }
+        target_order -= 1;
+        upper_limit[index] = limit + 1;
+        toggles[index] = 0;
+        // println!("shift back to {}", target_order);
+    }
+}
+
+#[allow(dead_code)]
+fn _solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     // let scale: usize = 10000;
     let mut counter = 0;
     let num_buttons = buttons.len();
     let goal_len = goal.len();
-    // let button_weight: Vec<usize> =
-    //     buttons.iter().map(|l| l.len()).collect::<Vec<usize>>();
-    // let mut distribution = buttons.clone();
-    // distribution.sort_unstable_by_key(|l| l.len());
-    // distribution.reverse();
     let mut visited: FxHashSet<Vec<usize>> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
     let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
     to_visit.push(Reverse(State {
@@ -217,32 +294,12 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             }
             let mut s = state.clone();
             s.counts[bi] += 1;
-            // if s.remain < distribution.len() {
-            //     panic!(
-            //         "{:?} < {:?} :: {:?}, {}: {:?}",
-            //         s, goal, buttons, bi, distribution
-            //     );
-            // }
             let v = s.sum(buttons, goal_len);
             s.remain = goal
-                            .iter()
-                            .zip(v.iter())
-                            .map(|(a, b)| (*a - *b).pow(1) + 1)
-                            .product::<usize>()
-                        // * goal
-                        //     .iter()
-                        //     .zip(v.iter())
-                        //     .filter(|(a, b)| *a != *b)
-                        //     .count()
-                            // / s.counts
-                            //     .iter()
-                            //     .enumerate()
-                            //     .map(|(i, c)| *c * button_weight[i])
-                            //     .sum::<usize>();
-                            // * s.counts
-                            //     .iter()
-                            //     .sum::<usize>().isqrt();
-                            ;
+                .iter()
+                .zip(v.iter())
+                .map(|(a, b)| (*a - *b).pow(1) + 1)
+                .product::<usize>();
             if !visited.contains(&v) {
                 to_visit.push(Reverse(s));
             }
