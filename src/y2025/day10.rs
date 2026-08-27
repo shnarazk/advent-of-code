@@ -173,6 +173,17 @@ impl State {
     }
 }
 
+fn weight_order(buttons: &[Vec<usize>]) -> Vec<usize> {
+    let num_buttons: usize = buttons.len();
+    let mut order_to_index = vec![(0, 0); num_buttons];
+    for (i, button) in buttons.iter().enumerate() {
+        order_to_index[i] = (button.len(), i);
+    }
+    order_to_index.sort();
+    order_to_index.reverse();
+    order_to_index.iter().map(|(_, n)| *n).collect::<Vec<_>>()
+}
+
 fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
     buttons
         .iter()
@@ -205,26 +216,23 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("goal: {:?}", &goal);
     println!("buttons: {:?}", &buttons);
-    let num_buttons = buttons.len();
-    let num_lights = goal.len();
-    let limits = upper_limits(buttons, goal);
-    // let limit = goal.iter().copied().max().unwrap();
+    let num_buttons: usize = buttons.len();
+    let num_lights: usize = goal.len();
+    let upper_limits: Vec<usize> = upper_limits(buttons, goal);
     let mut target_order: usize = 0;
-    let mut order_to_index = vec![(0, 0); num_buttons];
-    for (i, button) in buttons.iter().enumerate() {
-        order_to_index[i] = (button.len(), i);
-    }
-    order_to_index.sort();
-    order_to_index.reverse();
+    let order_to_index = weight_order(buttons);
     println!("order_to_index: {:?}", &order_to_index);
-    let mut upper_limit = limits.clone();
+    let mut available_bands: Vec<(usize, usize)> =
+        upper_limits.iter().map(|u| (0, *u)).collect::<Vec<_>>();
     let mut toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let mut flips = vec![0; num_lights];
     'shift_target: loop {
-        let index = order_to_index[target_order].1;
-        for limit in (0..upper_limit[index]).rev() {
-            toggles[index] = limit;
+        let index = order_to_index[target_order];
+        // TODO: switch to binary search.
+        for limit in (0..available_bands[index].1).rev() {
+            let lim = limit;
+            toggles[index] = lim;
             flips.fill(0);
             for (i, n) in toggles.iter().enumerate() {
                 for j in buttons[i].iter() {
@@ -254,17 +262,16 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                     }
                     target_order += 1;
                     // println!("shift to next");
-                    upper_limit[index] = limit;
+                    available_bands[index].1 = lim;
                     continue 'shift_target;
                 }
             }
         }
         if target_order == 0 {
-            // panic!("");
             return 0;
         }
         target_order -= 1;
-        upper_limit[index] = limits[index];
+        available_bands[index] = (0, upper_limits[index]);
         toggles[index] = 0;
         // println!("shift back to {}", target_order);
     }
