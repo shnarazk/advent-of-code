@@ -173,6 +173,13 @@ impl State {
     }
 }
 
+fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
+    buttons
+        .iter()
+        .map(|targets| targets.iter().map(|i| goal[*i]).min().unwrap_or_default() + 1)
+        .collect::<Vec<usize>>()
+}
+
 /// returns `true` if `values + dist` exceeds `goal` by any amount
 fn exceeds(flips: &[usize], dist: &[usize], goal: &[usize]) -> bool {
     debug_assert_eq!(flips.len(), goal.len());
@@ -200,7 +207,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("buttons: {:?}", &buttons);
     let num_buttons = buttons.len();
     let num_lights = goal.len();
-    let limit = goal.iter().copied().max().unwrap();
+    let limits = upper_limits(buttons, goal);
+    // let limit = goal.iter().copied().max().unwrap();
     let mut target_order: usize = 0;
     let mut order_to_index = vec![(0, 0); num_buttons];
     for (i, button) in buttons.iter().enumerate() {
@@ -209,7 +217,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     order_to_index.sort();
     order_to_index.reverse();
     println!("order_to_index: {:?}", &order_to_index);
-    let mut upper_limit = vec![limit + 1; num_buttons];
+    let mut upper_limit = limits.clone();
     let mut toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let mut flips = vec![0; num_lights];
@@ -223,7 +231,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                     flips[*j] += n;
                 }
             }
-            // println!("{:?} => {:?}", &tmp, &flips);
+            // println!("{:?} => {:?}", &toggles, &flips);
             match compare(&flips, goal) {
                 Ordering::Equal => {
                     println!("{:?}", &toggles);
@@ -256,7 +264,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             return 0;
         }
         target_order -= 1;
-        upper_limit[index] = limit + 1;
+        upper_limit[index] = limits[index];
         toggles[index] = 0;
         // println!("shift back to {}", target_order);
     }
