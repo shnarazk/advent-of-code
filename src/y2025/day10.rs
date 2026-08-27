@@ -140,7 +140,9 @@ fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 struct State {
+    /// distance to goal. smaller is better.
     remain: usize,
+    /// the number of times each button is pressed.
     counts: Vec<usize>,
 }
 
