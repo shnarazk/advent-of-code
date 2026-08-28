@@ -99,8 +99,8 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .iter()
-            .take(2)
+            .par_iter()
+            // .take(2)
             .map(|(_, buttons, goal)| {
                 if true {
                     solve2(buttons, goal)
@@ -191,6 +191,42 @@ fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
         .collect::<Vec<usize>>()
 }
 
+fn lower_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
+    let mut affectors = vec![Vec::new(); goal.len()];
+    for (button_id, targets) in buttons.iter().enumerate() {
+        for light_id in targets {
+            affectors[*light_id].push(button_id);
+        }
+    }
+    let mut result = vec![0; buttons.len()];
+    for (light_id, bs) in affectors.iter().enumerate() {
+        if bs.len() == 1 {
+            result[bs[0]] = goal[light_id];
+        }
+    }
+    result
+}
+
+fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -> Vec<Vec<usize>> {
+    let mut last_affector: Vec<usize> = vec![0; num_lights];
+    for button_id in order.iter() {
+        for light_id in buttons[*button_id].iter() {
+            last_affector[*light_id] = *button_id;
+        }
+    }
+    // println!("last_affector: {:?}", &last_affector);
+    (0..buttons.len())
+        .map(|button_id| {
+            last_affector
+                .iter()
+                .enumerate()
+                .filter(|(_, b)| **b == button_id)
+                .map(|(i, _)| i)
+                .collect::<Vec<usize>>()
+        })
+        .collect::<Vec<Vec<usize>>>()
+}
+
 /// returns `true` if `values + dist` exceeds `goal` by any amount
 fn exceeds(flips: &[usize], dist: &[usize], goal: &[usize]) -> bool {
     debug_assert_eq!(flips.len(), goal.len());
@@ -218,25 +254,34 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("buttons: {:?}", &buttons);
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
-    let upper_limits: Vec<usize> = upper_limits(buttons, goal);
     let mut target_order: usize = 0;
     let order_to_index = weight_order(buttons);
     println!("order_to_index: {:?}", &order_to_index);
-    let mut available_bands: Vec<(usize, usize)> =
-        upper_limits.iter().map(|u| (0, *u)).collect::<Vec<_>>();
+    let final_affector = final_affectors(buttons, &order_to_index, num_lights);
+    println!("final_affector: {:?}", &final_affector);
+    let available_bands: Vec<(usize, usize)> = lower_limits(buttons, goal)
+        .iter()
+        .zip(upper_limits(buttons, goal).iter())
+        .map(|(l, u)| (*l, *u))
+        .collect::<Vec<_>>();
+    println!("available_bands: {:?}", &available_bands);
+    let mut limits = available_bands.clone();
     let mut toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let mut flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
-        // TODO: switch to binary search.
-        for limit in (0..available_bands[index].1).rev() {
-            let lim = limit;
+        'next_value: for lim in (limits[index].0..limits[index].1).rev() {
             toggles[index] = lim;
             flips.fill(0);
             for (i, n) in toggles.iter().enumerate() {
                 for j in buttons[i].iter() {
                     flips[*j] += n;
+                }
+            }
+            for light_id in final_affector[index].iter() {
+                if flips[*light_id] != goal[*light_id] {
+                    continue 'next_value;
                 }
             }
             // println!("{:?} => {:?}", &toggles, &flips);
@@ -262,7 +307,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                     }
                     target_order += 1;
                     // println!("shift to next");
-                    available_bands[index].1 = lim;
+                    limits[index].1 = lim;
                     continue 'shift_target;
                 }
             }
@@ -271,7 +316,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             return 0;
         }
         target_order -= 1;
-        available_bands[index] = (0, upper_limits[index]);
+        limits[index] = available_bands[index];
         toggles[index] = 0;
         // println!("shift back to {}", target_order);
     }
