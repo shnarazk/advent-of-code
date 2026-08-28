@@ -218,29 +218,31 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .collect::<Vec<_>>();
     println!("available_bands: {:?}", &available_bands);
     let mut limits = available_bands.clone();
-    let mut toggles = vec![0; num_buttons];
+    let mut button_toggles = vec![0; num_buttons];
     // let mut best = usize::MAX;
-    let mut flips = vec![0; num_lights];
+    let mut light_flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
         'next_value: for lim in (limits[index].0..limits[index].1).rev() {
-            toggles[index] = lim;
-            flips.fill(0);
-            for (button_id, n) in toggles.iter().enumerate() {
+            button_toggles[index] = lim;
+            light_flips.fill(0);
+            for (button_id, n) in button_toggles.iter().enumerate() {
                 for light_id in buttons[button_id].iter() {
-                    flips[*light_id] += n;
+                    light_flips[*light_id] += n;
                 }
             }
             for light_id in final_affector[index].iter() {
-                if flips[*light_id] != goal[*light_id] {
-                    continue 'next_value;
+                match light_flips[*light_id].cmp(&goal[*light_id]) {
+                    Ordering::Less => break 'next_value,
+                    Ordering::Equal => (),
+                    Ordering::Greater => continue 'next_value,
                 }
             }
             // println!("{:?} => {:?}", &toggles, &flips);
-            match compare(&flips, goal) {
+            match compare(&light_flips, goal) {
                 Ordering::Equal => {
-                    println!("{:?}", &toggles);
-                    return dbg!(toggles.iter().copied().sum::<usize>());
+                    println!("{:?}", &button_toggles);
+                    return dbg!(button_toggles.iter().copied().sum::<usize>());
                 }
                 Ordering::Greater => {
                     continue;
@@ -269,7 +271,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         }
         target_order -= 1;
         limits[index] = available_bands[index];
-        toggles[index] = 0;
+        button_toggles[index] = 0;
         // println!("shift back to {}", target_order);
     }
 }
