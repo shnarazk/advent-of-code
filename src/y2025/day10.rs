@@ -3,12 +3,7 @@ use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
-    rustc_data_structures::fx::{FxHashSet, FxHasher},
-    std::{
-        cmp::{Ordering, Reverse},
-        collections::{BinaryHeap, HashSet},
-        hash::BuildHasherDefault,
-    },
+    std::{cmp::Ordering, collections::HashSet},
 };
 
 type Spec = (Vec<bool>, Vec<Vec<usize>>, Vec<usize>);
@@ -139,40 +134,6 @@ fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
         .sum::<usize>()
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
-struct State {
-    /// distance to goal. smaller is better.
-    remain: usize,
-    /// the number of times each button is pressed.
-    counts: Vec<usize>,
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.remain.partial_cmp(&other.remain)
-    }
-}
-
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.remain.cmp(&other.remain)
-    }
-}
-
-impl State {
-    /// - `buttons` is a mapping from `id` to `[affecting_light_id]`
-    /// - `n` is the number of lights
-    fn sum(&self, buttons: &[Vec<usize>], n: usize) -> Vec<usize> {
-        let mut result = vec![0; n];
-        for (bi, n) in self.counts.iter().enumerate() {
-            for i in buttons[bi].iter() {
-                result[*i] += *n as usize;
-            }
-        }
-        result
-    }
-}
-
 fn weight_order(buttons: &[Vec<usize>]) -> Vec<usize> {
     let num_buttons: usize = buttons.len();
     let mut order_to_index = vec![(0, 0); num_buttons];
@@ -227,15 +188,6 @@ fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -
         .collect::<Vec<Vec<usize>>>()
 }
 
-/// returns `true` if `values + dist` exceeds `goal` by any amount
-fn exceeds(flips: &[usize], dist: &[usize], goal: &[usize]) -> bool {
-    debug_assert_eq!(flips.len(), goal.len());
-    flips
-        .iter()
-        .enumerate()
-        .any(|(i, n)| dist.contains(&(i as usize)) as usize + n > goal[i])
-}
-
 fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
     let mut ord = Ordering::Equal;
     for (f, g) in flips.iter().zip(goal.iter()) {
@@ -267,16 +219,16 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("available_bands: {:?}", &available_bands);
     let mut limits = available_bands.clone();
     let mut toggles = vec![0; num_buttons];
-    let mut best = usize::MAX;
+    // let mut best = usize::MAX;
     let mut flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
         'next_value: for lim in (limits[index].0..limits[index].1).rev() {
             toggles[index] = lim;
             flips.fill(0);
-            for (i, n) in toggles.iter().enumerate() {
-                for j in buttons[i].iter() {
-                    flips[*j] += n;
+            for (button_id, n) in toggles.iter().enumerate() {
+                for light_id in buttons[button_id].iter() {
+                    flips[*light_id] += n;
                 }
             }
             for light_id in final_affector[index].iter() {
@@ -294,14 +246,14 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                     continue;
                 }
                 Ordering::Less => {
-                    let dist = flips
-                        .iter()
-                        .zip(goal.iter())
-                        .map(|(a, b)| *b - *a)
-                        .sum::<usize>();
-                    if dist < best {
-                        best = dbg!(dist);
-                    }
+                    // let dist = flips
+                    //     .iter()
+                    //     .zip(goal.iter())
+                    //     .map(|(a, b)| *b - *a)
+                    //     .sum::<usize>();
+                    // if dist < best {
+                    //     best = dbg!(dist);
+                    // }
                     if target_order + 1 == num_buttons {
                         break;
                     }
@@ -320,51 +272,4 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         toggles[index] = 0;
         // println!("shift back to {}", target_order);
     }
-}
-
-#[allow(dead_code)]
-fn _solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
-    // let scale: usize = 10000;
-    let mut counter = 0;
-    let num_buttons = buttons.len();
-    let goal_len = goal.len();
-    let mut visited: FxHashSet<Vec<usize>> = HashSet::<_, BuildHasherDefault<FxHasher>>::default();
-    let mut to_visit: BinaryHeap<Reverse<State>> = BinaryHeap::new();
-    to_visit.push(Reverse(State {
-        remain: goal.iter().map(|d| *d).sum::<usize>(),
-        counts: vec![0; num_buttons],
-    }));
-    while let Some(Reverse(state)) = to_visit.pop() {
-        let values = state.sum(buttons, goal_len);
-        if values == *goal {
-            return dbg!(state.counts.into_iter().sum::<usize>());
-        }
-        if state.remain == 0 || visited.contains(&values) {
-            continue;
-        }
-        let sum = state.counts.iter().sum::<usize>();
-        if counter < sum {
-            counter = sum;
-            dbg!(&state);
-        }
-        // assert_eq!(values.len(), goal.len());
-        for (bi, distribution) in buttons.iter().enumerate() {
-            if exceeds(&values, &distribution, &goal) {
-                continue;
-            }
-            let mut s = state.clone();
-            s.counts[bi] += 1;
-            let v = s.sum(buttons, goal_len);
-            s.remain = goal
-                .iter()
-                .zip(v.iter())
-                .map(|(a, b)| (*a - *b).pow(1) + 1)
-                .product::<usize>();
-            if !visited.contains(&v) {
-                to_visit.push(Reverse(s));
-            }
-        }
-        visited.insert(values);
-    }
-    unreachable!()
 }
