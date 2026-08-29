@@ -265,6 +265,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 }
             }
         }
+        // TODO: at one of final affectors, we can remember the combination of fixed light flips not
+        // to search the subspace again!
         debug_assert!(target_order > 0);
         target_order -= 1;
         limits[index] = available_bands[index];
