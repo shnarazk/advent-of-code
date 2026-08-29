@@ -223,13 +223,18 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let mut light_flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
+        debug_assert_eq!(light_flips[index], 0);
+        light_flips.fill(0);
+        button_toggles[index] = limits[index].1;
+        for (button_id, n) in button_toggles.iter().enumerate() {
+            for light_id in buttons[button_id].iter() {
+                light_flips[*light_id] += n;
+            }
+        }
         'next_value: for lim in (limits[index].0..limits[index].1).rev() {
             button_toggles[index] = lim;
-            light_flips.fill(0);
-            for (button_id, n) in button_toggles.iter().enumerate() {
-                for light_id in buttons[button_id].iter() {
-                    light_flips[*light_id] += n;
-                }
+            for light_id in buttons[index].iter() {
+                light_flips[*light_id] -= 1;
             }
             for light_id in final_affector[index].iter() {
                 match light_flips[*light_id].cmp(&goal[*light_id]) {
