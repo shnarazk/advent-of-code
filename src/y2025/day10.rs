@@ -142,7 +142,10 @@ fn weight_order(buttons: &[Vec<usize>]) -> Vec<usize> {
     }
     order_to_index.sort();
     order_to_index.reverse();
-    order_to_index.iter().map(|(_, n)| *n).collect::<Vec<_>>()
+    order_to_index
+        .into_iter()
+        .map(|(_, n)| n)
+        .collect::<Vec<_>>()
 }
 
 fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
