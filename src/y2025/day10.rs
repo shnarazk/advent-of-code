@@ -219,7 +219,6 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("available_bands: {:?}", &available_bands);
     let mut limits = available_bands.clone();
     let mut button_toggles = vec![0; num_buttons];
-    // let mut best = usize::MAX;
     let mut light_flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
@@ -247,20 +246,12 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             match compare(&light_flips, goal) {
                 Ordering::Equal => {
                     println!("{:?}", &button_toggles);
-                    return dbg!(button_toggles.iter().copied().sum::<usize>());
+                    return dbg!(button_toggles.into_iter().sum::<usize>());
                 }
                 Ordering::Greater => {
                     continue;
                 }
                 Ordering::Less => {
-                    // let dist = flips
-                    //     .iter()
-                    //     .zip(goal.iter())
-                    //     .map(|(a, b)| *b - *a)
-                    //     .sum::<usize>();
-                    // if dist < best {
-                    //     best = dbg!(dist);
-                    // }
                     if target_order + 1 == num_buttons {
                         break;
                     }
@@ -271,9 +262,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 }
             }
         }
-        if target_order == 0 {
-            return 0;
-        }
+        debug_assert!(target_order > 0);
         target_order -= 1;
         limits[index] = available_bands[index];
         button_toggles[index] = 0;
