@@ -233,8 +233,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 light_flips[*light_id] += n;
             }
         }
-        'next_value: for lim in (limits[index].0..limits[index].1).rev() {
-            button_toggles[index] = lim;
+        'next_value: for num_toggles in (limits[index].0..limits[index].1).rev() {
+            button_toggles[index] = num_toggles;
             for light_id in buttons[index].iter() {
                 light_flips[*light_id] -= 1;
             }
@@ -260,7 +260,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                     }
                     target_order += 1;
                     // println!("shift to next");
-                    limits[index].1 = lim;
+                    limits[index].1 = num_toggles;
                     continue 'shift_target;
                 }
             }
