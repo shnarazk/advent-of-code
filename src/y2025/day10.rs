@@ -233,19 +233,22 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let mut checkpoint: usize = usize::MAX;
     {
         let mut possibility: usize = 1;
-        'next: for (order, button_id) in order_to_index.iter().enumerate() {
+        for (order, button_id) in order_to_index.iter().enumerate() {
             for light_id in final_affector[*button_id].iter() {
                 resolved_lights.insert(*light_id);
             }
-            possibility = 1;
-            for (light_id, band) in available_bands.iter().enumerate() {
-                if !resolved_lights.contains(&light_id) {
-                    possibility *= band.1 - band.0;
-                    if possibility > 1_000_000_000 {
-                        continue 'next;
-                    }
-                }
+            if resolved_lights.len() * 2 < num_lights {
+                continue;
             }
+            possibility = 1;
+            // for (light_id, band) in available_bands.iter().enumerate() {
+            //     if !resolved_lights.contains(&light_id) {
+            //         possibility *= band.1 - band.0;
+            //         if possibility > 1_000_000_000 {
+            //             continue 'next;
+            //         }
+            //     }
+            // }
             checkpoint = order;
             break;
         }
