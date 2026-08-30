@@ -204,6 +204,13 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
     ord
 }
 
+/*
+goal: [209, 264, 67, 234, 249, 232, 234, 233, 59, 84]
+buttons: [[1, 2, 5, 6, 7, 8, 9], [2, 4, 9], [3, 4, 6, 7, 8, 9], [0, 5], [0, 1, 2, 7, 9], [0, 1, 4, 5, 7, 9], [1, 3, 8], [1, 2, 3, 4, 5, 6, 8, 9], [1, 2, 3, 4, 6, 8, 9], [0, 1, 2, 3, 4, 5, 7, 8, 9], [0, 1, 3, 4, 5, 6, 7], [1, 2, 4, 5, 6, 7, 9], [0, 1, 2, 3, 4, 5, 8, 9]]
+order_to_index: [9, 12, 7, 11, 10, 8, 0, 5, 2, 4, 6, 1, 3]
+final_affector: [[], [2, 4, 9], [6], [0, 5], [7], [], [1, 3, 8], [], [], [], [], [], []]
+available_bands: [(0, 60), (0, 68), (0, 60), (0, 210), (0, 68), (0, 85), (0, 60), (0, 60), (0, 60), (0, 60), (0, 210), (0, 68), (0, 60)]
+*/
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     println!("goal: {:?}", &goal);
     println!("buttons: {:?}", &buttons);
@@ -220,6 +227,33 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
     println!("available_bands: {:?}", &available_bands);
+    let mut resolved_lights: HashSet<usize> = HashSet::new();
+    let mut checkpoint: usize;
+    {
+        'next: for (order, button_id) in order_to_index.iter().enumerate() {
+            for light_id in final_affector[*button_id].iter() {
+                resolved_lights.insert(*light_id);
+            }
+            let mut possibility: usize = 1;
+            for (light_id, band) in available_bands.iter().enumerate() {
+                if !resolved_lights.contains(&light_id) {
+                    possibility *= band.1 - band.0;
+                    if possibility > 400_000_000 {
+                        continue 'next;
+                    }
+                }
+            }
+            checkpoint = order;
+            println!(
+                "{} check{}: {:?}",
+                checkpoint,
+                possibility,
+                &order_to_index[0..order]
+            );
+            return 0;
+        }
+    }
+    let mut unsat_patterns: HashSet<Vec<usize>> = HashSet::new();
     let mut limits = available_bands.clone();
     let mut button_toggles = vec![0; num_buttons];
     let mut light_flips = vec![0; num_lights];
