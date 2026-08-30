@@ -98,7 +98,6 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            // .take(2)
             .map(|(_, buttons, goal)| {
                 if true {
                     solve2(buttons, goal)
@@ -242,7 +241,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             for (light_id, band) in available_bands.iter().enumerate() {
                 if !resolved_lights.contains(&light_id) {
                     possibility *= band.1 - band.0;
-                    if possibility > 400_000_000 {
+                    if possibility > 1_000_000_000 {
                         continue 'next;
                     }
                 }
@@ -280,15 +279,14 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 .filter(|(i, _)| !resolved_lights.contains(i))
                 .map(|(_, n)| *n)
                 .collect();
-            if let Some(checked) = checked_patterns.get(&key) {
-                if let Some(n) = checked {
-                    return *n;
-                } else {
-                    target_order -= 1;
-                    limits[index] = available_bands[index];
-                    button_toggles[index] = 0;
-                    continue 'shift_target;
+            if let Some(_) = checked_patterns.get(&key) {
+                if target_order == 0 {
+                    break 'shift_target;
                 }
+                target_order -= 1;
+                limits[index] = available_bands[index];
+                button_toggles[index] = 0;
+                continue 'shift_target;
             }
         }
         'next_value: for num_toggles in (limits[index].0..limits[index].1).rev() {
@@ -307,11 +305,11 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             match compare(&light_flips, goal) {
                 Ordering::Equal => {
                     let ans = button_toggles.iter().sum::<usize>();
-                    println!("found: {:?} => {}", &button_toggles, ans);
                     // TODO: maybe we need to keep to traverse after updating the best record
                     if let Some(n) = checked_patterns.get(&key.clone()) {
                         if let Some(a) = n {
                             if ans < *a {
+                                println!("found: {:?} => {}", &button_toggles, ans);
                                 checked_patterns.insert(key.clone(), Some(ans));
                             }
                         } else {
@@ -339,14 +337,18 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         }
         // debug_assert!(target_order > 0);
         if target_order == 0 {
-            break;
+            break 'shift_target;
         }
         target_order -= 1;
         limits[index] = available_bands[index];
         button_toggles[index] = 0;
         if target_order == checkpoint {
-            // TODO: at one of final affectors, we can remember the combination of fixed light flips not
-            // to search the subspace again!
+            key = light_flips
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| !resolved_lights.contains(i))
+                .map(|(_, n)| *n)
+                .collect();
             if !checked_patterns.contains_key(&key) {
                 checked_patterns.insert(key.clone(), None);
             }
