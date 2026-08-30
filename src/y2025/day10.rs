@@ -3,7 +3,10 @@ use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
-    std::{cmp::Ordering, collections::HashSet},
+    std::{
+        cmp::Ordering,
+        collections::{HashMap, HashSet},
+    },
 };
 
 type Spec = (Vec<bool>, Vec<Vec<usize>>, Vec<usize>);
@@ -94,7 +97,7 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .par_iter()
+            .iter()
             // .take(2)
             .map(|(_, buttons, goal)| {
                 if true {
@@ -212,6 +215,9 @@ final_affector: [[], [2, 4, 9], [6], [0, 5], [7], [], [1, 3, 8], [], [], [], [],
 available_bands: [(0, 60), (0, 68), (0, 60), (0, 210), (0, 68), (0, 85), (0, 60), (0, 60), (0, 60), (0, 60), (0, 210), (0, 68), (0, 60)]
 */
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
+    if buttons.len() < 13 {
+        return 0;
+    }
     println!("goal: {:?}", &goal);
     println!("buttons: {:?}", &buttons);
     let num_buttons: usize = buttons.len();
@@ -228,7 +234,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .collect::<Vec<_>>();
     println!("available_bands: {:?}", &available_bands);
     let mut resolved_lights: HashSet<usize> = HashSet::new();
-    let mut checkpoint: usize;
+    let mut checkpoint: usize = usize::MAX;
     {
         'next: for (order, button_id) in order_to_index.iter().enumerate() {
             for light_id in final_affector[*button_id].iter() {
@@ -253,13 +259,28 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             return 0;
         }
     }
-    let mut unsat_patterns: HashSet<Vec<usize>> = HashSet::new();
+    let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
     let mut limits = available_bands.clone();
     let mut button_toggles = vec![0; num_buttons];
     let mut light_flips = vec![0; num_lights];
     'shift_target: loop {
         let index = order_to_index[target_order];
         debug_assert_eq!(light_flips[index], 0);
+        // Now we have a cache at a specific order (= checkpoint), check it.
+        if target_order == checkpoint {
+            // TODO: build the list of flips of unsolved lights
+            let key: Vec<usize> = Vec::new();
+            if let Some(checked) = checked_patterns.get(&key) {
+                if let Some(n) = checked {
+                    return *n;
+                } else {
+                    target_order -= 1;
+                    limits[index] = available_bands[index];
+                    button_toggles[index] = 0;
+                    continue 'shift_target;
+                }
+            }
+        }
         light_flips.fill(0);
         button_toggles[index] = limits[index].1;
         for (button_id, n) in button_toggles.iter().enumerate() {
@@ -283,6 +304,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             match compare(&light_flips, goal) {
                 Ordering::Equal => {
                     println!("{:?}", &button_toggles);
+                    // TODO: maybe we need to keep to traverse after updating the best record
+                    if target_order == checkpoint {}
                     return dbg!(button_toggles.into_iter().sum::<usize>());
                 }
                 Ordering::Greater => {
@@ -299,8 +322,13 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 }
             }
         }
-        // TODO: at one of final affectors, we can remember the combination of fixed light flips not
-        // to search the subspace again!
+        if target_order == checkpoint {
+            // TODO: at one of final affectors, we can remember the combination of fixed light flips not
+            // to search the subspace again!
+            // TODO: build the list of flips of unsolved lights
+            let key: Vec<usize> = Vec::new();
+            checked_patterns.insert(key, None);
+        }
         debug_assert!(target_order > 0);
         target_order -= 1;
         limits[index] = available_bands[index];
