@@ -229,41 +229,17 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
     println!("available_bands: {:?}", &available_bands);
-    let mut resolved_lights: HashSet<usize> = HashSet::new();
-    let mut checkpoint: usize = usize::MAX;
-    {
-        let mut possibility: usize = 1;
-        for (order, button_id) in order_to_index.iter().enumerate() {
-            for light_id in final_affector[*button_id].iter() {
-                resolved_lights.insert(*light_id);
-            }
-            if resolved_lights.len() * 2 < num_lights {
-                continue;
-            }
-            possibility = 1;
-            // for (light_id, band) in available_bands.iter().enumerate() {
-            //     if !resolved_lights.contains(&light_id) {
-            //         possibility *= band.1 - band.0;
-            //         if possibility > 1_000_000_000 {
-            //             continue 'next;
-            //         }
-            //     }
-            // }
-            checkpoint = order;
-            break;
-        }
-        println!(
-            "check at {} for {} possibilities: {:?}",
-            checkpoint,
-            possibility,
-            &order_to_index[0..checkpoint]
-        );
-    }
-    let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
+    let mut checked_patterns: HashMap<(usize, Vec<usize>), Option<usize>> = HashMap::new();
     let mut limits = available_bands.clone();
     let mut button_toggles = vec![0; num_buttons];
     let mut light_flips = vec![0; num_lights];
-    let mut key: Vec<usize> = Vec::new();
+    // FIXME: key is set to partial light space
+    // cache is [target_order, non resolved lights...]
+    let mut key: (usize, Vec<usize>) = (0, vec![0; num_lights]);
+    // let build_key = |key: &mut (usize, Vec<usize>), order: usize| {
+    //     key.0 = order;
+    //     key.1 = light_flips.clone();
+    // };
     'shift_target: loop {
         let index = order_to_index[target_order];
         debug_assert_eq!(light_flips[index], 0);
@@ -275,13 +251,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             }
         }
         // Now we have a cache at a specific order (= checkpoint), check it.
-        if target_order == checkpoint {
-            key = light_flips
-                .iter()
-                .enumerate()
-                .filter(|(i, _)| !resolved_lights.contains(i))
-                .map(|(_, n)| *n)
-                .collect();
+        if final_affector[index].len() > 0 {
+            key = (target_order, light_flips.clone());
             if let Some(_) = checked_patterns.get(&key) {
                 if target_order == 0 {
                     break 'shift_target;
@@ -309,13 +280,14 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 Ordering::Equal => {
                     let ans = button_toggles.iter().sum::<usize>();
                     // TODO: maybe we need to keep to traverse after updating the best record
-                    if let Some(n) = checked_patterns.get(&key.clone()) {
+                    if let Some(n) = checked_patterns.get(&key) {
                         if let Some(a) = n {
                             if ans < *a {
                                 println!("found: {:?} => {}", &button_toggles, ans);
                                 checked_patterns.insert(key.clone(), Some(ans));
                             }
                         } else {
+                            dbg!(key);
                             unreachable!();
                         }
                     } else {
@@ -342,22 +314,18 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         if target_order == 0 {
             break 'shift_target;
         }
-        target_order -= 1;
         limits[index] = available_bands[index];
         button_toggles[index] = 0;
-        if target_order == checkpoint {
-            key = light_flips
-                .iter()
-                .enumerate()
-                .filter(|(i, _)| !resolved_lights.contains(i))
-                .map(|(_, n)| *n)
-                .collect();
+        if final_affector[index].len() > 0 {
+            key = (target_order, light_flips.clone());
             if !checked_patterns.contains_key(&key) {
                 checked_patterns.insert(key.clone(), None);
             }
         }
+        target_order -= 1;
         // println!("shift back to {}", target_order);
     }
+    dbg!(checked_patterns.len());
     checked_patterns
         .into_values()
         .filter_map(|v| v)
