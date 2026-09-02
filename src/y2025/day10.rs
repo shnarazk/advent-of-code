@@ -208,7 +208,8 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
 fn solve2_aux(
     level: usize,
     // FIXME: おそらくchecked_patternsの定義域が最適でない。また保持する値も不適切。
-    checked_patterns: &mut HashMap<(usize, Vec<usize>), Option<usize>>,
+    // おそらく、先に使ったボタンはもう使えない閾値があって、それ以上でmemoizaitionするのだろう。
+    checked_patterns: &mut HashMap<Vec<usize>, Option<usize>>,
     button_toggles_pre: &[usize],
     order_to_index: &[usize],
     final_affector: &[Vec<usize>],
@@ -227,8 +228,9 @@ fn solve2_aux(
     }
     // light_flips は $[0, index)$ のbuttonを使った場合のflipsを保持している。
     // この状態に対してmemoを割り当てる。
-    let key = (level, light_flips.clone());
-    if level + 2 < buttons.len() && final_affector[index].len() > 0 {
+    let key = light_flips.clone();
+    let to_memoize = level + 1 < buttons.len() && final_affector[index].len() > 0;
+    if to_memoize {
         if let Some(n) = checked_patterns.get(&key) {
             return *n;
         }
@@ -286,7 +288,7 @@ fn solve2_aux(
         }
     }
     let res = if best == usize::MAX { None } else { Some(best) };
-    if level + 2 < buttons.len() && final_affector[index].len() > 0 {
+    if to_memoize {
         // println!(
         //     "\n#### PROBLEM ####\n\
         //          - goal          : {goal:?}\n\
@@ -297,7 +299,10 @@ fn solve2_aux(
         //          - light_flips   : {light_flips:?}\n\
         //          - key           : {key:?}",
         // );
-        assert!(!checked_patterns.contains_key(&key));
+        if let Some(Some(n)) = checked_patterns.get(&key) {
+            assert_eq!(*n, best);
+        }
+        // assert!(!checked_patterns.contains_key(&key));
         checked_patterns.insert(key, res);
         assert!(checked_patterns.len() < 100_000_000);
         // if !checked_patterns.contains_key(&key) {
@@ -318,7 +323,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
     // println!("available_bands: {:?}", &available_bands);
-    let mut checked_patterns: HashMap<(usize, Vec<usize>), Option<usize>> = HashMap::new();
+    let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
     let button_toggles = vec![0; num_buttons];
     println!(
         "\n#### PROBLEM ####\n\
