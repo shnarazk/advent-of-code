@@ -98,18 +98,17 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
-            .map(|(_, buttons, goal)| {
-                if true {
-                    solve2(buttons, goal)
-                } else {
-                    solve(buttons, goal)
-                }
+            .enumerate()
+            .map(|(i, (_, buttons, goal))| {
+                dbg!(i);
+                dbg!(solve2(buttons, goal))
+                //     solve(buttons, goal)
             })
             .sum::<usize>()
     }
 }
 
-fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
@@ -206,129 +205,138 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
     ord
 }
 
-/*
-goal: [209, 264, 67, 234, 249, 232, 234, 233, 59, 84]
-buttons: [[1, 2, 5, 6, 7, 8, 9], [2, 4, 9], [3, 4, 6, 7, 8, 9], [0, 5], [0, 1, 2, 7, 9], [0, 1, 4, 5, 7, 9], [1, 3, 8], [1, 2, 3, 4, 5, 6, 8, 9], [1, 2, 3, 4, 6, 8, 9], [0, 1, 2, 3, 4, 5, 7, 8, 9], [0, 1, 3, 4, 5, 6, 7], [1, 2, 4, 5, 6, 7, 9], [0, 1, 2, 3, 4, 5, 8, 9]]
-order_to_index: [9, 12, 7, 11, 10, 8, 0, 5, 2, 4, 6, 1, 3]
-final_affector: [[], [2, 4, 9], [6], [0, 5], [7], [], [1, 3, 8], [], [], [], [], [], []]
-available_bands: [(0, 60), (0, 68), (0, 60), (0, 210), (0, 68), (0, 85), (0, 60), (0, 60), (0, 60), (0, 60), (0, 210), (0, 68), (0, 60)]
-*/
+fn solve2_aux(
+    level: usize,
+    // FIXME: おそらくchecked_patternsの定義域が最適でない。また保持する値も不適切。
+    checked_patterns: &mut HashMap<(usize, Vec<usize>), Option<usize>>,
+    button_toggles_pre: &[usize],
+    order_to_index: &[usize],
+    final_affector: &[Vec<usize>],
+    available_bands: &[(usize, usize)],
+    buttons: &[Vec<usize>],
+    goal: &[usize],
+) -> Option<usize> {
+    let index = order_to_index[level];
+    let mut best = usize::MAX;
+    let mut button_toggles = button_toggles_pre.to_vec();
+    let mut light_flips: Vec<usize> = vec![0; goal.len()];
+    for i in order_to_index.iter().take(level) {
+        for light_id in buttons[*i].iter() {
+            light_flips[*light_id] += button_toggles[*i];
+        }
+    }
+    // light_flips は $[0, index)$ のbuttonを使った場合のflipsを保持している。
+    // この状態に対してmemoを割り当てる。
+    let key = (level, light_flips.clone());
+    if level + 2 < buttons.len() && final_affector[index].len() > 0 {
+        if let Some(n) = checked_patterns.get(&key) {
+            return *n;
+        }
+    }
+    for light_id in buttons[index].iter() {
+        light_flips[*light_id] += available_bands[index].1;
+    }
+    for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
+        button_toggles[index] = num_toggles;
+        for light_id in buttons[index].iter() {
+            light_flips[*light_id] -= 1;
+        }
+        for light_id in final_affector[index].iter() {
+            match light_flips[*light_id].cmp(&goal[*light_id]) {
+                Ordering::Less => break,
+                Ordering::Equal => (),
+                Ordering::Greater => continue,
+            }
+        }
+        match compare(&light_flips, goal) {
+            Ordering::Equal => {
+                let ans = button_toggles.iter().sum::<usize>();
+                best = best.min(ans);
+                println!(
+                    "\n#### FOUND ####\n\
+                         - key           : {key:?}\n\
+                         - botton_toggles: {button_toggles:?}\n\
+                         - light_flips   : {light_flips:?}\n\
+                         - checked       : {}",
+                    checked_patterns.len()
+                );
+                break;
+            }
+            Ordering::Greater => {
+                continue;
+            }
+            Ordering::Less => {
+                if level + 1 == buttons.len() {
+                    break;
+                }
+                if let Some(n) = solve2_aux(
+                    level + 1,
+                    checked_patterns,
+                    &button_toggles,
+                    order_to_index,
+                    final_affector,
+                    available_bands,
+                    buttons,
+                    goal,
+                ) {
+                    best = best.min(n);
+                    break;
+                }
+            }
+        }
+    }
+    let res = if best == usize::MAX { None } else { Some(best) };
+    if level + 2 < buttons.len() && final_affector[index].len() > 0 {
+        // println!(
+        //     "\n#### PROBLEM ####\n\
+        //          - goal          : {goal:?}\n\
+        //          - buttons       : {buttons:?}\n\
+        //          - order_to_index: {order_to_index:?}\n\
+        //          - level         : {level:?}\n\
+        //          - botton_toggles: {button_toggles:?}\n\
+        //          - light_flips   : {light_flips:?}\n\
+        //          - key           : {key:?}",
+        // );
+        assert!(!checked_patterns.contains_key(&key));
+        checked_patterns.insert(key, res);
+        assert!(checked_patterns.len() < 100_000_000);
+        // if !checked_patterns.contains_key(&key) {
+        //     checked_patterns.insert(key, res);
+        // }
+    }
+    res
+}
+
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
-    println!("goal: {:?}", &goal);
-    println!("buttons: {:?}", &buttons);
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
-    let mut target_order: usize = 0;
     let order_to_index = weight_order(buttons);
-    println!("order_to_index: {:?}", &order_to_index);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
-    println!("final_affector: {:?}", &final_affector);
     let available_bands: Vec<(usize, usize)> = lower_limits(buttons, goal)
         .iter()
         .zip(upper_limits(buttons, goal).iter())
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
-    println!("available_bands: {:?}", &available_bands);
+    // println!("available_bands: {:?}", &available_bands);
     let mut checked_patterns: HashMap<(usize, Vec<usize>), Option<usize>> = HashMap::new();
-    let mut limits = available_bands.clone();
-    let mut button_toggles = vec![0; num_buttons];
-    let mut light_flips = vec![0; num_lights];
-    // FIXME: key is set to partial light space
-    // cache is [target_order, non resolved lights...]
-    let mut key: (usize, Vec<usize>) = (0, vec![0; num_lights]);
-    // let build_key = |key: &mut (usize, Vec<usize>), order: usize| {
-    //     key.0 = order;
-    //     key.1 = light_flips.clone();
-    // };
-    'shift_target: loop {
-        let index = order_to_index[target_order];
-        debug_assert_eq!(light_flips[index], 0);
-        light_flips.fill(0);
-        button_toggles[index] = limits[index].1;
-        for (button_id, n) in button_toggles.iter().enumerate() {
-            for light_id in buttons[button_id].iter() {
-                light_flips[*light_id] += n;
-            }
-        }
-        // Now we have a cache at a specific order (= checkpoint), check it.
-        if final_affector[index].len() > 0 {
-            key = (target_order, light_flips.clone());
-            if let Some(_) = checked_patterns.get(&key) {
-                if target_order == 0 {
-                    break 'shift_target;
-                }
-                target_order -= 1;
-                limits[index] = available_bands[index];
-                button_toggles[index] = 0;
-                continue 'shift_target;
-            }
-        }
-        'next_value: for num_toggles in (limits[index].0..limits[index].1).rev() {
-            button_toggles[index] = num_toggles;
-            for light_id in buttons[index].iter() {
-                light_flips[*light_id] -= 1;
-            }
-            for light_id in final_affector[index].iter() {
-                match light_flips[*light_id].cmp(&goal[*light_id]) {
-                    Ordering::Less => break 'next_value,
-                    Ordering::Equal => (),
-                    Ordering::Greater => continue 'next_value,
-                }
-            }
-            // println!("{:?} => {:?}", &toggles, &flips);
-            match compare(&light_flips, goal) {
-                Ordering::Equal => {
-                    let ans = button_toggles.iter().sum::<usize>();
-                    // TODO: maybe we need to keep to traverse after updating the best record
-                    if let Some(n) = checked_patterns.get(&key) {
-                        if let Some(a) = n {
-                            if ans < *a {
-                                println!("found: {:?} => {}", &button_toggles, ans);
-                                checked_patterns.insert(key.clone(), Some(ans));
-                            }
-                        } else {
-                            dbg!(key);
-                            unreachable!();
-                        }
-                    } else {
-                        checked_patterns.insert(key.clone(), Some(ans));
-                    }
-                    continue;
-                    // return dbg!(button_toggles.into_iter().sum::<usize>());
-                }
-                Ordering::Greater => {
-                    continue;
-                }
-                Ordering::Less => {
-                    if target_order + 1 == num_buttons {
-                        break;
-                    }
-                    target_order += 1;
-                    // println!("shift to next");
-                    limits[index].1 = num_toggles;
-                    continue 'shift_target;
-                }
-            }
-        }
-        // debug_assert!(target_order > 0);
-        if target_order == 0 {
-            break 'shift_target;
-        }
-        limits[index] = available_bands[index];
-        button_toggles[index] = 0;
-        if final_affector[index].len() > 0 {
-            key = (target_order, light_flips.clone());
-            if !checked_patterns.contains_key(&key) {
-                checked_patterns.insert(key.clone(), None);
-            }
-        }
-        target_order -= 1;
-        // println!("shift back to {}", target_order);
-    }
-    dbg!(checked_patterns.len());
-    checked_patterns
-        .into_values()
-        .filter_map(|v| v)
-        .min()
-        .unwrap_or(0)
+    let button_toggles = vec![0; num_buttons];
+    println!(
+        "\n#### PROBLEM ####\n\
+        - goal           : {goal:?}\n\
+        - buttons        : {buttons:?}\n\
+        - order_to_index : {order_to_index:?}\n\
+        - final_affector : {final_affector:?}\n\
+        - available_bands: {available_bands:?}\n"
+    );
+    solve2_aux(
+        0,
+        &mut checked_patterns,
+        &button_toggles,
+        &order_to_index,
+        &final_affector,
+        &available_bands,
+        &buttons,
+        &goal,
+    )
+    .unwrap()
 }
