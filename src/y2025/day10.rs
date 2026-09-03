@@ -210,6 +210,8 @@ fn solve2_aux(
     // FIXME: おそらくchecked_patternsの定義域が最適でない。また保持する値も不適切。
     // おそらく、先に使ったボタンはもう使えない閾値があって、それ以上でmemoizaitionするのだろう。
     checked_patterns: &mut HashMap<Vec<usize>, Option<usize>>,
+    // 後戻りが生じないlevelを集めたもの
+    basin: &[usize],
     button_toggles_pre: &[usize],
     order_to_index: &[usize],
     final_affector: &[Vec<usize>],
@@ -229,7 +231,7 @@ fn solve2_aux(
     // light_flips は $[0, index)$ のbuttonを使った場合のflipsを保持している。
     // この状態に対してmemoを割り当てる。
     let key = light_flips.clone();
-    let to_memoize = level + 1 < buttons.len() && final_affector[index].len() > 0;
+    let to_memoize = level + 1 < buttons.len() && basin.contains(&level);
     if to_memoize {
         if let Some(n) = checked_patterns.get(&key) {
             return *n;
@@ -274,6 +276,7 @@ fn solve2_aux(
                 if let Some(n) = solve2_aux(
                     level + 1,
                     checked_patterns,
+                    basin,
                     &button_toggles,
                     order_to_index,
                     final_affector,
@@ -323,19 +326,54 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
     // println!("available_bands: {:?}", &available_bands);
+    let mut basin: Vec<usize> = Vec::new();
+    {
+        let btns = order_to_index
+            .iter()
+            .map(|i| buttons[*i].clone())
+            .collect::<Vec<_>>();
+        let affectors = order_to_index
+            .iter()
+            .map(|i| final_affector[*i].clone())
+            .collect::<Vec<_>>();
+        let bands = order_to_index
+            .iter()
+            .map(|i| available_bands[*i].clone())
+            .collect::<Vec<_>>();
+        for level in 0..num_buttons {
+            let mut fixed = Vec::new();
+            for b_id in order_to_index.iter().take(level + 1) {
+                for l_id in final_affector[*b_id].iter() {
+                    fixed.push(*l_id);
+                }
+            }
+            if order_to_index
+                .iter()
+                .take(level + 1)
+                .all(|b_id| buttons[*b_id].iter().any(|l_id| fixed.contains(l_id)))
+            {
+                basin.push(level);
+            }
+        }
+        println!(
+            "\n#### PROBLEM ####\n\
+        - goal           : {goal:?}\n\
+        - order_to_index : {order_to_index:?}\n\
+        - buttons        (ordered): {btns:?}\n\
+        - final_affector (ordered): {affectors:?}\n\
+        - available_bands(ordered): {bands:?}\n\
+        - basin          (ordered): {basin:?}\n"
+        );
+        if btns.len() > 0 {
+            return 0;
+        }
+    }
     let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
     let button_toggles = vec![0; num_buttons];
-    println!(
-        "\n#### PROBLEM ####\n\
-        - goal           : {goal:?}\n\
-        - buttons        : {buttons:?}\n\
-        - order_to_index : {order_to_index:?}\n\
-        - final_affector : {final_affector:?}\n\
-        - available_bands: {available_bands:?}\n"
-    );
     solve2_aux(
         0,
         &mut checked_patterns,
+        &basin,
         &button_toggles,
         &order_to_index,
         &final_affector,
