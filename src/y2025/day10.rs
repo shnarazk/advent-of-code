@@ -205,6 +205,7 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
     ord
 }
 
+/// level-1まで確定した部分解に対して 1 step展開する。
 fn solve2_aux(
     level: usize,
     // FIXME: おそらくchecked_patternsの定義域が最適でない。また保持する値も不適切。
@@ -220,7 +221,7 @@ fn solve2_aux(
     goal: &[usize],
 ) -> Option<usize> {
     let index = order_to_index[level];
-    let mut best = usize::MAX;
+    // let mut best = usize::MAX;
     let mut button_toggles = button_toggles_pre.to_vec();
     let mut light_flips: Vec<usize> = vec![0; goal.len()];
     for i in order_to_index.iter().take(level) {
@@ -228,34 +229,37 @@ fn solve2_aux(
             light_flips[*light_id] += button_toggles[*i];
         }
     }
-    // light_flips は $[0, index)$ のbuttonを使った場合のflipsを保持している。
-    // この状態に対してmemoを割り当てる。
-    let key = light_flips.clone();
     let to_memoize = level + 1 < buttons.len() && basin.contains(&level);
-    if to_memoize {
-        if let Some(n) = checked_patterns.get(&key) {
-            return *n;
-        }
-    }
     for light_id in buttons[index].iter() {
         light_flips[*light_id] += available_bands[index].1;
     }
-    for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
+    'next_value: for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
         button_toggles[index] = num_toggles;
         for light_id in buttons[index].iter() {
             light_flips[*light_id] -= 1;
         }
         for light_id in final_affector[index].iter() {
             match light_flips[*light_id].cmp(&goal[*light_id]) {
-                Ordering::Less => break,
+                Ordering::Less => break 'next_value,
                 Ordering::Equal => (),
-                Ordering::Greater => continue,
+                Ordering::Greater => continue 'next_value,
+            }
+        }
+        // light_flips は $[0, index]$ のbuttonを使った場合のflipsを保持している。
+        // この状態に対してmemoを割り当てる。
+        let key = light_flips.clone();
+        if to_memoize && let Some(n) = checked_patterns.get(&key) {
+            if n.is_some() {
+                return *n;
+            } else {
+                continue;
             }
         }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
+                let key = light_flips.clone();
                 let ans = button_toggles.iter().sum::<usize>();
-                best = best.min(ans);
+                // best = best.min(ans);
                 println!(
                     "\n#### FOUND ####\n\
                          - key           : {key:?}\n\
@@ -264,10 +268,11 @@ fn solve2_aux(
                          - checked       : {}",
                     checked_patterns.len()
                 );
-                break;
+                return Some(ans);
+                // break;
             }
             Ordering::Greater => {
-                continue;
+                // continue;
             }
             Ordering::Less => {
                 if level + 1 == buttons.len() {
@@ -284,35 +289,46 @@ fn solve2_aux(
                     buttons,
                     goal,
                 ) {
-                    best = best.min(n);
-                    break;
+                    if to_memoize {
+                        let key = light_flips.clone();
+                        checked_patterns.insert(key, Some(n));
+                        assert!(checked_patterns.len() < 10_000_000);
+                    }
+                    // best = best.min(n);
+                    return Some(n);
+                    // break;
                 }
             }
         }
-    }
-    let res = if best == usize::MAX { None } else { Some(best) };
-    if to_memoize {
-        // println!(
-        //     "\n#### PROBLEM ####\n\
-        //          - goal          : {goal:?}\n\
-        //          - buttons       : {buttons:?}\n\
-        //          - order_to_index: {order_to_index:?}\n\
-        //          - level         : {level:?}\n\
-        //          - botton_toggles: {button_toggles:?}\n\
-        //          - light_flips   : {light_flips:?}\n\
-        //          - key           : {key:?}",
-        // );
-        if let Some(Some(n)) = checked_patterns.get(&key) {
-            assert_eq!(*n, best);
+        if to_memoize {
+            let key = light_flips.clone();
+            checked_patterns.insert(key, None);
         }
-        // assert!(!checked_patterns.contains_key(&key));
-        checked_patterns.insert(key, res);
-        assert!(checked_patterns.len() < 100_000_000);
-        // if !checked_patterns.contains_key(&key) {
-        //     checked_patterns.insert(key, res);
-        // }
     }
-    res
+    None
+    // let res = if best == usize::MAX { None } else { Some(best) };
+    // if to_memoize {
+    //     // println!(
+    //     //     "\n#### PROBLEM ####\n\
+    //     //          - goal          : {goal:?}\n\
+    //     //          - buttons       : {buttons:?}\n\
+    //     //          - order_to_index: {order_to_index:?}\n\
+    //     //          - level         : {level:?}\n\
+    //     //          - botton_toggles: {button_toggles:?}\n\
+    //     //          - light_flips   : {light_flips:?}\n\
+    //     //          - key           : {key:?}",
+    //     // );
+    //     if let Some(Some(n)) = checked_patterns.get(&key) {
+    //         assert_eq!(*n, best);
+    //     }
+    //     // assert!(!checked_patterns.contains_key(&key));
+    //     checked_patterns.insert(key, res);
+    //     assert!(checked_patterns.len() < 100_000_000);
+    //     // if !checked_patterns.contains_key(&key) {
+    //     //     checked_patterns.insert(key, res);
+    //     // }
+    // }
+    // res
 }
 
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
@@ -364,9 +380,9 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         - available_bands(ordered): {bands:?}\n\
         - basin          (ordered): {basin:?}\n"
         );
-        if btns.len() > 0 {
-            return 0;
-        }
+        // if btns.len() > 0 {
+        //     return 0;
+        // }
     }
     let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
     let button_toggles = vec![0; num_buttons];
