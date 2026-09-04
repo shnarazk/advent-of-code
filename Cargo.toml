@@ -46,4 +46,4 @@ y2015 = ["md-5"]
 codegen-units = 1
 lto = "fat"
 panic = "abort"
-strip = true
+# strip = true
