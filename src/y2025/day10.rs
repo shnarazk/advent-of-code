@@ -205,13 +205,11 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
     ord
 }
 
-/// level-1まで確定した部分解に対して 1 step展開する。
-fn solve2_aux(
+/// level-1まで確定した部分解に対して one step展開する。
+fn memoized_solve2(
     level: usize,
-    // FIXME: おそらくchecked_patternsの定義域が最適でない。また保持する値も不適切。
-    // おそらく、先に使ったボタンはもう使えない閾値があって、それ以上でmemoizaitionするのだろう。
     checked_patterns: &mut HashMap<Vec<usize>, Option<usize>>,
-    // 後戻りが生じないlevelを集めたもの
+    // 先に使ったボタンはもう使えない閾値となるレベルを集めたもの
     basin: &[usize],
     button_toggles_pre: &[usize],
     order_to_index: &[usize],
@@ -247,8 +245,7 @@ fn solve2_aux(
         }
         // light_flips は $[0, index]$ のbuttonを使った場合のflipsを保持している。
         // この状態に対してmemoを割り当てる。
-        let key = light_flips.clone();
-        if to_memoize && let Some(n) = checked_patterns.get(&key) {
+        if to_memoize && let Some(n) = checked_patterns.get(&light_flips) {
             if n.is_some() {
                 return *n;
             } else {
@@ -278,7 +275,7 @@ fn solve2_aux(
                 if level + 1 == buttons.len() {
                     break;
                 }
-                if let Some(n) = solve2_aux(
+                if let Some(n) = memoized_solve2(
                     level + 1,
                     checked_patterns,
                     basin,
@@ -301,8 +298,7 @@ fn solve2_aux(
             }
         }
         if to_memoize {
-            let key = light_flips.clone();
-            checked_patterns.insert(key, None);
+            checked_patterns.insert(light_flips.clone(), None);
         }
     }
     None
@@ -386,7 +382,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     }
     let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
     let button_toggles = vec![0; num_buttons];
-    solve2_aux(
+    memoized_solve2(
         0,
         &mut checked_patterns,
         &basin,
