@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "shnarazk",
-   "rev": "2bf2a305ee7bc23416b37fed48f4ab1f6249fb01",
+   "rev": "ab95d413cc7a13b553049cc9b2006a76a6d575d2",
    "name": "«lean4-winnow»",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",
