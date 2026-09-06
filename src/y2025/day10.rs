@@ -3,10 +3,7 @@ use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
-    std::{
-        cmp::Ordering,
-        collections::{HashMap, HashSet},
-    },
+    std::{cmp::Ordering, collections::HashSet},
 };
 
 type Spec = (Vec<bool>, Vec<Vec<usize>>, Vec<usize>);
@@ -99,16 +96,24 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .enumerate()
+            // .filter(|(i, _)| {
+            //     [
+            //         10, 46, 52, 63, 70, 73, 85, 96, 101, 108, 113, 125, 149, 156, 161, 162, 175,
+            //         178, 181,
+            //     ]
+            //     .contains(i)
+            // })
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
-                dbg!(solve2(buttons, goal))
-                //     solve(buttons, goal)
+                let new = dbg!(solve2(buttons, goal));
+                assert_eq!(solve(buttons, goal), new);
+                new
             })
             .sum::<usize>()
     }
 }
 
-fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
@@ -208,7 +213,8 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
 /// level-1まで確定した部分解に対して one step展開する。
 fn memoized_solve2(
     level: usize,
-    checked_patterns: &mut HashMap<Vec<usize>, Option<usize>>,
+    best: &mut usize,
+    checked_patterns: &mut HashSet<Vec<usize>>,
     // 先に使ったボタンはもう使えない閾値となるレベルを集めたもの
     basin: &[usize],
     button_toggles_pre: &[usize],
@@ -217,9 +223,11 @@ fn memoized_solve2(
     available_bands: &[(usize, usize)],
     buttons: &[Vec<usize>],
     goal: &[usize],
-) -> Option<usize> {
+) {
+    if level == buttons.len() {
+        return;
+    }
     let index = order_to_index[level];
-    // let mut best = usize::MAX;
     let mut button_toggles = button_toggles_pre.to_vec();
     let mut light_flips: Vec<usize> = vec![0; goal.len()];
     for i in order_to_index.iter().take(level) {
@@ -243,40 +251,27 @@ fn memoized_solve2(
                 Ordering::Greater => continue 'next_value,
             }
         }
+        if button_toggles.iter().sum::<usize>() > *best {
+            continue;
+        }
         // light_flips は $[0, index]$ のbuttonを使った場合のflipsを保持している。
         // この状態に対してmemoを割り当てる。
-        if to_memoize && let Some(n) = checked_patterns.get(&light_flips) {
-            if n.is_some() {
-                return *n;
-            } else {
-                continue;
-            }
-        }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
-                let key = light_flips.clone();
                 let ans = button_toggles.iter().sum::<usize>();
-                // best = best.min(ans);
-                println!(
-                    "\n#### FOUND ####\n\
-                         - key           : {key:?}\n\
-                         - botton_toggles: {button_toggles:?}\n\
-                         - light_flips   : {light_flips:?}\n\
-                         - checked       : {}",
-                    checked_patterns.len()
-                );
-                return Some(ans);
-                // break;
-            }
-            Ordering::Greater => {
-                // continue;
-            }
-            Ordering::Less => {
-                if level + 1 == buttons.len() {
-                    break;
+                if ans < *best {
+                    *best = ans;
+                    println!(
+                        " - {best:>7} / {:>8}| toggles: {button_toggles:?}",
+                        checked_patterns.len()
+                    );
                 }
-                if let Some(n) = memoized_solve2(
+            }
+            Ordering::Greater => {}
+            Ordering::Less => {
+                memoized_solve2(
                     level + 1,
+                    best,
                     checked_patterns,
                     basin,
                     &button_toggles,
@@ -285,46 +280,17 @@ fn memoized_solve2(
                     available_bands,
                     buttons,
                     goal,
-                ) {
-                    if to_memoize {
-                        let key = light_flips.clone();
-                        checked_patterns.insert(key, Some(n));
-                        assert!(checked_patterns.len() < 10_000_000);
-                    }
-                    // best = best.min(n);
-                    return Some(n);
-                    // break;
-                }
+                );
             }
         }
         if to_memoize {
-            checked_patterns.insert(light_flips.clone(), None);
+            if checked_patterns.contains(&light_flips) {
+                continue;
+            } else {
+                checked_patterns.insert(light_flips.clone());
+            }
         }
     }
-    None
-    // let res = if best == usize::MAX { None } else { Some(best) };
-    // if to_memoize {
-    //     // println!(
-    //     //     "\n#### PROBLEM ####\n\
-    //     //          - goal          : {goal:?}\n\
-    //     //          - buttons       : {buttons:?}\n\
-    //     //          - order_to_index: {order_to_index:?}\n\
-    //     //          - level         : {level:?}\n\
-    //     //          - botton_toggles: {button_toggles:?}\n\
-    //     //          - light_flips   : {light_flips:?}\n\
-    //     //          - key           : {key:?}",
-    //     // );
-    //     if let Some(Some(n)) = checked_patterns.get(&key) {
-    //         assert_eq!(*n, best);
-    //     }
-    //     // assert!(!checked_patterns.contains_key(&key));
-    //     checked_patterns.insert(key, res);
-    //     assert!(checked_patterns.len() < 100_000_000);
-    //     // if !checked_patterns.contains_key(&key) {
-    //     //     checked_patterns.insert(key, res);
-    //     // }
-    // }
-    // res
 }
 
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
@@ -337,7 +303,6 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .zip(upper_limits(buttons, goal).iter())
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
-    // println!("available_bands: {:?}", &available_bands);
     let mut basin: Vec<usize> = Vec::new();
     {
         let btns = order_to_index
@@ -380,10 +345,12 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         //     return 0;
         // }
     }
-    let mut checked_patterns: HashMap<Vec<usize>, Option<usize>> = HashMap::new();
+    let mut checked_patterns: HashSet<Vec<usize>> = HashSet::new();
     let button_toggles = vec![0; num_buttons];
+    let mut best = usize::MAX;
     memoized_solve2(
         0,
+        &mut best,
         &mut checked_patterns,
         &basin,
         &button_toggles,
@@ -392,6 +359,6 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         &available_bands,
         &buttons,
         &goal,
-    )
-    .unwrap()
+    );
+    best
 }
