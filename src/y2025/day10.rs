@@ -351,7 +351,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let mut checked_patterns: HashSet<Vec<u16>> = HashSet::new();
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
-    assert!(goal.iter().all(|n| *n <= 255));
+    assert!(goal.iter().all(|n| *n <= 1024));
     let goal_u16 = goal.iter().map(|n| *n as u16).collect::<Vec<u16>>();
     memoized_solve2(
         0,
