@@ -197,7 +197,7 @@ fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -
         .collect::<Vec<Vec<usize>>>()
 }
 
-fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
+fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
     let mut ord = Ordering::Equal;
     for (f, g) in flips.iter().zip(goal.iter()) {
         match f.cmp(g) {
@@ -214,7 +214,7 @@ fn compare(flips: &[usize], goal: &[usize]) -> Ordering {
 fn memoized_solve2(
     level: usize,
     best: &mut usize,
-    checked_patterns: &mut HashSet<Vec<usize>>,
+    checked_patterns: &mut HashSet<Vec<u16>>,
     // 先に使ったボタンはもう使えない閾値となるレベルを集めたもの
     basin: &[usize],
     button_toggles_pre: &[usize],
@@ -222,26 +222,29 @@ fn memoized_solve2(
     final_affector: &[Vec<usize>],
     available_bands: &[(usize, usize)],
     buttons: &[Vec<usize>],
-    goal: &[usize],
+    goal: &[u16],
 ) {
     if level == buttons.len() {
         return;
     }
     let index = order_to_index[level];
     let mut button_toggles = button_toggles_pre.to_vec();
-    let mut light_flips: Vec<usize> = vec![0; goal.len()];
+    let mut light_flips: Vec<u16> = vec![0; goal.len()];
     for i in order_to_index.iter().take(level) {
         for light_id in buttons[*i].iter() {
-            light_flips[*light_id] += button_toggles[*i];
+            assert!(light_flips[*light_id] as usize + button_toggles[*i] < 1024);
+            light_flips[*light_id] += button_toggles[*i] as u16;
         }
     }
     let to_memoize = level + 1 < buttons.len() && basin.contains(&level);
     for light_id in buttons[index].iter() {
-        light_flips[*light_id] += available_bands[index].1;
+        assert!(light_flips[*light_id] as usize + available_bands[index].1 < 1024);
+        light_flips[*light_id] += available_bands[index].1 as u16;
     }
     'next_value: for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
         button_toggles[index] = num_toggles;
         for light_id in buttons[index].iter() {
+            assert!(light_flips[*light_id] > 0);
             light_flips[*light_id] -= 1;
         }
         for light_id in final_affector[index].iter() {
@@ -339,15 +342,17 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         - buttons        (ordered): {btns:?}\n\
         - final_affector (ordered): {affectors:?}\n\
         - available_bands(ordered): {bands:?}\n\
-        - basin          (ordered): {basin:?}\n"
+        - basin          (ordered): {basin:?}"
         );
         // if btns.len() > 0 {
         //     return 0;
         // }
     }
-    let mut checked_patterns: HashSet<Vec<usize>> = HashSet::new();
+    let mut checked_patterns: HashSet<Vec<u16>> = HashSet::new();
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
+    assert!(goal.iter().all(|n| *n <= 255));
+    let goal_u16 = goal.iter().map(|n| *n as u16).collect::<Vec<u16>>();
     memoized_solve2(
         0,
         &mut best,
@@ -358,7 +363,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         &final_affector,
         &available_bands,
         &buttons,
-        &goal,
+        &goal_u16,
     );
     best
 }
