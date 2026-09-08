@@ -96,13 +96,6 @@ impl AdventOfCode for Puzzle {
         self.line
             .iter()
             .enumerate()
-            // .filter(|(i, _)| {
-            //     [
-            //         10, 46, 52, 63, 70, 73, 85, 96, 101, 108, 113, 125, 149, 156, 161, 162, 175,
-            //         178, 181,
-            //     ]
-            //     .contains(i)
-            // })
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
                 let new = solve2(buttons, goal);
@@ -214,7 +207,7 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 fn memoized_solve2(
     level: usize,
     best: &mut usize,
-    checked_patterns: &mut HashSet<Vec<u16>>,
+    checked_patterns: &mut HashSet<(u8, usize, Vec<u16>)>,
     // 先に使ったボタンはもう使えない閾値となるレベルを集めたもの
     basin: &[usize],
     button_toggles_pre: &[usize],
@@ -254,14 +247,15 @@ fn memoized_solve2(
                 Ordering::Greater => continue 'next_value,
             }
         }
-        if button_toggles.iter().sum::<usize>() > *best {
+        let ans = button_toggles.iter().sum::<usize>();
+        if ans > *best {
             continue;
         }
-        // light_flips は $[0, index]$ のbuttonを使った場合のflipsを保持している。
-        // この状態に対してmemoを割り当てる。
+        if to_memoize && checked_patterns.contains(&(level as u8, ans, light_flips.clone())) {
+            continue;
+        }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
-                let ans = button_toggles.iter().sum::<usize>();
                 if ans < *best {
                     *best = ans;
                     println!(
@@ -287,11 +281,7 @@ fn memoized_solve2(
             }
         }
         if to_memoize {
-            if checked_patterns.contains(&light_flips) {
-                continue;
-            } else {
-                checked_patterns.insert(light_flips.clone());
-            }
+            checked_patterns.insert((level as u8, ans, light_flips.clone()));
         }
     }
 }
@@ -344,11 +334,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         - available_bands(ordered): {bands:?}\n\
         - basin          (ordered): {basin:?}"
         );
-        // if btns.len() > 0 {
-        //     return 0;
-        // }
     }
-    let mut checked_patterns: HashSet<Vec<u16>> = HashSet::new();
+    let mut checked_patterns: HashSet<(u8, usize, Vec<u16>)> = HashSet::new();
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     assert!(goal.iter().all(|n| *n <= 1024));
