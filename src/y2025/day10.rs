@@ -105,7 +105,7 @@ impl AdventOfCode for Puzzle {
             // })
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
-                let new = dbg!(solve2(buttons, goal));
+                let new = solve2(buttons, goal);
                 assert_eq!(solve(buttons, goal), new);
                 new
             })
@@ -265,7 +265,7 @@ fn memoized_solve2(
                 if ans < *best {
                     *best = ans;
                     println!(
-                        " - {best:>7} / {:>8}| toggles: {button_toggles:?}",
+                        "- {best:>7} / {:>8}| toggles: {button_toggles:?}",
                         checked_patterns.len()
                     );
                 }
@@ -336,7 +336,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             }
         }
         println!(
-            "\n#### PROBLEM ####\n\
+            "\
         - goal           : {goal:?}\n\
         - order_to_index : {order_to_index:?}\n\
         - buttons        (ordered): {btns:?}\n\
