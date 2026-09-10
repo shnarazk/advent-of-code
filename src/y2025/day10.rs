@@ -290,6 +290,15 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
     let order_to_index = weight_order(buttons);
+    let affectors: Vec<Vec<usize>> = {
+        let mut tmp: Vec<Vec<usize>> = vec![Vec::new(); num_lights];
+        for (b_id, lights) in buttons.iter().enumerate() {
+            for l_id in lights.iter() {
+                tmp[*l_id].push(b_id);
+            }
+        }
+        tmp
+    };
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
     let available_bands: Vec<(usize, usize)> = lower_limits(buttons, goal)
         .iter()
@@ -301,10 +310,6 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         let btns = order_to_index
             .iter()
             .map(|i| buttons[*i].clone())
-            .collect::<Vec<_>>();
-        let affectors = order_to_index
-            .iter()
-            .map(|i| final_affector[*i].clone())
             .collect::<Vec<_>>();
         let bands = order_to_index
             .iter()
@@ -329,8 +334,9 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
             "\
         - goal           : {goal:?}\n\
         - order_to_index : {order_to_index:?}\n\
+        - affectors      : {affectors:?}\n\
         - buttons        (ordered): {btns:?}\n\
-        - final_affector (ordered): {affectors:?}\n\
+        - final_affector (ordered): {final_affector:?}\n\
         - available_bands(ordered): {bands:?}\n\
         - basin          (ordered): {basin:?}"
         );
