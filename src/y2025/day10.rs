@@ -1,6 +1,9 @@
 //! <https://adventofcode.com/2025/day/10>
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
+    crate::{
+        framework::{AdventOfCode, ParseError, aoc},
+        math::permutations,
+    },
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     std::{cmp::Ordering, collections::HashSet},
@@ -95,6 +98,7 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .iter()
+            .take(4)
             .enumerate()
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
@@ -284,6 +288,38 @@ fn memoized_solve2(
             checked_patterns.insert((level as u8, ans, light_flips.clone()));
         }
     }
+}
+
+#[allow(dead_code, unused_variables, unused_mut)]
+fn best_button_order(
+    buttons: &[Vec<usize>],
+    button_bands: &[(usize, usize)],
+    goal: &[u16],
+    affectors: &[Vec<usize>],
+) -> Vec<usize> {
+    let num_buttons: usize = buttons.len();
+    let num_lights: usize = goal.len();
+    let perms = permutations(0, num_buttons - 1);
+    let mut best_order: Vec<usize> = perms[0].clone();
+    let mut best_value: f64 = f64::MAX;
+    for order in perms.into_iter() {
+        // evaluate `order`
+        let mut e: f64 = 0.0;
+        for (i, b_id) in order.iter().enumerate() {
+            // TODO
+            if true
+            /* b_id is the last affector */
+            {
+                let point = i as f64 / button_bands[*b_id].1 as f64;
+                e += point;
+            }
+        }
+        if e < best_value {
+            best_value = e;
+            best_order = order;
+        }
+    }
+    return best_order;
 }
 
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
