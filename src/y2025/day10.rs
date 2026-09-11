@@ -1,9 +1,7 @@
 //! <https://adventofcode.com/2025/day/10>
 use {
-    crate::{
-        framework::{AdventOfCode, ParseError, aoc},
-        math::permutations,
-    },
+    crate::framework::{AdventOfCode, ParseError, aoc},
+    itertools::Itertools,
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     std::{cmp::Ordering, collections::HashSet},
@@ -292,10 +290,9 @@ fn memoized_solve2(
 fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u16]) -> Vec<usize> {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
-    let perms = permutations(0, num_buttons - 1);
-    let mut best_order: Vec<usize> = perms[0].clone();
+    let mut best_order: Vec<usize> = Vec::new();
     let mut best_value: f64 = f64::MAX;
-    'next_cand: for order in perms.into_iter() {
+    'next_cand: for order in (0..num_buttons).permutations(num_buttons) {
         // evaluate `order`
         let mut e: f64 = 0.0;
         let mut used_button = vec![false; num_buttons];
