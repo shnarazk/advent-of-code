@@ -283,9 +283,9 @@ fn memoized_solve2(
                 );
             }
         }
-        if to_memoize {
-            checked_patterns.insert((level as u8, ans, light_flips.clone()));
-        }
+        // if to_memoize {
+        //     checked_patterns.insert((level as u8, ans, light_flips.clone()));
+        // }
     }
 }
 
