@@ -100,14 +100,14 @@ impl AdventOfCode for Puzzle {
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
                 let new = solve2(buttons, goal);
-                assert_eq!(solve(buttons, goal), new);
+                // assert_eq!(solve(buttons, goal), new);
                 new
             })
             .sum::<usize>()
     }
 }
 
-fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
@@ -132,20 +132,6 @@ fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
         .map(|b| solution[*b])
         .map(|f| f.round() as usize)
         .sum::<usize>()
-}
-
-fn _weight_order(buttons: &[Vec<usize>]) -> Vec<usize> {
-    let num_buttons: usize = buttons.len();
-    let mut order_to_index = vec![(0, 0); num_buttons];
-    for (i, button) in buttons.iter().enumerate() {
-        order_to_index[i] = (button.len(), i);
-    }
-    order_to_index.sort();
-    order_to_index.reverse();
-    order_to_index
-        .into_iter()
-        .map(|(_, n)| n)
-        .collect::<Vec<_>>()
 }
 
 fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
@@ -208,7 +194,6 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 fn memoized_solve2(
     level: usize,
     best: &mut usize,
-    checked_patterns: &mut HashSet<(u8, usize, Vec<u16>)>,
     // 先に使ったボタンはもう使えない閾値となるレベルを集めたもの
     basin: &[usize],
     button_toggles_pre: &[usize],
@@ -230,7 +215,6 @@ fn memoized_solve2(
             light_flips[*light_id] += button_toggles[*i] as u16;
         }
     }
-    let to_memoize = level + 1 < buttons.len() && basin.contains(&level);
     for light_id in buttons[index].iter() {
         assert!(light_flips[*light_id] as usize + available_bands[index].1 < 1024);
         light_flips[*light_id] += available_bands[index].1 as u16;
@@ -252,17 +236,11 @@ fn memoized_solve2(
         if ans > *best {
             continue;
         }
-        if to_memoize && checked_patterns.contains(&(level as u8, ans, light_flips.clone())) {
-            continue;
-        }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
                     *best = ans;
-                    println!(
-                        "- {best:>5}/ {:>7}| toggles: {button_toggles:?}",
-                        checked_patterns.len()
-                    );
+                    println!("- {best:>5}| toggles: {button_toggles:?}");
                 }
             }
             Ordering::Greater => {}
@@ -270,7 +248,6 @@ fn memoized_solve2(
                 memoized_solve2(
                     level + 1,
                     best,
-                    checked_patterns,
                     basin,
                     &button_toggles,
                     order_to_index,
@@ -281,23 +258,12 @@ fn memoized_solve2(
                 );
             }
         }
-        // if to_memoize {
-        //     checked_patterns.insert((level as u8, ans, light_flips.clone()));
-        // }
     }
 }
 
 fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u16]) -> Vec<usize> {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
-    // println!(
-    //     "\
-    // - goal           : {goal:?}\n\
-    // - affectors      : {affectors:?}\n\
-    // - buttons        : {buttons:?}\n\
-    // - num_buttons    : {num_buttons:?}\n\
-    // - num_lights     : {num_lights:?}"
-    // );
     let mut best_order: Vec<usize> = Vec::new();
     let mut best_value: f64 = f64::MAX;
     let mut count: usize = 0;
@@ -359,14 +325,6 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
     let mut basin: Vec<usize> = Vec::new();
     {
-        let btns = order_to_index
-            .iter()
-            .map(|i| buttons[*i].clone())
-            .collect::<Vec<_>>();
-        let bands = order_to_index
-            .iter()
-            .map(|i| available_bands[*i].clone())
-            .collect::<Vec<_>>();
         for level in 0..num_buttons {
             let mut fixed = Vec::new();
             for b_id in order_to_index.iter().take(level + 1) {
@@ -382,24 +340,22 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
                 basin.push(level);
             }
         }
-        println!(
-            "\
-        - goal           : {goal:?}\n\
-        - affectors      : {affectors:?}\n\
-        - order_to_index : {order_to_index:?}\n\
-        - buttons        (ordered): {btns:?}\n\
-        - final_affector (ordered): {final_affector:?}\n\
-        - available_bands(ordered): {bands:?}\n\
-        - basin          (ordered): {basin:?}"
-        );
+        // println!(
+        //     "\
+        // - goal           : {goal:?}\n\
+        // - affectors      : {affectors:?}\n\
+        // - order_to_index : {order_to_index:?}\n\
+        // - buttons        (ordered): {btns:?}\n\
+        // - final_affector (ordered): {final_affector:?}\n\
+        // - available_bands(ordered): {bands:?}\n\
+        // - basin          (ordered): {basin:?}"
+        // );
     }
-    let mut checked_patterns: HashSet<(u8, usize, Vec<u16>)> = HashSet::new();
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     memoized_solve2(
         0,
         &mut best,
-        &mut checked_patterns,
         &basin,
         &button_toggles,
         &order_to_index,
