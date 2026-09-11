@@ -290,10 +290,20 @@ fn memoized_solve2(
 fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u16]) -> Vec<usize> {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
+    // println!(
+    //     "\
+    // - goal           : {goal:?}\n\
+    // - affectors      : {affectors:?}\n\
+    // - buttons        : {buttons:?}\n\
+    // - num_buttons    : {num_buttons:?}\n\
+    // - num_lights     : {num_lights:?}"
+    // );
     let mut best_order: Vec<usize> = Vec::new();
     let mut best_value: f64 = f64::MAX;
+    let mut count: usize = 0;
+    let mut icount: usize = 0;
     'next_cand: for order in (0..num_buttons).permutations(num_buttons) {
-        // evaluate `order`
+        count += 1;
         let mut e: f64 = 0.0;
         let mut used_button = vec![false; num_buttons];
         let mut nomore_affector = vec![false; num_lights];
@@ -302,7 +312,8 @@ fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u
             for l_id in 0..num_lights {
                 if !nomore_affector[l_id] && affectors[l_id].iter().all(|b| used_button[*b]) {
                     nomore_affector[l_id] = true;
-                    let point = i as f64 / goal[l_id] as f64;
+                    // some settings contain zero-goal!
+                    let point = (i + 1) as f64 / (1 + goal[l_id]) as f64;
                     e += point;
                     if best_value < e {
                         continue 'next_cand;
@@ -310,12 +321,17 @@ fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u
                 }
             }
         }
+        icount += 1;
+        assert!(used_button.iter().all(|b| *b));
+        assert!(nomore_affector.iter().all(|b| *b));
+        assert!(e > 0.0);
         if e < best_value {
             best_value = e;
             best_order = order;
             println!("{best_order:?} ({best_value:>5.5})");
         }
     }
+    assert!(best_value < f64::MAX, "aborted after: {count}/{icount}");
     return best_order;
 }
 
