@@ -3,7 +3,7 @@ use {
     crate::framework::{AdventOfCode, ParseError, aoc},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
-    std::collections::HashSet,
+    std::{cmp::Ordering, collections::HashSet},
 };
 
 type Spec = (Vec<bool>, Vec<Vec<usize>>, Vec<usize>);
@@ -95,12 +95,18 @@ impl AdventOfCode for Puzzle {
     fn part2(&mut self) -> Self::Output2 {
         self.line
             .par_iter()
-            .map(|(_, buttons, goal)| solve(buttons, goal))
+            .enumerate()
+            .map(|(i, (_, buttons, goal))| {
+                dbg!(i);
+                let new = solve2(buttons, goal);
+                // assert_eq!(solve(buttons, goal), new);
+                new
+            })
             .sum::<usize>()
     }
 }
 
-fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
@@ -125,4 +131,254 @@ fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
         .map(|b| solution[*b])
         .map(|f| f.round() as usize)
         .sum::<usize>()
+}
+
+fn upper_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
+    buttons
+        .iter()
+        .map(|targets| targets.iter().map(|i| goal[*i]).min().unwrap_or_default() + 1)
+        .collect::<Vec<usize>>()
+}
+
+fn lower_limits(buttons: &[Vec<usize>], goal: &[usize]) -> Vec<usize> {
+    let mut affectors = vec![Vec::new(); goal.len()];
+    for (button_id, targets) in buttons.iter().enumerate() {
+        for light_id in targets {
+            affectors[*light_id].push(button_id);
+        }
+    }
+    let mut result = vec![0; buttons.len()];
+    for (light_id, bs) in affectors.iter().enumerate() {
+        if bs.len() == 1 {
+            result[bs[0]] = goal[light_id];
+        }
+    }
+    result
+}
+
+fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -> Vec<Vec<usize>> {
+    let mut last_affector: Vec<usize> = vec![0; num_lights];
+    for button_id in order.iter() {
+        for light_id in buttons[*button_id].iter() {
+            last_affector[*light_id] = *button_id;
+        }
+    }
+    // println!("last_affector: {:?}", &last_affector);
+    (0..buttons.len())
+        .map(|button_id| {
+            last_affector
+                .iter()
+                .enumerate()
+                .filter(|(_, b)| **b == button_id)
+                .map(|(i, _)| i)
+                .collect::<Vec<usize>>()
+        })
+        .collect::<Vec<Vec<usize>>>()
+}
+
+fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
+    let mut ord = Ordering::Equal;
+    for (f, g) in flips.iter().zip(goal.iter()) {
+        match f.cmp(g) {
+            Ordering::Greater => return Ordering::Greater,
+            o => {
+                ord = ord.min(o);
+            }
+        }
+    }
+    ord
+}
+
+/// level-1まで確定した部分解に対して one step展開する。
+fn memoized_solve2(
+    level: usize,
+    best: &mut usize,
+    button_toggles_pre: &[usize],
+    order_to_index: &[usize],
+    final_affector: &[Vec<usize>],
+    available_bands: &[(usize, usize)],
+    buttons: &[Vec<usize>],
+    goal: &[u16],
+) {
+    if level == buttons.len() {
+        return;
+    }
+    let index = order_to_index[level];
+    let mut button_toggles = button_toggles_pre.to_vec();
+    let mut light_flips: Vec<u16> = vec![0; goal.len()];
+    for i in order_to_index.iter().take(level) {
+        for light_id in buttons[*i].iter() {
+            debug_assert!(light_flips[*light_id] as usize + button_toggles[*i] < 1024);
+            light_flips[*light_id] += button_toggles[*i] as u16;
+        }
+    }
+    for light_id in buttons[index].iter() {
+        debug_assert!(light_flips[*light_id] as usize + available_bands[index].1 < 1024);
+        light_flips[*light_id] += available_bands[index].1 as u16;
+    }
+    'next_value: for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
+        button_toggles[index] = num_toggles;
+        for light_id in buttons[index].iter() {
+            debug_assert!(light_flips[*light_id] > 0);
+            light_flips[*light_id] -= 1;
+        }
+        for light_id in final_affector[index].iter() {
+            match light_flips[*light_id].cmp(&goal[*light_id]) {
+                Ordering::Less => break 'next_value,
+                Ordering::Equal => (),
+                Ordering::Greater => continue 'next_value,
+            }
+        }
+        let ans = button_toggles.iter().sum::<usize>();
+        if ans > *best {
+            continue;
+        }
+        match compare(&light_flips, goal) {
+            Ordering::Equal => {
+                if ans < *best {
+                    *best = ans;
+                    println!("- {best:>4} = ∑ {button_toggles:?}");
+                }
+            }
+            Ordering::Greater => {}
+            Ordering::Less => {
+                memoized_solve2(
+                    level + 1,
+                    best,
+                    &button_toggles,
+                    order_to_index,
+                    final_affector,
+                    available_bands,
+                    buttons,
+                    goal,
+                );
+            }
+        }
+    }
+}
+
+fn button_order(a: &(f64, usize), b: &(f64, usize)) -> Ordering {
+    match a.0.partial_cmp(&b.0) {
+        Some(Ordering::Equal) => a.1.cmp(&b.1),
+        Some(o) => o,
+        None => unreachable!(),
+    }
+}
+
+fn best_button_order2(
+    // button -> [lights]
+    buttons: &[Vec<usize>],
+    // light -> [button]
+    affectors_base: &[Vec<usize>],
+    _goal: &[u16],
+) -> Vec<usize> {
+    // println!("buttons: {:?}", &buttons);
+    // println!("goal: {:?}", &goal);
+    let num_buttons: usize = buttons.len();
+    // build button_weight vector
+    let mut result: Vec<usize> = Vec::new();
+    let mut affectors: Vec<Vec<usize>> = affectors_base.to_vec();
+    // println!("affectors: {:?}", &affectors);
+    for _ in 0..num_buttons {
+        let mut button_weights: Vec<f64> = vec![0.0; num_buttons];
+        for (b_id, affcting_lights) in buttons.iter().enumerate() {
+            if result.contains(&b_id) {
+                button_weights[b_id] = f64::MAX;
+                continue;
+            }
+            let mut occr = f64::MAX;
+            for l_id in affcting_lights.iter() {
+                if affectors[*l_id].contains(&b_id) {
+                    let value = affectors[*l_id].len() as f64;
+                    if value < occr {
+                        occr = value;
+                    }
+                }
+            }
+            button_weights[b_id] = occr;
+        }
+        // println!("button_weights: {:?}", &button_weights);
+        let mut tmp = button_weights
+            .iter()
+            .enumerate()
+            .map(|(i, w)| (*w, i))
+            .collect::<Vec<_>>();
+        tmp.sort_by(button_order);
+        // println!("sorted weights: {:?}", &tmp);
+        let target: usize = tmp[0].1;
+        result.push(target);
+        affectors
+            .iter_mut()
+            .for_each(|buttons| buttons.retain(|b| *b != target));
+        // println!("affectors: {:?}", &affectors);
+    }
+    result
+}
+
+fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
+    let num_buttons: usize = buttons.len();
+    let num_lights: usize = goal.len();
+    debug_assert!(goal.iter().all(|n| *n <= 1024));
+    let goal_u16 = goal.iter().map(|n| *n as u16).collect::<Vec<u16>>();
+    // light -> [button]
+    let affectors: Vec<Vec<usize>> = {
+        let mut tmp: Vec<Vec<usize>> = vec![Vec::new(); num_lights];
+        for (b_id, lights) in buttons.iter().enumerate() {
+            for l_id in lights.iter() {
+                tmp[*l_id].push(b_id);
+            }
+        }
+        tmp
+    };
+    let available_bands: Vec<(usize, usize)> = lower_limits(buttons, goal)
+        .iter()
+        .zip(upper_limits(buttons, goal).iter())
+        .map(|(l, u)| (*l, *u))
+        .collect::<Vec<_>>();
+    // let order_to_index = best_button_order(&buttons, &affectors, &goal_u16);
+    let order_to_index = best_button_order2(buttons, &affectors, &goal_u16);
+    // assert_eq!(&order_to_index, &order_to_index2);
+    // let order_to_index = weight_order(buttons);
+    let final_affector = final_affectors(buttons, &order_to_index, num_lights);
+    let mut basin: Vec<usize> = Vec::new();
+    {
+        for level in 0..num_buttons {
+            let mut fixed = Vec::new();
+            for b_id in order_to_index.iter().take(level + 1) {
+                for l_id in final_affector[*b_id].iter() {
+                    fixed.push(*l_id);
+                }
+            }
+            if order_to_index
+                .iter()
+                .take(level + 1)
+                .all(|b_id| buttons[*b_id].iter().any(|l_id| fixed.contains(l_id)))
+            {
+                basin.push(level);
+            }
+        }
+        // println!(
+        //     "\
+        // - goal           : {goal:?}\n\
+        // - affectors      : {affectors:?}\n\
+        // - order_to_index : {order_to_index:?}\n\
+        // - buttons        (ordered): {btns:?}\n\
+        // - final_affector (ordered): {final_affector:?}\n\
+        // - available_bands(ordered): {bands:?}\n\
+        // - basin          (ordered): {basin:?}"
+        // );
+    }
+    let button_toggles = vec![0; num_buttons];
+    let mut best = usize::MAX;
+    memoized_solve2(
+        0,
+        &mut best,
+        &button_toggles,
+        &order_to_index,
+        &final_affector,
+        &available_bands,
+        buttons,
+        &goal_u16,
+    );
+    best
 }

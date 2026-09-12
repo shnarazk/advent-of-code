@@ -198,7 +198,7 @@ partial def unsupportedW? (mapping : RectHash) (pos : Vec₂) (half : Bool) : Bo
   | none        , false
   | some .boxH  , false =>
       -- w might be out of range, so we must define w only if it's really needed.
-      let w := pos + Dir.W;  mapping[w]? != some Kind.boxH || unsupportedW? mapping w false
+      let w := pos + Dir.W; mapping[w]? != some Kind.boxH || unsupportedW? mapping w false
   | none        , true  => true
   | some .wall  , _     => false
   | some .box   , _     => let w := pos + Dir.W; unsupportedW? mapping w true
@@ -257,7 +257,7 @@ partial def shiftW (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash 
     if mapping[w]? == some .boxH then shiftW mapping w false |>.set w .box else mapping
   | some .box  , false => shiftW mapping w true |>.erase pos |>.set w .boxH
   | some .box  , true  => shiftW mapping w true |>.erase pos |>.set w .boxH
-  | _          , _     => mapping;
+  | _          , _     => mapping
 
 partial def shiftS (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
   let s := pos + Dir.S
@@ -275,7 +275,7 @@ partial def shiftS (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash 
     mapping |> (shiftS · s true) |> (shiftS · (s + Dir.E) false) |>.erase pos |>.set s .boxH
   | some .box, true    =>
     mapping |> (shiftS · s false) |> (shiftS · s true) |>.erase pos |>.set s .box
-  | _        , _       => mapping;
+  | _        , _       => mapping
 
 partial def shiftN (mapping : RectHash) (pos : Vec₂) (half : Bool) : RectHash := Id.run do
   let n := pos + Dir.N

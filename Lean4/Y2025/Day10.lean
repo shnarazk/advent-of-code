@@ -2,6 +2,7 @@ module
 
 public import Itertools
 public import WinnowParsers
+public meta import WinnowParsers
 public import «AoC».Basic
 public import «AoC».Math
 public meta import «AoC».Math
@@ -41,26 +42,25 @@ instance : ToString Input where toString s := s!"{s.line}"
 namespace parser
 
 open WinnowParsers
-open Std.Internal.Parsec
 open Std.Internal.Parsec.String
 
 def parse_indicators := do
   let v ← pchar '[' *> repeated (pchar '.' <|> pchar '#') <* pchar ']'
   v.iter.map (· == '#') |>.toArray |> pure
 
--- #guard parse parse_indicators "[..#.]" == some #[false, false, true, false]
+#guard parse parse_indicators "[..#.]" == some #[false, false, true, false]
 
 def parse_nums := separated number (pchar ',')
 
--- #guard parse parse_nums "42,31,8" == some #[42, 31, 8]
+#guard parse parse_nums "42,31,8" == some #[42, 31, 8]
 
 def parse_buttons := separated (pchar '(' *> parse_nums <* pchar ')') (pchar ' ')
 
--- #guard parse parse_buttons "(42,31) (4,31)" == some #[#[42, 31], #[4, 31]]
+#guard parse parse_buttons "(42,31) (4,31)" == some #[#[42, 31], #[4, 31]]
 
 def parse_requirement := pchar '{' *> parse_nums <* pchar '}'
 
--- #guard parse parse_requirement "{42,31,4,31}" == some #[42, 31, 4, 31]
+#guard parse parse_requirement "{42,31,4,31}" == some #[42, 31, 4, 31]
 
 def parse_line := do
   let i ← parse_indicators <* pchar ' '
@@ -72,7 +72,8 @@ def parse : String → Option Input := AoCParser.parse parser
   where
     parser : Parser Input := do Input.mk <$> separated parse_line eol
 
--- #guard parse "[.#] (1,0) (2,4) {4,3}" == some { line := #[(#[false, true], #[#[1, 0], #[2, 4]], #[4, 3])]}
+#guard parse "[.#] (1,0) (2,4) {4,3}"
+    == some { line := #[(#[false, true], #[#[1, 0], #[2, 4]], #[4, 3])]}
 
 end parser
 
@@ -85,7 +86,7 @@ def toIdicator (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : 
     |>.enumerate
     |>.fold
       (fun acc (n, b) ↦
-        if b then buttons[n]! |>.iter |>.fold (fun acc i ↦ acc.modify i (!·)) acc else acc)
+        if b then buttons[n]!.iter.fold (fun acc i ↦ acc.modify i (!·)) acc else acc)
       (Array.replicate len false)
 
 #guard toIdicator #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]

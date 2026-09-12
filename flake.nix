@@ -9,7 +9,7 @@
     in {
       devShells.default = pkgs.mkShell {
         packages = [
-          pkgs.bashInteractive
+          # pkgs.bashInteractive
           pkgs.cargo-watch
           pkgs.graphviz
           pkgs.lldb_21
