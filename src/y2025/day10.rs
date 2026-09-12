@@ -100,14 +100,14 @@ impl AdventOfCode for Puzzle {
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
                 let new = solve2(buttons, goal);
-                // assert_eq!(solve(buttons, goal), new);
+                assert_eq!(solve(buttons, goal), new);
                 new
             })
             .sum::<usize>()
     }
 }
 
-fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
@@ -261,7 +261,11 @@ fn memoized_solve2(
     }
 }
 
-fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u16]) -> Vec<usize> {
+fn _best_button_order(
+    buttons: &[Vec<usize>],
+    affectors: &[Vec<usize>],
+    goal: &[u16],
+) -> Vec<usize> {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
     let mut best_order: Vec<usize> = Vec::new();
@@ -301,11 +305,70 @@ fn best_button_order(buttons: &[Vec<usize>], affectors: &[Vec<usize>], goal: &[u
     return best_order;
 }
 
+fn button_order(a: &(f64, usize), b: &(f64, usize)) -> Ordering {
+    match a.0.partial_cmp(&b.0) {
+        Some(Ordering::Equal) => a.1.cmp(&b.1),
+        Some(o) => o,
+        None => unreachable!(),
+    }
+}
+
+fn best_button_order2(
+    // button -> [lights]
+    buttons: &[Vec<usize>],
+    // light -> [button]
+    affectors_base: &[Vec<usize>],
+    _goal: &[u16],
+) -> Vec<usize> {
+    // println!("buttons: {:?}", &buttons);
+    // println!("goal: {:?}", &goal);
+    let num_buttons: usize = buttons.len();
+    // build button_weight vector
+    let mut result: Vec<usize> = Vec::new();
+    let mut affectors: Vec<Vec<usize>> = affectors_base.to_vec();
+    // println!("affectors: {:?}", &affectors);
+    for _ in 0..num_buttons {
+        let mut button_weights: Vec<f64> = vec![0.0; num_buttons];
+        for (b_id, affcting_lights) in buttons.iter().enumerate() {
+            if result.contains(&b_id) {
+                button_weights[b_id] = f64::MAX;
+                continue;
+            }
+            let mut occr = f64::MAX;
+            for l_id in affcting_lights.iter() {
+                if affectors[*l_id].contains(&b_id) {
+                    let value = affectors[*l_id].len() as f64;
+                    if value < occr {
+                        occr = value;
+                    }
+                }
+            }
+            button_weights[b_id] = occr;
+        }
+        // println!("button_weights: {:?}", &button_weights);
+        let mut tmp = button_weights
+            .iter()
+            .enumerate()
+            .map(|(i, w)| (*w, i))
+            .collect::<Vec<_>>();
+        tmp.sort_by(button_order);
+        // println!("sorted weights: {:?}", &tmp);
+        let target: usize = tmp[0].1;
+        result.push(target);
+        affectors
+            .iter_mut()
+            .for_each(|buttons| buttons.retain(|b| *b != target));
+        // println!("affectors: {:?}", &affectors);
+    }
+    result
+}
+
 fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
     assert!(goal.iter().all(|n| *n <= 1024));
     let goal_u16 = goal.iter().map(|n| *n as u16).collect::<Vec<u16>>();
+    // light -> [button]
     let affectors: Vec<Vec<usize>> = {
         let mut tmp: Vec<Vec<usize>> = vec![Vec::new(); num_lights];
         for (b_id, lights) in buttons.iter().enumerate() {
@@ -320,7 +383,9 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .zip(upper_limits(buttons, goal).iter())
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
-    let order_to_index = best_button_order(&buttons, &affectors, &goal_u16);
+    // let order_to_index = best_button_order(&buttons, &affectors, &goal_u16);
+    let order_to_index = best_button_order2(&buttons, &affectors, &goal_u16);
+    // assert_eq!(&order_to_index, &order_to_index2);
     // let order_to_index = weight_order(buttons);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
     let mut basin: Vec<usize> = Vec::new();
