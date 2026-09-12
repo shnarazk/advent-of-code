@@ -190,7 +190,7 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
-fn memoized_solve2(
+fn solve2_rec(
     level: usize,
     best: &mut usize,
     button_toggles_pre: &[usize],
@@ -242,7 +242,7 @@ fn memoized_solve2(
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                memoized_solve2(
+                solve2_rec(
                     level + 1,
                     best,
                     &button_toggles,
@@ -370,7 +370,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     }
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
-    memoized_solve2(
+    solve2_rec(
         0,
         &mut best,
         &button_toggles,
