@@ -240,7 +240,7 @@ fn memoized_solve2(
             Ordering::Equal => {
                 if ans < *best {
                     *best = ans;
-                    println!("- {best:>5}| toggles: {button_toggles:?}");
+                    println!("- {best:>4} = ∑ {button_toggles:?}");
                 }
             }
             Ordering::Greater => {}
