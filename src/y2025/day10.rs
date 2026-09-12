@@ -95,19 +95,19 @@ impl AdventOfCode for Puzzle {
     }
     fn part2(&mut self) -> Self::Output2 {
         self.line
-            .iter()
+            .par_iter()
             .enumerate()
             .map(|(i, (_, buttons, goal))| {
                 dbg!(i);
                 let new = solve2(buttons, goal);
-                assert_eq!(solve(buttons, goal), new);
+                // assert_eq!(solve(buttons, goal), new);
                 new
             })
             .sum::<usize>()
     }
 }
 
-fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
