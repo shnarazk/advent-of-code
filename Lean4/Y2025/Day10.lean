@@ -193,7 +193,7 @@ def lowerLimits (buttons : Array Vec) (goal : Vec) : Vec := Id.run do
   let mut affectors : Array Vec := Array.ofFn (n := goal.size) (fun _ ↦ #[])
   for (target, b_id) in buttons.zipIdx.iter do
     for light_id in target do
-      affectors := affectors.modify light_id.toNat (fun val ↦ val.push b_id)
+      affectors := affectors.modify light_id.toNat (·.push b_id)
   let mut result : Vec := Array.ofFn (n := buttons.size) (fun _ ↦ 0)
   for (bs, light_id) in affectors.zipIdx.iter do
     if bs.size == 1 then
@@ -201,6 +201,47 @@ def lowerLimits (buttons : Array Vec) (goal : Vec) : Vec := Id.run do
   result
 
 #guard lowerLimits #[#[0, 1], #[2]] #[4, 2, 6] == #[2, 6]
+
+/-- orderの下で各buttonによって値が確定するlight
+- Rustの `final_affectors`をrename
+-/
+def fixLights (buttons : Array Vec) (order : Vec) (numLights : Nat) : Array Vec := Id.run do
+  let mut lastAffector : Vec := Array.ofFn (n := numLights) (fun _ ↦ 0)
+  for buttonId in order.iter do
+    for lightId in buttons[buttonId.toNat]!.iter do
+      lastAffector := lastAffector.set! lightId.toNat buttonId
+  Array.range buttons.size
+    |>.iter
+    |>.map (fun buttonId ↦
+        lastAffector.zipIdx.iter
+          |>.filter (fun (b, _) ↦ b.toNat == buttonId)
+          |>.map (fun (_, i) ↦ i) -- なぜか Prod.snd にすると型エラー
+          |>.toArray )
+    |>.toArray
+
+#guard fixLights #[#[0, 1], #[2], #[0, 2]] #[0, 1, 2] 3 == #[#[1], #[], #[0, 2]]
+
+/-- Return `Odering` compared with the `goal` -/
+def reachability (flips goal : Vec) : Ordering := Id.run do
+  let mut ord := Ordering.eq
+  for (f, g) in (flips.zip goal).iter do
+    match compare f g with
+    | .gt => return .gt
+    | .lt => ord := .lt
+    | _ => ()
+  ord
+
+#guard reachability #[3, 0, 4] #[3, 2, 1] = .gt
+
+def buttonOrdering (a b : Float × Nat) : Ordering :=
+  if a.fst = b.fst
+  then compare a.snd b.snd
+  else if a.fst < b.fst then .lt else .gt
+
+/-- TODO -/
+def bestButtonOrder (_buttons affectors' : Array Vec) : Vec := Id.run do
+  let mut _affectors := affectors'
+  #[]
 
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   let _num_leds := requirement.size
