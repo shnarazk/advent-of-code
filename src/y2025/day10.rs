@@ -270,7 +270,6 @@ fn best_button_order2(
     buttons: &[Vec<usize>],
     // light -> [button]
     affectors_base: &[Vec<usize>],
-    _goal: &[u16],
 ) -> Vec<usize> {
     // println!("buttons: {:?}", &buttons);
     // println!("goal: {:?}", &goal);
@@ -336,7 +335,7 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
     // let order_to_index = best_button_order(&buttons, &affectors, &goal_u16);
-    let order_to_index = best_button_order2(buttons, &affectors, &goal_u16);
+    let order_to_index = best_button_order2(buttons, &affectors);
     // assert_eq!(&order_to_index, &order_to_index2);
     // let order_to_index = weight_order(buttons);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
