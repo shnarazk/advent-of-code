@@ -221,7 +221,9 @@ def fixLights (buttons : Array Vec) (order : Vec) (numLights : Nat) : Array Vec 
 
 #guard fixLights #[#[0, 1], #[2], #[0, 2]] #[0, 1, 2] 3 == #[#[1], #[], #[0, 2]]
 
-/-- Return `Odering` compared with the `goal` -/
+/-- Return `Odering` compared with the `goal`
+- Rustの `compare`をrename
+-/
 def reachability (flips goal : Vec) : Ordering := Id.run do
   let mut ord := Ordering.eq
   for (f, g) in (flips.zip goal).iter do
@@ -233,15 +235,41 @@ def reachability (flips goal : Vec) : Ordering := Id.run do
 
 #guard reachability #[3, 0, 4] #[3, 2, 1] = .gt
 
+/--
+- Rustの`button_order`をrename
+-/
 def buttonOrdering (a b : Float × Nat) : Ordering :=
   if a.fst = b.fst
   then compare a.snd b.snd
   else if a.fst < b.fst then .lt else .gt
 
-/-- TODO -/
-def bestButtonOrder (_buttons affectors' : Array Vec) : Vec := Id.run do
-  let mut _affectors := affectors'
-  #[]
+def bestButtonOrder (buttons affectors' : Array Vec) : Vec := Id.run do
+  let fMax :Float := 10_000_000.0
+  let numButtons := buttons.size
+  let mut result : Vec := #[]
+  let mut affectors := affectors'
+  for _ in 0 ... numButtons do
+    let mut buttonWeights : Array Float := Array.ofFn (n := numButtons) (fun _ ↦ 0.0)
+    for (affectingLights, bId) in buttons.zipIdx.iter do
+      if result.contains bId then
+        buttonWeights := buttonWeights.set! bId fMax
+        continue
+      let mut occr := fMax
+      for lId in affectingLights.iter do
+        if affectors[lId.toNat]!.contains bId then
+          let value : Float := affectors[lId.toNat]!.size.toFloat
+          if value < occr then
+            occr := value
+        buttonWeights := buttonWeights.set! bId occr
+    let mut tmp : Array (Float × Nat) := buttonWeights.zipIdx
+    tmp := tmp.qsort (buttonOrdering · · == .lt)
+    let target : Nat := tmp[0]!.snd
+    result := result.push target
+    affectors := affectors.iter |>.map (·.erase target) |>.toArray
+  result
+
+/- TODO -/
+#guard bestButtonOrder #[] #[] == #[]
 
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   let _num_leds := requirement.size
