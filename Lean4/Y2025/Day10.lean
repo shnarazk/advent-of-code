@@ -182,6 +182,26 @@ instance : HMul (Array Vec) Vec Vec where
       (fun acc (i, n) ↦ acc + buttons[i]! * n)
       (Array.replicate buttons[0]!.size 0)
 
+def upperLimits₁ (buttons : Array Vec) (goal : Vec) : Vec :=
+  buttons.iter
+    |>.map (·.iter.map (goal[·.toNat]!) |>.fold min (goal.max?.unwrapOr 0) |> (· + 1))
+    |>.toArray
+
+#guard upperLimits₁ #[#[0, 1], #[1, 2]] #[2, 5, 6] == #[3, 6]
+
+def lowerLimits (buttons : Array Vec) (goal : Vec) : Vec := Id.run do
+  let mut affectors : Array Vec := Array.ofFn (n := goal.size) (fun _ ↦ #[])
+  for (target, b_id) in buttons.zipIdx.iter do
+    for light_id in target do
+      affectors := affectors.modify light_id.toNat (fun val ↦ val.push b_id)
+  let mut result : Vec := Array.ofFn (n := buttons.size) (fun _ ↦ 0)
+  for (bs, light_id) in affectors.zipIdx.iter do
+    if bs.size == 1 then
+      result := result.set! bs[0]!.toNat goal[light_id]!
+  result
+
+#guard lowerLimits #[#[0, 1], #[2]] #[4, 2, 6] == #[2, 6]
+
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   let _num_leds := requirement.size
   let num_buttons := buttons.size
