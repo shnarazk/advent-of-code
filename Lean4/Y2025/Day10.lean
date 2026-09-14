@@ -235,6 +235,7 @@ def reachability (flips goal : Vec) : Ordering := Id.run do
   ord
 
 #guard reachability #[3, 0, 4] #[3, 2, 1] = .gt
+#guard reachability #[3, 2, 4] #[3, 2, 4] = .eq
 
 /--
 - Rustの`button_order`をrename
@@ -290,7 +291,9 @@ def solveRec
   for lightId in buttons[index]!.iter do
       lightFlips := lightFlips.modify lightId.toNat (· + availabeBands[index]!.snd)
   -- next_value
-  for numToggles in availabeBands[index]!.fst ... availabeBands[index]!.snd do
+  let band := availabeBands[index]!.snd - availabeBands[index]!.fst
+  for numToggles' in 0 ... band do
+    let numToggles := availabeBands[index]!.snd - 1 - numToggles'
     -- - some true  : break 'next_value
     -- - some false : continue 'next_value
     let mut skipToNextValue : Option Bool := none
@@ -301,14 +304,14 @@ def solveRec
       match compare lightFlips[lightId.toNat]! goal[lightId.toNat]! with
       | .lt => skipToNextValue := some true
       | .eq => ()
-      | .gt => skipToNextValue := some false
-    match skipToNextValue with
+      | .gt => if skipToNextValue.isNone then skipToNextValue := some false
+    match dbg s!"   {buttonToggles}: {lightFlips}" skipToNextValue with
     | some true => break
     | some false => continue
     | _ => ()
     let ans := buttonToggles.sum.toNat
     if ans > best then continue
-    match compare lightFlips goal with
+    match (fun a ↦ dbg s!"{level}/{index}{buttonToggles}: {lightFlips} {a.isLT}" a) <| reachability lightFlips goal with
     | .lt =>
       best := solveRec
           (level + 1)
@@ -319,8 +322,9 @@ def solveRec
           availabeBands
           buttons
           goal
-    | .eq => if ans < best then best := ans
-    | .gt => ()
+        |> (min · best)
+    | .eq => if ans < best then best := dbg "improved" ans
+    | .gt => continue
   best
 termination_by buttons.size - level
 
@@ -339,11 +343,11 @@ def solve' (buttons : Array Vec) (goal : Vec) : Nat := Id.run do
     0
     1_000_000_000
     buttonToggles
-    orderToIndex
+    (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
     finalAffector
-    availableBands
+    (dbg s!"availableBands:{availableBands}" availableBands)
     buttons
-    goal
+    (dbg s!"goal: {goal}" goal)
 
 
 def solve (input : Input) : Nat :=
