@@ -4,6 +4,7 @@ public import Itertools
 public import WinnowParsers
 public meta import WinnowParsers
 public import «AoC».Basic
+public meta import «AoC».Basic
 public import «AoC».Math
 public meta import «AoC».Math
 
@@ -261,15 +262,67 @@ def bestButtonOrder (buttons affectors' : Array Vec) : Vec := Id.run do
           if value < occr then
             occr := value
         buttonWeights := buttonWeights.set! bId occr
-    let mut tmp : Array (Float × Nat) := buttonWeights.zipIdx
-    tmp := tmp.qsort (buttonOrdering · · == .lt)
-    let target : Nat := tmp[0]!.snd
-    result := result.push target
-    affectors := affectors.iter |>.map (·.erase target) |>.toArray
+    let tmp : Array (Float × Nat) := buttonWeights.zipIdx.qsort (buttonOrdering · · == .lt)
+    let theButton : Nat := tmp[0]!.snd
+    result := result.push theButton
+    affectors := affectors.iter |>.map (·.erase theButton) |>.toArray
   result
 
-/- TODO -/
-#guard bestButtonOrder #[] #[] == #[]
+#guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] == #[0, 2, 1]
+
+def solveRec
+    (level best' : Nat)
+    (button_toggles' : Vec)
+    (orderToIndex : Array Nat)
+    (finalAffector : Array Vec)
+    (availabeBands : Array (Nat × Nat))
+    (buttons : Array Vec)
+    (goal : Vec)
+    : Nat := Id.run do
+  if level ≥ buttons.size then return best'
+  let index : Nat := orderToIndex[level]!
+  let mut best := best'
+  let mut buttonToggles := button_toggles'
+  let mut lightFlips := Array.ofFn (n := goal.size) (fun _ ↦ 0)
+  for i in orderToIndex.iter.take level do
+    for lightId in buttons[i]!.iter do
+      lightFlips := lightFlips.modify lightId.toNat (· + buttonToggles[i]!)
+  for lightId in buttons[index]!.iter do
+      lightFlips := lightFlips.modify lightId.toNat (· + availabeBands[index]!.snd)
+  -- next_value
+  for numToggles in availabeBands[index]!.fst ... availabeBands[index]!.snd do
+    -- - some true  : break 'next_value
+    -- - some false : continue 'next_value
+    let mut skipToNextValue : Option Bool := none
+    buttonToggles := buttonToggles.set! index numToggles
+    for lightId in buttons[index]!.iter do
+      lightFlips := lightFlips.modify lightId.toNat (· - 1)
+    for lightId in finalAffector[index]!.iter do
+      match compare lightFlips[lightId.toNat]! goal[lightId.toNat]! with
+      | .lt => skipToNextValue := some true
+      | .eq => ()
+      | .gt => skipToNextValue := some false
+    match skipToNextValue with
+    | some true => break
+    | some false => continue
+    | _ => ()
+    let ans := buttonToggles.sum.toNat
+    if ans > best then continue
+    match compare lightFlips goal with
+    | .lt =>
+      best := solveRec
+          (level + 1)
+          best
+          buttonToggles
+          orderToIndex
+          finalAffector
+          availabeBands
+          buttons
+          goal
+    | .eq => if ans < best then best := ans
+    | .gt => ()
+  best
+termination_by buttons.size - level
 
 def solve' (buttons : Array Vec) (requirement : Vec) : Nat :=
   let _num_leds := requirement.size
