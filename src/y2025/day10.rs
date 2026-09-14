@@ -334,39 +334,8 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .zip(upper_limits(buttons, goal).iter())
         .map(|(l, u)| (*l, *u))
         .collect::<Vec<_>>();
-    // let order_to_index = best_button_order(&buttons, &affectors, &goal_u16);
     let order_to_index = best_button_order2(buttons, &affectors);
-    // assert_eq!(&order_to_index, &order_to_index2);
-    // let order_to_index = weight_order(buttons);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
-    let mut basin: Vec<usize> = Vec::new();
-    {
-        for level in 0..num_buttons {
-            let mut fixed = Vec::new();
-            for b_id in order_to_index.iter().take(level + 1) {
-                for l_id in final_affector[*b_id].iter() {
-                    fixed.push(*l_id);
-                }
-            }
-            if order_to_index
-                .iter()
-                .take(level + 1)
-                .all(|b_id| buttons[*b_id].iter().any(|l_id| fixed.contains(l_id)))
-            {
-                basin.push(level);
-            }
-        }
-        // println!(
-        //     "\
-        // - goal           : {goal:?}\n\
-        // - affectors      : {affectors:?}\n\
-        // - order_to_index : {order_to_index:?}\n\
-        // - buttons        (ordered): {btns:?}\n\
-        // - final_affector (ordered): {final_affector:?}\n\
-        // - available_bands(ordered): {bands:?}\n\
-        // - basin          (ordered): {basin:?}"
-        // );
-    }
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     solve2_rec(
