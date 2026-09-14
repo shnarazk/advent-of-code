@@ -305,13 +305,13 @@ def solveRec
       | .lt => skipToNextValue := some true
       | .eq => ()
       | .gt => if skipToNextValue.isNone then skipToNextValue := some false
-    match dbg s!"   {buttonToggles}: {lightFlips}" skipToNextValue with
+    match /- dbg s!"   {buttonToggles}: {lightFlips}" -/ skipToNextValue with
     | some true => break
     | some false => continue
     | _ => ()
     let ans := buttonToggles.sum.toNat
     if ans > best then continue
-    match (fun a ↦ dbg s!"{level}/{index}{buttonToggles}: {lightFlips} {a.isLT}" a) <| reachability lightFlips goal with
+    match /- (fun a ↦ dbg s!"{level}/{index}{buttonToggles}: {lightFlips} {a.isLT}" a) <| -/ reachability lightFlips goal with
     | .lt =>
       best := solveRec
           (level + 1)
@@ -323,7 +323,7 @@ def solveRec
           buttons
           goal
         |> (min · best)
-    | .eq => if ans < best then best := dbg "improved" ans
+    | .eq => if ans < best then best := dbg s!"improved {ans}" ans
     | .gt => continue
   best
 termination_by buttons.size - level
