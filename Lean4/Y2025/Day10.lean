@@ -10,6 +10,13 @@ public meta import «AoC».Math
 
 abbrev Vec := Array Int
 
+-- for debug
+instance : Std.ToFormat Ordering where
+  format o := match o with
+    | .lt => "lt"
+    | .eq => "eq"
+    | .gt => "gt"
+
 class ToVec (α : Type) (β : outParam Type) where
   toVec : α → β
 
@@ -183,22 +190,22 @@ instance : HMul (Array Vec) Vec Vec where
       (fun acc (i, n) ↦ acc + buttons[i]! * n)
       (Array.replicate buttons[0]!.size 0)
 
-def upperLimits₁ (buttons : Array Vec) (goal : Vec) : Array Nat :=
+def upperLimits₁ (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat :=
   buttons.iter
-    |>.map (·.iter.map (goal[·.toNat]!) |>.fold min (goal.max?.unwrapOr 0) |> (·.toNat + 1))
+    |>.map (·.iter.map (goal[·]!) |>.fold min (goal.max?.unwrapOr 0) |> (· + 1))
     |>.toArray
 
 #guard upperLimits₁ #[#[0, 1], #[1, 2]] #[2, 5, 6] == #[3, 6]
 
-def lowerLimits (buttons : Array Vec) (goal : Vec) : Array Nat := Id.run do
-  let mut affectors : Array Vec := Array.ofFn (n := goal.size) (fun _ ↦ #[])
+def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := Id.run do
+  let mut affectors : Array (Array Nat) := Array.ofFn (n := goal.size) (fun _ ↦ #[])
   for (target, b_id) in buttons.zipIdx.iter do
     for light_id in target do
-      affectors := affectors.modify light_id.toNat (·.push b_id)
+      affectors := affectors.modify light_id (·.push b_id)
   let mut result : Array Nat := Array.ofFn (n := buttons.size) (fun _ ↦ 0)
   for (bs, light_id) in affectors.zipIdx.iter do
     if bs.size == 1 then
-      result := result.set! bs[0]!.toNat goal[light_id]!.toNat
+      result := result.set! bs[0]! goal[light_id]!
   result
 
 #guard lowerLimits #[#[0, 1], #[2]] #[4, 2, 6] == #[2, 6]
@@ -206,18 +213,16 @@ def lowerLimits (buttons : Array Vec) (goal : Vec) : Array Nat := Id.run do
 /-- orderの下で各buttonによって値が確定するlight
 - Rustの `final_affectors`をrename
 -/
-def fixLights (buttons : Array Vec) (order : Array Nat) (numLights : Nat) : Array Vec := Id.run do
-  let mut lastAffector : Vec := Array.ofFn (n := numLights) (fun _ ↦ 0)
+def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat)
+    : Array (Array Nat) := Id.run do
+  let mut lastAffector : Array Nat := Array.ofFn (n := numLights) (fun _ ↦ 0)
   for buttonId in order.iter do
     for lightId in buttons[buttonId]!.iter do
-      lastAffector := lastAffector.set! lightId.toNat buttonId
+      lastAffector := lastAffector.set! lightId buttonId
   Array.range buttons.size
     |>.iter
     |>.map (fun buttonId ↦
-        lastAffector.zipIdx.iter
-          |>.filter (fun (b, _) ↦ b.toNat == buttonId)
-          |>.map (fun (_, i) ↦ i) -- なぜか Prod.snd にすると型エラー
-          |>.toArray )
+        lastAffector.zipIdx.iter.filter (·.fst == buttonId) |>.map Prod.snd |>.toArray )
     |>.toArray
 
 #guard fixLights #[#[0, 1], #[2], #[0, 2]] #[0, 1, 2] 3 == #[#[1], #[], #[0, 2]]
@@ -225,7 +230,7 @@ def fixLights (buttons : Array Vec) (order : Array Nat) (numLights : Nat) : Arra
 /-- Return `Odering` compared with the `goal`
 - Rustの `compare`をrename
 -/
-def reachability (flips goal : Vec) : Ordering := Id.run do
+def reachability (flips goal : Array Nat) : Ordering := Id.run do
   let mut ord := Ordering.eq
   for (f, g) in (flips.zip goal).iter do
     match compare f g with
@@ -245,7 +250,7 @@ def buttonOrdering (a b : Float × Nat) : Ordering :=
   then compare a.snd b.snd
   else if a.fst < b.fst then .lt else .gt
 
-def bestButtonOrder (buttons affectors' : Array Vec) : Array Nat := Id.run do
+def bestButtonOrder (buttons : Array (Array Nat)) (affectors' : Array Vec) : Array Nat := Id.run do
   let fMax :Float := 10_000_000.0
   let numButtons := buttons.size
   let mut result : Array Nat := #[]
@@ -258,8 +263,8 @@ def bestButtonOrder (buttons affectors' : Array Vec) : Array Nat := Id.run do
         continue
       let mut occr := fMax
       for lId in affectingLights.iter do
-        if affectors[lId.toNat]!.contains bId then
-          let value : Float := affectors[lId.toNat]!.size.toFloat
+        if affectors[lId]!.contains bId then
+          let value : Float := affectors[lId]!.size.toFloat
           if value < occr then
             occr := value
         buttonWeights := buttonWeights.set! bId occr
@@ -273,23 +278,23 @@ def bestButtonOrder (buttons affectors' : Array Vec) : Array Nat := Id.run do
 
 def solveRec
     (level best' : Nat)
-    (button_toggles' : Vec)
+    (button_toggles' : Array Nat)
     (orderToIndex : Array Nat)
-    (finalAffector : Array Vec)
+    (finalAffector : Array (Array Nat))
     (availabeBands : Array (Nat × Nat))
-    (buttons : Array Vec)
-    (goal : Vec)
+    (buttons : Array (Array Nat))
+    (goal : Array Nat)
     : Nat := Id.run do
   if level ≥ buttons.size then return best'
   let index : Nat := orderToIndex[level]!
   let mut best := best'
   let mut buttonToggles := button_toggles'
-  let mut lightFlips := Array.ofFn (n := goal.size) (fun _ ↦ 0)
+  let mut lightFlips : Array Nat := Array.ofFn (n := goal.size) (fun _ ↦ 0)
   for i in orderToIndex.iter.take level do
     for lightId in buttons[i]!.iter do
-      lightFlips := lightFlips.modify lightId.toNat (· + buttonToggles[i]!)
+      lightFlips := lightFlips.modify lightId (· + buttonToggles[i]!)
   for lightId in buttons[index]!.iter do
-      lightFlips := lightFlips.modify lightId.toNat (· + availabeBands[index]!.snd)
+      lightFlips := lightFlips.modify lightId (· + availabeBands[index]!.snd)
   -- next_value
   let band := availabeBands[index]!.snd - availabeBands[index]!.fst
   for numToggles' in 0 ... band do
@@ -299,9 +304,9 @@ def solveRec
     let mut skipToNextValue : Option Bool := none
     buttonToggles := buttonToggles.set! index numToggles
     for lightId in buttons[index]!.iter do
-      lightFlips := lightFlips.modify lightId.toNat (· - 1)
+      lightFlips := lightFlips.modify lightId (· - 1)
     for lightId in finalAffector[index]!.iter do
-      match compare lightFlips[lightId.toNat]! goal[lightId.toNat]! with
+      match compare lightFlips[lightId]! goal[lightId]! with
       | .lt => skipToNextValue := some true
       | .eq => ()
       | .gt => if skipToNextValue.isNone then skipToNextValue := some false
@@ -309,9 +314,9 @@ def solveRec
     | some true => break
     | some false => continue
     | _ => ()
-    let ans := buttonToggles.sum.toNat
+    let ans := buttonToggles.sum
     if ans > best then continue
-    match /- (fun a ↦ dbg s!"{level}/{index}{buttonToggles}: {lightFlips} {a.isLT}" a) <| -/ reachability lightFlips goal with
+    match /- (fun a ↦ dbg f!"{level}/{index}{buttonToggles}: {lightFlips} {a}" a) <| -/ reachability lightFlips goal with
     | .lt =>
       best := solveRec
           (level + 1)
@@ -328,13 +333,13 @@ def solveRec
   best
 termination_by buttons.size - level
 
-def solve' (buttons : Array Vec) (goal : Vec) : Nat := Id.run do
+def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
   let numButtons := buttons.size
   let numLights := goal.size
   let mut affectors : Array Vec := Array.ofFn (n := numLights) (fun _ ↦ #[])
   for (lights, bId) in buttons.zipIdx.iter do
     for lId in lights.iter do
-      affectors := affectors.modify lId.toNat (·.push bId)
+      affectors := affectors.modify lId (·.push bId)
   let availableBands := Array.zip (lowerLimits buttons goal) (upperLimits₁ buttons goal)
   let orderToIndex := bestButtonOrder buttons affectors
   let finalAffector := fixLights buttons orderToIndex numLights
@@ -352,7 +357,7 @@ def solve' (buttons : Array Vec) (goal : Vec) : Nat := Id.run do
 
 def solve (input : Input) : Nat :=
   input.line.iter
-    |>.map (fun (_, b, r) ↦ solve' b.inted r.inted)
+    |>.map (fun (_, b, r) ↦ solve' b r)
     |>.sum
 
 end Part2
