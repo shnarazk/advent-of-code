@@ -13,17 +13,13 @@ linter.unusedVariables = true
 [[require]]
 name = "batteries"
 scope = "leanprover-community"
-# git = "git@github.com:shnarazk/batteries.git"
-# rev = "main"
-rev = "v4.34.0"
+rev = "v4.35.0-rc2"
 
 [[require]]
 name = "Cli"
 scope = "leanprover"
 git = "git@github.com:leanprover/lean4-cli.git"
-# rev = "main"
-rev = "v4.34.0"
-# version = "git#e4d23db1b205e04589230eedbfe1439693dd3b9c"
+rev = "v4.35.0-rc2"
 
 [[require]]
 name = "lean4-itertools"
@@ -54,7 +50,6 @@ name = "aoc"
 root = "AoC"
 moreLinkArgs = ["-O3", "-UNDEBUG"]
 buildType = "release"
-# supportInterpreter = true
 
 [[lean_exe]]
 name = "testDriver"
