@@ -42,9 +42,15 @@ def W (f : α → α → β) (a : α) := f a a
 @[inline]
 def C (f : α → β → γ) (b : β) (a : α) : γ := f a b
 
-/-- Composition: λf g a. f (g a) -/
-@[inline]
+/-- Composition: λf g a. f (g a)
+- Use `f ∘' g` notation instead of a direct call
+- -/
+@[inline, reducible]
 def B (f : β → γ) (g : α → β) (a : α) := f (g a)
+
+@[inherit_doc] infixr:80 " ∘' " => B
+
+#guard ((· + 2) ∘' (· + 1)) (8 : Nat) = 11
 
 /-- Monadic After: λf g a. f a (g a)
 - `D` is the dyadic version,
@@ -57,11 +63,15 @@ def S (f : α → β → γ) (g : α → β) (a : α) := f a (g a)
 @[inline]
 def D (f : α → γ → δ) (a : α) (g : β → γ) (b : β) := f a (g b)
 
-/-- Monadic Before: λf g a. f (g a) a
+/-- Monadic Before: λf g.λ a. f (g a) a
 - _This is not included in the paper._
 - `S` is the mirror version. -/
 @[inline]
-def T (f : β → α → γ) (g : α → β) (a : α) := f (g a) a
+def T (f : β → α → γ) (g : α → β) : α → γ := fun a ↦ f (g a) a
+
+-- @[inherit_doc] infixr:90 " -∘ " => T
+--
+-- #guard ((· + ·) -∘ (· + (1 : Nat))) (8 : Nat) = 17
 
 /-- Dyadic Composition: λf g a b. f (g a b) -/
 @[inline]
