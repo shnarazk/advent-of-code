@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2025/day/10>
 use {
-    crate::framework::{AdventOfCode, ParseError, aoc},
+    crate::framework::{aoc, AdventOfCode, ParseError},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     std::{cmp::Ordering, collections::HashSet},
@@ -18,10 +18,10 @@ mod parser {
         super::Spec,
         crate::parser::parse_usize,
         winnow::{
-            ModalResult, Parser,
             ascii::newline,
             combinator::{repeat, separated, seq},
             token::one_of,
+            ModalResult, Parser,
         },
     };
 
