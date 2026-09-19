@@ -68,10 +68,10 @@ def solve (input : Input) : Nat := Id.run do
   let num_boxes := input.boxes.size
   let mut group : Batteries.UnionFind := Batteries.UnionFind.mkEmpty num_boxes
   while group.size < num_boxes do group := group.push
-  for (_, (i, j)) in input.dists do
+  for (_, (i, j)) in input.dists.iter do
     group := group.union! i j
     let root := group.root! 0
-    if (0...num_boxes).iter.all (group.root! · == root) then
+    if (1...num_boxes).iter.all (group.root! · == root) then
       return input.boxes[i]!.x.toNat * input.boxes[j]!.x.toNat
   0
 
