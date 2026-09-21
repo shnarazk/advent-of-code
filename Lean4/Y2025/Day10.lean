@@ -315,7 +315,7 @@ def solveRec
     | some false => continue
     | _ => ()
     let ans := buttonToggles.sum
-    if ans > best then continue
+    if ans ≥ best then continue
     match /- (fun a ↦ dbg f!"{level}/{index}{buttonToggles}: {lightFlips} {a}" a) <| -/ reachability lightFlips goal with
     | .lt =>
       best := solveRec
