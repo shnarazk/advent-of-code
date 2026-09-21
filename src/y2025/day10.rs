@@ -1,6 +1,6 @@
 //! <https://adventofcode.com/2025/day/10>
 use {
-    crate::framework::{aoc, AdventOfCode, ParseError},
+    crate::framework::{AdventOfCode, ParseError, aoc},
     microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     std::{cmp::Ordering, collections::HashSet},
@@ -18,10 +18,10 @@ mod parser {
         super::Spec,
         crate::parser::parse_usize,
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{repeat, separated, seq},
             token::one_of,
-            ModalResult, Parser,
         },
     };
 
@@ -97,8 +97,7 @@ impl AdventOfCode for Puzzle {
             .par_iter()
             .enumerate()
             .map(|(i, (_, buttons, goal))| {
-                dbg!(i);
-                let new = solve2(buttons, goal);
+                let new = solve2(i, buttons, goal);
                 // assert_eq!(solve(buttons, goal), new);
                 new
             })
@@ -189,22 +188,30 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
     ord
 }
 
+struct Setting {
+    id: usize,
+    order_to_index: Vec<usize>,
+    final_affector: Vec<Vec<usize>>,
+    available_bands: Vec<(usize, usize)>,
+    buttons: Vec<Vec<usize>>,
+    goal: Vec<u16>,
+}
+
 /// level-1まで確定した部分解に対して one step展開する。
-fn solve2_rec(
-    level: usize,
-    best: &mut usize,
-    button_toggles_pre: &[usize],
-    order_to_index: &[usize],
-    final_affector: &[Vec<usize>],
-    available_bands: &[(usize, usize)],
-    buttons: &[Vec<usize>],
-    goal: &[u16],
-) {
-    if level == buttons.len() {
+fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setting) {
+    let Setting {
+        id,
+        order_to_index,
+        final_affector,
+        available_bands,
+        buttons,
+        goal,
+    } = setting;
+    if level == setting.buttons.len() {
         return;
     }
     let index = order_to_index[level];
-    let mut button_toggles = button_toggles_pre.to_vec();
+    let mut button_toggles = toggles.to_vec();
     let mut light_flips: Vec<u16> = vec![0; goal.len()];
     for i in order_to_index.iter().take(level) {
         for light_id in buttons[*i].iter() {
@@ -230,28 +237,19 @@ fn solve2_rec(
             }
         }
         let ans = button_toggles.iter().sum::<usize>();
-        if ans > *best {
+        if ans >= *best {
             continue;
         }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
                     *best = ans;
-                    println!("- {best:>4} = ∑ {button_toggles:?}");
+                    println!("-({id:>3}) {best:>4} = ∑ {button_toggles:?}");
                 }
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                solve2_rec(
-                    level + 1,
-                    best,
-                    &button_toggles,
-                    order_to_index,
-                    final_affector,
-                    available_bands,
-                    buttons,
-                    goal,
-                );
+                solve2_rec(level + 1, best, &button_toggles, setting);
             }
         }
     }
@@ -265,12 +263,11 @@ fn button_order(a: &(f64, usize), b: &(f64, usize)) -> Ordering {
     }
 }
 
-fn best_button_order2(
-    // button -> [lights]
-    buttons: &[Vec<usize>],
-    // light -> [button]
-    affectors_base: &[Vec<usize>],
-) -> Vec<usize> {
+///
+/// - buttons: button -> [lights]
+/// - affectors_base: light -> [button]
+///
+fn best_button_order2(buttons: &[Vec<usize>], affectors_base: &[Vec<usize>]) -> Vec<usize> {
     // println!("buttons: {:?}", &buttons);
     // println!("goal: {:?}", &goal);
     let num_buttons: usize = buttons.len();
@@ -314,7 +311,7 @@ fn best_button_order2(
     result
 }
 
-fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
+fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let num_buttons: usize = buttons.len();
     let num_lights: usize = goal.len();
     debug_assert!(goal.iter().all(|n| *n <= 1024));
@@ -338,15 +335,14 @@ fn solve2(buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
-    solve2_rec(
-        0,
-        &mut best,
-        &button_toggles,
-        &order_to_index,
-        &final_affector,
-        &available_bands,
-        buttons,
-        &goal_u16,
-    );
+    let setting = Setting {
+        id,
+        order_to_index,
+        final_affector,
+        available_bands,
+        buttons: buttons.to_vec(),
+        goal: goal_u16.to_vec(),
+    };
+    solve2_rec(0, &mut best, &button_toggles, &setting);
     best
 }
