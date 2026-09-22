@@ -230,6 +230,7 @@ def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat
 /-- Return `Odering` compared with the `goal`
 - Rustの `compare`をrename
 -/
+@[inline]
 def reachability (flips goal : Array Nat) : Ordering := Id.run do
   let mut ord := Ordering.eq
   for (f, g) in (flips.zip goal).iter do
@@ -250,31 +251,32 @@ def buttonOrdering (a b : Float × Nat) : Ordering :=
   then compare a.snd b.snd
   else if a.fst < b.fst then .lt else .gt
 
-def bestButtonOrder (buttons : Array (Array Nat)) (affectors' : Array Vec) : Array Nat := Id.run do
-  let fMax :Float := 10_000_000.0
+def bestButtonOrder
+    (buttons : Array (Array Nat))
+    (affectors' : Array Vec) -- light → [button]
+    (goal: Array Nat)
+    : Array Nat := Id.run do
   let numButtons := buttons.size
   let mut result : Array Nat := #[]
   let mut affectors := affectors'
   for _ in 0 ... numButtons do
     let mut buttonWeights : Array Float := Array.ofFn (n := numButtons) (fun _ ↦ 0.0)
-    for (affectingLights, bId) in buttons.zipIdx.iter do
-      if result.contains bId then
-        buttonWeights := buttonWeights.set! bId fMax
-        continue
-      let mut occr := fMax
+    for (affectingLights, bId) in buttons.zipIdx.iter.filter (!result.contains ·.snd) do
       for lId in affectingLights.iter do
         if affectors[lId]!.contains bId then
-          let value : Float := affectors[lId]!.size.toFloat
-          if value < occr then
-            occr := value
-        buttonWeights := buttonWeights.set! bId occr
-    let tmp : Array (Float × Nat) := buttonWeights.zipIdx.qsort (buttonOrdering · · == .lt)
+          let r : Float := affectors[lId]!.size.toFloat
+          let s : Float := goal[lId]!.toFloat
+          buttonWeights := buttonWeights.modify bId (· + s * r / (r + 1.0))
+    let tmp : Array (Float × Nat) := buttonWeights.zipIdx.qsort (buttonOrdering · · == .gt)
     let theButton : Nat := tmp[0]!.snd
     result := result.push theButton
     affectors := affectors.iter |>.map (·.erase theButton) |>.toArray
   result
 
-#guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] == #[0, 2, 1]
+#guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] #[1, 9]
+    == #[2, 0, 1]
+#guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] #[9, 1]
+    == #[2, 1, 0]
 
 def solveRec
     (level best' : Nat)
@@ -341,7 +343,7 @@ def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
     for lId in lights.iter do
       affectors := affectors.modify lId (·.push bId)
   let availableBands := Array.zip (lowerLimits buttons goal) (upperLimits₁ buttons goal)
-  let orderToIndex := bestButtonOrder buttons affectors
+  let orderToIndex := bestButtonOrder buttons affectors goal
   let finalAffector := fixLights buttons orderToIndex numLights
   let buttonToggles := Array.ofFn (n := numButtons) (fun _ ↦ 0)
   solveRec
@@ -350,10 +352,9 @@ def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
     buttonToggles
     (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
     finalAffector
-    (dbg s!"availableBands:{availableBands}" availableBands)
+    (dbg s!"availableBands: {availableBands}" availableBands)
     buttons
     (dbg s!"goal: {goal}" goal)
-
 
 def solve (input : Input) : Nat :=
   input.line.iter
