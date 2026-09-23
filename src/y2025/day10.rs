@@ -198,7 +198,13 @@ struct Setting {
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
-fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setting) {
+fn solve2_rec(
+    level: usize,
+    best: &mut usize,
+    toggles: &[usize],
+    hash: &mut HashSet<Vec<u16>>,
+    setting: &Setting,
+) {
     let Setting {
         id,
         order_to_index,
@@ -240,6 +246,9 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
         if ans >= *best {
             continue;
         }
+        if level == 8 && *best != usize::MAX && hash.contains(&light_flips) {
+            continue;
+        }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
@@ -249,7 +258,15 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                solve2_rec(level + 1, best, &button_toggles, setting);
+                if level == 8 && *best != usize::MAX && *best - ans < 10 {
+                    let pre = *best;
+                    solve2_rec(level + 1, best, &button_toggles, hash, setting);
+                    if pre == *best {
+                        hash.insert(light_flips.clone());
+                    }
+                } else {
+                    solve2_rec(level + 1, best, &button_toggles, hash, setting);
+                }
             }
         }
     }
@@ -343,6 +360,8 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
     };
-    solve2_rec(0, &mut best, &button_toggles, &setting);
+    let mut hash: HashSet<Vec<u16>> = HashSet::new();
+    solve2_rec(0, &mut best, &button_toggles, &mut hash, &setting);
+    dbg!(hash.len());
     best
 }
