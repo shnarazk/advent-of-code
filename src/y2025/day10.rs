@@ -189,12 +189,14 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 }
 
 struct Setting {
-    id: usize,
+    _id: usize,
+    // num_lights: usize,
     order_to_index: Vec<usize>,
     final_affector: Vec<Vec<usize>>,
     available_bands: Vec<(usize, usize)>,
     buttons: Vec<Vec<usize>>,
     goal: Vec<u16>,
+    mid_point: usize,
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
@@ -203,15 +205,19 @@ fn solve2_rec(
     best: &mut usize,
     toggles: &[usize],
     hash: &mut HashSet<Vec<u16>>,
+    used: &mut usize,
     setting: &Setting,
 ) {
     let Setting {
-        id,
+        // id,
+        // num_lights,
         order_to_index,
         final_affector,
         available_bands,
         buttons,
         goal,
+        mid_point,
+        ..
     } = setting;
     if level == setting.buttons.len() {
         return;
@@ -246,26 +252,27 @@ fn solve2_rec(
         if ans >= *best {
             continue;
         }
-        if level == 8 && *best != usize::MAX && hash.contains(&light_flips) {
+        if level >= *mid_point && *best != usize::MAX && hash.contains(&light_flips) {
+            *used += 1;
             continue;
         }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
                     *best = ans;
-                    println!("-({id:>3}) {best:>4} = ∑ {button_toggles:?}");
+                    // println!("-({id:>3}) {best:>4} = ∑ {button_toggles:?}");
                 }
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                if level == 8 && *best != usize::MAX && *best - ans < 10 {
+                if *best != usize::MAX && level == *mid_point {
                     let pre = *best;
-                    solve2_rec(level + 1, best, &button_toggles, hash, setting);
+                    solve2_rec(level + 1, best, &button_toggles, hash, used, setting);
                     if pre == *best {
                         hash.insert(light_flips.clone());
                     }
                 } else {
-                    solve2_rec(level + 1, best, &button_toggles, hash, setting);
+                    solve2_rec(level + 1, best, &button_toggles, hash, used, setting);
                 }
             }
         }
@@ -352,16 +359,36 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
+    // light -> [affecting_level]
+    let _order_affectors: Vec<Vec<usize>> = {
+        let mut tmp: Vec<Vec<usize>> = vec![Vec::new(); num_lights];
+        for (order, b_id) in order_to_index.iter().enumerate() {
+            for l_id in buttons[*b_id].iter() {
+                tmp[*l_id].push(order);
+            }
+        }
+        tmp
+    };
+    // the minimal level at which each light turns on at least once.
     let setting = Setting {
-        id,
+        _id: id,
         order_to_index,
         final_affector,
         available_bands,
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
+        mid_point: num_buttons - 3,
     };
     let mut hash: HashSet<Vec<u16>> = HashSet::new();
-    solve2_rec(0, &mut best, &button_toggles, &mut hash, &setting);
-    dbg!(hash.len());
+    let mut used: usize = 0;
+    solve2_rec(
+        0,
+        &mut best,
+        &button_toggles,
+        &mut hash,
+        &mut used,
+        &setting,
+    );
+    println!("-({:>3}){:>8},{:>9}", id, hash.len(), used);
     best
 }
