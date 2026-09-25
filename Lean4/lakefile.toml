@@ -13,13 +13,13 @@ linter.unusedVariables = true
 [[require]]
 name = "batteries"
 scope = "leanprover-community"
-rev = "v4.35.0-rc2"
+rev = "v4.35.0-rc3"
 
 [[require]]
 name = "Cli"
 scope = "leanprover"
 git = "git@github.com:leanprover/lean4-cli.git"
-rev = "v4.35.0-rc2"
+rev = "v4.35.0-rc3"
 
 [[require]]
 name = "lean4-itertools"
