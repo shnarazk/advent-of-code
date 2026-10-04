@@ -9,7 +9,7 @@ public meta import «AoC».Basic
 public import «AoC».Combinator
 -- public import «AoC».Vec
 
-namespace Y2025.Day00
+namespace Y2027.Day00
 
 open Std
 
@@ -17,7 +17,9 @@ open Std
 structure Input where
 deriving BEq, Hashable, Repr
 
-instance : ToString Input where toString _ := s!""
+-- instance : ToString Input where toString _ := s!"as string"
+-- instance : Repr Input where reprPrec _ _ := s!"as repr"
+instance : ToFormat Input where format _ := f!"«d: »"
 
 namespace parser
 
@@ -45,9 +47,9 @@ def solve (_ : Input) : Nat := Id.run do 0
 
 end Part2
 
-public def solve := AocProblem.config 2025 00
-  ((CiCL.T dbg (fun data ↦ s!"parsed as {data}")) ∘ parser.parse)
+public def solve := AocProblem.config 2027 00
+  ((CiCL.T dbg (fun data ↦ f!"parsed as {data}")) ∘ parser.parse)
   Part1.solve
   Part2.solve
 
-end Y2025.Day00
+end Y2027.Day00
