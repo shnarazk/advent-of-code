@@ -35,6 +35,9 @@ pub struct ConfigAoC {
     /// activate 'dump' function for JSON serialization
     #[arg(short, long)]
     pub serialize: bool,
+    /// Download the input of the target day to data/YEAR/input-dayDD.txt, using $AOC_SESSION as the session cookie
+    #[arg(short, long)]
+    pub download: bool,
 }
 impl ConfigAoC {
     /// return data file name

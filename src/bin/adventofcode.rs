@@ -28,7 +28,7 @@ use serde::Serialize;
 use {
     adventofcode::{
         aoc_arms, color,
-        framework::{AdventOfCode, ConfigAoC, JSON_DUMP_DIR},
+        framework::{AdventOfCode, ConfigAoC, DATA_DIR, JSON_DUMP_DIR},
         progress,
     },
     clap::Parser,
@@ -42,13 +42,40 @@ use {
 pub fn main() {
     let config = ConfigAoC::parse();
     let last_day: usize = if config.year <= 2024 { 25 } else { 12 };
-    if config.bench {
+    if config.download {
+        let Some(day) = config.day.filter(|day| (1..=last_day).contains(day)) else {
+            panic!("{}No valid day{}", color::RED, color::RESET);
+        };
+        match download_input(config.year, day) {
+            Ok(path) => println!("{}# download succeeded: {}{}", color::MAGENTA, path, color::RESET),
+            Err(e) => {
+                println!("{}# download failed: {}{}", color::RED, e, color::RESET);
+                std::process::exit(1);
+            }
+        }
+    } else if config.bench {
         bench(config);
     } else if config.day.is_none_or(|day| last_day < day) {
         panic!("{}No valid day{}", color::RED, color::RESET);
     } else {
         run_solver(config);
     }
+}
+
+/// Download the puzzle input with the session cookie in `$AOC_SESSION`; return the saved path.
+fn download_input(year: usize, day: usize) -> Result<String, Box<dyn std::error::Error>> {
+    let session = std::env::var("AOC_SESSION").map_err(|_| "environment variable AOC_SESSION is not set")?;
+    let url = format!("https://adventofcode.com/{year}/day/{day}/input");
+    let mut response = ureq::get(&url)
+        .header("Cookie", format!("session={}", session.trim()))
+        .header("User-Agent", "github.com/shnarazk/advent-of-code by shujinarazaki@protonmail.com")
+        .call()?;
+    let body = response.body_mut().read_to_string()?;
+    let dir = format!("{DATA_DIR}/{year}");
+    fs::create_dir_all(&dir)?;
+    let path = format!("{dir}/input-day{day:>02}.txt");
+    fs::write(&path, body)?;
+    Ok(path)
 }
 
 fn run_solver(mut config: ConfigAoC) {
