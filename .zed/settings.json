@@ -1,0 +1,33 @@
+{
+  "file_scan_exclusions": [
+    "**/.delta",
+    "**/.git",
+    "**/data",
+    "**/target",
+    "**/BQN",
+    "**/Julia",
+    "**/Uiua-0.7",
+  ],
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "files": {
+          "excludeDirs": [
+            ".delta",
+            "target",
+            "data",
+            "misc",
+            "BQN",
+            "Factor",
+            "Julia",
+            "Lean4",
+            "Ocaml5-AoC",
+            "Pharo",
+            "Swift",
+            "Uiua-0.7",
+          ]
+        }
+      }
+    }
+  }
+}
