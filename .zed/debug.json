@@ -5,6 +5,7 @@
 [
   {
     "label": "Debug AoC",
+    "sourceLanguages": ["rust"],
     "adapter": "CodeLLDB",
     "build": {
       "command": "cargo",

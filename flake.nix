@@ -10,7 +10,6 @@
       devShells.default = pkgs.mkShell {
         packages = [
           pkgs.cargo-watch
-          pkgs.gdb
           pkgs.graphviz
           pkgs.lldb_22
           pkgs.libiconv
