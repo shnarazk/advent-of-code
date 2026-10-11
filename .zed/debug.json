@@ -14,5 +14,9 @@
     "program": "~/.cargo/target/debug/adventofcode",
     "cwd": "$ZED_WORKTREE_ROOT",
     "args": ["10", "0"],
+    "env": {
+      "PATH": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Resources:${env:PATH}"
+    },
+    // "env": {"PATH": "~/.local/bin:${env:PATH}"},
   },
 ]

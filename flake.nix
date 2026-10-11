@@ -9,10 +9,10 @@
     in {
       devShells.default = pkgs.mkShell {
         packages = [
-          # pkgs.bashInteractive
           pkgs.cargo-watch
+          pkgs.gdb
           pkgs.graphviz
-          pkgs.lldb_21
+          pkgs.lldb_22
           pkgs.libiconv
           pkgs.samply # a profiler
           pkgs.tokei
