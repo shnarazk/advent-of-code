@@ -1,5 +1,10 @@
 Factor always crashes after the first(?) gc on M1. I gave up for now.
 
+# 2026-10-15
+
+Factor 0.102 works!
+
+
 # 2024-07-07
 
 Here's the patch to run:
