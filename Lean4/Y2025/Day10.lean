@@ -17,28 +17,6 @@ instance : Std.ToFormat Ordering where
     | .eq => "eq"
     | .gt => "gt"
 
-class ToVec (α : Type) (β : outParam Type) where
-  toVec : α → β
-
-instance : ToVec Nat Int where
-  toVec (n : Nat) : Int := n.toInt64.toInt
-
-instance {α β : Type} [ToVec α β] : ToVec (Array α) (Array β) where
-  toVec v := v.iter.map ToVec.toVec |>.toArray
-
-#guard ToVec.toVec #[1, 2] == #[(1 : Int), 2]
-#guard ToVec.toVec #[#[1, 2]] == #[#[(1 : Int), 2]]
-#guard ToVec.toVec #[#[#[1], #[2]]] == #[#[#[(1 : Int)], #[2]]]
-
-/-- rank-polymorphic toInt -/
-def Nat.inted (n : Nat) : Int := ToVec.toVec n
-def Array.inted {α β : Type} [ToVec α β] (v : Array α) : Array β := ToVec.toVec v
-
-#guard (3 : Nat).inted == (3 : Int)
-#guard #[1, 2].inted == #[(1 : Int), 2]
-#guard #[#[1, 2]].inted == #[#[(1 : Int), 2]]
-#guard #[#[#[1], #[2]]].inted == #[#[#[(1 : Int)], #[2]]]
-
 namespace Y2025.Day10
 
 structure Input where
@@ -89,7 +67,8 @@ namespace Part1
 
 open Std
 
-def toIdicator (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : Array Bool :=
+/-- return the status of lightscorresponding to the button `state` -/
+def toIndicatorStatus (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : Array Bool :=
   state.iter
     |>.enumerate
     |>.fold
@@ -97,7 +76,8 @@ def toIdicator (buttons : Array (Array Nat)) (state : Array Bool) (len : Nat) : 
         if b then buttons[n]!.iter.fold (fun acc i ↦ acc.modify i (!·)) acc else acc)
       (Array.replicate len false)
 
-#guard toIdicator #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]
+#guard toIndicatorStatus #[#[1], #[0,2]] #[false, true] 3 == #[true, false, true]
+#guard toIndicatorStatus #[#[1], #[1,2]] #[true, true] 3 == #[false, false, true]
 
 def solve' (setting : Array Bool × Array (Array Nat) × Array Nat) : Nat := Id.run do
   let (indicator, buttons,_ ) := setting
@@ -106,7 +86,7 @@ def solve' (setting : Array Bool × Array (Array Nat) × Array Nat) : Nat := Id.
   while !toVisit.isEmpty do
     let mut next : HashSet (Array Bool) := HashSet.emptyWithCapacity 1
     for state in toVisit.iter do
-      if toIdicator buttons state len == indicator then return (state.iter.filter (·) |>.length)
+      if toIndicatorStatus buttons state len == indicator then return (state.iter.filter (·) |>.length)
       for (i, b) in state.iter.enumerate do
         if b then continue
         let s := state.set! i true
@@ -278,16 +258,24 @@ def bestButtonOrder
 #guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] #[9, 1]
     == #[2, 1, 0]
 
+structure Config where
+  orderToIndex : Array Nat
+  finalAffector : Array (Array Nat)
+  availabeBands : Array (Nat × Nat)
+  buttons : Array (Array Nat)
+  goal : Array Nat
+
 def solveRec
     (level best' : Nat)
     (button_toggles' : Array Nat)
-    (orderToIndex : Array Nat)
-    (finalAffector : Array (Array Nat))
-    (availabeBands : Array (Nat × Nat))
-    (buttons : Array (Array Nat))
-    (goal : Array Nat)
+    (config : Config)
     : Nat := Id.run do
-  if level ≥ buttons.size then return best'
+  if level ≥ config.buttons.size then return best'
+  let orderToIndex := config.orderToIndex
+  let finalAffector := config.finalAffector
+  let availabeBands := config.availabeBands
+  let buttons := config.buttons
+  let goal := config.goal
   let index : Nat := orderToIndex[level]!
   let mut best := best'
   let mut buttonToggles := button_toggles'
@@ -320,20 +308,12 @@ def solveRec
     if ans ≥ best then continue
     match /- (fun a ↦ dbg f!"{level}/{index}{buttonToggles}: {lightFlips} {a}" a) <| -/ reachability lightFlips goal with
     | .lt =>
-      best := solveRec
-          (level + 1)
-          best
-          buttonToggles
-          orderToIndex
-          finalAffector
-          availabeBands
-          buttons
-          goal
+      best := solveRec (level + 1) best buttonToggles config
         |> (min · best)
     | .eq => if ans < best then best := dbg s!"improved {ans}" ans
     | .gt => continue
   best
-termination_by buttons.size - level
+termination_by config.buttons.size - level
 
 def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
   let numButtons := buttons.size
@@ -350,11 +330,12 @@ def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
     0
     1_000_000_000
     buttonToggles
-    (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
-    finalAffector
-    (dbg s!"availableBands: {availableBands}" availableBands)
-    buttons
-    (dbg s!"goal: {goal}" goal)
+    (Config.mk
+      (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
+      finalAffector
+      (dbg s!"availableBands: {availableBands}" availableBands)
+      buttons
+      (dbg s!"goal: {goal}" goal))
 
 def solve (input : Input) : Nat :=
   input.line.iter
