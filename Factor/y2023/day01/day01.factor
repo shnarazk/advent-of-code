@@ -21,7 +21,7 @@ IN: y2023.day01
 ;
 
 : transform ( substring -- letter )
-    " " append
+  " " append
   {
     { [ dup " " = ] [ drop CHAR: A ] }
     { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }

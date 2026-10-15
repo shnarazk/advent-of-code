@@ -1,7 +1,7 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2022 Your name.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: advent-of-code-2023 arrays combinators formatting io
+USING: AoC arrays combinators formatting io
 kernel math math.parser prettyprint sequences splitting unicode ;
 IN: test
 
