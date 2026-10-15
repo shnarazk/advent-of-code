@@ -179,13 +179,17 @@ def upperLimits₁ (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat 
 
 def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := Id.run do
   let mut affectors : Array (Array Nat) := Array.ofFn (n := goal.size) (fun _ ↦ #[])
-  for (target, b_id) in buttons.zipIdx.iter do
+  let mut b_id := 0
+  for target in buttons.iter do
     for light_id in target do
       affectors := affectors.modify light_id (·.push b_id)
+    b_id := b_id + 1
   let mut result : Array Nat := Array.ofFn (n := buttons.size) (fun _ ↦ 0)
-  for (bs, light_id) in affectors.zipIdx.iter do
+  let mut light_id := 0
+  for bs in affectors.iter do
     if bs.size == 1 then
       result := result.set! bs[0]! goal[light_id]!
+    light_id := light_id + 1
   result
 
 #guard lowerLimits #[#[0, 1], #[2]] #[4, 2, 6] == #[2, 6]
@@ -241,12 +245,15 @@ def bestButtonOrder
   let mut affectors := affectors'
   for _ in 0 ... numButtons do
     let mut buttonWeights : Array Float := Array.ofFn (n := numButtons) (fun _ ↦ 0.0)
-    for (affectingLights, bId) in buttons.zipIdx.iter.filter (!result.contains ·.snd) do
-      for lId in affectingLights.iter do
-        if affectors[lId]!.contains bId then
-          let r : Float := affectors[lId]!.size.toFloat
-          let s : Float := goal[lId]!.toFloat
-          buttonWeights := buttonWeights.modify bId (· + s * r / (r + 1.0))
+    let mut bId := 0
+    for affectingLights in buttons.iter do
+      if !result.contains bId then
+        for lId in affectingLights.iter do
+          if affectors[lId]!.contains bId then
+            let r : Float := affectors[lId]!.size.toFloat
+            let s : Float := goal[lId]!.toFloat
+            buttonWeights := buttonWeights.modify bId (· + s * r / (r + 1.0))
+      bId := bId + 1
     let tmp : Array (Float × Nat) := buttonWeights.zipIdx.qsort (buttonOrdering · · == .gt)
     let theButton : Nat := tmp[0]!.snd
     result := result.push theButton
@@ -333,7 +340,7 @@ def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
     (Config.mk
       (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
       finalAffector
-      (dbg s!"availableBands: {availableBands}" availableBands)
+      availableBands
       buttons
       (dbg s!"goal: {goal}" goal))
 
