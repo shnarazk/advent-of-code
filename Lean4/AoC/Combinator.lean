@@ -5,7 +5,7 @@ public import Batteries
 
 @[expose] public section
 
-/-
+/-!
 @inproceedings{10.1145/3520306.3534504,
     author = {Hoekstra, Conor},
     title = {Combinatory logic and combinators in array languages},
@@ -20,6 +20,8 @@ public import Batteries
     numpages = {12},
     series = {ARRAY 2022}
 }
+
+Note: there are some equivalents in Mathlb.Logic.Function.Defs
 -/
 
 namespace CiCL -- Combinators in Combinatory Logic
@@ -32,7 +34,7 @@ def I (a : α) := a
 
 /-- Constant: λa b. a -/
 @[inline]
-def K (a : α) (b : β) := (a, b).1
+def K (_ : α) (b : β) := b
 
 /-- Dyandic application -/
 @[inline]
