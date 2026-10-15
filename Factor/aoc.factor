@@ -64,7 +64,7 @@ PRIVATE>
 : run-aoc ( -- )
   args>config [ config>data ] [ config>solver ] bi
   [ run-solver ] benchmark
-  1000000.0 / pprint
+  1000000.0 / "%.2f msec" printf
 ;
 
 MAIN: run-aoc
