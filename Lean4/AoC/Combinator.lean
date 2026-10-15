@@ -30,11 +30,11 @@ variable {α β γ δ ζ η ε : Type}
 
 /-- Identity: λa. a -/
 @[inline]
-def I (a : α) := a
+def I (a : α) : α := a
 
 /-- Constant: λa b. a -/
 @[inline]
-def K (a : α) (_ : β) := a
+def K (a : α) (_ : β) : α := a
 
 /-- Dyandic application -/
 @[inline]
