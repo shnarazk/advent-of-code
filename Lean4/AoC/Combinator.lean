@@ -34,7 +34,7 @@ def I (a : α) := a
 
 /-- Constant: λa b. a -/
 @[inline]
-def K (_ : α) (b : β) := b
+def K (a : α) (_ : β) := a
 
 /-- Dyandic application -/
 @[inline]
