@@ -1,20 +1,18 @@
 USING:
-  arrays combinators io kernel math prettyprint sequences
-  splitting unicode
+  arrays combinators io kernel math prettyprint sequences splitting unicode
 ;
-
 IN: y2023.day01
 
 <PRIVATE
 
-: split-line ( string -- lines ) "\n" split [ "" = ] reject ;
+: split-line ( string -- lines ) "\n" split [ "" = ] reject ; inline
 
 : part1/line ( line -- number )
   [ digit? ] filter
   [ first ] [ last ] bi
   [ CHAR: 0 - ] bi@
   swap 10 * +
-;
+; inline
 
 : transform ( substring -- letter )
   ! Due to the implementation detail, we must guard with string length
@@ -36,7 +34,7 @@ IN: y2023.day01
   ]
   [ first ]
   if
-;
+; inline
 
 : part2/line ( line -- number )
   dup length <iota> >array [ dupd tail transform ] map
@@ -45,7 +43,7 @@ IN: y2023.day01
   [ CHAR: 0 - ] bi@
   swap 10 * +
   swap drop
-;
+; inline
 
 : part1 ( data -- number ) split-line [ part1/line ] map sum ;
 : part2 ( data -- number ) split-line [ part2/line ] map sum ;
