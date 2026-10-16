@@ -13,37 +13,47 @@ IN: aoc
 
 : base-dir ( -- path ) "AOC_DIR" os-env ;
 
+: default-year ( -- n ) 2025 ;
+
 : config>target ( config -- string )
   first3
-  dup empty?
-  [ drop "data/%04d/input-day%02d.txt" sprintf ]
-  [ "data/%04d/input-day%02d-%s.txt" sprintf ]
-  if
+  "data/%04d/input-day%02d%s.txt" sprintf
   base-dir prepend-path
 ;
 
-: target>data ( target -- string )
-  utf8 file-contents
-;
+: target>data ( target -- string ) utf8 file-contents ;
 
-: config>data ( config -- string )
-  config>target target>data
-;
+: config>data ( config -- string ) config>target target>data ;
 
 : args>config ( -- config )
   command-line get dup length
   {
-    { [ dup 0 = ] [ drop drop 2025 1 "" { } 3sequence ] }
-    { [ dup 1 = ] [ drop first string>number 2025 swap "" { } 3sequence ] }
-    { [ dup 2 = ] [ drop dup first string>number swap second string>number "" { } 3sequence ] }
+    { [ dup 0 = ] [ drop drop default-year 1 "" { } 3sequence ] }
+    { [ dup 1 = ]
+      [ drop first string>number default-year swap "" { } 3sequence ] }
+    { [ dup 2 = ]
+      [
+        drop dup last first CHAR: - =
+        [
+          default-year
+          swap dup first string>number
+          swap second
+          { } 3sequence
+        ]
+        [
+          dup first string>number
+          swap second string>number ""
+          { } 3sequence
+        ]
+        if
+      ]
+    }
     [ drop unclip-last swap [ string>number ] map swap suffix ]
   }
   cond
 ;
 
-: args>data ( -- string )
-  args>config config>target target>data
-;
+: args>data ( -- string ) args>config config>target target>data ;
 
 : config>solver ( config -- function )
   but-last
@@ -55,9 +65,7 @@ IN: aoc
   of
 ;
 
-: run-solver ( ? quot: ( ? -- ) -- )
-  call
-;
+: run-solver ( ? quot: ( ? -- ) -- ) call ;
 
 PRIVATE>
 

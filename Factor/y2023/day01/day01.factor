@@ -6,6 +6,7 @@ USING:
 IN: y2023.day01
 
 <PRIVATE
+
 : split-line ( string -- lines ) "\n" split [ "" = ] reject ;
 
 : part1/line ( line -- number )
@@ -17,7 +18,7 @@ IN: y2023.day01
 
 : transform ( substring -- letter )
   ! Due to the implementation detail, we must guard with string length
-  dup [ first "otfsen" member? ] [ length 2 > ]  bi and
+  dup [ first "otfsen" member? ] [ length 2 > ] bi and
   [
     {
       { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
