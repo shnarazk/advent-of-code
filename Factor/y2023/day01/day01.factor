@@ -21,21 +21,25 @@ IN: y2023.day01
 ;
 
 : transform ( substring -- letter )
-  " " append
-  {
-    { [ dup " " = ] [ drop CHAR: A ] }
-    { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
-    { [ dup 0 "two"   swapd subseq-starts-at? ] [ drop CHAR: 2 ] }
-    { [ dup 0 "three" swapd subseq-starts-at? ] [ drop CHAR: 3 ] }
-    { [ dup 0 "four"  swapd subseq-starts-at? ] [ drop CHAR: 4 ] }
-    { [ dup 0 "five"  swapd subseq-starts-at? ] [ drop CHAR: 5 ] }
-    { [ dup 0 "six"   swapd subseq-starts-at? ] [ drop CHAR: 6 ] }
-    { [ dup 0 "seven" swapd subseq-starts-at? ] [ drop CHAR: 7 ] }
-    { [ dup 0 "eight" swapd subseq-starts-at? ] [ drop CHAR: 8 ] }
-    { [ dup 0 "nine"  swapd subseq-starts-at? ] [ drop CHAR: 9 ] }
-    [ first ]
-  }
-  cond
+  ! Due to the implementation detail, we must guard with string length
+  dup [ first "otfsen" member? ] [ length 2 > ]  bi and
+  [
+    {
+      { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
+      { [ dup 0 "two"   swapd subseq-starts-at? ] [ drop CHAR: 2 ] }
+      { [ dup 0 "three" swapd subseq-starts-at? ] [ drop CHAR: 3 ] }
+      { [ dup 0 "four"  swapd subseq-starts-at? ] [ drop CHAR: 4 ] }
+      { [ dup 0 "five"  swapd subseq-starts-at? ] [ drop CHAR: 5 ] }
+      { [ dup 0 "six"   swapd subseq-starts-at? ] [ drop CHAR: 6 ] }
+      { [ dup 0 "seven" swapd subseq-starts-at? ] [ drop CHAR: 7 ] }
+      { [ dup 0 "eight" swapd subseq-starts-at? ] [ drop CHAR: 8 ] }
+      { [ dup 0 "nine"  swapd subseq-starts-at? ] [ drop CHAR: 9 ] }
+      [ first ]
+    }
+    cond
+  ]
+  [ first ]
+  if
 ;
 
 : part2/line ( line -- number )
