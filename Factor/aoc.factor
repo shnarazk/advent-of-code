@@ -1,7 +1,7 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: arrays assocs combinators command-line environment formatting
+USING: accessors arrays assocs combinators command-line environment formatting
   io io.encodings.utf8 io.files io.pathnames
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
@@ -11,12 +11,23 @@ IN: aoc
 
 <PRIVATE
 
+TUPLE: config year day alt ;
+
+: config-new ( year day alt -- config )
+  config new
+  swap >>alt
+  swap >>day
+  swap >>year
+;
+
+! { 2025 } [ 2025 1 "" config-new year>> ] unit-test
+
 : base-dir ( -- path ) "AOC_DIR" os-env ;
 
 : default-year ( -- n ) 2025 ;
 
 : config>target ( config -- string )
-  first3
+  [ year>> ] [ day>> ] [ alt>> ] tri
   "data/%04d/input-day%02d%s.txt" sprintf
   base-dir prepend-path
 ;
@@ -28,9 +39,9 @@ IN: aoc
 : args>config ( -- config )
   command-line get dup length
   {
-    { [ dup 0 = ] [ drop drop default-year 1 "" { } 3sequence ] }
+    { [ dup 0 = ] [ drop drop default-year 1 "" config-new ] }
     { [ dup 1 = ]
-      [ drop first string>number default-year swap "" { } 3sequence ] }
+      [ drop first string>number default-year swap "" config-new ] }
     { [ dup 2 = ]
       [
         drop dup last first CHAR: - =
@@ -38,17 +49,18 @@ IN: aoc
           default-year
           swap dup first string>number
           swap second
-          { } 3sequence
+          config-new
         ]
         [
           dup first string>number
           swap second string>number ""
-          { } 3sequence
+          config-new
         ]
         if
       ]
     }
-    [ drop unclip-last swap [ string>number ] map swap suffix ]
+    [ drop
+      [ first string>number ] [ second string>number ] [ last ] tri config-new ]
   }
   cond
 ;
@@ -56,7 +68,7 @@ IN: aoc
 : args>data ( -- string ) args>config config>target target>data ;
 
 : config>solver ( config -- function )
-  but-last
+  [ year>> ] [ day>> ] bi { } 2sequence
   H{
     { { 2023 1 } [ y2023day01 ] }
     { { 2023 2 } [ y2023day01 ] }
