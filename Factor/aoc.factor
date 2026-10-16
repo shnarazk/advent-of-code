@@ -6,6 +6,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
   y2023.day01
+  y2025.day01
 ;
 IN: aoc
 
@@ -70,7 +71,7 @@ TUPLE: config year day alt ;
 : config>solver ( config -- function )
   [ year>> ] [ day>> ] bi { } 2sequence
   H{
-    { { 2023 1 } [ y2023day01 ] }
+    { { 2025 1 } [ y2025day01 ] }
     { { 2023 2 } [ y2023day01 ] }
   }
   swap
