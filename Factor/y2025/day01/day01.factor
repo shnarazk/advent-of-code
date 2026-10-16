@@ -35,7 +35,7 @@ IN: y2025.day01
     [ dup zero? [ 1 + ] [ 100 /i ] if ] [ 100 mod ] bi ! ( inc next' )
   ]
   if-negative
- ;
+ ; inline
 
 ! { 0  5 } [ 1    5 part2/passing_mod100 ] unit-test
 ! { 1  2 } [ 1  102 part2/passing_mod100 ] unit-test
@@ -52,7 +52,7 @@ IN: y2025.day01
   part2/passing_mod100         ! ( count inc next' )
   -rot +                       ! ( next' count' )
   swap { } 2sequence
- ;
+ ; inline
 
 : part1 ( turns -- number ) { 0 50 } [ part1/step ] reduce first ;
 : part2 ( turns -- number ) { 0 50 } [ part2/step ] reduce first ;
