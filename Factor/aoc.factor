@@ -1,7 +1,7 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
 ! See https://factorcode.org/license.txt for BSD license.
-USING: arrays combinators command-line environment formatting
+USING: arrays assocs combinators command-line environment formatting
   io io.encodings.utf8 io.files io.pathnames
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode

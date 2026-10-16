@@ -1,11 +1,6 @@
-#!/usr/bin/env Factor
-! Copyright (C) 2022 Your name.
-! See https://factorcode.org/license.txt for BSD license.
-USING: arrays combinators command-line environment formatting
-  io io.encodings.utf8 io.files io.pathnames
-  kernel math math.parser namespaces prettyprint
-  sequences splitting tools.time unicode
-  y2023
+USING:
+  arrays combinators io kernel math prettyprint sequences
+  splitting unicode
 ;
 
 IN: y2023.day01
@@ -60,7 +55,3 @@ PRIVATE>
   [ part1 ] [ part2 ] bi
   [ pprint "" print ] bi@
 ;
-
-! run as
-! $ Factor -run=test target-file
-! MAIN: y2023day01
