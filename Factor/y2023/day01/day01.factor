@@ -1,0 +1,56 @@
+USING:
+  arrays combinators io kernel math prettyprint sequences splitting unicode
+;
+IN: y2023.day01
+
+<PRIVATE
+
+: split-line ( string -- lines ) "\n" split [ "" = ] reject ; inline
+
+: part1/line ( line -- number )
+  [ digit? ] filter
+  [ first ] [ last ] bi
+  [ CHAR: 0 - ] bi@
+  swap 10 * +
+; inline
+
+: transform ( substring -- letter )
+  ! Due to the implementation detail, we must guard with string length
+  dup [ first "otfsen" member? ] [ length 2 > ] bi and
+  [
+    {
+      { [ dup 0 "one"   swapd subseq-starts-at? ] [ drop CHAR: 1 ] }
+      { [ dup 0 "two"   swapd subseq-starts-at? ] [ drop CHAR: 2 ] }
+      { [ dup 0 "three" swapd subseq-starts-at? ] [ drop CHAR: 3 ] }
+      { [ dup 0 "four"  swapd subseq-starts-at? ] [ drop CHAR: 4 ] }
+      { [ dup 0 "five"  swapd subseq-starts-at? ] [ drop CHAR: 5 ] }
+      { [ dup 0 "six"   swapd subseq-starts-at? ] [ drop CHAR: 6 ] }
+      { [ dup 0 "seven" swapd subseq-starts-at? ] [ drop CHAR: 7 ] }
+      { [ dup 0 "eight" swapd subseq-starts-at? ] [ drop CHAR: 8 ] }
+      { [ dup 0 "nine"  swapd subseq-starts-at? ] [ drop CHAR: 9 ] }
+      [ first ]
+    }
+    cond
+  ]
+  [ first ]
+  if
+; inline
+
+: part2/line ( line -- number )
+  dup length <iota> >array [ dupd tail transform ] map
+  [ digit? ] filter
+  [ first ] [ last ] bi
+  [ CHAR: 0 - ] bi@
+  swap 10 * +
+  swap drop
+; inline
+
+: part1 ( data -- number ) split-line [ part1/line ] map sum ;
+: part2 ( data -- number ) split-line [ part2/line ] map sum ;
+
+PRIVATE>
+
+: y2023day01 ( str -- )
+  [ part1 ] [ part2 ] bi
+  [ pprint "" print ] bi@
+;
