@@ -1,12 +1,10 @@
 {
   "file_scan_exclusions": [
     "**/.delta",
+    "**/.direnv",
     "**/.git",
-    "**/data",
     "**/target",
-    "**/BQN",
-    "**/Julia",
-    "**/Uiua-0.7",
+    "**/.DS_Store"
   ],
   "lsp": {
     "rust-analyzer": {
