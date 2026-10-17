@@ -40,30 +40,20 @@ TUPLE: config year day alt ;
 : args>config ( -- config )
   command-line get dup length
   {
-    { [ dup 0 = ] [ drop drop default-year 1 "" config-new ] }
-    { [ dup 1 = ]
-      [ drop first string>number default-year swap "" config-new ] }
+    { [ dup 0 = ] [ drop drop default-year 1 "" ] }
+    { [ dup 1 = ] [ drop first string>number default-year swap "" ] }
     { [ dup 2 = ]
       [
         drop dup last first CHAR: - =
-        [
-          default-year
-          swap dup first string>number
-          swap second
-          config-new
-        ]
-        [
-          dup first string>number
-          swap second string>number ""
-          config-new
-        ]
+        [ default-year swap dup first string>number swap second ]
+        [ dup first string>number swap second string>number "" ]
         if
       ]
     }
-    [ drop
-      [ first string>number ] [ second string>number ] [ last ] tri config-new ]
+    [ drop [ first string>number ] [ second string>number ] [ last ] tri ]
   }
   cond
+  config-new
 ;
 
 : args>data ( -- string ) args>config config>target target>data ;

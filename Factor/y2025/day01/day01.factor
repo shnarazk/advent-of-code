@@ -8,10 +8,8 @@ IN: y2025.day01
 <PRIVATE
 
 : parse-line ( line -- number )
-  1 cut
-  string>number
-  swap
-  "L" =
+  1 cut swap
+  [ string>number ] [ "L" = ] bi*
   [ -1 * ] when
 ; inline
 
@@ -21,7 +19,7 @@ IN: y2025.day01
   [ 100 + ] [ ] if-negative
   dup zero? [ drop 1 + 0 ] [ ] if
   { } 2sequence
- ;
+; inline
 
 : part2/passing_mod100 ( now next -- inc next' )
   [
@@ -35,7 +33,7 @@ IN: y2025.day01
     [ dup zero? [ 1 + ] [ 100 /i ] if ] [ 100 mod ] bi ! ( inc next' )
   ]
   if-negative
- ; inline
+; inline
 
 ! { 0  5 } [ 1    5 part2/passing_mod100 ] unit-test
 ! { 1  2 } [ 1  102 part2/passing_mod100 ] unit-test
