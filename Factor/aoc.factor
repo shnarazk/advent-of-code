@@ -7,6 +7,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   sequences splitting tools.time unicode
   y2023.day01
   y2025.day01
+  y2025.day03
 ;
 IN: aoc
 
@@ -62,6 +63,7 @@ TUPLE: config year day alt ;
   [ year>> ] [ day>> ] bi { } 2sequence
   H{
     { { 2025 1 } [ y2025day01 ] }
+    { { 2025 3 } [ y2025day03 ] }
     { { 2023 2 } [ y2023day01 ] }
   }
   swap
