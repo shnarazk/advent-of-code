@@ -12,49 +12,72 @@ IN: y2025.day03
 ! { 1 2 } [ 1 2 sort2 ] unit-test
 ! { 1 2 } [ 2 1 sort2 ] unit-test
 
+! `seq` is from the most significant digit to the least significant digit
 : seq>number ( seq -- number )
-  reverse
   0
   [ swap 10 * + ]
   reduce
 ; inline
 
-! { 21 } [ { 1 2 } seq>number ] unit-test
-! { 3021 } [ { 1 2 0 3 } seq>number ] unit-test
+{ 21 } [ { 2 1 } seq>number ] unit-test
+{ 1203 } [ { 1 2 0 3 } seq>number ] unit-test
+
+: number>seq ( number -- seq )
+  dup zero?
+  [ drop { } ]
+  [ [ 10 /i number>seq ] [ 10 mod ] bi suffix ]
+  if
+; recursive
+
+{ { 5 0 1 2 } } [ 5012 number>seq ] unit-test
 
 : part1/line ( line -- value )
   reverse
   2 cut
   swap
-  [                    ! ( { l t } elt -- next )
-    swap               ! ( elt { l t } )
-    first2             ! ( elt l t )
+  reverse
+  [                    ! ( { t l } elt -- next )
+    swap               ! ( elt { t l } )
+    first2             ! ( elt t l )
+    swap               ! ( elt l t )
     rot                ! ( l t elt )
     2dup <=             ! ( l t elt (t <= elt) )
-    [ -rot max swap { } 2sequence ]
-    [ drop { } 2sequence ]
+    [ -rot max { } 2sequence ]
+    [ drop swap { } 2sequence ]
     if
   ]
   reduce
   seq>number
 ; inline
 
-! { } [  ] unit-test
-
-: part2/line ( line -- number )
-  reverse
-  12 cut
-  swap
-  [                    ! ( { ... } elt -- next )
-    drop
+: inject ( list digit -- new-list )
+  over length zero?
+  [ swap swap drop ]
+  [ 2dup swap first >=
+    [ swap 1 cut swap first inject swap prefix ]
+    [ drop ]
+    if
   ]
-  reduce
-  first2
-  10 * +
+  if
+; recursive
+
+! { { } } [ { } 5 inject ] unit-test
+! { { 5 } } [ { 1 } 5 inject ] unit-test
+! { { 6 } } [ { 6 } 2 inject ] unit-test
+! { { 5 3 1 } } [ { 3 0 1 } 5 inject ] unit-test
+
+: part2/line ( line depth -- value )
+  swap
+  reverse
+  swap cut
+  swap
+  reverse
+  [ inject ] reduce
+  seq>number
 ; inline
 
 : part1 ( data -- number ) [ part1/line ] map sum ;
-: part2 ( data -- number ) [ part2/line ] map sum ;
+: part2 ( data -- number ) [ 12 part2/line ] map sum ;
 
 PRIVATE>
 
