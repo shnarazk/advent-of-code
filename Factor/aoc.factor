@@ -6,6 +6,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
   y2023.day01
+  y2024.day01
   y2025.day01
   y2025.day03
   y2025.day05
@@ -66,6 +67,7 @@ TUPLE: config year day alt ;
     { { 2025 1 } [ y2025day01 ] }
     { { 2025 3 } [ y2025day03 ] }
     { { 2025 5 } [ y2025day05 ] }
+    { { 2024 1 } [ y2024day01 ] }
     { { 2023 2 } [ y2023day01 ] }
   }
   swap
