@@ -1,6 +1,6 @@
 USING:
-  accessors arrays combinators io kernel math math.parser prettyprint
-  sequences splitting unicode
+  accessors arrays assocs combinators io kernel
+  math math.parser prettyprint sequences sorting splitting unicode
   aoclib.parser
 ;
 IN: y2025.day05
@@ -40,8 +40,44 @@ TUPLE: range from to ;
 
 : part1 ( ranges targets -- number ) [ over part1/line ] map sum nip ;
 
+: >sorted ( ranges -- seq )
+  { }
+  [ ! ( set range )
+    [ from>> 0 { } 2sequence ] [ to>> 1 { } 2sequence ] bi
+    rot
+    swap prefix
+    swap prefix
+  ]
+  reduce
+  sort
+;
+
+! { { { 1 1 } { 2 0 } } } [ 1 2 range-new { } 1sequence >set ] unit-test
+
 : part2 ( ranges _ -- number )
-  drop length
+  drop
+  >sorted
+  { 0 0 0 } ! { start count level }
+  [
+    first2 zero?           ! ( state pos )
+    [ swap first3          ! ( pos start count level )
+      dup zero?
+      [ drop -rot          ! ( count pos start )
+        drop swap 1        ! ( pos count 1 )
+        { } 3sequence ]
+      [ 1 + { } 3sequence nip ]
+      if ]
+    [ swap first3          ! ( pos start count level )
+      1 - dup zero?        ! ( pos start count level' )
+      [ drop swap -        ! ( pos count-start )
+        over + 1 + 0       ! ( pos count' 0 )
+        { } 3sequence ]
+      [ { } 3sequence nip ]
+      if ]
+    if
+  ]
+  reduce
+  second
 ;
 
 PRIVATE>
