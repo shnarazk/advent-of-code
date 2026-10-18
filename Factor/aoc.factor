@@ -8,6 +8,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   y2023.day01
   y2025.day01
   y2025.day03
+  y2025.day05
 ;
 IN: aoc
 
@@ -64,6 +65,7 @@ TUPLE: config year day alt ;
   H{
     { { 2025 1 } [ y2025day01 ] }
     { { 2025 3 } [ y2025day03 ] }
+    { { 2025 5 } [ y2025day05 ] }
     { { 2023 2 } [ y2023day01 ] }
   }
   swap
