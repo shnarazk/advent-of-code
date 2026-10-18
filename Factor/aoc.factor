@@ -36,6 +36,11 @@ TUPLE: config year day alt ;
   base-dir prepend-path
 ;
 
+: config>print ( config -- )
+  [ year>> ] [ day>> ] [ alt>> ] tri
+  "data/%04d/input-day%02d%s.txt\n" printf
+;
+
 : target>data ( target -- string ) utf8 file-contents ;
 
 : config>data ( config -- string ) config>target target>data ;
@@ -79,7 +84,7 @@ TUPLE: config year day alt ;
 PRIVATE>
 
 : run-aoc ( -- )
-  args>config [ config>data ] [ config>solver ] bi
+  args>config [ config>print ] [ config>data ] [ config>solver ] tri
   [ run-solver ] benchmark
   1000000.0 / "%.2f msec" printf
 ;
