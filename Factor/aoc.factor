@@ -2,11 +2,13 @@
 ! Copyright (C) 2026 Narazaki, Shuji.
 ! See https://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators command-line environment formatting
-  io io.encodings.utf8 io.files io.pathnames
+  colors hashtables
+  io io.encodings.utf8 io.files io.pathnames io.styles
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
   y2023.day01
   y2024.day01
+  y2024.day02
   y2025.day01
   y2025.day03
   y2025.day05
@@ -38,7 +40,8 @@ TUPLE: config year day alt ;
 
 : config>print ( config -- )
   [ year>> ] [ day>> ] [ alt>> ] tri
-  "data/%04d/input-day%02d%s.txt\n" printf
+  "data/%04d/input-day%02d%s.txt\n" sprintf
+   "red" named-color foreground associate format
 ;
 
 : target>data ( target -- string ) utf8 file-contents ;
@@ -73,6 +76,7 @@ TUPLE: config year day alt ;
     { { 2025 3 } [ y2025day03 ] }
     { { 2025 5 } [ y2025day05 ] }
     { { 2024 1 } [ y2024day01 ] }
+    { { 2024 2 } [ y2024day02 ] }
     { { 2023 2 } [ y2023day01 ] }
   }
   swap
