@@ -10,12 +10,11 @@ IN: aoclib.matrices
 
 <PRIVATE
 
-! : 4neighbors/expander ( loc -- sequence-of-locs )
-!   { { -1 0 } { 0 -1 } { 0 1 } { 1 0 } }
-!   [ over [ + ] 2map ]
-!   nip
-! ;
-!
+: 4neighbors/expander ( loc -- sequence-of-locs )
+  { { -1 0 } { 0 -1 } { 0 1 } { 1 0 } }
+  [ over [ + ] 2map ]
+  nip
+;
 
 : 8neighbors/expander ( loc -- sequence-of-locs )
   { { -1 -1 } { -1  0 } { -1  1 }
@@ -31,13 +30,14 @@ IN: aoclib.matrices
 
 PRIVATE>
 
-! : 4neighbors ( matrix -- matrix )
-!   dup
-!   matrix-indices
-! ;
+MEMO: 4neighbors ( dim -- matrix )
+  dup first2 [ 2array 4neighbors/expander ] <matrix-by-indices>
+  [ [ over range-check ] filter ] matrix-map
+  nip
+;
 
-: 8neighbors ( matrix -- matrix )
-  dimension dup first2 [ 2array 8neighbors/expander ] <matrix-by-indices>
+MEMO: 8neighbors ( dim -- matrix )
+  dup first2 [ 2array 8neighbors/expander ] <matrix-by-indices>
   [ [ over range-check ] filter ] matrix-map
   nip
 ;
