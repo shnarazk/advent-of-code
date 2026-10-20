@@ -18,7 +18,7 @@ IN: aoclib.matrices
 
 : 8neighbors/expander ( loc -- sequence-of-locs )
   { { -1 -1 } { -1  0 } { -1  1 }
-    {  0 -1 } {  0  0 } {  0  1 }
+    {  0 -1 }           {  0  1 }
     {  1 -1 } {  1  0 } {  1  1 } }
   [ over [ + ] 2map ] map
   nip
@@ -30,14 +30,20 @@ IN: aoclib.matrices
 
 PRIVATE>
 
-MEMO: 4neighbors ( dim -- matrix )
+MEMO: 4neighbors-indices ( dim -- matrix )
   dup first2 [ 2array 4neighbors/expander ] <matrix-by-indices>
   [ [ over range-check ] filter ] matrix-map
   nip
 ;
 
-MEMO: 8neighbors ( dim -- matrix )
+MEMO: 8neighbors-indices ( dim -- matrix )
   dup first2 [ 2array 8neighbors/expander ] <matrix-by-indices>
   [ [ over range-check ] filter ] matrix-map
+  nip
+;
+
+: 8neighbors-values ( matrix -- matrix )
+  dup dimension 8neighbors-indices
+  [ over matrix-nths ] matrix-map
   nip
 ;

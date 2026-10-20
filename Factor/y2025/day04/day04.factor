@@ -8,9 +8,11 @@ IN: y2025.day04
 <PRIVATE
 
 : part1 ( matrix -- number )
-  dup matrix-indices
-  ...
-  drop 1
+  dup 8neighbors-values
+  [ 0 [ [ 1 ] [ 0 ] if + ] reduce 4 < [ 1 ] [ 0 ] if ] matrix-map
+  swap [ [ 1 ] [ 0 ] if ] matrix-map
+  m*
+  [ sum ] map sum
 ;
 
 : part2 ( matrix -- number )
