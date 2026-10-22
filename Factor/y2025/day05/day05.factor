@@ -1,3 +1,4 @@
+USING: arrays ;
 USING:
   accessors arrays assocs combinators io kernel
   math math.parser prettyprint sequences sorting splitting unicode
@@ -43,7 +44,7 @@ TUPLE: range from to ;
 : >sorted ( ranges -- seq )
   { }
   [ ! ( set range )
-    [ from>> 0 { } 2sequence ] [ to>> 1 { } 2sequence ] bi
+    [ from>> 0 2array ] [ to>> 1 2array ] bi
     rot
     swap prefix
     swap prefix

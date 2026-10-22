@@ -29,7 +29,7 @@ PRIVATE>
   string>lines
   [ " " split [ empty? not ] filter [ string>number ] map ] map
   { { } { } }
-  [ [ first2 ] bi@ swapd [ suffix ] 2bi@ { } 2sequence ]
+  [ [ first2 ] bi@ swapd [ suffix ] 2bi@ 2array ]
   reduce
   first2
   [ part1 ] [ part2 ] 2bi

@@ -18,7 +18,7 @@ IN: y2025.day01
   + 100 mod
   [ 100 + ] [ ] if-negative
   dup zero? [ drop 1 + 0 ] [ ] if
-  { } 2sequence
+  2array
 ; inline
 
 : part2/passing_mod100 ( now next -- inc next' )
@@ -49,7 +49,7 @@ IN: y2025.day01
   dupd +                       ! ( count pos next )
   part2/passing_mod100         ! ( count inc next' )
   -rot +                       ! ( next' count' )
-  swap { } 2sequence
+  swap 2array
  ; inline
 
 : part1 ( turns -- number ) { 0 50 } [ part1/step ] reduce first ;
