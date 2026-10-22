@@ -6,13 +6,14 @@ USING: accessors arrays assocs combinators command-line environment formatting
   io io.encodings.utf8 io.files io.pathnames io.styles
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
-  y2023.day01
-  y2024.day01
-  y2024.day02
   y2025.day01
+  y2025.day02
   y2025.day03
   y2025.day04
   y2025.day05
+  y2024.day01
+  y2024.day02
+  y2023.day01
 ;
 IN: aoc
 
@@ -71,9 +72,10 @@ TUPLE: config year day alt ;
 : args>data ( -- string ) args>config config>target target>data ;
 
 : config>solver ( config -- function )
-  [ year>> ] [ day>> ] bi { } 2sequence
+  [ year>> ] [ day>> ] bi 2array
   H{
     { { 2025 1 } [ y2025day01 ] }
+    { { 2025 2 } [ y2025day02 ] }
     { { 2025 3 } [ y2025day03 ] }
     { { 2025 4 } [ y2025day04 ] }
     { { 2025 5 } [ y2025day05 ] }
