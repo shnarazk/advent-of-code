@@ -25,11 +25,6 @@ IN: y2025.day02
 
 : div-m? ( n m -- n/m m ? ) [ /i ] [ [ nip ] [ mod zero? ] 2bi ] 2bi ; inline
 
-! { 2 4 f } [ 9 4 div-m? ] unit-test
-! { 2 1 t } [ 2 1 div-m? ] unit-test
-
-! { "11" } [ "12" 2 1 swapd head swap repeat ] unit-test
-
 : n-repeat? ( number -- ? )
   number>string
   dup length dup 2 /i <iota> [ 1 + ] map
@@ -40,10 +35,6 @@ IN: y2025.day02
   ] any?
   2nip
 ; inline
-
-! { t } [ 110110 n-repeat? ] unit-test
-! { f } [ 111110 n-repeat? ] unit-test
-! { f } [ 110111 n-repeat? ] unit-test
 
 : part2/loop ( limit n sum -- sum' )
   2over >=
