@@ -1,7 +1,7 @@
-USING: sequences ;
+USING: sequences kernel ;
 USING:
   arrays combinators io kernel math math.parser prettyprint
-  sequences splitting unicode
+  sequences sequences.repeating splitting unicode
   aoclib.parser
 ;
 IN: y2025.day02
@@ -23,10 +23,36 @@ IN: y2025.day02
 
 : part1/line ( beg-end -- number ) first2 swap part1/loop ; inline
 
-: part2/line ( number -- number )
-  ! >string
-  drop 2
+: div-m? ( n m -- n/m m ? ) [ /i ] [ [ nip ] [ mod zero? ] 2bi ] 2bi ; inline
+
+! { 2 4 f } [ 9 4 div-m? ] unit-test
+! { 2 1 t } [ 2 1 div-m? ] unit-test
+
+! { "11" } [ "12" 2 1 swapd head swap repeat ] unit-test
+
+: n-repeat? ( number -- ? )
+  number>string
+  dup length dup 2 /i <iota> [ 1 + ] map
+  [ 2over rot                         ! ( string length string length n )
+    div-m?                            ! ( string length string l/n n l%n? )
+    [ swapd head swap repeat pick = ] ! ( string length l/n*string%n=string )
+    [ 3drop f ] if
+  ] any?
+  2nip
 ; inline
+
+! { t } [ 110110 n-repeat? ] unit-test
+! { f } [ 111110 n-repeat? ] unit-test
+! { f } [ 110111 n-repeat? ] unit-test
+
+: part2/loop ( limit n sum -- sum' )
+  2over >=
+  [ over n-repeat? [ [ drop 1 + ] [ + ] 2bi part2/loop ] [ swap 1 + swap part2/loop ] if ]
+  [ 2nip ]
+  if
+; recursive
+
+: part2/line ( beg-end -- number ) first2 swap 0 part2/loop ; inline
 
 : part1 ( data -- number ) [ part1/line ] map sum ;
 : part2 ( data -- number ) [ part2/line ] map sum ;
