@@ -19,7 +19,7 @@ IN: aoc.y20YY.dayDD
 
 PRIVATE>
 
-: y202Xday0X ( str -- )
+: y20XXdayDD ( str -- )
   [ part1 ] [ part2 ] bi
   [ pprint "" print ] bi@
 ;
