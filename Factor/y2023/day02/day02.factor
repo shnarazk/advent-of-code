@@ -12,50 +12,56 @@ IN: aoc.y2023.day02
   reduce
 ;
 
-: mybag ( -- hashmap )
-  H{ { "red" 12 } { "green" 13 } { "blue" 14 } }
-; inline
+: mybag ( -- hashmap ) H{ { "red" 12 } { "green" 13 } { "blue" 14 } } ; inline
 
-: key-num ( hashmap key -- key-num )
-  swap dupd at* [ ] [ drop 0 ] if 2array
-;
+: key-num ( hashmap key -- key-num ) swap dupd at* [ ] [ drop 0 ] if 2array ;
 
-: >key-vals ( hashmap keys -- sequence )
-  [ dupd key-num ] map nip
-;
+: >key-vals ( hashmap keys -- sequence ) [ dupd key-num ] map nip ;
 
-: union-bags ( bag1 bag2 -- merged-bag )
+: part1/union-bags ( bag1 bag2 -- merged-bag )
   2dup
   [ keys ] bi@ union
   [ >key-vals ] curry bi@
   [ [ first2 ] bi@ nip max 2array ] 2map >hashtable
 ;
 
-: all<=? ( bag1 bag2 -- merged-bag )
+: part1/all<=? ( bag1 bag2 -- merged-bag )
   2dup
   [ keys ] bi@ union
   [ >key-vals ] curry bi@
   [ [ second ] bi@ <= ] 2map [ ] all?
 ;
-: possible-game? ( tables -- ? )
-  3 <hashtable> [ union-bags ] reduce
-  mybag all<=?
+
+: part1/possible-game? ( tables -- ? )
+  3 <hashtable> [ part1/union-bags ] reduce
+  mybag part1/all<=?
 ;
+
+: part1/game ( game -- number ) first2 part1/possible-game? [ ] [ drop 0 ] if ;
+
+: part1 ( games -- number ) [ part1/game ] map sum ;
+
+: part2/union-bags ( bag1 bag2 -- merged-bag )
+  2dup
+  [ keys ] bi@ union
+  [ >key-vals ] curry bi@
+  [ [ first2 ] bi@ nip max 2array ] 2map >hashtable
+;
+
+: part2/possible-game ( tables -- number )
+  3 <hashtable> [ part2/union-bags ] reduce
+  values product
+;
+
+: part2/game ( game -- number ) second part2/possible-game ;
+
+: part2 ( games -- number ) [ part2/game ] map sum ;
 
 : parser ( string -- number-config )
   ":" split
   first2 [ " " split last string>number ] [ ";" split [ "," split >hashmap ] map ] bi*
   2array
 ;
-
-: part1/game ( game -- number ) first2 possible-game? [ ] [ drop 0 ] if ;
-
-: part2/game ( game -- number )
-  drop 2
-; inline
-
-: part1 ( games -- number ) [ part1/game ] map sum ;
-: part2 ( games -- number ) [ part2/game ] map sum ;
 
 PRIVATE>
 
