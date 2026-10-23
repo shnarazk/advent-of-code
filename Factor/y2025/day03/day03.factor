@@ -1,9 +1,9 @@
 USING:
   arrays combinators io kernel math math.order
   prettyprint sequences splitting unicode
-  aoclib.parser
+  aoc.lib.parser
 ;
-IN: y2025.day03
+IN: aoc.y2025.day03
 
 <PRIVATE
 

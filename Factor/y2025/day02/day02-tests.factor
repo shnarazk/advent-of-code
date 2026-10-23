@@ -1,7 +1,9 @@
-USING: tools.test y2025.day02.private ;
-IN: y2025.day02
+USING: kernel sequences sequences.repeating tools.test
+  aoc.y2025.day02.private
+;
+IN: aoc.y2025.day02
 
-! Factor -e='"y2025.day02" dup load test'
+! Factor -e='"aoc.y2025.day02" dup load test'
 
 { 2 4 f } [ 9 4 div-m? ] unit-test
 { 2 4 f } [ 9 4 div-m? ] unit-test

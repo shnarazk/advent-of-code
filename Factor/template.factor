@@ -1,8 +1,8 @@
 USING:
   arrays combinators io kernel math prettyprint sequences splitting unicode
-  aoclib.parser
+  aoc.lib.parser
 ;
-IN: y202X.day0X
+IN: aoc.y202X.day0X
 
 <PRIVATE
 

@@ -1,8 +1,11 @@
-USING: arrays kernel math math.matrices sequences splitting ;
-IN: aoclib.matrices
+USING:
+  arrays help.markup help.syntax kernel math math.matrices sequences splitting
+  aoc.lib.matrices.private
+;
+IN: aoc.lib.matrices
 
 HELP: matrix-indices
-  { $values { "matrix" matrix } { "array" array } }
+  { $values { "matrix" matrix } { "array" { $sequence pair } } }
   { $description "List of indices (pairs) of the given matrix." } ;
 
 HELP: 4neighbors-indices

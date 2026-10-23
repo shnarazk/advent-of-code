@@ -2,9 +2,9 @@ USING: arrays ;
 USING:
   accessors arrays assocs combinators io kernel
   math math.parser prettyprint sequences sorting splitting unicode
-  aoclib.parser
+  aoc.lib.parser
 ;
-IN: y2025.day05
+IN: aoc.y2025.day05
 
 <PRIVATE
 

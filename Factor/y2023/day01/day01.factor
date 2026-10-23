@@ -1,7 +1,7 @@
 USING:
   arrays combinators io kernel math prettyprint sequences splitting unicode
 ;
-IN: y2023.day01
+IN: aoc.y2023.day01
 
 <PRIVATE
 

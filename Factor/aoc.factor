@@ -6,14 +6,14 @@ USING: accessors arrays assocs combinators command-line environment formatting
   io io.encodings.utf8 io.files io.pathnames io.styles
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
-  y2025.day01
-  y2025.day02
-  y2025.day03
-  y2025.day04
-  y2025.day05
-  y2024.day01
-  y2024.day02
-  y2023.day01
+  aoc.y2025.day01
+  aoc.y2025.day02
+  aoc.y2025.day03
+  aoc.y2025.day04
+  aoc.y2025.day05
+  aoc.y2024.day01
+  aoc.y2024.day02
+  aoc.y2023.day01
 ;
 IN: aoc
 

@@ -1,6 +1,6 @@
-USING: assocs kernel math sequences ;
-
-IN: aoclib.sequences
+USING: assocs kernel math sequences
+;
+IN: aoc.lib.sequences
 
 : window2 ( seq -- seq ) dup [ but-last ] [ rest ] bi* zip ;
 

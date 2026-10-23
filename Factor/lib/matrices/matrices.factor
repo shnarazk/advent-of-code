@@ -1,6 +1,6 @@
 USING: arrays kernel math math.matrices sequences splitting
 ;
-IN: aoclib.matrices
+IN: aoc.lib.matrices
 
 : matrix-indices ( matrix -- sequence )
   dimension first2 [ 2array ] <matrix-by-indices> { } join
@@ -12,7 +12,7 @@ IN: aoclib.matrices
 
 : 4neighbors/expander ( loc -- sequence-of-locs )
   { { -1 0 } { 0 -1 } { 0 1 } { 1 0 } }
-  [ over [ + ] 2map ]
+  [ over [ + ] 2map ] map
   nip
 ;
 

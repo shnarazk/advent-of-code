@@ -1,5 +1,7 @@
-USING: help help.markup help.syntax math strings sequences y2025.day03.private ;
-IN: y2025.day03
+USING: help help.markup help.syntax math strings sequences
+  aoc.y2025.day03.private
+;
+IN: aoc.y2025.day03
 
 HELP: y2025day03
 { $values { } }
