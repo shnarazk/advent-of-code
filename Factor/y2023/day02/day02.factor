@@ -1,16 +1,26 @@
-USING:
-  arrays combinators io kernel math prettyprint sequences splitting unicode
+USING: arrays assocs combinators hashtables io kernel math math.parser
+  prettyprint sequences splitting
   aoc.lib.parser
 ;
 IN: aoc.y2023.day02
 
 <PRIVATE
 
+: >hashmap ( sequence -- hathmap )
+  100 <hashtable>
+  [ over [ [ CHAR: \s = ] trim " " split first2 swap string>number ] dip set-at ]
+  reduce
+;
+
+: parser ( string -- number-config )
+  ":" split
+  first2 [ " " split last string>number ] [ ";" split [ "," split >hashmap ] map ] bi*
+  2array dup ...
+;
+
 : part1/line ( line -- number )
   drop 1
 ; inline
-
-! { } [  ] unit-test
 
 : part2/line ( line -- number )
   drop 2
@@ -22,7 +32,7 @@ IN: aoc.y2023.day02
 PRIVATE>
 
 : y2023day02 ( str -- )
-  string>lines
+  string>lines [ parser ] map
   dup ...
   [ part1 ] [ part2 ] bi
   [ pprint "" print ] bi@
