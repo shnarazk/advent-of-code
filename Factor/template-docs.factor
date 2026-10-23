@@ -3,7 +3,7 @@ USING: help help.markup help.syntax math strings sequences
 ;
 IN: aoc.y20YY.dayDD
 
-HELP: ???
+HELP: y20YYdayDD
 { $values { } }
 { $description "" } ;
 
