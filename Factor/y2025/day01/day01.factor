@@ -29,8 +29,8 @@ IN: aoc.y2025.day01
     swap                                        ! ( inc' next' )
   ]
   [
-    swap drop                                          ! ( next )
-    [ dup zero? [ 1 + ] [ 100 /i ] if ] [ 100 mod ] bi ! ( inc next' )
+    nip                                         ! ( next )
+    [ [ 1 ] [ 100 /i ] if-zero ] [ 100 mod ] bi ! ( inc next' )
   ]
   if-negative
 ; inline
@@ -44,11 +44,10 @@ IN: aoc.y2025.day01
 ! { 5 90 } [ 5 -410 part2/passing_mod100 ] unit-test
 
 : part2/step ( count-pos turn -- next )
-  swap [ first ] [ second ] bi ! ( turn count pos )
-  rot                          ! ( count pos turn )
-  dupd +                       ! ( count pos next )
-  part2/passing_mod100         ! ( count inc next' )
-  -rot +                       ! ( next' count' )
+  [ first2 ] dip        ! ( count pos turn )
+  dupd +                ! ( count pos next )
+  part2/passing_mod100  ! ( count inc next' )
+  -rot +                ! ( next' count' )
   swap 2array
  ; inline
 

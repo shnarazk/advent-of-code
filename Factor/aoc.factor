@@ -59,8 +59,8 @@ TUPLE: config year day alt ;
     { [ dup 2 = ]
       [
         drop dup last first CHAR: - =
-        [ default-year swap dup first string>number swap second ]
-        [ dup first string>number swap second string>number "" ]
+        [ default-year swap first2 [ string>number ] [ ] bi* ]
+        [ first2 [ string>number ] bi@ "" ]
         if
       ]
     }

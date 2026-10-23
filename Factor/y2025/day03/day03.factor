@@ -33,9 +33,8 @@ IN: aoc.y2025.day03
 ; recursive
 
 : maximize ( line depth -- value )
-  swap
-  reverse
-  swap cut
+  [ reverse ] dip
+  cut
   swap
   reverse
   [ inject ] reduce

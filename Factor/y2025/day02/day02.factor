@@ -38,7 +38,7 @@ IN: aoc.y2025.day02
 
 : part2/loop ( limit n sum -- sum' )
   2over >=
-  [ over n-repeat? [ [ drop 1 + ] [ + ] 2bi part2/loop ] [ swap 1 + swap part2/loop ] if ]
+  [ over n-repeat? [ [ drop 1 + ] [ + ] 2bi part2/loop ] [ [ 1 + ] dip part2/loop ] if ]
   [ 2nip ]
   if
 ; recursive
