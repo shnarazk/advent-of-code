@@ -10,8 +10,6 @@ IN: aoc.y20YY.dayDD
   drop 1
 ; inline
 
-! { } [  ] unit-test
-
 : part2/line ( line -- number )
   drop 2
 ; inline
