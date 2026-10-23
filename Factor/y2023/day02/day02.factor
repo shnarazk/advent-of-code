@@ -8,7 +8,7 @@ IN: aoc.y2023.day02
 
 : >hashmap ( sequence -- hathmap )
   100 <hashtable>
-  [ over [ [ CHAR: \s = ] trim " " split first2 swap string>number ] dip set-at ]
+  [ over [ [ CHAR: \u000020 = ] trim " " split first2 swap string>number ] dip set-at ]
   reduce
 ;
 
