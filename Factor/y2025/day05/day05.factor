@@ -21,15 +21,7 @@ TUPLE: range from to ;
   first2 range boa
  ;
 
-! { 1 } [ "1-5" string>range from>> ] unit-test
-! { 5 } [ "1-5" string>range to>> ] unit-test
-
 : in-range? ( target range -- ? ) [ from>> >= ] [ to>> <= ] 2bi and ;
-
-! { t } [ 3 1 5 range-new in-range? ] unit-test
-! { t } [ 5 1 5 range-new in-range? ] unit-test
-! { f } [ 1 3 5 range-new in-range? ] unit-test
-! { f } [ 8 1 5 range-new in-range? ] unit-test
 
 : part1/line ( target ranges -- 0/1 )
   [ dupd in-range? ] any? [ 1 ] [ 0 ] if nip
@@ -52,8 +44,6 @@ TUPLE: range from to ;
   reduce
   sort
 ;
-
-! { { { 1 1 } { 2 0 } } } [ 1 2 range-new { } 1sequence >set ] unit-test
 
 : part2 ( ranges _ -- number )
   drop
