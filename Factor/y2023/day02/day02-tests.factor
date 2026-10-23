@@ -4,7 +4,7 @@ USING: arrays assocs combinators hashtables kernel prettyprint sequences
 ;
 IN: aoc.y2023.day02
 
-! Factor -e='"aoc.y2023.day02," dup load test'
+! Factor -e='"aoc.y2023.day02" dup load test'
 
 { H{ { "green" 2 } } } [ { "2 green" } >hashmap ] unit-test
 

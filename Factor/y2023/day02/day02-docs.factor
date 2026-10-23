@@ -3,16 +3,12 @@ USING: help help.markup help.syntax math strings sequences
 ;
 IN: aoc.y2023.day02
 
-HELP: y2023day02
-{ $values { } }
-{ $description "" } ;
-
 ARTICLE: "aoc.y2023.day02" "aoc.y2023.day02"
-  "a text"
+  "マッピングに二項演算を導入する問題"
   $nl { $subsections part1 }
-  ""
+  "add 演算"
   $nl { $subsections part1 }
-  ""
+  "max 演算"
 ;
 
 ABOUT: "aoc.y2023.day02"
