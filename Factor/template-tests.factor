@@ -1,8 +1,8 @@
 USING: kernel sequences tools.test
-  aoc.y20YY.dayXX.private
+  aoc.y20YY.dayDD.private
 ;
-IN: aoc.y20YY.dayXX
+IN: aoc.y20YY.dayDD
 
-! Factor -e='"aoc.y20YY.dayXX" dup load test'
+! Factor -e='"aoc.y20YY.dayDD" dup load test'
 
 ! { } [ ] unit-test

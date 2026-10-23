@@ -1,7 +1,7 @@
 USING: help help.markup help.syntax math strings sequences
-  aoc.y20YY.dayXX.private
+  aoc.y20YY.dayDD.private
 ;
-IN: aoc.y20YY.dayXX
+IN: aoc.y20YY.dayDD
 
 HELP: ???
 { $values { } }

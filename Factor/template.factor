@@ -2,7 +2,7 @@ USING:
   arrays combinators io kernel math prettyprint sequences splitting unicode
   aoc.lib.parser
 ;
-IN: aoc.y202X.day0X
+IN: aoc.y20YY.dayDD
 
 <PRIVATE
 
