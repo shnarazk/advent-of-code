@@ -1,6 +1,5 @@
 USING:
-  arrays combinators io kernel math math.order
-  prettyprint sequences splitting unicode
+  combinators io kernel math prettyprint sequences
   aoc.lib.parser
 ;
 IN: aoc.y2025.day03
