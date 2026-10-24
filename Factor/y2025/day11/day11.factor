@@ -1,41 +1,46 @@
-USING: hashtables assocs xml.data ;
 USING:
-  arrays
-  combinators
-  hashtables
-  io kernel
-  math
-  prettyprint
-  sequences
-  splitting
-  unicode
+  arrays assocs combinators hashtables io kernel math
+  prettyprint sequences splitting unicode
   aoc.lib.parser
 ;
 IN: aoc.y2025.day11
 
 <PRIVATE
 
-: part1/line ( line -- number )
-  drop 1
-; inline
-
-: part2/line ( line -- number )
-  drop 2
-; inline
-
-: pathes ( hashtable from -- number )
+: part1/pathes ( hashtable from -- number )
   dup "out" =
   [ 2drop 1 ]
   [ over at* ! ( hashtable adjacents/f ? )
-    [ [ dupd pathes ] map sum nip ]
+    [ [ dupd part1/pathes ] map sum nip ]
     [ 2drop 0 ]
     if ]
   if
 ;
 
-: part1 ( hashtable -- number ) "you" pathes ;
+: part1 ( hashtable -- number ) "you" part1/pathes ;
 
-: part2 ( hashtable -- number ) drop 1 ;
+MEMO: part2/pathes ( hashtable from to -- number )
+  2dup =
+  [ 3drop 1 ]
+  [ -rot over at* ! ( to hashtable adjacents/f ? )
+    [ [ 2over -rot part2/pathes ] map sum 2nip ]
+    [ 3drop 0 ]
+    if ]
+  if
+;
+
+: part2 ( hashtable -- number )
+  [ [ "svr" "dac" part2/pathes ]
+    [ "dac" "fft" part2/pathes ]
+    [ "fft" "out" part2/pathes ]
+    tri * * ]
+  [ [ "svr" "fft" part2/pathes ]
+    [ "fft" "dac" part2/pathes ]
+    [ "dac" "out" part2/pathes ]
+    tri * * ]
+  bi
+  +
+;
 
 PRIVATE>
 
