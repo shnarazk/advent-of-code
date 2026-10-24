@@ -1,6 +1,8 @@
+USING: hashtables assocs xml.data ;
 USING:
   arrays
   combinators
+  hashtables
   io kernel
   math
   prettyprint
@@ -21,14 +23,26 @@ IN: aoc.y2025.day11
   drop 2
 ; inline
 
-: part1 ( data -- number ) [ part1/line ] map sum ;
-: part2 ( data -- number ) [ part2/line ] map sum ;
+: pathes ( hashtable from -- number )
+  dup "out" =
+  [ 2drop 1 ]
+  [ over at* ! ( hashtable adjacents/f ? )
+    [ [ dupd pathes ] map sum nip ]
+    [ 2drop 0 ]
+    if ]
+  if
+;
+
+: part1 ( hashtable -- number ) "you" pathes ;
+
+: part2 ( hashtable -- number ) drop 1 ;
 
 PRIVATE>
 
 : y2025day11 ( str -- )
-  string>lines [ ":" split first2 [ CHAR: \u000020 = ] trim " " split 2array ] map
-  dup ...
+  string>lines
+  [ ":" split first2 [ CHAR: \u000020 = ] trim " " split 2array ] map
+  >hashtable
   [ part1 ] [ part2 ] bi
   [ pprint "" print ] bi@
 ;
