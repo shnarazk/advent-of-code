@@ -1,21 +1,21 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
-! See https://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators command-line environment formatting
   colors hashtables
   io io.encodings.utf8 io.files io.pathnames io.styles
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
-  aoc.y2025.day01
-  aoc.y2025.day02
-  aoc.y2025.day03
-  aoc.y2025.day04
-  aoc.y2025.day05
-  aoc.y2025.day06
-  aoc.y2024.day01
-  aoc.y2024.day02
-  aoc.y2023.day01
-  aoc.y2023.day02
+  ! aoc.y2025.day01
+  ! aoc.y2025.day02
+  ! aoc.y2025.day03
+  ! aoc.y2025.day04
+  ! aoc.y2025.day05
+  ! aoc.y2025.day06
+  aoc.y2025.day07
+  ! aoc.y2024.day01
+  ! aoc.y2024.day02
+  ! aoc.y2023.day01
+  ! aoc.y2023.day02
 ;
 IN: aoc
 
@@ -76,16 +76,17 @@ TUPLE: config year day alt ;
 : config>solver ( config -- function )
   [ year>> ] [ day>> ] bi 2array
   H{
-    { { 2025 1 } [ y2025day01 ] }
-    { { 2025 2 } [ y2025day02 ] }
-    { { 2025 3 } [ y2025day03 ] }
-    { { 2025 4 } [ y2025day04 ] }
-    { { 2025 5 } [ y2025day05 ] }
-    { { 2025 6 } [ y2025day06 ] }
-    { { 2024 1 } [ y2024day01 ] }
-    { { 2024 2 } [ y2024day02 ] }
-    { { 2023 1 } [ y2023day01 ] }
-    { { 2023 2 } [ y2023day02 ] }
+    ! { { 2025 1 } [ y2025day01 ] }
+    ! { { 2025 2 } [ y2025day02 ] }
+    ! { { 2025 3 } [ y2025day03 ] }
+    ! { { 2025 4 } [ y2025day04 ] }
+    ! { { 2025 5 } [ y2025day05 ] }
+    ! { { 2025 6 } [ y2025day06 ] }
+    { { 2025 7 } [ y2025day07 ] }
+    ! { { 2024 1 } [ y2024day01 ] }
+    ! { { 2024 2 } [ y2024day02 ] }
+    ! { { 2023 1 } [ y2023day01 ] }
+    ! { { 2023 2 } [ y2023day02 ] }
   }
   swap
   of

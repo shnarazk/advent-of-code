@@ -1,4 +1,5 @@
-USING: help help.markup help.syntax math strings sequences
+USING:
+  help help.markup help.syntax strings sequences
   aoc.y20YY.dayDD.private
 ;
 IN: aoc.y20YY.dayDD

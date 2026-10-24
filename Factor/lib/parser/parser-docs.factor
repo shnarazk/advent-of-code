@@ -1,7 +1,4 @@
-USING:
-  arrays help.markup help.syntax kernel math math.matrices sequences splitting
-  aoc.lib.matrices.private
-;
+USING: help.markup help.syntax sequences strings ;
 IN: aoc.lib.parser
 
 HELP: string>lines
