@@ -4,8 +4,9 @@ USING: help help.markup help.syntax math strings sequences
 IN: aoc.y20YY.dayDD
 
 HELP: y20YYdayDD
-{ $values { } }
-{ $description "" } ;
+  { $values { } }
+  { $description "" }
+;
 
 ARTICLE: "aoc.y20YY.dayDD" "aoc.y20YY.dayDD"
   "a text"
