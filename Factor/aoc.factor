@@ -12,7 +12,8 @@ USING: accessors arrays assocs combinators command-line environment formatting
   ! aoc.y2025.day05
   ! aoc.y2025.day06
   !  aoc.y2025.day07
-  aoc.y2025.day11
+  aoc.y2025.day10
+  ! aoc.y2025.day11
   ! aoc.y2024.day01
   ! aoc.y2024.day02
   ! aoc.y2023.day01
@@ -84,7 +85,8 @@ TUPLE: config year day alt ;
     ! { { 2025 5 } [ y2025day05 ] }
     ! { { 2025 6 } [ y2025day06 ] }
     !  { { 2025 7 } [ y2025day07 ] }
-    { { 2025 11 } [ y2025day11 ] }
+    { { 2025 10 } [ y2025day10 ] }
+    ! { { 2025 11 } [ y2025day11 ] }
     ! { { 2024 1 } [ y2024day01 ] }
     ! { { 2024 2 } [ y2024day02 ] }
     ! { { 2023 1 } [ y2023day01 ] }

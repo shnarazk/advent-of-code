@@ -10,11 +10,9 @@ HELP: y2025day10
 ;
 
 ARTICLE: "aoc.y2025.day10" "aoc.y2025.day10"
-  "a text"
-  $nl { $subsections part1 }
-  ""
-  $nl { $subsections part1 }
-  ""
+  "Linear programmingが必要な組み合わせ問題"
+  $nl { $subsections part1 } "簡単なA*で解ける大きさの問題"
+  $nl { $subsections part1 } "無理"
 ;
 
 ABOUT: "aoc.y2025.day10"

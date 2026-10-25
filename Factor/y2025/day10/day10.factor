@@ -1,3 +1,4 @@
+USING: arrays sequences ;
 USING:
   arrays
   combinators
@@ -13,20 +14,45 @@ IN: aoc.y2025.day10
 
 <PRIVATE
 
-: part1/line ( line -- number )
-  drop 1
+: apply-button ( state button -- state' )
+  [ xor ] 2map
+;
+
+: spec ( goal-buttons-_ -- goal actions )
+  first2               ! ( goal buttons )
+  [ dup length f <array> ] dip
+  [                         ! template ( indices )
+    [ dup clone ] dip       ! ( template' indices )
+    [ t swap pick set-nth ] each
+  ] map
+  nip
 ; inline
 
-: part2/line ( line -- number )
-  drop 2
-; inline
+: solve ( goal actions -- number )
+  2dup 2array ...
+  2drop
+  1
+;
 
-: part1 ( data -- number ) [ part1/line ] map sum ;
-: part2 ( data -- number ) [ part2/line ] map sum ;
+: part1 ( data -- number ) [ spec solve ] map sum ;
 
 PRIVATE>
 
 : y2025day10 ( str -- )
-  [ part1 ] [ part2 ] bi
+  string>lines
+  [ "]" split
+    first2
+    [ >array rest [ CHAR: # = ] map ]
+    [ "{" split
+      first2
+      [ [ CHAR: \u000020 = ] reject
+        "()" split [ "" = ] reject
+        [ "," split [ string>number ] map ] map ]
+      [ but-last "," split [ string>number ] map ]
+      bi* ]
+    bi*
+    3array ]
+  map
+  [ part1 ] [ drop 0 ] bi
   [ pprint "" print ] bi@
 ;
