@@ -51,7 +51,7 @@ IN: aoc.y2025.day07
 ;
 
 : part2/add-branch ( hashtable pos count -- hashtable )
-  [ swap 0 or + ] curry
+  '[ _ swap 0 or + ]
   pick swap
   change-at
 ;

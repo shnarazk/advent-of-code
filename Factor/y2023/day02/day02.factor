@@ -21,14 +21,14 @@ IN: aoc.y2023.day02
 : part1/union-bags ( bag1 bag2 -- merged-bag )
   2dup
   [ keys ] bi@ union
-  [ >key-vals ] curry bi@
+  '[ _ >key-vals ] bi@
   [ [ first2 ] bi@ nip max 2array ] 2map >hashtable
 ;
 
 : part1/all<=? ( bag1 bag2 -- merged-bag )
   2dup
   [ keys ] bi@ union
-  [ >key-vals ] curry bi@
+  '[ _ >key-vals ] bi@
   [ [ second ] bi@ <= ] 2map [ ] all?
 ;
 
@@ -44,7 +44,7 @@ IN: aoc.y2023.day02
 : part2/union-bags ( bag1 bag2 -- merged-bag )
   2dup
   [ keys ] bi@ union
-  [ >key-vals ] curry bi@
+  '[ _ >key-vals ] bi@
   [ [ first2 ] bi@ nip max 2array ] 2map >hashtable
 ;
 

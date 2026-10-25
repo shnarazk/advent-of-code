@@ -6,13 +6,13 @@ IN: aoc.lib.sequences
 
 : satisfying-indices ( sequence quot: ( x -- ? ) -- indices )
   [ dup [ length <iota> ] dip ] dip ! ( iota seq quot )
-  [ call( x -- ? ) [ dup drop ] [ drop f ] if ] curry 2map
+  '[ @ [ dup drop ] [ drop f ] if ] 2map
   [ f = ] reject
 ;
 
 : unsatisfying-indices ( sequence quot: ( x -- ? ) -- indices )
   [ dup [ length <iota> ] dip ] dip ! ( iota seq quot )
-  [ call( x -- ? ) not [ dup drop ] [ drop f ] if ] curry 2map
+  '[ @ not [ dup drop ] [ drop f ] if ] 2map
   [ f = ] reject
 ;
 
