@@ -1,8 +1,10 @@
-USING: arrays sequences ;
 USING:
   arrays
   combinators
-  io kernel
+  hash-sets
+  heaps
+  io
+  kernel
   math
   prettyprint
   sequences
@@ -13,6 +15,27 @@ USING:
 IN: aoc.y2025.day10
 
 <PRIVATE
+
+:: A*-search/step ( goal actions to-visit visited -- number )
+  to-visit heap-empty?
+  [ -1 ]
+  [ heap pop
+    over goal =
+    [ drop ]
+    [ actions [ apply-button ] map
+      [ visited in ] reject
+      ! TODO: push to to-visit then call recursively
+    ]
+    if
+  ]
+  if
+; recursive
+
+: A*-search ( goal actions init-state  -- state )
+  <min-heap> swap 0 pick heap-push
+  HS{ }
+  A*-search/step
+;
 
 : apply-button ( state button -- state' )
   [ xor ] 2map
@@ -29,9 +52,8 @@ IN: aoc.y2025.day10
 ; inline
 
 : solve ( goal actions -- number )
-  2dup 2array ...
-  2drop
-  1
+  dup first [ drop f ] map
+  A*-search
 ;
 
 : part1 ( data -- number ) [ spec solve ] map sum ;
