@@ -6,8 +6,10 @@ USING:
   io
   kernel
   math
+  math.parser
   prettyprint
   sequences
+  sets
   splitting
   unicode
   aoc.lib.parser
@@ -16,15 +18,24 @@ IN: aoc.y2025.day10
 
 <PRIVATE
 
+: apply-button ( state button -- state' ) [ xor ] 2map ; inline
+
 :: A*-search/step ( goal actions to-visit visited -- number )
   to-visit heap-empty?
   [ -1 ]
-  [ heap pop
-    over goal =
-    [ drop ]
-    [ actions [ apply-button ] map
-      [ visited in ] reject
-      ! TODO: push to to-visit then call recursively
+  [ to-visit heap-pop
+    over goal =                         ! ( state count ? )
+    [ nip ]
+    [ over visited in?
+      [ 2drop goal actions to-visit visited A*-search/step ]
+      [ over visited adjoin
+        1 +                                    ! ( state count+1 )
+        actions [ pick swap apply-button ] map ! ( state count+1 next-states )
+        [ visited in? ] reject
+        [ over to-visit heap-push ] each
+        2drop goal actions to-visit visited A*-search/step
+      ]
+      if
     ]
     if
   ]
@@ -35,10 +46,6 @@ IN: aoc.y2025.day10
   <min-heap> swap 0 pick heap-push
   HS{ }
   A*-search/step
-;
-
-: apply-button ( state button -- state' )
-  [ xor ] 2map
 ;
 
 : spec ( goal-buttons-_ -- goal actions )
