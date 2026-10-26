@@ -21,10 +21,12 @@ TUPLE: range from to ;
   first2 range boa
  ;
 
-: in-range? ( target range -- ? ) [ from>> >= ] [ to>> <= ] 2bi and ;
+: in-range? ( target range -- ? )
+  [ from>> >= ] [ to>> <= ] 2bi and
+; inline
 
 : part1/line ( target ranges -- 0/1 )
-  [ dupd in-range? ] any? [ 1 ] [ 0 ] if nip
+  [ dupd in-range? ] any? 1 0 ? nip
 ; inline
 
 : part2/line ( line -- number )

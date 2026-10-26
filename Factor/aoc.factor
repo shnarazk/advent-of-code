@@ -103,7 +103,7 @@ PRIVATE>
 : run-aoc ( -- )
   args>config [ config>print ] [ config>data ] [ config>solver ] tri
   [ [ drop "Can't dispatch" print ] or run-solver ] benchmark
-  1000000.0 / "%.2f msec" printf
+  1_000_000.0 / "%.2f msec" printf
 ;
 
 MAIN: run-aoc
