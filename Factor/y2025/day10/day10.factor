@@ -1,17 +1,6 @@
 USING:
-  arrays
-  combinators
-  hash-sets
-  heaps
-  io
-  kernel
-  math
-  math.parser
-  prettyprint
-  sequences
-  sets
-  splitting
-  unicode
+  arrays combinators hash-sets heaps io kernel math math.parser
+  prettyprint sequences sets splitting unicode
   aoc.lib.parser
 ;
 IN: aoc.y2025.day10
@@ -30,8 +19,7 @@ IN: aoc.y2025.day10
       [ 2drop goal actions to-visit visited A*-search/step ]
       [ over visited adjoin
         1 +                                    ! ( state count+1 )
-        actions [ pick swap apply-button ] map ! ( state count+1 next-states )
-        [ visited in? ] reject
+        actions [ pick swap apply-button ] map ! ( state count+1 nexts )
         [ over to-visit heap-push ] each
         2drop goal actions to-visit visited A*-search/step
       ]
@@ -42,9 +30,9 @@ IN: aoc.y2025.day10
   if
 ; recursive
 
-: A*-search ( goal actions init-state  -- state )
+: A*-search ( goal actions init-state -- state )
   <min-heap> swap 0 pick heap-push
-  HS{ }
+  HS{ } clone
   A*-search/step
 ;
 
