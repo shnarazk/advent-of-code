@@ -6,6 +6,7 @@ USING:
   kernel
   math
   math.parser
+  multiline
   prettyprint
   sequences
   sorting
@@ -17,33 +18,49 @@ IN: aoc.y2025.day08
 
 <PRIVATE
 
-MEMO: a ( -- ) 3 drop ;
-
 TUPLE: union-group
-  { n number read-only }
-  { new-group-id number }
-  { parent-group array }   ! group-id -> parent group-id
-  { membership array }        ! node-id -> group-id
+  { n number read-only }  ! number of nodes
+  { group array }         ! group-id -> parent group-id
+  { membership array }    ! node-id -> group-id
 ;
 
 : union-group-new ( n -- union-group )
-  0 { } pick f <array> union-group boa
+  { } over f <array> union-group boa
 ;
 
-GENERIC: group-id>> ( node-id class -- number? )
-GENERIC: >>group-id ( group-id node-id class -- )
-GENERIC: add-group ( class -- number )
-GENERIC: add-nodes ( node1 node2 class -- )
-GENERIC: merge-groups ( group1 group2 class -- )
+GENERIC: new-group-id ( self -- group-id )
+M: union-group new-group-id
+  [ f suffix ] change-group group>> length 1 -
+;
 
-M::  union-group group-id>> ( n self -- number? )
-  n self membership>> nth
-  [ self parent-group>> nth dup f = not ] [ ] while
+{ 1 } [ 1 union-group-new n>> ] unit-test
+{ 0 } [ 2 union-group-new new-group-id ] unit-test
+
+GENERIC: set-group-id ( group-id node-id class -- )
+M: union-group set-group-id  membership>> set-nth ;
+
+GENERIC: group-id ( node-id item -- number/f )
+M:: union-group group-id ( node-id self -- group-id/id )
+  node-id self membership>> nth
+  dup
+  [ [ self group>> nth dup f = not ] [ ] while ]
+  [ ]
+  if
 ;
-M:  union-group >>group-id ( g n self -- ) membership>> set-nth ;
-M:: union-group add-nodes ( a b self -- )
-  ! TODO
-;
+
+! GENERIC: add-group ( class -- number )
+! M:
+! GENERIC: add-nodes ( node1 node2 class -- )
+! GENERIC: merge-groups ( group1 group2 class -- )
+
+! 4 union-group-new 1 2 pick group-id>> /* 0 over group-id>> */ ...
+
+! M:: union-group add-nodes ( a b self -- )
+!   ! TODO
+! ;
+
+{ t f } [ t 2 3 union-group-new group-id ] unit-test
+{ t f } [ t 2 3 union-group-new dup new-group-id 2 pick set-group-id group-id ] unit-test
 
 : iota-triangle ( n -- sequence )
   <iota> dup dup '[ _ swap 1 + tail ] map but-last
