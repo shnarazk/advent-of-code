@@ -1,3 +1,4 @@
+USING: kernel ;
 USING:
   accessors arrays assocs combinators hashtables io kernel math math.parser
   multiline prettyprint sequences sorting splitting unicode
@@ -49,7 +50,7 @@ M:: union-group dispatch ( node-pair self -- )
   { { { f f } [ drop self new-group-id '[ _ swap self set-group ] each ] } !
     { { f t } [ [ first ] [ second ] bi* swap self set-group ] }
     { { t f } [ [ second ] [ first ] bi* swap self set-group ] }
-    { { t t } [ first2 self merge-groups drop ] } }
+    { { t t } [ inv-sort first2 self merge-groups drop ] } }
   case
 ;
 
@@ -60,6 +61,18 @@ M: union-group group-sizes ( self -- sequence )
   H{ } swap over '[ _ inc-at ] each
   values
   inv-sort
+;
+
+GENERIC: united? ( self -- ? )
+M: union-group united?
+  dup membership>> [ f = not ] all?
+  [
+    [ ] [ membership>> length <iota> ] [ 0 swap group-id ] tri
+    '[ over group-id _ = ] all?
+    nip
+  ]
+  [ drop f ]
+  if
 ;
 
 : iota-triangle ( n -- sequence )
@@ -80,7 +93,18 @@ M: union-group group-sizes ( self -- sequence )
   group-sizes 3 head product
 ;
 
-: part2 ( table order -- number ) 2drop 1 ;
+: part2 ( table order -- number )
+  [ dup length union-group-new ] dip   ! ( table union-group order )
+  f
+  [ over f =
+    [ nip 2dup swap dispatch over united? [ ] [ drop f ] if ]
+    [ drop ]
+    if ]
+  reduce
+  nip
+  [ over nth first ] map product
+  nip
+;
 
 PRIVATE>
 
