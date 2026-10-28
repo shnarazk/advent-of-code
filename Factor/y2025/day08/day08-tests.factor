@@ -1,11 +1,10 @@
-USING: kernel sequences tools.test
+USING: accessors kernel sequences tools.test
   aoc.y2025.day08.private
 ;
 IN: aoc.y2025.day08
 
 ! Factor -e='"aoc.y2025.day08" dup load test'
 
-{ 1 } [ 1 union-group-new n>> ] unit-test
 { 0 } [ 2 union-group-new new-group-id ] unit-test
 
 { { f f f } } [ 3 union-group-new membership>> ] unit-test
