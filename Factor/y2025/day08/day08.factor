@@ -1,3 +1,4 @@
+USING: kernel ;
 USING:
   accessors
   arrays
@@ -24,43 +25,51 @@ TUPLE: union-group
   { membership array }    ! node-id -> group-id
 ;
 
-: union-group-new ( n -- union-group )
-  { } over f <array> union-group boa
-;
+: union-group-new ( n -- union-group ) { } over f <array> union-group boa ;
 
 GENERIC: new-group-id ( self -- group-id )
-M: union-group new-group-id
-  [ f suffix ] change-group group>> length 1 -
+M: union-group new-group-id [ f suffix ] change-group group>> length 1 - ;
+
+GENERIC: add-to-new-group ( node-id self -- )
+M:: union-group add-to-new-group ( node-id self -- )
+  self [ f suffix ] change-group group>> length 1 -
+  node-id self membership>> set-nth
 ;
 
-{ 1 } [ 1 union-group-new n>> ] unit-test
-{ 0 } [ 2 union-group-new new-group-id ] unit-test
+GENERIC: set-group ( group-id node-id self -- )
+M: union-group set-group membership>> set-nth ;
 
-GENERIC: set-group-id ( group-id node-id class -- )
-M: union-group set-group-id  membership>> set-nth ;
+GENERIC: set-parent-group ( parent-group-id group-id self -- )
+M:: union-group set-parent-group ( parent-group-id group-id self -- )
+  parent-group-id group-id =
+  [
+    parent-group-id f = [ "eee2" ... 2 exit ] when
+    group-id f = [ "eee3" ... 2 exit ] when
+    parent-group-id group-id self group>> set-nth
+  ] unless
+;
 
-GENERIC: group-id ( node-id item -- number/f )
-M:: union-group group-id ( node-id self -- group-id/id )
+GENERIC: group-id ( node-id self -- group-id/f )
+M:: union-group group-id ( node-id self -- group-id/d )
   node-id self membership>> nth
   dup
-  [ [ self group>> nth dup f = not ] [ ] while ]
-  [ ]
-  if
+  [ dup [ self group>> nth dup f = not ] [ nip dup ] while drop ]
+  when
 ;
 
-! GENERIC: add-group ( class -- number )
-! M:
-! GENERIC: add-nodes ( node1 node2 class -- )
-! GENERIC: merge-groups ( group1 group2 class -- )
+GENERIC: merge-groups ( from-group into-group self -- )
+M: union-group merge-groups ( from into self -- ) swapd set-parent-group ;
 
-! 4 union-group-new 1 2 pick group-id>> /* 0 over group-id>> */ ...
-
-! M:: union-group add-nodes ( a b self -- )
-!   ! TODO
-! ;
-
-{ t f } [ t 2 3 union-group-new group-id ] unit-test
-{ t f } [ t 2 3 union-group-new dup new-group-id 2 pick set-group-id group-id ] unit-test
+GENERIC: dispatch ( node-pair self -- )
+M:: union-group dispatch ( node-pair self -- )
+  node-pair dup [ self group-id ] map
+  dup [ not not ] map
+  { { { f f } [ drop self new-group-id '[ _ swap self set-group ] each ] } !
+    { { f t } [ [ first ] [ second ] bi* swap self set-group ] }
+    { { t f } [ [ second ] [ first ] bi* swap self set-group ] }
+    { { t t } [ first2 self merge-groups drop ] } }
+  case
+;
 
 : iota-triangle ( n -- sequence )
   <iota> dup dup '[ _ swap 1 + tail ] map but-last
@@ -68,13 +77,17 @@ M:: union-group group-id ( node-id self -- group-id/id )
   { } join
 ;
 
-: distance ( a b -- number ) [ - abs dup * ] 2map sum ; inline
+: distance ( a b -- number ) [ - abs dup * ] 2map sum ; ! inline
 
-: dist ( a b table -- number ) '[ _ nth ] 2over rot bi@ distance 3array ; inline
+: dist ( a b table -- number ) '[ _ nth ] 2over rot bi@ distance 3array ; ! inline
 
-: part1 ( table -- number ) drop 1 ;
+: part1 ( table order -- number )
+  over length union-group-new
+  swap over '[ _ dispatch ] each
+  ...
+  drop 1 ;
 
-: part2 ( table -- number ) drop 1 ;
+: part2 ( table order -- number ) 2drop 1 ;
 
 PRIVATE>
 
@@ -83,7 +96,6 @@ PRIVATE>
   [ "," split [ string>number ] map ] map
   dup length iota-triangle
   [ first2 pick dist ] map [ 2 swap nth ] sort-by [ but-last ] map
-  drop
-  [ part1 ] [ part2 ] bi
+  [ part1 ] [ part2 ] 2bi
   [ pprint "" print ] bi@
 ;
