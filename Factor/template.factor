@@ -1,12 +1,15 @@
 USING:
   arrays
+  ! accessors
   combinators
-  io kernel
+  io
+  kernel
   math
+  ! math.parser
   prettyprint
   sequences
   splitting
-  unicode
+  ! unicode
   aoc.lib.parser
 ;
 IN: aoc.y20YY.dayDD

@@ -5,6 +5,9 @@ USING: accessors arrays assocs combinators command-line environment formatting
   io io.encodings.utf8 io.files io.pathnames io.styles
   kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
+  aoc.y2026.day01
+  aoc.y2026.day02
+  aoc.y2026.day03
   ! aoc.y2025.day01
   ! aoc.y2025.day02
   ! aoc.y2025.day03
@@ -12,7 +15,8 @@ USING: accessors arrays assocs combinators command-line environment formatting
   ! aoc.y2025.day05
   ! aoc.y2025.day06
   ! aoc.y2025.day07
-  aoc.y2025.day08
+  ! aoc.y2025.day08
+  ! aoc.y2025.day09
   ! aoc.y2025.day10
   ! aoc.y2025.day11
   ! aoc.y2024.day01
@@ -79,6 +83,9 @@ TUPLE: config year day alt ;
 : config>solver ( config -- function )
   [ year>> ] [ day>> ] bi 2array
   H{
+    { { 2026 1 } [ y2026day01 ] }
+    { { 2026 2 } [ y2026day02 ] }
+    { { 2026 3 } [ y2026day03 ] }
     ! { { 2025 1 } [ y2025day01 ] }
     ! { { 2025 2 } [ y2025day02 ] }
     ! { { 2025 3 } [ y2025day03 ] }
@@ -86,7 +93,8 @@ TUPLE: config year day alt ;
     ! { { 2025 5 } [ y2025day05 ] }
     ! { { 2025 6 } [ y2025day06 ] }
     ! { { 2025 7 } [ y2025day07 ] }
-    { { 2025 8 } [ y2025day08 ] }
+    ! { { 2025 8 } [ y2025day08 ] }
+    ! { { 2025 9 } [ y2025day09 ] }
     ! { { 2025 10 } [ y2025day10 ] }
     ! { { 2025 11 } [ y2025day11 ] }
     ! { { 2024 1 } [ y2024day01 ] }
