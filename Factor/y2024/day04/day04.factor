@@ -1,17 +1,7 @@
-USING: math.matrices ;
 USING:
-  arrays
-  ! accessors
-  combinators
-  continuations
-  io
-  kernel
-  math
-  math.vectors
-  prettyprint
-  sequences
-  splitting
-  aoc.lib.matrices
+  arrays combinators continuations io kernel
+  math math.matrices math.vectors
+  prettyprint sequences splitting aoc.lib.matrices
   aoc.lib.parser
 ;
 IN: aoc.y2024.day04
@@ -41,7 +31,23 @@ IN: aoc.y2024.day04
   ]
 ;
 
-: part2 ( grid -- number ) drop 1 ;
+:: x-len3' ( base -- slash-and-backslash )
+  { { -1 -1 } { 1  1 } } [ base v+ ] map
+  { { -1  1 } { 1 -1 } } [ base v+ ] map
+  2array
+;
+
+: ms/sm? ( 2chars matrix -- ? )
+  '[ _ '[ _ matrix-nth ] [ 2drop f ] recover ] map
+  [ { CHAR: M CHAR: S } = ] [ { CHAR: S CHAR: M } = ] bi or
+;
+
+:: part2 ( grid -- number )
+    grid matrix-indices
+    [ grid matrix-nth CHAR: A = ] filter
+    [ x-len3' [ grid ms/sm? ] all? ] filter
+    length
+;
 
 PRIVATE>
 
