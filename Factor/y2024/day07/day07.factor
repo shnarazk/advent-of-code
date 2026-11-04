@@ -6,6 +6,7 @@ USING:
   io
   kernel
   math
+  math.functions
   math.parser
   prettyprint
   sequences
@@ -45,11 +46,38 @@ IN: aoc.y2024.day07
 
 : part1 ( data -- number ) [ first2 part1/line ] map sum ;
 
-: part2/line ( line -- number )
-  drop 2
+: | ( a b -- a<b )
+ dup 0 = f assert=
+ dup log10 >integer 1 + 10 swap ^ rot * +
 ; inline
 
-: part2 ( data -- number ) [ part2/line ] map sum ;
+:: part2/recursor ( goal states elements -- ? )
+  elements empty?
+  [ f ]
+  [ elements first
+    states members
+    HS{ } clone
+    [ pick over + dup goal <= [ pick adjoin ] [ drop ] if
+      pick over * dup goal <= [ pick adjoin ] [ drop ] if
+      pick over swap | dup goal <= [ pick adjoin ] [ drop ] if
+      drop ]
+    reduce
+    nip
+    goal over in?
+    [ drop t ]
+    [ members goal swap elements rest part2/recursor ]
+    if ]
+  if
+; recursive
+
+:: part2/line ( goal elements -- number )
+  goal elements 1 cut
+  [ first 1array ] dip
+  part2/recursor
+  goal 0 ?
+; inline
+
+: part2 ( data -- number ) [ first2 part2/line ] map sum ;
 
 PRIVATE>
 
