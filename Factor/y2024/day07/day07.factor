@@ -1,18 +1,6 @@
 USING:
-  arrays
-  ! accessors
-  combinators
-  hash-sets
-  io
-  kernel
-  math
-  math.functions
-  math.parser
-  prettyprint
-  sequences
-  sets
-  splitting
-  ! unicode
+  arrays combinators hash-sets io kernel math math.functions math.parser
+  prettyprint sequences sets splitting
   aoc.lib.parser
 ;
 IN: aoc.y2024.day07
@@ -21,7 +9,7 @@ IN: aoc.y2024.day07
 
 :: part1/recursor ( goal states elements -- ? )
   elements empty?
-  [ f ]
+  [ goal states in? ]
   [ elements first
     states members
     HS{ } clone
@@ -30,10 +18,7 @@ IN: aoc.y2024.day07
       dup goal <= [ over adjoin ] [ drop ] if ]
     reduce
     nip
-    goal over in?
-    [ drop t ]
-    [ members goal swap elements rest part1/recursor ]
-    if ]
+    members goal swap elements rest part1/recursor ]
   if
 ; recursive
 
@@ -53,7 +38,7 @@ IN: aoc.y2024.day07
 
 :: part2/recursor ( goal states elements -- ? )
   elements empty?
-  [ f ]
+  [ goal states in? ]
   [ elements first
     states members
     HS{ } clone
@@ -63,10 +48,7 @@ IN: aoc.y2024.day07
       drop ]
     reduce
     nip
-    goal over in?
-    [ drop t ]
-    [ members goal swap elements rest part2/recursor ]
-    if ]
+    members goal swap elements rest part2/recursor ]
   if
 ; recursive
 
