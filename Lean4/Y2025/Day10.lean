@@ -217,8 +217,8 @@ def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat
 @[inline]
 def reachability (flips goal : Array Nat) : Ordering := Id.run do
   let mut ord := Ordering.eq
-  for (f, g) in (flips.zip goal).iter do
-    match compare f g with
+  for i in [0:min flips.size goal.size] do
+    match compare flips[i]! goal[i]! with
     | .gt => return .gt
     | .lt => ord := .lt
     | _ => ()
@@ -272,52 +272,58 @@ structure Config where
   buttons : Array (Array Nat)
   goal : Array Nat
 
+/-- Outcome of checking the final affectors of a button against the goal. -/
+inductive FinalCheck where
+  | ok
+  | skip
+  | stop
+
+/-- `stop` if some final light is below its goal, else `skip` if some light is above it. -/
+@[inline]
+def checkFinal (lightFlips goal lights : Array Nat) : FinalCheck := Id.run do
+  let mut result := FinalCheck.ok
+  for k in [0:lights.size] do
+    let l := lights[k]!
+    match compare lightFlips[l]! goal[l]! with
+    | .lt => return .stop
+    | .gt => result := .skip
+    | .eq => ()
+  result
+
 def solveRec
     (level best' : Nat)
-    (button_toggles' : Array Nat)
+    (buttonToggles' : Array Nat)
     (config : Config)
     : Nat := Id.run do
   if level ≥ config.buttons.size then return best'
-  let orderToIndex := config.orderToIndex
-  let finalAffector := config.finalAffector
-  let availabeBands := config.availabeBands
+  let index := config.orderToIndex[level]!
+  let (lo, hi) := config.availabeBands[index]!
   let buttons := config.buttons
   let goal := config.goal
-  let index : Nat := orderToIndex[level]!
   let mut best := best'
-  let mut buttonToggles := button_toggles'
-  let mut lightFlips : Array Nat := Array.ofFn (n := goal.size) (fun _ ↦ 0)
-  for i in orderToIndex.iter.take level do
-    for lightId in buttons[i]!.iter do
+  let mut buttonToggles := buttonToggles'
+  let mut lightFlips : Array Nat := Array.replicate goal.size 0
+  for l in [0:level] do
+    let i := config.orderToIndex[l]!
+    for lightId in buttons[i]! do
       lightFlips := lightFlips.modify lightId (· + buttonToggles[i]!)
-  for lightId in buttons[index]!.iter do
-      lightFlips := lightFlips.modify lightId (· + availabeBands[index]!.snd)
-  -- next_value
-  let band := availabeBands[index]!.snd - availabeBands[index]!.fst
-  for numToggles' in 0 ... band do
-    let numToggles := availabeBands[index]!.snd - 1 - numToggles'
-    -- - some true  : break 'next_value
-    -- - some false : continue 'next_value
-    let mut skipToNextValue : Option Bool := none
+  for lightId in buttons[index]! do
+    lightFlips := lightFlips.modify lightId (· + hi)
+  -- try the toggle counts from `hi - 1` down to `lo`
+  for k in [0:hi - lo] do
+    let numToggles := hi - 1 - k
     buttonToggles := buttonToggles.set! index numToggles
-    for lightId in buttons[index]!.iter do
+    for lightId in buttons[index]! do
       lightFlips := lightFlips.modify lightId (· - 1)
-    for lightId in finalAffector[index]!.iter do
-      match compare lightFlips[lightId]! goal[lightId]! with
-      | .lt => skipToNextValue := some true
-      | .eq => ()
-      | .gt => if skipToNextValue.isNone then skipToNextValue := some false
-    match /- dbg s!"   {buttonToggles}: {lightFlips}" -/ skipToNextValue with
-    | some true => break
-    | some false => continue
-    | _ => ()
+    match checkFinal lightFlips goal config.finalAffector[index]! with
+    | .stop => break
+    | .skip => continue
+    | .ok => pure ()
     let ans := buttonToggles.sum
     if ans ≥ best then continue
-    match /- (fun a ↦ dbg f!"{level}/{index}{buttonToggles}: {lightFlips} {a}" a) <| -/ reachability lightFlips goal with
-    | .lt =>
-      best := solveRec (level + 1) best buttonToggles config
-        |> (min · best)
-    | .eq => if ans < best then best := dbg s!"improved {ans}" ans
+    match reachability lightFlips goal with
+    | .lt => best := min (solveRec (level + 1) best buttonToggles config) best
+    | .eq => best := dbg s!"improved {ans}" ans
     | .gt => continue
   best
 termination_by config.buttons.size - level
