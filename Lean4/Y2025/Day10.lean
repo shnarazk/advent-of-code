@@ -217,8 +217,8 @@ def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat
 @[inline]
 def reachability (flips goal : Array Nat) : Ordering := Id.run do
   let mut ord := Ordering.eq
-  for (f, g) in (flips.zip goal).iter do
-    match compare f g with
+  for i in 0 ... min flips.size goal.size do
+    match compare flips[i]! goal[i]! with
     | .gt => return .gt
     | .lt => ord := .lt
     | _ => ()
