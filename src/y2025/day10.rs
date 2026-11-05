@@ -197,6 +197,18 @@ struct Setting {
     goal: Vec<u16>,
 }
 
+/// Lower bound on the number of further button presses needed to reach `goal` from `state`.
+///
+/// Each press raises a light by at most one, so the largest remaining deficit is admissible for A*-style pruning.
+fn remaining_lower_bound(state: &[u16], goal: &[u16]) -> usize {
+    state
+        .iter()
+        .zip(goal.iter())
+        .map(|(s, g)| g.saturating_sub(*s) as usize)
+        .max()
+        .unwrap_or_default()
+}
+
 /// level-1まで確定した部分解に対して one step展開する。
 fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setting) {
     let Setting {
@@ -237,7 +249,7 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
             }
         }
         let ans = button_toggles.iter().sum::<usize>();
-        if ans >= *best {
+        if ans + remaining_lower_bound(&light_flips, goal) >= *best {
             continue;
         }
         match compare(&light_flips, goal) {
