@@ -337,7 +337,7 @@ def solveRec
     if ans + remainingLowerBound lightFlips goal ≥ best then continue
     match reachability lightFlips goal with
     | .lt => best := min (solveRec (level + 1) best buttonToggles config) best
-    | .eq => best := dbg s!"improved {ans}" ans
+    | .eq => best := ans -- dbg s!"improved {ans}" ans
     | .gt => continue
   best
 termination_by config.buttons.size - level
@@ -358,11 +358,12 @@ def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
     1_000_000_000
     buttonToggles
     (Config.mk
-      (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
+      orderToIndex -- (dbg s!"orderToIndex: {orderToIndex}" orderToIndex)
       finalAffector
       availableBands
       buttons
-      (dbg s!"goal: {goal}" goal))
+      goal -- (dbg s!"goal: {goal}" goal)
+      )
 
 def solve (input : Input) : Nat :=
   input.line.iter
