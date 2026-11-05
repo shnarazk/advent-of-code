@@ -290,6 +290,20 @@ def checkFinal (lightFlips goal lights : Array Nat) : FinalCheck := Id.run do
     | .eq => ()
   result
 
+/-- Lower bound on the number of further button presses needed to reach `goal` from `state`.
+- Each press raises a light by at most one, so the largest remaining deficit is admissible.
+- Rustの`remaining_lower_bound`に対応
+-/
+@[inline]
+def remainingLowerBound (state goal : Array Nat) : Nat := Id.run do
+  let mut bound := 0
+  for i in [0:min state.size goal.size] do
+    bound := max bound (goal[i]! - state[i]!)
+  bound
+
+#guard remainingLowerBound #[3, 0, 4] #[3, 2, 1] == 2
+#guard remainingLowerBound #[3, 2, 4] #[3, 2, 4] == 0
+
 def solveRec
     (level best' : Nat)
     (buttonToggles' : Array Nat)
@@ -320,7 +334,7 @@ def solveRec
     | .skip => continue
     | .ok => pure ()
     let ans := buttonToggles.sum
-    if ans ≥ best then continue
+    if ans + remainingLowerBound lightFlips goal ≥ best then continue
     match reachability lightFlips goal with
     | .lt => best := min (solveRec (level + 1) best buttonToggles config) best
     | .eq => best := dbg s!"improved {ans}" ans
