@@ -1,7 +1,8 @@
 //! <https://adventofcode.com/2025/day/10>
+#[cfg(feature = "use_lp_solver")]
+use microlp::{ComparisonOp, OptimizationDirection, Problem, Variable};
 use {
     crate::framework::{AdventOfCode, ParseError, aoc},
-    microlp::{ComparisonOp, OptimizationDirection, Problem, Variable},
     rayon::prelude::*,
     std::{cmp::Ordering, collections::HashSet},
 };
@@ -105,7 +106,8 @@ impl AdventOfCode for Puzzle {
     }
 }
 
-fn _solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
+#[cfg(feature = "use_lp_solver")]
+fn solve(buttons: &[Vec<usize>], goals: &[usize]) -> usize {
     let mut problem = Problem::new(OptimizationDirection::Minimize);
     let mut variables: Vec<Variable> = Vec::new();
     for _ in 0..buttons.len() {
