@@ -269,6 +269,22 @@ def remainingLowerBound (state goal : Array Nat) : Nat := Id.run do
 #guard remainingLowerBound #[3, 0, 4] #[3, 2, 1] == 2
 #guard remainingLowerBound #[3, 2, 4] #[3, 2, 4] == 0
 
+inductive FinalCheck where
+  | ok
+  | skip
+  | stop
+
+/-- `stop` if some final light is below its goal, else `skip` if some light is above it. -/
+@[inline]
+def checkFinal (lightFlips goal lights : Array Nat) : FinalCheck := Id.run do
+  let mut result := FinalCheck.ok
+  for lightId in lights.iter do
+    match compare lightFlips[lightId]! goal[lightId]! with
+    | .lt => return .stop
+    | .gt => result := .skip
+    | .eq => ()
+  result
+
 structure Config where
   orderToIndex : Array Nat
   finalAffector : Array (Array Nat)
@@ -299,20 +315,12 @@ def solveRec
   let band := availabeBands[index]!.snd - availabeBands[index]!.fst
   for numToggles' in 0 ... band do
     let numToggles := availabeBands[index]!.snd - 1 - numToggles'
-    -- - some true  : break 'next_value
-    -- - some false : continue 'next_value
-    let mut skipToNextValue : Option Bool := none
     for lightId in buttons[index]!.iter do
       lightFlips := lightFlips.modify lightId (· - 1)
-    for lightId in finalAffector[index]!.iter do
-      match compare lightFlips[lightId]! goal[lightId]! with
-      | .lt => skipToNextValue := some true
-      | .eq => ()
-      | .gt => if skipToNextValue.isNone then skipToNextValue := some false
-    match /- dbg s!"   {buttonToggles}: {lightFlips}" -/ skipToNextValue with
-    | some true => break
-    | some false => continue
-    | _ => ()
+    match checkFinal lightFlips goal finalAffector[index]! with
+    | .stop => break
+    | .skip => continue
+    | .ok => pure ()
     let ans := toggleSum + numToggles
     if ans + remainingLowerBound lightFlips goal ≥ best then continue
     match /- (fun a ↦ dbg f!"{level}/{index}{buttonToggles}: {lightFlips} {a}" a) <| -/ reachability lightFlips goal with
