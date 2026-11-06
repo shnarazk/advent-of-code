@@ -178,13 +178,13 @@ def upperLimits₁ (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat 
 #guard upperLimits₁ #[#[0, 1], #[1, 2]] #[2, 5, 6] == #[3, 6]
 
 def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := Id.run do
-  let mut affectors : Array (Array Nat) := Array.ofFn (n := goal.size) (fun _ ↦ #[])
+  let mut affectors : Array (Array Nat) := Array.replicate goal.size #[]
   let mut b_id := 0
   for target in buttons.iter do
     for light_id in target do
       affectors := affectors.modify light_id (·.push b_id)
     b_id := b_id + 1
-  let mut result : Array Nat := Array.ofFn (n := buttons.size) (fun _ ↦ 0)
+  let mut result : Array Nat := Array.replicate buttons.size 0
   let mut light_id := 0
   for bs in affectors.iter do
     if bs.size == 1 then
@@ -199,7 +199,7 @@ def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := 
 -/
 def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat)
     : Array (Array Nat) := Id.run do
-  let mut lastAffector : Array Nat := Array.ofFn (n := numLights) (fun _ ↦ 0)
+  let mut lastAffector : Array Nat := Array.replicate numLights 0
   for buttonId in order.iter do
     for lightId in buttons[buttonId]!.iter do
       lastAffector := lastAffector.set! lightId buttonId
@@ -244,7 +244,7 @@ def bestButtonOrder
   let mut result : Array Nat := #[]
   let mut affectors := affectors'
   for _ in 0 ... numButtons do
-    let mut buttonWeights : Array Float := Array.ofFn (n := numButtons) (fun _ ↦ 0.0)
+    let mut buttonWeights : Array Float := Array.replivate numButtons 0.0
     let mut bId := 0
     for affectingLights in buttons.iter do
       if !result.contains bId then
@@ -300,7 +300,7 @@ def solveRec
   let index : Nat := orderToIndex[level]!
   let mut best := best'
   let mut buttonToggles := button_toggles'
-  let mut lightFlips : Array Nat := Array.ofFn (n := goal.size) (fun _ ↦ 0)
+  let mut lightFlips : Array Nat := Array.replicate goal.size 0
   for i in orderToIndex.iter.take level do
     for lightId in buttons[i]!.iter do
       lightFlips := lightFlips.modify lightId (· + buttonToggles[i]!)
@@ -339,14 +339,14 @@ termination_by config.buttons.size - level
 def solve' (buttons : Array (Array Nat)) (goal : Array Nat) : Nat := Id.run do
   let numButtons := buttons.size
   let numLights := goal.size
-  let mut affectors : Array Vec := Array.ofFn (n := numLights) (fun _ ↦ #[])
+  let mut affectors : Array Vec := Array.replicate numLights #[]
   for (lights, bId) in buttons.zipIdx.iter do
     for lId in lights.iter do
       affectors := affectors.modify lId (·.push bId)
   let availableBands := Array.zip (lowerLimits buttons goal) (upperLimits₁ buttons goal)
   let orderToIndex := bestButtonOrder buttons affectors goal
   let finalAffector := fixLights buttons orderToIndex numLights
-  let buttonToggles := Array.ofFn (n := numButtons) (fun _ ↦ 0)
+  let buttonToggles := Array.replicate numButtons 0
   solveRec
     0
     1_000_000_000
