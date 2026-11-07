@@ -278,7 +278,7 @@ inductive FinalCheck where
 @[inline]
 def checkFinal (lightFlips goal lights : Array Nat) : FinalCheck := Id.run do
   let mut result := FinalCheck.ok
-  for lightId in lights.iter do
+  for lightId in lights do
     match compare lightFlips[lightId]! goal[lightId]! with
     | .lt => return .stop
     | .gt => result := .skip
@@ -309,13 +309,13 @@ def solveRec
   let index : Nat := orderToIndex[level]!
   let mut best := best'
   let mut lightFlips := lightFlips'
-  for lightId in buttons[index]!.iter do
+  for lightId in buttons[index]! do
       lightFlips := lightFlips.modify lightId (· + availabeBands[index]!.snd)
   -- next_value
   let band := availabeBands[index]!.snd - availabeBands[index]!.fst
   for numToggles' in 0 ... band do
     let numToggles := availabeBands[index]!.snd - 1 - numToggles'
-    for lightId in buttons[index]!.iter do
+    for lightId in buttons[index]! do
       lightFlips := lightFlips.modify lightId (· - 1)
     match checkFinal lightFlips goal finalAffector[index]! with
     | .stop => break
