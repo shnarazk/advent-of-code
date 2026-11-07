@@ -101,17 +101,17 @@ end Part1
 namespace Part2
 
 instance : HAdd Vec Vec Vec where
-  hAdd a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! + b[i]!) |>.toArray
+  hAdd a b := (0 ... min a.size b.size).iter.map (fun i ↦ a[i]! + b[i]!) |>.toArray
 
 #guard #[(1 : Int), 1, 3] + #[(3 : Int), 2, 5] == #[4, 3, 8]
 
 instance : HSub Vec Vec Vec where
-  hSub a b := (0... min a.size b.size).iter.map (fun i ↦ a[i]! - b[i]!) |>.toArray
+  hSub a b := (0 ... min a.size b.size).iter.map (fun i ↦ a[i]! - b[i]!) |>.toArray
 
 #guard #[(1 : Int), 1, 3] - #[(3 : Int), 2, 5] == #[-2, -1, -2]
 
 instance : HMul Vec Int Vec where
-  hMul v n := v.iter.map (· * n) |>.toArray
+  hMul v n := v.map (· * n)
 
 #guard #[(1 : Int), 2, 3] * (3 : Int) == #[3, 6, 9]
 
@@ -171,22 +171,20 @@ instance : HMul (Array Vec) Vec Vec where
       (Array.replicate buttons[0]!.size 0)
 
 def upperLimits₁ (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat :=
-  buttons.iter
-    |>.map (·.iter.map (goal[·]!) |>.fold min (goal.max?.unwrapOr 0) |> (· + 1))
-    |>.toArray
+  buttons.map (·.iter.map (goal[·]!) |>.fold min (goal.max?.unwrapOr 0) |> (· + 1))
 
 #guard upperLimits₁ #[#[0, 1], #[1, 2]] #[2, 5, 6] == #[3, 6]
 
 def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := Id.run do
   let mut affectors : Array (Array Nat) := Array.replicate goal.size #[]
   let mut b_id := 0
-  for target in buttons.iter do
+  for target in buttons do
     for light_id in target do
       affectors := affectors.modify light_id (·.push b_id)
     b_id := b_id + 1
   let mut result : Array Nat := Array.replicate buttons.size 0
   let mut light_id := 0
-  for bs in affectors.iter do
+  for bs in affectors do
     if bs.size == 1 then
       result := result.set! bs[0]! goal[light_id]!
     light_id := light_id + 1
@@ -200,14 +198,12 @@ def lowerLimits (buttons : Array (Array Nat)) (goal : Array Nat) : Array Nat := 
 def fixLights (buttons : Array (Array Nat)) (order : Array Nat) (numLights : Nat)
     : Array (Array Nat) := Id.run do
   let mut lastAffector : Array Nat := Array.replicate numLights 0
-  for buttonId in order.iter do
+  for buttonId in order do
     for lightId in buttons[buttonId]!.iter do
       lastAffector := lastAffector.set! lightId buttonId
   Array.range buttons.size
-    |>.iter
     |>.map (fun buttonId ↦
-        lastAffector.zipIdx.iter.filter (·.fst == buttonId) |>.map Prod.snd |>.toArray )
-    |>.toArray
+        lastAffector.zipIdx.iter.filter (·.fst == buttonId) |>.map Prod.snd |>.toArray)
 
 #guard fixLights #[#[0, 1], #[2], #[0, 2]] #[0, 1, 2] 3 == #[#[1], #[], #[0, 2]]
 
@@ -239,9 +235,9 @@ def bestButtonOrder
     let mut buttonWeights : Array Nat :=
       Array.ofFn (n := numButtons) (fun b ↦ if result.contains b.val then numButtons + 2 else numButtons + 1)
     let mut bId := 0
-    for affectingLights in buttons.iter do
+    for affectingLights in buttons do
       if !result.contains bId then
-        for lId in affectingLights.iter do
+        for lId in affectingLights do
           if affectors[lId]!.contains bId then
             buttonWeights := buttonWeights.modify bId (min · affectors[lId]!.size)
       bId := bId + 1
@@ -250,7 +246,7 @@ def bestButtonOrder
       if buttonWeights[b]! < buttonWeights[theButton]! then
         theButton := b
     result := result.push theButton
-    affectors := affectors.iter |>.map (·.erase theButton) |>.toArray
+    affectors := affectors.map (·.erase theButton)
   result
 
 #guard bestButtonOrder #[#[1], #[0], #[0, 1]] #[#[1, 2], #[0, 2]] == #[0, 2, 1]
@@ -278,7 +274,7 @@ inductive FinalCheck where
 @[inline]
 def checkFinal (lightFlips goal lights : Array Nat) : FinalCheck := Id.run do
   let mut result := FinalCheck.ok
-  for lightId in lights.iter do
+  for lightId in lights do
     match compare lightFlips[lightId]! goal[lightId]! with
     | .lt => return .stop
     | .gt => result := .skip
@@ -309,13 +305,13 @@ def solveRec
   let index : Nat := orderToIndex[level]!
   let mut best := best'
   let mut lightFlips := lightFlips'
-  for lightId in buttons[index]!.iter do
+  for lightId in buttons[index]! do
       lightFlips := lightFlips.modify lightId (· + availabeBands[index]!.snd)
   -- next_value
   let band := availabeBands[index]!.snd - availabeBands[index]!.fst
   for numToggles' in 0 ... band do
     let numToggles := availabeBands[index]!.snd - 1 - numToggles'
-    for lightId in buttons[index]!.iter do
+    for lightId in buttons[index]! do
       lightFlips := lightFlips.modify lightId (· - 1)
     match checkFinal lightFlips goal finalAffector[index]! with
     | .stop => break
