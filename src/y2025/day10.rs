@@ -177,6 +177,21 @@ fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -
         .collect::<Vec<Vec<usize>>>()
 }
 
+/// TODO: add documentation
+fn make_distance_envelops(goal: &[usize], buttons: &[Vec<usize>]) -> Vec<Vec<usize>> {
+    let mut matrix: Vec<Vec<usize>> = vec![vec![0; goal.len()]; goal.len()];
+    for (l_id, _) in goal.iter().enumerate() {
+        for vec in buttons.iter() {
+            if vec.contains(&l_id) {
+                for l in vec.iter() {
+                    matrix[l_id][*l] = matrix[l_id][*l].max(1);
+                }
+            }
+        }
+    }
+    matrix
+}
+
 fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
     let mut ord = Ordering::Equal;
     for (f, g) in flips.iter().zip(goal.iter()) {
@@ -195,6 +210,7 @@ struct Setting {
     order_to_index: Vec<usize>,
     final_affector: Vec<Vec<usize>>,
     available_bands: Vec<(usize, usize)>,
+    distance_envelove: Vec<Vec<usize>>,
     buttons: Vec<Vec<usize>>,
     goal: Vec<u16>,
 }
@@ -202,7 +218,7 @@ struct Setting {
 /// Lower bound on the number of further button presses needed to reach `goal` from `state`.
 ///
 /// Each press raises a light by at most one, so the largest remaining deficit is admissible for A*-style pruning.
-fn remaining_lower_bound(state: &[u16], goal: &[u16]) -> usize {
+fn remaining_lower_bound(state: &[u16], goal: &[u16], _distance_envelove: &[Vec<usize>]) -> usize {
     state
         .iter()
         .zip(goal.iter())
@@ -218,6 +234,7 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
         order_to_index,
         final_affector,
         available_bands,
+        distance_envelove,
         buttons,
         goal,
     } = setting;
@@ -251,7 +268,7 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
             }
         }
         let ans = button_toggles.iter().sum::<usize>();
-        if ans + remaining_lower_bound(&light_flips, goal) >= *best {
+        if ans + remaining_lower_bound(&light_flips, goal, &distance_envelove) >= *best {
             continue;
         }
         match compare(&light_flips, goal) {
@@ -354,6 +371,7 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         order_to_index,
         final_affector,
         available_bands,
+        distance_envelove: make_distance_envelops(goal, buttons),
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
     };
