@@ -1,7 +1,7 @@
 //! <https://adventofcode.com/2025/day/9>
 use {
     crate::{
-        framework::{aoc, AdventOfCode, ParseError},
+        framework::{AdventOfCode, ParseError, aoc},
         geometric::{Dim2, NeighborIter},
     },
     // rayon::prelude::*,
@@ -21,9 +21,9 @@ mod parser {
     use {
         crate::{geometric::Dim2, parser::parse_usize},
         winnow::{
+            ModalResult, Parser,
             ascii::newline,
             combinator::{separated, seq},
-            ModalResult, Parser,
         },
     };
 
