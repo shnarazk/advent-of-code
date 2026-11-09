@@ -109,7 +109,7 @@ where
                 let m1 = {
                     if c1.is_empty() {
                         "❔"
-                    } else if *c1 == format!("{o1:?}") {
+                    } else if c1 == &format!("{o1:?}") {
                         "✅"
                     } else {
                         "❎"
@@ -118,7 +118,7 @@ where
                 let m2 = {
                     if c2.is_empty() {
                         "❔"
-                    } else if *c2 == format!("{o2:?}") {
+                    } else if c2 == &format!("{o2:?}") {
                         "✅"
                     } else {
                         "❎"
@@ -130,7 +130,7 @@ where
                 let m = {
                     if c.is_empty() {
                         "❔"
-                    } else if *c == format!("{o:?}") {
+                    } else if c == &format!("{o:?}") {
                         "✅"
                     } else {
                         "❎"
@@ -142,7 +142,7 @@ where
                 let m = {
                     if c.is_empty() {
                         "❔"
-                    } else if *c == format!("{o:?}") {
+                    } else if c == &format!("{o:?}") {
                         "✅"
                     } else {
                         "❎"
@@ -216,7 +216,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     }
     /// # UNDER THE HOOD
     /// Return the verified answers from the answer file.
-    /// "" will be used as default value (no file, no field, or not-stored explictly)
+    /// "" will be used as default value (no file, no field, or not-stored explicitly)
     fn load_answers(config: &ConfigAoC) -> (String, String) {
         let path = PathBuf::from(JSON_DUMP_DIR).join("answers.json");
         let Ok(file) = File::open(&path) else {
