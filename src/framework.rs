@@ -4,6 +4,8 @@ pub use aoc_macro::{aoc, aoc_at};
 use {
     crate::color,
     clap::Parser,
+    serde::Deserialize,
+    std::collections::HashMap,
     std::sync::OnceLock,
     std::{
         fmt,
@@ -15,6 +17,16 @@ use {
 
 pub const JSON_DUMP_DIR: &str = "misc";
 pub const DATA_DIR: &str = "data";
+
+/// Stored answers in `misc/answers.json`: year -> day -> variant -> part answers
+pub type AnswerMap = HashMap<String, HashMap<String, HashMap<String, PartAnswers>>>;
+
+/// The stored answers of one puzzle variant
+#[derive(Clone, Debug, Deserialize)]
+pub struct PartAnswers {
+    pub part1: String,
+    pub part2: String,
+}
 
 #[derive(Clone, Debug, Default, Parser)]
 #[command(author, version, about, long_about = None)]
@@ -79,9 +91,9 @@ static CONFIG: OnceLock<ConfigAoC> = OnceLock::new();
 /// IT MUST BE UNDER THE HOOD
 #[derive(Debug, Eq, PartialEq)]
 pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::Debug + PartialEq> {
-    Answers(Output1, Output2),
-    Part1(Output1),
-    Part2(Output2),
+    Answers((Output1, String), (Output2, String)),
+    Part1(Output1, String),
+    Part2(Output2, String),
     Dump,
     None,
 }
@@ -93,9 +105,51 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Answer::Answers(o1, o2) => write!(f, "Answers: {o1:?}, {o2:?}"),
-            Answer::Part1(o) => write!(f, "Part1: {o:?}"),
-            Answer::Part2(o) => write!(f, "Part2: {o:?}"),
+            Answer::Answers((o1, c1), (o2, c2)) => {
+                let m1 = {
+                    if c1.is_empty() {
+                        "❔"
+                    } else if *c1 == format!("{o1:?}") {
+                        "✅"
+                    } else {
+                        "❎"
+                    }
+                };
+                let m2 = {
+                    if c2.is_empty() {
+                        "❔"
+                    } else if *c2 == format!("{o2:?}") {
+                        "✅"
+                    } else {
+                        "❎"
+                    }
+                };
+                write!(f, "Answers: {o1:?} {m1}, {o2:?} {m2}")
+            }
+            Answer::Part1(o, c) => {
+                let m = {
+                    if c.is_empty() {
+                        "❔"
+                    } else if *c == format!("{o:?}") {
+                        "✅"
+                    } else {
+                        "❎"
+                    }
+                };
+                write!(f, "Part1: {o:?} {m}")
+            }
+            Answer::Part2(o, c) => {
+                let m = {
+                    if c.is_empty() {
+                        "❔"
+                    } else if *c == format!("{o:?}") {
+                        "✅"
+                    } else {
+                        "❎"
+                    }
+                };
+                write!(f, "Part2: {o:?} {m}")
+            }
             Answer::Dump => write!(f, ""),
             Answer::None => write!(f, "No answer"),
         }
@@ -144,7 +198,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
         Ok(())
     }
     /// # UNDER THE HOOD
-    fn load(config: ConfigAoC) -> Result<String, ParseError> {
+    fn load_data(config: ConfigAoC) -> Result<String, ParseError> {
         fn load_file(file_name: String) -> Result<String, ParseError> {
             match File::open(&file_name) {
                 Ok(mut file) => {
@@ -158,20 +212,32 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                 Err(e) => panic!("Can't read {file_name}: {e:?}"),
             }
         }
-        // fn load_data(desc: &Description) -> Result<String, ParseError> {
-        //     match desc {
-        //         Description::TestData(s) => Ok(s.to_string()),
-        //         _ => Err(ParseError),
-        //     }
-        // }
         load_file(config.data_filename(Self::YEAR, Self::DAY)?)
+    }
+    /// # UNDER THE HOOD
+    /// Return the verified answers from the answer file.
+    /// "" will be used as default value (no file, no field, or not-stored explictly)
+    fn load_answers(config: &ConfigAoC) -> (String, String) {
+        let path = PathBuf::from(JSON_DUMP_DIR).join("answers.json");
+        let Ok(file) = File::open(&path) else {
+            return Default::default();
+        };
+        let stored: AnswerMap =
+            serde_json::from_reader(file).unwrap_or_else(|e| panic!("Can't parse {path:?}: {e}"));
+        let key = config.alt.as_deref().unwrap_or(" ");
+        stored
+            .get(&Self::YEAR.to_string())
+            .and_then(|days| days.get(&Self::DAY.to_string()))
+            .and_then(|variants| variants.get(key))
+            .map(|parts| (parts.part1.clone(), parts.part2.clone()))
+            .unwrap_or_default()
     }
     /// # UNDER THE HOOD.
     /// parse a structured data file, which has some 'blocks' separated with `Self::DELIMITER`
     /// then return `Ok(Self)`.
     fn build(config: ConfigAoC) -> Result<Self, ParseError> {
         let mut instance = Self::default();
-        let contents = Self::load(config)?;
+        let contents = Self::load_data(config)?;
         instance.prepare(contents.as_str())?;
         Ok(instance)
     }
@@ -270,7 +336,8 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part1(Self::build(config).expect(&parse_error).part1())
+                let oracle = Self::load_answers(&config).0;
+                Answer::Part1(Self::build(config).expect(&parse_error).part1(), oracle)
             }
             2 => {
                 println!(
@@ -281,7 +348,8 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
-                Answer::Part2(Self::build(config).expect(&parse_error).part2())
+                let oracle = Self::load_answers(&config).1;
+                Answer::Part2(Self::build(config).expect(&parse_error).part2(), oracle)
             }
             3 => {
                 println!(
@@ -292,10 +360,11 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     input,
                     color::RESET,
                 );
+                let oracles = Self::load_answers(&config);
                 let solver = Self::build(config.clone()).expect(&parse_error);
                 let ans1 = solver.clone().part1();
                 let ans2 = solver.clone().part2();
-                Answer::Answers(ans1, ans2)
+                Answer::Answers((ans1, oracles.0), (ans2, oracles.1))
             }
             _ => Answer::None,
         }
