@@ -18,16 +18,6 @@ use {
 pub const JSON_DUMP_DIR: &str = "misc";
 pub const DATA_DIR: &str = "data";
 
-/// Stored answers in `misc/answers.json`: year -> day -> variant -> part answers
-pub type AnswerMap = HashMap<String, HashMap<String, HashMap<String, PartAnswers>>>;
-
-/// The stored answers of one puzzle variant
-#[derive(Clone, Debug, Deserialize)]
-pub struct PartAnswers {
-    pub part1: String,
-    pub part2: String,
-}
-
 #[derive(Clone, Debug, Default, Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct ConfigAoC {
@@ -218,6 +208,16 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
     /// Return the verified answers from the answer file.
     /// "" will be used as default value (no file, no field, or not-stored explicitly)
     fn load_answers(config: &ConfigAoC) -> (String, String) {
+        /// Stored answers in `misc/answers.json`: year -> day -> variant -> part answers
+        type AnswerMap = HashMap<String, HashMap<String, HashMap<String, PartAnswers>>>;
+
+        /// The stored answers of one puzzle variant
+        #[derive(Clone, Debug, Deserialize)]
+        struct PartAnswers {
+            pub part1: String,
+            pub part2: String,
+        }
+
         let path = PathBuf::from(JSON_DUMP_DIR).join("answers.json");
         let Ok(file) = File::open(&path) else {
             return Default::default();
