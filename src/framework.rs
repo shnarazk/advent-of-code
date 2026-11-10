@@ -98,47 +98,47 @@ where
             Answer::Answers((o1, c1), (o2, c2)) => {
                 let m1 = {
                     if c1.is_empty() {
-                        "❔"
+                        ""
                     } else if c1 == &format!("{o1:?}") {
-                        "✅"
+                        " ✅"
                     } else {
-                        "❎"
+                        " ❎"
                     }
                 };
                 let m2 = {
                     if c2.is_empty() {
-                        "❔"
+                        ""
                     } else if c2 == &format!("{o2:?}") {
-                        "✅"
+                        " ✅"
                     } else {
-                        "❎"
+                        " ❎"
                     }
                 };
-                write!(f, "Answers: {o1:?} {m1}, {o2:?} {m2}")
+                write!(f, "Answers: {o1:?}{m1}, {o2:?}{m2}")
             }
             Answer::Part1(o, c) => {
                 let m = {
                     if c.is_empty() {
-                        "❔"
+                        ""
                     } else if c == &format!("{o:?}") {
-                        "✅"
+                        " ✅"
                     } else {
-                        "❎"
+                        " ❎"
                     }
                 };
-                write!(f, "Part1: {o:?} {m}")
+                write!(f, "Part1: {o:?}{m}")
             }
             Answer::Part2(o, c) => {
                 let m = {
                     if c.is_empty() {
-                        "❔"
+                        ""
                     } else if c == &format!("{o:?}") {
                         "✅"
                     } else {
                         "❎"
                     }
                 };
-                write!(f, "Part2: {o:?} {m}")
+                write!(f, "Part2: {o:?}{m}")
             }
             Answer::Dump => write!(f, ""),
             Answer::None => write!(f, "No answer"),
