@@ -28,13 +28,18 @@ def dbg {α β : Type} [ToString β] (value : β) (a : α) : α :=
   dbgTrace s!"{value}" (fun _ ↦ a)
   -- dbgTrace s!"{label}: {a}" (fun _ ↦ a)
 
-/-- return a path to the datafile of `year` and `day` -/
+/-- return the path to the datafile of `year` and `day` -/
 def dataFileName (year day : Nat) (ext : Option String): IO String := do
   let aoc_dir ← IO.getEnv "AOC_DIR"
   let d := ("0" ++ s!"{day}").takeEnd 2
   return match ext with
   | some ext => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}-{ext}.txt"
   | none     => s!"{aoc_dir.getD ".."}/data/{year}/input-day{d}.txt"
+
+/-- return the path to answers.json -/
+def answerFileName : IO String := do
+  let aoc_dir ← IO.getEnv "AOC_DIR"
+  return s!"{aoc_dir.getD ".."}/misc/answers.json"
 
 /-- return the content of `datafilename` -/
 def readData (datafilename : String) : IO String := do
@@ -75,6 +80,8 @@ structure AocProblem where
   answers: Option (String × String) := none
   /-- the total elapsed time to solve the both parts -/
   time: Float := 0
+  /-- validated and stored answers -/
+  oracles: String × String
 deriving BEq --, Repr
 instance : ToString AocProblem where toString s := s!"Y{s.year}D{s.day}"
 
@@ -104,6 +111,7 @@ def new (year day : Nat) : AocProblem :=
     ""
     none
     0
+    ("", "")
 
 /-- return the input data file name -/
 def fileName (self : AocProblem) (ext : Option String) : IO String :=
@@ -112,6 +120,22 @@ def fileName (self : AocProblem) (ext : Option String) : IO String :=
 /-- return the content of the input data file name -/
 def getData (self : AocProblem) (ext : Option String) : IO String :=
   dataFileName self.year self.day ext >>= readData
+
+def getAnswers (self : AocProblem) (ext : Option String)
+    : IO (String × String) := do
+  try
+    let txt ← answerFileName >>= readData
+    let json ← IO.ofExcept $ Lean.Json.parse txt
+    let s ← (
+        json.getObjVal? s!"{self.year}"
+        >>= (·.getObjVal? s!"{self.day}")
+        >>= (·.getObjVal? (ext.getD " "))
+        >>= (fun j ↦ return (j.getObjValD "part1", j.getObjValD "part2")))
+      |> IO.ofExcept
+    let p1 ← IO.ofExcept s.fst.getStr?
+    let p2 ← IO.ofExcept s.snd.getStr?
+    return (p1, p2)
+  catch e => return dbg s!"{e}" ("", "")
 
 /-- return the lines of the input data file name as an Array -/
 def getLines (self : AocProblem) (ext : Option String) : IO (Array String) :=
@@ -138,12 +162,15 @@ def build {α β γ : Type} [ToString β] [ToString γ]
     (alt : Option String)
     : IO AocProblem := do
   if let some d := parser (← self.getData alt)
-  then return { self with
-    input_name := (← self.fileName alt)
-    answers := some (s!"{solve₁ d}", s!"{solve₂ d}") }
-  else return { self with
-    input_name := (← self.fileName alt)
-    answers := none }
+  then
+    return { self with
+      input_name := (← self.fileName alt)
+      answers := some (s!"{solve₁ d}", s!"{solve₂ d}")
+      oracles := (← self.getAnswers alt) }
+  else
+    return { self with
+      input_name := (← self.fileName alt)
+      answers := none }
 
 /--
   Configure and build an `AocProblem` for the given Advent of Code `(year, day)`.
@@ -305,7 +332,7 @@ def Array.windows2 {α : Type} (a : Array α) : List (α × α) :=
 
 #guard (Array.range 4 |>.windows2) = [(0, 1), (1, 2), (2, 3)]
 
-/-- Type `\^-` to insert it. This isn't the high-minus `¯` used in BQN. -/
+/-- Type `\ ^ -` to insert it. This isn't the high-minus `¯` used in BQN. -/
 prefix:max "⁻" => Neg.neg
 
 #guard 4 + ⁻2 = 2
