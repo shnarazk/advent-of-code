@@ -12,6 +12,7 @@ use {
         fs::File,
         io::prelude::*,
         path::{Path, PathBuf},
+        time::Instant,
     },
 };
 
@@ -79,9 +80,9 @@ impl ConfigAoC {
 static CONFIG: OnceLock<ConfigAoC> = OnceLock::new();
 
 /// IT MUST BE UNDER THE HOOD
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum Answer<Output1: Sized + fmt::Debug + PartialEq, Output2: Sized + fmt::Debug + PartialEq> {
-    Answers((Output1, String), (Output2, String)),
+    Answers((Output1, String), (Output2, String), f64),
     Part1(Output1, String),
     Part2(Output2, String),
     Dump,
@@ -95,7 +96,7 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Answer::Answers((o1, c1), (o2, c2)) => {
+            Answer::Answers((o1, c1), (o2, c2), t) => {
                 let m1 = {
                     if c1.is_empty() {
                         ""
@@ -114,7 +115,7 @@ where
                         " ❎"
                     }
                 };
-                write!(f, "Answers: {o1:?}{m1}, {o2:?}{m2}")
+                write!(f, "Answers: {o1:?}{m1}, {o2:?}{m2} ({t:.1} msec.)")
             }
             Answer::Part1(o, c) => {
                 let m = {
@@ -362,9 +363,15 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                 );
                 let oracles = Self::load_answers(&config);
                 let solver = Self::build(config.clone()).expect(&parse_error);
+                let beg = Instant::now();
                 let ans1 = solver.clone().part1();
                 let ans2 = solver.clone().part2();
-                Answer::Answers((ans1, oracles.0), (ans2, oracles.1))
+                let end = Instant::now();
+                Answer::Answers(
+                    (ans1, oracles.0),
+                    (ans2, oracles.1),
+                    (end - beg).as_secs_f64() * 1000.0,
+                )
             }
             _ => Answer::None,
         }

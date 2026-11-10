@@ -128,7 +128,7 @@ fn run_solver(mut config: ConfigAoC) {
     };
     let end = Instant::now();
     println!(
-        "{}# Execution time: {:.1} msec.{}",
+        "{}# Total execution time: {:.1} msec.{}",
         color::RED,
         (end - beg).as_secs_f64() * 1000.0,
         color::RESET
