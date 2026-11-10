@@ -47,7 +47,12 @@ pub fn main() {
             panic!("{}No valid day{}", color::RED, color::RESET);
         };
         match download_input(config.year, day) {
-            Ok(path) => println!("{}# download succeeded: {}{}", color::MAGENTA, path, color::RESET),
+            Ok(path) => println!(
+                "{}# download succeeded: {}{}",
+                color::MAGENTA,
+                path,
+                color::RESET
+            ),
             Err(e) => {
                 println!("{}# download failed: {}{}", color::RED, e, color::RESET);
                 std::process::exit(1);
@@ -64,11 +69,15 @@ pub fn main() {
 
 /// Download the puzzle input with the session cookie in `$AOC_SESSION`; return the saved path.
 fn download_input(year: usize, day: usize) -> Result<String, Box<dyn std::error::Error>> {
-    let session = std::env::var("AOC_SESSION").map_err(|_| "environment variable AOC_SESSION is not set")?;
+    let session =
+        std::env::var("AOC_SESSION").map_err(|_| "environment variable AOC_SESSION is not set")?;
     let url = format!("https://adventofcode.com/{year}/day/{day}/input");
     let mut response = ureq::get(&url)
         .header("Cookie", format!("session={}", session.trim()))
-        .header("User-Agent", "github.com/shnarazk/advent-of-code by shujinarazaki@protonmail.com")
+        .header(
+            "User-Agent",
+            "github.com/shnarazk/advent-of-code by shujinarazaki@protonmail.com",
+        )
         .call()?;
     let body = response.body_mut().read_to_string()?;
     let dir = format!("{DATA_DIR}/{year}");

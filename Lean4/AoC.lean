@@ -98,7 +98,13 @@ def AocProblem.show (self : AocProblem) : IO Unit :=
   match self.answers, self.time with
     | some ans, time => do
       IO.println s!"{Color.blue}- {self.input_name.up_to_depth 4}{Color.reset}: {formatFloat time 2}{Color.reset} msec"
-      IO.println s!"{Color.green}  => {ans.1}, {ans.2}{Color.reset}"
+      let m1 := if self.oracles.fst.isEmpty
+        then ""
+        else if s!"{ans.1}" = self.oracles.fst then " ✅" else " ❎"
+      let m2 := if self.oracles.snd.isEmpty
+        then ""
+        else if s!"{ans.2}" = self.oracles.snd then " ✅" else " ❎"
+      IO.println s!"{Color.green}  => {ans.1}{m1}, {ans.2}{m2}{Color.reset}"
     | _, _ => do return
 
 /-- Solve the puzzle for year and day in IO monad and return the result as `Option AoCProblem`.

@@ -17,3 +17,4 @@ Cargo.lock
 /tmp/
 # /misc/*.png
 /misc/**/*.png
+/misc/answers.json
