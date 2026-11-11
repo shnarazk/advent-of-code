@@ -1,9 +1,9 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
 USING: accessors arrays assocs combinators command-line environment formatting
-  colors hashtables
+  colors continuations hashtables
   io io.encodings.utf8 io.files io.pathnames io.styles
-  kernel math math.parser namespaces prettyprint
+  json kernel math math.parser namespaces prettyprint
   sequences splitting tools.time unicode
   aoc.y2026.day01
   aoc.y2026.day02
@@ -51,6 +51,31 @@ TUPLE: config year day alt ;
   [ year>> ] [ day>> ] [ alt>> ] tri
   "data/%04d/input-day%02d%s.txt" sprintf
   base-dir prepend-path
+;
+
+:: config>oracles ( config -- 2strings )
+  [
+    "misc/answers.json" base-dir prepend-path
+    utf8 file-contents json>
+    config year>> number>string swap at
+    config day>> number>string swap at
+    config alt>>
+    dup empty?
+    [ drop " " ]
+    [ dup 1 cut swap "-" =
+      [ nip ]
+      [ drop ]
+      if
+    ]
+    if
+    swap at
+    [ "part1" swap at ]
+    [ "part2" swap at ]
+    bi
+    2array
+  ]
+  [ ... { "" "" } ]
+  recover
 ;
 
 : config>print ( config -- )
@@ -119,8 +144,12 @@ TUPLE: config year day alt ;
 PRIVATE>
 
 : run-aoc ( -- )
-  args>config [ config>print ] [ config>data ] [ config>solver ] tri
-  [ [ drop "Can't dispatch" print ] or run-solver ] benchmark
+  args>config
+  dup config>oracles
+  ...
+  [ config>print ] [ config>data ] [ config>solver ] tri
+  [ [ drop "Can't dispatch" print ] or
+   run-solver ] benchmark
   1_000_000.0 / "%.2f msec" printf
 ;
 
