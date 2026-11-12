@@ -29,8 +29,8 @@ microlp = { version = "0.7.0", optional = true }
 ureq = "3"
 
 [features]
-# default = ["y2026", "y2025"]
-default = ["y2026", "y2025", "y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
+default = ["y2026", "y2025"]
+# default = ["y2026", "y2025", "y2024", "y2023", "y2022", "y2021", "y2020", "y2019", "y2018", "y2017", "y2016", "y2015"]
 y2026 = []
 use_lp_solver = ["microlp"]
 y2025 = ["rayon"]
