@@ -141,27 +141,16 @@ TUPLE: config year day alt ;
 ;
 
 : run-solver ( oracles data quot: ( data -- answers ) -- )
-  call
-  [
-    {
-      { [ dup number? ]
-        [ over "" =
-          [ nip "%d" sprintf ]
-          [ swap over number>string = "✅" "❎" ? "%d %s" sprintf ]
-          if
-        ] }
-      { [ dup string? ]
-        [ over "" =
-          [ nip "%d" sprintf ]
-          [ swap over = "✅" "❎" ? "%s %s" sprintf ]
-          if
-        ] }
-      [ ... ... "unsupported type" ]
-    }
-    cond
-  ] 2map
-  first2
-  "%s %s\n" printf
+  [ call
+    [ unparse
+      over "" =
+      [ nip ]
+      [ swap over = "✅" "❎" ? "%s %s" sprintf ]
+      if ]
+    2map
+    first2 ]
+  benchmark 1_000_000.0 /
+  "Part1: %s, Part2: %s (%.2f msec.)\n" printf
 ;
 
 PRIVATE>
@@ -170,10 +159,10 @@ PRIVATE>
   args>config
   dup config>print
   [ config>oracles ] [ config>data ] [ config>solver ] tri
-  [ [ drop "Can't dispatch" print ] or
-    run-solver ]
-  benchmark
-  1_000_000.0 / "%.2f msec" printf
+  dup
+  [ run-solver ]
+  [ 3drop "Can't dispatch" print ]
+  if
 ;
 
 MAIN: run-aoc
