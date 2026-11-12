@@ -6,10 +6,10 @@ USING:
   io io.encodings.utf8 io.files io.pathnames io.styles
   json kernel math math.parser namespaces prettyprint
   sequences splitting strings tools.time unicode
-  ! aoc.y2026.day01
-  ! aoc.y2026.day02
-  ! aoc.y2026.day03
-  aoc.y2025.day01
+  aoc.y2026.day01
+  aoc.y2026.day02
+  aoc.y2026.day03
+  ! aoc.y2025.day01
   ! aoc.y2025.day02
   ! aoc.y2025.day03
   ! aoc.y2025.day04
@@ -113,10 +113,10 @@ TUPLE: config year day alt ;
 : config>solver ( config -- function )
   [ year>> ] [ day>> ] bi 2array
   H{
-    ! { { 2026 1 } [ y2026day01 ] }
-    ! { { 2026 2 } [ y2026day02 ] }
-    ! { { 2026 3 } [ y2026day03 ] }
-    { { 2025 1 } [ y2025day01 ] }
+    { { 2026 1 } [ y2026day01 ] }
+    { { 2026 2 } [ y2026day02 ] }
+    { { 2026 3 } [ y2026day03 ] }
+    ! { { 2025 1 } [ y2025day01 ] }
     ! { { 2025 2 } [ y2025day02 ] }
     ! { { 2025 3 } [ y2025day03 ] }
     ! { { 2025 4 } [ y2025day04 ] }

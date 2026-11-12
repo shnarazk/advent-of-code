@@ -68,5 +68,5 @@ PRIVATE>
 : y2023day02 ( str -- )
   string>lines [ parser ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

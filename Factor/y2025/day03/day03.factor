@@ -48,5 +48,5 @@ PRIVATE>
 : y2025day03 ( str -- )
   string>lines [ [ 48 - ] map { } like ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

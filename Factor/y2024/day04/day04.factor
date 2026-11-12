@@ -54,5 +54,5 @@ PRIVATE>
 : y2024day04 ( str -- )
   string>lines [ >array ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

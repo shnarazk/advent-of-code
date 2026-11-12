@@ -31,5 +31,5 @@ PRIVATE>
 
 : y20XXdayDD ( str -- )
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

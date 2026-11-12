@@ -81,5 +81,5 @@ PRIVATE>
   [ string>lines [ string>number ] map ]
   bi*
   [ part1 ] [ part2 ] 2bi
-  [ pprint "" print ] bi@
+  2array
 ;

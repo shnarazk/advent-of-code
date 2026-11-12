@@ -53,5 +53,5 @@ PRIVATE>
 : y2025day02 ( str -- )
   "," split [ [ CHAR: \n = ] trim "-" split [ string>number ] map ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;
