@@ -82,13 +82,13 @@ impl AdventOfCode for Puzzle {
             }
         }
         for j in 0..self.height {
-            for i in 0..self.width {
+            for (i, p) in self.line[j].iter().enumerate().take(self.width) {
                 print!(
                     "{}",
                     if visited.contains(&(j, i)) {
                         '#'
                     } else {
-                        (self.line[j][i] as u8 + b'a') as char
+                        (*p as u8 + b'a') as char
                     }
                 )
             }

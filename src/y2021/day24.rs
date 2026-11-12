@@ -141,8 +141,8 @@ impl Puzzle {
     #[allow(dead_code)]
     fn estimate_z(&self, n: usize) -> isize {
         let mut z = 0;
-        for pc in 0..n {
-            z = run_with(self.jit[pc].0, self.jit[pc].1, self.jit[pc].2, z, n);
+        for jit in self.jit.iter().take(n) {
+            z = run_with(jit.0, jit.1, jit.2, z, n);
         }
         0
     }

@@ -128,14 +128,17 @@ impl AdventOfCode for Puzzle {
                 }
                 continue;
             }
-            for i in 0..goal {
+            for (i, current_cost) in self.cost[*path.last().unwrap()]
+                .iter()
+                .enumerate()
+                .take(goal)
+            {
                 if path.contains(&i) {
                     continue;
                 }
-                let lst = *path.last().unwrap();
                 let mut p = path.clone();
                 p.push(i);
-                pathes.push(Reverse((cost + self.cost[lst][i], p)))
+                pathes.push(Reverse((cost + current_cost, p)))
             }
         }
         least

@@ -154,11 +154,16 @@ impl AdventOfCode for Puzzle {
                     }
                     continue;
                 }
-                for j in 1..self.branch_graph.len() {
-                    if self.branch_graph[p.pos][j] < usize::MAX && !p.used.contains(&j) {
+                for (j, cost) in self.branch_graph[p.pos]
+                    .iter()
+                    .enumerate()
+                    .take(self.branch_graph.len())
+                    .skip(1)
+                {
+                    if *cost < usize::MAX && !p.used.contains(&j) {
                         let mut q = p.clone();
                         q.pos = j;
-                        q.cost = p.cost + self.branch_graph[p.pos][j];
+                        q.cost = p.cost + cost;
                         longest_so_far = longest_so_far.max(q.cost);
                         q.used.push(j);
                         next.push(q);

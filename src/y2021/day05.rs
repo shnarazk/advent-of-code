@@ -69,14 +69,14 @@ impl AdventOfCode for Puzzle {
             if ds.beg.0 == ds.end.0 {
                 let beg = ds.beg.1.min(ds.end.1);
                 let end = ds.beg.1.max(ds.end.1);
-                for i in beg..=end {
-                    self.count[i][ds.beg.0] += 1;
+                for c in self.count.iter_mut().take(end + 1).skip(beg) {
+                    c[ds.beg.0] += 1;
                 }
             } else if ds.beg.1 == ds.end.1 {
                 let beg = ds.beg.0.min(ds.end.0);
                 let end = ds.beg.0.max(ds.end.0);
-                for i in beg..=end {
-                    self.count[ds.beg.1][i] += 1;
+                for c in self.count[ds.beg.1].iter_mut().take(end + 1).skip(beg) {
+                    *c += 1;
                 }
             } else {
                 // dbg!(ds);
@@ -93,18 +93,16 @@ impl AdventOfCode for Puzzle {
             if ds.beg.0 == ds.end.0 {
                 let beg = ds.beg.1.min(ds.end.1);
                 let end = ds.beg.1.max(ds.end.1);
-                for i in beg..=end {
-                    self.count[i][ds.beg.0] += 1;
+                for c in self.count.iter_mut().take(end + 1).skip(beg) {
+                    c[ds.beg.0] += 1;
                 }
             } else if ds.beg.1 == ds.end.1 {
                 let beg = ds.beg.0.min(ds.end.0);
                 let end = ds.beg.0.max(ds.end.0);
-                for i in beg..=end {
-                    self.count[ds.beg.1][i] += 1;
+                for c in self.count[ds.beg.1].iter_mut().take(end + 1).skip(beg) {
+                    *c += 1;
                 }
-            } else if (ds.beg.0 as isize - ds.end.0 as isize).abs()
-                == (ds.beg.0 as isize - ds.end.0 as isize).abs()
-            {
+            } else {
                 let mut x: isize = ds.beg.0 as isize;
                 let mut y: isize = ds.beg.1 as isize;
                 let diff_x: isize = (ds.end.0 as isize - ds.beg.0 as isize).signum();

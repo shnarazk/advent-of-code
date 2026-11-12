@@ -108,15 +108,15 @@ impl AdventOfCode for Puzzle {
             .iter()
             .map(|v| v.iter().cloned().collect())
             .collect::<Vec<HashMap<Var, Val>>>();
-        for i in 0..4 {
-            let mut it = self.rating_settings[i].iter().sorted();
+        for settings in &mut self.rating_settings {
+            let mut it = settings.iter().sorted();
             let beg = *it.next().unwrap();
             let end = *it.next_back().unwrap();
             if 1 < beg {
-                self.rating_settings[i].insert(1);
+                settings.insert(1);
             }
             if end < 4001 {
-                self.rating_settings[i].insert(4001);
+                settings.insert(4001);
             }
         }
         Ok(())
