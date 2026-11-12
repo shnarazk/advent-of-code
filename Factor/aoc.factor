@@ -1,14 +1,15 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
-USING: accessors arrays assocs combinators command-line environment formatting
-  colors continuations hashtables
+USING:
+  accessors arrays assocs combinators colors command-line continuations
+  environment formatting hashtables
   io io.encodings.utf8 io.files io.pathnames io.styles
   json kernel math math.parser namespaces prettyprint
-  sequences splitting tools.time unicode
-  aoc.y2026.day01
-  aoc.y2026.day02
-  aoc.y2026.day03
-  ! aoc.y2025.day01
+  sequences splitting strings tools.time unicode
+  ! aoc.y2026.day01
+  ! aoc.y2026.day02
+  ! aoc.y2026.day03
+  aoc.y2025.day01
   ! aoc.y2025.day02
   ! aoc.y2025.day03
   ! aoc.y2025.day04
@@ -24,7 +25,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   ! aoc.y2024.day03
   ! aoc.y2024.day04
   ! aoc.y2024.day05
-  aoc.y2024.day07
+  ! aoc.y2024.day07
   ! aoc.y2023.day01
   ! aoc.y2023.day02
 ;
@@ -112,10 +113,10 @@ TUPLE: config year day alt ;
 : config>solver ( config -- function )
   [ year>> ] [ day>> ] bi 2array
   H{
-    { { 2026 1 } [ y2026day01 ] }
-    { { 2026 2 } [ y2026day02 ] }
-    { { 2026 3 } [ y2026day03 ] }
-    ! { { 2025 1 } [ y2025day01 ] }
+    ! { { 2026 1 } [ y2026day01 ] }
+    ! { { 2026 2 } [ y2026day02 ] }
+    ! { { 2026 3 } [ y2026day03 ] }
+    { { 2025 1 } [ y2025day01 ] }
     ! { { 2025 2 } [ y2025day02 ] }
     ! { { 2025 3 } [ y2025day03 ] }
     ! { { 2025 4 } [ y2025day04 ] }
@@ -131,7 +132,7 @@ TUPLE: config year day alt ;
     ! { { 2024 3 } [ y2024day03 ] }
     ! { { 2024 4 } [ y2024day04 ] }
     ! { { 2024 5 } [ y2024day05 ] }
-    { { 2024 7 } [ y2024day07 ] }
+    ! { { 2024 7 } [ y2024day07 ] }
     ! { { 2023 1 } [ y2023day01 ] }
     ! { { 2023 2 } [ y2023day02 ] }
   }
@@ -139,17 +140,39 @@ TUPLE: config year day alt ;
   of
 ;
 
-: run-solver ( ? quot: ( ? -- ) -- ) call ;
+: run-solver ( oracles data quot: ( data -- answers ) -- )
+  call
+  [
+    {
+      { [ dup number? ]
+        [ over "" =
+          [ nip "%d" sprintf ]
+          [ swap over number>string = "✅" "❎" ? "%d %s" sprintf ]
+          if
+        ] }
+      { [ dup string? ]
+        [ over "" =
+          [ nip "%d" sprintf ]
+          [ swap over = "✅" "❎" ? "%s %s" sprintf ]
+          if
+        ] }
+      [ ... ... "unsupported type" ]
+    }
+    cond
+  ] 2map
+  first2
+  "%s %s\n" printf
+;
 
 PRIVATE>
 
 : run-aoc ( -- )
   args>config
-  dup config>oracles
-  ...
-  [ config>print ] [ config>data ] [ config>solver ] tri
+  dup config>print
+  [ config>oracles ] [ config>data ] [ config>solver ] tri
   [ [ drop "Can't dispatch" print ] or
-   run-solver ] benchmark
+    run-solver ]
+  benchmark
   1_000_000.0 / "%.2f msec" printf
 ;
 
