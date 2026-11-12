@@ -29,7 +29,7 @@ IN: aoc.y20YY.dayDD
 
 PRIVATE>
 
-: y20XXdayDD ( str -- )
+: y20XXdayDD ( str -- answers )
   [ part1 ] [ part2 ] bi
   2array
 ;
