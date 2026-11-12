@@ -54,10 +54,10 @@ impl AdventOfCode for Puzzle {
         pos.insert(self.start.1);
         let mut next: FxHashSet<usize> = HashSet::<usize, BuildHasherDefault<FxHasher>>::default();
         let mut num_splits = 0;
-        for y in self.start.0..height {
+        for line in self.line.iter().take(height).skip(self.start.0) {
             next.clear();
             for x in pos.iter() {
-                if self.line[y][*x] == '^' {
+                if line[*x] == '^' {
                     num_splits += 1;
                     if 0 < *x {
                         next.insert(x - 1);
@@ -81,10 +81,10 @@ impl AdventOfCode for Puzzle {
         pos.insert(self.start.1, 1);
         let mut next: FxHashMap<usize, usize> =
             HashMap::<usize, usize, BuildHasherDefault<FxHasher>>::default();
-        for y in self.start.0..height {
+        for line in self.line.iter().take(height).skip(self.start.0) {
             next.clear();
             for (x, n) in pos.iter() {
-                if self.line[y][*x] == '^' {
+                if line[*x] == '^' {
                     if 0 < *x {
                         *next.entry(x - 1).or_insert(0) += n;
                     }
