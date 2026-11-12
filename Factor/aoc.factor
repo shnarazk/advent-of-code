@@ -1,10 +1,11 @@
 #!/usr/bin/env Factor
 ! Copyright (C) 2026 Narazaki, Shuji.
-USING: accessors arrays assocs combinators command-line environment formatting
-  colors hashtables
+USING:
+  accessors arrays assocs combinators colors command-line continuations
+  environment formatting hashtables
   io io.encodings.utf8 io.files io.pathnames io.styles
-  kernel math math.parser namespaces prettyprint
-  sequences splitting tools.time unicode
+  json kernel math math.parser namespaces prettyprint
+  sequences splitting strings tools.time unicode
   aoc.y2026.day01
   aoc.y2026.day02
   aoc.y2026.day03
@@ -24,7 +25,7 @@ USING: accessors arrays assocs combinators command-line environment formatting
   ! aoc.y2024.day03
   ! aoc.y2024.day04
   ! aoc.y2024.day05
-  aoc.y2024.day07
+  ! aoc.y2024.day07
   ! aoc.y2023.day01
   ! aoc.y2023.day02
 ;
@@ -51,6 +52,31 @@ TUPLE: config year day alt ;
   [ year>> ] [ day>> ] [ alt>> ] tri
   "data/%04d/input-day%02d%s.txt" sprintf
   base-dir prepend-path
+;
+
+:: config>oracles ( config -- 2strings )
+  [
+    "misc/answers.json" base-dir prepend-path
+    utf8 file-contents json>
+    config year>> number>string swap at
+    config day>> number>string swap at
+    config alt>>
+    dup empty?
+    [ drop " " ]
+    [ dup 1 cut swap "-" =
+      [ nip ]
+      [ drop ]
+      if
+    ]
+    if
+    swap at
+    [ "part1" swap at ]
+    [ "part2" swap at ]
+    bi
+    2array
+  ]
+  [ ... { "" "" } ]
+  recover
 ;
 
 : config>print ( config -- )
@@ -106,7 +132,7 @@ TUPLE: config year day alt ;
     ! { { 2024 3 } [ y2024day03 ] }
     ! { { 2024 4 } [ y2024day04 ] }
     ! { { 2024 5 } [ y2024day05 ] }
-    { { 2024 7 } [ y2024day07 ] }
+    ! { { 2024 7 } [ y2024day07 ] }
     ! { { 2023 1 } [ y2023day01 ] }
     ! { { 2023 2 } [ y2023day02 ] }
   }
@@ -114,14 +140,29 @@ TUPLE: config year day alt ;
   of
 ;
 
-: run-solver ( ? quot: ( ? -- ) -- ) call ;
+: run-solver ( oracles data quot: ( data -- answers ) -- )
+  [ call
+    [ unparse
+      over "" =
+      [ nip ]
+      [ swap over = "✅" "❎" ? "%s %s" sprintf ]
+      if ]
+    2map
+    first2 ]
+  benchmark 1_000_000.0 /
+  "Part1: %s, Part2: %s (%.2f msec.)\n" printf
+;
 
 PRIVATE>
 
 : run-aoc ( -- )
-  args>config [ config>print ] [ config>data ] [ config>solver ] tri
-  [ [ drop "Can't dispatch" print ] or run-solver ] benchmark
-  1_000_000.0 / "%.2f msec" printf
+  args>config
+  dup config>print
+  [ config>oracles ] [ config>data ] [ config>solver ] tri
+  dup
+  [ run-solver ]
+  [ 3drop "Can't dispatch" print ]
+  if
 ;
 
 MAIN: run-aoc

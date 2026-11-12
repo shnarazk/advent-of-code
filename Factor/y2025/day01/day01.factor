@@ -56,8 +56,8 @@ IN: aoc.y2025.day01
 
 PRIVATE>
 
-: y2025day01 ( string -- )
+: y2025day01 ( string -- answers )
   string>lines [ parse-line ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

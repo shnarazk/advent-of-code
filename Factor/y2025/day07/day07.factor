@@ -84,5 +84,5 @@ PRIVATE>
   [ [ CHAR: . = ] unsatisfying-indices ] map [ empty? ] reject
   [ rest [ >hash-set ] map ] [ first first ] bi
   [ part1 ] [ part2 ] 2bi
-  [ pprint "" print ] bi@
+  2array
 ;

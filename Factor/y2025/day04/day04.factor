@@ -57,5 +57,5 @@ PRIVATE>
 : y2025day04 ( str -- )
   string>lines [ { } like [ CHAR: @ = >0/1 ] map ] map
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

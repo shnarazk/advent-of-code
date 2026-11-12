@@ -114,5 +114,5 @@ PRIVATE>
   dup length iota-triangle
   [ first2 pick dist ] map [ 2 swap nth ] sort-by [ but-last ] map
   [ part1 ] [ part2 ] 2bi
-  [ pprint "" print ] bi@
+  2array
 ;

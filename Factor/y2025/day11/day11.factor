@@ -49,5 +49,5 @@ PRIVATE>
   [ ":" split first2 [ CHAR: \u000020 = ] trim " " split 2array ] map
   >hashtable
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

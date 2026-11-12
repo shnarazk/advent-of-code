@@ -71,5 +71,5 @@ PRIVATE>
     3array ]
   map
   [ part1 ] [ drop 0 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

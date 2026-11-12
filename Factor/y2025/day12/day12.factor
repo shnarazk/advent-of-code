@@ -28,5 +28,5 @@ PRIVATE>
 
 : y2025day12 ( str -- )
   [ part1 ] [ part2 ] bi
-  [ pprint "" print ] bi@
+  2array
 ;

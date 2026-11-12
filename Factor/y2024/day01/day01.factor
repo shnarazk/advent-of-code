@@ -33,5 +33,5 @@ PRIVATE>
   reduce
   first2
   [ part1 ] [ part2 ] 2bi
-  [ pprint "" print ] bi@
+  2array
 ;
