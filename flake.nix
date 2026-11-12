@@ -21,9 +21,9 @@
             pkgs.cargo-watch
             pkgs.graphviz
             pkgs.lldb_22
-            pkgs.libiconv
-            pkgs.samply # a profiler
-            pkgs.tokei
+            # pkgs.libiconv
+            # pkgs.samply # a profiler
+            # pkgs.tokei
           ];
         };
       });
