@@ -10,18 +10,19 @@
       ...
     }:
     let
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "aarch64-darwin"
-      ];
       forAllSystems =
         f:
         builtins.listToAttrs (
-          map (system: {
-            name = system;
-            value = f system;
-          }) systems
+          map
+            (system: {
+              name = system;
+              value = f system;
+            })
+            [
+              "x86_64-linux"
+              "aarch64-linux"
+              "aarch64-darwin"
+            ]
         );
     in
     {
