@@ -1,14 +1,10 @@
 {
   description = "A basic flake with a shell";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  inputs.home.url = "github:shnarazk/flakes";
+  # inputs.home.url = "github:shnarazk/flakes";
 
   outputs =
-    {
-      nixpkgs,
-      home,
-      ...
-    }:
+    { self, nixpkgs }:
     let
       forAllSystems =
         f:
