@@ -8,8 +8,8 @@ public import Cli
 public import «AoC».Basic
 public import «AoC».Color
 public import «AoC».Combinator
-public import «Y2023»
-public import «Y2024»
+-- public import «Y2023»
+-- public import «Y2024»
 public import «Y2025»
 public import «Y2026»
 
@@ -39,8 +39,8 @@ def elapsedTime {α : Type} {m : Type → Type u} [Monad m] [MonadLiftT BaseIO m
 def events
     : Batteries.AssocList Nat (Nat × (Nat → Option String → IO AocProblem))
   := Batteries.AssocList.nil
-    |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
-    |>.cons 2024 (Y2024.solvedDays, Y2024.solve)
+    -- |>.cons 2023 (Y2023.solvedDays, Y2023.solve)
+    -- |>.cons 2024 (Y2024.solvedDays, Y2024.solve)
     |>.cons 2025 (Y2025.solvedDays, Y2025.solve)
     |>.cons 2026 (Y2026.solvedDays, Y2026.solve)
 -- #check events.find? 2023
