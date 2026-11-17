@@ -79,7 +79,7 @@ IN: aoc.y2025.day07
 
 PRIVATE>
 
-: y2025day07 ( str -- )
+: y2025day07 ( str -- answers )
   string>lines
   [ [ CHAR: . = ] unsatisfying-indices ] map [ empty? ] reject
   [ rest [ >hash-set ] map ] [ first first ] bi

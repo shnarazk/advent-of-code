@@ -55,7 +55,7 @@ IN: aoc.y2025.day10
 
 PRIVATE>
 
-: y2025day10 ( str -- )
+: y2025day10 ( str -- answers )
   string>lines
   [ "]" split
     first2

@@ -39,7 +39,7 @@ IN: aoc.y2025.day06
 
 PRIVATE>
 
-: y2025day06 ( str -- )
+: y2025day06 ( str -- answers )
   string>lines
   [ part1 ] [ part2 ] bi
   2array

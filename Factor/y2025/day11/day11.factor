@@ -44,7 +44,7 @@ MEMO: part2/pathes ( hashtable from to -- number )
 
 PRIVATE>
 
-: y2025day11 ( str -- )
+: y2025day11 ( str -- answers )
   string>lines
   [ ":" split first2 [ CHAR: \u000020 = ] trim " " split 2array ] map
   >hashtable

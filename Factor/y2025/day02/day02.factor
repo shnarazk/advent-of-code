@@ -50,7 +50,7 @@ IN: aoc.y2025.day02
 
 PRIVATE>
 
-: y2025day02 ( str -- )
+: y2025day02 ( str -- answers )
   "," split [ [ CHAR: \n = ] trim "-" split [ string>number ] map ] map
   [ part1 ] [ part2 ] bi
   2array

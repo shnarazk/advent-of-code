@@ -75,7 +75,7 @@ TUPLE: range from to ;
 
 PRIVATE>
 
-: y2025day05 ( str -- )
+: y2025day05 ( str -- answers )
   "\n\n" split1
   [ string>lines [ string>range ] map ]
   [ string>lines [ string>number ] map ]

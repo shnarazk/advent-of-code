@@ -108,7 +108,7 @@ M: union-group united?
 
 PRIVATE>
 
-: y2025day08 ( str -- )
+: y2025day08 ( str -- answers )
   string>lines
   [ "," split [ string>number ] map ] map
   dup length iota-triangle
