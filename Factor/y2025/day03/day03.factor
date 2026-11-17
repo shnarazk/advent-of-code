@@ -1,5 +1,5 @@
 USING:
-  combinators io kernel math prettyprint sequences
+  arrays combinators io kernel math prettyprint sequences
   aoc.lib.parser
 ;
 IN: aoc.y2025.day03
