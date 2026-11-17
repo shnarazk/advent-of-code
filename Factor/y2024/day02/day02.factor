@@ -27,7 +27,7 @@ IN: aoc.y2024.day02
 
 PRIVATE>
 
-: y2024day02 ( str -- )
+: y2024day02 ( str -- answers )
   string>lines [ " " split [ string>number ] map ] map
   [ part1 ] [ part2 ] bi
   2array

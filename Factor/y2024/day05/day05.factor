@@ -79,7 +79,7 @@ IN: aoc.y2024.day05
 
 PRIVATE>
 
-: y2024day05 ( str -- )
+: y2024day05 ( str -- answers )
   "\n\n" split-subseq [ >string ] map first2 [ "\n" split ] bi@
   [ [ "|" split [ string>number ] map ] map ]
   [ [ empty? ] reject [ "," split [ string>number ] map ] map ]

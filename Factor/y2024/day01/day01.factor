@@ -25,7 +25,7 @@ IN: aoc.y2024.day01
 
 PRIVATE>
 
-: y2024day01 ( str -- )
+: y2024day01 ( str -- answers )
   string>lines
   [ " " split [ empty? not ] filter [ string>number ] map ] map
   { { } { } }
