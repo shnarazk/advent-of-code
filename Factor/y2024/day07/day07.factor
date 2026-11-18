@@ -63,7 +63,7 @@ IN: aoc.y2024.day07
 
 PRIVATE>
 
-: y2024day07 ( str -- )
+: y2024day07 ( str -- answers )
   string>lines
   [ ":" split first2
     [ string>number ]

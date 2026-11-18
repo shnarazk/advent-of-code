@@ -65,7 +65,7 @@ IN: aoc.y2023.day02
 
 PRIVATE>
 
-: y2023day02 ( str -- )
+: y2023day02 ( str -- answers )
   string>lines [ parser ] map
   [ part1 ] [ part2 ] bi
   2array

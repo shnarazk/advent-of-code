@@ -38,7 +38,7 @@ IN: aoc.y2024.day03
 
 PRIVATE>
 
-: y2024day03 ( str -- answers )
+: y2024day03 ( str -- asnwers )
   [ part1 ] [ part2 ] bi
   2array
 ;
