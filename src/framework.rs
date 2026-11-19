@@ -43,20 +43,36 @@ pub struct ConfigAoC {
     pub download: bool,
 }
 impl ConfigAoC {
+    /// return the project directory
+    fn aoc_project_home(&self) -> String {
+        std::env::var("AOC_DIR").expect("Env var AOC_DIR is not defined.")
+    }
     /// return data file name
     fn data_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match &self.alt {
             Some(ext) if ext == "-" => Ok("A test input".to_string()),
-            Some(ext) => Ok(format!("{DATA_DIR}/{year}/input-day{day:>02}-{ext}.txt")),
-            None => Ok(format!("{DATA_DIR}/{year}/input-day{day:>02}.txt")),
+            Some(ext) => Ok(format!(
+                "{}/{DATA_DIR}/{year}/input-day{day:>02}-{ext}.txt",
+                self.aoc_project_home()
+            )),
+            None => Ok(format!(
+                "{}/{DATA_DIR}/{year}/input-day{day:>02}.txt",
+                self.aoc_project_home()
+            )),
         }
     }
     /// return the file name for serialization
     fn serialization_filename(&self, year: usize, day: usize) -> Result<String, ParseError> {
         match &self.alt {
             Some(ext) if ext == "-" => Ok("test.json".to_string()),
-            Some(ext) => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}.json")),
-            None => Ok(format!("{JSON_DUMP_DIR}/{year}/day{day:>02}.json")),
+            Some(ext) => Ok(format!(
+                "{}/{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}.json",
+                self.aoc_project_home()
+            )),
+            None => Ok(format!(
+                "{}/{JSON_DUMP_DIR}/{year}/day{day:>02}.json",
+                self.aoc_project_home()
+            )),
         }
     }
     pub fn serialization_path(
@@ -68,10 +84,12 @@ impl ConfigAoC {
         match &self.alt {
             Some(ext) if ext == "-" => Ok(PathBuf::from("test.json")),
             Some(ext) => Ok(PathBuf::from(format!(
-                "{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}-{key}"
+                "{}/{JSON_DUMP_DIR}/{year}/day{day:>02}-{ext}-{key}",
+                self.aoc_project_home()
             ))),
             None => Ok(PathBuf::from(format!(
-                "{JSON_DUMP_DIR}/{year}/day{day:>02}-{key}"
+                "{}/{JSON_DUMP_DIR}/{year}/day{day:>02}-{key}",
+                self.aoc_project_home()
             ))),
         }
     }
@@ -219,7 +237,8 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
             pub part2: String,
         }
 
-        let path = PathBuf::from(JSON_DUMP_DIR).join("answers.json");
+        let path = PathBuf::from(format!("{}/{JSON_DUMP_DIR}", config.aoc_project_home()))
+            .join("answers.json");
         let Ok(file) = File::open(&path) else {
             return Default::default();
         };
@@ -321,6 +340,11 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
         let input = config
             .data_filename(Self::YEAR, Self::DAY)
             .expect("no input");
+        let input_short_name = input
+            .strip_prefix(&config.aoc_project_home())
+            .unwrap_or(&input)
+            .trim_start_matches('/')
+            .to_string();
         let parse_error = format!("{}failed to parse{}", color::RED, color::RESET);
         match config.part {
             0 => {
@@ -334,7 +358,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input,
+                    input_short_name,
                     color::RESET,
                 );
                 let oracle = Self::load_answers(&config).0;
@@ -346,7 +370,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input,
+                    input_short_name,
                     color::RESET,
                 );
                 let oracle = Self::load_answers(&config).1;
@@ -358,7 +382,7 @@ pub trait AdventOfCode: fmt::Debug + Clone + Default {
                     color::GREEN,
                     Self::YEAR,
                     Self::DAY,
-                    input,
+                    input_short_name,
                     color::RESET,
                 );
                 let oracles = Self::load_answers(&config);
