@@ -233,7 +233,7 @@ fn remaining_lower_bound(
             if d > max_v {
                 max_v = d;
                 max_i = i;
-                if d as usize > limit {
+                if d as usize >= limit {
                     return false;
                 }
             }
@@ -242,6 +242,9 @@ fn remaining_lower_bound(
             break;
         }
         count += max_v as usize;
+        if count >= limit {
+            return false;
+        }
         for (i, b) in distance_envelove[max_i].iter().enumerate() {
             if *b {
                 light_state[i] = goal[i];
