@@ -177,6 +177,21 @@ fn final_affectors(buttons: &[Vec<usize>], order: &[usize], num_lights: usize) -
         .collect::<Vec<Vec<usize>>>()
 }
 
+/// TODO: add documentation
+fn make_distance_envelops(goal: &[usize], buttons: &[Vec<usize>]) -> Vec<Vec<bool>> {
+    let mut matrix: Vec<Vec<bool>> = vec![vec![false; goal.len()]; goal.len()];
+    for (l_id, _) in goal.iter().enumerate() {
+        for vec in buttons.iter() {
+            if vec.contains(&l_id) {
+                for l in vec.iter() {
+                    matrix[l_id][*l] = true;
+                }
+            }
+        }
+    }
+    matrix
+}
+
 fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
     let mut ord = Ordering::Equal;
     for (f, g) in flips.iter().zip(goal.iter()) {
@@ -191,10 +206,11 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 }
 
 struct Setting {
-    id: usize,
+    _id: usize,
     order_to_index: Vec<usize>,
     final_affector: Vec<Vec<usize>>,
     available_bands: Vec<(usize, usize)>,
+    distance_envelove: Vec<Vec<bool>>,
     buttons: Vec<Vec<usize>>,
     goal: Vec<u16>,
 }
@@ -202,22 +218,60 @@ struct Setting {
 /// Lower bound on the number of further button presses needed to reach `goal` from `state`.
 ///
 /// Each press raises a light by at most one, so the largest remaining deficit is admissible for A*-style pruning.
-fn remaining_lower_bound(state: &[u16], goal: &[u16]) -> usize {
-    state
-        .iter()
-        .zip(goal.iter())
-        .map(|(s, g)| g.saturating_sub(*s) as usize)
-        .max()
-        .unwrap_or_default()
+fn remaining_lower_bound(
+    limit: usize,
+    light_state: &mut [u16],
+    goal: &[u16],
+    distance_envelove: &[Vec<bool>],
+) -> bool {
+    let mut count: usize = 0;
+    loop {
+        let mut max_v = 0;
+        let mut max_i: usize = 0;
+        for (i, (g, s)) in goal.iter().zip(light_state.iter()).enumerate() {
+            let d = g.saturating_sub(*s);
+            if d > max_v {
+                max_v = d;
+                max_i = i;
+                if d as usize >= limit {
+                    return false;
+                }
+            }
+        }
+        if max_v == 0 {
+            break;
+        }
+        count += max_v as usize;
+        if count >= limit {
+            return false;
+        }
+        for (i, b) in distance_envelove[max_i].iter().enumerate() {
+            if *b {
+                light_state[i] = goal[i];
+            }
+        }
+    }
+    count < limit
+}
+
+/// Reusable buffers for `solve2_rec`, allocated once per puzzle line.
+struct Scratch {
+    /// toggle count per button; entries of levels not on the current path are 0
+    toggles: Vec<usize>,
+    /// light flip counts per recursion level
+    flips: Vec<Vec<u16>>,
+    /// working copy of the flips passed to `remaining_lower_bound`
+    bound: Vec<u16>,
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
-fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setting) {
+fn solve2_rec(level: usize, best: &mut usize, setting: &Setting, scratch: &mut Scratch) {
     let Setting {
-        id,
+        _id: _,
         order_to_index,
         final_affector,
         available_bands,
+        distance_envelove,
         buttons,
         goal,
     } = setting;
@@ -225,12 +279,13 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
         return;
     }
     let index = order_to_index[level];
-    let mut button_toggles = toggles.to_vec();
-    let mut light_flips: Vec<u16> = vec![0; goal.len()];
+    // Take this level's buffer so the recursive calls can borrow `scratch` mutably.
+    let mut light_flips = std::mem::take(&mut scratch.flips[level]);
+    light_flips.fill(0);
     for i in order_to_index.iter().take(level) {
         for light_id in buttons[*i].iter() {
-            debug_assert!(light_flips[*light_id] as usize + button_toggles[*i] < 1024);
-            light_flips[*light_id] += button_toggles[*i] as u16;
+            debug_assert!(light_flips[*light_id] as usize + scratch.toggles[*i] < 1024);
+            light_flips[*light_id] += scratch.toggles[*i] as u16;
         }
     }
     for light_id in buttons[index].iter() {
@@ -238,7 +293,7 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
         light_flips[*light_id] += available_bands[index].1 as u16;
     }
     'next_value: for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
-        button_toggles[index] = num_toggles;
+        scratch.toggles[index] = num_toggles;
         for light_id in buttons[index].iter() {
             debug_assert!(light_flips[*light_id] > 0);
             light_flips[*light_id] -= 1;
@@ -250,23 +305,29 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
                 Ordering::Greater => continue 'next_value,
             }
         }
-        let ans = button_toggles.iter().sum::<usize>();
-        if ans + remaining_lower_bound(&light_flips, goal) >= *best {
-            continue;
-        }
+        let ans = scratch.toggles.iter().sum::<usize>();
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
                     *best = ans;
-                    println!("-({id:>3}) {best:>4} = ∑ {button_toggles:?}");
+                    // println!("-({id:>3}) {best:>4} = ∑ {button_toggles:?}");
                 }
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                solve2_rec(level + 1, best, &button_toggles, setting);
+                if *best <= ans {
+                    continue;
+                }
+                scratch.bound.copy_from_slice(&light_flips);
+                if !remaining_lower_bound(*best - ans, &mut scratch.bound, goal, distance_envelove) {
+                    continue;
+                }
+                solve2_rec(level + 1, best, setting, scratch);
             }
         }
     }
+    scratch.toggles[index] = 0;
+    scratch.flips[level] = light_flips;
 }
 
 fn button_order(a: &(f64, usize), b: &(f64, usize)) -> Ordering {
@@ -347,16 +408,21 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .collect::<Vec<_>>();
     let order_to_index = best_button_order2(buttons, &affectors);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
-    let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let setting = Setting {
-        id,
+        _id: id,
         order_to_index,
         final_affector,
         available_bands,
+        distance_envelove: make_distance_envelops(goal, buttons),
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
     };
-    solve2_rec(0, &mut best, &button_toggles, &setting);
+    let mut scratch = Scratch {
+        toggles: vec![0; num_buttons],
+        flips: vec![vec![0; num_lights]; num_buttons],
+        bound: vec![0; num_lights],
+    };
+    solve2_rec(0, &mut best, &setting, &mut scratch);
     best
 }
