@@ -254,14 +254,18 @@ fn remaining_lower_bound(
     count < limit
 }
 
+/// Reusable buffers for `solve2_rec`, allocated once per puzzle line.
+struct Scratch {
+    /// toggle count per button; entries of levels not on the current path are 0
+    toggles: Vec<usize>,
+    /// light flip counts per recursion level
+    flips: Vec<Vec<u16>>,
+    /// working copy of the flips passed to `remaining_lower_bound`
+    bound: Vec<u16>,
+}
+
 /// level-1まで確定した部分解に対して one step展開する。
-fn solve2_rec(
-    level: usize,
-    best: &mut usize,
-    toggles: &[usize],
-    setting: &Setting,
-    light_state_work: &mut [u16],
-) {
+fn solve2_rec(level: usize, best: &mut usize, setting: &Setting, scratch: &mut Scratch) {
     let Setting {
         _id: _,
         order_to_index,
@@ -275,12 +279,13 @@ fn solve2_rec(
         return;
     }
     let index = order_to_index[level];
-    let mut button_toggles = toggles.to_vec();
-    let mut light_flips: Vec<u16> = vec![0; goal.len()];
+    // Take this level's buffer so the recursive calls can borrow `scratch` mutably.
+    let mut light_flips = std::mem::take(&mut scratch.flips[level]);
+    light_flips.fill(0);
     for i in order_to_index.iter().take(level) {
         for light_id in buttons[*i].iter() {
-            debug_assert!(light_flips[*light_id] as usize + button_toggles[*i] < 1024);
-            light_flips[*light_id] += button_toggles[*i] as u16;
+            debug_assert!(light_flips[*light_id] as usize + scratch.toggles[*i] < 1024);
+            light_flips[*light_id] += scratch.toggles[*i] as u16;
         }
     }
     for light_id in buttons[index].iter() {
@@ -288,7 +293,7 @@ fn solve2_rec(
         light_flips[*light_id] += available_bands[index].1 as u16;
     }
     'next_value: for num_toggles in (available_bands[index].0..available_bands[index].1).rev() {
-        button_toggles[index] = num_toggles;
+        scratch.toggles[index] = num_toggles;
         for light_id in buttons[index].iter() {
             debug_assert!(light_flips[*light_id] > 0);
             light_flips[*light_id] -= 1;
@@ -300,7 +305,7 @@ fn solve2_rec(
                 Ordering::Greater => continue 'next_value,
             }
         }
-        let ans = button_toggles.iter().sum::<usize>();
+        let ans = scratch.toggles.iter().sum::<usize>();
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
@@ -313,16 +318,16 @@ fn solve2_rec(
                 if *best <= ans {
                     continue;
                 }
-                for (i, v) in light_flips.iter().enumerate() {
-                    light_state_work[i] = *v;
-                }
-                if !remaining_lower_bound(*best - ans, light_state_work, goal, distance_envelove) {
+                scratch.bound.copy_from_slice(&light_flips);
+                if !remaining_lower_bound(*best - ans, &mut scratch.bound, goal, distance_envelove) {
                     continue;
                 }
-                solve2_rec(level + 1, best, &button_toggles, setting, light_state_work);
+                solve2_rec(level + 1, best, setting, scratch);
             }
         }
     }
+    scratch.toggles[index] = 0;
+    scratch.flips[level] = light_flips;
 }
 
 fn button_order(a: &(f64, usize), b: &(f64, usize)) -> Ordering {
@@ -403,7 +408,6 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         .collect::<Vec<_>>();
     let order_to_index = best_button_order2(buttons, &affectors);
     let final_affector = final_affectors(buttons, &order_to_index, num_lights);
-    let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let setting = Setting {
         _id: id,
@@ -414,12 +418,11 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
     };
-    solve2_rec(
-        0,
-        &mut best,
-        &button_toggles,
-        &setting,
-        &mut setting.goal.to_vec(),
-    );
+    let mut scratch = Scratch {
+        toggles: vec![0; num_buttons],
+        flips: vec![vec![0; num_lights]; num_buttons],
+        bound: vec![0; num_lights],
+    };
+    solve2_rec(0, &mut best, &setting, &mut scratch);
     best
 }
