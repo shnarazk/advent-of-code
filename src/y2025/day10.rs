@@ -228,12 +228,12 @@ fn remaining_lower_bound(
     loop {
         let mut max_v = 0;
         let mut max_i: usize = 0;
-        for (i, (s, g)) in goal.iter().zip(light_state.iter()).enumerate() {
-            let d = s.saturating_sub(*g);
+        for (i, (g, s)) in goal.iter().zip(light_state.iter()).enumerate() {
+            let d = g.saturating_sub(*s);
             if d > max_v {
                 max_v = d;
                 max_i = i;
-                if d > limit as u16 {
+                if d as usize > limit {
                     return false;
                 }
             }
@@ -248,7 +248,7 @@ fn remaining_lower_bound(
             }
         }
     }
-    count <= limit
+    count < limit
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
