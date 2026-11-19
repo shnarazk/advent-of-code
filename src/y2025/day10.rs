@@ -206,7 +206,7 @@ fn compare(flips: &[u16], goal: &[u16]) -> Ordering {
 }
 
 struct Setting {
-    id: usize,
+    _id: usize,
     order_to_index: Vec<usize>,
     final_affector: Vec<Vec<usize>>,
     available_bands: Vec<(usize, usize)>,
@@ -219,20 +219,23 @@ struct Setting {
 ///
 /// Each press raises a light by at most one, so the largest remaining deficit is admissible for A*-style pruning.
 fn remaining_lower_bound(
-    light_state: &[u16],
+    limit: usize,
+    light_state: &mut [u16],
     goal: &[u16],
     distance_envelove: &[Vec<bool>],
-) -> usize {
+) -> bool {
     let mut count: usize = 0;
-    let mut state = light_state.to_vec();
     loop {
         let mut max_v = 0;
         let mut max_i: usize = 0;
-        for (i, (s, g)) in goal.iter().zip(state.iter()).enumerate() {
+        for (i, (s, g)) in goal.iter().zip(light_state.iter()).enumerate() {
             let d = s.saturating_sub(*g);
             if d > max_v {
                 max_v = d;
                 max_i = i;
+                if d > limit as u16 {
+                    return false;
+                }
             }
         }
         if max_v == 0 {
@@ -241,17 +244,23 @@ fn remaining_lower_bound(
         count += max_v as usize;
         for (i, b) in distance_envelove[max_i].iter().enumerate() {
             if *b {
-                state[i] = goal[i];
+                light_state[i] = goal[i];
             }
         }
     }
-    count
+    count <= limit
 }
 
 /// level-1まで確定した部分解に対して one step展開する。
-fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setting) {
+fn solve2_rec(
+    level: usize,
+    best: &mut usize,
+    toggles: &[usize],
+    setting: &Setting,
+    light_state_work: &mut [u16],
+) {
     let Setting {
-        id: _,
+        _id: _,
         order_to_index,
         final_affector,
         available_bands,
@@ -289,9 +298,6 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
             }
         }
         let ans = button_toggles.iter().sum::<usize>();
-        if ans + remaining_lower_bound(&light_flips, goal, distance_envelove) >= *best {
-            continue;
-        }
         match compare(&light_flips, goal) {
             Ordering::Equal => {
                 if ans < *best {
@@ -301,7 +307,16 @@ fn solve2_rec(level: usize, best: &mut usize, toggles: &[usize], setting: &Setti
             }
             Ordering::Greater => {}
             Ordering::Less => {
-                solve2_rec(level + 1, best, &button_toggles, setting);
+                if *best <= ans {
+                    continue;
+                }
+                for (i, v) in light_flips.iter().enumerate() {
+                    light_state_work[i] = *v;
+                }
+                if !remaining_lower_bound(*best - ans, light_state_work, goal, distance_envelove) {
+                    continue;
+                }
+                solve2_rec(level + 1, best, &button_toggles, setting, light_state_work);
             }
         }
     }
@@ -388,7 +403,7 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
     let button_toggles = vec![0; num_buttons];
     let mut best = usize::MAX;
     let setting = Setting {
-        id,
+        _id: id,
         order_to_index,
         final_affector,
         available_bands,
@@ -396,6 +411,12 @@ fn solve2(id: usize, buttons: &[Vec<usize>], goal: &[usize]) -> usize {
         buttons: buttons.to_vec(),
         goal: goal_u16.to_vec(),
     };
-    solve2_rec(0, &mut best, &button_toggles, &setting);
+    solve2_rec(
+        0,
+        &mut best,
+        &button_toggles,
+        &setting,
+        &mut setting.goal.to_vec(),
+    );
     best
 }
