@@ -229,7 +229,7 @@ fn remaining_lower_bound(
         let mut max_v = 0;
         let mut max_i: usize = 0;
         for (i, (s, g)) in goal.iter().zip(state.iter()).enumerate() {
-            let d = g.saturating_sub(*s);
+            let d = s.saturating_sub(*g);
             if d > max_v {
                 max_v = d;
                 max_i = i;
@@ -241,7 +241,7 @@ fn remaining_lower_bound(
         count += max_v as usize;
         for (i, b) in distance_envelove[max_i].iter().enumerate() {
             if *b {
-                state[i] = 0;
+                state[i] = goal[i];
             }
         }
     }
