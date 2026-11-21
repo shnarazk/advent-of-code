@@ -1,5 +1,6 @@
 #import "@preview/lilaq:0.6.0" as lq
 
+#set page(width: auto, height: auto)
 #let data = json("stats.json")
 
 #lq.diagram(
