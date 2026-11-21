@@ -31,7 +31,6 @@
             packages = [
               pkgs.bashInteractive
               pkgs.graphviz
-              pkgs.julia-bin
               pkgs.tinymist
               pkgs.typst
             ];
