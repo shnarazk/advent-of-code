@@ -1,6 +1,6 @@
 #import "@preview/lilaq:0.6.0" as lq
-
-#set page(width: auto, height: auto)
+#let year = 2023
+#set page(width: auto, height: auto, margin: 10pt)
 
 #let build_svg(year: int) = {
   let data = json(str(year) + "/stats.json");
@@ -39,4 +39,4 @@
   )
 }
 
-#build_svg(year: 2024)
+#build_svg(year: year)
