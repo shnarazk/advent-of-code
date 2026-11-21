@@ -31,7 +31,7 @@
           default = pkgs.mkShell {
             packages = [
               pkgs.bashInteractive
-              pkgs.julia-bin
+              # pkgs.julia-bin
               # my-flakes.packages.${system}.julia-bin
               pkgs.watchexec
             ];
