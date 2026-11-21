@@ -18,6 +18,8 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 - day09: problem contains only 1K points per axis like [Y2021Day22](https://adventofcode.com/2021/day/22)
 - day10: ILP that I've never used
 
+![](misc/hist-2025.svg)
+
 ![](https://github.com/user-attachments/assets/d9a87d41-bef7-4706-9568-6cc883dfd962)
 
 ## 2024 completed
