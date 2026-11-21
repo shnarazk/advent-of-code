@@ -25,7 +25,7 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          bqn-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
+          _bqn-driver = nixpkgs.legacyPackages.${system}.stdenv.mkDerivation rec {
             name = "aoc-bqn-driver-${version}";
             pname = "aoc-bqn-driver";
             version = "20230928-1";
@@ -49,9 +49,9 @@
         {
           default = pkgs.mkShell {
             packages = [
-              pkgs.bashInteractive
-              pkgs.entr
-              bqn-driver
+              # pkgs.bashInteractive
+              # pkgs.entr
+              # bqn-driver
             ];
           };
         }

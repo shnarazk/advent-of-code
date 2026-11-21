@@ -46,8 +46,8 @@
         {
           default = pkgs.mkShell {
             packages = [
-              pkgs.bashInteractive
-              pkgs.uiua
+              # pkgs.bashInteractive
+              # pkgs.uiua
             ];
             # packages = [ pkgs.bashInteractive uiua.packages.${system}.default uiua-driver ];
           };
