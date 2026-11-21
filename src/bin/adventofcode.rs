@@ -29,7 +29,7 @@ use {
     adventofcode::{
         aoc_arms, color,
         framework::{AdventOfCode, ConfigAoC, DATA_DIR, JSON_DUMP_DIR},
-        progress,
+        kde, progress,
     },
     clap::Parser,
     std::{
@@ -141,6 +141,13 @@ struct ResultData {
     day: usize,
     time: f64,
 }
+
+#[derive(Serialize)]
+struct StatData {
+    hist: Vec<(usize, f64)>,
+    kde: Vec<(f64, f64)>,
+}
+
 fn bench(config: ConfigAoC) {
     let last_day: usize = if config.year <= 2024 { 25 } else { 12 };
     let results = (1..=last_day)
@@ -192,21 +199,50 @@ fn bench(config: ConfigAoC) {
             }
         })
         .collect::<Vec<_>>();
-    let dump_dir = format!("{}/{}", JSON_DUMP_DIR, config.year);
+    let dump_dir = format!(
+        "{}/{}/{}",
+        config.aoc_project_home(),
+        JSON_DUMP_DIR,
+        config.year
+    );
     if !matches!(fs::exists(&dump_dir), Ok(true)) {
         fs::create_dir_all(&dump_dir).unwrap_or_else(|_| panic!("failed to create {dump_dir}"));
     }
-    let output = format!("{}/execution_time.json", dump_dir);
+    let data_output: String = format!("{}/execution_time.json", dump_dir);
     if let Ok(json) = serde_json::to_string(&results) {
-        let mut file = File::create(&output).unwrap_or_else(|_| panic!("fail to open {output}"));
+        let mut file =
+            File::create(&data_output).unwrap_or_else(|_| panic!("fail to open {data_output}"));
         writeln!(file, "{json}").expect("fail to save");
         println!(
             "{}# write JSON data on {}{}",
             color::MAGENTA,
-            output,
+            data_output,
             color::RESET,
         );
     };
+    // dump histogram and KDE
+    let stat_output: String = format!("{}/stats.json", dump_dir);
+    let times: Vec<f64> = results.iter().map(|r| r.time.log10()).collect::<Vec<_>>();
+    let hi = kde::hist(&times, -1.0, 5.0, 6);
+    let mut kd = kde::kde(&times, -1.0, 5.0, 6);
+    kd.iter_mut().for_each(|v| {
+        if v.1 < 0.01 {
+            v.1 = 0.0
+        }
+    });
+    let stat_data: StatData = StatData { hist: hi, kde: kd };
+    if let Ok(json) = serde_json::to_string(&stat_data) {
+        let mut file =
+            File::create(&stat_output).unwrap_or_else(|_| panic!("fail to open {stat_output}"));
+        writeln!(file, "{json}").expect("fail to save");
+        println!(
+            "{}# write stat data on {}{}",
+            color::MAGENTA,
+            stat_output,
+            color::RESET,
+        );
+    };
+
     println!("|   day | time(ms)|");
     println!("|------:|--------:|");
     for result in results.iter() {

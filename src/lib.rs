@@ -2,6 +2,7 @@ pub mod array;
 pub mod color;
 pub mod framework;
 pub mod geometric;
+pub mod kde;
 pub mod math;
 pub mod parser;
 pub mod rect;

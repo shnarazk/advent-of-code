@@ -44,7 +44,7 @@ pub struct ConfigAoC {
 }
 impl ConfigAoC {
     /// return the project directory
-    fn aoc_project_home(&self) -> String {
+    pub fn aoc_project_home(&self) -> String {
         std::env::var("AOC_DIR").expect("Env var AOC_DIR is not defined.")
     }
     /// return data file name
