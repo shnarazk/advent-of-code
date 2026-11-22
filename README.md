@@ -56,6 +56,7 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [calendar](https://adventofcode.com/2022)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2022/README.md)
 
+![](misc/hist-2022.svg)
 
 ## 2021 completed
 
@@ -66,6 +67,7 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 
 - day22: convert to a problem-size small world by heterogeneous scaling!
 
+![](misc/hist-2021.svg)
 
 ## 2020 completed
 
@@ -74,12 +76,16 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [calendar](https://adventofcode.com/2020)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2020/README.md)
 
+![](misc/hist-2020.svg)
+
 ## 2019 completed
 
 ![](https://user-images.githubusercontent.com/997855/182404533-3f2328ec-a9ad-4b64-8103-3588eb08ea42.png)
 
 * [calendar](https://adventofcode.com/2019)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2019/README.md)
+
+![](misc/hist-2019.svg)
 
 ## 2018 completed
 
@@ -88,12 +94,16 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [calendar](https://adventofcode.com/2018)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2018/README.md)
 
+![](misc/hist-2018.svg)
+
 ## 2017 completed
 
 ![](https://user-images.githubusercontent.com/997855/185718427-a07f1447-a476-465e-9d96-89688e13d7d1.png)
 
 * [calendar](https://adventofcode.com/2017)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2017/README.md)
+
+![](misc/hist-2017.svg)
 
 ## 2016 completed
 
@@ -102,9 +112,13 @@ I solve all the problems in Rust and sometimes use some other interesting langua
 * [calendar](https://adventofcode.com/2016)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2016/README.md)
 
+![](misc/hist-2016.svg)
+
 ## 2015 completed
 
 ![](https://user-images.githubusercontent.com/997855/147841525-2a16610d-a342-46ba-8d91-30d865aa78a5.png)
 
 * [calendar](https://adventofcode.com/2015)
 * [execution time in Rust](https://github.com/shnarazk/advent-of-code/blob/main/src/y2015/README.md)
+
+![](misc/hist-2015.svg)
