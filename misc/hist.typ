@@ -1,5 +1,5 @@
 #import "@preview/lilaq:0.6.0" as lq
-#let year = 2023
+#let year = int(sys.inputs.at("year"))
 #set page(width: auto, height: auto, margin: 10pt)
 
 #let build_svg(year: int) = {
