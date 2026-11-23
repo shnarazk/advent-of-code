@@ -8,6 +8,7 @@ public import Cli
 public import «AoC».Basic
 public import «AoC».Color
 public import «AoC».Combinator
+public import «AoC».Stats
 -- public import «Y2023»
 -- public import «Y2024»
 public import «Y2025»
