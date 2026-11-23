@@ -32,6 +32,8 @@
             packages = [
               # pkgs.bashInteractive
               pkgs.elan
+              pkgs.tinymist
+              pkgs.typst
               pkgs.watchexec
             ];
           };
