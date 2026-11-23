@@ -3,7 +3,7 @@ module
 -- @[expose] public section
 
 /-- Linear-interpolated quantile of a soted data -/
-def quantile (data : Array Float) (p : Float): Float :=
+def quantile (data : Array Float) (p : Float) : Float :=
   let pos : Float := p * (data.size - 1).toFloat
   let lo : Nat := pos.floor.toUSize.toNat
   let hi : Nat := pos.ceil.toUSize.toNat
@@ -37,7 +37,7 @@ def Kde.pdf (self : Kde) (x : Float) : Float :=
   let sum : Float := self.data.map (fun xi ↦ let u := (x - xi) * inv_h; (-0.5 * u * u).exp) |>.sum
   sum / (self.data.size.toFloat * self.bandwidth * (2.0 * 3.141592).sqrt)
 
-def Kde.evaluateGrid (self : Kde) (lo hi : Float) (m: Nat) : Array (Float × Float) :=
+def Kde.evaluateGrid (self : Kde) (lo hi : Float) (m : Nat) : Array (Float × Float) :=
   let step : Float := (hi - lo) / (m - 1).toFloat
   (Array.range m).map (fun i ↦ let x := lo + step * i.toFloat; (x, self.pdf x))
 

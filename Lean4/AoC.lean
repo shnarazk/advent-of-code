@@ -138,6 +138,17 @@ def aoc_driver (year : Nat) (days : Array Nat) (alt : Option String) : IO Unit :
 /--
   Run all puzzles of `year` and dump the result to a JSON file.
 -/
+structure StatJson where
+  kde: Array (Float × Float)
+  hist: Array (Nat × Float)
+
+instance : Lean.ToJson StatJson where
+  toJson (s: StatJson) :=
+    Lean.Json.mkObj [
+      ⟨"kde", Lean.ToJson.toJson s.kde⟩,
+      ⟨"hist", Lean.ToJson.toJson s.hist⟩,
+    ]
+
 def benchmark_driver (year : Nat) : IO Unit := do
   let solved := events.find? year |>.map (·.fst) |>.getD 1
   let results ← List.range solved |>.mapM (fun d ↦ run year (d + 1) none)
@@ -149,6 +160,17 @@ def benchmark_driver (year : Nat) : IO Unit := do
     if !dir_exists then IO.FS.createDir dir
   IO.FS.writeFile filename s!"{json}"
   IO.println s!"dumped to '{filename}'"
+
+  let times : Array Float :=  results.toArray.filterMap (·) |>.map (·.time.log10)
+  let stats : StatJson := StatJson.mk (kde times (-1.0) 5.0 6) (hist times (-1.0) 5.0 6)
+  let statJson := Lean.ToJson.toJson stats
+  -- IO.println s!"stat: {statJson}"
+  let filename2 := System.mkFilePath ["misc", s!"{year}", "stats.json"]
+  if let some dir := filename2.parent then
+    let dir_exists ← dir.pathExists
+    if !dir_exists then IO.FS.createDir dir
+  IO.FS.writeFile filename2 s!"{statJson}"
+  IO.println s!"dumped stats to '{filename2}'"
   return ()
 
 /-- The entry point called by command line argument parser -/
