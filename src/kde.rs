@@ -86,7 +86,7 @@ fn quantile(sorted: &[f64], p: f64) -> f64 {
 }
 
 pub fn kde(data: &[f64], lo: f64, hi: f64, m: usize) -> Vec<(f64, f64)> {
-    let kd = Kde::new(&data, None).expect("valid input");
+    let kd = Kde::new(data, None).expect("valid input");
     println!("bandwidth = {:.4}", kd.bandwidth());
     for (x, y) in kd.evaluate_grid(0.0, 9.0, 10) {
         println!("{x:6.2}  {y:.5}");
