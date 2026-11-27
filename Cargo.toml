@@ -49,6 +49,3 @@ codegen-units = 1
 lto = "fat"
 panic = "abort"
 # strip = true
-
-[registry]
-global-min-publish-age = "7 days"
